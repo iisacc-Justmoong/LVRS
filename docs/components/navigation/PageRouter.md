@@ -12,6 +12,8 @@ Stack-based navigation with Svelte-like path syntax and SwiftUI-like stack contr
 - `path`: array of paths for stack state
 - `push(path)`, `pop()`, `popToRoot()`
 - `setRoot(path)`
+- `enforcePageViewport` (default `true`): pushed/replaced pages are forced to router viewport size.
+- `isolateInactivePages` (default `true`): only the active page remains visible/enabled, preventing inactive-page bleed-through.
 
 ## Delegation
 - `registerAsGlobalNavigator` defaults to `true`.

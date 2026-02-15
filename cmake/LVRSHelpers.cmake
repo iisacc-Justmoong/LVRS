@@ -377,6 +377,20 @@ function(_lvrs_internal_bootstrap_generator_for_platform platform out_var)
         set(_lvrs_generator "Xcode")
     endif()
 
+    if(_lvrs_generator STREQUAL "" AND platform STREQUAL "wasm")
+        find_program(_lvrs_ninja_program NAMES ninja ninja-build)
+        if(_lvrs_ninja_program)
+            set(_lvrs_generator "Ninja")
+        elseif(DEFINED CMAKE_GENERATOR AND NOT CMAKE_GENERATOR STREQUAL "")
+            set(_lvrs_generator "${CMAKE_GENERATOR}")
+        endif()
+        unset(_lvrs_ninja_program)
+    endif()
+
+    if(_lvrs_generator STREQUAL "" AND DEFINED CMAKE_GENERATOR AND NOT CMAKE_GENERATOR STREQUAL "")
+        set(_lvrs_generator "${CMAKE_GENERATOR}")
+    endif()
+
     set(${out_var} "${_lvrs_generator}" PARENT_SCOPE)
 endfunction()
 
@@ -579,6 +593,26 @@ function(lvrs_create_framework_bootstrap_targets)
         endif()
     endif()
 
+    set(_lvrs_bootstrap_emsdk_root "")
+    if(DEFINED LVRS_BOOTSTRAP_EMSDK_ROOT AND NOT LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "${LVRS_BOOTSTRAP_EMSDK_ROOT}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_EMSDK_ROOT} AND NOT "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}" STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}")
+    elseif(DEFINED LVRS_EMSDK_HINT AND NOT LVRS_EMSDK_HINT STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "${LVRS_EMSDK_HINT}")
+    elseif(DEFINED ENV{EMSDK} AND NOT "$ENV{EMSDK}" STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "$ENV{EMSDK}")
+    endif()
+
+    set(_lvrs_bootstrap_emscripten_toolchain_file "")
+    if(DEFINED LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE
+       AND NOT LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE STREQUAL "")
+        set(_lvrs_bootstrap_emscripten_toolchain_file "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}" STREQUAL "")
+        set(_lvrs_bootstrap_emscripten_toolchain_file "$ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+    endif()
+
     set(_lvrs_bootstrap_lvrs_build_examples "OFF")
     if(DEFINED LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES)
         set(_lvrs_bootstrap_lvrs_build_examples "${LVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES}")
@@ -744,6 +778,8 @@ function(lvrs_create_framework_bootstrap_targets)
                 "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
                 "-DLVRS_BOOTSTRAP_ANDROID_SDK_ROOT=${_lvrs_bootstrap_android_sdk_root}"
                 "-DLVRS_BOOTSTRAP_ANDROID_NDK=${_lvrs_bootstrap_android_ndk}"
+                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_bootstrap_emsdk_root}"
+                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_bootstrap_emscripten_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_INSTALL_PREFIX=${_lvrs_platform_install_prefix}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
@@ -820,6 +856,26 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
         else()
             set(_lvrs_bootstrap_find_use_pkg_registry "OFF")
         endif()
+    endif()
+
+    set(_lvrs_bootstrap_emsdk_root "")
+    if(DEFINED LVRS_BOOTSTRAP_EMSDK_ROOT AND NOT LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "${LVRS_BOOTSTRAP_EMSDK_ROOT}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_EMSDK_ROOT} AND NOT "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}" STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}")
+    elseif(DEFINED LVRS_EMSDK_HINT AND NOT LVRS_EMSDK_HINT STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "${LVRS_EMSDK_HINT}")
+    elseif(DEFINED ENV{EMSDK} AND NOT "$ENV{EMSDK}" STREQUAL "")
+        set(_lvrs_bootstrap_emsdk_root "$ENV{EMSDK}")
+    endif()
+
+    set(_lvrs_bootstrap_emscripten_toolchain_file "")
+    if(DEFINED LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE
+       AND NOT LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE STREQUAL "")
+        set(_lvrs_bootstrap_emscripten_toolchain_file "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}" STREQUAL "")
+        set(_lvrs_bootstrap_emscripten_toolchain_file "$ENV{LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
     endif()
 
     set(_lvrs_all_bootstrap_targets "")
@@ -970,6 +1026,8 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_generate_android_studio_project}"
                 "-DLVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR=${_lvrs_android_studio_project_dir}"
                 "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_androiddeployqt_path}"
+                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_bootstrap_emsdk_root}"
+                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_bootstrap_emscripten_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_LVRS_DIR=${_lvrs_bootstrap_lvrs_dir}"
                 "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"

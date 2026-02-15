@@ -449,6 +449,115 @@ function(_lvrs_bootstrap_find_android_apk build_dir out_var)
     set(${out_var} "${_lvrs_selected}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_bootstrap_detect_emscripten_toolchain_from_emsdk_root emsdk_root out_var)
+    set(_lvrs_toolchain_candidate "")
+    if(emsdk_root STREQUAL "" OR NOT IS_DIRECTORY "${emsdk_root}")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    if(EXISTS "${emsdk_root}/.emscripten")
+        file(READ "${emsdk_root}/.emscripten" _lvrs_emsdk_config)
+        string(REGEX MATCH "EMSCRIPTEN_ROOT.*$" _lvrs_emroot_line "${_lvrs_emsdk_config}")
+        string(REGEX MATCH "'([^' ]*)'" _lvrs_emroot_match "${_lvrs_emroot_line}")
+        string(REPLACE "'" "" _lvrs_emroot_suffix "${_lvrs_emroot_match}")
+        if(NOT _lvrs_emroot_suffix STREQUAL "")
+            file(TO_CMAKE_PATH "${_lvrs_emroot_suffix}" _lvrs_emroot_suffix)
+            set(_lvrs_toolchain_candidate
+                "${emsdk_root}/${_lvrs_emroot_suffix}/cmake/Modules/Platform/Emscripten.cmake")
+            if(EXISTS "${_lvrs_toolchain_candidate}")
+                set(${out_var} "${_lvrs_toolchain_candidate}" PARENT_SCOPE)
+                return()
+            endif()
+        endif()
+    endif()
+
+    set(_lvrs_emscripten_candidates
+        "${emsdk_root}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+        "${emsdk_root}/fastcomp/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+        "${emsdk_root}/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+    )
+    foreach(_lvrs_candidate IN LISTS _lvrs_emscripten_candidates)
+        if(EXISTS "${_lvrs_candidate}")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    set(${out_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_bootstrap_detect_emsdk_root out_var)
+    if(DEFINED LVRS_BOOTSTRAP_EMSDK_ROOT
+       AND NOT LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL ""
+       AND IS_DIRECTORY "${LVRS_BOOTSTRAP_EMSDK_ROOT}")
+        set(${out_var} "${LVRS_BOOTSTRAP_EMSDK_ROOT}" PARENT_SCOPE)
+        return()
+    endif()
+    if(DEFINED ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}
+       AND NOT "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}" STREQUAL ""
+       AND IS_DIRECTORY "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}")
+        set(${out_var} "$ENV{LVRS_BOOTSTRAP_EMSDK_ROOT}" PARENT_SCOPE)
+        return()
+    endif()
+    if(DEFINED ENV{EMSDK} AND NOT "$ENV{EMSDK}" STREQUAL "" AND IS_DIRECTORY "$ENV{EMSDK}")
+        set(${out_var} "$ENV{EMSDK}" PARENT_SCOPE)
+        return()
+    endif()
+
+    set(_lvrs_prefix_hints "")
+    if(DEFINED LVRS_BOOTSTRAP_PREFIX_PATH AND NOT LVRS_BOOTSTRAP_PREFIX_PATH STREQUAL "")
+        foreach(_lvrs_prefix_hint IN LISTS LVRS_BOOTSTRAP_PREFIX_PATH)
+            if(NOT _lvrs_prefix_hint STREQUAL "")
+                list(APPEND _lvrs_prefix_hints "${_lvrs_prefix_hint}")
+            endif()
+        endforeach()
+    endif()
+    if(DEFINED LVRS_BOOTSTRAP_TOOLCHAIN_FILE
+       AND NOT LVRS_BOOTSTRAP_TOOLCHAIN_FILE STREQUAL ""
+       AND LVRS_BOOTSTRAP_TOOLCHAIN_FILE MATCHES "qt\\.toolchain\\.cmake$")
+        get_filename_component(_lvrs_qt6_dir "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}" DIRECTORY)
+        get_filename_component(_lvrs_qt_prefix "${_lvrs_qt6_dir}/../../.." ABSOLUTE)
+        if(IS_DIRECTORY "${_lvrs_qt_prefix}")
+            list(APPEND _lvrs_prefix_hints "${_lvrs_qt_prefix}")
+        endif()
+    endif()
+
+    set(_lvrs_emsdk_candidates "")
+    foreach(_lvrs_prefix_hint IN LISTS _lvrs_prefix_hints)
+        get_filename_component(_lvrs_prefix_abs "${_lvrs_prefix_hint}" ABSOLUTE)
+        if(NOT IS_DIRECTORY "${_lvrs_prefix_abs}")
+            continue()
+        endif()
+        get_filename_component(_lvrs_qt_version_root "${_lvrs_prefix_abs}" DIRECTORY)
+        get_filename_component(_lvrs_qt_root "${_lvrs_qt_version_root}" DIRECTORY)
+        list(APPEND _lvrs_emsdk_candidates
+            "${_lvrs_qt_root}/Tools/emsdk"
+            "${_lvrs_qt_root}/Tools/Emscripten"
+        )
+    endforeach()
+    list(APPEND _lvrs_emsdk_candidates
+        "$ENV{HOME}/emsdk"
+        "$ENV{HOME}/.emsdk"
+        "/opt/emsdk"
+    )
+    list(REMOVE_DUPLICATES _lvrs_emsdk_candidates)
+
+    foreach(_lvrs_candidate IN LISTS _lvrs_emsdk_candidates)
+        if(NOT IS_DIRECTORY "${_lvrs_candidate}")
+            continue()
+        endif()
+        _lvrs_bootstrap_detect_emscripten_toolchain_from_emsdk_root(
+            "${_lvrs_candidate}" _lvrs_candidate_toolchain)
+        if(NOT _lvrs_candidate_toolchain STREQUAL "")
+            set(${out_var} "${_lvrs_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    set(${out_var} "" PARENT_SCOPE)
+endfunction()
+
 if(NOT DEFINED LVRS_BOOTSTRAP_SOURCE_DIR OR LVRS_BOOTSTRAP_SOURCE_DIR STREQUAL "")
     _lvrs_bootstrap_fail("LVRS_BOOTSTRAP_SOURCE_DIR is required.")
 endif()
@@ -533,6 +642,12 @@ endif()
 if(NOT DEFINED LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER)
     set(LVRS_BOOTSTRAP_IOS_BUNDLE_IDENTIFIER "")
 endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_EMSDK_ROOT)
+    set(LVRS_BOOTSTRAP_EMSDK_ROOT "")
+endif()
+if(NOT DEFINED LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE)
+    set(LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE "")
+endif()
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
@@ -567,6 +682,36 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
     endif()
 endif()
 
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
+    if(LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL "")
+        _lvrs_bootstrap_detect_emsdk_root(_lvrs_detected_emsdk_root)
+        set(LVRS_BOOTSTRAP_EMSDK_ROOT "${_lvrs_detected_emsdk_root}")
+    endif()
+    if(NOT LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL "")
+        set(ENV{EMSDK} "${LVRS_BOOTSTRAP_EMSDK_ROOT}")
+    endif()
+
+    if(LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE STREQUAL "")
+        _lvrs_bootstrap_detect_emscripten_toolchain_from_emsdk_root(
+            "${LVRS_BOOTSTRAP_EMSDK_ROOT}" _lvrs_detected_emscripten_toolchain)
+        set(LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE "${_lvrs_detected_emscripten_toolchain}")
+    endif()
+    if(NOT LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE STREQUAL ""
+       AND NOT EXISTS "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+        _lvrs_bootstrap_fail("configured LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE does not exist: ${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+    endif()
+
+    set(_lvrs_wasm_uses_qt_toolchain FALSE)
+    if(NOT LVRS_BOOTSTRAP_TOOLCHAIN_FILE STREQUAL ""
+       AND LVRS_BOOTSTRAP_TOOLCHAIN_FILE MATCHES "qt\\.toolchain\\.cmake$")
+        set(_lvrs_wasm_uses_qt_toolchain TRUE)
+    endif()
+
+    if(_lvrs_wasm_uses_qt_toolchain AND LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE STREQUAL "")
+        _lvrs_bootstrap_fail("cannot resolve Emscripten.cmake for Qt WASM toolchain. Set LVRS_BOOTSTRAP_EMSDK_ROOT or LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE or export EMSDK to a valid emsdk root.")
+    endif()
+endif()
+
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
@@ -593,6 +738,12 @@ if(NOT LVRS_BOOTSTRAP_SYSTEM_NAME STREQUAL "Unknown")
 endif()
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_PREFIX_PATH" "${LVRS_BOOTSTRAP_PREFIX_PATH}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_TOOLCHAIN_FILE" "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
+if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
+    _lvrs_bootstrap_append_cache_arg(
+        _lvrs_configure_cmd
+        "QT_CHAINLOAD_TOOLCHAIN_FILE"
+        "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}")
+endif()
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_BUILD_TYPE" "${LVRS_BOOTSTRAP_BUILD_TYPE}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_OSX_SYSROOT" "${LVRS_BOOTSTRAP_OSX_SYSROOT}")
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")

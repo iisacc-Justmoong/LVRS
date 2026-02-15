@@ -17,6 +17,7 @@ class PageRouterTests : public QObject
 private slots:
     void route_params_are_passed_to_target_component();
     void component_navigation_keeps_path_stack_in_sync();
+    void route_pages_are_isolated_and_forced_to_viewport();
     void page_router_updates_view_state_tracker_from_stack();
     void global_navigator_allows_one_line_navigation();
     void global_navigator_falls_back_to_previous_router();
@@ -181,6 +182,81 @@ Item {
     QTRY_COMPARE(root->property("depth").toInt(), 0);
     QCOMPARE(root->property("pathLength").toInt(), 0);
     QCOMPARE(root->property("currentPath").toString(), QString());
+}
+
+void PageRouterTests::route_pages_are_isolated_and_forced_to_viewport()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 360
+    height: 240
+
+    property var firstPageItem: null
+    property var secondPageItem: null
+    property int depth: router.depth
+    property bool firstVisibleAtRoot: firstPageItem ? firstPageItem.visible : false
+    property bool firstHiddenAfterPush: firstPageItem ? !firstPageItem.visible : false
+    property bool secondVisibleAfterPush: secondPageItem ? secondPageItem.visible : false
+    property bool secondFillsViewport: router.currentPageItem
+        ? Math.abs(router.currentPageItem.width - router.width) < 0.5
+          && Math.abs(router.currentPageItem.height - router.height) < 0.5
+        : false
+    property bool secondAnchoredToOrigin: router.currentPageItem
+        ? Math.abs(router.currentPageItem.x) < 0.5 && Math.abs(router.currentPageItem.y) < 0.5
+        : false
+
+    Component {
+        id: foldersPage
+        Item {
+            width: 180
+            height: 180
+            Component.onCompleted: root.firstPageItem = this
+        }
+    }
+
+    Component {
+        id: notesPage
+        Item {
+            width: 200
+            height: 160
+            Component.onCompleted: root.secondPageItem = this
+        }
+    }
+
+    LV.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/folders"
+        routes: [
+            { path: "/folders", component: foldersPage },
+            { path: "/notes", component: notesPage }
+        ]
+    }
+
+    function openNotes() {
+        router.go("/notes")
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("depth").toInt(), 1);
+    QTRY_VERIFY(root->property("firstVisibleAtRoot").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "openNotes"));
+    QTRY_COMPARE(root->property("depth").toInt(), 2);
+    QTRY_VERIFY(root->property("firstHiddenAfterPush").toBool());
+    QTRY_VERIFY(root->property("secondVisibleAfterPush").toBool());
+    QTRY_VERIFY(root->property("secondFillsViewport").toBool());
+    QTRY_VERIFY(root->property("secondAnchoredToOrigin").toBool());
 }
 
 void PageRouterTests::page_router_updates_view_state_tracker_from_stack()

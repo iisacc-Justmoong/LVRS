@@ -17,14 +17,123 @@ Item {
     property Component notFoundComponent: null
     property url notFoundSource: ""
     property bool registerAsGlobalNavigator: true
+    property bool enforcePageViewport: true
+    property bool isolateInactivePages: true
     property var _trackedViewIds: []
+    property bool _presentationSyncScheduled: false
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
+    readonly property var currentPageItem: stackView.currentItem
 
     signal navigated(string path, var params)
     signal navigationFailed(string path)
     signal componentNavigated(var component)
+
+    function hasAnyAnchors(item) {
+        if (!item || item.anchors === undefined)
+            return false
+        return item.anchors.left || item.anchors.right
+            || item.anchors.top || item.anchors.bottom
+            || item.anchors.horizontalCenter || item.anchors.verticalCenter
+    }
+
+    function applyPageViewportContract(item) {
+        if (!item || !enforcePageViewport)
+            return
+
+        if (item.x !== undefined)
+            item.x = 0
+        if (item.y !== undefined)
+            item.y = 0
+
+        if (item.width !== undefined)
+            item.width = Qt.binding(function() { return stackView.width })
+        if (item.height !== undefined)
+            item.height = Qt.binding(function() { return stackView.height })
+
+        if (item.clip !== undefined)
+            item.clip = true
+    }
+
+    function applySingleChildViewportContract(container) {
+        if (!container || !enforcePageViewport || container.children === undefined || container.children.length !== 1)
+            return
+
+        var child = container.children[0]
+        if (!child || child === container || child.width === undefined || child.height === undefined)
+            return
+
+        var childHasExternalAnchors = child.anchors !== undefined
+            && hasAnyAnchors(child)
+            && child.anchors.fill !== stackView
+        if (childHasExternalAnchors)
+            return
+
+        if (container.width !== undefined
+                && container.height !== undefined
+                && child.width >= container.width - 0.5
+                && child.height >= container.height - 0.5) {
+            return
+        }
+
+        if (child.x !== undefined)
+            child.x = 0
+        if (child.y !== undefined)
+            child.y = 0
+        child.width = Qt.binding(function() { return stackView.width })
+        child.height = Qt.binding(function() { return stackView.height })
+        if (child.clip !== undefined)
+            child.clip = true
+    }
+
+    function syncActivePagePresentation() {
+        if (!isolateInactivePages)
+            return
+
+        var topIndex = stackView.depth - 1
+        for (var i = 0; i < stackView.depth; i++) {
+            var page = stackView.get(i)
+            if (!page)
+                continue
+
+            var active = i === topIndex
+            if (page.visible !== undefined)
+                page.visible = active
+            if (page.enabled !== undefined)
+                page.enabled = active
+            if (!active && page.focus !== undefined)
+                page.focus = false
+        }
+    }
+
+    function scheduleActivePagePresentationSync() {
+        if (_presentationSyncScheduled)
+            return
+        _presentationSyncScheduled = true
+        Qt.callLater(function() {
+            _presentationSyncScheduled = false
+            syncActivePagePresentation()
+        })
+    }
+
+    function applyStackOperation(target, params, mode) {
+        var payload = params !== undefined ? params : ({})
+        var item = null
+        if (mode === "replace") {
+            item = stackView.replace(target, payload)
+        } else if (mode === "set") {
+            stackView.clear()
+            item = stackView.push(target, payload)
+        } else {
+            item = stackView.push(target, payload)
+        }
+
+        applyPageViewportContract(item)
+        applySingleChildViewportContract(item)
+        scheduleActivePagePresentationSync()
+        return item
+    }
 
     function go(path, params) {
         navigate(path, params, "push")
@@ -61,6 +170,8 @@ Item {
     function pop() {
         if (stackView.depth > 1) {
             stackView.pop()
+            applyPageViewportContract(stackView.currentItem)
+            scheduleActivePagePresentationSync()
             if (path.length > 1) {
                 var nextPath = path.slice(0, path.length - 1)
                 setPathInternal(nextPath)
@@ -76,6 +187,8 @@ Item {
     function popToRoot() {
         if (stackView.depth > 1) {
             stackView.pop(stackView.get(0))
+            applyPageViewportContract(stackView.currentItem)
+            scheduleActivePagePresentationSync()
             if (path.length > 0) {
                 setPathInternal([path[0]])
                 applyCurrentFromPathEntry(path[0])
@@ -213,14 +326,7 @@ Item {
         if (!resolved) {
             if (notFoundComponent || notFoundSource) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
-                if (mode === "replace")
-                    stackView.replace(fallback, targetParams)
-                else if (mode === "set") {
-                    stackView.clear()
-                    stackView.push(fallback, targetParams)
-                } else {
-                    stackView.push(fallback, targetParams)
-                }
+                applyStackOperation(fallback, targetParams, mode)
                 updatePathStack(normalized, targetParams, mode)
                 setCurrent(normalized, targetParams)
                 navigated(normalized, targetParams)
@@ -235,14 +341,7 @@ Item {
             navigationFailed(normalized)
             return
         }
-        if (mode === "replace") {
-            stackView.replace(target, targetParams)
-        } else if (mode === "set") {
-            stackView.clear()
-            stackView.push(target, targetParams)
-        } else {
-            stackView.push(target, targetParams)
-        }
+        applyStackOperation(target, targetParams, mode)
         updatePathStack(normalized, targetParams, mode)
         setCurrent(normalized, targetParams)
         bindRouteViewModel(normalized,
@@ -256,14 +355,7 @@ Item {
         if (!component)
             return
         var targetParams = params || {}
-        if (mode === "replace") {
-            stackView.replace(component, targetParams)
-        } else if (mode === "set") {
-            stackView.clear()
-            stackView.push(component, targetParams)
-        } else {
-            stackView.push(component, targetParams)
-        }
+        applyStackOperation(component, targetParams, mode)
         updateComponentPathStack(component, targetParams, mode)
         setCurrent("", targetParams)
         bindRouteViewModel("",
@@ -278,8 +370,10 @@ Item {
             Navigator.registerRouter(root)
         if (initialPath)
             setRoot(initialPath)
-        else
+        else {
             syncViewStateTracker()
+            scheduleActivePagePresentationSync()
+        }
     }
 
     Component.onDestruction: {
@@ -293,6 +387,7 @@ Item {
         anchors.fill: parent
         clip: true
         focus: true
+        onDepthChanged: root.scheduleActivePagePresentationSync()
     }
 
     property bool _syncingPath: false
@@ -312,6 +407,7 @@ Item {
             _syncingPath = false
             setCurrent("", {})
             syncViewStateTracker()
+            scheduleActivePagePresentationSync()
             return
         }
         for (var i = 0; i < path.length; i++) {
@@ -320,7 +416,7 @@ Item {
             var entryParams = typeof entry === "object" && entry.params !== undefined ? entry.params : undefined
             var hasComponentEntry = typeof entry === "object" && entry.component !== undefined
             if (hasComponentEntry && entry.component) {
-                stackView.push(entry.component, entryParams || {})
+                applyStackOperation(entry.component, entryParams || ({}), "push")
                 continue
             }
             var resolved = resolveRoute(entryPath)
@@ -328,7 +424,7 @@ Item {
             if (!resolved) {
                 var fallback = notFoundComponent ? notFoundComponent : notFoundSource
                 if (fallback)
-                    stackView.push(fallback, entryParams || {})
+                    applyStackOperation(fallback, entryParams || ({}), "push")
                 else
                     navigationFailed(normalized)
                 continue
@@ -339,7 +435,7 @@ Item {
                 continue
             }
             var mergedParams = entryParams !== undefined ? entryParams : resolved.params
-            stackView.push(target, mergedParams || {})
+            applyStackOperation(target, mergedParams || ({}), "push")
             bindRouteViewModel(normalized, resolved.route, mergedParams || {}, i)
         }
         _syncingPath = false
