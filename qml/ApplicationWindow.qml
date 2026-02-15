@@ -55,6 +55,14 @@ Controls.ApplicationWindow {
     property alias navHeader: scaffold.navHeader
     property alias navFooter: scaffold.navFooter
     property alias pageRouter: scaffold.pageRouter
+    property alias pageRoutes: scaffold.routes
+    property alias pageInitialPath: scaffold.initialPath
+    property alias useInternalPageStack: scaffold.useInternalPageStack
+    property alias internalRouterRegisterAsGlobalNavigator: scaffold.internalRouterRegisterAsGlobalNavigator
+    readonly property bool internalPageStackEnabled: scaffold.internalPageStackEnabled
+    readonly property var activePageRouter: scaffold.activePageRouter
+    readonly property string adaptiveLayoutProfile: scaffold.layoutProfile
+    readonly property string adaptiveNavigationMode: scaffold.navigationMode
     property alias headerActions: scaffold.headerActions
     default property alias content: scaffold.content
     readonly property bool adaptiveMobileLayout: scaffold.mobileLayout
@@ -68,6 +76,9 @@ Controls.ApplicationWindow {
     signal navActivated(int index, var item)
     signal globalPressedEvent(var eventData)
     signal globalContextEvent(var eventData)
+    signal adaptiveLayoutStateChanged(string profile, string navigationMode)
+    signal pageStackNavigated(string path, var params)
+    signal pageStackNavigationFailed(string path)
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
@@ -97,6 +108,8 @@ Controls.ApplicationWindow {
             return adaptiveDrawerNavigation
         if (token === "bottom-nav")
             return adaptiveBottomNavigation
+        if (token === "stack-enabled")
+            return internalPageStackEnabled
         return false
     }
 
@@ -152,6 +165,9 @@ Controls.ApplicationWindow {
             headerSubtitle: root.subtitle
             navModel: root.navItems
             layoutPlatform: root.platform
+            onLayoutStateChanged: root.adaptiveLayoutStateChanged(profile, navigationMode)
+            onStackNavigated: root.pageStackNavigated(path, params)
+            onStackNavigationFailed: root.pageStackNavigationFailed(path)
             onNavActivated: root.navActivated(index, item)
         }
     }

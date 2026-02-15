@@ -116,6 +116,8 @@ On the configured host desktop platform, the matching runtime target directly la
 - `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
 - runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
+State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.AppScaffold`.
+Page-stack API on `LV.ApplicationWindow`: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`

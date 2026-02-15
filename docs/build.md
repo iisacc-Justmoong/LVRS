@@ -88,6 +88,8 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 - `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
 - runtime state flags: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
+State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) in `LV.AppScaffold`.
+`LV.ApplicationWindow` page-stack API: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`

@@ -26,8 +26,15 @@ Item {
     property Component navHeader: null
     property Component navFooter: null
     property var pageRouter: null
+    property var routes: []
+    property string initialPath: "/"
+    property bool useInternalPageStack: true
+    property bool internalRouterRegisterAsGlobalNavigator: false
 
     signal navActivated(int index, var item)
+    signal layoutStateChanged(string profile, string navigationMode)
+    signal stackNavigated(string path, var params)
+    signal stackNavigationFailed(string path)
 
     property alias headerActions: appHeader.actions
 
@@ -50,6 +57,15 @@ Item {
     readonly property bool drawerNavigationEnabled: root.hasNav
         && !root.navigationRailEnabled
         && !root.bottomNavigationEnabled
+    readonly property string layoutProfile: root.mobileLayout
+        ? (root.wide ? "mobile-wide" : "mobile-compact")
+        : (root.wide ? "desktop-wide" : "desktop-compact")
+    readonly property string navigationMode: root.navigationRailEnabled
+        ? "rail"
+        : (root.bottomNavigationEnabled ? "bottom" : "drawer")
+    readonly property var effectiveRoutes: root.collectEffectiveRoutes()
+    readonly property bool internalPageStackEnabled: root.useInternalPageStack && root.effectiveRoutes.length > 0
+    readonly property var activePageRouter: root.resolveRouter()
 
     implicitWidth: 1200
     implicitHeight: 760
@@ -69,6 +85,8 @@ Item {
     function resolveRouter() {
         if (pageRouter)
             return pageRouter
+        if (internalPageStackEnabled)
+            return internalPageRouter
         if (typeof Navigator !== "undefined" && Navigator && Navigator.router)
             return Navigator.router
         return null
@@ -125,6 +143,44 @@ Item {
         return token === "android" || token === "ios"
     }
 
+    function collectEffectiveRoutes() {
+        if (routes) {
+            if (typeof routes.length === "number" && routes.length > 0)
+                return routes
+            if (typeof routes.count === "number" && routes.count > 0 && typeof routes.get === "function") {
+                var explicitRoutes = []
+                for (var r = 0; r < routes.count; r++)
+                    explicitRoutes.push(routes.get(r))
+                if (explicitRoutes.length > 0)
+                    return explicitRoutes
+            }
+        }
+
+        var derived = []
+        var count = root.navModelCount()
+        for (var i = 0; i < count; i++) {
+            var item = root.itemAt(i)
+            if (!item || typeof item !== "object")
+                continue
+            var path = root.normalizedPath(root.routeForItem(item))
+            if (!path)
+                continue
+
+            var hasComponent = item.component !== undefined && item.component !== null
+            var hasSource = item.source !== undefined && item.source !== null && String(item.source).trim().length > 0
+            if (!hasComponent && !hasSource)
+                continue
+
+            var route = { path: path }
+            if (hasComponent)
+                route.component = item.component
+            else
+                route.source = item.source
+            derived.push(route)
+        }
+        return derived
+    }
+
     function syncNavIndexToCurrentPath() {
         var targetRouter = resolveRouter()
         if (!targetRouter || targetRouter.currentPath === undefined)
@@ -163,6 +219,8 @@ Item {
     }
     onNavModelChanged: syncNavIndexToCurrentPath()
     onPageRouterChanged: Qt.callLater(syncNavIndexToCurrentPath)
+    onLayoutProfileChanged: root.layoutStateChanged(layoutProfile, navigationMode)
+    onNavigationModeChanged: root.layoutStateChanged(layoutProfile, navigationMode)
 
     Connections {
         target: root.resolveRouter()
@@ -419,69 +477,87 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            Rectangle {
-                id: navRail
-                visible: root.navigationRailEnabled
-                width: root.navigationRailEnabled ? root.navWidth : 0
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
+            RowLayout {
+                anchors.fill: parent
                 anchors.margins: Theme.radiusXl
-                radius: Theme.radiusLg
-                color: Theme.surfaceSolid
+                spacing: Theme.gap12
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.gap16
-                    spacing: Theme.gap12
+                Rectangle {
+                    id: navRail
+                    visible: root.navigationRailEnabled
+                    Layout.preferredWidth: root.navigationRailEnabled ? root.navWidth : 0
+                    Layout.fillHeight: true
+                    radius: Theme.radiusLg
+                    color: Theme.surfaceSolid
 
-                    Loader {
-                        active: root.navHeader !== null
-                        sourceComponent: root.navHeader
-                        visible: active
-                        Layout.fillWidth: true
-                    }
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: Theme.gap16
+                        spacing: Theme.gap12
 
-                    Label {
-                        style: caption
-                        visible: root.navTitleVisible
-                        text: root.navTitle
-                        color: Theme.textTertiary
-                    }
+                        Loader {
+                            active: root.navHeader !== null
+                            sourceComponent: root.navHeader
+                            visible: active
+                            Layout.fillWidth: true
+                        }
 
-                    Repeater {
-                        model: root.navModel
-                        delegate: root.navDelegate ? root.navDelegate : defaultNavDelegate
-                    }
+                        Label {
+                            style: caption
+                            visible: root.navTitleVisible
+                            text: root.navTitle
+                            color: Theme.textTertiary
+                        }
 
-                    Loader {
-                        active: root.navFooter !== null
-                        sourceComponent: root.navFooter
-                        visible: active
-                        Layout.fillWidth: true
+                        Repeater {
+                            model: root.navModel
+                            delegate: root.navDelegate ? root.navDelegate : defaultNavDelegate
+                        }
+
+                        Loader {
+                            active: root.navFooter !== null
+                            sourceComponent: root.navFooter
+                            visible: active
+                            Layout.fillWidth: true
+                        }
                     }
                 }
-            }
 
-            Item {
-                id: contentWrap
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.left: root.navigationRailEnabled ? navRail.right : parent.left
-                anchors.margins: Theme.radiusXl
-            }
+                Item {
+                    id: contentWrap
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
 
-            Rectangle {
-                anchors.fill: contentWrap
-                radius: Theme.radiusXl
-                color: Theme.surfaceAlt
-            }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.radiusXl
+                        color: Theme.surfaceAlt
+                    }
 
-            Item {
-                id: contentArea
-                anchors.fill: contentWrap
-                anchors.margins: Theme.radiusLg
+                    Item {
+                        id: contentHost
+                        anchors.fill: parent
+                        anchors.margins: Theme.radiusLg
+
+                        PageRouter {
+                            id: internalPageRouter
+                            anchors.fill: parent
+                            visible: root.internalPageStackEnabled
+                            enabled: visible
+                            routes: root.effectiveRoutes
+                            initialPath: root.initialPath
+                            registerAsGlobalNavigator: root.internalRouterRegisterAsGlobalNavigator
+                            onNavigated: root.stackNavigated(path, params)
+                            onNavigationFailed: root.stackNavigationFailed(path)
+                        }
+
+                        Item {
+                            id: contentArea
+                            anchors.fill: parent
+                            visible: !root.internalPageStackEnabled
+                        }
+                    }
+                }
             }
         }
 
@@ -562,6 +638,7 @@ Item {
     QtObject {
         Component.onCompleted: {
             root.syncNavIndexToCurrentPath()
+            root.layoutStateChanged(root.layoutProfile, root.navigationMode)
         }
     }
 

@@ -15,6 +15,7 @@ class ImportApiTests : public QObject
 
 private slots:
     void versionless_import_application_window_loads();
+    void application_window_page_stack_state_loads();
     void versionless_import_window_loads();
     void appshell_compat_loads();
     void appscaffold_platform_adaptive_layout_loads();
@@ -161,6 +162,64 @@ LV.Window {
     QVERIFY(root->property("solidChrome").toBool());
     QVERIFY(root->property("windowApiReady").toBool());
     QVERIFY(root->property("contentApiReady").toBool());
+}
+
+void ImportApiTests::application_window_page_stack_state_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 900
+    height: 620
+    visible: false
+    title: "StackState"
+    useInternalPageStack: true
+    pageInitialPath: "/"
+    pageRoutes: [
+        { path: "/", component: homePage },
+        { path: "/reports", component: reportsPage }
+    ]
+
+    Component {
+        id: homePage
+        Item { objectName: "home-page" }
+    }
+    Component {
+        id: reportsPage
+        Item { objectName: "reports-page" }
+    }
+
+    property bool stackEnabledRule: internalPageStackEnabled && matchesMedia("stack-enabled")
+    property bool stackInitialReady: stackEnabledRule
+        && activePageRouter !== null
+        && activePageRouter.depth >= 1
+        && activePageRouter.currentPath === "/"
+    property bool stackNavigationWorked: false
+
+    onPageStackNavigated: {
+        if (path === "/reports")
+            stackNavigationWorked = true
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(function() {
+            if (activePageRouter)
+                activePageRouter.go("/reports")
+        })
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("stackInitialReady").toBool());
+    QTRY_VERIFY(root->property("stackNavigationWorked").toBool());
 }
 
 void ImportApiTests::appshell_compat_loads()
