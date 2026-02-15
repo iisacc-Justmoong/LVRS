@@ -37,6 +37,8 @@ Rectangle {
             id: headerBlock
             spacing: Theme.gap4
             Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: implicitHeight
 
             Label {
                 style: header
@@ -59,6 +61,8 @@ Rectangle {
         Rectangle {
             id: separator
             Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: Theme.strokeThin
             height: Theme.strokeThin
             radius: Theme.strokeThin
             color: Theme.surfaceSolid
@@ -67,6 +71,8 @@ Rectangle {
         Item {
             id: contentSlot
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: Math.max(1, childrenRect.height)
             Layout.preferredHeight: Math.max(1, childrenRect.height)
             implicitHeight: Math.max(1, childrenRect.height)
         }

@@ -165,10 +165,10 @@ Controls.ApplicationWindow {
             headerSubtitle: root.subtitle
             navModel: root.navItems
             layoutPlatform: root.platform
-            onLayoutStateChanged: root.adaptiveLayoutStateChanged(profile, navigationMode)
-            onStackNavigated: root.pageStackNavigated(path, params)
-            onStackNavigationFailed: root.pageStackNavigationFailed(path)
-            onNavActivated: root.navActivated(index, item)
+            onLayoutStateChanged: function(profile, navigationMode) { root.adaptiveLayoutStateChanged(profile, navigationMode) }
+            onStackNavigated: function(path, params) { root.pageStackNavigated(path, params) }
+            onStackNavigationFailed: function(path) { root.pageStackNavigationFailed(path) }
+            onNavActivated: function(index, item) { root.navActivated(index, item) }
         }
     }
 

@@ -35,6 +35,7 @@ Item {
     signal layoutStateChanged(string profile, string navigationMode)
     signal stackNavigated(string path, var params)
     signal stackNavigationFailed(string path)
+    signal transitionRejected(string kind, string fromState, string toState, string fallbackState)
 
     property alias headerActions: appHeader.actions
 
@@ -44,25 +45,25 @@ Item {
     readonly property bool hasNav: navigationEnabled && root.navModelCount() > 0
     readonly property string normalizedLayoutMode: root.normalizeLayoutMode(layoutMode)
     readonly property bool platformMobile: root.isMobilePlatform(layoutPlatform)
-    readonly property bool mobileLayout: root.normalizedLayoutMode === "mobile"
+    readonly property bool requestedMobileLayout: root.normalizedLayoutMode === "mobile"
         || (root.normalizedLayoutMode === "auto"
             && root.platformMobile
             && (!root.forceDesktopOnLargeMobile || root.width < root.mobileDesktopMinWidth))
-    readonly property bool desktopLayout: !root.mobileLayout
-    readonly property bool navigationRailEnabled: root.hasNav && root.desktopLayout && root.wide
-    readonly property bool bottomNavigationEnabled: root.hasNav
-        && root.mobileLayout
-        && root.preferBottomNavigation
-        && root.navModelCount() <= root.bottomNavigationMaxItems
-    readonly property bool drawerNavigationEnabled: root.hasNav
-        && !root.navigationRailEnabled
-        && !root.bottomNavigationEnabled
-    readonly property string layoutProfile: root.mobileLayout
+    readonly property bool requestedDesktopLayout: !root.requestedMobileLayout
+    readonly property string requestedLayoutProfile: root.requestedMobileLayout
         ? (root.wide ? "mobile-wide" : "mobile-compact")
         : (root.wide ? "desktop-wide" : "desktop-compact")
-    readonly property string navigationMode: root.navigationRailEnabled
-        ? "rail"
-        : (root.bottomNavigationEnabled ? "bottom" : "drawer")
+    readonly property string requestedNavigationMode: root.requestedNavigationModeForProfile(root.requestedLayoutProfile)
+    property string layoutProfile: root.requestedLayoutProfile
+    property string navigationMode: root.requestedNavigationMode
+    readonly property bool mobileLayout: root.layoutProfile.indexOf("mobile-") === 0
+    readonly property bool desktopLayout: !root.mobileLayout
+    readonly property bool navigationRailEnabled: root.hasNav && root.navigationMode === "rail"
+    readonly property bool bottomNavigationEnabled: root.hasNav && root.navigationMode === "bottom"
+    readonly property bool drawerNavigationEnabled: root.hasNav && root.navigationMode === "drawer"
+    property bool _adaptiveUpdateInProgress: false
+    property string lastRejectedLayoutTransition: ""
+    property string lastRejectedNavigationTransition: ""
     readonly property var effectiveRoutes: root.collectEffectiveRoutes()
     readonly property bool internalPageStackEnabled: root.useInternalPageStack && root.effectiveRoutes.length > 0
     readonly property var activePageRouter: root.resolveRouter()
@@ -143,6 +144,108 @@ Item {
         return token === "android" || token === "ios"
     }
 
+    function requestedNavigationModeForProfile(profile) {
+        if (!root.hasNav)
+            return "none"
+        if (profile === "desktop-wide")
+            return "rail"
+        if (profile.indexOf("mobile-") === 0
+                && root.preferBottomNavigation
+                && root.navModelCount() <= root.bottomNavigationMaxItems) {
+            return "bottom"
+        }
+        return "drawer"
+    }
+
+    function isAllowedLayoutTransition(fromState, toState) {
+        if (!fromState || fromState === toState)
+            return true
+
+        if (fromState === "mobile-compact")
+            return toState === "mobile-wide" || toState === "desktop-compact"
+        if (fromState === "mobile-wide")
+            return toState === "mobile-compact" || toState === "desktop-wide"
+        if (fromState === "desktop-compact")
+            return toState === "desktop-wide" || toState === "mobile-compact"
+        if (fromState === "desktop-wide")
+            return toState === "desktop-compact" || toState === "mobile-wide"
+        return true
+    }
+
+    function nextLayoutTransitionState(fromState, toState) {
+        if (root.isAllowedLayoutTransition(fromState, toState))
+            return toState
+
+        var fromParts = String(fromState).split("-")
+        var toParts = String(toState).split("-")
+        var fromFamily = fromParts.length > 0 ? fromParts[0] : ""
+        var fromSize = fromParts.length > 1 ? fromParts[1] : ""
+        var toFamily = toParts.length > 0 ? toParts[0] : ""
+        var toSize = toParts.length > 1 ? toParts[1] : ""
+
+        if (fromFamily && fromSize && toFamily && toSize && fromFamily !== toFamily && fromSize !== toSize)
+            return toFamily + "-" + fromSize
+        return toState
+    }
+
+    function isAllowedNavigationTransition(fromState, toState) {
+        if (!fromState || fromState === toState)
+            return true
+        if (fromState === "none" || toState === "none")
+            return true
+        if (fromState === "rail")
+            return toState === "drawer"
+        if (fromState === "drawer")
+            return toState === "rail" || toState === "bottom"
+        if (fromState === "bottom")
+            return toState === "drawer"
+        return true
+    }
+
+    function nextNavigationTransitionState(fromState, toState) {
+        if (root.isAllowedNavigationTransition(fromState, toState))
+            return toState
+        if ((fromState === "rail" && toState === "bottom")
+                || (fromState === "bottom" && toState === "rail")) {
+            return "drawer"
+        }
+        return toState
+    }
+
+    function updateAdaptiveState() {
+        if (root._adaptiveUpdateInProgress)
+            return
+
+        root._adaptiveUpdateInProgress = true
+        var needsFollowUp = false
+
+        var currentLayoutProfile = root.layoutProfile
+        var targetLayoutProfile = root.requestedLayoutProfile
+        var nextLayoutProfile = root.nextLayoutTransitionState(currentLayoutProfile, targetLayoutProfile)
+        if (nextLayoutProfile !== currentLayoutProfile)
+            root.layoutProfile = nextLayoutProfile
+        if (nextLayoutProfile !== targetLayoutProfile) {
+            root.lastRejectedLayoutTransition = currentLayoutProfile + "->" + targetLayoutProfile
+            root.transitionRejected("layoutProfile", currentLayoutProfile, targetLayoutProfile, nextLayoutProfile)
+            needsFollowUp = true
+        }
+
+        var currentNavigationMode = root.navigationMode
+        var targetNavigationMode = root.requestedNavigationModeForProfile(nextLayoutProfile)
+        var nextNavigationMode = root.nextNavigationTransitionState(currentNavigationMode, targetNavigationMode)
+        if (nextNavigationMode !== currentNavigationMode)
+            root.navigationMode = nextNavigationMode
+        if (nextNavigationMode !== targetNavigationMode) {
+            root.lastRejectedNavigationTransition = currentNavigationMode + "->" + targetNavigationMode
+            root.transitionRejected("navigationMode", currentNavigationMode, targetNavigationMode, nextNavigationMode)
+            needsFollowUp = true
+        }
+
+        root._adaptiveUpdateInProgress = false
+        if (needsFollowUp)
+            Qt.callLater(root.updateAdaptiveState)
+    }
+
     function collectEffectiveRoutes() {
         if (routes) {
             if (typeof routes.length === "number" && routes.length > 0)
@@ -217,7 +320,12 @@ Item {
         if (!drawerNavigationEnabled && navDrawer.opened)
             navDrawer.close()
     }
-    onNavModelChanged: syncNavIndexToCurrentPath()
+    onRequestedLayoutProfileChanged: root.updateAdaptiveState()
+    onRequestedNavigationModeChanged: root.updateAdaptiveState()
+    onNavModelChanged: {
+        root.syncNavIndexToCurrentPath()
+        root.updateAdaptiveState()
+    }
     onPageRouterChanged: Qt.callLater(syncNavIndexToCurrentPath)
     onLayoutProfileChanged: root.layoutStateChanged(layoutProfile, navigationMode)
     onNavigationModeChanged: root.layoutStateChanged(layoutProfile, navigationMode)
@@ -244,6 +352,9 @@ Item {
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
             property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
 
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: implicitHeight
             width: parent ? parent.width : implicitWidth
             text: itemLabel
             enabled: itemEnabled
@@ -311,6 +422,9 @@ Item {
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
             property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
 
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: implicitHeight
             width: parent ? parent.width : implicitWidth
             text: itemLabel
             enabled: itemEnabled
@@ -545,10 +659,10 @@ Item {
                             visible: root.internalPageStackEnabled
                             enabled: visible
                             routes: root.effectiveRoutes
-                            initialPath: root.initialPath
-                            registerAsGlobalNavigator: root.internalRouterRegisterAsGlobalNavigator
-                            onNavigated: root.stackNavigated(path, params)
-                            onNavigationFailed: root.stackNavigationFailed(path)
+                            initialPath: root.internalPageStackEnabled ? root.initialPath : ""
+                            registerAsGlobalNavigator: root.internalPageStackEnabled && root.internalRouterRegisterAsGlobalNavigator
+                            onNavigated: function(path, params) { root.stackNavigated(path, params) }
+                            onNavigationFailed: function(path) { root.stackNavigationFailed(path) }
                         }
 
                         Item {
