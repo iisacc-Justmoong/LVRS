@@ -2,58 +2,87 @@
 
 Location: `qml/components/layout/AppScaffold.qml`
 
-Main layout scaffold: header, nav rail/drawer, and content area.
+`AppScaffold` is an adaptive navigation + content container.
+It does not force a top app header/title region.
+Main content is full-bleed by default (`adaptiveOuterMargin: 0`, `adaptiveContentInset: 0`).
 
-## Navigation Integration
-- `pageRouter`: if set and `navModel` items include `path`, clicking updates router.
+## Layout Model
 
-## Adaptive Layout Controls
-- `layoutMode`: `auto`, `mobile`, `desktop`.
-- `preferBottomNavigation` + `bottomNavigationMaxItems`: controls whether bottom navigation is used, including the `desktop-compact` profile.
-- `compactSpacingEnabled` + `compactSpacingBreakpoint`: shrinks outer margins/content insets/drawer insets on narrow or mobile layouts.
-- `navRailMaxWidthRatio`: caps rail width by viewport ratio.
-- `drawerMarginSafety`: keeps a safety gap so the drawer does not over-cover narrow viewports.
+- Navigation modes:
+  - `rail` (desktop-wide)
+  - `drawer`
+  - `bottom`
+  - `none`
+- Layout profiles:
+  - `mobile-compact`, `mobile-wide`, `desktop-compact`, `desktop-wide`
+- The scaffold computes a requested state and applies guarded transitions.
+
+## Main Properties
+
+Navigation model:
+- `navModel`
+- `navIndex`
+- `navigationEnabled`
+- `navTitle`, `navTitleVisible`
+- `navDelegate`, `navHeader`, `navFooter`
+
+Navigation dimensions:
+- `navWidth`
+- `navDrawerWidth`
+- `navRailMaxWidthRatio`
+- `drawerMarginSafety`
+
+Adaptive controls:
+- `layoutMode` (`auto`, `mobile`, `desktop`)
+- `layoutPlatform`
+- `forceDesktopOnLargeMobile`
+- `mobileDesktopMinWidth`
+- `preferBottomNavigation`
+- `bottomNavigationMaxItems`
+- `compactSpacingEnabled`
+- `compactSpacingBreakpoint`
+
+Routing:
+- `pageRouter` (external router)
+- `routes`, `initialPath`
+- `useInternalPageStack`
+- `internalRouterRegisterAsGlobalNavigator`
+
+State/read-only:
+- `layoutProfile`, `navigationMode`
+- `mobileLayout`, `desktopLayout`
+- `navigationRailEnabled`, `drawerNavigationEnabled`, `bottomNavigationEnabled`
+- `internalPageStackEnabled`
+- `activePageRouter`
+
+## Signals
+
+- `navActivated(index, item)`
+- `layoutStateChanged(profile, navigationMode)`
+- `stackNavigated(path, params)`
+- `stackNavigationFailed(path)`
+- `transitionRejected(kind, fromState, toState, fallbackState)`
 
 ## Usage
 ```qml
-LV.AppScaffold {
-    headerTitle: "App"
-    navModel: [{ label: "Overview", path: "/" }]
-}
-```
-
-## Practical Examples
-
-### Example 1: Basic scaffold with default slots
-```qml
 import QtQuick
 import LVRS 1.0 as LV
 
 LV.AppScaffold {
-    headerTitle: "Platform"
-    headerSubtitle: "Operations"
-    navModel: ["Overview", "Runs", "Reports"]
-
-    Rectangle { color: LV.Theme.surfaceAlt; anchors.fill: parent }
-}
-```
-
-### Example 2: Object nav model with badges and icons
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.AppScaffold {
-    headerTitle: "Alerts"
+    anchors.fill: parent
     navModel: [
-        { label: "Open", icon: "!", badge: 12 },
-        { label: "Acknowledged", icon: "✓", badge: 3 },
-        { label: "Muted", icon: "·", enabled: false }
+        { label: "Overview", path: "/" },
+        { label: "Reports", path: "/reports" }
     ]
+
+    Rectangle {
+        anchors.fill: parent
+        color: LV.Theme.window
+    }
 }
 ```
 
-### Example 3: Delegate navigation to `PageRouter`
+## Practical Example: External Router
 ```qml
 import QtQuick
 import LVRS 1.0 as LV

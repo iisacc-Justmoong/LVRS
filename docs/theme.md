@@ -2,40 +2,85 @@
 
 Location: `qml/Theme.qml`
 
-`Theme` is the central design-token singleton used by all LVRS components.
+`Theme` is the global design-token singleton for LVRS QML components.
 
 ## Token Groups
 
-- Typography: family resolution, text size/weight/style-name triplets, line-height metadata.
-- Surface: window and panel background layers.
-- Semantic color: `primary`, `success`, `warning`, `danger`.
-- Accent palette: full iconset-derived colors for component states and diagnostics.
-- Metrics: spacing, radius, control heights, icon sizes.
+- Typography: font family resolution and text size/weight/style-name tokens.
+- Surface: window color and 12-step panel background scale.
+- Semantic color: `primary`/`accent`, `success`, `warning`, `danger`.
+- Accent palette: iconset-derived color token set (`accentPaletteTokens`).
+- Metrics: spacing, radius, control size, dialog size, and interaction timings.
+
+## Window and Panel Surfaces
+
+Window base:
+- `window: "#141414"`
+
+Panel background scale (dark, low-saturation, 12 steps):
+- `panelBackground01: "#1B1B1C"`
+- `panelBackground02: "#1D1D1D"`
+- `panelBackground03: "#1F1F20"`
+- `panelBackground04: "#212223"`
+- `panelBackground05: "#242525"`
+- `panelBackground06: "#262728"`
+- `panelBackground07: "#292A2B"`
+- `panelBackground08: "#2C2E2F"`
+- `panelBackground09: "#303232"`
+- `panelBackground10: "#343536"`
+- `panelBackground11: "#373A3B"`
+- `panelBackground12: "#3C3E3F"`
+
+Derived surface aliases:
+- `windowAlt -> panelBackground03`
+- `subSurface -> panelBackground04`
+- `surfaceSolid -> panelBackground05`
+- `surfaceAlt -> panelBackground06`
+- `surfaceGhost -> panelBackground02`
+
+## Hex Format Rule
+
+- Opaque surface tokens use 6-digit hex.
+- Alpha-required tokens remain 8-digit hex (for example `overlayBackdrop`, text opacity tokens).
 
 ## Icon Path Resolution
 
-`Theme.iconPath(iconName)` resolves a logical icon name to `qrc:/qt/qml/LVRS/resources/iconset/`.
+`Theme.iconPath(iconName)` resolves logical icon names into:
+`qrc:/qt/qml/LVRS/resources/iconset/`
 
+Rules:
 - Empty input returns empty string.
-- Full resource path (`:/`) is preserved.
-- `.svg` suffix is appended automatically when omitted.
+- Full resource path (`:/`) is returned as-is.
+- `.svg` is appended when omitted.
 
-## Accent Palette
+## Accent Palette Tokens
 
-Accent colors are now split into two layers:
+There are two layers:
 
-- Legacy semantic accent tokens (for stable component styling): `accentBlue`, `accentRed`, `accentGreen`, `accentSlateMuted`, etc.
-- Full extracted iconset palette: `accentIconPaletteTokens` (`[{ name, hex, color }]`).
+- Stable semantic accent properties (`accentBlue`, `accentRed`, `accentGreen`, etc.).
+- Extracted palette list: `accentPaletteTokens`.
 
-`accentIconPaletteTokens` is generated from `resources/iconset/*.svg` fill/stroke color values.
-Current snapshot includes `386` unique colors across `2182` icons.
-New non-semantic colors are exposed as deterministic descriptive names (for example `accentDeepRed`, `accentDarkerYellow`, `accentLightOrangeVividBirch`).
+`accentPaletteTokens` item schema:
+- `{ name: string, color: string }`
 
-## Important Mappings
+Count is available as:
+- `accentPaletteTokenCount`
 
-- `accent` aliases `primary`.
-- Context menu tokens are explicit: `contextMenuSurface`, `contextMenuDivider`, `contextMenuItemSelectedBackground`, `contextMenuItemInactiveBackground`.
-- Button and control defaults depend on `controlHeightSm`, `controlHeightMd`, `radiusControl`, and gap tokens.
+The extracted palette is generated from `resources/iconset/*.svg` fill/stroke colors.
+
+## Related UI Defaults
+
+- Context menu colors:
+  - `contextMenuSurface`
+  - `contextMenuDivider`
+  - `contextMenuItemSelectedBackground`
+  - `contextMenuItemInactiveBackground`
+- Dialog sizing:
+  - `dialogMinWidth: 280`
+  - `dialogMaxWidth: 360`
+- Common radii:
+  - `radiusSm: 4`
+  - `radiusLg: 12`
 
 ## Usage
 

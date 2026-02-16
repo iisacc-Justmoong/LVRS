@@ -32,7 +32,7 @@ LV.ApplicationWindow {
     readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogCardInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
 
-    readonly property var accentPreviewTokens: LV.Theme.accentIconPaletteTokens
+    readonly property var accentPreviewTokens: LV.Theme.accentPaletteTokens
 
     readonly property var runtimeSnapshot: LV.AppState.runtimeSnapshot
     readonly property var viewStateSnapshot: LV.AppState.viewStateSnapshot
@@ -884,7 +884,7 @@ LV.ApplicationWindow {
                                         LV.Label {
                                             style: disabled
                                             color: LV.Theme.textTertiary
-                                            text: accentCard.modelData.hex
+                                            text: accentCard.modelData.color
                                         }
                                     }
                                 }

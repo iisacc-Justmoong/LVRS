@@ -2,7 +2,9 @@
 
 Location: `qml/ApplicationWindow.qml`
 
-`ApplicationWindow` is LVRS's root shell component. It wraps `AppScaffold`, manages size classes, and wires global runtime event signals.
+`ApplicationWindow` is LVRS's root window component.
+It hosts `AppScaffold`, manages size classes, and wires global runtime event signals.
+No top header/title panel is injected by default.
 
 ## Responsibilities
 
@@ -11,6 +13,7 @@ Location: `qml/ApplicationWindow.qml`
 - Render-quality layer supersampling bridge (`RenderQuality`).
 - Global event bridge to app-level signals.
 - Native window style integration.
+- Plain window background via `windowColor` (`Theme.window` by default).
 
 ## Global Event Signals
 
@@ -35,15 +38,47 @@ On completion, `ApplicationWindow`:
 
 ## Key Aliases and Properties
 
-Navigation and scaffold aliases:
-- `navIndex`, `navigationEnabled`, `navTitle`, `navWidth`, `headerActions`, `pageRouter`
-- `scaffoldLayoutMode`, `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`
-- `scaffoldCompactSpacingEnabled`, `scaffoldCompactSpacingBreakpoint`
-- `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
-
-Sizing and platform:
+Window/platform:
+- `windowColor`, `forceNativeDarkTitleBar`
 - `platform`, `isMobilePlatform`, `isDesktopPlatform`
 - `widthClass`, `heightClass`, `isCompact`, `isExpanded`
+- `desktopMinWidth`, `desktopMinHeight`, `mobileMinWidth`, `mobileMinHeight`
+- `usePlatformSafeMargin`, `safeMargin`
+
+Scaffold and navigation aliases:
+- `navIndex`, `navigationEnabled`
+- `navTitle`, `navTitleVisible`
+- `navWidth`, `navDrawerWidth`
+- `wideBreakpoint`
+- `scaffoldLayoutMode`, `scaffoldLayoutPlatform`
+- `scaffoldForceDesktopOnLargeMobile`, `scaffoldMobileDesktopMinWidth`
+- `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`
+- `scaffoldCompactSpacingEnabled`, `scaffoldCompactSpacingBreakpoint`
+- `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
+- `navDelegate`, `navHeader`, `navFooter`
+
+Routing aliases:
+- `pageRouter`
+- `pageRoutes`, `pageInitialPath`
+- `useInternalPageStack`
+- `internalRouterRegisterAsGlobalNavigator`
+- `internalPageStackEnabled` (readonly)
+- `activePageRouter` (readonly)
+
+Adaptive state:
+- `adaptiveLayoutProfile`
+- `adaptiveNavigationMode`
+- `adaptiveMobileLayout`, `adaptiveDesktopLayout`
+- `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
+
+Event/runtime:
+- `globalEventListenersEnabled`
+- `lastGlobalPressedEventData`, `lastGlobalContextEventData`
+- `autoAttachRuntimeEvents`, `autoHookBackendUserEvents`
+- `matchesMedia(rule)`
+
+Content slot:
+- `default property alias content`
 
 ## Usage
 
@@ -52,9 +87,11 @@ import LVRS 1.0 as LV
 
 LV.ApplicationWindow {
     visible: true
-    width: 1480
-    height: 980
-    title: "LVRS Visual Catalog"
+    width: 1280
+    height: 800
+    title: "LVRS"
+
+    navigationEnabled: false
 
     onGlobalContextEvent: function(eventData) {
         console.log(eventData.ui.path)

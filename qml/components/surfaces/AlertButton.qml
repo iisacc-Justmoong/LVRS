@@ -12,6 +12,26 @@ AbstractButton {
     implicitHeight: Theme.gap20
     height: Theme.gap20
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    readonly property bool isPrimaryTone: tone === AbstractButton.Primary
+    readonly property bool isDefaultTone: tone === AbstractButton.Default
+
+    // Alert default actions use a brighter neutral surface per Figma spec.
+    backgroundColor: isPrimaryTone
+        ? Theme.accent
+        : isDefaultTone
+            ? Theme.panelBackground12
+            : toneBackgroundColor
+    backgroundColorHover: isPrimaryTone
+        ? Qt.darker(Theme.accent, 1.12)
+        : isDefaultTone
+            ? Qt.lighter(Theme.panelBackground12, 1.08)
+            : toneBackgroundColorHover
+    backgroundColorPressed: isPrimaryTone
+        ? Qt.darker(Theme.accent, 1.2)
+        : isDefaultTone
+            ? Theme.panelBackground10
+            : toneBackgroundColorPressed
+    backgroundColorDisabled: Theme.panelBackground09
 
     contentItem: Label {
         style: body
