@@ -27,6 +27,7 @@ private slots:
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
+    void checkbox_figma_contract_loads();
     void context_menu_item_action_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
@@ -74,6 +75,10 @@ LV.ApplicationWindow {
         && matchesMedia("bottom-nav")
         && !matchesMedia("rail-nav")
     property bool qualityReady: LV.RenderQuality.enabled && LV.RenderQuality.supersampleScale >= 3.0
+    property bool backendOptimizationDefaultsReady: autoAttachRuntimeEvents
+        && autoAttachRuntimeEvents === globalEventListenersEnabled
+        && !autoHookBackendUserEvents
+        && globalEventListenersEnabled
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
@@ -127,6 +132,7 @@ LV.ApplicationWindow {
     QVERIFY(root->property("shellApiReady").toBool());
     QVERIFY(root->property("adaptiveApiReady").toBool());
     QVERIFY(root->property("qualityReady").toBool());
+    QVERIFY(root->property("backendOptimizationDefaultsReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
@@ -928,6 +934,78 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaPaddingReady").toBool());
+}
+
+void ImportApiTests::checkbox_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.CheckBox { id: checkedEnabled; text: "Label"; checked: true; enabled: true; visible: false }
+    LV.CheckBox { id: checkedDisabled; text: "Label"; checked: true; enabled: false; visible: false }
+    LV.CheckBox { id: uncheckedEnabled; text: "Label"; checked: false; enabled: true; visible: false }
+    LV.CheckBox { id: uncheckedDisabled; text: "Label"; checked: false; enabled: false; visible: false }
+
+    function indicatorOf(control) {
+        if (!control || !control.contentItem || control.contentItem.children.length < 1)
+            return null
+        return control.contentItem.children[0]
+    }
+
+    function labelOf(control) {
+        if (!control || !control.contentItem || control.contentItem.children.length < 2)
+            return null
+        return control.contentItem.children[1]
+    }
+
+    readonly property var checkedEnabledIndicator: indicatorOf(checkedEnabled)
+    readonly property var checkedDisabledIndicator: indicatorOf(checkedDisabled)
+    readonly property var uncheckedEnabledIndicator: indicatorOf(uncheckedEnabled)
+    readonly property var uncheckedDisabledIndicator: indicatorOf(uncheckedDisabled)
+    readonly property var checkedEnabledLabel: labelOf(checkedEnabled)
+    readonly property var checkedDisabledLabel: labelOf(checkedDisabled)
+
+    property bool figmaCheckBoxReady:
+        checkedEnabled.boxSize === 17
+        && Math.abs(checkedEnabled.boxRadius - 3.5) < 0.01
+        && checkedEnabled.contentItem.spacing === LV.Theme.gap6
+        && checkedEnabled.checkColor === LV.Theme.bodyColor
+        && checkedEnabled.checkMarkColorDisabled === LV.Theme.disabledColor
+        && checkedEnabledIndicator !== null
+        && checkedDisabledIndicator !== null
+        && uncheckedEnabledIndicator !== null
+        && uncheckedDisabledIndicator !== null
+        && checkedEnabledIndicator.color === LV.Theme.accent
+        && checkedDisabledIndicator.color === LV.Theme.panelBackground12
+        && uncheckedEnabledIndicator.color === LV.Theme.bodyColor
+        && uncheckedDisabledIndicator.color === LV.Theme.panelBackground12
+        && Math.abs(checkedEnabledIndicator.border.width - 0) < 0.01
+        && Math.abs(checkedDisabledIndicator.border.width - 0.5) < 0.01
+        && Math.abs(uncheckedEnabledIndicator.border.width - 0.5) < 0.01
+        && Math.abs(uncheckedDisabledIndicator.border.width - 0) < 0.01
+        && checkedDisabledIndicator.border.color === LV.Theme.panelBackground12
+        && uncheckedEnabledIndicator.border.color === LV.Theme.bodyColor
+        && checkedEnabled.showInnerShadow === false
+        && checkedDisabled.showInnerShadow === true
+        && uncheckedEnabled.showInnerShadow === true
+        && uncheckedDisabled.showInnerShadow === true
+        && checkedEnabledLabel !== null
+        && checkedDisabledLabel !== null
+        && checkedEnabledLabel.color === LV.Theme.bodyColor
+        && checkedDisabledLabel.color === LV.Theme.disabledColor
+        && checkedEnabledLabel.font.pixelSize === LV.Theme.textBody
+        && checkedEnabledLabel.font.weight === LV.Theme.textBodyWeight
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("figmaCheckBoxReady").toBool());
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()

@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include <QCoreApplication>
+#include <QElapsedTimer>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QQuickWindow>
@@ -24,6 +25,7 @@ private slots:
     void backend_file_roundtrip_and_errors();
     void backend_error_signal_and_directory_idempotence();
     void backend_event_hook_receives_runtime_events();
+    void backend_async_concurrency_and_io_contract();
 };
 
 void BackendIoTests::backend_file_roundtrip_and_errors()
@@ -144,6 +146,107 @@ void BackendIoTests::backend_event_hook_receives_runtime_events()
 
     backend.unhookUserEvents();
     QVERIFY(!backend.userEventHooked());
+}
+
+void BackendIoTests::backend_async_concurrency_and_io_contract()
+{
+    Backend backend;
+    backend.setAsyncMaxConcurrency(2);
+    QCOMPARE(backend.asyncMaxConcurrency(), 2);
+
+    QSignalSpy queuedSpy(&backend, &Backend::asyncRequestQueued);
+    QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
+    QSignalSpy inFlightSpy(&backend, &Backend::asyncJobsInFlightChanged);
+    QVERIFY(queuedSpy.isValid());
+    QVERIFY(finishedSpy.isValid());
+    QVERIFY(inFlightSpy.isValid());
+
+    auto hasFinishedRequest = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return true;
+        }
+        return false;
+    };
+
+    auto finishedArgsFor = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return args;
+        }
+        return QList<QVariant>();
+    };
+
+    QElapsedTimer timer;
+    timer.start();
+    const qulonglong taskA = backend.dispatchAsyncTask(QStringLiteral("ui-task-a"),
+                                                       QVariantMap { { QStringLiteral("key"), QStringLiteral("a") } },
+                                                       260);
+    const qulonglong taskB = backend.dispatchAsyncTask(QStringLiteral("ui-task-b"),
+                                                       QVariantMap { { QStringLiteral("key"), QStringLiteral("b") } },
+                                                       260);
+    QTRY_VERIFY(backend.asyncJobsInFlight() > 0);
+    QTRY_VERIFY(hasFinishedRequest(taskA));
+    QTRY_VERIFY(hasFinishedRequest(taskB));
+
+    const qint64 elapsedMs = timer.elapsed();
+    QVERIFY2(elapsedMs < 430,
+             qPrintable(QStringLiteral("Expected parallel execution (<430ms), elapsed=%1ms").arg(elapsedMs)));
+
+    const QList<QVariant> taskAArgs = finishedArgsFor(taskA);
+    const QList<QVariant> taskBArgs = finishedArgsFor(taskB);
+    QVERIFY(taskAArgs.size() >= 7);
+    QVERIFY(taskBArgs.size() >= 7);
+    QCOMPARE(taskAArgs.at(1).toString(), QStringLiteral("dispatchTask"));
+    QCOMPARE(taskBArgs.at(1).toString(), QStringLiteral("dispatchTask"));
+    QVERIFY(taskAArgs.at(3).toBool());
+    QVERIFY(taskBArgs.at(3).toBool());
+    QCOMPARE(taskAArgs.at(4).toMap().value(QStringLiteral("key")).toString(), QStringLiteral("a"));
+    QCOMPARE(taskBArgs.at(4).toMap().value(QStringLiteral("key")).toString(), QStringLiteral("b"));
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString nestedDir = tempDir.path() + "/async/contract";
+    const QString filePath = nestedDir + "/sample.txt";
+
+    const qulonglong ensureId = backend.ensureDirAsync(nestedDir);
+    QTRY_VERIFY(hasFinishedRequest(ensureId));
+    const QList<QVariant> ensureArgs = finishedArgsFor(ensureId);
+    QVERIFY(ensureArgs.size() >= 7);
+    QCOMPARE(ensureArgs.at(1).toString(), QStringLiteral("ensureDir"));
+    QVERIFY(ensureArgs.at(3).toBool());
+    QVERIFY(ensureArgs.at(4).toMap().value(QStringLiteral("ensured")).toBool());
+
+    const qulonglong saveId = backend.saveTextFileAsync(filePath, QStringLiteral("async-metrics"));
+    QTRY_VERIFY(hasFinishedRequest(saveId));
+    const QList<QVariant> saveArgs = finishedArgsFor(saveId);
+    QVERIFY(saveArgs.size() >= 7);
+    QCOMPARE(saveArgs.at(1).toString(), QStringLiteral("saveTextFile"));
+    QVERIFY(saveArgs.at(3).toBool());
+    QVERIFY(saveArgs.at(4).toMap().value(QStringLiteral("bytes")).toLongLong() > 0);
+
+    const qulonglong readId = backend.readTextFileAsync(filePath);
+    QTRY_VERIFY(hasFinishedRequest(readId));
+    const QList<QVariant> readArgs = finishedArgsFor(readId);
+    QVERIFY(readArgs.size() >= 7);
+    QCOMPARE(readArgs.at(1).toString(), QStringLiteral("readTextFile"));
+    QVERIFY(readArgs.at(3).toBool());
+    QCOMPARE(readArgs.at(4).toMap().value(QStringLiteral("text")).toString(), QStringLiteral("async-metrics"));
+    QCOMPARE(readArgs.at(4).toMap().value(QStringLiteral("length")).toInt(),
+             QStringLiteral("async-metrics").length());
+
+    const qulonglong badReadId = backend.readTextFileAsync(QStringLiteral(" "));
+    QTRY_VERIFY(hasFinishedRequest(badReadId));
+    const QList<QVariant> badReadArgs = finishedArgsFor(badReadId);
+    QVERIFY(badReadArgs.size() >= 7);
+    QCOMPARE(badReadArgs.at(1).toString(), QStringLiteral("readTextFile"));
+    QVERIFY(!badReadArgs.at(3).toBool());
+    QCOMPARE(badReadArgs.at(5).toString(), QStringLiteral("Empty path"));
+    QCOMPARE(backend.lastError(), QStringLiteral("Empty path"));
+
+    QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
+    QVERIFY(queuedSpy.count() >= 6);
+    QVERIFY(finishedSpy.count() >= 6);
 }
 
 QTEST_MAIN(BackendIoTests)

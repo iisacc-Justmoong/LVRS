@@ -28,8 +28,8 @@ On `Component.onCompleted`, shell performs:
 1. `FontPolicy.enforceApplicationFallback()`,
 2. `RenderQuality.applyWindow(windowRoot)`,
 3. `SvgManager.ensureMinimumScale(effectiveSupersampleScale)`,
-4. optional runtime daemon start/attach (`autoAttachRuntimeEvents`),
-5. optional backend hook (`autoHookBackendUserEvents`),
+4. runtime daemon start/attach by default (`autoAttachRuntimeEvents`, default: `globalEventListenersEnabled`),
+5. optional backend mirror hook (`autoHookBackendUserEvents`, default `false`),
 6. native window style application and deferred refresh.
 
 Order matters because:
@@ -71,8 +71,8 @@ Order matters because:
 | Property/Signal | Meaning |
 |---|---|
 | `globalEventListenersEnabled` | Master switch for global listener components. |
-| `autoAttachRuntimeEvents` | Auto-start/attach runtime daemon. |
-| `autoHookBackendUserEvents` | Auto-hook backend mirror cache. |
+| `autoAttachRuntimeEvents` | Auto-start/attach runtime daemon (default: follows `globalEventListenersEnabled`). |
+| `autoHookBackendUserEvents` | Auto-hook backend mirror cache (default `false`, opt-in). |
 | `globalPressedEvent(eventData)` | Root global press relay. |
 | `globalContextEvent(eventData)` | Root global context-request relay. |
 | `lastGlobalPressedEventData`, `lastGlobalContextEventData` | Last relayed payload snapshots. |
@@ -105,8 +105,8 @@ This prevents unstable oscillation during rapid resize/device-class changes.
 
 | Case | Condition | Expected behavior |
 |---|---|---|
-| Runtime auto attach enabled | `autoAttachRuntimeEvents=true` | daemon starts and attaches to this window |
-| Backend auto hook enabled | `autoHookBackendUserEvents=true` | `Backend.hookUserEvents()` attempted and logged on failure |
+| Runtime auto attach enabled (default) | `globalEventListenersEnabled=true` and `autoAttachRuntimeEvents=true` | daemon starts and attaches to this window |
+| Backend auto hook enabled (opt-in) | `autoHookBackendUserEvents=true` | `Backend.hookUserEvents()` attempted and logged on failure |
 | Global listener disabled | `globalEventListenersEnabled=false` | global pressed/context relays stop |
 | Context event with no coordinates | malformed payload | context menu helpers should no-op safely |
 
@@ -122,8 +122,6 @@ LV.ApplicationWindow {
     width: 1280
     height: 800
 
-    autoAttachRuntimeEvents: true
-    autoHookBackendUserEvents: false
     globalEventListenersEnabled: true
 }
 ```
@@ -147,7 +145,8 @@ LV.ApplicationWindow {
 - Enabling route definitions but disabling internal page stack unintentionally.
 - Replacing render-layer sizing math in-page instead of using backend resolver.
 - Expecting global context signals while root listeners are disabled.
-- Assuming runtime daemon is attached when `autoAttachRuntimeEvents=false`.
+- Assuming runtime daemon is always attached even after manually setting `autoAttachRuntimeEvents=false`.
+- Assuming backend mirrored cache is always active without enabling `autoHookBackendUserEvents`.
 
 ## 9. Troubleshooting Matrix
 

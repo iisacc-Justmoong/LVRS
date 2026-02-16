@@ -8,14 +8,33 @@ AbstractButton {
     checkable: true
     tone: AbstractButton.Borderless
 
-    property int boxSize: Theme.controlIndicatorSize
-    property color checkColor: Theme.textPrimary
+    property int boxSize: 17
+    property real boxRadius: 3.5
+    property color checkColor: Theme.bodyColor
     property color checkedColor: Theme.accent
-    property color uncheckedColor: Theme.surfaceAlt
-    property color disabledCheckedColor: Theme.surfaceAlt
-    property color disabledUncheckedColor: Theme.subSurface
-    property color checkMarkColorDisabled: Theme.textTertiary
+    property color uncheckedColor: Theme.bodyColor
+    property color disabledCheckedColor: Theme.panelBackground12
+    property color disabledUncheckedColor: Theme.panelBackground12
+    property color checkMarkColorDisabled: Theme.disabledColor
     property int checkMarkStrokeWidth: Theme.gap2
+    property real boxBorderWidthCheckedEnabled: 0
+    property real boxBorderWidthCheckedDisabled: 0.5
+    property real boxBorderWidthUncheckedEnabled: 0.5
+    property real boxBorderWidthUncheckedDisabled: 0
+    property color boxBorderColorCheckedEnabled: "transparent"
+    property color boxBorderColorCheckedDisabled: Theme.panelBackground12
+    property color boxBorderColorUncheckedEnabled: Theme.bodyColor
+    property color boxBorderColorUncheckedDisabled: "transparent"
+    property color innerShadowSoftColor: "#14000000"
+    property color innerShadowStrongColor: "#1A000000"
+
+    readonly property bool showInnerShadow: !(control.checked && control.enabled)
+    readonly property real resolvedBoxBorderWidth: control.checked
+        ? (control.enabled ? control.boxBorderWidthCheckedEnabled : control.boxBorderWidthCheckedDisabled)
+        : (control.enabled ? control.boxBorderWidthUncheckedEnabled : control.boxBorderWidthUncheckedDisabled)
+    readonly property color resolvedBoxBorderColor: control.checked
+        ? (control.enabled ? control.boxBorderColorCheckedEnabled : control.boxBorderColorCheckedDisabled)
+        : (control.enabled ? control.boxBorderColorUncheckedEnabled : control.boxBorderColorUncheckedDisabled)
 
     leftPadding: 0
     rightPadding: 0
@@ -32,7 +51,7 @@ AbstractButton {
     background: Item { }
 
     contentItem: RowLayout {
-        spacing: control.text.length > 0 ? Theme.gap8 : Theme.gapNone
+        spacing: control.text.length > 0 ? Theme.gap6 : Theme.gapNone
         Layout.alignment: Qt.AlignVCenter
 
         Rectangle {
@@ -40,11 +59,35 @@ AbstractButton {
             implicitHeight: control.boxSize
             Layout.preferredWidth: control.boxSize
             Layout.preferredHeight: control.boxSize
-            radius: Theme.radiusSm
+            radius: control.boxRadius
             color: control.enabled
                 ? (control.checked ? control.checkedColor : control.uncheckedColor)
                 : (control.checked ? control.disabledCheckedColor : control.disabledUncheckedColor)
+            border.width: control.resolvedBoxBorderWidth
+            border.color: control.resolvedBoxBorderColor
             antialiasing: true
+
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                color: "transparent"
+                border.width: 1
+                border.color: control.innerShadowSoftColor
+                visible: control.showInnerShadow
+                antialiasing: true
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: parent.height * 0.45
+                radius: parent.radius
+                color: control.innerShadowStrongColor
+                opacity: control.showInnerShadow ? 0.5 : 0
+                antialiasing: true
+                clip: true
+            }
 
             Canvas {
                 id: checkmarkCanvas
@@ -59,9 +102,9 @@ AbstractButton {
                         return
 
                     ctx.beginPath()
-                    ctx.moveTo(width * 0.22, height * 0.55)
-                    ctx.lineTo(width * 0.42, height * 0.74)
-                    ctx.lineTo(width * 0.78, height * 0.30)
+                    ctx.moveTo(width * 0.25, height * 0.52)
+                    ctx.lineTo(width * 0.43, height * 0.70)
+                    ctx.lineTo(width * 0.69, height * 0.34)
                     ctx.lineWidth = control.checkMarkStrokeWidth
                     ctx.lineCap = "round"
                     ctx.lineJoin = "round"
@@ -72,9 +115,9 @@ AbstractButton {
         }
 
         Label {
-            style: description
+            style: body
             text: control.text
-            color: control.enabled ? Theme.textPrimary : Theme.textTertiary
+            color: control.enabled ? Theme.bodyColor : Theme.disabledColor
             visible: control.text.length > 0
             Layout.alignment: Qt.AlignVCenter
         }
@@ -84,6 +127,7 @@ AbstractButton {
     onEnabledChanged: checkmarkCanvas.requestPaint()
     onCheckColorChanged: checkmarkCanvas.requestPaint()
     onCheckMarkColorDisabledChanged: checkmarkCanvas.requestPaint()
+    onCheckMarkStrokeWidthChanged: checkmarkCanvas.requestPaint()
 
 }
 

@@ -10,6 +10,7 @@ It is intentionally simple: transport and bounded caching, not policy-heavy anal
 `Backend` owns:
 
 - atomic text save/read helpers,
+- async worker-pool based file/task dispatch for non-blocking UI flows,
 - writable location lookup bridge,
 - runtime-event hook lifecycle to `RuntimeEvents`,
 - bounded mirrored event cache with per-type counters,
@@ -31,6 +32,8 @@ It is intentionally simple: transport and bounded caching, not policy-heavy anal
 | `hookedEventCapacity` | `int` | Max mirrored events to retain. | Clamped `[64, 32768]`. |
 | `lastHookedEvent` | `map` | Most recent mirrored event (with `hookEpochMs`). | Empty before first event. |
 | `lastHookedInputState` | `map` | Latest input snapshot from payload/runtime fallback. | May be stale when unhooked. |
+| `asyncJobsInFlight` | `int` | Number of queued/running async requests. | Lower-bounded to `0`. |
+| `asyncMaxConcurrency` | `int` | Worker-pool max parallelism for async dispatch. | Clamped `[1, 64]`. |
 
 ## 3. Method Contract (Detailed)
 
@@ -65,7 +68,49 @@ Failure cases:
 - Direct bridge to `QStandardPaths::writableLocation`.
 - Caller is responsible for validating non-empty path and creating directories.
 
-### 3.2 Runtime hook lifecycle APIs
+### 3.2 Async APIs (multi-thread, UI non-blocking)
+
+#### `saveTextFileAsync(path, text): qulonglong`
+
+- Enqueues atomic UTF-8 text save on backend worker thread pool.
+- Returns request id immediately.
+- Emits:
+  - `asyncRequestQueued(requestId, "saveTextFile", path)`
+  - `asyncRequestFinished(...)` on completion.
+- Completion `result` map includes:
+  - `bytes`
+
+#### `readTextFileAsync(path): qulonglong`
+
+- Enqueues UTF-8 text read on backend worker thread pool.
+- Returns request id immediately.
+- Emits queued/finished signals.
+- Completion `result` map includes:
+  - `text`
+  - `length`
+
+#### `ensureDirAsync(path): qulonglong`
+
+- Enqueues recursive directory ensure (`mkpath(".")`) on worker pool.
+- Returns request id immediately.
+- Completion `result` map includes:
+  - `ensured` (`bool`)
+
+#### `dispatchAsyncTask(taskName, payload = {}, delayMs = 0): qulonglong`
+
+- General-purpose async task dispatcher for UI orchestration.
+- Runs on worker pool, optional delay (`delayMs` clamped `[0, 3600000]`).
+- Returns request id immediately.
+- Completion `result` map echoes payload and appends:
+  - `taskName`
+  - `delayMs`
+
+#### `setAsyncMaxConcurrency(value): void`
+
+- Controls worker pool parallelism.
+- Useful when UI workload requires deterministic throttling.
+
+### 3.3 Runtime hook lifecycle APIs
 
 #### `hookUserEvents(): bool`
 
@@ -93,7 +138,7 @@ Returns `false` when runtime singleton is unavailable.
 - Clears mirrored events, type counters, last-hooked snapshots.
 - Emits `hookedEventsChanged`.
 
-### 3.3 Query APIs
+### 3.4 Query APIs
 
 #### `hookedUserEvents(limit = -1): list`
 
@@ -161,7 +206,33 @@ function exportEvents(path) {
 }
 ```
 
-### 6.2 Measurement-window reset pattern
+### 6.2 Async non-blocking UI workflow
+
+```qml
+import LVRS 1.0 as LV
+
+Component.onCompleted: {
+    LV.Backend.asyncMaxConcurrency = 4
+}
+
+Connections {
+    target: LV.Backend
+    function onAsyncRequestFinished(requestId, operation, subject, ok, result, error, elapsedMs) {
+        if (!ok) {
+            console.warn(operation, "failed:", error)
+            return
+        }
+        if (operation === "readTextFile")
+            console.log("loaded text:", result.text)
+    }
+}
+
+function refreshModelFromFile(path) {
+    LV.Backend.readTextFileAsync(path)
+}
+```
+
+### 6.3 Measurement-window reset pattern
 
 ```qml
 function beginMeasurementWindow() {
@@ -180,6 +251,7 @@ function beginMeasurementWindow() {
 | per-type counts inconsistent expectation | capacity eviction occurred | compare count vs capacity | increase capacity for burst windows |
 | stale input state | runtime detached/unhooked | check `userEventHooked` | re-hook or read direct runtime singleton |
 | save fails intermittently | path/permission issue | inspect `lastError` content | validate directory + permission + disk state |
+| UI stutter during file/task workflow | sync API was used in hot path | inspect calls for `saveTextFile/readTextFile/ensureDir` | migrate to async APIs and handle completion signals |
 
 ## 8. Codex-Oriented Playbook
 
@@ -202,14 +274,16 @@ After modifications:
 
 1. hook/unhook toggles `userEventHooked` correctly,
 2. capacity clamp + eviction behavior remains deterministic,
-3. summary map includes expected keys,
-4. file save/read failure paths still set `lastError`.
+3. async queue emits queued/finished signals with stable schema,
+4. summary map includes expected keys,
+5. file save/read failure paths still set `lastError`.
 
 ## 9. Validation Checklist
 
 - Runtime hook succeeds with active runtime singleton.
 - Mirrored count obeys capacity bounds.
 - Type counters adjust on both append and eviction.
+- Async jobs update `asyncJobsInFlight` correctly.
 - File helper APIs behave atomically and report errors correctly.
 
 ## 10. Related APIs

@@ -33,9 +33,11 @@ Controls.ApplicationWindow {
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
-    property bool autoAttachRuntimeEvents: false
-    property bool autoHookBackendUserEvents: false
     property bool globalEventListenersEnabled: true
+    // Runtime daemon attach is useful for global listeners and is enabled by default.
+    property bool autoAttachRuntimeEvents: globalEventListenersEnabled
+    // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
+    property bool autoHookBackendUserEvents: false
     property bool windowDragHandleEnabled: isDesktopPlatform
     property int windowDragHandleHeight: 28
     property int windowDragHandleTopMargin: 0
