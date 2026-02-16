@@ -215,7 +215,7 @@ When enabled, configure fails if:
 - `main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.
 - `example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.
 - `example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
-- `resources/iconset/`: SVG icon source set used for theme accent extraction.
+- `resources/iconset/`: SVG icon source set used for theme accent extraction. Most icons in this set are sourced from JetBrains Int Icons (IntelliJ Platform Icons).
 - `tests/`: Qt tests for components and runtime services.
 - `docs/`: full technical documentation index.
 
