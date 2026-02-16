@@ -77,8 +77,19 @@ class RuntimeEvents : public QObject
     Q_PROPERTY(int osSampleIntervalMs READ osSampleIntervalMs WRITE setOsSampleIntervalMs NOTIFY osSampleIntervalMsChanged)
     Q_PROPERTY(qint64 uptimeMs READ uptimeMs NOTIFY osStatsChanged)
     Q_PROPERTY(qint64 rssBytes READ rssBytes NOTIFY osStatsChanged)
+    Q_PROPERTY(int captureProfile READ captureProfile WRITE setCaptureProfile NOTIFY captureProfileChanged)
+    Q_PROPERTY(bool pointerHitTestingEnabled READ pointerHitTestingEnabled WRITE setPointerHitTestingEnabled NOTIFY pointerHitTestingEnabledChanged)
+    Q_PROPERTY(int pointerHitTestMinIntervalMs READ pointerHitTestMinIntervalMs WRITE setPointerHitTestMinIntervalMs NOTIFY pointerHitTestMinIntervalMsChanged)
+    Q_PROPERTY(bool uiTrackingEnabled READ uiTrackingEnabled WRITE setUiTrackingEnabled NOTIFY uiTrackingEnabledChanged)
 
 public:
+    enum CaptureProfile {
+        FullCapture = 0,
+        BalancedCapture = 1,
+        LowLatencyCapture = 2
+    };
+    Q_ENUM(CaptureProfile)
+
     explicit RuntimeEvents(QObject *parent = nullptr);
     ~RuntimeEvents() override;
     static RuntimeEvents *instance();
@@ -142,6 +153,14 @@ public:
     void setOsSampleIntervalMs(int value);
     qint64 uptimeMs() const;
     qint64 rssBytes() const;
+    int captureProfile() const;
+    void setCaptureProfile(int value);
+    bool pointerHitTestingEnabled() const;
+    void setPointerHitTestingEnabled(bool value);
+    int pointerHitTestMinIntervalMs() const;
+    void setPointerHitTestMinIntervalMs(int value);
+    bool uiTrackingEnabled() const;
+    void setUiTrackingEnabled(bool value);
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void stop();
@@ -181,6 +200,10 @@ signals:
     void eventLogChanged();
     void recentEventCapacityChanged();
     void daemonHeartbeat(qint64 epochMs, qint64 uptimeMs, quint64 eventSequence);
+    void captureProfileChanged();
+    void pointerHitTestingEnabledChanged();
+    void pointerHitTestMinIntervalMsChanged();
+    void uiTrackingEnabledChanged();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -196,8 +219,8 @@ private:
     void detachTrackedObjects();
     void handleTrackedDestroyed(const QObject *object);
     void recordUiEvent(const QString &eventType, const QObject *object, bool visible);
-    void updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers);
-    void updatePointerUiSnapshot();
+    void updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers, bool refreshPointerUi = true);
+    void updatePointerUiSnapshot(bool forceRefresh = false);
     void handleIdleTick();
     void handleOsTick();
     void updateIdleState(bool nextIdle);
@@ -205,6 +228,7 @@ private:
     qint64 elapsedSinceEpoch(qint64 epochMs) const;
     qint64 sampleResidentSetBytes() const;
     bool isHighFrequencyEventType(const QString &eventType) const;
+    bool shouldSampleHighFrequencyPayload(const QString &eventType, qint64 epochMs) const;
     bool shouldSkipHighFrequencyRecord(const QString &eventType, qint64 epochMs);
     void scheduleRuntimeStateSignals();
     void recordRuntimeEvent(const QString &eventType, const QVariantMap &payload = QVariantMap());
@@ -273,6 +297,11 @@ private:
     int m_recentEventCapacity = 256;
     int m_highFrequencyEventMinIntervalMs = 16;
     int m_runtimeStateSignalMinIntervalMs = 16;
+    int m_captureProfile = FullCapture;
+    bool m_pointerHitTestingEnabled = true;
+    int m_pointerHitTestMinIntervalMs = 0;
+    bool m_uiTrackingEnabled = true;
+    qint64 m_lastPointerHitTestEpochMs = -1;
     QHash<QString, qint64> m_lastEventRecordedEpochByType;
     bool m_runtimeStateSignalDirty = false;
 

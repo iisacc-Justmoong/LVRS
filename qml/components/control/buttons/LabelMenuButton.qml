@@ -18,13 +18,11 @@ AbstractButton {
             : control.tone === AbstractButton.Primary || control.tone === AbstractButton.Destructive
                 ? control.indicatorNameAccent
                 : control.indicatorNameDefault
-    readonly property int iconRevision: SvgManager.revision
-    readonly property string renderedIndicatorSource: {
-        control.iconRevision
-        return SvgManager.icon(
-                    Theme.iconPath(control.resolvedIndicatorName),
-                    Theme.iconSm)
-    }
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
+    readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
     horizontalPadding: Theme.gap8
     verticalPadding: Theme.gap2
@@ -49,8 +47,8 @@ AbstractButton {
 
         Image {
             source: control.renderedIndicatorSource
-            sourceSize.width: Theme.iconSm
-            sourceSize.height: Theme.iconSm
+            sourceSize.width: control.indicatorSourceSize
+            sourceSize.height: control.indicatorSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: Theme.iconSm

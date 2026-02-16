@@ -29,6 +29,15 @@ QString SvgManager::icon(const QString &svgUrl, int logicalSize, qreal scale)
         return QString();
     }
 
+    if (isVectorSource(trimmedUrl)) {
+        if (trimmedUrl.startsWith(QStringLiteral("data:image/svg"), Qt::CaseInsensitive)
+            && !trimmedUrl.contains(QLatin1Char(','))) {
+            setLastError(QStringLiteral("Malformed SVG data URL"));
+            return QString();
+        }
+        return trimmedUrl;
+    }
+
     const int targetLogicalSize = qBound(1, logicalSize, 2048);
     const qreal targetScale = resolveScale(scale);
     const QString cacheKey = makeCacheKey(trimmedUrl, targetLogicalSize, targetScale);
@@ -94,9 +103,45 @@ void SvgManager::clearCache()
     emit revisionChanged();
 }
 
+void SvgManager::ensureMinimumScale(qreal value)
+{
+    const qreal requested = qMax(1.0, value);
+    if (requested > m_maximumScale) {
+        m_maximumScale = requested;
+        emit maximumScaleChanged();
+    }
+    if (requested > m_minimumScale) {
+        m_minimumScale = requested;
+        emit minimumScaleChanged();
+    }
+}
+
 QString SvgManager::lastError() const
 {
     return m_lastError;
+}
+
+bool SvgManager::vectorFirst() const
+{
+    return m_vectorFirst;
+}
+
+void SvgManager::setVectorFirst(bool value)
+{
+    Q_UNUSED(value)
+
+    // SVG rendering is enforced as vector-only policy.
+    const bool next = true;
+    if (m_vectorFirst == next)
+        return;
+    m_vectorFirst = next;
+    m_cache.clear();
+    m_cacheOrder.clear();
+    m_sourcePayloadCache.clear();
+    m_pendingSourceUrls.clear();
+    m_revision += 1;
+    emit revisionChanged();
+    emit vectorFirstChanged();
 }
 
 qreal SvgManager::minimumScale() const
@@ -158,6 +203,40 @@ void SvgManager::setCacheSize(int value)
 quint64 SvgManager::revision() const
 {
     return m_revision;
+}
+
+bool SvgManager::isVectorSource(const QString &sourceUrl) const
+{
+    const QString trimmed = sourceUrl.trimmed();
+    if (trimmed.isEmpty())
+        return false;
+
+    if (trimmed.startsWith(QStringLiteral("data:image/svg"), Qt::CaseInsensitive))
+        return true;
+
+    if (trimmed.startsWith(QStringLiteral(":/")))
+        return trimmed.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive)
+            || trimmed.endsWith(QStringLiteral(".svgz"), Qt::CaseInsensitive);
+
+    const QUrl parsed = QUrl::fromUserInput(trimmed);
+    if (!parsed.isValid())
+        return false;
+
+    if (parsed.scheme() == QStringLiteral("qrc")) {
+        const QString qrcPath = parsed.path();
+        return qrcPath.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive)
+            || qrcPath.endsWith(QStringLiteral(".svgz"), Qt::CaseInsensitive);
+    }
+
+    if (parsed.isLocalFile()) {
+        const QString localPath = parsed.toLocalFile();
+        return localPath.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive)
+            || localPath.endsWith(QStringLiteral(".svgz"), Qt::CaseInsensitive);
+    }
+
+    const QString path = parsed.path();
+    return path.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive)
+        || path.endsWith(QStringLiteral(".svgz"), Qt::CaseInsensitive);
 }
 
 qreal SvgManager::resolveScale(qreal requestedScale) const

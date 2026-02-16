@@ -31,9 +31,10 @@ QtQuickWindow.Window {
     property bool autoAttachRuntimeEvents: false
 
     readonly property real effectiveSupersampleScale: autoApplyRenderQuality && RenderQuality.enabled
-        ? Math.max(RenderQuality.minimumSupersampleScale,
-                   Math.min(RenderQuality.maximumSupersampleScale, RenderQuality.supersampleScale))
+        ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
+    readonly property bool sceneSupersamplingActive: autoApplyRenderQuality
+        && RenderQuality.sceneSupersamplingActive
 
     default property alias content: contentHost.data
 
@@ -88,16 +89,10 @@ QtQuickWindow.Window {
         id: contentHost
         anchors.fill: parent
         anchors.margins: root.safeMargin
-        layer.enabled: root.effectiveSupersampleScale > 1.0
+        layer.enabled: root.sceneSupersamplingActive
         layer.smooth: layer.enabled
-        layer.mipmap: layer.enabled
-        layer.textureSize: layer.enabled
-            ? Qt.size(
-                  Math.max(1, Math.round(width * root.effectiveSupersampleScale)),
-                  Math.max(1, Math.round(height * root.effectiveSupersampleScale)))
-            : Qt.size(
-                  Math.max(1, Math.round(width)),
-                  Math.max(1, Math.round(height)))
+        layer.mipmap: false
+        layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
     }
 
     QtObject {
@@ -105,8 +100,7 @@ QtQuickWindow.Window {
             FontPolicy.enforceApplicationFallback()
             if (root.autoApplyRenderQuality) {
                 RenderQuality.applyWindow(root)
-                if (SvgManager.minimumScale < root.effectiveSupersampleScale)
-                    SvgManager.minimumScale = root.effectiveSupersampleScale
+                SvgManager.ensureMinimumScale(root.effectiveSupersampleScale)
             }
             if (root.autoAttachRuntimeEvents) {
                 RuntimeEvents.start()

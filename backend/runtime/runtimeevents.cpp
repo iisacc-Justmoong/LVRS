@@ -425,6 +425,105 @@ qint64 RuntimeEvents::rssBytes() const
     return m_rssBytes;
 }
 
+int RuntimeEvents::captureProfile() const
+{
+    return m_captureProfile;
+}
+
+void RuntimeEvents::setCaptureProfile(int value)
+{
+    const int next = qBound(static_cast<int>(FullCapture),
+                            value,
+                            static_cast<int>(LowLatencyCapture));
+    if (m_captureProfile == next)
+        return;
+
+    m_captureProfile = next;
+
+    int nextHighFrequencyInterval = 16;
+    int nextRuntimeSignalInterval = 16;
+    bool nextPointerHitTestingEnabled = true;
+    int nextPointerHitTestMinInterval = 0;
+    bool nextUiTrackingEnabled = true;
+
+    switch (static_cast<CaptureProfile>(m_captureProfile)) {
+    case FullCapture:
+        break;
+    case BalancedCapture:
+        nextHighFrequencyInterval = 24;
+        nextRuntimeSignalInterval = 24;
+        nextPointerHitTestMinInterval = 16;
+        break;
+    case LowLatencyCapture:
+        nextHighFrequencyInterval = 33;
+        nextRuntimeSignalInterval = 33;
+        nextPointerHitTestingEnabled = false;
+        nextUiTrackingEnabled = false;
+        break;
+    default:
+        break;
+    }
+
+    setPointerHitTestingEnabled(nextPointerHitTestingEnabled);
+    setPointerHitTestMinIntervalMs(nextPointerHitTestMinInterval);
+    setUiTrackingEnabled(nextUiTrackingEnabled);
+
+    m_highFrequencyEventMinIntervalMs = nextHighFrequencyInterval;
+    m_runtimeStateSignalMinIntervalMs = nextRuntimeSignalInterval;
+    if (m_stateSignalTimer.interval() != m_runtimeStateSignalMinIntervalMs)
+        m_stateSignalTimer.setInterval(m_runtimeStateSignalMinIntervalMs);
+
+    emit captureProfileChanged();
+}
+
+bool RuntimeEvents::pointerHitTestingEnabled() const
+{
+    return m_pointerHitTestingEnabled;
+}
+
+void RuntimeEvents::setPointerHitTestingEnabled(bool value)
+{
+    if (m_pointerHitTestingEnabled == value)
+        return;
+    m_pointerHitTestingEnabled = value;
+    m_lastPointerHitTestEpochMs = -1;
+    updatePointerUiSnapshot(true);
+    emit pointerHitTestingEnabledChanged();
+    emit mouseChanged();
+}
+
+int RuntimeEvents::pointerHitTestMinIntervalMs() const
+{
+    return m_pointerHitTestMinIntervalMs;
+}
+
+void RuntimeEvents::setPointerHitTestMinIntervalMs(int value)
+{
+    const int next = qBound(0, value, 1000);
+    if (m_pointerHitTestMinIntervalMs == next)
+        return;
+    m_pointerHitTestMinIntervalMs = next;
+    emit pointerHitTestMinIntervalMsChanged();
+}
+
+bool RuntimeEvents::uiTrackingEnabled() const
+{
+    return m_uiTrackingEnabled;
+}
+
+void RuntimeEvents::setUiTrackingEnabled(bool value)
+{
+    if (m_uiTrackingEnabled == value)
+        return;
+    m_uiTrackingEnabled = value;
+    if (!m_uiTrackingEnabled) {
+        detachTrackedObjects();
+    } else if (m_window) {
+        trackUiObjectRecursive(m_window);
+    }
+    emit uiTrackingEnabledChanged();
+}
+
 void RuntimeEvents::start()
 {
     if (m_running)
@@ -505,8 +604,9 @@ void RuntimeEvents::attachWindow(QObject *window)
                                               emit daemonStateChanged();
                                           });
 
-    trackUiObjectRecursive(m_window);
-    updatePointerUiSnapshot();
+    if (m_uiTrackingEnabled)
+        trackUiObjectRecursive(m_window);
+    updatePointerUiSnapshot(true);
 }
 
 void RuntimeEvents::markActivity()
@@ -540,6 +640,7 @@ void RuntimeEvents::resetCounters()
     m_mouseButtonPressed = false;
     m_lastMousePressEpochMs = -1;
     m_lastMouseReleaseEpochMs = -1;
+    m_lastPointerHitTestEpochMs = -1;
     m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
     emit mouseChanged();
 
@@ -690,14 +791,17 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     }
     case QEvent::MouseMove: {
         auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const qint64 epochMs = nowEpochMs();
+        const bool shouldRecordPayload = shouldSampleHighFrequencyPayload(QStringLiteral("mouse-move"), epochMs);
         m_mouseMoveCount += 1;
         updateMouseFromEvent(mouseEvent->globalPosition().x(),
                              mouseEvent->globalPosition().y(),
                              static_cast<int>(mouseEvent->buttons()),
-                             static_cast<int>(mouseEvent->modifiers()));
+                             static_cast<int>(mouseEvent->modifiers()),
+                             shouldRecordPayload);
         emit mouseChanged();
         emit mouseMoved(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
-        {
+        if (shouldRecordPayload) {
             QVariantMap payload;
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
@@ -1017,14 +1121,17 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     }
     case QEvent::HoverMove: {
         auto *hoverEvent = static_cast<QHoverEvent *>(event);
+        const qint64 epochMs = nowEpochMs();
+        const bool shouldRecordPayload = shouldSampleHighFrequencyPayload(QStringLiteral("hover-move"), epochMs);
         m_mouseMoveCount += 1;
         updateMouseFromEvent(hoverEvent->globalPosition().x(),
                              hoverEvent->globalPosition().y(),
                              m_lastMouseButtons,
-                             m_lastMouseModifiers);
+                             m_lastMouseModifiers,
+                             shouldRecordPayload);
         emit mouseChanged();
         emit mouseMoved(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
-        {
+        if (shouldRecordPayload) {
             QVariantMap payload;
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
@@ -1045,7 +1152,7 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     case QEvent::ChildAdded: {
         auto *childEvent = static_cast<QChildEvent *>(event);
         const bool withinTrackedTree = watched == m_window || m_trackedObjects.contains(watched);
-        if (withinTrackedTree && childEvent->added() && childEvent->child())
+        if (m_uiTrackingEnabled && withinTrackedTree && childEvent->added() && childEvent->child())
             trackUiObjectRecursive(childEvent->child());
         break;
     }
@@ -1066,7 +1173,7 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
 
 void RuntimeEvents::trackUiObjectRecursive(QObject *object)
 {
-    if (!object || m_trackedObjects.contains(object))
+    if (!m_uiTrackingEnabled || !object || m_trackedObjects.contains(object))
         return;
 
     m_trackedObjects.insert(object);
@@ -1102,7 +1209,7 @@ void RuntimeEvents::detachTrackedObjects()
 
 void RuntimeEvents::handleTrackedDestroyed(const QObject *object)
 {
-    if (!m_trackedInfo.contains(object))
+    if (!m_uiTrackingEnabled || !m_trackedInfo.contains(object))
         return;
 
     const UiObjectInfo info = m_trackedInfo.take(object);
@@ -1124,7 +1231,7 @@ void RuntimeEvents::handleTrackedDestroyed(const QObject *object)
 
 void RuntimeEvents::recordUiEvent(const QString &eventType, const QObject *object, bool visible)
 {
-    if (!object || !m_trackedInfo.contains(object))
+    if (!m_uiTrackingEnabled || !object || !m_trackedInfo.contains(object))
         return;
 
     UiObjectInfo &info = m_trackedInfo[object];
@@ -1151,17 +1258,32 @@ void RuntimeEvents::recordUiEvent(const QString &eventType, const QObject *objec
     recordRuntimeEvent(QStringLiteral("ui-event"), payload);
 }
 
-void RuntimeEvents::updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers)
+void RuntimeEvents::updateMouseFromEvent(qreal x, qreal y, int buttons, int modifiers, bool refreshPointerUi)
 {
     m_lastMouseX = x;
     m_lastMouseY = y;
     m_lastMouseButtons = buttons;
     m_lastMouseModifiers = modifiers;
-    updatePointerUiSnapshot();
+    if (refreshPointerUi)
+        updatePointerUiSnapshot();
 }
 
-void RuntimeEvents::updatePointerUiSnapshot()
+void RuntimeEvents::updatePointerUiSnapshot(bool forceRefresh)
 {
+    if (!m_pointerHitTestingEnabled) {
+        m_pointerUi = fallbackUiAt(m_lastMouseX, m_lastMouseY);
+        return;
+    }
+
+    const qint64 epochMs = nowEpochMs();
+    if (!forceRefresh
+        && m_pointerHitTestMinIntervalMs > 0
+        && m_lastPointerHitTestEpochMs >= 0
+        && (epochMs - m_lastPointerHitTestEpochMs) < m_pointerHitTestMinIntervalMs) {
+        return;
+    }
+
+    m_lastPointerHitTestEpochMs = epochMs;
     QVariantMap hit = describeQuickItemAtGlobal(m_lastMouseX, m_lastMouseY);
     m_pointerUi = hit.isEmpty() ? fallbackUiAt(m_lastMouseX, m_lastMouseY) : hit;
 }
@@ -1265,6 +1387,17 @@ bool RuntimeEvents::isHighFrequencyEventType(const QString &eventType) const
 {
     return eventType == QLatin1String("mouse-move")
         || eventType == QLatin1String("hover-move");
+}
+
+bool RuntimeEvents::shouldSampleHighFrequencyPayload(const QString &eventType, qint64 epochMs) const
+{
+    if (m_highFrequencyEventMinIntervalMs <= 0)
+        return true;
+    if (!isHighFrequencyEventType(eventType))
+        return true;
+
+    const qint64 lastEpochMs = m_lastEventRecordedEpochByType.value(eventType, -1);
+    return !(lastEpochMs >= 0 && (epochMs - lastEpochMs) < m_highFrequencyEventMinIntervalMs);
 }
 
 bool RuntimeEvents::shouldSkipHighFrequencyRecord(const QString &eventType, qint64 epochMs)

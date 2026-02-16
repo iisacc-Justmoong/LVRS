@@ -73,6 +73,7 @@ LV.ApplicationWindow {
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
         && contentLabel.color === LV.Theme.bodyColor
+        && contentLabel.renderType === Text.NativeRendering
     property bool figmaTextDesignReady:
         titleLabel.font.pixelSize === LV.Theme.textTitle
         && titleLabel.font.weight === LV.Theme.textTitleWeight

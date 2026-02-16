@@ -24,6 +24,7 @@ private slots:
 void SvgManagerTests::svg_manager_generates_png_and_clamps()
 {
     SvgManager manager;
+    QVERIFY(manager.vectorFirst());
 
     manager.setMaximumScale(0.5);
     QCOMPARE(manager.maximumScale(), 1.0);
@@ -33,6 +34,12 @@ void SvgManagerTests::svg_manager_generates_png_and_clamps()
     manager.setMinimumScale(3.0);
     QCOMPARE(manager.minimumScale(), 3.0);
     QCOMPARE(manager.maximumScale(), 4.0);
+    manager.ensureMinimumScale(3.5);
+    QCOMPARE(manager.minimumScale(), 3.5);
+    QCOMPARE(manager.maximumScale(), 4.0);
+    manager.ensureMinimumScale(5.0);
+    QCOMPARE(manager.minimumScale(), 5.0);
+    QCOMPARE(manager.maximumScale(), 5.0);
 
     manager.setCacheSize(10000);
     QCOMPARE(manager.cacheSize(), 4096);
@@ -48,16 +55,18 @@ void SvgManagerTests::svg_manager_generates_png_and_clamps()
         "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'>"
         "<rect x='0' y='0' width='16' height='16' fill='#ff453a'/></svg>");
     const QString svgUrl = QStringLiteral("data:image/svg+xml;base64,") + QString::fromLatin1(svg.toBase64());
-    const QString pngA = manager.icon(svgUrl, 16, 3.0);
-    QVERIFY(pngA.startsWith(QStringLiteral("data:image/png;base64,")));
+    const QString vectorA = manager.icon(svgUrl, 16, 3.0);
+    QCOMPARE(vectorA, svgUrl);
     QVERIFY(manager.lastError().isEmpty());
 
-    const QString pngB = manager.icon(svgUrl, 16, 3.0);
-    QCOMPARE(pngB, pngA);
+    manager.setVectorFirst(false);
+    QCOMPARE(manager.vectorFirst(), true);
+    const QString vectorB = manager.icon(svgUrl, 16, 3.0);
+    QCOMPARE(vectorB, svgUrl);
 
     const quint64 revisionBeforeClear = manager.revision();
     manager.clearCache();
-    QVERIFY(manager.revision() > revisionBeforeClear);
+    QCOMPARE(manager.revision(), revisionBeforeClear);
     QVERIFY(manager.deviceScale() >= 1.0);
 }
 
@@ -65,11 +74,13 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
 {
     SvgManager manager;
     QSignalSpy errorSpy(&manager, &SvgManager::lastErrorChanged);
+    QSignalSpy vectorSpy(&manager, &SvgManager::vectorFirstChanged);
     QSignalSpy minimumSpy(&manager, &SvgManager::minimumScaleChanged);
     QSignalSpy maximumSpy(&manager, &SvgManager::maximumScaleChanged);
     QSignalSpy cacheSpy(&manager, &SvgManager::cacheSizeChanged);
     QSignalSpy revisionSpy(&manager, &SvgManager::revisionChanged);
     QVERIFY(errorSpy.isValid());
+    QVERIFY(vectorSpy.isValid());
     QVERIFY(minimumSpy.isValid());
     QVERIFY(maximumSpy.isValid());
     QVERIFY(cacheSpy.isValid());
@@ -96,8 +107,15 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
         "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'>"
         "<circle cx='12' cy='12' r='8' fill='#34c759'/></svg>");
     const QString dataUrl = QStringLiteral("data:image/svg+xml;base64,") + QString::fromLatin1(svg.toBase64());
-    const QString pngA = manager.icon(dataUrl, 24, 0.0);
-    QVERIFY(pngA.startsWith(QStringLiteral("data:image/png;base64,")));
+    const QString vectorData = manager.icon(dataUrl, 24, 0.0);
+    QCOMPARE(vectorData, dataUrl);
+    QCOMPARE(manager.lastError(), QString());
+
+    manager.setVectorFirst(false);
+    QCOMPARE(vectorSpy.count(), 0);
+    QCOMPARE(manager.vectorFirst(), true);
+    const QString vectorAgain = manager.icon(dataUrl, 24, 0.0);
+    QCOMPARE(vectorAgain, dataUrl);
     QCOMPARE(manager.lastError(), QString());
 
     QTemporaryFile file;
@@ -105,17 +123,17 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
     QVERIFY(file.open());
     QVERIFY(file.write(svg) > 0);
     file.flush();
-    const QString pngB = manager.icon(QUrl::fromLocalFile(file.fileName()).toString(), 18, 2.0);
-    QVERIFY(pngB.startsWith(QStringLiteral("data:image/png;base64,")));
+    const QString fileVector = manager.icon(QUrl::fromLocalFile(file.fileName()).toString(), 18, 2.0);
+    QVERIFY(fileVector.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive));
 
     const quint64 revisionBefore = manager.revision();
     manager.clearCache();
-    QVERIFY(manager.revision() > revisionBefore);
-    QCOMPARE(revisionSpy.count(), 1);
+    QCOMPARE(manager.revision(), revisionBefore);
 
     const quint64 revisionAfterFirstClear = manager.revision();
     manager.clearCache();
     QCOMPARE(manager.revision(), revisionAfterFirstClear);
+    QCOMPARE(revisionSpy.count(), 0);
 }
 
 QTEST_MAIN(SvgManagerTests)

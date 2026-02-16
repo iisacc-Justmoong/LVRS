@@ -16,6 +16,10 @@ Item {
     property int spacing: Theme.gap4
     property color backgroundColor: Theme.subSurface
     property bool interactive: true
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
 
     signal iconClicked(int index, string source)
 
@@ -88,8 +92,8 @@ Item {
                         anchors.centerIn: parent
                         visible: slotButton.slotIconSource.length > 0
                         source: slotButton.slotIconSource
-                        sourceSize.width: control.iconSize
-                        sourceSize.height: control.iconSize
+                        sourceSize.width: control.iconSourceSize
+                        sourceSize.height: control.iconSourceSize
                         width: control.iconSize
                         height: control.iconSize
                         fillMode: Image.PreserveAspectFit

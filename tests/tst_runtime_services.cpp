@@ -55,6 +55,18 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     events.setOsSampleIntervalMs(70 * 1000);
     QCOMPARE(events.osSampleIntervalMs(), 60 * 1000);
 
+    events.setCaptureProfile(RuntimeEvents::LowLatencyCapture);
+    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    QVERIFY(!events.pointerHitTestingEnabled());
+    QVERIFY(!events.uiTrackingEnabled());
+
+    events.setCaptureProfile(RuntimeEvents::FullCapture);
+    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::FullCapture));
+    QVERIFY(events.pointerHitTestingEnabled());
+    QVERIFY(events.uiTrackingEnabled());
+    events.setPointerHitTestMinIntervalMs(48);
+    QCOMPARE(events.pointerHitTestMinIntervalMs(), 48);
+
     const qint64 previousActivityEpoch = events.lastActivityEpochMs();
     QTest::qWait(2);
     events.markActivity();

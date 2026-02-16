@@ -41,13 +41,11 @@ AbstractButton {
                 : control.tone === AbstractButton.Borderless
                     ? control.iconSourceBorderless
                     : control.iconSourceDefault
-    readonly property int iconRevision: SvgManager.revision
-    readonly property string renderedIconSource: {
-        control.iconRevision
-        return SvgManager.icon(
-                    control.resolvedIconSource.toString(),
-                    control.iconSize)
-    }
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
     readonly property string indicatorNameDefault: "panDownSymbolicDefault"
     readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
     readonly property string indicatorNameAccent: "panDownSymbolicAccent"
@@ -59,12 +57,7 @@ AbstractButton {
             : control.tone === AbstractButton.Primary || control.tone === AbstractButton.Destructive
                 ? control.indicatorNameAccent
                 : control.indicatorNameDefault
-    readonly property string renderedIndicatorSource: {
-        control.iconRevision
-        return SvgManager.icon(
-                    Theme.iconPath(control.resolvedIndicatorName),
-                    Theme.iconSm)
-    }
+    readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
     horizontalPadding: Theme.gap2
     verticalPadding: Theme.gap2
@@ -81,9 +74,9 @@ AbstractButton {
 
         Image {
             visible: control.iconGlyph.length === 0
-            source: control.renderedIconSource
-            sourceSize.width: control.iconSize
-            sourceSize.height: control.iconSize
+            source: control.resolvedIconSource
+            sourceSize.width: control.iconSourceSize
+            sourceSize.height: control.iconSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: control.iconSize
@@ -109,8 +102,8 @@ AbstractButton {
 
         Image {
             source: control.renderedIndicatorSource
-            sourceSize.width: Theme.iconSm
-            sourceSize.height: Theme.iconSm
+            sourceSize.width: control.indicatorSourceSize
+            sourceSize.height: control.indicatorSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: Theme.iconSm

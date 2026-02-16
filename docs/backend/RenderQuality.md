@@ -2,16 +2,27 @@
 
 Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
 
-`RenderQuality` controls supersampling and text/MSAA quality defaults exposed to QML.
+`RenderQuality` controls LVRS rendering backend quality policy exposed to QML.
 
 ## Purpose
 
-- Define supersampling scale policy.
+- Enforce vector-first rendering policy for SVG/icon pipelines.
+- Enforce HiDPI + HiRes `@3x` supersampling policy.
+- Enforce antialiasing defaults (MSAA + native text rendering).
 - Apply quality settings per window and optionally as global defaults.
-- Expose quality controls to runtime UI/debug tools.
 
 ## Properties
 
+- `vectorFirst: bool` (constant, `true`)
+- `textVectorFirst: bool` (constant, `true`)
+- `hiDpiEnabled: bool` (constant, `true`)
+- `hiResScale: real` (constant, `3.0`)
+- `effectiveSupersampleScaleValue: real` (constant policy value)
+- `supersamplingEnabled: bool` (constant, `true`)
+- `antialiasingEnabled: bool` (constant, `true`)
+- `sceneSupersampling: bool` (default `true`)
+- `sceneSupersamplingActive: bool` (read-only, computed from bound window size/policy)
+- `sceneSupersamplePixelBudget: int` (constant, default `6000000`)
 - `enabled: bool`
 - `supersampleScale: real`
 - `minimumSupersampleScale: real` (constant)
@@ -22,9 +33,13 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 ## Methods
 
 - `effectiveSupersampleScale(): real`
+- `shouldUseSceneSupersampling(width, height): bool`
+- `resolveLayerTextureSize(width, height, sceneSupersamplingActive = true): size`
+- `bindWindow(window): void`
+- `unbindWindow(): void`
 - `applyWindow(window): void`
 - `applyGlobalDefaults(): void`
-- `configureGlobalDefaults(msaaSamples = 8, nativeTextRendering = true)` (static)
+- `configureGlobalDefaults(msaaSamples = 4, nativeTextRendering = true)` (static)
 
 ## Usage Pattern
 
@@ -40,9 +55,17 @@ Component.onCompleted: {
 
 ## Behavior Notes
 
-- Effective supersample scale is clamped to min/max bounds.
-- Disabling `enabled` effectively returns scale `1.0` behavior.
-- App bootstrap can initialize global defaults before window creation.
+- Effective supersample scale is forced to HiRes `@3x`.
+- Full-scene supersampling is gated by pixel budget (`width * height * scale^2 <= sceneSupersamplePixelBudget`)
+  to avoid large-window latency spikes.
+- Scene-supersampling activation state is computed in C++ backend and exposed as
+  `sceneSupersamplingActive` for low-level policy ownership.
+- Layer texture size calculation is owned by C++ (`resolveLayerTextureSize`) so QML keeps
+  display-only wiring.
+- `enabled`/`supersampleScale` remain API-compatible, but backend policy keeps quality-on defaults.
+- Text rendering is forced to native text rendering to keep text vector-priority.
+- App bootstrap initializes HiDPI/MSAA/native-text global defaults before window creation.
+- GPU-friendly defaults are applied (`QSG_RHI_PREFER_SOFTWARE_RENDERER=0`, `QSG_RENDER_LOOP=threaded` when unset).
 
 ## Tuning Guidance
 

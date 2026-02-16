@@ -156,9 +156,9 @@ Controls.ApplicationWindow {
     }
 
     readonly property real effectiveSupersampleScale: RenderQuality.enabled
-        ? Math.max(RenderQuality.minimumSupersampleScale,
-                   Math.min(RenderQuality.maximumSupersampleScale, RenderQuality.supersampleScale))
+        ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
+    readonly property bool sceneSupersamplingActive: RenderQuality.sceneSupersamplingActive
 
     component AdaptiveLayoutHost: Item {
             id: root
@@ -899,16 +899,10 @@ Controls.ApplicationWindow {
         id: supersampleHost
         anchors.fill: parent
         anchors.margins: windowRoot.safeMargin
-        layer.enabled: RenderQuality.enabled && windowRoot.effectiveSupersampleScale > 1.0
+        layer.enabled: windowRoot.sceneSupersamplingActive
         layer.smooth: layer.enabled
-        layer.mipmap: layer.enabled
-        layer.textureSize: layer.enabled
-            ? Qt.size(
-                  Math.max(1, Math.round(width * windowRoot.effectiveSupersampleScale)),
-                  Math.max(1, Math.round(height * windowRoot.effectiveSupersampleScale)))
-            : Qt.size(
-                  Math.max(1, Math.round(width)),
-                  Math.max(1, Math.round(height)))
+        layer.mipmap: false
+        layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
 
         AdaptiveLayoutHost {
             id: scaffold
@@ -973,8 +967,7 @@ Controls.ApplicationWindow {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
             RenderQuality.applyWindow(windowRoot)
-            if (SvgManager.minimumScale < windowRoot.effectiveSupersampleScale)
-                SvgManager.minimumScale = windowRoot.effectiveSupersampleScale
+            SvgManager.ensureMinimumScale(windowRoot.effectiveSupersampleScale)
             if (windowRoot.autoAttachRuntimeEvents) {
                 RuntimeEvents.start()
                 RuntimeEvents.attachWindow(windowRoot)

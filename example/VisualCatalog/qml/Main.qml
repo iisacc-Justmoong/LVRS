@@ -298,6 +298,7 @@ LV.ApplicationWindow {
     Component.onCompleted: {
         LV.AppState.bootstrap()
         LV.FontPolicy.enforceApplicationFallback()
+        LV.RuntimeEvents.captureProfile = LV.RuntimeEvents.LowLatencyCapture
         LV.RenderMonitor.attachWindow(root)
         LV.PageMonitor.record("/visual-catalog")
         syncRuntimeState()

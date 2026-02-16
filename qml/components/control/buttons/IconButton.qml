@@ -42,13 +42,10 @@ AbstractButton {
         : control.resolvedIconName.length > 0
             ? Theme.iconPath(control.resolvedIconName)
             : control.toneIconSource
-    readonly property int iconRevision: SvgManager.revision
-    readonly property string renderedIconSource: {
-        control.iconRevision
-        return SvgManager.icon(
-                    control.resolvedIconSource.toString(),
-                    control.iconSize)
-    }
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
 
     horizontalPadding: Theme.gap2
     verticalPadding: Theme.gap2
@@ -64,9 +61,9 @@ AbstractButton {
 
         Image {
             visible: control.iconGlyph.length === 0
-            source: control.renderedIconSource
-            sourceSize.width: control.iconSize
-            sourceSize.height: control.iconSize
+            source: control.resolvedIconSource
+            sourceSize.width: control.iconSourceSize
+            sourceSize.height: control.iconSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: control.iconSize

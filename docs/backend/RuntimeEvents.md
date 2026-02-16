@@ -79,6 +79,11 @@ Utility:
 - Recent event capacity is configurable (`recentEventCapacity`).
 - High-frequency event emission is internally throttled by minimum interval policies.
 - Hit testing falls back gracefully when direct quick-item resolution is unavailable.
+- Capture profile can be switched at runtime:
+  - `FullCapture` (`captureProfile = 0`)
+  - `BalancedCapture` (`captureProfile = 1`)
+  - `LowLatencyCapture` (`captureProfile = 2`)
+- Low-latency profile lowers runtime signal frequency and disables pointer-hit tracking + UI lifecycle tracking.
 
 ## Extended Example: Idle Detection Hook
 

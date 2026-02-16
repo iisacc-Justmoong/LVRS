@@ -17,6 +17,10 @@ AbstractButton {
     property int contentSpacing: Theme.gap8
     property int iconSize: Theme.iconSm
     property color listBackgroundColor: Theme.surfaceGhost
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
 
     readonly property string resolvedIconSource: {
         const raw = iconName === undefined || iconName === null ? "" : String(iconName).trim()
@@ -49,8 +53,8 @@ AbstractButton {
             id: iconImage
             visible: control.resolvedIconSource.length > 0
             source: control.resolvedIconSource
-            sourceSize.width: control.iconSize
-            sourceSize.height: control.iconSize
+            sourceSize.width: control.iconSourceSize
+            sourceSize.height: control.iconSourceSize
             implicitWidth: control.iconSize
             implicitHeight: control.iconSize
             Layout.preferredWidth: control.iconSize

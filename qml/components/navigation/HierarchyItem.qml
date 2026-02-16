@@ -37,6 +37,10 @@ AbstractButton {
     property color textColorNormal: Theme.bodyColor
     property color textColorDisabled: Theme.disabledColor
     property color chevronColor: Theme.descriptionColor
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
     readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
     property color rowBackgroundColor: resolvedSelected ? Theme.accentOverlay : "transparent"
     property color rowBackgroundColorHover: resolvedSelected ? Theme.accentOverlay : Theme.surfaceGhost
@@ -97,8 +101,8 @@ AbstractButton {
                     anchors.centerIn: parent
                     visible: control.iconGlyph.length === 0 && control.resolvedIconSource.toString().length > 0
                     source: control.resolvedIconSource
-                    sourceSize.width: control.iconSize
-                    sourceSize.height: control.iconSize
+                    sourceSize.width: control.iconSourceSize
+                    sourceSize.height: control.iconSourceSize
                     width: control.iconSize
                     height: control.iconSize
                     fillMode: Image.PreserveAspectFit

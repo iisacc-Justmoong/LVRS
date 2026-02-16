@@ -23,6 +23,10 @@ AbstractButton {
     property color iconPlaceholderColor: Theme.darkGrey10
     property color iconPlaceholderAccentColor: Qt.lighter(Theme.darkGrey10, 1.2)
     property color chevronColor: Theme.descriptionColor
+    readonly property real iconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
 
     readonly property bool isSelected: state === selectedState
     readonly property bool isInactive: state === inactiveState
@@ -84,8 +88,8 @@ AbstractButton {
                     width: control.iconSize
                     height: control.iconSize
                     source: control.resolvedIconSource
-                    sourceSize.width: control.iconSize
-                    sourceSize.height: control.iconSize
+                    sourceSize.width: control.iconSourceSize
+                    sourceSize.height: control.iconSourceSize
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                 }
