@@ -26,15 +26,17 @@ QtObject {
 
     readonly property color window: "#141414"
 
-    // Figma backgrounds (node-id: 147:29, 147:30, 147:31, 147:32, 147:33, 147:34, 147:36, 147:37)
-    readonly property color panelBackground01: "#CC252627" // rgba(37,38,39,0.8)
-    readonly property color panelBackground02: "#B3252627" // rgba(37,38,39,0.7)
-    readonly property color panelBackground03: "#99252627" // rgba(37,38,39,0.6)
-    readonly property color panelBackground04: "#80252627" // rgba(37,38,39,0.5)
-    readonly property color panelBackground05: "#66252627" // rgba(37,38,39,0.4)
-    readonly property color panelBackground06: "#4D252627" // rgba(37,38,39,0.3)
-    readonly property color panelBackground07: "#33252627" // rgba(37,38,39,0.2)
-    readonly property color panelBackground08: "#33252627" // rgba(37,38,39,0.2)
+    // Figma backgrounds
+    // 147:29 rgba(37,38,39,0.8), 147:30 rgba(37,38,39,0.7), 147:31 rgba(37,38,39,0.6), 147:32 rgba(37,38,39,0.5)
+    // 147:33 rgba(37,38,39,0.4), 147:34 rgba(37,38,39,0.3), 147:36 rgba(37,38,39,0.2), 147:37 rgba(37,38,39,0.2)
+    readonly property color panelBackground01: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.8)
+    readonly property color panelBackground02: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.7)
+    readonly property color panelBackground03: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.6)
+    readonly property color panelBackground04: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.5)
+    readonly property color panelBackground05: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.4)
+    readonly property color panelBackground06: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.3)
+    readonly property color panelBackground07: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.2)
+    readonly property color panelBackground08: Qt.rgba(37 / 255, 38 / 255, 39 / 255, 0.2)
 
     readonly property color windowAlt: panelBackground08
     readonly property color subSurface: panelBackground01

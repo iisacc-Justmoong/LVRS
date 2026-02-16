@@ -36,7 +36,7 @@ Controls.ApplicationWindow {
     property bool globalEventListenersEnabled: true
 
     property string subtitle: ""
-    property var navItems: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
+    property var navItems: []
 
     property alias navIndex: scaffold.navIndex
     property alias navigationEnabled: scaffold.navigationEnabled
@@ -67,7 +67,6 @@ Controls.ApplicationWindow {
     readonly property var activePageRouter: scaffold.activePageRouter
     readonly property string adaptiveLayoutProfile: scaffold.layoutProfile
     readonly property string adaptiveNavigationMode: scaffold.navigationMode
-    property alias headerActions: scaffold.headerActions
     default property alias content: scaffold.content
     readonly property bool adaptiveMobileLayout: scaffold.mobileLayout
     readonly property bool adaptiveDesktopLayout: scaffold.desktopLayout
@@ -165,8 +164,6 @@ Controls.ApplicationWindow {
         AppScaffold {
             id: scaffold
             anchors.fill: parent
-            headerTitle: root.title
-            headerSubtitle: root.subtitle
             navModel: root.navItems
             layoutPlatform: root.platform
             onLayoutStateChanged: function(profile, navigationMode) { root.adaptiveLayoutStateChanged(profile, navigationMode) }

@@ -7,8 +7,6 @@ import LVRS 1.0
 Item {
     id: root
 
-    property string headerTitle: "LVRS"
-    property string headerSubtitle: ""
     property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
     property int navIndex: 0
     property bool navigationEnabled: true
@@ -42,8 +40,6 @@ Item {
     signal stackNavigationFailed(string path)
     signal transitionRejected(string kind, string fromState, string toState, string fallbackState)
 
-    property alias headerActions: appHeader.actions
-
     default property alias content: contentArea.data
 
     readonly property bool wide: width >= wideBreakpoint
@@ -71,9 +67,10 @@ Item {
     property string lastRejectedNavigationTransition: ""
     readonly property bool compactSpacing: root.compactSpacingEnabled
         && (root.mobileLayout || root.width < root.compactSpacingBreakpoint)
-    readonly property int adaptiveOuterMargin: root.compactSpacing ? Theme.gap8 : Theme.radiusXl
+    // Keep scaffold content full-bleed by default instead of forcing horizontal narrowing.
+    readonly property int adaptiveOuterMargin: 0
     readonly property int adaptiveNavigationInset: root.compactSpacing ? Theme.gap12 : Theme.gap16
-    readonly property int adaptiveContentInset: root.compactSpacing ? Theme.gap10 : Theme.radiusLg
+    readonly property int adaptiveContentInset: 0
     readonly property int adaptiveBottomInset: root.compactSpacing ? Theme.gap6 : Theme.gap8
     readonly property int effectiveNavRailWidth: root.resolveNavRailWidth()
     readonly property int effectiveNavDrawerWidth: root.resolveDrawerWidth()
@@ -579,57 +576,9 @@ Item {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.window
-
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: Theme.window }
-            GradientStop { position: 0.6; color: Theme.windowAlt }
-            GradientStop { position: 1.0; color: Theme.window }
-        }
-
-        Rectangle {
-            width: Theme.scaffoldBlobPrimarySize
-            height: Theme.scaffoldBlobPrimarySize
-            radius: Theme.scaffoldBlobPrimaryRadius
-            color: Theme.accent
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.rightMargin: Theme.scaffoldBlobPrimaryRightMargin
-            anchors.topMargin: Theme.scaffoldBlobPrimaryTopMargin
-        }
-
-        Rectangle {
-            width: Theme.scaffoldBlobSecondaryWidth
-            height: Theme.scaffoldBlobSecondaryHeight
-            radius: Theme.scaffoldBlobSecondaryRadius
-            color: Theme.accent
-            opacity: Theme.scaffoldBlobSecondaryOpacity
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.leftMargin: Theme.scaffoldBlobSecondaryLeftMargin
-            anchors.bottomMargin: Theme.scaffoldBlobSecondaryBottomMargin
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         spacing: Theme.gapNone
-
-        AppHeader {
-            id: appHeader
-            title: root.headerTitle
-            subtitle: root.headerSubtitle
-            menuVisible: root.drawerNavigationEnabled
-            compact: root.compactSpacing
-            Layout.fillWidth: true
-            Layout.preferredHeight: implicitHeight
-            onMenuClicked: {
-                if (root.drawerNavigationEnabled)
-                    navDrawer.open()
-            }
-        }
 
         Item {
             id: contentRoot
@@ -686,12 +635,6 @@ Item {
                     id: contentWrap
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: Theme.radiusXl
-                        color: Theme.surfaceAlt
-                    }
 
                     Item {
                         id: contentHost
@@ -761,12 +704,6 @@ Item {
             anchors.margins: root.adaptiveNavigationInset
             spacing: Theme.gap12
 
-            Label {
-                style: header
-                text: root.headerTitle
-                color: Theme.textPrimary
-            }
-
             Loader {
                 active: root.navHeader !== null
                 sourceComponent: root.navHeader
@@ -805,4 +742,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.AppScaffold { headerTitle: "LVRS"; navModel: ["Overview"] }
+// LV.AppScaffold { navModel: ["Overview"] }
