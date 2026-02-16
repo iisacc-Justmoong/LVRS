@@ -11,8 +11,10 @@ Rectangle {
     property bool clipList: true
 
     property alias toolbarButtons: toolbar.buttons
+    property alias toolbarItems: toolbar.buttonItems
     property alias activeToolbarButton: toolbar.activeButton
     property alias activeToolbarButtonId: toolbar.activeButtonId
+    property alias activeToolbarIndex: toolbar.activeIndex
     property alias activeListItem: hierarchyList.activeItem
     property alias activeListItemId: hierarchyList.activeItemId
     property alias activeListItemKey: hierarchyList.activeItemKey
@@ -22,7 +24,9 @@ Rectangle {
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     default property alias listItems: hierarchyList.items
 
-    signal toolbarActivated(var button, int buttonId, int index)
+    signal toolbarActivated(var button, var buttonId, int index)
+    signal toolbarButtonTriggered(var button, var buttonId, int index, var item)
+    signal toolbarEventTriggered(string eventName, var payload, int index, var item, var buttonId)
     signal listItemActivated(var item, int itemId, int index)
     signal listItemExpanded(var item, int itemId, int index, bool expanded)
 
@@ -74,6 +78,12 @@ Rectangle {
         onActiveChanged: function(button, buttonId, index) {
             control.toolbarActivated(button, buttonId, index)
         }
+        onButtonTriggered: function(button, buttonId, index, item) {
+            control.toolbarButtonTriggered(button, buttonId, index, item)
+        }
+        onButtonEventTriggered: function(eventName, payload, index, item, buttonId) {
+            control.toolbarEventTriggered(eventName, payload, index, item, buttonId)
+        }
     }
 
     Flickable {
@@ -120,7 +130,10 @@ Rectangle {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.Hierarchy {
-//     toolbarButtons: [LV.ToolbarButton { buttonId: 1 }, LV.ToolbarButton { buttonId: 2 }]
+//     toolbarItems: [
+//         { id: "structure", iconName: "projectStructure", eventName: "hierarchy.structure" },
+//         { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
+//     ]
 //     model: [
 //         { key: "root", label: "Root", expanded: true, children: [{ key: "child", label: "Child" }] }
 //     ]

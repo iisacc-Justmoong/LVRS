@@ -4,22 +4,31 @@ import LVRS 1.0
 Item {
     id: control
 
-    property color dividerColor: Theme.surface
+    // axis: "horizontal" | "vertical"
+    property string axis: "horizontal"
+    property color dividerColor: Theme.contextMenuDivider
     property int thickness: 1
-    property int verticalPadding: 1
+    property int crossPadding: 1
+    property int lineLength: 220
 
-    implicitWidth: 220
-    implicitHeight: thickness + (verticalPadding * 2)
+    readonly property bool verticalAxis: {
+        const normalized = axis === undefined || axis === null
+            ? ""
+            : String(axis).trim().toLowerCase()
+        return normalized === "vertical"
+    }
+
+    implicitWidth: verticalAxis ? (thickness + (crossPadding * 2)) : lineLength
+    implicitHeight: verticalAxis ? lineLength : (thickness + (crossPadding * 2))
 
     Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        height: control.thickness
+        anchors.centerIn: parent
+        width: control.verticalAxis ? control.thickness : parent.width
+        height: control.verticalAxis ? parent.height : control.thickness
         color: control.dividerColor
     }
 }
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.MenuDivider { }
+// LV.MenuDivider { axis: "horizontal" }

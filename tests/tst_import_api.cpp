@@ -22,8 +22,10 @@ private slots:
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
+    void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
+    void context_menu_item_action_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
 
@@ -481,6 +483,106 @@ Item {
     QTRY_VERIFY(root->property("stringModelReady").toBool());
 }
 
+void ImportApiTests::hierarchy_toolbar_item_model_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 300
+    height: 120
+
+    property int activatedCount: 0
+    property int triggeredCount: 0
+    property int eventCount: 0
+    property string callbackButtonId: ""
+    property string lastEventName: ""
+    property string payloadKind: ""
+    property bool disabledTriggered: false
+    property bool outOfRangeTriggered: false
+    property bool iconNameResolved: false
+
+    property var toolbarItems: [
+        {
+            id: "structure",
+            iconName: "projectStructure",
+            selected: true
+        },
+        {
+            id: "layers",
+            iconName: "projectStructure",
+            events: [
+                "hierarchy.layers",
+                { name: "analytics.hierarchy.layers", payload: ({ "kind": "analytics" }) }
+            ],
+            onClicked: function(ctx) {
+                root.callbackButtonId = String(ctx.buttonId)
+                ctx.emit("hierarchy.layers.custom", ({ "kind": "custom" }))
+            }
+        },
+        {
+            id: "disabled",
+            iconName: "projectStructure",
+            enabled: false,
+            eventName: "hierarchy.disabled"
+        }
+    ]
+
+    LV.HierarchyToolbar {
+        id: toolbar
+        visible: false
+        width: 200
+        buttonItems: root.toolbarItems
+        onActiveChanged: function(button, buttonId, index) {
+            root.activatedCount += 1
+        }
+        onButtonTriggered: function(button, buttonId, index, item) {
+            root.triggeredCount += 1
+        }
+        onButtonEventTriggered: function(eventName, payload, index, item, buttonId) {
+            root.eventCount += 1
+            root.lastEventName = eventName
+            if (payload && payload.kind !== undefined)
+                root.payloadKind = payload.kind
+        }
+    }
+
+    Component.onCompleted: {
+        const buttons = toolbar.collectButtons()
+        root.iconNameResolved = buttons.length > 0 && buttons[0].resolvedIconName === "projectStructure"
+
+        toolbar.triggerIndex(1)
+        root.disabledTriggered = toolbar.triggerIndex(2)
+        root.outOfRangeTriggered = toolbar.triggerIndex(9)
+    }
+
+    property bool toolbarContractReady:
+        toolbar.itemCount === 3
+        && toolbar.buttonCount === 3
+        && toolbar.activeButtonId === "layers"
+        && toolbar.activeIndex === 1
+        && activatedCount === 1
+        && triggeredCount === 1
+        && eventCount === 3
+        && callbackButtonId === "layers"
+        && lastEventName === "hierarchy.layers.custom"
+        && payloadKind === "custom"
+        && disabledTriggered === false
+        && outOfRangeTriggered === false
+        && iconNameResolved
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("toolbarContractReady").toBool());
+}
+
 void ImportApiTests::hierarchy_row_click_only_activates_not_toggles()
 {
     QQmlEngine engine;
@@ -609,6 +711,102 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaPaddingReady").toBool());
+}
+
+void ImportApiTests::context_menu_item_action_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 180
+
+    property int triggerCount: 0
+    property int eventCount: 0
+    property string lastEvent: ""
+    property string callbackMarker: ""
+    property string callbackAliasMarker: ""
+    property string payloadMarker: ""
+    property bool dividerTriggered: false
+
+    property var menuItems: [
+        {
+            id: "rename",
+            label: "Rename",
+            showChevron: false,
+            eventName: "menu.rename",
+            eventPayload: ({ "origin": "context-menu" }),
+            keepOpen: true,
+            onTriggered: function(ctx) {
+                root.callbackMarker = "cb:" + ctx.eventName
+                root.payloadMarker = ctx.payload.origin
+            }
+        },
+        { type: "divider" },
+        {
+            id: "duplicate",
+            label: "Duplicate",
+            showChevron: false,
+            events: [
+                "menu.duplicate",
+                { name: "menu.audit", payload: ({ "kind": "duplicate" }) }
+            ],
+            closeOnTrigger: true
+        },
+        {
+            id: "share",
+            label: "Share",
+            showChevron: false,
+            eventName: "",
+            onClicked: function(ctx) {
+                root.callbackAliasMarker = "alias:" + ctx.index
+                ctx.emit("menu.share", ({ "kind": "share" }))
+                ctx.close()
+            }
+        }
+    ]
+
+    LV.ContextMenu {
+        id: menu
+        visible: false
+        items: root.menuItems
+        autoCloseOnTrigger: true
+        onItemTriggered: root.triggerCount += 1
+        onItemEventTriggered: function(eventName, payload, index, item) {
+            root.eventCount += 1
+            root.lastEvent = eventName
+            if (payload && payload.kind !== undefined)
+                root.payloadMarker = payload.kind
+        }
+    }
+
+    Component.onCompleted: {
+        menu.triggerEntry(0)
+        root.dividerTriggered = menu.triggerEntry(1)
+        menu.triggerEntry(2)
+        menu.triggerEntry(3)
+    }
+
+    property bool actionContract:
+        triggerCount === 3
+        && eventCount === 4
+        && dividerTriggered === false
+        && callbackMarker === "cb:menu.rename"
+        && callbackAliasMarker === "alias:3"
+        && lastEvent === "menu.share"
+        && payloadMarker === "share"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("actionContract").toBool());
 }
 
 void ImportApiTests::list_item_and_footer_figma_contract_loads()

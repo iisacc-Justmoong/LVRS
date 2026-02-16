@@ -15,11 +15,12 @@ Controls.Popup {
     property bool dismissOnGlobalContextRequest: true
     property color menuColor: Theme.contextMenuSurface
     property color dividerColor: Theme.contextMenuDivider
-    property real menuOpacity: 0.5
+    property real menuOpacity: 1.0
     readonly property color resolvedMenuColor:
         Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
 
     signal itemTriggered(int index, var item)
+    signal itemEventTriggered(string eventName, var payload, int index, var item)
 
     modal: true
     dim: false
@@ -153,6 +154,18 @@ Controls.Popup {
         return true
     }
 
+    function itemSelectionDirection(entry) {
+        if (!entry || typeof entry !== "object")
+            return "right"
+        if (entry.selectionDirection !== undefined)
+            return entry.selectionDirection
+        if (entry.direction !== undefined)
+            return entry.direction
+        if (entry.chevronDirection !== undefined)
+            return entry.chevronDirection
+        return "right"
+    }
+
     function itemState(entry, index, menuItem) {
         if (entry && typeof entry === "object" && entry.state !== undefined)
             return entry.state
@@ -163,6 +176,163 @@ Controls.Popup {
         if (!itemEnabled(entry))
             return menuItem.inactiveState
         return menuItem.defaultState
+    }
+
+    function itemCallback(entry) {
+        if (!entry || typeof entry !== "object")
+            return null
+        if (entry.onTriggered !== undefined && typeof entry.onTriggered === "function")
+            return entry.onTriggered
+        if (entry.onClicked !== undefined && typeof entry.onClicked === "function")
+            return entry.onClicked
+        if (entry.handler !== undefined && typeof entry.handler === "function")
+            return entry.handler
+        return null
+    }
+
+    function itemEventName(entry, index) {
+        if (!entry || typeof entry !== "object")
+            return ""
+
+        const explicit = entry.eventName !== undefined
+            ? entry.eventName
+            : (entry.event !== undefined
+                   ? entry.event
+                   : (entry.action !== undefined
+                          ? entry.action
+                          : entry.id))
+        if (explicit === undefined || explicit === null)
+            return ""
+        return String(explicit).trim()
+    }
+
+    function itemEventPayload(entry) {
+        if (!entry || typeof entry !== "object")
+            return entry
+        if (entry.eventPayload !== undefined)
+            return entry.eventPayload
+        if (entry.payload !== undefined)
+            return entry.payload
+        return entry
+    }
+
+    function itemEventSpecs(entry, index) {
+        const specs = []
+        if (!entry || typeof entry !== "object")
+            return specs
+
+        if (Array.isArray(entry.events)) {
+            for (let i = 0; i < entry.events.length; i++) {
+                const rawSpec = entry.events[i]
+                if (typeof rawSpec === "string") {
+                    const eventName = rawSpec.trim()
+                    if (eventName.length > 0)
+                        specs.push({ eventName: eventName, payload: itemEventPayload(entry) })
+                    continue
+                }
+
+                if (!rawSpec || typeof rawSpec !== "object")
+                    continue
+
+                const rawName = rawSpec.eventName !== undefined
+                    ? rawSpec.eventName
+                    : (rawSpec.event !== undefined
+                           ? rawSpec.event
+                           : (rawSpec.name !== undefined
+                                  ? rawSpec.name
+                                  : rawSpec.type))
+                if (rawName === undefined || rawName === null)
+                    continue
+
+                const normalizedName = String(rawName).trim()
+                if (normalizedName.length === 0)
+                    continue
+
+                specs.push({
+                    eventName: normalizedName,
+                    payload: rawSpec.payload !== undefined ? rawSpec.payload : itemEventPayload(entry)
+                })
+            }
+        }
+
+        if (specs.length === 0) {
+            const fallbackName = itemEventName(entry, index)
+            if (fallbackName.length > 0)
+                specs.push({ eventName: fallbackName, payload: itemEventPayload(entry) })
+        }
+        return specs
+    }
+
+    function shouldCloseOnTrigger(entry) {
+        if (!entry || typeof entry !== "object")
+            return control.autoCloseOnTrigger && !itemShowChevron(entry)
+
+        if (entry.keepOpen === true || entry.preventClose === true)
+            return false
+        if (entry.closeOnTrigger !== undefined)
+            return !!entry.closeOnTrigger
+        if (entry.autoClose !== undefined)
+            return !!entry.autoClose
+        return control.autoCloseOnTrigger && !itemShowChevron(entry)
+    }
+
+    function emitItemEvents(index, entry) {
+        const specs = itemEventSpecs(entry, index)
+        for (let i = 0; i < specs.length; i++) {
+            const spec = specs[i]
+            if (!spec || spec.eventName === undefined || spec.eventName === null)
+                continue
+            const normalizedName = String(spec.eventName).trim()
+            if (normalizedName.length === 0)
+                continue
+            itemEventTriggered(normalizedName, spec.payload, index, entry)
+        }
+        return specs.length > 0 ? specs[0] : null
+    }
+
+    function invokeItemCallback(index, entry, firstEventSpec) {
+        const callback = itemCallback(entry)
+        if (!callback)
+            return false
+
+        try {
+            callback({
+                index: index,
+                item: entry,
+                menu: control,
+                eventName: firstEventSpec && firstEventSpec.eventName !== undefined ? firstEventSpec.eventName : "",
+                payload: firstEventSpec ? firstEventSpec.payload : itemEventPayload(entry),
+                emit: function(eventName, payload) {
+                    if (eventName === undefined || eventName === null)
+                        return
+                    const normalizedName = String(eventName).trim()
+                    if (normalizedName.length === 0)
+                        return
+                    control.itemEventTriggered(normalizedName, payload, index, entry)
+                },
+                close: function() {
+                    control.close()
+                }
+            })
+            return true
+        } catch (error) {
+            console.warn("ContextMenu callback failed:", error)
+            return false
+        }
+    }
+
+    function triggerEntry(index) {
+        const entry = entryAt(index)
+        if (entry === undefined || entry === null || isDivider(entry) || !itemEnabled(entry))
+            return false
+
+        const firstEventSpec = emitItemEvents(index, entry)
+        invokeItemCallback(index, entry, firstEventSpec)
+        itemTriggered(index, entry)
+
+        if (shouldCloseOnTrigger(entry))
+            close()
+        return true
     }
 
     function openAt(xPos, yPos) {
@@ -257,12 +427,9 @@ Controls.Popup {
                     iconName: control.itemIconName(delegateRoot.entry)
                     iconSource: control.itemIconSource(delegateRoot.entry)
                     showChevron: control.itemShowChevron(delegateRoot.entry)
+                    selectionDirection: control.itemSelectionDirection(delegateRoot.entry)
                     enabled: control.itemEnabled(delegateRoot.entry)
-                    onClicked: {
-                        control.itemTriggered(delegateRoot.index, delegateRoot.entry)
-                        if (control.autoCloseOnTrigger && !control.itemShowChevron(delegateRoot.entry))
-                            control.close()
-                    }
+                    onClicked: control.triggerEntry(delegateRoot.index)
                 }
             }
         }
@@ -271,4 +438,15 @@ Controls.Popup {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.ContextMenu { items: [{ icon: "iconname", label: "Open", key: "cmd+o" }, { type: "divider" }, { icon: "iconname", label: "Share", key: "cmd+s", hasSubmenu: true }] }
+// LV.ContextMenu {
+//     items: [
+//         {
+//             id: "openRecent",
+//             label: "Open Recent",
+//             eventName: "menu.openRecent",
+//             eventPayload: ({ source: "context-menu" }),
+//             onTriggered: function(ctx) { console.log(ctx.eventName) },
+//             closeOnTrigger: true
+//         }
+//     ]
+// }

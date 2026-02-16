@@ -58,6 +58,8 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/control/AbstractButton.md`
 - `docs/components/control/LabelButton.md`
 - `docs/components/control/IconButton.md`
+- `docs/components/control/LabelSegmentedControl.md`
+- `docs/components/control/IconSegmentedControl.md`
 - `docs/components/control/LabelMenuButton.md`
 - `docs/components/control/IconMenuButton.md`
 - `docs/components/control/Label.md`
@@ -82,7 +84,10 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/Link.md`
 - `docs/components/navigation/Hierarchy.md`
+- `docs/components/navigation/HierarchyToolbar.md`
 - `docs/components/navigation/ContextMenu.md`
+- `docs/components/navigation/MenuItem.md`
+- `docs/components/navigation/MenuDivider.md`
 
 ## Surface Components
 

@@ -519,10 +519,10 @@ QtObject {
 
     //ContextMenu
 
-    readonly property color contextMenuSurface: surface
-    readonly property color contextMenuDivider: surface
+    readonly property color contextMenuSurface: panelBackground03
+    readonly property color contextMenuDivider: panelBackground08
     readonly property color contextMenuItemSelectedBackground: primary
-    readonly property color contextMenuItemInactiveBackground: surface
+    readonly property color contextMenuItemInactiveBackground: panelBackground08
 
     //Radius
 

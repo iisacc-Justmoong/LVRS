@@ -5,7 +5,7 @@ IconButton {
     id: control
 
     readonly property bool __isToolbarButton: true
-    property int buttonId: -1
+    property var buttonId: -1
     property var toolbar: null
 
     readonly property bool active: toolbar && toolbar.activeButton === control

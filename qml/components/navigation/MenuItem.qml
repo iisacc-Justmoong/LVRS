@@ -8,12 +8,18 @@ AbstractButton {
     readonly property int defaultState: 0
     readonly property int selectedState: 1
     readonly property int inactiveState: 2
+    readonly property int directionRight: 0
+    readonly property int directionLeft: 1
+    readonly property int directionUp: 2
+    readonly property int directionDown: 3
 
     property int state: defaultState
     property string label: "Label"
     property alias key: shortcutLabel.text
     property alias shortcut: shortcutLabel.text
     property bool showChevron: true
+    // Supports int enum or string: right|left|up|down
+    property var selectionDirection: directionRight
     property int itemWidth: 161
     property int itemHeight: 22
     property int iconSize: 16
@@ -21,7 +27,6 @@ AbstractButton {
     property string iconName: ""
     property url iconSource: ""
     property color iconPlaceholderColor: Theme.darkGrey10
-    property color iconPlaceholderAccentColor: Qt.lighter(Theme.darkGrey10, 1.2)
     property color chevronColor: Theme.descriptionColor
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
@@ -39,6 +44,22 @@ AbstractButton {
         : resolvedIconName.length > 0
             ? Theme.iconPath(resolvedIconName)
             : ""
+    readonly property int resolvedSelectionDirection: {
+        const raw = selectionDirection
+        if (typeof raw === "number")
+            return Math.max(directionRight, Math.min(directionDown, Math.round(raw)))
+
+        const normalized = raw === undefined || raw === null
+            ? ""
+            : String(raw).trim().toLowerCase()
+        if (normalized === "left")
+            return directionLeft
+        if (normalized === "up")
+            return directionUp
+        if (normalized === "down")
+            return directionDown
+        return directionRight
+    }
     readonly property color resolvedBackgroundColor: isSelected
         ? Theme.contextMenuItemSelectedBackground
         : isInactive
@@ -106,28 +127,19 @@ AbstractButton {
                         anchors.centerIn: parent
                         antialiasing: true
                     }
-
-                    Rectangle {
-                        width: 5
-                        height: 5
-                        radius: Theme.gap2
-                        color: control.iconPlaceholderAccentColor
-                        anchors.left: parent.horizontalCenter
-                        anchors.top: parent.verticalCenter
-                        anchors.leftMargin: -5
-                        anchors.topMargin: -5
-                        antialiasing: true
-                    }
                 }
             }
 
             Label {
+                id: labelNode
                 style: body
                 text: control.label
                 color: control.isInactive ? Theme.titleHeaderColor
                                           : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
                 Layout.alignment: Qt.AlignVCenter
                 elide: Text.ElideRight
+                lineHeight: 12
+                lineHeightMode: Text.FixedHeight
             }
         }
 
@@ -146,6 +158,8 @@ AbstractButton {
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)
                 Layout.alignment: Qt.AlignVCenter
                 elide: Text.ElideRight
+                lineHeight: 12
+                lineHeightMode: Text.FixedHeight
             }
 
             Canvas {
@@ -165,9 +179,23 @@ AbstractButton {
                         return
 
                     ctx.beginPath()
-                    ctx.moveTo(width * 0.38, height * 0.28)
-                    ctx.lineTo(width * 0.58, height * 0.5)
-                    ctx.lineTo(width * 0.38, height * 0.72)
+                    if (control.resolvedSelectionDirection === control.directionLeft) {
+                        ctx.moveTo(width * 0.62, height * 0.28)
+                        ctx.lineTo(width * 0.42, height * 0.5)
+                        ctx.lineTo(width * 0.62, height * 0.72)
+                    } else if (control.resolvedSelectionDirection === control.directionUp) {
+                        ctx.moveTo(width * 0.28, height * 0.62)
+                        ctx.lineTo(width * 0.5, height * 0.42)
+                        ctx.lineTo(width * 0.72, height * 0.62)
+                    } else if (control.resolvedSelectionDirection === control.directionDown) {
+                        ctx.moveTo(width * 0.28, height * 0.38)
+                        ctx.lineTo(width * 0.5, height * 0.58)
+                        ctx.lineTo(width * 0.72, height * 0.38)
+                    } else {
+                        ctx.moveTo(width * 0.38, height * 0.28)
+                        ctx.lineTo(width * 0.58, height * 0.5)
+                        ctx.lineTo(width * 0.38, height * 0.72)
+                    }
                     ctx.lineWidth = 1.6
                     ctx.lineCap = "round"
                     ctx.lineJoin = "round"
@@ -183,8 +211,9 @@ AbstractButton {
     onChevronColorChanged: chevronCanvas.requestPaint()
     onShowChevronChanged: chevronCanvas.requestPaint()
     onEnabledChanged: chevronCanvas.requestPaint()
+    onSelectionDirectionChanged: chevronCanvas.requestPaint()
 }
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.MenuItem { iconName: "iconname"; state: selectedState; label: "Label"; key: "key" }
+// LV.MenuItem { iconName: "iconname"; state: selectedState; label: "Label"; key: "key"; selectionDirection: "right" }

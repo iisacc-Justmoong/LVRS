@@ -22,8 +22,10 @@ Model and selection aliases:
 Toolbar aliases:
 
 - `toolbarButtons`
+- `toolbarItems`
 - `activeToolbarButton`
 - `activeToolbarButtonId`
+- `activeToolbarIndex`
 
 Behavior aliases:
 
@@ -40,6 +42,8 @@ Methods:
 Signals:
 
 - `toolbarActivated(button, buttonId, index)`
+- `toolbarButtonTriggered(button, buttonId, index, item)`
+- `toolbarEventTriggered(eventName, payload, index, item, buttonId)`
 - `listItemActivated(item, itemId, index)`
 - `listItemExpanded(item, itemId, index, expanded)`
 
@@ -49,6 +53,10 @@ Signals:
 import LVRS 1.0 as LV
 
 LV.Hierarchy {
+    toolbarItems: [
+        { id: "structure", iconName: "projectStructure", eventName: "hierarchy.structure" },
+        { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
+    ]
     model: [
         {
             key: "root",
