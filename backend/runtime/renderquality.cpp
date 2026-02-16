@@ -16,9 +16,13 @@ bool RenderQuality::enabled() const
 
 void RenderQuality::setEnabled(bool value)
 {
-    if (m_enabled == value)
+    Q_UNUSED(value)
+
+    // HiRes is enforced framework-wide at renderer policy level.
+    const bool next = true;
+    if (m_enabled == next)
         return;
-    m_enabled = value;
+    m_enabled = next;
     emit enabledChanged();
 }
 
@@ -29,7 +33,10 @@ qreal RenderQuality::supersampleScale() const
 
 void RenderQuality::setSupersampleScale(qreal value)
 {
-    const qreal next = qBound(m_minimumSupersampleScale, value, m_maximumSupersampleScale);
+    Q_UNUSED(value)
+
+    // Supersample scale is fixed to @3x.
+    const qreal next = kForcedSupersampleScale;
     if (qFuzzyCompare(m_supersampleScale, next))
         return;
     m_supersampleScale = next;
@@ -75,9 +82,7 @@ void RenderQuality::setNativeTextRendering(bool value)
 
 qreal RenderQuality::effectiveSupersampleScale() const
 {
-    if (!m_enabled)
-        return 1.0;
-    return qBound(m_minimumSupersampleScale, m_supersampleScale, m_maximumSupersampleScale);
+    return kForcedSupersampleScale;
 }
 
 void RenderQuality::applyWindow(QObject *window)
@@ -93,8 +98,8 @@ void RenderQuality::applyWindow(QObject *window)
         quickWindow->setFormat(format);
     }
 
-    quickWindow->setPersistentGraphics(m_enabled);
-    quickWindow->setPersistentSceneGraph(m_enabled);
+    quickWindow->setPersistentGraphics(true);
+    quickWindow->setPersistentSceneGraph(true);
     QQuickWindow::setTextRenderType(
         m_nativeTextRendering ? QQuickWindow::NativeTextRendering : QQuickWindow::QtTextRendering);
 }

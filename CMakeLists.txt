@@ -27,7 +27,11 @@ option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
     ON
 )
 
-option(LVRS_FORCE_X86_QT_TOOLS "Deprecated option (ignored): Apple x86 paths are disabled" OFF)
+option(LVRS_FORCE_X86_QT_TOOLS "Force Qt host tools to run under x86_64 on Apple hosts" OFF)
+option(LVRS_AUTO_FALLBACK_X86_QT_TOOLS
+    "On Apple hosts, fallback Qt host tools to x86_64 when native arm64 tool execution fails"
+    ON
+)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
 option(LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS
@@ -202,66 +206,135 @@ if(APPLE AND NOT IOS AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
     endif()
 endif()
 
-if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
-    message(WARNING "LVRS_FORCE_X86_QT_TOOLS is ignored because Apple x86 paths are disabled.")
-    set(LVRS_FORCE_X86_QT_TOOLS OFF CACHE BOOL "Deprecated option (ignored): Apple x86 paths are disabled" FORCE)
-endif()
-
-if(APPLE AND LVRS_FORCE_X86_QT_TOOLS)
-    function(_uifw_wrap_qt_tool target)
+if(APPLE)
+    function(_lvrs_resolve_qt_tool_realpath target out_path)
         if(NOT TARGET ${target})
+            set(${out_path} "" PARENT_SCOPE)
             return()
         endif()
 
-        get_target_property(_uifw_imported_configs ${target} IMPORTED_CONFIGURATIONS)
-        set(_uifw_location_props IMPORTED_LOCATION)
-        if(_uifw_imported_configs)
-            foreach(_uifw_config IN LISTS _uifw_imported_configs)
-                string(TOUPPER "${_uifw_config}" _uifw_config_upper)
-                list(APPEND _uifw_location_props "IMPORTED_LOCATION_${_uifw_config_upper}")
+        get_target_property(_lvrs_imported_configs ${target} IMPORTED_CONFIGURATIONS)
+        set(_lvrs_location_props IMPORTED_LOCATION)
+        if(_lvrs_imported_configs)
+            foreach(_lvrs_config IN LISTS _lvrs_imported_configs)
+                string(TOUPPER "${_lvrs_config}" _lvrs_config_upper)
+                list(APPEND _lvrs_location_props "IMPORTED_LOCATION_${_lvrs_config_upper}")
             endforeach()
         endif()
 
-        string(REPLACE "::" "_" _uifw_tool_name "${target}")
-        set(_uifw_wrapped_any OFF)
-
-        foreach(_uifw_location_prop IN LISTS _uifw_location_props)
-            get_target_property(_uifw_tool_path ${target} ${_uifw_location_prop})
-            if(NOT _uifw_tool_path)
+        foreach(_lvrs_location_prop IN LISTS _lvrs_location_props)
+            get_target_property(_lvrs_tool_path ${target} ${_lvrs_location_prop})
+            if(NOT _lvrs_tool_path)
                 continue()
             endif()
-            get_filename_component(_uifw_tool_realpath "${_uifw_tool_path}" REALPATH)
-            if(NOT EXISTS "${_uifw_tool_realpath}")
-                continue()
+            get_filename_component(_lvrs_tool_realpath "${_lvrs_tool_path}" REALPATH)
+            if(EXISTS "${_lvrs_tool_realpath}")
+                set(${out_path} "${_lvrs_tool_realpath}" PARENT_SCOPE)
+                return()
             endif()
-
-            string(TOLOWER "${_uifw_location_prop}" _uifw_prop_suffix)
-            set(_uifw_wrapper "${CMAKE_CURRENT_BINARY_DIR}/${_uifw_tool_name}_${_uifw_prop_suffix}_x86_wrapper")
-            file(WRITE "${_uifw_wrapper}" "#!/bin/sh\nexec arch -x86_64 \"${_uifw_tool_realpath}\" \"$@\"\n")
-            file(CHMOD "${_uifw_wrapper}"
-                PERMISSIONS
-                    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-            )
-            set_property(TARGET ${target} PROPERTY ${_uifw_location_prop} "${_uifw_wrapper}")
-            set(_uifw_wrapped_any ON)
         endforeach()
 
-        if(NOT _uifw_wrapped_any)
-            message(WARNING "LVRS_FORCE_X86_QT_TOOLS requested, but ${target} had no import location to wrap.")
+        set(${out_path} "" PARENT_SCOPE)
+    endfunction()
+
+    function(_lvrs_qt_tool_arch_works target arch out_ok)
+        _lvrs_resolve_qt_tool_realpath("${target}" _lvrs_tool_realpath)
+        if(NOT _lvrs_tool_realpath)
+            set(${out_ok} OFF PARENT_SCOPE)
+            return()
+        endif()
+
+        execute_process(
+            COMMAND arch "-${arch}" "${_lvrs_tool_realpath}" --version
+            RESULT_VARIABLE _lvrs_tool_result
+            OUTPUT_QUIET
+            ERROR_QUIET
+        )
+        if(_lvrs_tool_result EQUAL 0)
+            set(${out_ok} ON PARENT_SCOPE)
+        else()
+            set(${out_ok} OFF PARENT_SCOPE)
         endif()
     endfunction()
 
-    _uifw_wrap_qt_tool(Qt6::rcc)
-    if(TARGET Qt6::qmlcachegen)
-        _uifw_wrap_qt_tool(Qt6::qmlcachegen)
+    set(_lvrs_wrap_qt_tools_x86 OFF)
+    if(LVRS_FORCE_X86_QT_TOOLS)
+        set(_lvrs_wrap_qt_tools_x86 ON)
+        message(STATUS "LVRS_FORCE_X86_QT_TOOLS is ON: wrapping Qt host tools with arch -x86_64.")
+    elseif(LVRS_AUTO_FALLBACK_X86_QT_TOOLS)
+        _lvrs_qt_tool_arch_works(Qt6::rcc arm64 _lvrs_rcc_arm64_works)
+        _lvrs_qt_tool_arch_works(Qt6::rcc x86_64 _lvrs_rcc_x86_works)
+        if(NOT _lvrs_rcc_arm64_works AND _lvrs_rcc_x86_works)
+            set(_lvrs_wrap_qt_tools_x86 ON)
+            message(WARNING
+                "Qt host tools fail natively on arm64 (for example, rcc --version). "
+                "Enabling automatic x86_64 fallback wrappers."
+            )
+        endif()
     endif()
-    if(TARGET Qt6::qmlsc)
-        _uifw_wrap_qt_tool(Qt6::qmlsc)
-    endif()
-    if(TARGET Qt6::qmltyperegistrar)
-        _uifw_wrap_qt_tool(Qt6::qmltyperegistrar)
+
+    if(_lvrs_wrap_qt_tools_x86)
+        function(_uifw_wrap_qt_tool target)
+            if(NOT TARGET ${target})
+                return()
+            endif()
+
+            get_target_property(_uifw_imported_configs ${target} IMPORTED_CONFIGURATIONS)
+            set(_uifw_location_props IMPORTED_LOCATION)
+            if(_uifw_imported_configs)
+                foreach(_uifw_config IN LISTS _uifw_imported_configs)
+                    string(TOUPPER "${_uifw_config}" _uifw_config_upper)
+                    list(APPEND _uifw_location_props "IMPORTED_LOCATION_${_uifw_config_upper}")
+                endforeach()
+            endif()
+
+            string(REPLACE "::" "_" _uifw_tool_name "${target}")
+            set(_uifw_wrapped_any OFF)
+
+            foreach(_uifw_location_prop IN LISTS _uifw_location_props)
+                get_target_property(_uifw_tool_path ${target} ${_uifw_location_prop})
+                if(NOT _uifw_tool_path)
+                    continue()
+                endif()
+                get_filename_component(_uifw_tool_realpath "${_uifw_tool_path}" REALPATH)
+                if(NOT EXISTS "${_uifw_tool_realpath}")
+                    continue()
+                endif()
+
+                string(TOLOWER "${_uifw_location_prop}" _uifw_prop_suffix)
+                set(_uifw_wrapper "${CMAKE_CURRENT_BINARY_DIR}/${_uifw_tool_name}_${_uifw_prop_suffix}_x86_wrapper")
+                file(WRITE "${_uifw_wrapper}" "#!/bin/sh\nexec arch -x86_64 \"${_uifw_tool_realpath}\" \"$@\"\n")
+                file(CHMOD "${_uifw_wrapper}"
+                    PERMISSIONS
+                        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                        GROUP_READ GROUP_EXECUTE
+                        WORLD_READ WORLD_EXECUTE
+                )
+                set_property(TARGET ${target} PROPERTY ${_uifw_location_prop} "${_uifw_wrapper}")
+                set(_uifw_wrapped_any ON)
+            endforeach()
+
+            if(NOT _uifw_wrapped_any)
+                message(WARNING "Qt host tool wrapping is enabled, but ${target} had no import location to wrap.")
+            endif()
+        endfunction()
+
+        _uifw_wrap_qt_tool(Qt6::rcc)
+        if(TARGET Qt6::qmlcachegen)
+            _uifw_wrap_qt_tool(Qt6::qmlcachegen)
+        endif()
+        if(TARGET Qt6::qmlsc)
+            _uifw_wrap_qt_tool(Qt6::qmlsc)
+        endif()
+        if(TARGET Qt6::qmltyperegistrar)
+            _uifw_wrap_qt_tool(Qt6::qmltyperegistrar)
+        endif()
+        if(TARGET Qt6::uic)
+            _uifw_wrap_qt_tool(Qt6::uic)
+        endif()
+        if(TARGET Qt6::qmlimportscanner)
+            _uifw_wrap_qt_tool(Qt6::qmlimportscanner)
+        endif()
     endif()
 endif()
 

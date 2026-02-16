@@ -32,6 +32,7 @@ Controls.ApplicationWindow {
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
+    property bool solidChrome: true
     property bool autoAttachRuntimeEvents: false
     property bool autoHookBackendUserEvents: false
     property bool globalEventListenersEnabled: true
@@ -121,9 +122,17 @@ Controls.ApplicationWindow {
     }
 
     function applyNativeWindowStyle() {
+        if (windowRoot.solidChrome && NativeWindowStyle.solidChromeSupported)
+            return NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
         if (!NativeWindowStyle.titleBarColorSupported)
             return false
         return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
+    }
+
+    function requestWindowMove() {
+        if (typeof windowRoot.startSystemMove === "function")
+            return !!windowRoot.startSystemMove()
+        return false
     }
 
     onVisibleChanged: {
@@ -132,6 +141,7 @@ Controls.ApplicationWindow {
     }
     onWindowColorChanged: applyNativeWindowStyle()
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
+    onSolidChromeChanged: applyNativeWindowStyle()
     onAutoAttachRuntimeEventsChanged: {
         if (!autoAttachRuntimeEvents)
             return
@@ -953,8 +963,8 @@ Controls.ApplicationWindow {
             onPressed: function(mouse) {
                 if (mouse.button !== Qt.LeftButton)
                     return
-                if (typeof windowRoot.startSystemMove === "function")
-                    windowRoot.startSystemMove()
+                if (!windowRoot.requestWindowMove())
+                    mouse.accepted = false
             }
         }
     }

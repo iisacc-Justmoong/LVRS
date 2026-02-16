@@ -30,10 +30,11 @@ void RenderQualityTests::render_quality_bounds_and_window_apply()
     QCOMPARE(quality.supersampleScale(), quality.minimumSupersampleScale());
 
     quality.setEnabled(false);
-    QCOMPARE(quality.effectiveSupersampleScale(), 1.0);
+    QCOMPARE(quality.enabled(), true);
+    QCOMPARE(quality.effectiveSupersampleScale(), RenderQuality::kForcedSupersampleScale);
     quality.setEnabled(true);
-    quality.setSupersampleScale(3.0);
-    QCOMPARE(quality.effectiveSupersampleScale(), 3.0);
+    quality.setSupersampleScale(1.0);
+    QCOMPARE(quality.effectiveSupersampleScale(), RenderQuality::kForcedSupersampleScale);
 
     quality.setMsaaSamples(-4);
     QCOMPARE(quality.msaaSamples(), 0);
@@ -63,12 +64,12 @@ void RenderQualityTests::render_quality_signal_and_global_defaults()
     quality.setEnabled(true);
     QCOMPARE(enabledSpy.count(), 0);
     quality.setEnabled(false);
-    QCOMPARE(enabledSpy.count(), 1);
+    QCOMPARE(enabledSpy.count(), 0);
 
     quality.setSupersampleScale(3.0);
     QCOMPARE(scaleSpy.count(), 0);
     quality.setSupersampleScale(2.5);
-    QCOMPARE(scaleSpy.count(), 1);
+    QCOMPARE(scaleSpy.count(), 0);
 
     quality.setMsaaSamples(8);
     QCOMPARE(msaaSpy.count(), 0);

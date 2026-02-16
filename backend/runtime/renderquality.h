@@ -17,6 +17,8 @@ class RenderQuality : public QObject
     Q_PROPERTY(bool nativeTextRendering READ nativeTextRendering WRITE setNativeTextRendering NOTIFY nativeTextRenderingChanged)
 
 public:
+    static constexpr qreal kForcedSupersampleScale = 3.0;
+
     explicit RenderQuality(QObject *parent = nullptr);
 
     bool enabled() const;
@@ -48,9 +50,9 @@ signals:
 
 private:
     bool m_enabled = true;
-    qreal m_supersampleScale = 3.0;
-    qreal m_minimumSupersampleScale = 1.0;
-    qreal m_maximumSupersampleScale = 4.0;
+    qreal m_supersampleScale = kForcedSupersampleScale;
+    qreal m_minimumSupersampleScale = kForcedSupersampleScale;
+    qreal m_maximumSupersampleScale = kForcedSupersampleScale;
     int m_msaaSamples = 8;
     bool m_nativeTextRendering = true;
 };
