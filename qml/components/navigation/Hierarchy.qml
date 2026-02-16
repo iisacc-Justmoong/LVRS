@@ -7,7 +7,7 @@ Rectangle {
 
     property int minimumPanelWidth: 200
     property int minimumPanelHeight: 530
-    property color panelColor: Theme.subSurface
+    property color panelColor: Theme.panelBackground05
     property bool clipList: true
 
     property alias toolbarButtons: toolbar.buttons
@@ -24,11 +24,19 @@ Rectangle {
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     default property alias listItems: hierarchyList.items
 
+    // Optional bottom-left ListFooter API.
+    property bool footerVisible: false
+    property bool footerInteractive: true
+    property var footerButton1: ({ type: "icon", iconName: "projectStructure" })
+    property var footerButton2: ({ type: "icon", iconName: "delete" })
+    property var footerButton3: ({ type: "icon", iconName: "cwmPermissionView" })
+
     signal toolbarActivated(var button, var buttonId, int index)
     signal toolbarButtonTriggered(var button, var buttonId, int index, var item)
     signal toolbarEventTriggered(string eventName, var payload, int index, var item, var buttonId)
     signal listItemActivated(var item, int itemId, int index)
     signal listItemExpanded(var item, int itemId, int index, bool expanded)
+    signal footerButtonTriggered(int index, var config)
 
     implicitWidth: minimumPanelWidth
     implicitHeight: minimumPanelHeight
@@ -69,6 +77,13 @@ Rectangle {
         return hierarchyList.activateByKey(itemKey)
     }
 
+    function triggerFooterButton(index) {
+        if (!footer.visible || !footer.dispatchClicked)
+            return false
+        footer.dispatchClicked(index)
+        return true
+    }
+
     HierarchyToolbar {
         id: toolbar
         anchors.left: parent.left
@@ -91,7 +106,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: toolbar.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: footer.visible ? footer.top : parent.bottom
         clip: control.clipList
         contentWidth: width
         contentHeight: hierarchyList.implicitHeight
@@ -110,8 +125,26 @@ Rectangle {
         }
     }
 
+    ListFooter {
+        id: footer
+        objectName: "hierarchyFooter"
+        visible: control.footerVisible
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        interactive: control.footerInteractive
+        button1: control.footerButton1
+        button2: control.footerButton2
+        button3: control.footerButton3
+        onButtonClicked: function(index, config) {
+            control.footerButtonTriggered(index, config)
+        }
+    }
+
     WheelScrollGuard {
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: toolbar.bottom
+        anchors.bottom: listViewport.bottom
         targetFlickable: listViewport
         consumeInside: true
     }
@@ -137,4 +170,6 @@ Rectangle {
 //     model: [
 //         { key: "root", label: "Root", expanded: true, children: [{ key: "child", label: "Child" }] }
 //     ]
+//     footerVisible: true
+//     footerButton1: ({ type: "icon", iconName: "projectStructure" })
 // }

@@ -36,7 +36,7 @@ AbstractButton {
     property color iconPlaceholderColor: Theme.darkGrey10
     property color textColorNormal: Theme.bodyColor
     property color textColorDisabled: Theme.disabledColor
-    property color chevronColor: Theme.descriptionColor
+    property color chevronColor: Theme.darkGrey10
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0

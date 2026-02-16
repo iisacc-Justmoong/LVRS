@@ -84,6 +84,8 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/Link.md`
 - `docs/components/navigation/Hierarchy.md`
+- `docs/components/navigation/HierarchyList.md`
+- `docs/components/navigation/HierarchyItem.md`
 - `docs/components/navigation/HierarchyToolbar.md`
 - `docs/components/navigation/ContextMenu.md`
 - `docs/components/navigation/MenuItem.md`

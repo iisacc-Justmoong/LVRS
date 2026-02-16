@@ -22,6 +22,8 @@ private slots:
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
+    void hierarchy_nested_children_indent_contract_loads();
+    void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
@@ -481,6 +483,189 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("stringModelReady").toBool());
+}
+
+void ImportApiTests::hierarchy_nested_children_indent_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 280
+    height: 280
+
+    property bool activatedGreat: false
+
+    function tryActivateGreat() {
+        if (activatedGreat)
+            return
+        if (hierarchyList.itemCount < 4)
+            return
+        activatedGreat = hierarchyList.activateByKey("great")
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        visible: false
+        width: 200
+        model: [
+            {
+                key: "root",
+                label: "Root",
+                iconName: "projectStructure",
+                expanded: true,
+                children: [
+                    {
+                        key: "child",
+                        label: "Child",
+                        iconName: "viewMoreSymbolicDefault",
+                        children: [
+                            {
+                                key: "grand",
+                                label: "Grand",
+                                iconName: "viewMoreSymbolicBorderless",
+                                children: [
+                                    {
+                                        key: "great",
+                                        label: "Great",
+                                        iconName: "viewMoreSymbolicDisabled"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+
+    Component.onCompleted: Qt.callLater(root.tryActivateGreat)
+
+    Connections {
+        target: hierarchyList
+        function onItemCountChanged() {
+            root.tryActivateGreat()
+        }
+    }
+
+    property bool nestedContractReady: {
+        const items = hierarchyList.collectItems()
+        if (!items || items.length !== 4)
+            return false
+
+        const rootItem = items[0]
+        const childItem = items[1]
+        const grandItem = items[2]
+        const greatItem = items[3]
+
+        return rootItem.label === "Root"
+            && rootItem.iconName === "projectStructure"
+            && childItem.label === "Child"
+            && childItem.iconName === "viewMoreSymbolicDefault"
+            && grandItem.label === "Grand"
+            && grandItem.iconName === "viewMoreSymbolicBorderless"
+            && greatItem.label === "Great"
+            && greatItem.iconName === "viewMoreSymbolicDisabled"
+            && rootItem.indentLevel === 0
+            && childItem.indentLevel === 1
+            && grandItem.indentLevel === 2
+            && greatItem.indentLevel === 3
+            && rootItem.computedLeftPadding === 8
+            && childItem.computedLeftPadding === 21
+            && grandItem.computedLeftPadding === 34
+            && greatItem.computedLeftPadding === 47
+            && activatedGreat
+            && hierarchyList.activeItemKey === "great"
+            && childItem.expanded
+            && grandItem.expanded
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("nestedContractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_optional_footer_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 420
+
+    property int footerSignalCount: 0
+    property int footerCallbackCount: 0
+    property bool footerTriggerResult: false
+    property string footerIconName: ""
+
+    LV.Hierarchy {
+        id: hierarchy
+        width: 200
+        height: 320
+        toolbarItems: [
+            { id: "structure", iconName: "projectStructure" },
+            { id: "layers", iconName: "projectStructure" }
+        ]
+        model: [
+            {
+                key: "root",
+                label: "Root",
+                iconName: "projectStructure",
+                expanded: true,
+                children: [
+                    { key: "child", label: "Child", iconName: "viewMoreSymbolicDefault" }
+                ]
+            }
+        ]
+        footerVisible: true
+        footerButton1: ({
+            type: "icon",
+            iconName: "projectStructure",
+            onClicked: function() { root.footerCallbackCount += 1 }
+        })
+        footerButton2: ({ type: "icon", iconName: "delete" })
+        footerButton3: ({ type: "menu", iconName: "viewMoreSymbolicDefault" })
+
+        onFooterButtonTriggered: function(index, config) {
+            root.footerSignalCount += 1
+            if (index === 0 && config && config.iconName !== undefined)
+                root.footerIconName = String(config.iconName)
+        }
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(function() {
+            root.footerTriggerResult = hierarchy.triggerFooterButton(0)
+        })
+    }
+
+    property bool footerContractReady:
+        hierarchy.footerVisible
+        && hierarchy.toolbarItems.length === 2
+        && hierarchy.model.length === 1
+        && footerTriggerResult
+        && footerSignalCount === 1
+        && footerCallbackCount === 1
+        && footerIconName === "projectStructure"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("footerContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_toolbar_item_model_contract_loads()
