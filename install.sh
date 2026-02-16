@@ -53,6 +53,44 @@ detect_bootstrap_framework_platforms() {
     esac
 }
 
+lvrs_clean_recreate_dir() {
+    target_dir="$1"
+    target_name="$2"
+
+    if [ ! -e "${target_dir}" ]; then
+        cmake -E make_directory "${target_dir}"
+        return 0
+    fi
+
+    if cmake -E rm -rf "${target_dir}"; then
+        cmake -E make_directory "${target_dir}"
+        return 0
+    fi
+
+    parent_dir=$(dirname "${target_dir}")
+    base_dir=$(basename "${target_dir}")
+    stale_dir="${parent_dir}/.${base_dir}.lvrs-stale-$$"
+
+    if [ -e "${stale_dir}" ]; then
+        cmake -E rm -rf "${stale_dir}" || true
+    fi
+
+    if ! mv "${target_dir}" "${stale_dir}"; then
+        echo "[LVRS] Failed to relocate ${target_name} directory: ${target_dir}" >&2
+        echo "[LVRS] Check running processes that keep the directory busy, then retry." >&2
+        return 1
+    fi
+
+    cmake -E make_directory "${target_dir}"
+
+    if ! cmake -E rm -rf "${stale_dir}"; then
+        echo "[LVRS] Warning: stale ${target_name} directory remains: ${stale_dir}" >&2
+        echo "[LVRS] New ${target_name} directory is clean; continuing reinstall." >&2
+    fi
+
+    return 0
+}
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_ROOT="$SCRIPT_DIR"
 BUILD_DIR="${PROJECT_ROOT}/build"
@@ -165,8 +203,9 @@ echo "[LVRS] Tests        : ${BUILD_TESTS}"
 echo "[LVRS] Clean mode   : forced reinstall"
 
 echo "[LVRS] Cleaning build directory..."
-cmake -E rm -rf "${BUILD_DIR}"
-cmake -E make_directory "${BUILD_DIR}"
+if ! lvrs_clean_recreate_dir "${BUILD_DIR}" "build"; then
+    exit 1
+fi
 
 echo "[LVRS] Cleaning previous LVRS install artifacts..."
 cmake -E rm -rf \
