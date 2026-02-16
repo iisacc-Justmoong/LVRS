@@ -43,7 +43,10 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     window.setHeight(500);
     events.attachWindow(&window);
     QTRY_VERIFY(events.running());
-    QVERIFY(events.uiCreatedCount() > 0);
+    QCOMPARE(events.uiCreatedCount(), quint64(0));
+    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    QVERIFY(!events.pointerHitTestingEnabled());
+    QVERIFY(!events.uiTrackingEnabled());
 
     events.setIdleTimeoutMs(-10);
     QCOMPARE(events.idleTimeoutMs(), 250);
@@ -64,6 +67,7 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::FullCapture));
     QVERIFY(events.pointerHitTestingEnabled());
     QVERIFY(events.uiTrackingEnabled());
+    QVERIFY(events.uiCreatedCount() > 0);
     events.setPointerHitTestMinIntervalMs(48);
     QCOMPARE(events.pointerHitTestMinIntervalMs(), 48);
 

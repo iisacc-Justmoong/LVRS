@@ -20,9 +20,10 @@ For overlay dismissal, global context menu control, and app-level interaction ho
 
 These triggers are resilient to nested local event boundaries.
 
-## Rule 3: Backend-first state is default for burst-sensitive paths
+## Rule 3: Incident payload is default; backend/input enrichment is opt-in
 
-When interaction logic depends on coherent instantaneous input state, use backend-first reads (`Backend.currentUserInputState`) via `EventListener`.
+`EventListener` must stay incident-centric by default.
+Enable `includeInputState` / `preferBackendState` only when the callback truly requires coherent input snapshots.
 
 ## Rule 4: Outside-dismiss must be coordinate based
 

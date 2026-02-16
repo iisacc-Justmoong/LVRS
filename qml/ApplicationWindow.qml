@@ -921,6 +921,8 @@ Controls.ApplicationWindow {
         anchors.fill: parent
         enabled: windowRoot.globalEventListenersEnabled
         trigger: "globalPressed"
+        includeUiHit: false
+        includeInputState: false
         action: function(eventData) {
             windowRoot.lastGlobalPressedEventData = eventData || ({})
             windowRoot.globalPressedEvent(eventData)
@@ -932,6 +934,8 @@ Controls.ApplicationWindow {
         anchors.fill: parent
         enabled: windowRoot.globalEventListenersEnabled
         trigger: "globalContextRequested"
+        includeUiHit: true
+        includeInputState: false
         action: function(eventData) {
             windowRoot.lastGlobalContextEventData = eventData || ({})
             windowRoot.globalContextEvent(eventData)

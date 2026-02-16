@@ -9,6 +9,8 @@
 #include <QKeyEvent>
 #include <QtPlugin>
 
+#include "backend/runtime/runtimeevents.h"
+
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
@@ -59,6 +61,8 @@ LV.ApplicationWindow {
     property int mouseMoveCount: LV.RuntimeEvents.mouseMoveCount
     property int mousePressCount: LV.RuntimeEvents.mousePressCount
     property int mouseReleaseCount: LV.RuntimeEvents.mouseReleaseCount
+    property int captureProfile: LV.RuntimeEvents.captureProfile
+    property bool uiTrackingEnabled: LV.RuntimeEvents.uiTrackingEnabled
     property int uiCreatedCount: LV.RuntimeEvents.uiCreatedCount
     property int uiShownCount: LV.RuntimeEvents.uiShownCount
     property int uiHiddenCount: LV.RuntimeEvents.uiHiddenCount
@@ -107,7 +111,9 @@ void RuntimeEventsTests::runtime_events_are_exposed_and_idle_transitions()
     QTRY_VERIFY(root->property("running").toBool());
     QVERIFY(root->property("pid").toInt() > 0);
     QVERIFY(!root->property("osLabel").toString().isEmpty());
-    QVERIFY(root->property("uiCreatedCount").toInt() > 0);
+    QCOMPARE(root->property("captureProfile").toInt(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    QVERIFY(!root->property("uiTrackingEnabled").toBool());
+    QCOMPARE(root->property("uiCreatedCount").toInt(), 0);
     QVERIFY(root->property("daemonBootEpochMs").toDouble() > 0.0);
     QVariant runningFromHealth;
     QVERIFY(QMetaObject::invokeMethod(root.data(),

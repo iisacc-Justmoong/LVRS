@@ -2,92 +2,236 @@
 
 Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
 
-`RenderQuality` controls LVRS rendering backend quality policy exposed to QML.
+`RenderQuality` is the low-level rendering-quality policy singleton for LVRS.  
+Its job is to keep vector-first quality guarantees while bounding latency cost for full-scene supersampling.
 
-## Purpose
+## 1. Scope and Design Contract
 
-- Enforce vector-first rendering policy for SVG/icon pipelines.
-- Enforce HiDPI + HiRes `@3x` supersampling policy.
-- Enforce antialiasing defaults (MSAA + native text rendering).
-- Apply quality settings per window and optionally as global defaults.
+`RenderQuality` owns:
 
-## Properties
+- fixed quality policy constants (vector-first, text-vector-first, HiDPI, HiRes @3x),
+- per-window scene-supersampling activation decision,
+- default surface format / text-rendering global bootstrap policy,
+- layer texture-size resolution for QML consumers.
 
-- `vectorFirst: bool` (constant, `true`)
-- `textVectorFirst: bool` (constant, `true`)
-- `hiDpiEnabled: bool` (constant, `true`)
-- `hiResScale: real` (constant, `3.0`)
-- `effectiveSupersampleScaleValue: real` (constant policy value)
-- `supersamplingEnabled: bool` (constant, `true`)
-- `antialiasingEnabled: bool` (constant, `true`)
-- `sceneSupersampling: bool` (default `true`)
-- `sceneSupersamplingActive: bool` (read-only, computed from bound window size/policy)
-- `sceneSupersamplePixelBudget: int` (constant, default `6000000`)
-- `enabled: bool`
-- `supersampleScale: real`
-- `minimumSupersampleScale: real` (constant)
-- `maximumSupersampleScale: real` (constant)
-- `msaaSamples: int`
-- `nativeTextRendering: bool`
+`RenderQuality` does **not** own:
 
-## Methods
+- icon/svg source resolution (`SvgManager` owns this),
+- UI tree composition (QML owns this),
+- platform backend selection (`vulkanbootstrap` owns this).
 
-- `effectiveSupersampleScale(): real`
-- `shouldUseSceneSupersampling(width, height): bool`
-- `resolveLayerTextureSize(width, height, sceneSupersamplingActive = true): size`
-- `bindWindow(window): void`
-- `unbindWindow(): void`
-- `applyWindow(window): void`
-- `applyGlobalDefaults(): void`
-- `configureGlobalDefaults(msaaSamples = 4, nativeTextRendering = true)` (static)
+## 2. Property Contract (Detailed)
 
-## Usage Pattern
+| Property | Type | Mutability | Effective Behavior | Edge Cases |
+|---|---|---|---|---|
+| `vectorFirst` | `bool` | constant | Always `true`. Backend policy value, not user-tunable at runtime. | None. |
+| `textVectorFirst` | `bool` | constant | Always `true`. Native text rendering is enforced as policy. | None. |
+| `hiDpiEnabled` | `bool` | constant | Always `true`. Global env policy is configured when defaults are applied. | If app is already created before policy call, Qt may warn about timing. |
+| `hiResScale` | `real` | constant | Always `3.0`. Public mirror of forced supersample scale. | None. |
+| `effectiveSupersampleScaleValue` | `real` | constant-read | Returns `3.0` when enabled; returns `1.0` only if supersampling is effectively disabled. | Disabled path is API-compatible fallback behavior. |
+| `supersamplingEnabled` | `bool` | constant | Always `true` in current policy build. | Compile-time policy only. |
+| `antialiasingEnabled` | `bool` | constant | Always `true`; MSAA floor >= 2 is enforced. | Requests below 2 are clamped. |
+| `sceneSupersampling` | `bool` | read/write | Gate flag for full-scene layer supersampling decision. | Setting `false` forces `sceneSupersamplingActive=false`. |
+| `sceneSupersamplingActive` | `bool` | read-only | Computed from current bound window size + policy budget + scale. | `false` when no bound window, invalid size, or over budget. |
+| `sceneSupersamplePixelBudget` | `int` | constant | Default `6,000,000` pixels (cost model uses `w*h*scale^2`). | Constant in current implementation. |
+| `enabled` | `bool` | read/write (policy-clamped) | API accepts writes, but policy normalizes to enabled=true (quality-on default). | Write `false` is ignored by policy in current build. |
+| `supersampleScale` | `real` | read/write (policy-clamped) | API accepts writes, but scale is normalized to fixed `3.0`. | Any value is clamped/forced to policy. |
+| `minimumSupersampleScale` | `real` | constant | `3.0` | None. |
+| `maximumSupersampleScale` | `real` | constant | `3.0` | None. |
+| `msaaSamples` | `int` | read/write | Clamped to `[2,16]` when antialiasing is enabled. | Negative/zero values become `2`. |
+| `nativeTextRendering` | `bool` | read/write (policy-clamped) | Enforced `true`; API remains for compatibility. | Write `false` is ignored by policy. |
+
+## 3. Method Contract (Detailed)
+
+### `effectiveSupersampleScale(): real`
+
+- Returns the effective scale used by policy, not the raw user request.
+- In current policy: normally `3.0`.
+
+### `shouldUseSceneSupersampling(width, height): bool`
+
+Decision formula:
+
+1. `enabled` must be true.
+2. `sceneSupersampling` must be true.
+3. `width > 0 && height > 0`.
+4. `effectiveScale > 1.0`.
+5. `width * height * scale^2 <= sceneSupersamplePixelBudget`.
+
+Examples with `scale=3.0`, budget `6,000,000`:
+
+- `640x360`: cost = `640*360*9 = 2,073,600` -> active candidate = true
+- `1280x720`: cost = `8,294,400` -> false (over budget)
+- `1480x980`: cost = `13,053,600` -> false
+
+### `resolveLayerTextureSize(width, height, sceneSupersamplingActive = true): size`
+
+Rules:
+
+- Base dimensions are clamped to at least `1x1`.
+- If `sceneSupersamplingActive=false`, returns base size.
+- If active and scale>1, returns rounded scaled size.
+
+Examples (scale=3):
+
+- `(640,360,true)` -> `(1920,1080)`
+- `(640,360,false)` -> `(640,360)`
+- `(0,0,true)` -> `(3,3)` because base becomes `(1,1)` then scaled.
+
+### `bindWindow(window): void`
+
+- Accepts `QObject*`; only `QQuickWindow*` is valid.
+- On valid window:
+  - stores pointer,
+  - subscribes to width/height change,
+  - subscribes to destroyed signal,
+  - recomputes `sceneSupersamplingActive`.
+- On invalid/null:
+  - clears existing binding,
+  - forces `sceneSupersamplingActive=false`.
+
+### `unbindWindow(): void`
+
+- Disconnects all bound-window signal links and clears active flag.
+
+### `applyWindow(window): void`
+
+Per-window quality application:
+
+1. Validates window type.
+2. Binds window (for live active-flag recompute).
+3. Applies format constraints:
+   - `samples >= msaaSamples` (clamped by policy),
+   - keeps stronger existing format values.
+4. Enables persistent graphics/scene graph.
+5. Forces native text rendering.
+6. Recomputes `sceneSupersamplingActive`.
+
+### `applyGlobalDefaults(): void`
+
+- Calls static default configuration with current runtime msaa setting.
+
+### `configureGlobalDefaults(msaaSamples = 4, nativeTextRendering = true)` (static)
+
+Global process-level defaults:
+
+- HiDPI env hints (`QT_ENABLE_HIGHDPI_SCALING`, rounding policy),
+- antialiasing method hint (`QSG_ANTIALIASING_METHOD=msaa`),
+- render-loop / software-render fallback defaults when unset,
+- default `QSurfaceFormat` sample/depth/stencil floors,
+- native text render type enforcement.
+
+`nativeTextRendering` parameter is currently API-compatible but policy-forced to native rendering.
+
+## 4. State Transition Model
+
+### Scene supersampling active flag
+
+`sceneSupersamplingActive` transitions on:
+
+- `bindWindow`,
+- bound window width/height changes,
+- `enabled`/`sceneSupersampling`/`supersampleScale` policy updates,
+- `unbindWindow`,
+- bound window destruction.
+
+### Window lifecycle scenarios
+
+| Scenario | Expected Result |
+|---|---|
+| bind small window (`640x360`) | `sceneSupersamplingActive=true` |
+| resize to large (`1480x980`) | flips to `false` |
+| unbind | `false` |
+| destroy bound window | `false` + connections released |
+| applyWindow(null) | no-op |
+
+## 5. QML Integration Patterns
+
+### Recommended
 
 ```qml
 import LVRS 1.0 as LV
 
-Component.onCompleted: {
-    LV.RenderQuality.enabled = true
-    LV.RenderQuality.supersampleScale = 2.5
-    LV.RenderQuality.applyWindow(window)
+LV.ApplicationWindow {
+    id: root
+    readonly property bool sceneSsaa: LV.RenderQuality.sceneSupersamplingActive
+
+    Component.onCompleted: {
+        LV.RenderQuality.applyWindow(root)
+    }
+
+    Item {
+        anchors.fill: parent
+        layer.enabled: root.sceneSsaa
+        layer.textureSize: LV.RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
+    }
 }
 ```
 
-## Behavior Notes
+### Avoid
 
-- Effective supersample scale is forced to HiRes `@3x`.
-- Full-scene supersampling is gated by pixel budget (`width * height * scale^2 <= sceneSupersamplePixelBudget`)
-  to avoid large-window latency spikes.
-- Scene-supersampling activation state is computed in C++ backend and exposed as
-  `sceneSupersamplingActive` for low-level policy ownership.
-- Layer texture size calculation is owned by C++ (`resolveLayerTextureSize`) so QML keeps
-  display-only wiring.
-- `enabled`/`supersampleScale` remain API-compatible, but backend policy keeps quality-on defaults.
-- Text rendering is forced to native text rendering to keep text vector-priority.
-- App bootstrap initializes HiDPI/MSAA/native-text global defaults before window creation.
-- GPU-friendly defaults are applied (`QSG_RHI_PREFER_SOFTWARE_RENDERER=0`, `QSG_RENDER_LOOP=threaded` when unset).
+- Re-implementing texture-size math directly in QML repeatedly.
+- Assuming raw `supersampleScale` write is honored as-is in policy-fixed builds.
+- Enabling full-scene supersampling blindly for large windows without budget gating.
 
-## Tuning Guidance
+## 6. Failure and Troubleshooting Matrix
 
-- High-density desktop displays: start with `supersampleScale` in `2.0..3.0`.
-- Mid/low-power devices: reduce supersample scale first before disabling quality entirely.
-- Keep `msaaSamples` aligned with backend/platform constraints.
+| Symptom | Likely Cause | Verification | Action |
+|---|---|---|---|
+| No visible quality change | `applyWindow()` not called on active window | inspect startup sequence logs | call `applyWindow(root)` at `Component.onCompleted` |
+| `sceneSupersamplingActive` always false | window too large for budget | evaluate `w*h*scale^2` | keep policy, accept fallback to non-scene-SSAA |
+| Text looks rasterized | custom text render type override elsewhere | inspect `QQuickWindow::textRenderType()` | remove conflicting override, keep native rendering |
+| MSAA lower than expected | format already fixed before app default set | inspect startup order | configure defaults before window creation |
+| HiDPI warning at runtime | policy called after `QGuiApplication` creation | check logs | move global default call earlier in bootstrap |
 
-## Troubleshooting
+## 7. Compatibility Notes
 
-If visual quality changes do not apply:
+- API keeps setter surfaces (`enabled`, `supersampleScale`, `nativeTextRendering`) for compatibility with existing QML, even when policy is fixed.
+- Consumers should bind to `effectiveSupersampleScaleValue` and `sceneSupersamplingActive` instead of assuming mutable scale.
+- If future build variants relax policy, the same APIs remain valid.
 
-1. verify `enabled` is true,
-2. verify `applyWindow(window)` is called on the active window,
-3. verify requested values are not clamped by min/max bounds.
+## 8. Codex-Oriented Playbook
 
-## FAQ
+This section is written for automated engineering agents (Codex) operating on LVRS.
 
-Q. Should supersample scale be maximized by default?  
-A. No. Choose scale by target hardware budget and visual requirement.
+### 8.1 Safe default sequence for code generation
 
-## Validation Checklist
+1. Use `effectiveSupersampleScaleValue` as read-only source of truth.
+2. Call `applyWindow(window)` once at window/component startup.
+3. Bind `layer.enabled` to `sceneSupersamplingActive`.
+4. Derive `layer.textureSize` exclusively via `resolveLayerTextureSize(...)`.
+5. Avoid writing policy-clamped setters unless preserving external API shape.
 
-- requested supersample value stays within min/max range,
-- active window receives updated quality policy via `applyWindow`,
-- visual improvements are measured against render cost on target hardware.
+### 8.2 “Do” contract for Codex patches
+
+- Prefer backend-owned policy calls over inline QML math.
+- Preserve `bindWindow`/`unbindWindow` lifecycle correctness if window ownership changes.
+- Keep compatibility-facing properties intact even if policy is fixed.
+
+### 8.3 “Do not” contract for Codex patches
+
+- Do not add duplicate supersampling formulas in multiple QML components.
+- Do not bypass scene budget checks by forcing `layer.enabled=true`.
+- Do not reintroduce non-native text rendering for convenience.
+
+### 8.4 Quick verification script pattern
+
+After patching:
+
+1. resize-test small and large windows to validate active-flag transitions,
+2. inspect that `sceneSupersamplingActive` flips deterministically,
+3. confirm no QML-side custom texture-size arithmetic remains in touched files.
+
+## 9. Validation Checklist
+
+- `applyWindow()` called for each active `QQuickWindow`.
+- `sceneSupersamplingActive` flips correctly across resize thresholds.
+- `layer.textureSize` is resolved by `resolveLayerTextureSize()`.
+- `QQuickWindow::textRenderType()` remains native.
+- Default surface format has expected sample/depth/stencil floors.
+
+## 10. Related APIs
+
+- `SvgManager`: vector icon source enforcement.
+- `RuntimeEvents`: runtime capture cost controls (indirect latency impact).
+- `ApplicationWindow`: standard QML integration shell using this policy.

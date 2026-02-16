@@ -191,11 +191,14 @@ Based on `qml/components/control/util/EventListener.qml`:
 
 - Local pointer triggers (`clicked|pressed|released`):
   - `x`, `y`, `globalX`, `globalY`, `button`, `buttons`, `modifiers`, `isGlobal=false`
-  - `ui` (optional), `input`
+  - `ui` (optional, `includeUiHit=true`)
+  - `input` (optional, `includeInputState=true`)
   - `backend` (optional, `includeBackendSummary=true`)
 - Global triggers (`globalPressed|globalContextRequested`):
   - `x`, `y`, `globalX`, `globalY`, `buttons`, `modifiers`, `isGlobal=true`
-  - `ui` (optional), `input`, `backend` (optional)
+  - `ui` (optional, `includeUiHit=true`)
+  - `input` (optional, `includeInputState=true`)
+  - `backend` (optional)
   - for context events, `reason` and `source(mouse|context)` are added
 - Key/wheel triggers pass Qt event objects directly.
 

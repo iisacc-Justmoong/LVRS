@@ -2,135 +2,198 @@
 
 Location: `qml/ApplicationWindow.qml`
 
-`ApplicationWindow` is LVRS's root window component.
-It hosts the adaptive layout/navigation content directly, manages size classes, and wires global runtime event signals.
-No top header/title panel is injected by default.
+`ApplicationWindow` is the LVRS root shell for adaptive layout, global interaction routing, and runtime/render policy wiring.
 
-## Responsibilities
+## 1. Scope and Role
 
-- Cross-platform minimum-size policy.
-- Safe-margin policy for mobile footprints.
-- Render-quality layer supersampling bridge (`RenderQuality`).
-- Global event bridge to app-level signals.
-- Native window style integration.
-- Plain window background via `windowColor` (`Theme.window` by default).
+`ApplicationWindow` owns:
 
-## Global Event Signals
+- platform/size-class signals and adaptive layout state,
+- scaffold navigation composition (rail/drawer/bottom modes),
+- render-quality layer bridge (`RenderQuality`),
+- global pressed/context events via root listeners,
+- optional runtime and backend hook bootstrapping,
+- optional native window styling hooks.
 
-- `globalPressedEvent(eventData)`
-- `globalContextEvent(eventData)`
+`ApplicationWindow` does **not** own:
 
-Internally, these are emitted through two always-on `EventListener` instances using triggers:
-- `globalPressed`
-- `globalContextRequested`
+- backend policy constants (RenderQuality/RuntimeEvents own those),
+- route parser internals (`PageRouter` owns route matching),
+- data persistence.
 
-Each payload includes coordinates and resolved UI/input context.
+## 2. Startup Sequence (Operational Contract)
 
-## Runtime Boot Sequence
+On `Component.onCompleted`, shell performs:
 
-On completion, `ApplicationWindow`:
+1. `FontPolicy.enforceApplicationFallback()`,
+2. `RenderQuality.applyWindow(windowRoot)`,
+3. `SvgManager.ensureMinimumScale(effectiveSupersampleScale)`,
+4. optional runtime daemon start/attach (`autoAttachRuntimeEvents`),
+5. optional backend hook (`autoHookBackendUserEvents`),
+6. native window style application and deferred refresh.
 
-1. enforces font fallback policy,
-2. applies render quality,
-3. starts and attaches `RuntimeEvents`,
-4. hooks backend user events via `Backend.hookUserEvents()`,
-5. emits creation/debug logs.
+Order matters because:
 
-## Key Aliases and Properties
+- render-layer sizing depends on active render-quality policy,
+- runtime hook path expects daemon availability and attached window context.
 
-Window/platform:
-- `windowColor`, `forceNativeDarkTitleBar`
-- `platform`, `isMobilePlatform`, `isDesktopPlatform`
-- `widthClass`, `heightClass`, `isCompact`, `isExpanded`
-- `desktopMinWidth`, `desktopMinHeight`, `mobileMinWidth`, `mobileMinHeight`
-- `usePlatformSafeMargin`, `safeMargin`
+## 3. Core Property Groups
 
-Scaffold and navigation aliases:
-- `navIndex`, `navigationEnabled`
-- `navTitle`, `navTitleVisible`
-- `navWidth`, `navDrawerWidth`
-- `wideBreakpoint`
-- `scaffoldLayoutMode`, `scaffoldLayoutPlatform`
-- `scaffoldForceDesktopOnLargeMobile`, `scaffoldMobileDesktopMinWidth`
-- `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`
-- `scaffoldCompactSpacingEnabled`, `scaffoldCompactSpacingBreakpoint`
-- `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
-- `navDelegate`, `navHeader`, `navFooter`
+### 3.1 Platform and size-class
 
-Routing aliases:
-- `pageRouter`
-- `pageRoutes`, `pageInitialPath`
-- `useInternalPageStack`
-- `internalRouterRegisterAsGlobalNavigator`
-- `internalPageStackEnabled` (readonly)
-- `activePageRouter` (readonly)
+| Property | Meaning |
+|---|---|
+| `platform` | OS token from `Qt.platform.os`. |
+| `isMobilePlatform`, `isDesktopPlatform` | Platform group flags. |
+| `widthClass`, `heightClass` | Compact/medium/expanded classification. |
+| `isCompact`, `isExpanded` | Combined class helpers. |
 
-Adaptive state:
-- `adaptiveLayoutProfile`
-- `adaptiveNavigationMode`
-- `adaptiveMobileLayout`, `adaptiveDesktopLayout`
-- `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
+### 3.2 Layout and scaffold
 
-Event/runtime:
-- `globalEventListenersEnabled`
-- `lastGlobalPressedEventData`, `lastGlobalContextEventData`
-- `autoAttachRuntimeEvents`, `autoHookBackendUserEvents`
-- `matchesMedia(rule)`
+| Property | Meaning |
+|---|---|
+| `navItems` | Source nav model for scaffold delegates. |
+| `navIndex`, `navigationEnabled` | Current navigation selection and enable-state. |
+| `scaffoldLayoutMode` | `auto/mobile/desktop` preference hint. |
+| `adaptiveLayoutProfile` | Resolved profile (`mobile-compact`, `desktop-wide`, etc.). |
+| `adaptiveNavigationMode` | Resolved navigation mode (`rail`, `drawer`, `bottom`, `none`). |
 
-Content slot:
-- `default property alias content`
+### 3.3 Render-quality bridge
 
-## Usage
+| Property | Meaning |
+|---|---|
+| `effectiveSupersampleScale` | Mirrors backend effective policy value. |
+| `sceneSupersamplingActive` | Backend-computed activation flag for scene layer supersampling. |
+| supersample host `layer.textureSize` | Resolved through `RenderQuality.resolveLayerTextureSize(...)`. |
+
+### 3.4 Runtime/global event bridge
+
+| Property/Signal | Meaning |
+|---|---|
+| `globalEventListenersEnabled` | Master switch for global listener components. |
+| `autoAttachRuntimeEvents` | Auto-start/attach runtime daemon. |
+| `autoHookBackendUserEvents` | Auto-hook backend mirror cache. |
+| `globalPressedEvent(eventData)` | Root global press relay. |
+| `globalContextEvent(eventData)` | Root global context-request relay. |
+| `lastGlobalPressedEventData`, `lastGlobalContextEventData` | Last relayed payload snapshots. |
+
+## 4. Adaptive Layout State Behavior
+
+Internal adaptive host enforces guarded transitions for:
+
+- layout profile transitions (`mobile-compact`, `mobile-wide`, `desktop-compact`, `desktop-wide`),
+- navigation mode transitions (`rail`, `drawer`, `bottom`, `none`).
+
+Guard logic:
+
+- disallows abrupt incompatible transitions in one step,
+- emits transition rejection metadata,
+- schedules follow-up convergence (`Qt.callLater`) when intermediate state is needed.
+
+This prevents unstable oscillation during rapid resize/device-class changes.
+
+## 5. Render Path Cases
+
+| Case | `sceneSupersamplingActive` | Expected layer behavior |
+|---|---|---|
+| Small window under pixel budget | true | supersample layer active; texture size scaled by backend policy |
+| Large window over budget | false | layer remains unscaled base size |
+| RenderQuality disabled by build variant | false/1x | graceful fallback to base texture sizing |
+| Window not yet applied | false until apply | call `RenderQuality.applyWindow` |
+
+## 6. Runtime/Event Cases
+
+| Case | Condition | Expected behavior |
+|---|---|---|
+| Runtime auto attach enabled | `autoAttachRuntimeEvents=true` | daemon starts and attaches to this window |
+| Backend auto hook enabled | `autoHookBackendUserEvents=true` | `Backend.hookUserEvents()` attempted and logged on failure |
+| Global listener disabled | `globalEventListenersEnabled=false` | global pressed/context relays stop |
+| Context event with no coordinates | malformed payload | context menu helpers should no-op safely |
+
+## 7. Recommended Integration Patterns
+
+### 7.1 Production shell baseline
 
 ```qml
 import LVRS 1.0 as LV
 
 LV.ApplicationWindow {
-    visible: true
-    width: 1280
-    height: 800
-    title: "LVRS"
-
-    navigationEnabled: false
-
-    onGlobalContextEvent: function(eventData) {
-        console.log(eventData.ui.path)
-    }
-}
-```
-
-## Advanced Integration Example
-
-```qml
-import LVRS 1.0 as LV
-
-LV.ApplicationWindow {
-    id: appWindow
     visible: true
     width: 1280
     height: 800
 
     autoAttachRuntimeEvents: true
-    autoHookBackendUserEvents: true
-
-    pageRoutes: [
-        { path: "/", component: homePage, viewModelKey: "HomeVM", writable: true },
-        { path: "/reports", component: reportsPage, viewModelKey: "ReportsVM" }
-    ]
-
-    onPageStackNavigated: function(path, params) {
-        console.log("navigated", path, JSON.stringify(params))
-    }
+    autoHookBackendUserEvents: false
+    globalEventListenersEnabled: true
 }
 ```
 
-## Operational Notes
+### 7.2 Navigation with internal page stack
 
-- Keep `globalEventListenersEnabled` on when overlays/context menus rely on root-level global signals.
-- Use `matchesMedia()` for feature-gating adaptive UI logic in page components.
-- For desktop chrome control, verify native style support on target OS before enforcing style assumptions.
+```qml
+import LVRS 1.0 as LV
 
-## Common Pitfalls
+LV.ApplicationWindow {
+    useInternalPageStack: true
+    pageRoutes: [
+        { path: "/", component: homePage },
+        { path: "/reports", component: reportsPage }
+    ]
+}
+```
 
-- Setting routes without enabling internal stack path (`useInternalPageStack`) when relying on `pageRoutes`.
-- Expecting global event signals while runtime/backend hooks remain disabled.
+## 8. Common Pitfalls
+
+- Enabling route definitions but disabling internal page stack unintentionally.
+- Replacing render-layer sizing math in-page instead of using backend resolver.
+- Expecting global context signals while root listeners are disabled.
+- Assuming runtime daemon is attached when `autoAttachRuntimeEvents=false`.
+
+## 9. Troubleshooting Matrix
+
+| Symptom | Likely Cause | Verification | Action |
+|---|---|---|---|
+| adaptive mode flickers on resize | conflicting manual state writes | inspect layout profile transitions | let adaptive host own profile transitions |
+| context menu not appearing | missing global context payload or listener disabled | inspect `lastGlobalContextEventData` | enable listeners, verify payload coordinates |
+| render quality no effect | window policy not applied | check startup logs/order | ensure `RenderQuality.applyWindow` runs at completion |
+| backend hook fails | runtime unavailable or hook error | inspect `Backend.lastError` | ensure runtime singleton loaded and attached |
+
+## 10. Codex-Oriented Playbook
+
+### 10.1 Safe Codex patch boundaries
+
+When editing `ApplicationWindow.qml`, prefer:
+
+1. keep adaptive state machine semantics intact,
+2. keep render-quality math in backend API calls,
+3. keep runtime hook wiring behind existing feature flags,
+4. keep signal payload contracts stable.
+
+### 10.2 Codex anti-patterns
+
+- Do not inline new supersample formulas in multiple delegates.
+- Do not directly mutate internal adaptive host private transition flags unless required.
+- Do not hard-wire backend hooks to always-on if feature flags exist.
+
+### 10.3 Codex regression checklist
+
+After patching shell behavior:
+
+1. verify adaptive layout still converges after fast resize,
+2. verify global pressed/context signals still emit,
+3. verify supersample host binds to backend-resolved texture size,
+4. verify runtime auto-attach and backend auto-hook flags still work independently.
+
+## 11. Validation Checklist
+
+- Startup sequence ordering remains unchanged for policy-sensitive operations.
+- Adaptive transitions remain deterministic under compact/wide boundary changes.
+- Render layer toggles by backend flag, not duplicated local math.
+- Global event relays and runtime flags behave independently as documented.
+
+## 12. Related APIs
+
+- `RenderQuality` (`docs/backend/RenderQuality.md`)
+- `RuntimeEvents` (`docs/backend/RuntimeEvents.md`)
+- `Backend` (`docs/backend/Backend.md`)
+- `PageRouter` component docs

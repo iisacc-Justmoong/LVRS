@@ -2,93 +2,194 @@
 
 Location: `qml/components/control/util/EventListener.qml`
 
-`EventListener` is an embeddable behavior bridge that maps trigger names to pointer/wheel/key/global runtime callbacks.
+`EventListener` is the LVRS interaction bridge component that maps trigger tokens to callback events.  
+Current policy is incident-centric: it avoids continuous state harvesting unless explicitly enabled.
 
-## Purpose
+## 1. Design Goal
 
-- Replace ad-hoc event glue with one payload contract.
-- Provide optional backend-first input snapshot resolution.
-- Support dedup windows for global press/context behavior.
+- Deliver event callbacks for actual incidents (`click`, `press`, `release`, `context request`, etc.).
+- Avoid high-cost payload enrichment by default.
+- Prevent chain reactions caused by unnecessary runtime snapshot/hit-test pulls.
 
-## Trigger Set
+## 2. Supported Triggers
 
-- pointer-local: `clicked`, `pressed`, `released`, `entered`, `exited`, `hoverChanged`
-- wheel: `wheel`
-- keyboard: `keyPressed`, `keyReleased`
-- global runtime: `globalPressed`, `globalContextRequested`
+- Pointer-local: `clicked`, `pressed`, `released`, `entered`, `exited`, `hoverChanged`
+- Wheel: `wheel`
+- Keyboard: `keyPressed`, `keyReleased`
+- Global runtime: `globalPressed`, `globalContextRequested`
 
-## Core API
+## 3. Core API
 
-- `trigger`
-- `action` (callback)
-- `enabled`
-- `acceptedButtons`
-- `includeUiHit` (default `true`)
-- `preferBackendState` (default `false`)
-- `includeBackendSummary` (default `false`)
-- `macControlClickAsRight`
+| Property | Default | Meaning |
+|---|---|---|
+| `trigger` | `"clicked"` | Event source selector. |
+| `action` | `null` | Callback invoked when trigger fires. |
+| `enabled` | `true` | Listener enable flag. |
+| `acceptedButtons` | `Qt.LeftButton` | Mouse buttons accepted by local pointer path. |
+| `macControlClickAsRight` | `true` | Treat macOS Ctrl+Left as context gesture. |
+| `includeUiHit` | `false` | Enrich payload with `ui` hit-test info (opt-in). |
+| `includeInputState` | `false` | Enrich payload with runtime/backend `input` snapshot (opt-in). |
+| `preferBackendState` | `false` | When `includeInputState=true`, prefer backend-first input state resolution. |
+| `includeBackendSummary` | `false` | Include backend hook summary map in payload (opt-in). |
+| `globalPressDedupMs` | `24` | Global press dedup time window. |
+| `globalPressDedupTolerancePx` | `2.0` | Global press dedup spatial tolerance. |
+| `contextDedupMs` | `180` | Context dedup time window. |
+| `contextDedupTolerancePx` | `2.0` | Context dedup spatial tolerance. |
 
-Dedup controls:
+## 4. Incident-Centric Payload Rules
 
-- `globalPressDedupMs`, `globalPressDedupTolerancePx`
-- `contextDedupMs`, `contextDedupTolerancePx`
+### 4.1 Default mode (recommended)
 
-## Payload Behavior
+By default:
 
-Global payloads may include:
+- no `input` snapshot is fetched,
+- no UI hit-test traversal is executed,
+- callback receives only direct incident fields.
 
-- position fields (`x`, `y`, `globalX`, `globalY`)
-- button/modifier masks
-- `input` snapshot
-- `ui` hit-test map when enabled
-- `backend` summary when requested
+This minimizes runtime coupling and avoids invisible view-tree tracking for non-required cases.
 
-## Usage
+### 4.2 Enriched mode (explicit opt-in)
 
-```qml
-import LVRS 1.0 as LV
+Set `includeInputState: true` when callback logic truly needs runtime state coherence.  
+Set `includeUiHit: true` only when UI hit metadata is required for decisions (for example, contextual menus).
 
-LV.EventListener {
-    trigger: "globalContextRequested"
-    preferBackendState: true
-    action: function(eventData) {
-        console.log(eventData.globalX, eventData.globalY)
-    }
-}
-```
+### 4.3 Backend summary mode
 
-## How It Works
+`includeBackendSummary: true` is diagnostic-oriented and can be expensive in high-rate flows.  
+Use only for tooling/debug dashboards, not hot-path interaction callbacks.
 
-- Trigger string selects source path (`MouseArea`, `WheelHandler`, `Keys`, or runtime `Connections`).
-- Backend-first mode calls `Backend.hookUserEvents()` when needed and resolves `Backend.currentUserInputState()` first.
-- Context dedup suppresses duplicate context callbacks within configured time-distance window.
+## 5. Payload Schema
 
-## Advanced Example: Backend Summary Included
+### Local pointer (`clicked|pressed|released`)
+
+Always:
+
+- `x`, `y`, `globalX`, `globalY`
+- `button`, `buttons`, `modifiers`
+- `isGlobal=false`
+
+Optional:
+
+- `ui` when `includeUiHit=true`
+- `input` when `includeInputState=true`
+- `backend` when `includeBackendSummary=true`
+
+### Global pointer (`globalPressed|globalContextRequested`)
+
+Always:
+
+- `x`, `y`, `globalX`, `globalY`
+- `buttons`, `modifiers`
+- `isGlobal=true`
+
+Context-only additions:
+
+- `reason`
+- `source` (`"mouse"` or `"context"`)
+
+Optional enrichments follow same toggles as local pointer payloads.
+
+### Wheel / key triggers
+
+- wheel/key triggers forward Qt event objects directly.
+
+### `hoverChanged`
+
+- payload: `{ containsMouse: bool }`
+
+## 6. Dedup Behavior
+
+- Global press dedup suppresses duplicate press incidents in a short time-distance window.
+- Context dedup suppresses duplicate context incidents in its own window.
+- Dedup affects callback emission only; it does not mutate external runtime daemon counters.
+
+## 7. Usage Patterns
+
+### 7.1 Minimal incident listener (preferred)
 
 ```qml
 import LVRS 1.0 as LV
 
 LV.EventListener {
     trigger: "globalPressed"
-    preferBackendState: true
-    includeBackendSummary: true
     action: function(eventData) {
-        console.log(eventData.backend.eventCount)
+        // Use only coordinates/buttons for outside-dismiss logic.
     }
 }
 ```
 
-## Troubleshooting
+### 7.2 Context listener with UI hit metadata
 
-If trigger callback is never invoked:
+```qml
+import LVRS 1.0 as LV
 
-1. verify `enabled` state,
-2. verify trigger token spelling,
-3. verify runtime event source availability for global triggers.
+LV.EventListener {
+    trigger: "globalContextRequested"
+    includeUiHit: true
+    action: function(eventData) {
+        console.log(eventData.ui ? eventData.ui.path : "unknown")
+    }
+}
+```
 
-## Review Checklist
+### 7.3 Explicit input-state opt-in
 
-- trigger token matches supported set,
-- callback is pure and non-blocking,
-- dedup thresholds are justified for context/press flows,
-- backend-first mode is enabled only when stable snapshot semantics are required.
+```qml
+import LVRS 1.0 as LV
+
+LV.EventListener {
+    trigger: "globalContextRequested"
+    includeInputState: true
+    preferBackendState: true
+    action: function(eventData) {
+        const input = eventData.input || ({})
+        console.log(input.activeModifierNames)
+    }
+}
+```
+
+## 8. Common Pitfalls
+
+- Enabling `includeInputState` everywhere by habit.
+- Enabling both `includeUiHit` and `includeBackendSummary` for high-frequency interaction paths.
+- Using `hoverChanged` for business logic that should be press/release driven.
+- Treating global triggers as local geometry-only events without global coordinate checks.
+
+## 9. Troubleshooting Matrix
+
+| Symptom | Likely Cause | Verification | Action |
+|---|---|---|---|
+| callback not firing | wrong trigger token or disabled listener | inspect `trigger`, `enabled` | fix token/state |
+| missing `ui` payload | `includeUiHit=false` | inspect listener props | enable only where needed |
+| missing `input` payload | `includeInputState=false` | inspect listener props | enable explicitly for that listener |
+| duplicate context callbacks | dedup window too loose for source | inspect dedup config | tune `contextDedup*` values |
+| heavy callback chain | unnecessary enrichment enabled globally | inspect props in hot path | reduce to minimal incident payload |
+
+## 10. Codex-Oriented Playbook
+
+### 10.1 Safe Codex defaults for new listeners
+
+1. Keep `includeUiHit=false`.
+2. Keep `includeInputState=false`.
+3. Keep `includeBackendSummary=false`.
+4. Enable enrichment only when callback logic requires it.
+
+### 10.2 Codex anti-patterns
+
+- Do not auto-inject input-state enrichment into every listener.
+- Do not use global listeners for per-frame tracking semantics.
+- Do not add side-effect-heavy callback bodies in shared root listeners.
+
+### 10.3 Codex regression checklist
+
+After edits:
+
+1. global press/context listeners still fire exactly once per incident,
+2. outside-dismiss flows still work with minimal payload,
+3. enriched listeners still receive requested optional fields when enabled.
+
+## 11. Related APIs
+
+- `RuntimeEvents`: runtime daemon source for global triggers.
+- `Backend`: optional backend-first input state source.
+- `ApplicationWindow`: installs root-level global listeners for app-wide behavior.

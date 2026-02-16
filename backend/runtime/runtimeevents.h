@@ -295,12 +295,12 @@ private:
     QVariantMap m_lastEvent;
     QVariantList m_recentEvents;
     int m_recentEventCapacity = 256;
-    int m_highFrequencyEventMinIntervalMs = 16;
-    int m_runtimeStateSignalMinIntervalMs = 16;
-    int m_captureProfile = FullCapture;
-    bool m_pointerHitTestingEnabled = true;
+    int m_highFrequencyEventMinIntervalMs = 33;
+    int m_runtimeStateSignalMinIntervalMs = 33;
+    int m_captureProfile = LowLatencyCapture;
+    bool m_pointerHitTestingEnabled = false;
     int m_pointerHitTestMinIntervalMs = 0;
-    bool m_uiTrackingEnabled = true;
+    bool m_uiTrackingEnabled = false;
     qint64 m_lastPointerHitTestEpochMs = -1;
     QHash<QString, qint64> m_lastEventRecordedEpochByType;
     bool m_runtimeStateSignalDirty = false;

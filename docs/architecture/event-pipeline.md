@@ -16,7 +16,8 @@ This document describes the end-to-end event path from OS/Qt events to high-leve
 
 3. Consumption Stage: `EventListener`
 - Converts trigger names to concrete source subscriptions.
-- Builds normalized payloads including coordinates, input state, and optional UI hit info.
+- Builds incident-first payloads (coordinates/button/modifier core).
+- Adds `input`/`ui` enrichment only when explicitly enabled.
 - Supports dedup windows for global press/context sequences.
 
 4. Dispatch Stage: `ApplicationWindow`
@@ -30,20 +31,23 @@ This document describes the end-to-end event path from OS/Qt events to high-leve
 
 ## Canonical Payload Shape
 
-Global pointer/context flows generally carry:
+Global pointer/context flows always carry:
 
 - Position: `x`, `y`, `globalX`, `globalY`
 - Input masks: `buttons`, `modifiers`
-- `input`: normalized input state snapshot
-- `ui`: hit-test metadata when enabled
+
+Optional enrichments:
+
+- `input`: normalized input state snapshot (`includeInputState=true`)
+- `ui`: hit-test metadata (`includeUiHit=true`)
 - `backend`: optional backend summary when requested
 
 This shape is intentionally shared so feature components can consume one schema.
 
-## Why Backend-First Exists
+## Why Backend-First Exists (Opt-In)
 
 Directly reading runtime singleton state from many QML handlers can cause temporal skew under bursty input.
-Backend-first mode reduces skew by reading from a stable mirrored cache.
+Backend-first mode reduces skew by reading from a stable mirrored cache, but it is intentionally opt-in to avoid hot-path overhead.
 
 ## Context Dismiss Flow (Reference)
 
@@ -57,9 +61,9 @@ Backend-first mode reduces skew by reading from a stable mirrored cache.
 When validating event behavior, verify:
 
 - `RuntimeEvents.running == true`
-- `Backend.userEventHooked == true` for backend-first listeners
+- `Backend.userEventHooked == true` only for listeners that opt into backend/input enrichment
 - expected trigger fires exactly once within dedup window
-- payload carries expected `ui` and `input` shape
+- payload carries expected optional `ui`/`input` fields only when enabled
 
 ## Extended Example: Global Context Menu Dispatch
 

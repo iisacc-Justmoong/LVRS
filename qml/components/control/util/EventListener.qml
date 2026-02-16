@@ -16,7 +16,8 @@ Item {
     property real globalPressDedupTolerancePx: 2.0
     property int contextDedupMs: 180
     property real contextDedupTolerancePx: 2.0
-    property bool includeUiHit: true
+    property bool includeUiHit: false
+    property bool includeInputState: false
     property bool preferBackendState: false
     property bool includeBackendSummary: false
     property double lastContextTimestamp: -1
@@ -96,7 +97,8 @@ Item {
         }
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(x, y)
-        data.input = root.resolveInputState()
+        if (root.includeInputState)
+            data.input = root.resolveInputState()
         if (root.includeBackendSummary)
             data.backend = root.resolveBackendSummary()
         return data
@@ -110,6 +112,8 @@ Item {
             if (root.mapHasEntries(resolved))
                 return resolved
         }
+        if (!root.includeInputState)
+            return ({})
         const inputState = root.resolveInputState()
         const pointerUi = inputState && inputState.pointerUi ? inputState.pointerUi : ({})
         return root.mapHasEntries(pointerUi) ? pointerUi : ({})
@@ -154,7 +158,8 @@ Item {
         }
         if (root.includeUiHit)
             data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y)
-        data.input = root.resolveInputState()
+        if (root.includeInputState)
+            data.input = root.resolveInputState()
         if (root.includeBackendSummary)
             data.backend = root.resolveBackendSummary()
         return data

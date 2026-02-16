@@ -97,6 +97,8 @@ LV.ApplicationWindow {
     LV.EventListener {
         trigger: "globalContextRequested"
         enabled: true
+        includeUiHit: true
+        includeInputState: true
         action: function(mouse) {
             root.contextCount += 1
             root.lastSource = mouse.source || ""
