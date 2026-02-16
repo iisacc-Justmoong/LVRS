@@ -2,25 +2,51 @@
 
 Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp`
 
-`AppBootstrap` is an integrated initialization API that applies platform-specific render backend policy, render-quality defaults, and font/text fallbacks consistently at app entrypoints.
+`AppBootstrap` provides pre/post application initialization routines for graphics backend policy, style setup, and font fallback setup.
 
 ## API
 
-- `lvrs::preApplicationBootstrap(options)`
-- `lvrs::postApplicationBootstrap(app, options)`
+- `lvrs::preApplicationBootstrap(options) -> AppBootstrapState`
+- `lvrs::postApplicationBootstrap(app, options) -> void`
 
-## Options (`AppBootstrapOptions`)
+## `AppBootstrapOptions`
 
-- `applicationName`
-- `quickStyleName`
-- `configureRenderQualityDefaults`
-- `bootstrapGraphicsBackend`
-- `logGraphicsBackend`
-- `installBundledFonts`
-- `installPretendardFallbacks`
-- `enforcePretendardFallback`
+- `applicationName: QString`
+- `quickStyleName: QString`
+- `configureRenderQualityDefaults: bool` (default `true`)
+- `bootstrapGraphicsBackend: bool` (default `true`)
+- `logGraphicsBackend: bool` (default `true`)
+- `installBundledFonts: bool` (default `true`)
+- `installPretendardFallbacks: bool` (default `true`)
+- `enforcePretendardFallback: bool` (default `true`)
 
-## Typical Flow
+## `AppBootstrapState`
+
+- `ok: bool`
+- `errorMessage: QString`
+- `graphicsBackend: GraphicsBackendBootstrapResult`
+
+## Required Call Order
+
+1. Call `preApplicationBootstrap` before creating `QGuiApplication`.
+2. If `state.ok == false`, abort startup.
+3. Construct `QGuiApplication`.
+4. Call `postApplicationBootstrap` immediately after app creation.
+
+## What `preApplicationBootstrap` Does
+
+- Optional `RenderQuality::configureGlobalDefaults()`.
+- Optional `QQuickStyle::setStyle(quickStyleName)`.
+- Optional graphics backend bootstrap and diagnostics logging.
+
+## What `postApplicationBootstrap` Does
+
+- Applies application name (if provided).
+- Loads bundled fonts from resource set.
+- Installs Pretendard fallbacks.
+- Optionally enforces Pretendard fallback and warns if enforcement fails.
+
+## Typical C++ Usage
 
 ```cpp
 lvrs::AppBootstrapOptions options;
@@ -35,25 +61,33 @@ QGuiApplication app(argc, argv);
 lvrs::postApplicationBootstrap(app, options);
 ```
 
-## Notes
+## Option Tuning Examples
 
-- Call `preApplicationBootstrap` before creating `QGuiApplication`.
-- Call `postApplicationBootstrap` right after creating `QGuiApplication`.
-- Root `main.cpp` is a downstream template that uses this API and is not included in framework build targets.
+Minimal startup (disable backend bootstrap for constrained test harness):
 
-## Root `main.cpp` template overrides
+```cpp
+lvrs::AppBootstrapOptions options;
+options.bootstrapGraphicsBackend = false;
+options.logGraphicsBackend = false;
+```
 
-The root template entrypoint (`main.cpp`) can inject app-specific settings directly through environment variables and CLI arguments.
+Font-focused startup (keep typography policies only):
 
-- CLI:
-  - `--module <uri>`
-  - `--root <type>`
-  - `--app-name <name>`
-  - `--style <name>`
-- Environment:
-  - `LVRS_APP_MODULE_URI`
-  - `LVRS_APP_ROOT_OBJECT`
-  - `LVRS_APP_NAME`
-  - `LVRS_QUICK_STYLE`
+```cpp
+lvrs::AppBootstrapOptions options;
+options.configureRenderQualityDefaults = false;
+options.bootstrapGraphicsBackend = false;
+options.installBundledFonts = true;
+options.installPretendardFallbacks = true;
+```
 
-Apps linking LVRS as a static QML plugin should define `LVRS_USE_STATIC_QML_PLUGIN` to enable the `Q_IMPORT_PLUGIN(LVRSPlugin)` path.
+## Troubleshooting
+
+- `state.ok == false`: use `state.errorMessage` as primary root-cause string.
+- Missing style changes: verify `quickStyleName` is set before app construction.
+- Unexpected font fallback: verify bundled font resources and fallback enforcement results.
+
+## FAQ
+
+Q. Can `postApplicationBootstrap` be skipped?  
+A. It can be skipped technically, but recommended startup baseline (fonts/fallbacks/app name) will be incomplete.

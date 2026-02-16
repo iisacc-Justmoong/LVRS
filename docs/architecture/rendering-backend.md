@@ -1,53 +1,82 @@
 # Rendering Backend Policy
 
-This document defines how LVRS selects and enforces graphics backends.
+This document defines how LVRS selects, validates, and reports graphics backend policy across platforms.
 
 ## Bootstrap Entry
 
-Runtime backend bootstrap occurs before `QGuiApplication` creation via `lvrs::preApplicationBootstrap()` (`backend/runtime/appbootstrap.cpp`), and is used by app entrypoints such as `example/VisualCatalog/main.cpp`:
+Primary bootstrap path:
 
-- `RenderQuality::configureGlobalDefaults()`
-- `lvrs::bootstrapPreferredGraphicsBackend()`
+- `lvrs::preApplicationBootstrap(options)`
+- `lvrs::postApplicationBootstrap(app, options)`
 
-If bootstrap returns unavailable, app exits with error.
+Location: `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`
 
-## Platform Rules
+`preApplicationBootstrap` is responsible for graphics backend bootstrap and optional render-quality global defaults.
 
-### macOS / iOS
+## Platform Backend Matrix
 
-- Fixed to Metal.
-- If Qt Metal support is unavailable, bootstrap fails immediately.
+- macOS / iOS: Metal required.
+- Windows / Linux / Android: Vulkan required.
+- Other targets: no hard override; Qt default backend selection is used.
 
-### Windows / Linux / Android
-
-- Fixed to Vulkan.
-- Desktop Vulkan platforms validate loader availability before startup continues.
-
-### Other platforms
-
-- No forced backend.
-- Qt default backend selection is used.
+If a required backend is unavailable, bootstrap returns `ok == false` with error message.
 
 ## Build-Time Enforcement
 
-`CMakeLists.txt` provides `LVRS_ENFORCE_VULKAN` (default `ON`).
+CMake option: `LVRS_ENFORCE_VULKAN` (default `ON`)
 
-When enabled:
-- On macOS/iOS, configure fails if Qt Metal support is unavailable.
-- On Windows/Linux/Android, configure fails if Vulkan runtime/feature requirements are unavailable.
+When enabled, configuration fails early if required backend capability cannot be validated for target platform.
+This moves failures from runtime to configure/build phase.
 
-This enforcement is intentionally strict to surface deployment misconfiguration early.
+## Runtime Diagnostics
 
-## Diagnostics
+When backend bootstrap succeeds, startup logs include backend identity and loader details when available.
 
-On startup, LVRS logs backend and loader:
+Examples:
+
 - `LVRS graphics backend: metal`
 - `LVRS graphics backend: vulkan, loader = ...`
 
-When a fixed backend cannot be initialized, error text includes next-step guidance.
+## Interaction with RenderQuality
 
-## Related Components
+If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
+This keeps text/MSAA defaults aligned with backend policy.
 
+## Failure Handling Guidance
+
+If bootstrap fails:
+
+1. stop startup immediately,
+2. print bootstrap error message,
+3. verify platform SDK/runtime (Metal/Vulkan) and Qt feature support,
+4. rerun with explicit diagnostics enabled.
+
+## Related Files
+
+- `backend/runtime/vulkanbootstrap.h`
 - `backend/runtime/vulkanbootstrap.cpp`
+- `backend/runtime/renderquality.h`
 - `backend/runtime/renderquality.cpp`
-- `qml/ApplicationWindow.qml` (supersample layer setup)
+
+## Practical Target Matrix Validation
+
+Before shipping, validate one real device/simulator per target family:
+
+- macOS: confirm Metal backend selection and stable startup.
+- iOS: confirm Metal path and text rendering quality.
+- Windows/Linux: confirm Vulkan loader discovery and startup.
+- Android: confirm Vulkan-capable device behavior and fallback policy.
+
+## Deployment Troubleshooting
+
+If startup fails at bootstrap stage:
+
+- inspect bootstrap error string first,
+- verify Qt build includes required rendering backend feature,
+- verify runtime loader/driver presence for Vulkan targets,
+- confirm no environment override is forcing incompatible graphics API.
+
+## Operational Recommendation
+
+Keep backend bootstrap diagnostics enabled in non-production builds and CI smoke runs.
+This catches environment regressions before app-level UI logic is involved.

@@ -2,30 +2,71 @@
 
 Location: `qml/components/control/display/Table.qml`
 
-`Table` is a compact display surface that composes `TableHeader` + repeated `TableRow`.
+`Table` composes `TableHeader` and repeated `TableRow` delegates for compact read-only data display.
 
-## Core API
+## Purpose
 
-- `headerColumns` (`var`): header labels
-- `rows` (`var`): row/cell data
-- `rowHeight` (`int`, default `24`)
-- `cellWidth` (`int`, default `0`, auto-fit)
-- `backgroundColor` (`color`, default `#282828`)
-- `borderColor` / `borderWidth`
+- Provide fixed-height, dense tabular display.
+- Accept array/list-model style inputs for headers and rows.
 
-The default size is aligned with the Figma table node: `405x121`.
+## API
+
+Data:
+
+- `headerColumns`
+- `rows`
+
+Layout:
+
+- `rowHeight`
+- `cellWidth` (`0` means auto width)
+
+Visual:
+
+- `backgroundColor`
+- `borderColor`, `borderWidth`
+- `headerTextColor`
+- `cellTextColor`
+- `dividerColor`
+
+Helper methods:
+
+- `rowAt(index)`
+- `columnCountForRow(rowEntry)`
+- `autoCellWidth(rowEntry)`
 
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.Table {
-    width: 405
     headerColumns: ["Name", "State", "Owner"]
     rows: [
         ["Renderer", "Active", "Core"],
-        ["Input", "Idle", "UX"],
-        ["Pipeline", "Active", "Render"],
         ["Metrics", "Paused", "Ops"]
     ]
 }
 ```
+
+## How It Works
+
+- Header and row counts are resolved for both JS arrays and model-like objects.
+- Row delegates compute width either from fixed `cellWidth` or auto-fit formula.
+- Table container clips content and enforces internal divider contract.
+
+## Advanced Example: Object Rows
+
+```qml
+import LVRS 1.0 as LV
+
+LV.Table {
+    headerColumns: ["Service", "State", "Owner"]
+    rows: [
+        [{ text: "Renderer" }, { text: "Active" }, { text: "Core" }],
+        [{ text: "Input" }, { text: "Idle" }, { text: "UX" }]
+    ]
+}
+```
+
+Cell text fallback supports `label/text/title` object keys.

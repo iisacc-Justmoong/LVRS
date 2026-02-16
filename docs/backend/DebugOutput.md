@@ -218,3 +218,17 @@ Common payload:
 - `lastFrameMs`
 - `frameCount`
 - `backend` (`LV.RenderQuality.graphicsBackend`)
+
+## Consumer Implementation Notes
+
+When integrating with log viewers or telemetry pipelines:
+
+- treat `sequence` as ordered-event cursor,
+- treat `timestamp` fields as wall-clock and compute latency externally,
+- avoid strict schema parsing on optional payload fields for forward compatibility.
+
+## Parser Safety Recommendations
+
+- always null-check nested maps (`payload`, `input`, `ui`),
+- tolerate missing keys for older entries,
+- keep unknown field passthrough to preserve future extensibility.

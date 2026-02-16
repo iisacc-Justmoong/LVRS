@@ -2,96 +2,98 @@
 
 Location: `qml/components/navigation/Link.qml`
 
-Single navigation control for all click-to-route scenarios.
+`Link` is a click-to-navigation control that wraps route/component navigation into a button-like API.
 
-## Properties
-- `router`
+## Purpose
+
+- Provide declarative navigation trigger without direct router method calls in each click handler.
+- Support route path navigation and component-target navigation in one component.
+
+## API
+
+Routing:
+
+- `router` (optional explicit router)
 - `href`
 - `to` (alias of `href`)
 - `params`
-- `targetComponent`
 - `replace`
-- `text`
+- `targetComponent`
+
+Visual:
+
+- `linkColor`
+- `hoverColor`
+- `disabledColor`
 - `underline`
 
-`router` is optional when `Navigator` has a registered `PageRouter`.
+Content:
+
+- default `content` slot
+- fallback text rendering when no slot child exists
+
+## Router Resolution
+
+`Link` chooses router in this order:
+
+1. explicit `router` property
+2. `Navigator.router`
+3. no-op if unresolved
+
+## Navigation Behavior
+
+- if `targetComponent` is set:
+  - `replace == true` -> `replaceWith(component, params)`
+  - else -> `goTo(component, params)`
+- else route path:
+  - `replace == true` -> `replace(href, params)`
+  - else -> `go(href, params)`
 
 ## Usage
-```qml
-LV.Link { href: "/reports"; Text { text: "Reports" } }
-```
 
-## Practical Examples
-
-### Example 1: Text-only route navigation
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.Link {
-    text: "Open Reports"
     href: "/reports"
+    text: "Open Reports"
     underline: true
 }
 ```
 
-### Example 2: `to` alias for route path
-```qml
-import QtQuick
-import LVRS 1.0 as LV
+## Advanced Example: Component Navigation Replacement
 
-LV.Link {
-    text: "Open Overview"
-    to: "/overview"
-}
-```
-
-### Example 3: Link with custom child content (wrapper-style usage)
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.Link {
-    href: "/settings"
-
-    Rectangle {
-        width: 180
-        height: 40
-        radius: 8
-        color: LV.Theme.surfaceSolid
-        LV.Label { anchors.centerIn: parent; text: "Open Settings"; style: body }
-    }
-}
-```
-
-### Example 4: Replace current page and pass params
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.Link {
-    href: "/runs/42"
-    params: ({ source: "notifications" })
-    replace: true
-    text: "Go to latest failed run"
-}
-```
-
-### Example 5: Navigate directly to a component
 ```qml
 import QtQuick
 import LVRS 1.0 as LV
 
 Item {
-    Component {
-        id: detailsPage
-        Rectangle { color: LV.Theme.windowAlt }
-    }
+    Component { id: inspectorPage; Rectangle {} }
 
     LV.Link {
-        targetComponent: detailsPage
+        targetComponent: inspectorPage
         replace: true
-        text: "Open Details"
+        params: ({ source: "sidebar" })
+        text: "Open Inspector"
     }
 }
 ```
+
+## Common Mistake
+
+When no explicit `router` is provided, navigation silently no-ops if `Navigator.router` is not registered.
+Ensure router registration exists in nested/embedded navigation setups.
+
+## Recipe: Route Replace for Wizard Step
+
+```qml
+import LVRS 1.0 as LV
+
+LV.Link {
+    href: "/wizard/step-2"
+    replace: true
+    text: "Next"
+}
+```
+
+Use `replace` to prevent back-stack noise in linear wizard flows.

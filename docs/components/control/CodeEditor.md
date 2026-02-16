@@ -2,36 +2,95 @@
 
 Location: `qml/components/control/input/CodeEditor.qml`
 
-`CodeEditor` is a snippet-oriented editor specialized for code-style input (`PlainText + NoWrap`).
+`CodeEditor` is a snippet-oriented editor specialized for code input (`PlainText + NoWrap`).
 
-## Core API
+## Purpose
+
+- Keep code entry deterministic with monospaced defaults.
+- Provide optional snippet header metadata.
+- Preserve stable component height under large content.
+
+## API
+
+Core editing:
 
 - `text`, `placeholderText`, `readOnly`
-- `snippetTitle`, `snippetLanguage`, `showSnippetHeader`
-- `fieldMinHeight`, `headerHeight`, `insetHorizontal`, `insetVertical`
+- `cursorPosition`, `selectionStart`, `selectionEnd`
+- `selectByMouse`, `persistentSelection`, `overwriteMode`
 
-## Behavior
+Snippet header:
 
-- Uses internal `Flickable` for horizontal and vertical scrolling.
-- Keeps outer component height stable while content grows.
-- Emits `submitted(text)` on `Ctrl+Enter` or `Cmd+Enter`.
+- `snippetTitle`
+- `snippetLanguage`
+- `showSnippetHeader`
 
-## IME and Text Integrity
+Layout:
 
-Like `TextEditor`, `CodeEditor` includes:
-- `InputMethodGuard` for composition commit on IME transitions.
-- `font.preferShaping: true` for safer shaping path.
+- `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`
+- `headerHeight`, `headerSpacing`, `topInset`
+- `showScrollBar`, `autoFocusOnPress`
 
-## Wheel Isolation
+Signals/methods:
 
-`WheelScrollGuard` is applied to prevent outer container scrolling while cursor is over editor region.
+- `textEdited(text)`
+- `submitted(text)`
+- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`, `submit()`
 
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.CodeEditor {
     snippetTitle: "main.cpp"
     snippetLanguage: "C++"
     text: "int main() { return 0; }"
 }
 ```
+
+## How It Works
+
+- Uses `TextEdit.NoWrap` + plain text format by contract.
+- Monospace font default is platform-aware (`Menlo` on macOS, `Monospace` otherwise).
+- Embedded `InputMethodGuard` and `WheelScrollGuard` provide text integrity and nested scroll safety.
+
+## Advanced Example: Read-Only Snippet View
+
+```qml
+import LVRS 1.0 as LV
+
+LV.CodeEditor {
+    snippetTitle: "Build Command"
+    snippetLanguage: "bash"
+    readOnly: true
+    text: "cmake -S . -B build && cmake --build build"
+}
+```
+
+## Troubleshooting
+
+If horizontal scrolling feels inconsistent, verify parent scroll containers are guarded by `WheelScrollGuard`.
+
+## Recipe: Controlled Submit with Validation
+
+```qml
+import LVRS 1.0 as LV
+
+LV.CodeEditor {
+    id: editor
+    snippetTitle: "policy.json"
+
+    onSubmitted: function(text) {
+        try {
+            JSON.parse(text)
+            savePolicy(text)
+        } catch (e) {
+            console.warn("invalid json")
+        }
+    }
+}
+```
+
+## Operational Tip
+
+For auditability, pair `CodeEditor` submission with explicit version metadata in surrounding view model.

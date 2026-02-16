@@ -2,22 +2,35 @@
 
 Location: `qml/components/surfaces/AppCard.qml`
 
-Card container with title and subtitle, plus a content slot.
+`AppCard` is a titled surface container with separator and flexible content slot.
+
+## Purpose
+
+- Provide reusable card shell for metrics/forms/summary blocks.
+- Keep internal spacing and typography consistent.
+
+## API
+
+- `title`
+- `subtitle`
+- `cardPadding` (readonly)
+- `sectionSpacing` (readonly)
+- default `content` slot
+
+## Layout Contract
+
+- Header block: title + optional subtitle.
+- Separator line below header.
+- Flexible content region sized by child `childrenRect`.
+
+Implicit size is computed from header/content width and padding contract.
 
 ## Usage
-```qml
-LV.AppCard { title: "Summary"; subtitle: "Details" }
-```
 
-## Practical Examples
-
-### Example 1: Summary card with title and subtitle
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.AppCard {
-    width: 360
     title: "System Health"
     subtitle: "Last 15 minutes"
 
@@ -25,37 +38,31 @@ LV.AppCard {
 }
 ```
 
-### Example 2: Card containing form controls
+## Advanced Example: Form Card with Footer Actions
+
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.AppCard {
-    title: "Notification Settings"
-
-    Column {
-        spacing: 8
-        LV.CheckBox { text: "Email alerts"; checked: true }
-        LV.CheckBox { text: "Slack alerts"; checked: false }
-        LV.ToggleSwitch { checked: true }
-    }
-}
-```
-
-### Example 3: Metric card with compact layout
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-LV.AppCard {
-    width: 280
-    title: "Run Metrics"
+    title: "Profile"
+    subtitle: "Account Settings"
 
     LV.VStack {
-        spacing: 6
-        LV.Label { text: "Success Rate: 98.2%"; style: body }
-        LV.Label { text: "Average Duration: 4m 32s"; style: description }
-        LV.Label { text: "Failures Today: 3"; style: description }
+        spacing: 8
+        LV.InputField { placeholderText: "Display name" }
+        LV.HStack {
+            LV.Spacer {}
+            LV.LabelButton { text: "Save"; tone: LV.AbstractButton.Primary }
+        }
     }
 }
 ```
+
+## Note
+
+Keep heavy scrollable content outside card when possible; `AppCard` is intended as compact surface block, not full-page container.
+
+## FAQ
+
+Q. Should `AppCard` manage page-level scrolling?  
+A. No. Keep page scroll ownership outside and use cards as content blocks.

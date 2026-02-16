@@ -2,24 +2,67 @@
 
 Location: `qml/components/control/display/TableRow.qml`
 
-`TableRow` arranges repeated `TableCellItem` delegates for one row.
+`TableRow` renders one data row by repeating `TableCellItem` delegates.
 
-## Core API
+## Purpose
 
-- `cells` (`var`): row entries
-- `cellWidth` (`int`, default `234`)
-- `cellHeight` (`int`, default `24`)
-- `contentSpacing` (`int`, default `Theme.gap8`)
-- `dividerColor` (`color`)
-- `textColor` (`color`, default `Theme.bodyColor`)
+- Convert row input into visual cell delegates.
+- Preserve compact Figma-style row geometry.
 
-Row spacing is computed from available row width to preserve Figma distribution behavior.
+## API
+
+- `cells`
+- `cellWidth`
+- `cellHeight`
+- `contentSpacing`
+- `dividerColor`
+- `textColor`
+
+Helper methods:
+
+- `cellAt(index)`
+- `cellText(index)`
+
+Computed:
+
+- `resolvedCellCount`
+- `resolvedSpacing`
 
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.TableRow {
-    width: 717
-    cells: ["Text", "Text", "Text"]
+    cells: ["A", "B", "C"]
 }
 ```
+
+## How It Works
+
+- Cell text resolves from primitive values or object fallback keys.
+- Row spacing is computed from available width and fixed cell width.
+- Spacing never goes negative (`Math.max(0, computed)`).
+
+## Practical Tip
+
+When using fixed `cellWidth`, ensure row container width is large enough to avoid excessive zero spacing from clamping.
+
+## Extended Example: Mixed Primitive/Object Cells
+
+```qml
+import LVRS 1.0 as LV
+
+LV.TableRow {
+    cells: [
+        "Renderer",
+        { text: "Active" },
+        { title: "Core" }
+    ]
+}
+```
+
+## FAQ
+
+Q. Why does row spacing collapse to zero?  
+A. Container width is smaller than `cellCount * cellWidth`; computed spacing is clamped at zero.

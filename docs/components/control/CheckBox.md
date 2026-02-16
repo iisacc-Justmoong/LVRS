@@ -2,74 +2,65 @@
 
 Location: `qml/components/control/check/CheckBox.qml`
 
-Checkbox with label.
+`CheckBox` is a compact checkable control with optional text label.
+
+## Purpose
+
+- Provide deterministic check indicator rendering independent of platform style.
+- Support explicit palette overrides for checked/unchecked/disabled states.
+
+## API
+
+State:
+
+- `checked` (inherited)
+- `enabled` (inherited)
+- `text` (inherited)
+
+Visual customization:
+
+- `boxSize`
+- `checkColor`
+- `checkedColor`
+- `uncheckedColor`
+- `disabledCheckedColor`
+- `disabledUncheckedColor`
+- `checkMarkColorDisabled`
+- `checkMarkStrokeWidth`
 
 ## Usage
-```qml
-LV.CheckBox { text: "Remember me"; checked: true }
-```
 
-## Practical Examples
-
-### Example 1: Bind to a preference flag
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
-
-QtObject { id: settings; property bool autoSave: true }
 
 LV.CheckBox {
-    text: "Enable Auto Save"
-    checked: settings.autoSave
-    onToggled: settings.autoSave = checked
+    text: "Remember me"
+    checked: true
 }
 ```
 
-### Example 2: Gate an action with policy agreement
+## How It Works
+
+- Component is `checkable` and borderless by default.
+- Check mark is painted by `Canvas` and repainted on state/color changes.
+- Background interaction states are forced transparent to keep the control visually minimal.
+
+## Advanced Example: Custom Checkmark Weight
+
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
-Item {
-    property bool accepted: false
-
-    LV.CheckBox {
-        text: "I agree to the data policy"
-        checked: accepted
-        onToggled: accepted = checked
-    }
-
-    LV.LabelButton {
-        anchors.top: parent.top
-        anchors.topMargin: 40
-        text: "Continue"
-        tone: LV.AbstractButton.Primary
-        enabled: accepted
-    }
+LV.CheckBox {
+    text: "Strict validation"
+    checkMarkStrokeWidth: 2
+    checkedColor: "#3A8DFF"
 }
 ```
 
-### Example 3: Checklist generated from model data
-```qml
-import QtQuick
-import LVRS 1.0 as LV
+## Troubleshooting
 
-ListModel {
-    id: featureModel
-    ListElement { name: "Crash Reports"; enabled: true }
-    ListElement { name: "Usage Analytics"; enabled: false }
-    ListElement { name: "Weekly Summary"; enabled: true }
-}
+If checkmark appears clipped, verify control/container height and custom `boxSize` combination.
 
-Column {
-    spacing: 8
-    Repeater {
-        model: featureModel
-        delegate: LV.CheckBox {
-            text: name
-            checked: enabled
-            onToggled: featureModel.setProperty(index, "enabled", checked)
-        }
-    }
-}
-```
+## State Management Recommendation
+
+For dynamic lists, bind each checkbox directly to model index properties to avoid stale closure/index bugs during reorder operations.

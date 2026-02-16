@@ -2,59 +2,80 @@
 
 Location: `qml/components/control/display/Label.qml`
 
-Theme text wrapper that provides Figma-mapped typography styles.
+`Label` is the LVRS text wrapper that maps style tokens to typography metrics.
 
-## Style API
-- `style: title`
-- `style: title2`
-- `style: header`
-- `style: header2`
-- `style: body`
-- `style: description`
-- `style: caption`
-- `style: disabled`
+## Purpose
+
+- Provide consistent typographic style mapping from `Theme`.
+- Expose text-related `Text` APIs through aliases.
+- Validate style compliance through debug warning hook.
+
+## Style Constants
+
+- `title`
+- `title2`
+- `header`
+- `header2`
+- `body`
+- `description`
+- `caption`
+- `disabled`
+
+## Core API
+
+- `style`
+- `text`, `color`, `font`
+- `elide`, `wrapMode`
+- `horizontalAlignment`, `verticalAlignment`
+- `lineHeight`, `lineHeightMode`
+- `maximumLineCount`, `fontSizeMode`
+- `textFormat`, `linkColor`
+
+Computed style outputs:
+
+- `resolvedStyleColor`
+- `stylePixelSize`
+- `styleWeight`
+- `styleName`
+- `styleLineHeight`
+- `styleLetterSpacing`
 
 ## Usage
+
 ```qml
-LV.Label { text: "Label"; style: body }
-```
-
-## Practical Examples
-
-### Example 1: Title and subtitle pair
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-Column {
-    spacing: 4
-    LV.Label { text: "Release 1.2"; style: title }
-    LV.Label { text: "Deployment completed"; style: description }
-}
-```
-
-### Example 2: Wrapped explanatory text
-```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.Label {
-    width: 320
+    text: "Status"
     style: body
-    wrapMode: Text.WordWrap
-    maximumLineCount: 3
-    text: "This page displays real-time run metrics and updates automatically every five seconds."
 }
 ```
 
-### Example 3: Disabled-state helper text
+## How It Works
+
+- Style enum maps to `Theme` token groups for color, weight, size, line height, and style name.
+- Internal `Text` item is the rendering source of truth.
+- On style changes, non-compliant text styles can emit debug warning through `Debug.warn`.
+
+## Advanced Example: Two-Line Clamped Description
+
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
-Column {
-    spacing: 2
-    LV.Label { text: "API Token"; style: header2 }
-    LV.Label { text: "Only project owners can edit this field."; style: disabled }
+LV.Label {
+    width: 280
+    style: description
+    wrapMode: Text.WordWrap
+    maximumLineCount: 2
+    text: "This text is clamped to two lines and then elided by text metrics."
 }
 ```
+
+## Practical Tip
+
+Use semantic `style` constants instead of hard-coded font metrics for maintainability.
+
+## FAQ
+
+Q. Should text style be configured by custom font overrides or style constants?  
+A. Prefer style constants first, then apply minimal overrides only when unavoidable.

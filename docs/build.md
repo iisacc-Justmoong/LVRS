@@ -193,3 +193,33 @@ At runtime:
 - Backend selection logic lives in `backend/runtime/vulkanbootstrap.cpp`.
 - Downstream app bootstrap template is provided at `main.cpp` (not built by default).
 - Recommended reusable bootstrap API is `backend/runtime/appbootstrap.h`.
+
+## CI Build Pipeline Example
+
+A minimal CI pipeline usually runs the following sequence:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+ctest --test-dir build --output-on-failure
+```
+
+If test targets are not present, keep `ctest` but allow no-test pass semantics or gate it behind a project option.
+
+## Packaging Checklist
+
+When shipping LVRS-based binaries:
+
+1. Confirm Qt runtime deployment for the target OS.
+2. Confirm icon/font resources are available in packaged artifacts.
+3. Confirm graphics backend requirements (Metal/Vulkan) on target machines.
+4. Confirm environment overrides (`LVRS_APP_*`) are documented for operators.
+
+## Runtime Smoke Test Script
+
+For release candidates, run a smoke test that verifies:
+
+- app process starts without backend bootstrap failure,
+- root QML loads successfully,
+- route navigation works for at least one static and one dynamic route,
+- input/runtime events are captured when interacting with the window.

@@ -2,38 +2,42 @@
 
 Location: `qml/components/navigation/Hierarchy.qml`
 
-`Hierarchy` is a tree-panel component for array/list-like hierarchical models with explicit expand/collapse affordance.
+`Hierarchy` is a tree-panel surface composed of toolbar + scrollable hierarchy list.
 
-## High-Level API
+## Purpose
 
-- `model` (or `treeModel` alias): array/list-model based hierarchical input.
-- `activeListItem`, `activeListItemId`, `activeListItemKey`.
-- `expandAll()`, `collapseAll(keepRootExpanded)`.
-- `activateListItemById(id)`, `activateListItemByKey(key)`.
+- Render nested model data with explicit expand/collapse controls.
+- Provide activation and expansion callbacks for host features.
+- Keep tree navigation usable inside nested scroll containers.
 
-## Model Roles
+## API
 
-`HierarchyList` consumes role-configurable fields:
-- `itemIdRole` (default: `itemId`)
-- `itemKeyRole` (default: `key`)
-- `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
-- `enabledRole`, `expandedRole`, `selectedRole`, `showChevronRole`
-- `childrenRole` (default: `children`)
+Model and selection aliases:
 
-## Interaction Contract
+- `model` / `treeModel`
+- `activeListItem`
+- `activeListItemId`
+- `activeListItemKey`
 
-- Row click: activation only.
-- Chevron click area: expand/collapse toggle only.
-- Keyboard navigation: optional and visibility-aware.
+Toolbar aliases:
 
-This separation is intentional so parent-item activation never implicitly mutates expansion state.
+- `toolbarButtons`
+- `activeToolbarButton`
+- `activeToolbarButtonId`
 
-## Scroll Behavior
+Behavior aliases:
 
-The list viewport uses `WheelScrollGuard` with `consumeInside: true`.
-This avoids dual scrolling when hierarchy is nested inside another scrollable page.
+- `autoExpandDepth`
+- `keyboardListNavigationEnabled`
 
-## Signals
+Methods:
+
+- `expandAll()`
+- `collapseAll(keepRootExpanded)`
+- `activateListItemById(itemId)`
+- `activateListItemByKey(itemKey)`
+
+Signals:
 
 - `toolbarActivated(button, buttonId, index)`
 - `listItemActivated(item, itemId, index)`
@@ -42,17 +46,46 @@ This avoids dual scrolling when hierarchy is nested inside another scrollable pa
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.Hierarchy {
     model: [
         {
-            key: "world",
-            label: "World",
+            key: "root",
+            label: "Root",
             expanded: true,
-            children: [
-                { key: "camera", label: "Main Camera" },
-                { key: "lights", label: "Lights" }
-            ]
+            children: [{ key: "child", label: "Child" }]
         }
     ]
 }
 ```
+
+## How It Works
+
+- Toolbar and list communicate through explicit signals and forwarded aliases.
+- `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
+- `WheelScrollGuard` is installed to prevent nested scroll bleed.
+
+## Advanced Usage: Programmatic Activation
+
+```qml
+import LVRS 1.0 as LV
+
+LV.Hierarchy {
+    id: tree
+}
+
+function focusNodeByKey(key) {
+    tree.activateListItemByKey(key)
+}
+```
+
+## Operational Notes
+
+- Keep item ids/keys stable for reliable programmatic activation.
+- Combine `expandAll()` with `activate*()` in onboarding flows to reveal deep nodes deterministically.
+
+## Failure Pattern
+
+Using non-unique keys for sibling nodes breaks programmatic activation and expansion tracking.
+Assign stable unique identifiers for each logical node.

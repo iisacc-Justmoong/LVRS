@@ -2,47 +2,103 @@
 
 Location: `qml/components/control/input/TextEditor.qml`
 
-`TextEditor` is the multi-line editor component for plain text, markdown, and rich-text preview workflows.
+`TextEditor` is the multi-line rich/plain editor with optional rendered preview output.
 
-## Core API
+## Purpose
+
+- Provide stable multi-line editing in fixed viewport height.
+- Support mode-driven text normalization and preview rendering.
+- Isolate nested scroll and IME behavior for robust input handling.
+
+## API
+
+Mode constants:
+
+- `plainTextMode`
+- `markdownMode`
+- `richTextMode`
+
+Mode/control properties:
+
+- `mode`
+- `enforceModeDefaults`
+- `wrapMode`
+- `textFormat`
+
+Editing API:
 
 - `text`, `placeholderText`, `readOnly`
-- `mode`: `plainTextMode`, `markdownMode`, `richTextMode`
-- `editorHeight` (fixed editor viewport height input)
-- `fieldMinHeight` (minimum floor)
-- `showRenderedOutput`, `outputMinHeight`
-- `enforceModeDefaults`, `wrapMode`, `textFormat`
+- `cursorPosition`, `selectionStart`, `selectionEnd`
+- `selectByMouse`, `persistentSelection`, `overwriteMode`
 
-## Layout Contract
+Layout/preview:
 
-The edit area uses a fixed-height viewport (`resolvedEditorHeight`) while preserving responsive width.
-Content scrolls internally through `Flickable`, preventing parent layout drift during heavy text input.
+- `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`
+- `showRenderedOutput`, `outputMinHeight`, `previewHeight`
+- `showScrollBar`, `autoFocusOnPress`
 
-## IME and Composition Handling
+Signals/methods:
 
-`TextEditor` integrates `InputMethodGuard` and sets `font.preferShaping: true`.
-This combination reduces composition breakage when input method/locale state changes mid-entry.
-
-## Nested Scroll Isolation
-
-`WheelScrollGuard` is attached to the editor viewport so wheel events inside editor area do not leak into outer scroll pages.
-
-## Signals and Methods
-
-Signals:
 - `textEdited(text)`
-- `submitted(text)` (`Ctrl+Enter` / `Cmd+Enter`)
-
-Methods:
-- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`
+- `submitted(text)`
+- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`, `submit()`
 
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.TextEditor {
     mode: markdownMode
-    editorHeight: 220
+    editorHeight: 240
     showRenderedOutput: true
     onSubmitted: save(text)
 }
 ```
+
+## How It Works
+
+- Editing happens inside `Flickable` with fixed outer height; content grows internally.
+- `Ctrl+Enter` or `Cmd+Enter` emits `submitted`.
+- Preview text is produced through `TextMarkup.renderHtml(text)`.
+- `InputMethodGuard` and `WheelScrollGuard` are embedded for composition safety and scroll isolation.
+
+## Advanced Example: Submission Shortcut Workflow
+
+```qml
+import LVRS 1.0 as LV
+
+LV.TextEditor {
+    mode: plainTextMode
+    onSubmitted: function(text) {
+        console.log("submit", text.length)
+    }
+}
+```
+
+Submit is triggered by `Ctrl+Enter` or `Cmd+Enter`.
+
+## Practical Notes
+
+- Keep preview enabled only when users need immediate rendered feedback.
+- For large documents, monitor scroll behavior and ensure parent containers do not also capture wheel events.
+
+## Recipe: Markdown Preview Toggle
+
+```qml
+import LVRS 1.0 as LV
+
+Item {
+    property bool previewOn: true
+
+    LV.TextEditor {
+        mode: markdownMode
+        showRenderedOutput: previewOn
+    }
+}
+```
+
+## Failure Pattern
+
+Large markdown previews can increase layout work.
+For very large documents, provide manual preview toggle or lazy preview update policy.

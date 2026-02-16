@@ -2,43 +2,42 @@
 
 Location: `qml/components/surfaces/Alert.qml`
 
-`Alert` is a centered overlay dialog surface with a single opaque card body.
+`Alert` is a centered overlay dialog surface with configurable 1/2/3 action layouts.
 
-## Visual Structure
+## Purpose
 
-- Backdrop layer (`backdropColor`) with optional outside-dismiss (`dismissOnBackground`).
-- Single card surface (`cardBackgroundColor`) without outer frame/inner-frame split.
-- Content stack:
-  - App icon block
-  - Title/message text block
-  - Action block
+- Provide app-level blocking/attention dialog.
+- Support primary/secondary/tertiary action patterns in one component.
 
-The card background defaults are tied to action layout:
-- 3-action (vertical): `Theme.panelBackground07`
-- 1/2-action (horizontal/single): `Theme.panelBackground08`
-
-This avoids transparency/framing artifacts and keeps dialog contrast stable.
-
-## Properties
+## API
 
 State and text:
-- `open`, `title`, `message`
+
+- `open`
+- `title`
+- `message`
 - `primaryText`, `secondaryText`, `tertiaryText`
 - `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`
 
-Behavior and sizing:
+Behavior:
+
 - `dismissOnBackground`
 - `useOverlayLayer`
-- `minWidth`, `maxWidth`
-- `preferredWidth` (readonly, fixed to 328)
-- `useVerticalActionLayout` (readonly: true when tertiary action exists)
 
-Visual:
+Sizing/visual:
+
+- `minWidth`, `maxWidth`, `preferredWidth`
 - `backdropColor`
 - `cardBackgroundColor`
 - `appIconBackgroundColor`, `appIconFrameColor`, `appIconInnerColor`
 
-## Signals
+Derived layout flags:
+
+- `hasSecondaryAction`
+- `hasTertiaryAction`
+- `useVerticalActionLayout`
+
+Signals:
 
 - `primaryClicked()`
 - `secondaryClicked()`
@@ -47,13 +46,9 @@ Visual:
 
 ## Action Layout Rules
 
-- Tertiary action exists: render vertical 3-button stack.
-- Secondary action exists (without tertiary): render horizontal 2-button row.
-- Only primary action exists: render one full-width button.
-
-`AlertButton` tones are mapped as:
-- Primary action: `AbstractButton.Primary`
-- Secondary/tertiary actions: `AbstractButton.Default`
+- tertiary present -> vertical action stack (up to 3 buttons)
+- tertiary absent + secondary present -> horizontal two-button row
+- only primary -> single full-width primary button
 
 ## Usage
 
@@ -61,12 +56,44 @@ Visual:
 import LVRS 1.0 as LV
 
 LV.Alert {
-    open: appState.alertOpen
+    open: state.showDeleteDialog
     title: "Delete Scene?"
     message: "This action cannot be undone."
     primaryText: "Delete"
     secondaryText: "Cancel"
-    onPrimaryClicked: appState.confirmDelete()
-    onSecondaryClicked: appState.alertOpen = false
+    onPrimaryClicked: confirmDelete()
+    onSecondaryClicked: state.showDeleteDialog = false
 }
 ```
+
+## How It Works
+
+- When open, component re-parents to overlay layer when configured.
+- Backdrop click dismiss behavior is opt-in (`dismissOnBackground`).
+- Card background defaults differ by action layout to keep contrast stable.
+
+## Advanced Example: Three-Action Vertical Layout
+
+```qml
+import LVRS 1.0 as LV
+
+LV.Alert {
+    open: true
+    title: "Unsaved Changes"
+    message: "Choose how to proceed."
+    primaryText: "Save"
+    secondaryText: "Discard"
+    tertiaryText: "Cancel"
+}
+```
+
+## Operational Notes
+
+- `tertiaryText` presence switches action area to vertical layout.
+- Use `dismissed()` to unify background-dismiss state cleanup.
+- Keep `open` as single source of truth in app state store to avoid stale overlay visibility.
+
+## Failure Pattern
+
+Maintaining separate local `open` flags in multiple components can desynchronize dialog state.
+Use a single app-level source of truth for alert visibility.

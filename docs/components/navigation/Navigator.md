@@ -2,64 +2,82 @@
 
 Location: `qml/components/navigation/Navigator.qml`
 
-Global navigation delegate for `PageRouter`.
+`Navigator` is the global singleton delegate for active `PageRouter` navigation.
 
-## Concept
-- `PageRouter` auto-registers itself to `Navigator` by default.
-- Any QML item can navigate in one sentence without router wiring.
+## Purpose
 
-## Methods
+- Allow one-line app-wide navigation calls.
+- Track router registration stack and select active router.
+- Proxy path/component navigation and back stack operations.
+
+## Properties
+
+- `router`
+- `routerStack`
+- `hasRouter`
+- `currentPath`
+- `depth`
+
+## Router Lifecycle Methods
+
+- `registerRouter(targetRouter)`
+- `unregisterRouter(targetRouter?)`
+
+Registration order considers sibling order when routers share parent, then falls back to append.
+
+## Navigation Methods
+
+Path-based:
+
 - `go(path, params)`
 - `replace(path, params)`
 - `setRoot(path, params)`
 - `back()`
 - `popToRoot()`
+
+Component-based:
+
 - `goTo(component, params)`
 - `replaceWith(component, params)`
 - `setRootComponent(component, params)`
 
 ## Usage
-```qml
-LV.Navigator.go("/reports")
-```
 
-## Practical Examples
-
-### Example 1: One-line global navigation
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.LabelButton {
     text: "Open Reports"
-    tone: LV.AbstractButton.Primary
     onClicked: LV.Navigator.go("/reports")
 }
 ```
 
-### Example 2: Back stack controls
+## How It Works
+
+- Active router is the tail of `routerStack`.
+- Every navigation method returns `false` when no capable router exists.
+- On router activation change, tracker sync hook (`syncViewStateTracker`) is invoked when supported.
+
+## Nested Router Strategy
+
+In applications with nested routers, register/unregister order determines active router resolution.
+Use explicit registration boundaries when mounting/unmounting nested navigation regions.
+
+## Debug Tip
+
+Check `Navigator.currentPath` and `Navigator.depth` in debug panels to verify global target router state before diagnosing route failures.
+
+## Recipe: Safe Back Action
+
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
-Row {
-    spacing: 8
-    LV.LabelButton { text: "Back"; onClicked: LV.Navigator.back() }
-    LV.LabelButton { text: "Root"; onClicked: LV.Navigator.popToRoot() }
+function safeBack() {
+    if (LV.Navigator.depth > 1)
+        LV.Navigator.back()
 }
 ```
 
-### Example 3: Navigate to a component object
-```qml
-import QtQuick
-import LVRS 1.0 as LV
+## Failure Pattern
 
-Item {
-    Component { id: localPage; Rectangle { color: LV.Theme.surfaceAlt } }
-
-    LV.LabelButton {
-        text: "Open Local Page"
-        onClicked: LV.Navigator.goTo(localPage, { from: "quick-action" })
-    }
-}
-```
+Calling `back()` without depth guard in single-entry stacks produces no-op and can hide navigation bugs in upstream flow design.

@@ -1,31 +1,70 @@
 # Event Policy
 
-Goal: keep interaction behavior deterministic by routing all high-level UI reactions through unified runtime event sources.
+Goal: preserve deterministic interaction behavior by routing high-level reactions through a unified runtime event contract.
 
-## Rule 1: Prefer EventListener over ad-hoc local handlers
+## Rule 1: Prefer `EventListener` over ad-hoc handlers
 
-Attach `EventListener` where possible instead of scattering custom event plumbing across components.
+Cross-component interaction logic should use `EventListener` trigger semantics rather than duplicating raw `MouseArea`/`Keys` plumbing in each component.
 
-## Rule 2: Use global triggers for cross-surface behaviors
+Reason:
+- central payload shape,
+- consistent backend/runtime fallback,
+- shared dedup behavior.
 
-For overlays, context menus, and app-wide shortcuts, use:
+## Rule 2: Use global triggers for cross-surface behavior
+
+For overlay dismissal, global context menu control, and app-level interaction hooks, use:
+
 - `globalPressed`
 - `globalContextRequested`
 
-This ensures behavior remains valid regardless of local mouse area nesting.
+These triggers are resilient to nested local event boundaries.
 
-## Rule 3: Backend-first input state
+## Rule 3: Backend-first state is default for burst-sensitive paths
 
-When consuming event payloads, prefer `Backend.currentUserInputState()` path (default in `EventListener`) to avoid state skew under rapid event bursts.
+When interaction logic depends on coherent instantaneous input state, use backend-first reads (`Backend.currentUserInputState`) via `EventListener`.
 
-## Rule 4: Outside-dismiss behaviors must be coordinate-based
+## Rule 4: Outside-dismiss must be coordinate based
 
-Dismiss logic for menus/dialog-like surfaces must be based on global coordinates mapped to overlay-local geometry, not local-only click assumptions.
+Popup/dialog dismissal must use global-to-local coordinate mapping and geometry checks, not local-only click assumptions.
 
-## Rule 5: Nested scroll isolation is mandatory
+## Rule 5: Nested wheel isolation is mandatory
 
-Components with internal `Flickable` regions must install wheel guards to prevent parent and child scroll surfaces from reacting simultaneously.
+Any component that owns an internal scroll viewport inside a larger scrollable page must install wheel isolation (`WheelScrollGuard`) to avoid dual scrolling.
 
-## Rule 6: Text input composition safety
+## Rule 6: Text composition safety is mandatory
 
-Text-entry controls must include IME composition guards (`InputMethodGuard`) so locale/input-method transitions commit composition safely.
+All text entry surfaces must include `InputMethodGuard` so IME composition is committed safely on visibility/focus transitions.
+
+## Rule 7: Dedup windows must remain explicit
+
+Global press/context dedup thresholds (time and distance) are contract parameters. Any change must be documented and tested against context-menu behavior.
+
+## Concrete Implementation Pattern
+
+For overlays/popups, preferred pattern is:
+
+1. local action trigger for open,
+2. global trigger for outside dismiss,
+3. coordinate-based geometry check,
+4. explicit event consume strategy for nested scroll areas.
+
+## Review Checklist
+
+During code review, reject changes that:
+
+- duplicate global event plumbing per page without `EventListener`,
+- rely on local-only coordinates for global dismiss behavior,
+- remove `WheelScrollGuard` from nested `Flickable` surfaces,
+- disable IME composition guard on editable text controls.
+
+## Enforcement Note
+
+Event behavior must remain deterministic under high-frequency input.
+If behavior changes with click speed or scroll burst, pipeline design is incomplete.
+
+## Audit Checklist
+
+- global behaviors use global triggers, not local click hacks,
+- nested scroll surfaces include explicit wheel isolation,
+- text-input components include IME guard integration.

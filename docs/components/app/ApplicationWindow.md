@@ -98,3 +98,39 @@ LV.ApplicationWindow {
     }
 }
 ```
+
+## Advanced Integration Example
+
+```qml
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: appWindow
+    visible: true
+    width: 1280
+    height: 800
+
+    autoAttachRuntimeEvents: true
+    autoHookBackendUserEvents: true
+
+    pageRoutes: [
+        { path: "/", component: homePage, viewModelKey: "HomeVM", writable: true },
+        { path: "/reports", component: reportsPage, viewModelKey: "ReportsVM" }
+    ]
+
+    onPageStackNavigated: function(path, params) {
+        console.log("navigated", path, JSON.stringify(params))
+    }
+}
+```
+
+## Operational Notes
+
+- Keep `globalEventListenersEnabled` on when overlays/context menus rely on root-level global signals.
+- Use `matchesMedia()` for feature-gating adaptive UI logic in page components.
+- For desktop chrome control, verify native style support on target OS before enforcing style assumptions.
+
+## Common Pitfalls
+
+- Setting routes without enabling internal stack path (`useInternalPageStack`) when relying on `pageRoutes`.
+- Expecting global event signals while runtime/backend hooks remain disabled.

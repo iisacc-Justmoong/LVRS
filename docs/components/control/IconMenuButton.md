@@ -2,32 +2,67 @@
 
 Location: `qml/components/control/buttons/IconMenuButton.qml`
 
-`IconMenuButton` combines an icon glyph/source with a trailing chevron indicator.
+`IconMenuButton` combines a main icon and trailing menu indicator chevron.
 
-## Layout Contract
+## Purpose
 
-- Fixed visual height: `20px`
-- Horizontal padding: `2`
-- Vertical padding: `2`
-- Spacing: `4`
+- Provide compact menu-trigger button for icon-centric surfaces.
+- Apply consistent tone-aware policy to both main icon and chevron indicator.
 
-## Icon and Indicator Rules
+## API
 
-Main icon source resolution:
+Main icon API:
+
+- `iconSource` (alias)
+- `iconName`
+- `iconGlyph`
+- `iconSize`
+
+Indicator behavior:
+
+- indicator name is computed from tone + effective enabled state
+- rendered indicator source uses `SvgManager.icon(...)`
+
+Layout:
+
+- fixed height: `Theme.gap20`
+- `horizontalPadding: Theme.gap2`
+- `verticalPadding: Theme.gap2`
+- `spacing: Theme.gap4`
+
+## Main Icon Resolution Order
+
 1. explicit `iconSource`
 2. explicit `iconName`
-3. grouped icon name (`icon.name`)
-4. tone-based fallback icon
-
-Chevron indicator follows the same tone mapping used by `LabelMenuButton`.
-
-Both icon and indicator are processed via `SvgManager.icon(...)` and react to `SvgManager.revision` changes.
+3. grouped `icon.name`
+4. tone/disabled fallback icon
 
 ## Usage
 
 ```qml
+import LVRS 1.0 as LV
+
 LV.IconMenuButton {
-    tone: LV.AbstractButton.Borderless
-    iconName: "viewMoreSymbolicBorderless"
+    tone: LV.AbstractButton.Default
+    iconName: "viewMoreSymbolicDefault"
 }
 ```
+
+## Practical Notes
+
+- `IconMenuButton` is best for compact menu affordances where text labels are unnecessary.
+- For text-first menus, use `LabelMenuButton` for clearer affordance.
+
+## FAQ
+
+Q. Which icon wins when both `iconSource` and `iconName` are set?  
+A. `iconSource` has higher priority.
+
+Q. Is text label supported?  
+A. No explicit text label is part of this component contract. For text + indicator, use `LabelMenuButton`.
+
+## Validation Checklist
+
+- main icon fallback order works for empty/partial inputs,
+- indicator icon changes correctly on tone/enable transitions,
+- compact geometry remains stable in toolbar rows.

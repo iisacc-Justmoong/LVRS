@@ -91,3 +91,30 @@ Rectangle {
     color: LV.Theme.window
 }
 ```
+
+## Token Extension Workflow
+
+When adding new tokens, apply this order:
+
+1. Add primitive token in `Theme.qml`.
+2. Add semantic alias when the token has domain meaning (for example, warning surface).
+3. Update component defaults to consume semantic aliases instead of hard-coded colors.
+4. Update docs with value, purpose, and consumption target.
+
+## Accessibility and Contrast Checks
+
+For text/surface combinations, validate contrast manually and in tooling for:
+
+- `title/header` text on `panelBackground*` surfaces,
+- `description/caption` text on low-contrast surfaces,
+- disabled states (`disabledColor`, `textOctonary`) under dim overlays.
+
+Prefer documenting intentional low-contrast exceptions rather than silently keeping ambiguous palettes.
+
+## Design-System Synchronization Tips
+
+If tokens are synchronized with external design tools:
+
+- keep canonical token names stable,
+- treat rename as a breaking change,
+- stage deprecations by keeping old alias tokens for at least one release cycle.

@@ -2,55 +2,67 @@
 
 Location: `qml/components/layout/VStack.qml`
 
-SwiftUI-style vertical stack.
+`VStack` is a SwiftUI-style vertical stack implemented with `ColumnLayout`.
+
+## Purpose
+
+- Provide predictable vertical composition with alignment-name shorthand.
+- Propagate axis metadata to stack-aware children.
 
 ## API
-- `spacing`: -1 for default spacing
+
+- `spacing` (`-1` means default spacing)
 - `defaultSpacing`
-- `alignmentName`: `leading | center | trailing`
+- `alignment`
+- `alignmentName` (`leading | center | trailing`)
+- default `content` slot
 
 ## Usage
-```qml
-LV.VStack { alignmentName: "leading" }
-```
 
-## Practical Examples
-
-### Example 1: Vertical form layout
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.VStack {
-    spacing: 10
-    LV.Label { text: "Create Project"; style: title2 }
-    LV.CheckBox { text: "Private repository" }
-    LV.ToggleSwitch { checked: true }
+    alignmentName: "leading"
+    spacing: 8
+    LV.Label { text: "Title"; style: title2 }
+    LV.Label { text: "Description"; style: description }
 }
 ```
 
-### Example 2: Trailing alignment for numeric content
+## How It Works
+
+- Name tokens map to horizontal layout alignment flags.
+- Managed child alignment updates are applied only when child alignment is auto-managed.
+- Children exposing `stackAxis` receive `"vertical"` for `Spacer` cooperation.
+
+## Advanced Example: Trailing Alignment with Spacer
+
 ```qml
-import QtQuick
 import LVRS 1.0 as LV
 
 LV.VStack {
     alignmentName: "trailing"
-    LV.Label { text: "CPU"; style: body }
-    LV.Label { text: "68%"; style: header2 }
+    LV.Label { text: "Latency"; style: body }
+    LV.Spacer { minLength: 16 }
+    LV.Label { text: "12 ms"; style: header2 }
 }
 ```
 
-### Example 3: Use default spacing token
-```qml
-import QtQuick
-import LVRS 1.0 as LV
+## Practical Tip
 
-LV.VStack {
-    spacing: -1
-    defaultSpacing: 14
-    LV.Label { text: "Step 1"; style: body }
-    LV.Label { text: "Step 2"; style: body }
-    LV.Label { text: "Step 3"; style: body }
-}
-```
+Use `spacing = -1` with `defaultSpacing` when wanting a design-token-driven vertical rhythm.
+
+## FAQ
+
+Q. Does `alignmentName` override `alignment`?  
+A. Yes. Named alignment tokens take precedence when present.
+
+Q. Why does `Spacer` not push as expected?  
+A. Ensure child is inside stack-managed layout tree and not in a separately anchored subtree.
+
+## Validation Checklist
+
+- alignment token resolves to expected horizontal placement,
+- spacing fallback works when `spacing == -1`,
+- stack axis propagation enables spacer expansion.
