@@ -24,6 +24,7 @@ private slots:
     void hierarchy_string_array_model_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
+    void list_item_and_footer_figma_contract_loads();
 };
 
 static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
@@ -608,6 +609,48 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaPaddingReady").toBool());
+}
+
+void ImportApiTests::list_item_and_footer_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.ListItem {
+        id: listItem
+        label: "Label"
+        visible: false
+    }
+
+    LV.ListFooter {
+        id: listFooter
+        visible: false
+        button1: ({ "type": "icon", "iconName": "projectStructure", "tone": LV.AbstractButton.Borderless })
+        button2: ({ "type": "IconMenuButton", "iconName": "projectStructure", "tone": LV.AbstractButton.Borderless })
+        button3: ({ "type": "menu", "iconName": "viewMoreSymbolicDefault", "enabled": false })
+    }
+
+    property bool contractReady:
+        listItem.label === "Label"
+        && listItem.horizontalPadding === LV.Theme.gap4
+        && listItem.verticalPadding === LV.Theme.gap2
+        && Math.abs(listItem.separatorHeight - 1) < 0.01
+        && listItem.implicitWidth >= listItem.minItemWidth
+        && listFooter.button1.iconName === "projectStructure"
+        && listFooter.button2.type === "IconMenuButton"
+        && listFooter.button3.enabled === false
+        && listFooter.implicitHeight > 0
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("contractReady").toBool());
 }
 
 QTEST_MAIN(ImportApiTests)

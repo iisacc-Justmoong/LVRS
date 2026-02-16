@@ -20,9 +20,9 @@ Item {
     //   onClicked: function() {},
     //   props: { ...IconButton or IconMenuButton assignable props... }
     // }
-    property var button1: ({})
-    property var button2: ({})
-    property var button3: ({})
+    property var button1: ({ type: "icon", iconName: "projectStructure" })
+    property var button2: ({ type: "icon", iconName: "delete" })
+    property var button3: ({ type: "icon", iconName: "cwmPermissionView" })
     property int horizontalPadding: Theme.gap2
     property int verticalPadding: Theme.gap2
     property int spacing: Theme.gapNone

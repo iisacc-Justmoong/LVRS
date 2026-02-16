@@ -6,22 +6,33 @@ import LVRS 1.0
 Item {
     id: control
 
-    property var items: []
-    property bool toolbarVisible: true
+    property var items: ["Label", "Label", "Label", "Label", "Label", "Label"]
+    property int selectedIndex: 1
+    property bool interactive: true
+
+    // Optional top toolbar support for existing callers.
+    property bool toolbarVisible: false
     property string toolbarIcon1: ""
     property string toolbarIcon2: ""
     property string toolbarIcon3: ""
-    property int selectedIndex: -1
-    property bool interactive: true
 
-    property color backgroundColor: Theme.surfaceSolid
-    property color rowColor: Theme.surfaceGhost
-    property int rowSpacing: Theme.gap4
-    property int horizontalPadding: Theme.gap8
-    property int verticalPadding: Theme.gap8
+    property bool footerVisible: true
+    property var footerButton1: ({ type: "icon", iconName: "projectStructure" })
+    property var footerButton2: ({ type: "icon", iconName: "delete" })
+    property var footerButton3: ({ type: "icon", iconName: "cwmPermissionView" })
+
+    property int listWidth: 170
+    property int minimumListHeight: 223
+    property int itemHeight: Theme.gap24
+    property int itemLabelLeftPadding: Theme.gap8
+    property color backgroundColor: Theme.panelBackground03
+    property color selectedRowColor: Theme.primary
+    property color separatorColor: "#1A000000"
+    property real separatorOpacity: 0.5
 
     signal itemTriggered(int index, var item)
     signal toolbarIconTriggered(int index, string source)
+    signal footerButtonTriggered(int index, var config)
 
     readonly property int entryCount: {
         if (!items)
@@ -51,18 +62,6 @@ Item {
         return entry.label || entry.text || entry.title || ""
     }
 
-    function itemDetail(entry) {
-        if (!entry || typeof entry !== "object")
-            return ""
-        return entry.detail || entry.key || entry.subtitle || ""
-    }
-
-    function itemIcon(entry) {
-        if (!entry || typeof entry !== "object")
-            return ""
-        return entry.icon || entry.iconName || entry.source || ""
-    }
-
     function itemEnabled(entry) {
         if (!entry || typeof entry !== "object")
             return true
@@ -77,32 +76,24 @@ Item {
         return index === selectedIndex
     }
 
-    function itemShowChevron(entry) {
-        if (!entry || typeof entry !== "object")
-            return false
-        if (entry.showChevron !== undefined)
-            return !!entry.showChevron
-        return !!entry.hasSubmenu
+    readonly property int contentHeight: {
+        const toolbarHeight = toolbar.visible ? toolbar.implicitHeight : 0
+        const footerHeight = footer.visible ? footer.implicitHeight : 0
+        return toolbarHeight + listItemsColumn.implicitHeight + footerHeight
     }
 
-    implicitWidth: Math.max(Theme.inputWidthMd + Theme.gap14, listColumn.implicitWidth + (horizontalPadding * 2))
-    implicitHeight: listColumn.implicitHeight + (verticalPadding * 2)
+    implicitWidth: control.listWidth
+    implicitHeight: Math.max(control.minimumListHeight, contentHeight)
 
     Rectangle {
         anchors.fill: parent
-        radius: Theme.radiusMd
         color: control.backgroundColor
-        antialiasing: true
     }
 
     ColumnLayout {
-        id: listColumn
+        id: rootColumn
         anchors.fill: parent
-        anchors.leftMargin: control.horizontalPadding
-        anchors.rightMargin: control.horizontalPadding
-        anchors.topMargin: control.verticalPadding
-        anchors.bottomMargin: control.verticalPadding
-        spacing: control.rowSpacing
+        spacing: Theme.gapNone
 
         ListToolbar {
             id: toolbar
@@ -115,26 +106,93 @@ Item {
             onIconClicked: (index, source) => control.toolbarIconTriggered(index, source)
         }
 
-        Repeater {
-            model: control.entryCount
+        Item {
+            id: listItemsViewport
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
 
-            delegate: ListItem {
-                required property int index
-                readonly property var entry: control.entryAt(index)
-                Layout.fillWidth: true
-                label: control.itemLabel(entry)
-                detail: control.itemDetail(entry)
-                iconName: control.itemIcon(entry)
-                showChevron: control.itemShowChevron(entry)
-                selected: control.itemSelected(entry, index)
-                listBackgroundColor: control.rowColor
-                enabled: control.interactive && control.itemEnabled(entry)
-                onClicked: control.itemTriggered(index, entry)
+            Column {
+                id: listItemsColumn
+                width: listItemsViewport.width
+                spacing: Theme.gapNone
+
+                Repeater {
+                    model: control.entryCount
+
+                    delegate: AbstractButton {
+                        id: rowButton
+                        required property int index
+                        readonly property var entry: control.entryAt(index)
+                        readonly property bool rowSelected: control.itemSelected(entry, index)
+                        readonly property bool rowEnabled: control.interactive && control.itemEnabled(entry)
+
+                        width: listItemsColumn.width
+                        height: control.itemHeight
+                        implicitHeight: control.itemHeight
+                        tone: AbstractButton.Borderless
+                        enabled: rowEnabled
+                        horizontalPadding: Theme.gapNone
+                        verticalPadding: Theme.gapNone
+                        spacing: Theme.gapNone
+                        cornerRadius: Theme.gapNone
+                        backgroundColor: rowSelected ? control.selectedRowColor : "transparent"
+                        backgroundColorHover: rowSelected ? control.selectedRowColor : "transparent"
+                        backgroundColorPressed: rowSelected ? control.selectedRowColor : Theme.accentBlueMuted
+                        backgroundColorDisabled: rowSelected ? control.selectedRowColor : "transparent"
+                        textColor: Theme.bodyColor
+                        textColorDisabled: Theme.disabledColor
+
+                        contentItem: Item {
+                            Label {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: control.itemLabelLeftPadding
+                                anchors.rightMargin: Theme.gap8
+                                anchors.verticalCenter: parent.verticalCenter
+                                style: body
+                                text: control.itemLabel(rowButton.entry)
+                                color: rowButton.rowEnabled ? Theme.bodyColor : Theme.disabledColor
+                                font.pixelSize: 13
+                                font.weight: Font.Normal
+                                font.styleName: "Regular"
+                                lineHeight: 16
+                                lineHeightMode: Text.FixedHeight
+                                horizontalAlignment: Text.AlignLeft
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideRight
+                            }
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                height: 1
+                                color: control.separatorColor
+                                opacity: control.separatorOpacity
+                                visible: !rowButton.rowSelected
+                            }
+                        }
+
+                        onClicked: control.itemTriggered(index, entry)
+                    }
+                }
             }
+        }
+
+        ListFooter {
+            id: footer
+            visible: control.footerVisible
+            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+            interactive: control.interactive
+            button1: control.footerButton1
+            button2: control.footerButton2
+            button3: control.footerButton3
+            onButtonClicked: (index, config) => control.footerButtonTriggered(index, config)
         }
     }
 }
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.List { toolbarIcon1: "iconname"; toolbarIcon2: "iconname"; toolbarIcon3: "iconname"; items: [{label: "Item"}] }
+// LV.List { items: [{ label: "Item 1" }, { label: "Item 2" }] }
