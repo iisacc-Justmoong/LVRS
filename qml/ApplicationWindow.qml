@@ -35,6 +35,9 @@ Controls.ApplicationWindow {
     property bool autoAttachRuntimeEvents: false
     property bool autoHookBackendUserEvents: false
     property bool globalEventListenersEnabled: true
+    property bool windowDragHandleEnabled: isDesktopPlatform
+    property int windowDragHandleHeight: 28
+    property int windowDragHandleTopMargin: 0
 
     property string subtitle: ""
     property var navItems: []
@@ -928,6 +931,31 @@ Controls.ApplicationWindow {
         action: function(eventData) {
             windowRoot.lastGlobalContextEventData = eventData || ({})
             windowRoot.globalContextEvent(eventData)
+        }
+    }
+
+    Item {
+        id: windowDragHandle
+        visible: windowRoot.windowDragHandleEnabled && windowRoot.windowDragHandleHeight > 0
+        enabled: visible
+        z: 10000
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: windowRoot.windowDragHandleTopMargin
+        height: windowRoot.windowDragHandleHeight
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: windowDragHandle.enabled
+            acceptedButtons: Qt.LeftButton
+
+            onPressed: function(mouse) {
+                if (mouse.button !== Qt.LeftButton)
+                    return
+                if (typeof windowRoot.startSystemMove === "function")
+                    windowRoot.startSystemMove()
+            }
         }
     }
 
