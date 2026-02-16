@@ -12,11 +12,11 @@ AbstractInputBar {
     property alias placeholder: control.placeholderText
     property bool clearButtonVisible: true
     property bool searchIconVisible: mode === searchMode
-    property color searchIconColor: Theme.textOctonary
+    property color searchIconColor: Theme.descriptionColor
     property real searchIconStrokeWidth: 1.5
-    property color clearIconBackgroundColor: Theme.textTertiary
-    property color clearIconBackgroundColorDisabled: Theme.textOctonary
-    property color clearIconForegroundColor: Theme.subSurface
+    property color clearIconBackgroundColor: Theme.descriptionColor
+    property color clearIconBackgroundColorDisabled: Theme.disabledColor
+    property color clearIconForegroundColor: Theme.panelBackground10
 
     readonly property bool showClearButton: clearButtonVisible
         && enabled
@@ -30,49 +30,18 @@ AbstractInputBar {
     sideSpacing: Theme.gap5
     cornerRadius: Theme.radiusControl
 
-    textColor: Theme.textPrimary
-    textColorDisabled: Theme.textOctonary
-    placeholderColor: Theme.textPrimary
-    placeholderColorDisabled: Theme.textPrimary
-    placeholderOpacity: 0.33
+    textColor: Theme.titleHeaderColor
+    textColorDisabled: Theme.disabledColor
+    placeholderColor: Theme.titleHeaderColor
+    placeholderColorDisabled: Theme.disabledColor
+    placeholderOpacity: 1.0
 
-    backgroundColor: Theme.subSurface
-    backgroundColorFocused: Theme.subSurface
-    backgroundColorDisabled: Theme.subSurface
+    backgroundColor: Theme.panelBackground10
+    backgroundColorFocused: Theme.panelBackground10
+    backgroundColorDisabled: Theme.panelBackground10
 
     selectionColor: Theme.accent
     selectedTextColor: Theme.textPrimary
-
-    cursorDelegate: Rectangle {
-        id: cursorHandle
-        width: Theme.strokeThin
-        height: Theme.iconSm
-        radius: Theme.radiusHairline
-        color: Theme.textTertiary
-        visible: control.focused && control.enabled && !control.readOnly
-        opacity: visible ? 1.0 : 0.0
-
-        SequentialAnimation {
-            running: cursorHandle.visible
-            loops: Animation.Infinite
-
-            NumberAnimation {
-                target: cursorHandle
-                property: "opacity"
-                to: 1.0
-                duration: 520
-            }
-
-            NumberAnimation {
-                target: cursorHandle
-                property: "opacity"
-                to: 0.0
-                duration: 520
-            }
-        }
-
-        onVisibleChanged: opacity = visible ? 1.0 : 0.0
-    }
 
     leadingInternalItems: Item {
         id: searchIconHost

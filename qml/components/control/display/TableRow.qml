@@ -5,20 +5,27 @@ import LVRS 1.0
 Item {
     id: control
 
-    property var cells: ["Text", "Text", "Text"]
+    property var cellItems: undefined
+    property var cells: ["Text", "Text", "Text"] // legacy fallback
     property int cellWidth: 234
     property int cellHeight: 24
     property int contentSpacing: Theme.gap8
-    property color dividerColor: Theme.surface
+    property color dividerColor: Theme.panelBackground03
     property color textColor: Theme.bodyColor
 
+    readonly property var resolvedCellSource: {
+        if (control.cellItems !== undefined && control.cellItems !== null)
+            return control.cellItems
+        return control.cells
+    }
     readonly property int resolvedCellCount: {
-        if (!cells)
+        const source = control.resolvedCellSource
+        if (!source)
             return 0
-        if (cells.length !== undefined)
-            return cells.length
-        if (cells.count !== undefined)
-            return cells.count
+        if (source.length !== undefined)
+            return source.length
+        if (source.count !== undefined)
+            return source.count
         return 0
     }
 
@@ -31,12 +38,13 @@ Item {
     }
 
     function cellAt(index) {
-        if (!cells)
+        const source = control.resolvedCellSource
+        if (!source)
             return null
-        if (cells.length !== undefined)
-            return cells[index]
-        if (cells.get !== undefined)
-            return cells.get(index)
+        if (source.length !== undefined)
+            return source[index]
+        if (source.get !== undefined)
+            return source.get(index)
         return null
     }
 
@@ -67,6 +75,7 @@ Item {
 
                 width: control.cellWidth
                 height: control.cellHeight
+                itemData: control.cellAt(index)
                 text: control.cellText(index)
                 contentSpacing: control.contentSpacing
                 dividerColor: control.dividerColor
@@ -79,4 +88,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableRow { cells: ["Text", "Text", "Text"] }
+// LV.TableRow { cellItems: [{ text: "Text" }, { text: "Text" }, { text: "Text" }] }

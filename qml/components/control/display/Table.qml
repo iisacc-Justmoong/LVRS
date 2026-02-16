@@ -5,6 +5,7 @@ import LVRS 1.0
 Item {
     id: control
 
+    property var headerCellItems: undefined
     property var headerColumns: ["Column", "Column", "Column"]
     property var rows: [
         ["Text", "Text", "Text"],
@@ -20,7 +21,15 @@ Item {
     property real borderWidth: Theme.strokeThin
     property color headerTextColor: Theme.descriptionColor
     property color cellTextColor: Theme.bodyColor
-    property color dividerColor: Theme.surface
+    property color dividerColor: Theme.panelBackground03
+    property color rowDividerColor: dividerColor
+    property color headerSeparatorColor: Theme.panelBackground10
+
+    readonly property var resolvedHeaderSource: {
+        if (control.headerCellItems !== undefined && control.headerCellItems !== null)
+            return control.headerCellItems
+        return control.headerColumns
+    }
 
     readonly property int resolvedRowCount: {
         if (!rows)
@@ -32,12 +41,13 @@ Item {
         return 0
     }
     readonly property int resolvedHeaderCount: {
-        if (!headerColumns)
+        const source = control.resolvedHeaderSource
+        if (!source)
             return 0
-        if (headerColumns.length !== undefined)
-            return headerColumns.length
-        if (headerColumns.count !== undefined)
-            return headerColumns.count
+        if (source.length !== undefined)
+            return source.length
+        if (source.count !== undefined)
+            return source.count
         return 0
     }
 
@@ -85,9 +95,9 @@ Item {
             TableHeader {
                 id: tableHeader
                 width: tableFrame.width
-                columns: control.headerColumns
+                cellItems: control.resolvedHeaderSource
                 textColor: control.headerTextColor
-                separatorColor: control.dividerColor
+                separatorColor: control.headerSeparatorColor
             }
 
             Repeater {
@@ -99,10 +109,10 @@ Item {
 
                     width: tableFrame.width
                     height: control.rowHeight
-                    cells: rowData
+                    cellItems: rowData
                     cellWidth: control.cellWidth > 0 ? control.cellWidth : control.autoCellWidth(rowData)
                     cellHeight: control.rowHeight
-                    dividerColor: control.dividerColor
+                    dividerColor: control.rowDividerColor
                     textColor: control.cellTextColor
                 }
             }
@@ -112,4 +122,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.Table { headerColumns: ["Column", "Column", "Column"]; rows: [["A", "B", "C"]] }
+// LV.Table { headerCellItems: [{ label: "Column" }, { label: "Column" }, { label: "Column" }]; rows: [[{ text: "A" }, { text: "B" }, { text: "C" }]] }

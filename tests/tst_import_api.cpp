@@ -27,8 +27,12 @@ private slots:
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void button_padding_matches_figma_spec();
+    void input_field_figma_contract_loads();
+    void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
+    void radio_button_figma_contract_loads();
     void context_menu_item_action_contract_loads();
+    void table_cell_item_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
 
@@ -936,6 +940,111 @@ Item {
     QVERIFY(root->property("figmaPaddingReady").toBool());
 }
 
+void ImportApiTests::input_field_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.InputField {
+        id: defaultField
+        visible: false
+        placeholderText: "Placeholder"
+    }
+
+    LV.InputField {
+        id: searchField
+        visible: false
+        mode: searchMode
+        placeholderText: "Search"
+        text: "abc"
+    }
+
+    LV.InputField {
+        id: passwordField
+        visible: false
+        placeholderText: "Password"
+        echoMode: TextInput.Password
+        text: "secret"
+    }
+
+    LV.InputField {
+        id: readOnlyField
+        visible: false
+        placeholderText: "Read only"
+        readOnly: true
+        text: "locked"
+    }
+
+    property bool figmaInputFieldReady:
+        defaultField.backgroundColor === LV.Theme.panelBackground10
+        && defaultField.backgroundColorFocused === LV.Theme.panelBackground10
+        && defaultField.backgroundColorDisabled === LV.Theme.panelBackground10
+        && defaultField.textColor === LV.Theme.titleHeaderColor
+        && defaultField.textColorDisabled === LV.Theme.disabledColor
+        && defaultField.placeholderColor === LV.Theme.titleHeaderColor
+        && defaultField.placeholderColorDisabled === LV.Theme.disabledColor
+        && Math.abs(defaultField.placeholderOpacity - 1.0) < 0.001
+        && defaultField.searchIconColor === LV.Theme.descriptionColor
+        && defaultField.clearIconBackgroundColor === LV.Theme.descriptionColor
+        && defaultField.clearIconBackgroundColorDisabled === LV.Theme.disabledColor
+        && defaultField.clearIconForegroundColor === LV.Theme.panelBackground10
+        && searchField.mode === searchField.searchMode
+        && searchField.searchIconVisible
+        && searchField.showClearButton
+        && passwordField.echoMode === TextInput.Password
+        && readOnlyField.readOnly
+        && !readOnlyField.showClearButton
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("figmaInputFieldReady").toBool());
+}
+
+void ImportApiTests::toggle_switch_figma_color_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.ToggleSwitch { id: onSwitch; checked: true; enabled: true; visible: false }
+    LV.ToggleSwitch { id: offSwitch; checked: false; enabled: true; visible: false }
+
+    function trackOf(control) {
+        if (!control || !control.indicator || !control.indicator.children || control.indicator.children.length < 2)
+            return null
+        return control.indicator.children[1]
+    }
+
+    readonly property var onTrack: trackOf(onSwitch)
+    readonly property var offTrack: trackOf(offSwitch)
+
+    property bool figmaToggleColorReady:
+        onSwitch.onColor === LV.Theme.accent
+        && onSwitch.offColor === LV.Theme.panelBackground12
+        && onSwitch.knobFillColor === LV.Theme.textPrimary
+        && onTrack !== null
+        && offTrack !== null
+        && onTrack.color === LV.Theme.accent
+        && offTrack.color === LV.Theme.panelBackground12
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("figmaToggleColorReady").toBool());
+}
+
 void ImportApiTests::checkbox_figma_contract_loads()
 {
     QQmlEngine engine;
@@ -1006,6 +1115,70 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaCheckBoxReady").toBool());
+}
+
+void ImportApiTests::radio_button_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.RadioButton { id: onEnabled; checked: true; enabled: true; visible: false }
+    LV.RadioButton { id: onDisabled; checked: true; enabled: false; visible: false }
+    LV.RadioButton { id: offEnabled; checked: false; enabled: true; visible: false }
+    LV.RadioButton { id: offDisabled; checked: false; enabled: false; visible: false }
+
+    function indicatorOf(control) {
+        if (!control || !control.contentItem || control.contentItem.children.length < 1)
+            return null
+        return control.contentItem.children[0]
+    }
+
+    function dotOf(control) {
+        const indicator = indicatorOf(control)
+        if (!indicator || !indicator.children || indicator.children.length < 1)
+            return null
+        return indicator.children[0]
+    }
+
+    readonly property var onEnabledIndicator: indicatorOf(onEnabled)
+    readonly property var onDisabledIndicator: indicatorOf(onDisabled)
+    readonly property var offEnabledIndicator: indicatorOf(offEnabled)
+    readonly property var offDisabledIndicator: indicatorOf(offDisabled)
+    readonly property var onEnabledDot: dotOf(onEnabled)
+    readonly property var onDisabledDot: dotOf(onDisabled)
+
+    property bool figmaRadioReady:
+        onEnabled.indicatorSize === LV.Theme.controlIndicatorSize
+        && onEnabled.dotSize === LV.Theme.gap8
+        && onEnabled.onColor === LV.Theme.accent
+        && onEnabled.offColor === LV.Theme.textPrimary
+        && onEnabled.onColorDisabled === LV.Theme.panelBackground12
+        && onEnabled.offColorDisabled === LV.Theme.panelBackground12
+        && onEnabled.dotColor === LV.Theme.textPrimary
+        && onEnabled.dotColorDisabled === LV.Theme.textSeptenary
+        && onEnabledIndicator !== null
+        && onDisabledIndicator !== null
+        && offEnabledIndicator !== null
+        && offDisabledIndicator !== null
+        && onEnabledDot !== null
+        && onDisabledDot !== null
+        && onEnabledIndicator.color === LV.Theme.accent
+        && onDisabledIndicator.color === LV.Theme.panelBackground12
+        && offEnabledIndicator.color === LV.Theme.textPrimary
+        && offDisabledIndicator.color === LV.Theme.panelBackground12
+        && onEnabledDot.color === LV.Theme.textPrimary
+        && onDisabledDot.color === LV.Theme.textSeptenary
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("figmaRadioReady").toBool());
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()
@@ -1102,6 +1275,91 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("actionContract").toBool());
+}
+
+void ImportApiTests::table_cell_item_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.TableCellItem {
+        id: singleCell
+        visible: false
+        itemData: ({
+            label: "Renderer",
+            dividerColor: LV.Theme.panelBackground03,
+            textColor: LV.Theme.bodyColor
+        })
+    }
+
+    LV.TableHeader {
+        id: header
+        visible: false
+        width: 717
+        cellItems: [
+            { label: "Name" },
+            { text: "State" },
+            { title: "Owner" }
+        ]
+    }
+
+    LV.TableRow {
+        id: row
+        visible: false
+        width: 717
+        cellItems: [
+            { text: "Renderer" },
+            { text: "Active" },
+            "Core"
+        ]
+    }
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 717
+        headerCellItems: [
+            { label: "Name" },
+            { label: "State" },
+            { label: "Owner" }
+        ]
+        rows: [
+            [
+                { text: "Renderer" },
+                { text: "Active" },
+                { text: "Core" }
+            ]
+        ]
+    }
+
+    property bool tableCellContractReady:
+        singleCell.resolvedText === "Renderer"
+        && singleCell.resolvedDividerColor === LV.Theme.panelBackground03
+        && singleCell.resolvedTextColor === LV.Theme.bodyColor
+        && header.resolvedColumnCount === 3
+        && header.columnText(0) === "Name"
+        && header.columnText(1) === "State"
+        && header.columnText(2) === "Owner"
+        && header.separatorColor === LV.Theme.panelBackground10
+        && row.resolvedCellCount === 3
+        && row.cellText(0) === "Renderer"
+        && row.cellText(1) === "Active"
+        && row.cellText(2) === "Core"
+        && row.dividerColor === LV.Theme.panelBackground03
+        && table.resolvedHeaderCount === 3
+        && table.rowDividerColor === LV.Theme.panelBackground03
+        && table.headerSeparatorColor === LV.Theme.panelBackground10
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("tableCellContractReady").toBool());
 }
 
 void ImportApiTests::list_item_and_footer_figma_contract_loads()

@@ -17,8 +17,8 @@ AbstractButton {
 
     property color onColor: Theme.accent
     property color offColor: Theme.textPrimary
-    property color onColorDisabled: Theme.textOctonary
-    property color offColorDisabled: Theme.textOctonary
+    property color onColorDisabled: Theme.panelBackground12
+    property color offColorDisabled: Theme.panelBackground12
     property color dotColor: Theme.textPrimary
     property color dotColorDisabled: Theme.textSeptenary
 

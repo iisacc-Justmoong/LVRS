@@ -24,6 +24,12 @@ Colors:
 - `trackShadowColor`
 - `knobFillColor`
 
+Figma token defaults:
+
+- `onColor -> Theme.accent`
+- `offColor -> Theme.panelBackground12`
+- `knobFillColor -> Theme.textPrimary`
+
 State:
 
 - `checked`, `enabled`, `text` (inherited)

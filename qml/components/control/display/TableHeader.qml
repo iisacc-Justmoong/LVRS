@@ -6,30 +6,38 @@ import LVRS 1.0
 Item {
     id: control
 
+    property var cellItems: undefined
     property var columns: ["Column", "Column", "Column"]
     property int rowHeight: 24
     property int cellHorizontalPadding: Theme.gap8
     property color textColor: Theme.descriptionColor
     property real separatorHeight: Theme.strokeThin
-    property color separatorColor: Theme.surface
+    property color separatorColor: Theme.panelBackground10
 
+    readonly property var resolvedColumnSource: {
+        if (control.cellItems !== undefined && control.cellItems !== null)
+            return control.cellItems
+        return control.columns
+    }
     readonly property int resolvedColumnCount: {
-        if (!columns)
+        const source = control.resolvedColumnSource
+        if (!source)
             return 0
-        if (columns.length !== undefined)
-            return columns.length
-        if (columns.count !== undefined)
-            return columns.count
+        if (source.length !== undefined)
+            return source.length
+        if (source.count !== undefined)
+            return source.count
         return 0
     }
 
     function columnAt(index) {
-        if (!columns)
+        const source = control.resolvedColumnSource
+        if (!source)
             return null
-        if (columns.length !== undefined)
-            return columns[index]
-        if (columns.get !== undefined)
-            return columns.get(index)
+        if (source.length !== undefined)
+            return source[index]
+        if (source.get !== undefined)
+            return source.get(index)
         return null
     }
 
@@ -43,6 +51,23 @@ Item {
         if (!entry || typeof entry !== "object")
             return "Column"
         return entry.label || entry.text || entry.title || "Column"
+    }
+
+    function columnPadding(index) {
+        const entry = columnAt(index)
+        if (!entry || typeof entry !== "object")
+            return cellHorizontalPadding
+        if (entry.contentSpacing !== undefined && entry.contentSpacing !== null) {
+            const spacing = Number(entry.contentSpacing)
+            if (!isNaN(spacing) && spacing >= 0)
+                return spacing
+        }
+        if (entry.horizontalPadding !== undefined && entry.horizontalPadding !== null) {
+            const padding = Number(entry.horizontalPadding)
+            if (!isNaN(padding) && padding >= 0)
+                return padding
+        }
+        return cellHorizontalPadding
     }
 
     implicitWidth: 717
@@ -69,7 +94,7 @@ Item {
 
                     Label {
                         anchors.left: parent.left
-                        anchors.leftMargin: control.cellHorizontalPadding
+                        anchors.leftMargin: control.columnPadding(headerCell.index)
                         anchors.verticalCenter: parent.verticalCenter
                         style: description
                         text: control.columnText(headerCell.index)
@@ -91,4 +116,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableHeader { columns: ["Column", "Column", "Column"] }
+// LV.TableHeader { cellItems: [{ label: "Column" }, { label: "Column" }, { label: "Column" }] }

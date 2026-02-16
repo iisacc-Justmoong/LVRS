@@ -13,6 +13,7 @@ Location: `qml/components/control/display/Table.qml`
 
 Data:
 
+- `headerCellItems` (preferred)
 - `headerColumns`
 - `rows`
 
@@ -27,7 +28,9 @@ Visual:
 - `borderColor`, `borderWidth`
 - `headerTextColor`
 - `cellTextColor`
-- `dividerColor`
+- `dividerColor` (legacy alias for row divider baseline)
+- `rowDividerColor`
+- `headerSeparatorColor`
 
 Helper methods:
 
@@ -41,16 +44,22 @@ Helper methods:
 import LVRS 1.0 as LV
 
 LV.Table {
-    headerColumns: ["Name", "State", "Owner"]
+    headerCellItems: [
+        { label: "Name" },
+        { label: "State" },
+        { label: "Owner" }
+    ]
     rows: [
-        ["Renderer", "Active", "Core"],
-        ["Metrics", "Paused", "Ops"]
+        [{ text: "Renderer" }, { text: "Active" }, { text: "Core" }],
+        [{ text: "Metrics" }, { text: "Paused" }, { text: "Ops" }]
     ]
 }
 ```
 
 ## How It Works
 
+- Header source resolves from `headerCellItems` first, then `headerColumns`.
+- Row entries are forwarded to `TableRow.cellItems` and each cell to `TableCellItem.itemData`.
 - Header and row counts are resolved for both JS arrays and model-like objects.
 - Row delegates compute width either from fixed `cellWidth` or auto-fit formula.
 - Table container clips content and enforces internal divider contract.
@@ -61,7 +70,11 @@ LV.Table {
 import LVRS 1.0 as LV
 
 LV.Table {
-    headerColumns: ["Service", "State", "Owner"]
+    headerCellItems: [
+        { label: "Service" },
+        { label: "State" },
+        { label: "Owner" }
+    ]
     rows: [
         [{ text: "Renderer" }, { text: "Active" }, { text: "Core" }],
         [{ text: "Input" }, { text: "Idle" }, { text: "UX" }]

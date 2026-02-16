@@ -14,7 +14,7 @@ Controls.Switch {
     property int transitionDuration: Theme.toggleTransitionDuration
 
     property color onColor: Theme.accent
-    property color offColor: Theme.surfaceSolid
+    property color offColor: Theme.panelBackground12
     property color disabledTrackColor: Theme.surfaceAlt
     property color trackShadowColor: Theme.shadowStrong
     property color knobFillColor: Theme.textPrimary

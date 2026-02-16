@@ -11,6 +11,7 @@ Location: `qml/components/control/display/TableRow.qml`
 
 ## API
 
+- `cellItems` (preferred; array/list-model of TableCellItem-like entries)
 - `cells`
 - `cellWidth`
 - `cellHeight`
@@ -25,6 +26,7 @@ Helper methods:
 
 Computed:
 
+- `resolvedCellSource`
 - `resolvedCellCount`
 - `resolvedSpacing`
 
@@ -34,19 +36,25 @@ Computed:
 import LVRS 1.0 as LV
 
 LV.TableRow {
-    cells: ["A", "B", "C"]
+    cellItems: [
+        { text: "A" },
+        { text: "B" },
+        { text: "C" }
+    ]
 }
 ```
 
 ## How It Works
 
-- Cell text resolves from primitive values or object fallback keys.
+- `cellItems` is the primary contract; legacy `cells` remains fallback.
+- Each entry is forwarded to `TableCellItem.itemData`.
+- Cell text resolves from primitive values or object fallback keys (`label/text/title`).
 - Row spacing is computed from available width and fixed cell width.
 - Spacing never goes negative (`Math.max(0, computed)`).
 
 ## Practical Tip
 
-When using fixed `cellWidth`, ensure row container width is large enough to avoid excessive zero spacing from clamping.
+For exact Figma matching, keep `cellWidth: 234`, `cellHeight: 24`, and row width `717`.
 
 ## Extended Example: Mixed Primitive/Object Cells
 
@@ -54,15 +62,15 @@ When using fixed `cellWidth`, ensure row container width is large enough to avoi
 import LVRS 1.0 as LV
 
 LV.TableRow {
-    cells: [
+    cellItems: [
         "Renderer",
-        { text: "Active" },
-        { title: "Core" }
+        { text: "Active", dividerColor: LV.Theme.panelBackground03 },
+        { title: "Core", textColor: LV.Theme.bodyColor }
     ]
 }
 ```
 
 ## FAQ
 
-Q. Why does row spacing collapse to zero?  
-A. Container width is smaller than `cellCount * cellWidth`; computed spacing is clamped at zero.
+Q. Does `cells` still work?  
+A. Yes. `cells` is preserved for compatibility, but `cellItems` is the preferred API.

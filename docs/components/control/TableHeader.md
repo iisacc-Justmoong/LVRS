@@ -11,6 +11,7 @@ Location: `qml/components/control/display/TableHeader.qml`
 
 ## API
 
+- `cellItems` (preferred; array/list-model of TableCellItem-like entries)
 - `columns`
 - `rowHeight`
 - `cellHorizontalPadding`
@@ -22,6 +23,12 @@ Helper methods:
 
 - `columnAt(index)`
 - `columnText(index)`
+- `columnPadding(index)`
+
+Computed:
+
+- `resolvedColumnSource`
+- `resolvedColumnCount`
 
 ## Usage
 
@@ -29,19 +36,25 @@ Helper methods:
 import LVRS 1.0 as LV
 
 LV.TableHeader {
-    columns: ["Column", "Column", "Column"]
+    cellItems: [
+        { label: "Column" },
+        { label: "Column" },
+        { label: "Column" }
+    ]
 }
 ```
 
 ## How It Works
 
+- `cellItems` is the primary contract; legacy `columns` remains fallback.
 - Column text accepts primitive or object entry (`label/text/title` fallback).
+- Optional per-column `contentSpacing`/`horizontalPadding` overrides are supported.
 - Repeater delegates use `Layout.fillWidth` for equal distribution.
-- Bottom separator is always rendered as dedicated rectangle block.
+- Bottom separator is rendered as dedicated rectangle (`panelBackground10` default).
 
 ## Practical Tip
 
-For mixed locale tables, prefer explicit short header labels and rely on tooltip/help text outside the header row for verbose explanations.
+Keep header labels short and semantic (field type/category), because dense 12px semi-bold text is optimized for compact metadata.
 
 ## Extended Example: Object-Based Header Definition
 
@@ -49,10 +62,10 @@ For mixed locale tables, prefer explicit short header labels and rely on tooltip
 import LVRS 1.0 as LV
 
 LV.TableHeader {
-    columns: [
+    cellItems: [
         { label: "Service" },
-        { label: "State" },
-        { label: "Latency" }
+        { text: "State", contentSpacing: LV.Theme.gap8 },
+        { title: "Latency" }
     ]
 }
 ```

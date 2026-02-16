@@ -3,6 +3,7 @@
 Location: `qml/components/control/check/RadioButton.qml`
 
 `RadioButton` is a compact radio selector with compatibility aliases for legacy API names.
+Current default color mapping is aligned to Figma node `44:630`.
 
 ## Purpose
 
@@ -44,6 +45,11 @@ LV.RadioButton {
 
 - Alias synchronization handlers keep `state` and `checked` mirrored.
 - Effective colors are computed from `enabled + checked` combination.
+- Default state color matrix:
+  - `checked + enabled`: `Theme.accent` + dot `Theme.textPrimary`
+  - `checked + disabled`: `Theme.panelBackground12` + dot `Theme.textSeptenary`
+  - `unchecked + enabled`: `Theme.textPrimary`
+  - `unchecked + disabled`: `Theme.panelBackground12`
 - Background visuals remain transparent to avoid button-like surface styling.
 
 ## Advanced Example: Legacy Alias Interop

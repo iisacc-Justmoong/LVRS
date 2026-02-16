@@ -9,6 +9,7 @@ Location: `qml/components/control/input/InputField.qml`
 - Provide compact single-line text entry with optional search mode.
 - Include built-in search icon and clear-button behavior.
 - Reuse IME safety and focus behavior from shared input base.
+- Keep password and read-only usage available through inherited text-input API.
 
 ## API
 
@@ -30,9 +31,18 @@ Visual customization:
 - `clearIconBackgroundColor`, `clearIconBackgroundColorDisabled`
 - `clearIconForegroundColor`
 
+Figma-derived defaults:
+
+- `backgroundColor/backgroundColorFocused/backgroundColorDisabled -> Theme.panelBackground10`
+- `placeholderColor -> Theme.titleHeaderColor`
+- `placeholderColorDisabled -> Theme.disabledColor`
+- `searchIconColor -> Theme.descriptionColor`
+- `clearIconBackgroundColor -> Theme.descriptionColor`
+
 Inherited text API (`AbstractInputBar`):
 
 - `text`, `placeholderText`, `readOnly`, `validator`, `maximumLength`, `inputMethodHints`, and others.
+- `echoMode` (use `TextInput.Password` for password field)
 
 ## Usage
 
@@ -50,7 +60,7 @@ LV.InputField {
 - Search icon is painted via `Canvas` and repainted on mode/style changes.
 - Clear button appears only when editable and text is non-empty.
 - Clear action empties text and immediately restores input focus.
-- Cursor uses custom blink delegate and inherits IME guard from base component.
+- Cursor and text selection use default Qt `TextInput` behavior while IME guard remains inherited from base component.
 
 ## Advanced Example: Validated Input Field
 
@@ -62,6 +72,32 @@ LV.InputField {
     placeholderText: "Project ID"
     validator: RegularExpressionValidator { regularExpression: /[A-Z0-9_-]{3,20}/ }
     onAccepted: console.log("submitted", text)
+}
+```
+
+## Extended Example: Search / Password / Read-Only
+
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+Column {
+    spacing: 8
+
+    LV.InputField {
+        mode: searchMode
+        placeholderText: "Search"
+    }
+
+    LV.InputField {
+        placeholderText: "Password"
+        echoMode: TextInput.Password
+    }
+
+    LV.InputField {
+        text: "Read only value"
+        readOnly: true
+    }
 }
 ```
 
