@@ -18,7 +18,7 @@ private slots:
     void application_window_page_stack_state_loads();
     void versionless_import_window_loads();
     void appshell_compat_loads();
-    void appscaffold_platform_adaptive_layout_loads();
+    void application_window_platform_adaptive_layout_loads();
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
@@ -249,61 +249,66 @@ LV.AppShell {
     QVERIFY(root->property("navItems").isValid());
 }
 
-void ImportApiTests::appscaffold_platform_adaptive_layout_loads()
+void ImportApiTests::application_window_platform_adaptive_layout_loads()
 {
-    QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
-    engine.addImportPath(importBase);
-    const QByteArray qml = R"(
+    QQmlEngine mobileEngine;
+    mobileEngine.addImportPath(importBase);
+    const QByteArray mobileQml = R"(
 import QtQuick
 import LVRS as LV
 
-Item {
+LV.ApplicationWindow {
+    id: mobileWindow
     width: 1400
     height: 900
+    visible: false
+    scaffoldLayoutMode: "auto"
+    scaffoldLayoutPlatform: "android"
+    navItems: ["Home", "Runs", "Settings"]
+    navigationEnabled: true
 
-    LV.AppScaffold {
-        id: mobileScaffold
-        width: 1200
-        height: 760
-        layoutMode: "auto"
-        layoutPlatform: "android"
-        navModel: ["Home", "Runs", "Settings"]
-        navigationEnabled: true
-        visible: false
-    }
-
-    LV.AppScaffold {
-        id: desktopScaffold
-        width: 1200
-        height: 760
-        layoutMode: "auto"
-        layoutPlatform: "osx"
-        navModel: ["Home", "Runs", "Settings"]
-        navigationEnabled: true
-        visible: false
-    }
-
-    property bool mobileContract:
-        mobileScaffold.mobileLayout
-        && !mobileScaffold.desktopLayout
-        && mobileScaffold.bottomNavigationEnabled
-        && !mobileScaffold.navigationRailEnabled
-        && !mobileScaffold.drawerNavigationEnabled
-
-    property bool desktopContract:
-        desktopScaffold.desktopLayout
-        && !desktopScaffold.mobileLayout
-        && desktopScaffold.navigationRailEnabled
-        && !desktopScaffold.bottomNavigationEnabled
-        && !desktopScaffold.drawerNavigationEnabled
+    property bool contract:
+        mobileWindow.adaptiveMobileLayout
+        && !mobileWindow.adaptiveDesktopLayout
+        && mobileWindow.adaptiveBottomNavigation
+        && !mobileWindow.adaptiveRailNavigation
+        && !mobileWindow.adaptiveDrawerNavigation
 }
 )";
 
-    QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("mobileContract").toBool());
-    QVERIFY(root->property("desktopContract").toBool());
+    QScopedPointer<QObject> mobileRoot(createFromQml(mobileEngine, mobileQml));
+    QVERIFY(mobileRoot);
+    QTRY_VERIFY(mobileRoot->property("contract").toBool());
+
+    QQmlEngine desktopEngine;
+    desktopEngine.addImportPath(importBase);
+    const QByteArray desktopQml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: desktopWindow
+    width: 1400
+    height: 900
+    visible: false
+    scaffoldLayoutMode: "auto"
+    scaffoldLayoutPlatform: "osx"
+    navItems: ["Home", "Runs", "Settings"]
+    navigationEnabled: true
+
+    property bool contract:
+        desktopWindow.adaptiveDesktopLayout
+        && !desktopWindow.adaptiveMobileLayout
+        && desktopWindow.adaptiveRailNavigation
+        && !desktopWindow.adaptiveBottomNavigation
+        && !desktopWindow.adaptiveDrawerNavigation
+}
+)";
+
+    QScopedPointer<QObject> desktopRoot(createFromQml(desktopEngine, desktopQml));
+    QVERIFY(desktopRoot);
+    QTRY_VERIFY(desktopRoot->property("contract").toBool());
 }
 
 void ImportApiTests::icon_name_mapping_loads()

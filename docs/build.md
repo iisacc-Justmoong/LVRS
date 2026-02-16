@@ -83,7 +83,7 @@ lvrs_add_qml_app(
 
 Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when configuring the downstream project.
 `lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
-`LV.ApplicationWindow` and `LV.AppScaffold` provide adaptive layout policy APIs for mobile/desktop reordering:
+`LV.ApplicationWindow` provides adaptive layout policy APIs for mobile/desktop reordering:
 - `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
 - `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
 - `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
@@ -92,7 +92,7 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 - `scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`
 - runtime state flags: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
-State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) in `LV.AppScaffold`.
+State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 `LV.ApplicationWindow` page-stack API: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
 It also creates cross-platform runtime targets automatically:

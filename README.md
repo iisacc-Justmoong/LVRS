@@ -109,7 +109,7 @@ Only CMake configure/build/install is required. Manual file copy or custom plugi
 `lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
 `lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
-`LV.ApplicationWindow`/`LV.AppScaffold` now include adaptive layout policy properties:
+`LV.ApplicationWindow` now includes adaptive layout policy properties:
 - `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
 - `scaffoldLayoutPlatform` (platform token override; default `Qt.platform.os`)
 - `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
@@ -118,7 +118,7 @@ On the configured host desktop platform, the matching runtime target directly la
 - `scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`
 - runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
-State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.AppScaffold`.
+State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 Page-stack API on `LV.ApplicationWindow`: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:

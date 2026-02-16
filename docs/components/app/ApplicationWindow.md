@@ -3,7 +3,7 @@
 Location: `qml/ApplicationWindow.qml`
 
 `ApplicationWindow` is LVRS's root window component.
-It hosts `AppScaffold`, manages size classes, and wires global runtime event signals.
+It hosts the adaptive layout/navigation content directly, manages size classes, and wires global runtime event signals.
 No top header/title panel is injected by default.
 
 ## Responsibilities

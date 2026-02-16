@@ -1,10 +1,12 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls as Controls
+import QtQuick.Layouts
 import QtQuick.Window
 import LVRS 1.0
 
 Controls.ApplicationWindow {
-    id: root
+    id: windowRoot
 
     // Platform + size-class signals to mimic media-query style rules.
     readonly property string platform: Qt.platform.os
@@ -20,7 +22,6 @@ Controls.ApplicationWindow {
 
     readonly property bool isCompact: widthClass === compact || heightClass === compact
     readonly property bool isExpanded: widthClass === expanded && heightClass === expanded
-
 
     property int desktopMinWidth: 900
     property int desktopMinHeight: 600
@@ -85,7 +86,7 @@ Controls.ApplicationWindow {
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
-    color: root.windowColor
+    color: windowRoot.windowColor
 
     function matchesMedia(rule) {
         if (!rule)
@@ -119,7 +120,7 @@ Controls.ApplicationWindow {
     function applyNativeWindowStyle() {
         if (!NativeWindowStyle.titleBarColorSupported)
             return false
-        return NativeWindowStyle.applyTitleBarColor(root, root.windowColor, root.forceNativeDarkTitleBar)
+        return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
     }
 
     onVisibleChanged: {
@@ -132,7 +133,7 @@ Controls.ApplicationWindow {
         if (!autoAttachRuntimeEvents)
             return
         RuntimeEvents.start()
-        RuntimeEvents.attachWindow(root)
+        RuntimeEvents.attachWindow(windowRoot)
     }
     onAutoHookBackendUserEventsChanged: {
         if (!autoHookBackendUserEvents)
@@ -146,77 +147,811 @@ Controls.ApplicationWindow {
                    Math.min(RenderQuality.maximumSupersampleScale, RenderQuality.supersampleScale))
         : 1.0
 
+    component AdaptiveLayoutHost: Item {
+            id: root
+        
+            property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
+            property int navIndex: 0
+            property bool navigationEnabled: true
+            property string navTitle: "Navigation"
+            property bool navTitleVisible: true
+            property int navWidth: 220
+            property int navDrawerWidth: 240
+            property int wideBreakpoint: 980
+            property string layoutMode: "auto" // auto, mobile, desktop
+            property string layoutPlatform: Qt.platform.os
+            property bool forceDesktopOnLargeMobile: false
+            property int mobileDesktopMinWidth: 1200
+            property bool preferBottomNavigation: true
+            property int bottomNavigationMaxItems: 5
+            property bool compactSpacingEnabled: true
+            property int compactSpacingBreakpoint: 900
+            property real navRailMaxWidthRatio: 0.32
+            property int drawerMarginSafety: Theme.gap16
+            property Component navDelegate: null
+            property Component navHeader: null
+            property Component navFooter: null
+            property var pageRouter: null
+            property var routes: []
+            property string initialPath: "/"
+            property bool useInternalPageStack: true
+            property bool internalRouterRegisterAsGlobalNavigator: false
+        
+            signal navActivated(int index, var item)
+            signal layoutStateChanged(string profile, string navigationMode)
+            signal stackNavigated(string path, var params)
+            signal stackNavigationFailed(string path)
+            signal transitionRejected(string kind, string fromState, string toState, string fallbackState)
+        
+            default property alias content: contentArea.data
+        
+            readonly property bool wide: width >= wideBreakpoint
+            readonly property bool hasNav: navigationEnabled && root.navModelCount() > 0
+            readonly property string normalizedLayoutMode: root.normalizeLayoutMode(layoutMode)
+            readonly property bool platformMobile: root.isMobilePlatform(layoutPlatform)
+            readonly property bool requestedMobileLayout: root.normalizedLayoutMode === "mobile"
+                || (root.normalizedLayoutMode === "auto"
+                    && root.platformMobile
+                    && (!root.forceDesktopOnLargeMobile || root.width < root.mobileDesktopMinWidth))
+            readonly property bool requestedDesktopLayout: !root.requestedMobileLayout
+            readonly property string requestedLayoutProfile: root.requestedMobileLayout
+                ? (root.wide ? "mobile-wide" : "mobile-compact")
+                : (root.wide ? "desktop-wide" : "desktop-compact")
+            readonly property string requestedNavigationMode: root.requestedNavigationModeForProfile(root.requestedLayoutProfile)
+            property string layoutProfile: root.requestedLayoutProfile
+            property string navigationMode: root.requestedNavigationMode
+            readonly property bool mobileLayout: root.layoutProfile.indexOf("mobile-") === 0
+            readonly property bool desktopLayout: !root.mobileLayout
+            readonly property bool navigationRailEnabled: root.hasNav && root.navigationMode === "rail"
+            readonly property bool bottomNavigationEnabled: root.hasNav && root.navigationMode === "bottom"
+            readonly property bool drawerNavigationEnabled: root.hasNav && root.navigationMode === "drawer"
+            property bool _adaptiveUpdateInProgress: false
+            property string lastRejectedLayoutTransition: ""
+            property string lastRejectedNavigationTransition: ""
+            readonly property bool compactSpacing: root.compactSpacingEnabled
+                && (root.mobileLayout || root.width < root.compactSpacingBreakpoint)
+            // Keep scaffold content full-bleed by default instead of forcing horizontal narrowing.
+            readonly property int adaptiveOuterMargin: 0
+            readonly property int adaptiveNavigationInset: root.compactSpacing ? Theme.gap12 : Theme.gap16
+            readonly property int adaptiveContentInset: 0
+            readonly property int adaptiveBottomInset: root.compactSpacing ? Theme.gap6 : Theme.gap8
+            readonly property int effectiveNavRailWidth: root.resolveNavRailWidth()
+            readonly property int effectiveNavDrawerWidth: root.resolveDrawerWidth()
+            readonly property var effectiveRoutes: root.collectEffectiveRoutes()
+            readonly property bool internalPageStackEnabled: root.useInternalPageStack && root.effectiveRoutes.length > 0
+            readonly property var activePageRouter: root.resolveRouter()
+        
+            implicitWidth: 1200
+            implicitHeight: 760
+        
+            function routeForItem(item) {
+                if (item && typeof item === "object")
+                    return item.path || item.route || ""
+                return ""
+            }
+        
+            function paramsForItem(item) {
+                if (item && typeof item === "object" && item.params !== undefined)
+                    return item.params
+                return ({})
+            }
+        
+            function resolveRouter() {
+                if (pageRouter)
+                    return pageRouter
+                if (internalPageStackEnabled)
+                    return internalPageRouter
+                if (typeof Navigator !== "undefined" && Navigator && Navigator.router)
+                    return Navigator.router
+                return null
+            }
+        
+            function navigateTo(path, params) {
+                var targetRouter = resolveRouter()
+                if (!targetRouter || !path)
+                    return false
+                targetRouter.go(path, params !== undefined ? params : ({}))
+                return true
+            }
+        
+            function normalizedPath(value) {
+                var token = String(value || "").trim()
+                if (!token)
+                    return ""
+                if (!token.startsWith("/"))
+                    token = "/" + token
+                if (token.length > 1 && token.endsWith("/"))
+                    token = token.slice(0, -1)
+                return token
+            }
+        
+            function itemAt(index) {
+                if (!navModel)
+                    return null
+                if (typeof navModel.length === "number")
+                    return navModel[index]
+                if (typeof navModel.get === "function")
+                    return navModel.get(index)
+                return null
+            }
+        
+            function navModelCount() {
+                if (!navModel)
+                    return 0
+                if (typeof navModel.length === "number")
+                    return navModel.length
+                if (typeof navModel.count === "number")
+                    return navModel.count
+                return 0
+            }
+        
+            function normalizeLayoutMode(value) {
+                var token = String(value || "").trim().toLowerCase()
+                if (token === "mobile" || token === "desktop" || token === "auto")
+                    return token
+                return "auto"
+            }
+        
+            function isMobilePlatform(value) {
+                var token = String(value || "").trim().toLowerCase()
+                return token === "android" || token === "ios"
+            }
+        
+            function resolveNavRailWidth() {
+                if (!root.navigationRailEnabled)
+                    return 0
+        
+                var ratio = Number(root.navRailMaxWidthRatio)
+                if (!isFinite(ratio) || ratio <= 0)
+                    ratio = 0.32
+        
+                var ratioWidth = Math.floor(root.width * ratio)
+                var availableWidth = Math.max(140, Math.floor(root.width - (root.adaptiveOuterMargin * 2) - Theme.gap24))
+                var capped = Math.min(root.navWidth, ratioWidth, availableWidth)
+                return Math.max(140, capped)
+            }
+        
+            function resolveDrawerWidth() {
+                var safety = Number(root.drawerMarginSafety)
+                if (!isFinite(safety) || safety < 0)
+                    safety = 0
+        
+                var availableWidth = Math.max(160, Math.floor(root.width - safety))
+                var capped = Math.min(root.navDrawerWidth, availableWidth)
+                return Math.max(160, capped)
+            }
+        
+            function requestedNavigationModeForProfile(profile) {
+                if (!root.hasNav)
+                    return "none"
+        
+                var canUseBottomNavigation = root.preferBottomNavigation
+                        && root.navModelCount() > 0
+                        && root.navModelCount() <= root.bottomNavigationMaxItems
+        
+                if (profile === "desktop-wide")
+                    return "rail"
+                if (canUseBottomNavigation
+                        && (profile.indexOf("mobile-") === 0 || profile === "desktop-compact")) {
+                    return "bottom"
+                }
+                return "drawer"
+            }
+        
+            function isAllowedLayoutTransition(fromState, toState) {
+                if (!fromState || fromState === toState)
+                    return true
+        
+                if (fromState === "mobile-compact")
+                    return toState === "mobile-wide" || toState === "desktop-compact"
+                if (fromState === "mobile-wide")
+                    return toState === "mobile-compact" || toState === "desktop-wide"
+                if (fromState === "desktop-compact")
+                    return toState === "desktop-wide" || toState === "mobile-compact"
+                if (fromState === "desktop-wide")
+                    return toState === "desktop-compact" || toState === "mobile-wide"
+                return true
+            }
+        
+            function nextLayoutTransitionState(fromState, toState) {
+                if (root.isAllowedLayoutTransition(fromState, toState))
+                    return toState
+        
+                var fromParts = String(fromState).split("-")
+                var toParts = String(toState).split("-")
+                var fromFamily = fromParts.length > 0 ? fromParts[0] : ""
+                var fromSize = fromParts.length > 1 ? fromParts[1] : ""
+                var toFamily = toParts.length > 0 ? toParts[0] : ""
+                var toSize = toParts.length > 1 ? toParts[1] : ""
+        
+                if (fromFamily && fromSize && toFamily && toSize && fromFamily !== toFamily && fromSize !== toSize)
+                    return toFamily + "-" + fromSize
+                return toState
+            }
+        
+            function isAllowedNavigationTransition(fromState, toState) {
+                if (!fromState || fromState === toState)
+                    return true
+                if (fromState === "none" || toState === "none")
+                    return true
+                if (fromState === "rail")
+                    return toState === "drawer"
+                if (fromState === "drawer")
+                    return toState === "rail" || toState === "bottom"
+                if (fromState === "bottom")
+                    return toState === "drawer"
+                return true
+            }
+        
+            function nextNavigationTransitionState(fromState, toState) {
+                if (root.isAllowedNavigationTransition(fromState, toState))
+                    return toState
+                if ((fromState === "rail" && toState === "bottom")
+                        || (fromState === "bottom" && toState === "rail")) {
+                    return "drawer"
+                }
+                return toState
+            }
+        
+            function updateAdaptiveState() {
+                if (root._adaptiveUpdateInProgress)
+                    return
+        
+                root._adaptiveUpdateInProgress = true
+                var needsFollowUp = false
+        
+                var currentLayoutProfile = root.layoutProfile
+                var targetLayoutProfile = root.requestedLayoutProfile
+                var nextLayoutProfile = root.nextLayoutTransitionState(currentLayoutProfile, targetLayoutProfile)
+                if (nextLayoutProfile !== currentLayoutProfile)
+                    root.layoutProfile = nextLayoutProfile
+                if (nextLayoutProfile !== targetLayoutProfile) {
+                    root.lastRejectedLayoutTransition = currentLayoutProfile + "->" + targetLayoutProfile
+                    root.transitionRejected("layoutProfile", currentLayoutProfile, targetLayoutProfile, nextLayoutProfile)
+                    needsFollowUp = true
+                }
+        
+                var currentNavigationMode = root.navigationMode
+                var targetNavigationMode = root.requestedNavigationModeForProfile(nextLayoutProfile)
+                var nextNavigationMode = root.nextNavigationTransitionState(currentNavigationMode, targetNavigationMode)
+                if (nextNavigationMode !== currentNavigationMode)
+                    root.navigationMode = nextNavigationMode
+                if (nextNavigationMode !== targetNavigationMode) {
+                    root.lastRejectedNavigationTransition = currentNavigationMode + "->" + targetNavigationMode
+                    root.transitionRejected("navigationMode", currentNavigationMode, targetNavigationMode, nextNavigationMode)
+                    needsFollowUp = true
+                }
+        
+                root._adaptiveUpdateInProgress = false
+                if (needsFollowUp)
+                    Qt.callLater(root.updateAdaptiveState)
+            }
+        
+            function collectEffectiveRoutes() {
+                if (routes) {
+                    if (typeof routes.length === "number" && routes.length > 0)
+                        return routes
+                    if (typeof routes.count === "number" && routes.count > 0 && typeof routes.get === "function") {
+                        var explicitRoutes = []
+                        for (var r = 0; r < routes.count; r++)
+                            explicitRoutes.push(routes.get(r))
+                        if (explicitRoutes.length > 0)
+                            return explicitRoutes
+                    }
+                }
+        
+                var derived = []
+                var count = root.navModelCount()
+                for (var i = 0; i < count; i++) {
+                    var item = root.itemAt(i)
+                    if (!item || typeof item !== "object")
+                        continue
+                    var path = root.normalizedPath(root.routeForItem(item))
+                    if (!path)
+                        continue
+        
+                    var hasComponent = item.component !== undefined && item.component !== null
+                    var hasSource = item.source !== undefined && item.source !== null && String(item.source).trim().length > 0
+                    if (!hasComponent && !hasSource)
+                        continue
+        
+                    var route = { path: path }
+                    if (hasComponent)
+                        route.component = item.component
+                    else
+                        route.source = item.source
+                    derived.push(route)
+                }
+                return derived
+            }
+        
+            function syncNavIndexToCurrentPath() {
+                var targetRouter = resolveRouter()
+                if (!targetRouter || targetRouter.currentPath === undefined)
+                    return
+        
+                var current = normalizedPath(targetRouter.currentPath)
+                if (!current) {
+                    if (navIndex !== -1)
+                        navIndex = -1
+                    return
+                }
+        
+                var count = root.navModelCount()
+                var matchedIndex = -1
+                for (var i = 0; i < count; i++) {
+                    var candidate = normalizedPath(routeForItem(itemAt(i)))
+                    if (!candidate)
+                        continue
+                    if (current === candidate || (candidate !== "/" && current.startsWith(candidate + "/"))) {
+                        matchedIndex = i
+                        break
+                    }
+                }
+        
+                if (navIndex !== matchedIndex)
+                    navIndex = matchedIndex
+            }
+        
+            onNavigationRailEnabledChanged: {
+                if (navigationRailEnabled && navDrawer.opened)
+                    navDrawer.close()
+            }
+            onDrawerNavigationEnabledChanged: {
+                if (!drawerNavigationEnabled && navDrawer.opened)
+                    navDrawer.close()
+            }
+            onRequestedLayoutProfileChanged: root.updateAdaptiveState()
+            onRequestedNavigationModeChanged: root.updateAdaptiveState()
+            onNavModelChanged: {
+                root.syncNavIndexToCurrentPath()
+                root.updateAdaptiveState()
+            }
+            onPageRouterChanged: Qt.callLater(syncNavIndexToCurrentPath)
+            onLayoutProfileChanged: root.layoutStateChanged(layoutProfile, navigationMode)
+            onNavigationModeChanged: root.layoutStateChanged(layoutProfile, navigationMode)
+        
+            Connections {
+                target: root.resolveRouter()
+                ignoreUnknownSignals: true
+                function onCurrentPathChanged() {
+                    root.syncNavIndexToCurrentPath()
+                }
+                function onNavigated(path, params) {
+                    root.syncNavIndexToCurrentPath()
+                }
+            }
+        
+            Component {
+                id: defaultNavDelegate
+        
+                ItemDelegate {
+                    id: control
+                    required property int index
+                    property var item: root.itemAt(control.index)
+                    property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
+                    property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
+                    property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
+                    property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
+        
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    Layout.preferredHeight: implicitHeight
+                    width: parent ? parent.width : implicitWidth
+                    text: itemLabel
+                    enabled: itemEnabled
+                    highlighted: control.index === root.navIndex
+                    padding: Theme.gap10
+        
+                    contentItem: RowLayout {
+                        spacing: Theme.gap8
+                        Layout.fillWidth: true
+        
+                        Label {
+                            style: description
+                            visible: control.itemIcon.length > 0
+                            text: control.itemIcon
+                            color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                        }
+        
+                        Label {
+                            style: body
+                            text: control.text
+                            color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+        
+                        Rectangle {
+                            visible: control.itemBadge.length > 0
+                            radius: Theme.radiusMd
+                            color: control.highlighted ? Theme.accent : Theme.surfaceSolid
+                            Layout.preferredHeight: Theme.textDisplaySm
+                            Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
+        
+                            Label {
+                                style: caption
+                                id: badgeText
+                                anchors.centerIn: parent
+                                text: control.itemBadge
+                                color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
+                            }
+                        }
+                    }
+        
+                    background: Rectangle {
+                        radius: Theme.radiusSm
+                        color: control.highlighted ? Theme.accent : "transparent"
+                    }
+        
+                    onClicked: {
+                        root.navIndex = control.index
+                        root.navActivated(control.index, control.item)
+                        var path = root.routeForItem(control.item)
+                        root.navigateTo(path, root.paramsForItem(control.item))
+                    }
+                }
+            }
+        
+            Component {
+                id: defaultDrawerDelegate
+        
+                ItemDelegate {
+                    id: control
+                    required property int index
+                    property var item: root.itemAt(control.index)
+                    property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
+                    property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
+                    property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
+                    property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
+        
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    Layout.preferredHeight: implicitHeight
+                    width: parent ? parent.width : implicitWidth
+                    text: itemLabel
+                    enabled: itemEnabled
+                    highlighted: control.index === root.navIndex
+                    padding: Theme.gap10
+        
+                    contentItem: RowLayout {
+                        spacing: Theme.gap8
+                        Layout.fillWidth: true
+        
+                        Label {
+                            style: description
+                            visible: control.itemIcon.length > 0
+                            text: control.itemIcon
+                            color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                        }
+        
+                        Label {
+                            style: body
+                            text: control.text
+                            color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+        
+                        Rectangle {
+                            visible: control.itemBadge.length > 0
+                            radius: Theme.radiusMd
+                            color: control.highlighted ? Theme.accent : Theme.surfaceSolid
+                            Layout.preferredHeight: Theme.textDisplaySm
+                            Layout.preferredWidth: Math.max(Theme.textDisplaySm, badgeText.implicitWidth + Theme.gap10)
+        
+                            Label {
+                                style: caption
+                                id: badgeText
+                                anchors.centerIn: parent
+                                text: control.itemBadge
+                                color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
+                            }
+                        }
+                    }
+        
+                    background: Rectangle {
+                        radius: Theme.radiusSm
+                        color: control.highlighted ? Theme.accent : "transparent"
+                    }
+        
+                    onClicked: {
+                        root.navIndex = control.index
+                        root.navActivated(control.index, control.item)
+                        var path = root.routeForItem(control.item)
+                        root.navigateTo(path, root.paramsForItem(control.item))
+                        navDrawer.close()
+                    }
+                }
+            }
+        
+            Component {
+                id: defaultBottomDelegate
+        
+                ItemDelegate {
+                    id: control
+                    required property int index
+                    property var item: root.itemAt(control.index)
+                    property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
+                    property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
+                    property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
+        
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    enabled: itemEnabled
+                    highlighted: control.index === root.navIndex
+                    padding: Theme.gap8
+        
+                    contentItem: Column {
+                        spacing: Theme.gap4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+        
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            style: description
+                            visible: control.itemIcon.length > 0
+                            text: control.itemIcon
+                            color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                        }
+        
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            style: caption
+                            text: control.itemLabel
+                            color: control.highlighted ? Theme.textPrimary : Theme.textSecondary
+                            elide: Text.ElideRight
+                        }
+                    }
+        
+                    background: Rectangle {
+                        radius: Theme.radiusMd
+                        color: control.highlighted ? Theme.accent : "transparent"
+                    }
+        
+                    onClicked: {
+                        root.navIndex = control.index
+                        root.navActivated(control.index, control.item)
+                        var path = root.routeForItem(control.item)
+                        root.navigateTo(path, root.paramsForItem(control.item))
+                    }
+                }
+            }
+        
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: Theme.gapNone
+        
+                Item {
+                    id: contentRoot
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+        
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: root.adaptiveOuterMargin
+                        spacing: Theme.gap12
+        
+                        Rectangle {
+                            id: navRail
+                            visible: root.navigationRailEnabled
+                            Layout.preferredWidth: root.navigationRailEnabled ? root.effectiveNavRailWidth : 0
+                            Layout.fillHeight: true
+                            radius: Theme.radiusLg
+                            color: Theme.surfaceSolid
+        
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: root.adaptiveNavigationInset
+                                spacing: Theme.gap12
+        
+                                Loader {
+                                    active: root.navHeader !== null
+                                    sourceComponent: root.navHeader
+                                    visible: active
+                                    Layout.fillWidth: true
+                                }
+        
+                                Label {
+                                    style: caption
+                                    visible: root.navTitleVisible
+                                    text: root.navTitle
+                                    color: Theme.textTertiary
+                                }
+        
+                                Repeater {
+                                    model: root.navModel
+                                    delegate: root.navDelegate ? root.navDelegate : defaultNavDelegate
+                                }
+        
+                                Loader {
+                                    active: root.navFooter !== null
+                                    sourceComponent: root.navFooter
+                                    visible: active
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+        
+                        Item {
+                            id: contentWrap
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+        
+                            Item {
+                                id: contentHost
+                                anchors.fill: parent
+                                anchors.margins: root.adaptiveContentInset
+        
+                                PageRouter {
+                                    id: internalPageRouter
+                                    anchors.fill: parent
+                                    visible: root.internalPageStackEnabled
+                                    enabled: visible
+                                    routes: root.effectiveRoutes
+                                    initialPath: root.internalPageStackEnabled ? root.initialPath : ""
+                                    registerAsGlobalNavigator: root.internalPageStackEnabled && root.internalRouterRegisterAsGlobalNavigator
+                                    onNavigated: function(path, params) { root.stackNavigated(path, params) }
+                                    onNavigationFailed: function(path) { root.stackNavigationFailed(path) }
+                                }
+        
+                                Item {
+                                    id: contentArea
+                                    anchors.fill: parent
+                                    visible: !root.internalPageStackEnabled
+                                }
+                            }
+                        }
+                    }
+                }
+        
+                Rectangle {
+                    id: bottomNav
+                    visible: root.bottomNavigationEnabled
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible ? Theme.controlHeightMd + Theme.gap16 : 0
+                    Layout.leftMargin: root.adaptiveOuterMargin
+                    Layout.rightMargin: root.adaptiveOuterMargin
+                    Layout.bottomMargin: root.adaptiveOuterMargin
+                    radius: Theme.radiusLg
+                    color: Theme.surfaceSolid
+        
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: root.adaptiveBottomInset
+                        spacing: Theme.gap4
+        
+                        Repeater {
+                            model: root.navModel
+                            delegate: defaultBottomDelegate
+                        }
+                    }
+                }
+            }
+        
+            Drawer {
+                id: navDrawer
+                width: root.effectiveNavDrawerWidth
+                height: root.height
+                edge: Qt.LeftEdge
+                modal: true
+                interactive: root.drawerNavigationEnabled
+        
+                background: Rectangle {
+                    color: Theme.surfaceSolid
+                }
+        
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: root.adaptiveNavigationInset
+                    spacing: Theme.gap12
+        
+                    Loader {
+                        active: root.navHeader !== null
+                        sourceComponent: root.navHeader
+                        visible: active
+                        Layout.fillWidth: true
+                    }
+        
+                    Label {
+                        style: caption
+                        visible: root.navTitleVisible
+                        text: root.navTitle
+                        color: Theme.textTertiary
+                    }
+        
+                    Repeater {
+                        model: root.navModel
+                        delegate: root.navDelegate ? root.navDelegate : defaultDrawerDelegate
+                    }
+        
+                    Loader {
+                        active: root.navFooter !== null
+                        sourceComponent: root.navFooter
+                        visible: active
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+            QtObject {
+                Component.onCompleted: {
+                    root.syncNavIndexToCurrentPath()
+                    root.layoutStateChanged(root.layoutProfile, root.navigationMode)
+                }
+            }
+    }
+
     Item {
         id: supersampleHost
         anchors.fill: parent
-        anchors.margins: root.safeMargin
-        layer.enabled: RenderQuality.enabled && root.effectiveSupersampleScale > 1.0
+        anchors.margins: windowRoot.safeMargin
+        layer.enabled: RenderQuality.enabled && windowRoot.effectiveSupersampleScale > 1.0
         layer.smooth: layer.enabled
         layer.mipmap: layer.enabled
         layer.textureSize: layer.enabled
             ? Qt.size(
-                  Math.max(1, Math.round(width * root.effectiveSupersampleScale)),
-                  Math.max(1, Math.round(height * root.effectiveSupersampleScale)))
+                  Math.max(1, Math.round(width * windowRoot.effectiveSupersampleScale)),
+                  Math.max(1, Math.round(height * windowRoot.effectiveSupersampleScale)))
             : Qt.size(
                   Math.max(1, Math.round(width)),
                   Math.max(1, Math.round(height)))
 
-        AppScaffold {
+        AdaptiveLayoutHost {
             id: scaffold
             anchors.fill: parent
-            navModel: root.navItems
-            layoutPlatform: root.platform
-            onLayoutStateChanged: function(profile, navigationMode) { root.adaptiveLayoutStateChanged(profile, navigationMode) }
-            onStackNavigated: function(path, params) { root.pageStackNavigated(path, params) }
-            onStackNavigationFailed: function(path) { root.pageStackNavigationFailed(path) }
-            onNavActivated: function(index, item) { root.navActivated(index, item) }
+            navModel: windowRoot.navItems
+            layoutPlatform: windowRoot.platform
+            onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
+            onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
+            onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
+            onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
         }
     }
 
     EventListener {
         id: globalPressedListener
         anchors.fill: parent
-        enabled: root.globalEventListenersEnabled
+        enabled: windowRoot.globalEventListenersEnabled
         trigger: "globalPressed"
         action: function(eventData) {
-            root.lastGlobalPressedEventData = eventData || ({})
-            root.globalPressedEvent(eventData)
+            windowRoot.lastGlobalPressedEventData = eventData || ({})
+            windowRoot.globalPressedEvent(eventData)
         }
     }
 
     EventListener {
         id: globalContextListener
         anchors.fill: parent
-        enabled: root.globalEventListenersEnabled
+        enabled: windowRoot.globalEventListenersEnabled
         trigger: "globalContextRequested"
         action: function(eventData) {
-            root.lastGlobalContextEventData = eventData || ({})
-            root.globalContextEvent(eventData)
+            windowRoot.lastGlobalContextEventData = eventData || ({})
+            windowRoot.globalContextEvent(eventData)
         }
     }
 
     QtObject {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
-            RenderQuality.applyWindow(root)
-            if (SvgManager.minimumScale < root.effectiveSupersampleScale)
-                SvgManager.minimumScale = root.effectiveSupersampleScale
-            if (root.autoAttachRuntimeEvents) {
+            RenderQuality.applyWindow(windowRoot)
+            if (SvgManager.minimumScale < windowRoot.effectiveSupersampleScale)
+                SvgManager.minimumScale = windowRoot.effectiveSupersampleScale
+            if (windowRoot.autoAttachRuntimeEvents) {
                 RuntimeEvents.start()
-                RuntimeEvents.attachWindow(root)
+                RuntimeEvents.attachWindow(windowRoot)
             }
-            if (root.autoHookBackendUserEvents) {
+            if (windowRoot.autoHookBackendUserEvents) {
                 if (!Backend.hookUserEvents())
                     Debug.warn("ApplicationWindow", "io-event-hook-failed", Backend.lastError)
                 else
                     Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
             }
-            Debug.log("ApplicationWindow", "supersample-scale", root.effectiveSupersampleScale)
-            root.applyNativeWindowStyle()
-            Qt.callLater(root.applyNativeWindowStyle)
+            Debug.log("ApplicationWindow", "supersample-scale", windowRoot.effectiveSupersampleScale)
+            windowRoot.applyNativeWindowStyle()
+            Qt.callLater(windowRoot.applyNativeWindowStyle)
         }
     }
-
 }
 
 // API usage (external):

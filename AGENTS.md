@@ -6,7 +6,7 @@
 - `qml/` holds UI source. `qml/Main.qml` is the app window root.
 - `qml/components/` is split by concern:
   - `buttons/` (e.g., `AbstractButton.qml`, `LabelButton.qml`)
-  - `layout/` (e.g., `AppScaffold.qml`, `VStack.qml`)
+  - `layout/` (e.g., `VStack.qml`, `HStack.qml`)
   - `navigation/` (e.g., `PageRouter.qml`, `Link.qml`)
   - `surfaces/` (e.g., `AppCard.qml`)
 - `CMakeLists.txt` includes per-directory `CMakeLists.txt` to assemble sources and QML files.
@@ -36,7 +36,7 @@ _No automated tests are set up yet._
   - param: `/runs/[id]`
   - rest: `/logs/[...path]`
 - `Link` component mimics HTML `<a>`: set `href` and `router`, wrap child content.
-- `AppScaffold` can drive routing when `navModel` items include `path` and `pageRouter` is set.
+- `ApplicationWindow` directly drives adaptive navigation and can route when `navItems` include `path` and `pageRouter` is set.
 
 ## Backend Notes
 - `RenderMonitor` (QML singleton) attaches to a `QQuickWindow` to report FPS and frame timing.
@@ -49,7 +49,7 @@ _No automated tests are set up yet._
 
 ## Commit & Pull Request Guidelines
 - This repository is not currently a Git repo; no commit history exists.
-- If you initialize Git, use clear, action‑oriented commit messages (e.g., "Add AppScaffold layout").
+- If you initialize Git, use clear, action‑oriented commit messages (e.g., "Refine adaptive layout behavior").
 - For PRs, include:
   - A short summary of UI/behavior changes.
   - Screenshots or recordings for UI updates.
