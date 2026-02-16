@@ -26,20 +26,20 @@ cmake --build build -j
 ## Run
 
 ```bash
-cmake -S . -B build-dev \
+cmake -S . -B build \
   -DLVRS_BUILD_EXAMPLES=ON \
   -DLVRS_BUILD_TESTS=ON
-cmake --build build-dev --target LVRSExampleVisualCatalog
-./build-dev/bin/LVRSExampleVisualCatalog
+cmake --build build --target LVRSExampleVisualCatalog
+./build/bin/LVRSExampleVisualCatalog
 ```
 
-The visual-catalog example target (`LVRSExampleVisualCatalog`) emits the executable as `build-dev/bin/LVRSExampleVisualCatalog`.
+The visual-catalog example target (`LVRSExampleVisualCatalog`) emits the executable as `build/bin/LVRSExampleVisualCatalog`.
 The framework library target (`LVRSCore`) itself does not emit a runnable app.
 
 ## Test
 
 ```bash
-ctest --test-dir build-dev --output-on-failure
+ctest --test-dir build --output-on-failure
 ```
 
 ## Build Options
@@ -57,12 +57,12 @@ ctest --test-dir build-dev --output-on-failure
 Install LVRS into a prefix first:
 
 ```bash
-cmake -S . -B build-install \
+cmake -S . -B build \
   -DLVRS_BUILD_EXAMPLES=OFF \
   -DLVRS_BUILD_TESTS=OFF \
   -DCMAKE_INSTALL_PREFIX=/path/to/lvrs-prefix
-cmake --build build-install -j
-cmake --install build-install
+cmake --build build -j
+cmake --install build
 ```
 
 Then, in any Qt Quick project:

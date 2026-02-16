@@ -14,9 +14,9 @@ This example is buildable and runnable, and demonstrates the MVVM flow used in t
 From repository root:
 
 ```bash
-cmake -S . -B build-codex -DLVRS_BUILD_EXAMPLES=ON
-cmake --build build-codex --target LVRSExampleMVVM
-./build-codex/example/mvvm/LVRSExampleMVVM
+cmake -S . -B build -DLVRS_BUILD_EXAMPLES=ON
+cmake --build build --target LVRSExampleMVVM
+./build/example/mvvm/LVRSExampleMVVM
 ```
 
 On macOS Finder, you can also click `example/run-mvvm.command`.

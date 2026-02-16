@@ -33,6 +33,8 @@ When no explicit icon is provided:
 ```qml
 LV.IconButton {
     tone: LV.AbstractButton.Default
-    iconName: "viewMoreSymbolicDefault"
+    iconName: "add"
 }
 ```
+
+`iconName` is resolved from LVRS built-in icon set (`resources/iconset`), so no `qrc:/...` path is required.

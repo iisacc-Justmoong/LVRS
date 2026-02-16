@@ -10,7 +10,7 @@
   - `navigation/` (e.g., `PageRouter.qml`, `Link.qml`)
   - `surfaces/` (e.g., `AppCard.qml`)
 - `CMakeLists.txt` includes per-directory `CMakeLists.txt` to assemble sources and QML files.
-- `cmake-build-debug/` is a local build output folder (generated; do not edit by hand).
+- `build/` is the local build output folder (generated; do not edit by hand).
 
 ## Build, Test, and Development Commands
 - Configure: `cmake -S . -B build`  
@@ -57,4 +57,4 @@ _No automated tests are set up yet._
 
 ## Configuration Notes
 - Requires Qt 6.5+ with `QtQuick` and `QtQuickControls2`.
-- Keep generated build artifacts out of source control (e.g., `build/`, `cmake-build-*`).
+- Keep generated build artifacts out of source control (e.g., `build/`).

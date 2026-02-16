@@ -520,7 +520,7 @@ LV.ApplicationWindow {
                         Row {
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
-                            LV.IconButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Primary }
+                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Primary }
                             LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Primary }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Primary }
                         }
@@ -528,7 +528,7 @@ LV.ApplicationWindow {
                         Row {
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Default }
-                            LV.IconButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Default }
+                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Default }
                             LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Default }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Default }
                         }
@@ -536,7 +536,7 @@ LV.ApplicationWindow {
                         Row {
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Borderless }
-                            LV.IconButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
+                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Borderless }
                             LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Borderless }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
                         }
@@ -544,7 +544,7 @@ LV.ApplicationWindow {
                         Row {
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Destructive }
-                            LV.IconButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Destructive }
+                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Destructive }
                             LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Destructive }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Destructive }
                         }
@@ -552,7 +552,7 @@ LV.ApplicationWindow {
                         Row {
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; enabled: false }
-                            LV.IconButton { iconName: "viewMoreSymbolicDefault"; enabled: false }
+                            LV.IconButton { iconName: "add"; enabled: false }
                             LV.LabelMenuButton { text: "Menu"; enabled: false }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; enabled: false }
                         }

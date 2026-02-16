@@ -13,7 +13,7 @@ Builds and installs LVRS for selected runtime platforms via bootstrap_lvrs_all.
 
 Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
-  --build-dir <path>   Build directory (default: <repo>/build-install)
+  --build-dir <path>   Deprecated. Build directory is fixed to <repo>/build
   --build-type <type>  CMake build type (default: Release)
   --clean              Deprecated no-op (clean reinstall is always enabled)
   --without-examples   Disable host configure-time example targets
@@ -55,7 +55,7 @@ detect_bootstrap_framework_platforms() {
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_ROOT="$SCRIPT_DIR"
-BUILD_DIR="${PROJECT_ROOT}/build-install"
+BUILD_DIR="${PROJECT_ROOT}/build"
 
 if [ "${HOME:-}" ]; then
     HOME_DIR="$HOME"
@@ -86,7 +86,12 @@ while [ "$#" -gt 0 ]; do
             ;;
         --build-dir)
             [ "$#" -ge 2 ] || { echo "Missing value for --build-dir" >&2; exit 1; }
-            BUILD_DIR="$2"
+            BUILD_DIR_ARG="$2"
+            if [ "${BUILD_DIR_ARG}" != "${PROJECT_ROOT}/build" ] && [ "${BUILD_DIR_ARG}" != "build" ] && [ "${BUILD_DIR_ARG}" != "./build" ]; then
+                echo "[LVRS] --build-dir is deprecated. Use the fixed build directory: ${PROJECT_ROOT}/build" >&2
+                exit 1
+            fi
+            BUILD_DIR="${PROJECT_ROOT}/build"
             shift 2
             ;;
         --build-type)
