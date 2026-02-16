@@ -14,6 +14,7 @@ Location: `qml/components/surfaces/Alert.qml`
 State and text:
 
 - `open`
+- `buttonCount` (`0=auto`, `2`, `3`)
 - `title`
 - `message`
 - `primaryText`, `secondaryText`, `tertiaryText`
@@ -46,9 +47,13 @@ Signals:
 
 ## Action Layout Rules
 
-- tertiary present -> vertical action stack (up to 3 buttons)
-- tertiary absent + secondary present -> horizontal two-button row
+- `buttonCount == 3` -> vertical three-button stack
+- `buttonCount == 2` -> horizontal two-button row
+- `buttonCount == 0` (auto) + tertiary present -> vertical three-button stack
+- `buttonCount == 0` (auto) + tertiary absent + secondary present -> horizontal two-button row
 - only primary -> single full-width primary button
+
+When `buttonCount` is explicit (`2` or `3`), empty `secondaryText`/`tertiaryText` is automatically replaced with `"Button"` to keep the action count contract intact.
 
 ## Usage
 
@@ -57,6 +62,7 @@ import LVRS 1.0 as LV
 
 LV.Alert {
     open: state.showDeleteDialog
+    buttonCount: 2
     title: "Delete Scene?"
     message: "This action cannot be undone."
     primaryText: "Delete"
@@ -79,6 +85,7 @@ import LVRS 1.0 as LV
 
 LV.Alert {
     open: true
+    buttonCount: 3
     title: "Unsaved Changes"
     message: "Choose how to proceed."
     primaryText: "Save"
@@ -89,7 +96,8 @@ LV.Alert {
 
 ## Operational Notes
 
-- `tertiaryText` presence switches action area to vertical layout.
+- `buttonCount`가 `2`/`3`으로 명시되면 해당 값이 레이아웃을 우선 결정한다.
+- `buttonCount == 0`(auto)에서는 `tertiaryText` 존재 여부가 수직/수평 레이아웃을 결정한다.
 - Use `dismissed()` to unify background-dismiss state cleanup.
 - Keep `open` as single source of truth in app state store to avoid stale overlay visibility.
 

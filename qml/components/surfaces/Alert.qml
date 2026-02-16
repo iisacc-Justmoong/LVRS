@@ -8,6 +8,8 @@ Item {
     property bool open: false
     property string title: "Alert Dialog"
     property string message: "It can have 2 or 3 actions depending on your needs."
+    // 0 = auto(legacy by text presence), 2 or 3 = explicit Figma variant selection.
+    property int buttonCount: 0
     property string primaryText: "Button"
     property string secondaryText: "Button"
     property string tertiaryText: ""
@@ -26,8 +28,20 @@ Item {
 
     readonly property int preferredWidth: 328
     readonly property int sidePadding: Theme.gap24
-    readonly property bool hasSecondaryAction: root.secondaryText.length > 0
-    readonly property bool hasTertiaryAction: root.tertiaryText.length > 0
+    readonly property int resolvedButtonCount: {
+        if (root.buttonCount === 2 || root.buttonCount === 3)
+            return root.buttonCount
+        if (root.tertiaryText.length > 0)
+            return 3
+        if (root.secondaryText.length > 0)
+            return 2
+        return 1
+    }
+    readonly property string resolvedPrimaryText: root.primaryText.length > 0 ? root.primaryText : "Button"
+    readonly property string resolvedSecondaryText: root.secondaryText.length > 0 ? root.secondaryText : "Button"
+    readonly property string resolvedTertiaryText: root.tertiaryText.length > 0 ? root.tertiaryText : "Button"
+    readonly property bool hasSecondaryAction: root.resolvedButtonCount >= 2
+    readonly property bool hasTertiaryAction: root.resolvedButtonCount >= 3
     readonly property bool useVerticalActionLayout: root.hasTertiaryAction
 
     signal primaryClicked()
@@ -165,9 +179,9 @@ Item {
                     spacing: Theme.gap12
 
                     AlertButton {
-                        visible: root.primaryText.length > 0
+                        visible: root.resolvedPrimaryText.length > 0
                         width: parent.width
-                        text: root.primaryText
+                        text: root.resolvedPrimaryText
                         tone: AbstractButton.Primary
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
@@ -176,7 +190,7 @@ Item {
                     AlertButton {
                         visible: root.hasSecondaryAction
                         width: parent.width
-                        text: root.secondaryText
+                        text: root.resolvedSecondaryText
                         tone: AbstractButton.Default
                         enabled: root.secondaryEnabled
                         onClicked: root.secondaryClicked()
@@ -185,7 +199,7 @@ Item {
                     AlertButton {
                         visible: root.hasTertiaryAction
                         width: parent.width
-                        text: root.tertiaryText
+                        text: root.resolvedTertiaryText
                         tone: AbstractButton.Default
                         enabled: root.tertiaryEnabled
                         onClicked: root.tertiaryClicked()
@@ -203,7 +217,7 @@ Item {
 
                     AlertButton {
                         width: horizontalActions.buttonWidth
-                        text: root.primaryText
+                        text: root.resolvedPrimaryText
                         tone: AbstractButton.Primary
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
@@ -212,7 +226,7 @@ Item {
                     AlertButton {
                         width: horizontalActions.buttonWidth
                         visible: root.hasSecondaryAction
-                        text: root.secondaryText
+                        text: root.resolvedSecondaryText
                         tone: AbstractButton.Default
                         enabled: root.secondaryEnabled
                         onClicked: root.secondaryClicked()
@@ -221,11 +235,11 @@ Item {
 
                 AlertButton {
                     id: singleActionButton
-                    visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.primaryText.length > 0
+                    visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.resolvedPrimaryText.length > 0
                     x: Theme.gap24
                     y: Theme.gap24
                     width: parent.width - (Theme.gap24 * 2)
-                    text: root.primaryText
+                    text: root.resolvedPrimaryText
                     tone: AbstractButton.Primary
                     enabled: root.primaryEnabled
                     onClicked: root.primaryClicked()
@@ -247,6 +261,7 @@ Item {
 // import LVRS 1.0 as LV
 // LV.Alert {
 //     open: true
+//     buttonCount: 3
 //     title: "Alert Dialog"
 //     message: "It can have 2 or 3 actions depending on your needs."
 //     primaryText: "Button"

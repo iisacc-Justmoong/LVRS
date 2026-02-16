@@ -9,6 +9,7 @@ set(LVRS_NAVIGATION_QML_FILES
     qml/components/navigation/Hierarchy.qml
     qml/components/navigation/List.qml
     qml/components/navigation/ListItem.qml
+    qml/components/navigation/ListFooter.qml
     qml/components/navigation/ListToolbar.qml
     qml/components/navigation/ContextMenu.qml
     qml/components/navigation/MenuItem.qml

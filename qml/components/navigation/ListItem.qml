@@ -1,122 +1,65 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 AbstractButton {
     id: control
 
     property string label: ""
+    // Legacy compatibility fields kept for existing callers.
     property string detail: ""
     property string iconName: ""
     property bool selected: false
     property bool showChevron: false
 
-    property int rowHeight: Theme.controlHeightMd
-    property int rowHorizontalPadding: Theme.gap8
-    property int rowVerticalPadding: Theme.gap6
-    property int contentSpacing: Theme.gap8
-    property int iconSize: Theme.iconSm
-    property color listBackgroundColor: Theme.surfaceGhost
-    readonly property real iconSupersampleScale: RenderQuality.enabled
-        ? RenderQuality.effectiveSupersampleScaleValue
-        : 1.0
-    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
-
-    readonly property string resolvedIconSource: {
-        const raw = iconName === undefined || iconName === null ? "" : String(iconName).trim()
-        if (raw.length === 0)
-            return ""
-        return Theme.iconPath(raw)
-    }
+    property int rowHorizontalPadding: Theme.gap4
+    property int rowVerticalPadding: Theme.gap2
+    property int separatorHeight: 1
+    property int separatorTopSpacing: 1
+    property int minItemWidth: 170
+    property color listBackgroundColor: "transparent"
+    property color separatorColor: "#1A000000"
+    property real separatorOpacity: 0.5
 
     tone: AbstractButton.Borderless
     horizontalPadding: control.rowHorizontalPadding
     verticalPadding: control.rowVerticalPadding
-    spacing: control.contentSpacing
+    spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
 
-    implicitHeight: control.rowHeight
-    implicitWidth: Math.max(Theme.inputMinWidth, contentLayout.implicitWidth + leftPadding + rightPadding)
+    implicitHeight: contentColumn.implicitHeight + topPadding + bottomPadding
+    implicitWidth: Math.max(control.minItemWidth, contentColumn.implicitWidth + leftPadding + rightPadding)
 
-    backgroundColor: control.selected ? Theme.accentOverlay : listBackgroundColor
-    backgroundColorHover: control.selected ? Theme.accentOverlay : Theme.subSurface
-    backgroundColorPressed: control.selected ? Theme.accentOverlay : Theme.surfaceAlt
+    backgroundColor: control.selected ? Theme.accentOverlay : control.listBackgroundColor
+    backgroundColorHover: control.selected ? Theme.accentOverlay : control.listBackgroundColor
+    backgroundColorPressed: control.selected ? Theme.accentOverlay : control.listBackgroundColor
     backgroundColorDisabled: listBackgroundColor
-    textColor: Theme.titleHeaderColor
+    textColor: Theme.bodyColor
     textColorDisabled: Theme.disabledColor
 
-    contentItem: RowLayout {
-        id: contentLayout
-        spacing: control.contentSpacing
-
-        Image {
-            id: iconImage
-            visible: control.resolvedIconSource.length > 0
-            source: control.resolvedIconSource
-            sourceSize.width: control.iconSourceSize
-            sourceSize.height: control.iconSourceSize
-            implicitWidth: control.iconSize
-            implicitHeight: control.iconSize
-            Layout.preferredWidth: control.iconSize
-            Layout.preferredHeight: control.iconSize
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            Layout.alignment: Qt.AlignVCenter
-        }
+    contentItem: Column {
+        id: contentColumn
+        spacing: control.separatorTopSpacing
 
         Label {
-            id: labelNode
+            id: labelItem
             style: body
             text: control.label
             color: control.effectiveEnabled ? Theme.bodyColor : Theme.disabledColor
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
+            width: parent.width
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }
 
-        Label {
-            id: detailNode
-            visible: text.length > 0
-            style: description
-            text: control.detail
-            color: control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor
-            Layout.alignment: Qt.AlignVCenter
-            elide: Text.ElideRight
-        }
-
-        Canvas {
-            id: chevronNode
-            visible: control.showChevron
-            Layout.preferredWidth: Theme.iconSm
-            Layout.preferredHeight: Theme.iconSm
-            Layout.alignment: Qt.AlignVCenter
-            implicitWidth: Theme.iconSm
-            implicitHeight: Theme.iconSm
-            antialiasing: true
-
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                if (!control.showChevron)
-                    return
-
-                ctx.beginPath()
-                ctx.moveTo(width * 0.32, height * 0.24)
-                ctx.lineTo(width * 0.6, height * 0.5)
-                ctx.lineTo(width * 0.32, height * 0.76)
-                ctx.lineWidth = Theme.strokeRegular
-                ctx.lineCap = "round"
-                ctx.lineJoin = "round"
-                ctx.strokeStyle = control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor
-                ctx.stroke()
-            }
+        Rectangle {
+            width: parent.width
+            height: control.separatorHeight
+            color: control.separatorColor
+            opacity: control.separatorOpacity
         }
     }
-
-    onShowChevronChanged: chevronNode.requestPaint()
-    onEnabledChanged: chevronNode.requestPaint()
 }
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.ListItem { label: "Label"; detail: "key"; iconName: "iconname"; showChevron: true }
+// LV.ListItem { label: "Label" }

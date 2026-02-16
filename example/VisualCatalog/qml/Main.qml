@@ -329,6 +329,7 @@ LV.ApplicationWindow {
         id: sampleAlert
         anchors.fill: parent
         open: LV.AppState.alertOpen
+        buttonCount: 3
         title: "Alert Dialog"
         message: "This alert verifies frame, overlay, and action callback behavior."
         primaryText: "Confirm"
