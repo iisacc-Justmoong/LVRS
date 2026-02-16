@@ -1,5 +1,7 @@
 option(LVRS_BUILD_LEGACY_EXAMPLES "Build legacy desktop example apps" ON)
 
+set(LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
+
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
     add_subdirectory(iOSHello)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")

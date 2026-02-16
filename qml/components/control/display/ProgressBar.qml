@@ -1,5 +1,4 @@
 import QtQuick
-import LVRS 1.0
 
 Item {
     id: control

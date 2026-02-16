@@ -84,8 +84,6 @@ AbstractButton {
             source: control.renderedIconSource
             sourceSize.width: control.iconSize
             sourceSize.height: control.iconSize
-            width: control.iconSize
-            height: control.iconSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: control.iconSize
@@ -113,8 +111,6 @@ AbstractButton {
             source: control.renderedIndicatorSource
             sourceSize.width: Theme.iconSm
             sourceSize.height: Theme.iconSm
-            width: Theme.iconSm
-            height: Theme.iconSm
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: Theme.iconSm

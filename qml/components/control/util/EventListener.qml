@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import LVRS 1.0
 
@@ -209,7 +210,10 @@ Item {
     function fire(eventData) {
         if (!root.enabled || !root.action)
             return
-        root.action(eventData !== undefined ? eventData : root.payload)
+        const callback = root.action
+        if (typeof callback !== "function")
+            return
+        callback(eventData !== undefined ? eventData : root.payload)
     }
 
     onTriggerChanged: root.ensureKeyFocus()
@@ -252,15 +256,15 @@ Item {
         acceptedButtons: root.acceptedButtons
         propagateComposedEvents: true
 
-        onClicked: {
+        onClicked: function(mouse) {
             if (root.trigger === "clicked")
                 root.fire(root.pointerPayload(mouse))
         }
-        onPressed: {
+        onPressed: function(mouse) {
             if (root.trigger === "pressed")
                 root.fire(root.pointerPayload(mouse))
         }
-        onReleased: {
+        onReleased: function(mouse) {
             if (root.trigger === "released")
                 root.fire(root.pointerPayload(mouse))
         }

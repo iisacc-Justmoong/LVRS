@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -346,7 +347,8 @@ Item {
 
         ItemDelegate {
             id: control
-            property var item: root.itemAt(index)
+            required property int index
+            property var item: root.itemAt(control.index)
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
@@ -358,7 +360,7 @@ Item {
             width: parent ? parent.width : implicitWidth
             text: itemLabel
             enabled: itemEnabled
-            highlighted: index === root.navIndex
+            highlighted: control.index === root.navIndex
             padding: Theme.gap10
 
             contentItem: RowLayout {
@@ -367,8 +369,8 @@ Item {
 
                 Label {
                     style: description
-                    visible: itemIcon.length > 0
-                    text: itemIcon
+                    visible: control.itemIcon.length > 0
+                    text: control.itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
                 }
 
@@ -381,7 +383,7 @@ Item {
                 }
 
                 Rectangle {
-                    visible: itemBadge.length > 0
+                    visible: control.itemBadge.length > 0
                     radius: Theme.radiusMd
                     color: control.highlighted ? Theme.accent : Theme.surfaceSolid
                     Layout.preferredHeight: Theme.textDisplaySm
@@ -391,7 +393,7 @@ Item {
                         style: caption
                         id: badgeText
                         anchors.centerIn: parent
-                        text: itemBadge
+                        text: control.itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                     }
                 }
@@ -403,10 +405,10 @@ Item {
             }
 
             onClicked: {
-                root.navIndex = index
-                root.navActivated(index, item)
-                var path = root.routeForItem(item)
-                root.navigateTo(path, root.paramsForItem(item))
+                root.navIndex = control.index
+                root.navActivated(control.index, control.item)
+                var path = root.routeForItem(control.item)
+                root.navigateTo(path, root.paramsForItem(control.item))
             }
         }
     }
@@ -416,7 +418,8 @@ Item {
 
         ItemDelegate {
             id: control
-            property var item: root.itemAt(index)
+            required property int index
+            property var item: root.itemAt(control.index)
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
             property string itemBadge: typeof item === "object" && item.badge !== undefined ? String(item.badge) : ""
@@ -428,7 +431,7 @@ Item {
             width: parent ? parent.width : implicitWidth
             text: itemLabel
             enabled: itemEnabled
-            highlighted: index === root.navIndex
+            highlighted: control.index === root.navIndex
             padding: Theme.gap10
 
             contentItem: RowLayout {
@@ -437,8 +440,8 @@ Item {
 
                 Label {
                     style: description
-                    visible: itemIcon.length > 0
-                    text: itemIcon
+                    visible: control.itemIcon.length > 0
+                    text: control.itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
                 }
 
@@ -451,7 +454,7 @@ Item {
                 }
 
                 Rectangle {
-                    visible: itemBadge.length > 0
+                    visible: control.itemBadge.length > 0
                     radius: Theme.radiusMd
                     color: control.highlighted ? Theme.accent : Theme.surfaceSolid
                     Layout.preferredHeight: Theme.textDisplaySm
@@ -461,7 +464,7 @@ Item {
                         style: caption
                         id: badgeText
                         anchors.centerIn: parent
-                        text: itemBadge
+                        text: control.itemBadge
                         color: control.highlighted ? Theme.textPrimary : Theme.textPrimary
                     }
                 }
@@ -473,10 +476,10 @@ Item {
             }
 
             onClicked: {
-                root.navIndex = index
-                root.navActivated(index, item)
-                var path = root.routeForItem(item)
-                root.navigateTo(path, root.paramsForItem(item))
+                root.navIndex = control.index
+                root.navActivated(control.index, control.item)
+                var path = root.routeForItem(control.item)
+                root.navigateTo(path, root.paramsForItem(control.item))
                 navDrawer.close()
             }
         }
@@ -487,7 +490,8 @@ Item {
 
         ItemDelegate {
             id: control
-            property var item: root.itemAt(index)
+            required property int index
+            property var item: root.itemAt(control.index)
             property string itemLabel: typeof item === "string" ? item : (item.label || item.title || item.text || "")
             property string itemIcon: typeof item === "object" ? (item.icon || item.iconName || item.symbol || "") : ""
             property bool itemEnabled: typeof item === "object" && item.enabled !== undefined ? item.enabled : true
@@ -495,7 +499,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredWidth: 1
             enabled: itemEnabled
-            highlighted: index === root.navIndex
+            highlighted: control.index === root.navIndex
             padding: Theme.gap8
 
             contentItem: Column {
@@ -507,8 +511,8 @@ Item {
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     style: description
-                    visible: itemIcon.length > 0
-                    text: itemIcon
+                    visible: control.itemIcon.length > 0
+                    text: control.itemIcon
                     color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
                 }
 
@@ -527,10 +531,10 @@ Item {
             }
 
             onClicked: {
-                root.navIndex = index
-                root.navActivated(index, item)
-                var path = root.routeForItem(item)
-                root.navigateTo(path, root.paramsForItem(item))
+                root.navIndex = control.index
+                root.navActivated(control.index, control.item)
+                var path = root.routeForItem(control.item)
+                root.navigateTo(path, root.paramsForItem(control.item))
             }
         }
     }

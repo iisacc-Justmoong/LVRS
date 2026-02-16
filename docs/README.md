@@ -55,6 +55,10 @@ This documentation set is organized around runtime behavior, component contracts
 - `docs/components/control/TextEditor.md`
 - `docs/components/control/CodeEditor.md`
 - `docs/components/control/ProgressBar.md`
+- `docs/components/control/Table.md`
+- `docs/components/control/TableHeader.md`
+- `docs/components/control/TableRow.md`
+- `docs/components/control/TableCellItem.md`
 - `docs/components/control/EventListener.md`
 - `docs/components/control/InputMethodGuard.md`
 - `docs/components/control/WheelScrollGuard.md`

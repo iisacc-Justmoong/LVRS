@@ -36,8 +36,10 @@ AbstractButton {
         Layout.alignment: Qt.AlignVCenter
 
         Rectangle {
-            width: control.boxSize
-            height: control.boxSize
+            implicitWidth: control.boxSize
+            implicitHeight: control.boxSize
+            Layout.preferredWidth: control.boxSize
+            Layout.preferredHeight: control.boxSize
             radius: Theme.radiusSm
             color: control.enabled
                 ? (control.checked ? control.checkedColor : control.uncheckedColor)

@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -9,12 +10,22 @@ LV.ApplicationWindow {
     visible: true
     width: 1480
     height: 980
+    desktopMinWidth: 360
+    desktopMinHeight: 520
+    usePlatformSafeMargin: true
     autoAttachRuntimeEvents: true
     autoHookBackendUserEvents: false
     globalEventListenersEnabled: true
+    scaffoldLayoutMode: "auto"
+    scaffoldPreferBottomNavigation: true
+    scaffoldBottomNavigationMaxItems: 5
     title: "LVRS Visual Catalog"
     subtitle: "Developer-focused design system console"
     navItems: LV.AppState.navItems
+    readonly property bool catalogCompactLayout: matchesMedia("mobile-layout") || isCompact
+    readonly property int catalogOuterMargin: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap16
+    readonly property int catalogSectionGap: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
+    readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
 
     readonly property var accentPreviewTokens: [
         { name: "accentTransparent", hex: "transparent", color: LV.Theme.accentTransparent },
@@ -105,6 +116,11 @@ LV.ApplicationWindow {
             tab: "Buttons",
             title: "Button Families",
             doc: "Primary/default/borderless/destructive/disabled combinations and icon variants."
+        },
+        {
+            tab: "Table",
+            title: "Table Components",
+            doc: "Figma-based table composition: Table + Header + Row + CellItem primitives."
         },
         {
             tab: "Inputs",
@@ -344,11 +360,12 @@ LV.ApplicationWindow {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: LV.Theme.gap16
-        spacing: LV.Theme.gap12
+        anchors.margins: root.catalogOuterMargin
+        spacing: root.catalogSectionGap
 
         TabBar {
             id: tabBar
+            visible: !root.catalogCompactLayout
             Layout.fillWidth: true
             currentIndex: root.activeTabIndex
             onCurrentIndexChanged: {
@@ -365,13 +382,44 @@ LV.ApplicationWindow {
             }
         }
 
+        Flickable {
+            id: compactTabStrip
+            visible: root.catalogCompactLayout
+            Layout.fillWidth: true
+            Layout.preferredHeight: compactTabRow.implicitHeight
+            Layout.maximumHeight: compactTabRow.implicitHeight
+            contentWidth: compactTabRow.implicitWidth
+            contentHeight: compactTabRow.implicitHeight
+            interactive: contentWidth > width
+            flickableDirection: Flickable.HorizontalFlick
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+
+            Row {
+                id: compactTabRow
+                spacing: LV.Theme.gap6
+
+                Repeater {
+                    model: root.pageMeta
+
+                    delegate: LV.LabelButton {
+                        required property int index
+                        required property var modelData
+                        text: modelData.tab
+                        tone: root.activeTabIndex === index ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                        onClicked: root.activeTabIndex = index
+                    }
+                }
+            }
+        }
+
         LV.AppCard {
             Layout.fillWidth: true
-            implicitHeight: 108
+            implicitHeight: root.catalogCompactLayout ? 136 : 108
 
             Column {
                 anchors.fill: parent
-                anchors.margins: LV.Theme.gap12
+                anchors.margins: root.catalogContentInset
                 spacing: LV.Theme.gap6
 
                 LV.Label {
@@ -408,14 +456,17 @@ LV.ApplicationWindow {
 
                     LV.AppCard {
                         Layout.fillWidth: true
-                        implicitHeight: 132
+                        implicitHeight: root.catalogCompactLayout ? 216 : 132
 
-                        RowLayout {
+                        GridLayout {
                             anchors.fill: parent
-                            anchors.margins: LV.Theme.gap12
-                            spacing: LV.Theme.gap16
+                            anchors.margins: root.catalogContentInset
+                            columns: root.catalogCompactLayout ? 1 : 3
+                            rowSpacing: LV.Theme.gap8
+                            columnSpacing: LV.Theme.gap16
 
                             Column {
+                                Layout.fillWidth: true
                                 spacing: LV.Theme.gap4
                                 LV.Label { style: header2; color: LV.Theme.textPrimary; text: "Core Runtime" }
                                 LV.Label { style: description; color: LV.Theme.textSecondary; text: "pid=" + (root.runtimeSnapshot.pid !== undefined ? root.runtimeSnapshot.pid : "n/a") }
@@ -424,6 +475,7 @@ LV.ApplicationWindow {
                             }
 
                             Column {
+                                Layout.fillWidth: true
                                 spacing: LV.Theme.gap4
                                 LV.Label { style: header2; color: LV.Theme.textPrimary; text: "Compliance" }
                                 LV.Label { style: description; color: LV.Theme.textSecondary; text: "renderScale=" + root.metricsRenderScaleCompliant }
@@ -431,9 +483,9 @@ LV.ApplicationWindow {
                                 LV.Label { style: description; color: LV.Theme.textSecondary; text: "themeText=" + root.metricsThemeTextCompliant }
                             }
 
-                            Item { Layout.fillWidth: true }
-
                             Column {
+                                Layout.fillWidth: true
+                                Layout.alignment: root.catalogCompactLayout ? Qt.AlignLeft : Qt.AlignRight
                                 spacing: LV.Theme.gap8
                                 LV.LabelButton {
                                     text: "Open Alert"
@@ -517,7 +569,8 @@ LV.ApplicationWindow {
 
                         LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Button States" }
 
-                        Row {
+                        Flow {
+                            width: parent.width
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
                             LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Primary }
@@ -525,7 +578,8 @@ LV.ApplicationWindow {
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Primary }
                         }
 
-                        Row {
+                        Flow {
+                            width: parent.width
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Default }
                             LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Default }
@@ -533,7 +587,8 @@ LV.ApplicationWindow {
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Default }
                         }
 
-                        Row {
+                        Flow {
+                            width: parent.width
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Borderless }
                             LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Borderless }
@@ -541,7 +596,8 @@ LV.ApplicationWindow {
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
                         }
 
-                        Row {
+                        Flow {
+                            width: parent.width
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Destructive }
                             LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Destructive }
@@ -549,12 +605,142 @@ LV.ApplicationWindow {
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Destructive }
                         }
 
-                        Row {
+                        Flow {
+                            width: parent.width
                             spacing: LV.Theme.gap8
                             LV.LabelButton { text: "Label"; enabled: false }
                             LV.IconButton { iconName: "add"; enabled: false }
                             LV.LabelMenuButton { text: "Menu"; enabled: false }
                             LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; enabled: false }
+                        }
+                    }
+                }
+            }
+
+            Item {
+                LV.AppCard {
+                    anchors.fill: parent
+
+                    ScrollView {
+                        anchors.fill: parent
+                        clip: true
+
+                        ColumnLayout {
+                            width: parent.width
+                            spacing: root.catalogSectionGap
+
+                            LV.Label {
+                                style: title2
+                                color: LV.Theme.textPrimary
+                                text: "Table Components"
+                                Layout.leftMargin: root.catalogContentInset
+                                Layout.rightMargin: root.catalogContentInset
+                                Layout.topMargin: root.catalogContentInset
+                            }
+
+                            LV.Label {
+                                style: description
+                                color: LV.Theme.textSecondary
+                                text: "Table primitives are shown together for design-parity checks against Figma nodes."
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                                Layout.leftMargin: root.catalogContentInset
+                                Layout.rightMargin: root.catalogContentInset
+                            }
+
+                            Rectangle {
+                                Layout.leftMargin: root.catalogContentInset
+                                Layout.rightMargin: root.catalogContentInset
+                                Layout.fillWidth: true
+                                implicitHeight: tablePreview.implicitHeight + (root.catalogContentInset * 2)
+                                radius: LV.Theme.radiusMd
+                                color: LV.Theme.surfaceAlt
+                                border.width: 1
+                                border.color: LV.Theme.contextMenuDivider
+                                clip: true
+
+                                Flickable {
+                                    id: tablePreviewFlick
+                                    anchors.fill: parent
+                                    anchors.margins: root.catalogContentInset
+                                    contentWidth: tablePreview.implicitWidth
+                                    contentHeight: tablePreview.implicitHeight
+                                    interactive: contentWidth > width
+                                    flickableDirection: Flickable.HorizontalFlick
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    clip: true
+
+                                    LV.Table {
+                                        id: tablePreview
+                                        width: 405
+                                        headerColumns: ["Name", "State", "Owner"]
+                                        rows: [
+                                            ["Renderer", "Active", "Core"],
+                                            ["Input", "Idle", "UX"],
+                                            ["Pipeline", "Active", "Render"],
+                                            ["Metrics", "Paused", "Ops"]
+                                        ]
+                                    }
+                                }
+                            }
+
+                            LV.Label {
+                                style: header2
+                                color: LV.Theme.textPrimary
+                                text: "Subcomponents"
+                                Layout.leftMargin: root.catalogContentInset
+                                Layout.rightMargin: root.catalogContentInset
+                                Layout.topMargin: LV.Theme.gap4
+                            }
+
+                            Rectangle {
+                                Layout.leftMargin: root.catalogContentInset
+                                Layout.rightMargin: root.catalogContentInset
+                                Layout.fillWidth: true
+                                implicitHeight: subcomponentColumn.implicitHeight + (root.catalogContentInset * 2)
+                                radius: LV.Theme.radiusMd
+                                color: LV.Theme.surfaceAlt
+                                border.width: 1
+                                border.color: LV.Theme.contextMenuDivider
+                                clip: true
+
+                                Flickable {
+                                    id: subcomponentFlick
+                                    anchors.fill: parent
+                                    anchors.margins: root.catalogContentInset
+                                    contentWidth: subcomponentColumn.width
+                                    contentHeight: subcomponentColumn.height
+                                    interactive: contentWidth > width
+                                    flickableDirection: Flickable.HorizontalFlick
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    clip: true
+
+                                    Column {
+                                        id: subcomponentColumn
+                                        width: Math.max(subcomponentFlick.width, 717)
+                                        spacing: LV.Theme.gap8
+
+                                        LV.TableHeader {
+                                            width: parent.width
+                                            columns: ["Column", "Column", "Column"]
+                                        }
+
+                                        LV.TableRow {
+                                            width: parent.width
+                                            cells: ["Text", "Text", "Text"]
+                                        }
+
+                                        LV.TableCellItem {
+                                            text: "Text"
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: LV.Theme.gap12
+                            }
                         }
                     }
                 }
@@ -677,6 +863,7 @@ LV.ApplicationWindow {
                                 model: root.accentPreviewTokens
 
                                 delegate: Rectangle {
+                                    id: accentCard
                                     required property var modelData
                                     Layout.fillWidth: true
                                     implicitHeight: 84
@@ -694,22 +881,22 @@ LV.ApplicationWindow {
                                             width: parent.width
                                             height: 24
                                             radius: LV.Theme.radiusSm
-                                            color: modelData.color
-                                            border.width: modelData.name === "accentTransparent" ? 1 : 0
+                                            color: accentCard.modelData.color
+                                            border.width: accentCard.modelData.name === "accentTransparent" ? 1 : 0
                                             border.color: LV.Theme.contextMenuDivider
                                         }
 
                                         LV.Label {
                                             style: caption
                                             color: LV.Theme.textPrimary
-                                            text: modelData.name
+                                            text: accentCard.modelData.name
                                             elide: Text.ElideRight
                                         }
 
                                         LV.Label {
                                             style: disabled
                                             color: LV.Theme.textTertiary
-                                            text: modelData.hex
+                                            text: accentCard.modelData.hex
                                         }
                                     }
                                 }
@@ -742,9 +929,9 @@ LV.ApplicationWindow {
 
                     LV.AppCard {
                         Layout.fillWidth: true
-                        implicitHeight: 52
+                        implicitHeight: root.catalogCompactLayout ? 96 : 52
 
-                        Row {
+                        Flow {
                             anchors.fill: parent
                             anchors.margins: LV.Theme.gap10
                             spacing: LV.Theme.gap8
@@ -755,7 +942,6 @@ LV.ApplicationWindow {
                             LV.LabelButton { text: "Render"; tone: root.runtimeFilter === "render" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "render" }
                             LV.LabelButton { text: "Navigation"; tone: root.runtimeFilter === "navigation" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "navigation" }
                             LV.LabelButton { text: "System"; tone: root.runtimeFilter === "system" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "system" }
-                            Item { width: LV.Theme.gap8 }
                             LV.LabelButton {
                                 text: "Clear"
                                 tone: LV.AbstractButton.Default
@@ -790,9 +976,11 @@ LV.ApplicationWindow {
                                     model: root.runtimeRows
 
                                     delegate: Rectangle {
+                                        id: runtimeRowCard
                                         required property var modelData
                                         width: parent.width
-                                        visible: root.runtimeFilter === "all" || String(modelData.category) === root.runtimeFilter
+                                        visible: root.runtimeFilter === "all"
+                                            || String(runtimeRowCard.modelData.category) === root.runtimeFilter
                                         radius: LV.Theme.radiusSm
                                         color: LV.Theme.surfaceGhost
                                         border.width: 1
@@ -808,13 +996,21 @@ LV.ApplicationWindow {
                                             LV.Label {
                                                 style: body
                                                 color: LV.Theme.textPrimary
-                                                text: "[" + root.timestamp(modelData.epochMs) + "] " + modelData.source + " / " + modelData.type
+                                                text: "["
+                                                    + root.timestamp(runtimeRowCard.modelData.epochMs)
+                                                    + "] "
+                                                    + runtimeRowCard.modelData.source
+                                                    + " / "
+                                                    + runtimeRowCard.modelData.type
                                             }
 
                                             LV.Label {
                                                 style: caption
                                                 color: LV.Theme.textSecondary
-                                                text: "category=" + modelData.category + " | sequence=" + modelData.sequence
+                                                text: "category="
+                                                    + runtimeRowCard.modelData.category
+                                                    + " | sequence="
+                                                    + runtimeRowCard.modelData.sequence
                                             }
                                         }
                                     }

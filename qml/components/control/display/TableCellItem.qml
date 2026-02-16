@@ -16,25 +16,26 @@ Item {
     implicitHeight: cellHeight
     clip: clipContent
 
-    Row {
+    Rectangle {
+        id: dividerNode
+        visible: control.showDivider
+        width: Theme.strokeThin
+        height: parent.height
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        spacing: control.contentSpacing
+        color: control.dividerColor
+        antialiasing: false
+    }
 
-        Rectangle {
-            visible: control.showDivider
-            width: Theme.strokeThin
-            height: control.cellHeight
-            color: control.dividerColor
-            antialiasing: false
-        }
-
-        Label {
-            style: body
-            text: control.text
-            color: control.textColor
-            elide: Text.ElideRight
-        }
+    Label {
+        anchors.left: dividerNode.visible ? dividerNode.right : parent.left
+        anchors.leftMargin: dividerNode.visible ? control.contentSpacing : 0
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        style: body
+        text: control.text
+        color: control.textColor
+        elide: Text.ElideRight
     }
 }
 

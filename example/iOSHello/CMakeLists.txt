@@ -33,6 +33,7 @@ target_link_libraries(LVRSExampleIOSHello
 )
 
 lvrs_configure_qml_app(LVRSExampleIOSHello)
+lvrs_configure_example_target(LVRSExampleIOSHello)
 
 add_custom_target(run_LVRSExampleIOSHello
     COMMAND $<TARGET_FILE:LVRSExampleIOSHello>

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import LVRS 1.0
 
 Item {
     id: root
@@ -28,6 +27,10 @@ Item {
     onParentChanged: updateLayout()
     Component.onCompleted: updateLayout()
 
+    function hasStackFlag(item, flagName) {
+        return !!(item && item.property && item.property(flagName) === true)
+    }
+
     function updateLayout() {
         _fillWidth = false
         _fillHeight = false
@@ -38,21 +41,24 @@ Item {
         if (!parent)
             return
 
-        var className = parent.metaObject ? parent.metaObject.className : ""
+        var className = String(parent || "")
         var inLayout = className.indexOf("RowLayout") !== -1 || className.indexOf("ColumnLayout") !== -1
-        if (!(parent.__isVStack === true || parent.__isHStack === true || inLayout) && stackAxis !== "")
+        var inVStack = hasStackFlag(parent, "__isVStack")
+        var inHStack = hasStackFlag(parent, "__isHStack")
+        if (!(inVStack || inHStack || inLayout) && stackAxis !== "")
             stackAxis = ""
 
-        if (parent.__isZStack === true) {
+        if (hasStackFlag(parent, "__isZStack")) {
             anchors.fill = parent
             return
         }
 
         var resolvedAxis = stackAxis
         if (resolvedAxis === "") {
-            if (parent.__isVStack === true || (parent.parent && parent.parent.__isVStack === true))
+            var parentParent = parent.parent
+            if (inVStack || hasStackFlag(parentParent, "__isVStack"))
                 resolvedAxis = "vertical"
-            else if (parent.__isHStack === true || (parent.parent && parent.parent.__isHStack === true))
+            else if (inHStack || hasStackFlag(parentParent, "__isHStack"))
                 resolvedAxis = "horizontal"
         }
 

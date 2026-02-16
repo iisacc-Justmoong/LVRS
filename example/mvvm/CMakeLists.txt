@@ -36,6 +36,7 @@ target_link_libraries(LVRSExampleMVVM
 )
 
 lvrs_configure_qml_app(LVRSExampleMVVM)
+lvrs_configure_example_target(LVRSExampleMVVM)
 
 target_include_directories(LVRSExampleMVVM
     PRIVATE

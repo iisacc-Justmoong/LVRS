@@ -39,6 +39,7 @@ target_link_libraries(LVRSExampleEventListener
 )
 
 lvrs_configure_qml_app(LVRSExampleEventListener)
+lvrs_configure_example_target(LVRSExampleEventListener)
 
 add_custom_target(run_LVRSExampleEventListener
     COMMAND $<TARGET_FILE:LVRSExampleEventListener>

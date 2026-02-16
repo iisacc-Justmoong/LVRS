@@ -33,6 +33,7 @@ target_link_libraries(LVRSExampleTypingPractice
 )
 
 lvrs_configure_qml_app(LVRSExampleTypingPractice)
+lvrs_configure_example_target(LVRSExampleTypingPractice)
 
 add_custom_target(run_LVRSExampleTypingPractice
     COMMAND $<TARGET_FILE:LVRSExampleTypingPractice>

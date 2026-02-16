@@ -51,8 +51,10 @@ AbstractButton {
             source: control.resolvedIconSource
             sourceSize.width: control.iconSize
             sourceSize.height: control.iconSize
-            width: control.iconSize
-            height: control.iconSize
+            implicitWidth: control.iconSize
+            implicitHeight: control.iconSize
+            Layout.preferredWidth: control.iconSize
+            Layout.preferredHeight: control.iconSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.alignment: Qt.AlignVCenter
@@ -84,8 +86,8 @@ AbstractButton {
             Layout.preferredWidth: Theme.iconSm
             Layout.preferredHeight: Theme.iconSm
             Layout.alignment: Qt.AlignVCenter
-            width: Theme.iconSm
-            height: Theme.iconSm
+            implicitWidth: Theme.iconSm
+            implicitHeight: Theme.iconSm
             antialiasing: true
 
             onPaint: {

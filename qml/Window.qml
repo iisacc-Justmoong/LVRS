@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Window
+import QtQuick.Window as QtQuickWindow
 import LVRS 1.0
 
-Window {
+QtQuickWindow.Window {
     id: root
 
     readonly property string platform: Qt.platform.os
@@ -13,8 +13,8 @@ Window {
     readonly property int medium: 1
     readonly property int expanded: 2
 
-    readonly property int widthClass: width < 600 ? compact : (width < 1000 ? medium : expanded)
-    readonly property int heightClass: height < 600 ? compact : (height < 900 ? medium : expanded)
+    readonly property int widthClass: root.width < 600 ? compact : (root.width < 1000 ? medium : expanded)
+    readonly property int heightClass: root.height < 600 ? compact : (root.height < 900 ? medium : expanded)
     readonly property bool isCompact: widthClass === compact || heightClass === compact
     readonly property bool isExpanded: widthClass === expanded && heightClass === expanded
 
@@ -67,7 +67,7 @@ Window {
     }
 
     onVisibleChanged: {
-        if (visible)
+        if (root.visible)
             applyNativeWindowStyle()
     }
     onWindowColorChanged: applyNativeWindowStyle()

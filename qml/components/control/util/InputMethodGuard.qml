@@ -24,8 +24,11 @@ Item {
     function commitComposition(reason) {
         if (!root.guardEnabled || !root.targetHasComposition())
             return
-        if (Qt.inputMethod && Qt.inputMethod.commit)
-            Qt.inputMethod.commit()
+        const inputMethod = Qt.inputMethod
+        // qmllint disable missing-property
+        if (inputMethod && typeof inputMethod.commit === "function")
+            inputMethod.commit()
+        // qmllint enable missing-property
         if (root.logCommitEvents)
             Debug.log("InputMethodGuard", "composition-committed", reason)
     }
@@ -39,7 +42,11 @@ Item {
                 root.commitComposition("locale-changed")
         }
         function onVisibleChanged() {
-            if (root.commitOnVisibilityLost && !Qt.inputMethod.visible)
+            const inputMethod = Qt.inputMethod
+            // qmllint disable missing-property
+            const visible = inputMethod && inputMethod.visible !== undefined ? !!inputMethod.visible : false
+            // qmllint enable missing-property
+            if (root.commitOnVisibilityLost && !visible)
                 root.commitComposition("ime-hidden")
         }
     }

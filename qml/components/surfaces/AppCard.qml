@@ -63,7 +63,6 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.preferredHeight: Theme.strokeThin
-            height: Theme.strokeThin
             radius: Theme.strokeThin
             color: Theme.surfaceSolid
         }

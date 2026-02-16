@@ -67,8 +67,6 @@ AbstractButton {
             source: control.renderedIconSource
             sourceSize.width: control.iconSize
             sourceSize.height: control.iconSize
-            width: control.iconSize
-            height: control.iconSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: control.iconSize

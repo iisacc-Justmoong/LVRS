@@ -74,8 +74,8 @@ AbstractButton {
                 Layout.preferredWidth: control.iconSize
                 Layout.preferredHeight: control.iconSize
                 Layout.alignment: Qt.AlignVCenter
-                width: control.iconSize
-                height: control.iconSize
+                implicitWidth: control.iconSize
+                implicitHeight: control.iconSize
 
                 Image {
                     id: iconImage
@@ -150,8 +150,8 @@ AbstractButton {
                 Layout.preferredWidth: control.chevronSize
                 Layout.preferredHeight: control.chevronSize
                 Layout.alignment: Qt.AlignVCenter
-                width: control.chevronSize
-                height: control.chevronSize
+                implicitWidth: control.chevronSize
+                implicitHeight: control.chevronSize
                 antialiasing: true
 
                 onPaint: {

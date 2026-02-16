@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import LVRS 1.0
 
@@ -25,7 +26,8 @@ Item {
         const count = Math.max(1, resolvedCellCount)
         if (count <= 1)
             return 0
-        return (width - (count * cellWidth)) / (count - 1)
+        const computed = (width - (count * cellWidth)) / (count - 1)
+        return Math.max(0, computed)
     }
 
     function cellAt(index) {

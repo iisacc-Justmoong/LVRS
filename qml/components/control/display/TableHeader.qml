@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import LVRS 1.0
@@ -60,6 +61,7 @@ Item {
                 model: Math.max(1, control.resolvedColumnCount)
 
                 delegate: Item {
+                    id: headerCell
                     required property int index
 
                     Layout.fillWidth: true
@@ -70,7 +72,7 @@ Item {
                         anchors.leftMargin: control.cellHorizontalPadding
                         anchors.verticalCenter: parent.verticalCenter
                         style: description
-                        text: control.columnText(index)
+                        text: control.columnText(headerCell.index)
                         color: control.textColor
                         elide: Text.ElideRight
                     }

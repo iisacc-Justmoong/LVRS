@@ -7,8 +7,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(LVRS_DEFAULT_BUILD_EXAMPLES ON)
+    set(LVRS_DEFAULT_INSTALL_EXAMPLES ON)
+else()
+    # When LVRS is pulled as a subproject (e.g., standalone example builds),
+    # default to library-only to avoid recursive example target definitions.
+    set(LVRS_DEFAULT_BUILD_EXAMPLES OFF)
+    set(LVRS_DEFAULT_INSTALL_EXAMPLES OFF)
+endif()
+
 option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumption" ON)
-option(LVRS_BUILD_EXAMPLES "Build runnable example applications" OFF)
+option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ${LVRS_DEFAULT_BUILD_EXAMPLES})
+option(LVRS_INSTALL_EXAMPLES "Install example application binaries when examples are built" ${LVRS_DEFAULT_INSTALL_EXAMPLES})
 option(LVRS_BUILD_TESTS "Build LVRS tests" OFF)
 option(LVRS_INSTALL_QML_MODULE "Install LVRS QML module directory for downstream imports" ON)
 option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
@@ -19,6 +30,9 @@ option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
 option(LVRS_FORCE_X86_QT_TOOLS "Deprecated option (ignored): Apple x86 paths are disabled" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
+
+unset(LVRS_DEFAULT_BUILD_EXAMPLES)
+unset(LVRS_DEFAULT_INSTALL_EXAMPLES)
 
 set(LVRS_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/LVRS")
 set(LVRS_QML_MODULE_INSTALL_BASE "${CMAKE_INSTALL_LIBDIR}/qt6/qml")

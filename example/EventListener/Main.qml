@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import LVRS 1.0 as LV
 
@@ -234,6 +235,8 @@ LV.ApplicationWindow {
                                 model: root.eventHistory
 
                                 delegate: Rectangle {
+                                    id: historyRow
+                                    required property var modelData
                                     width: monitorColumn.width
                                     height: logRow.implicitHeight + (LV.Theme.gap4 * 2)
                                     radius: LV.Theme.radiusSm
@@ -250,21 +253,21 @@ LV.ApplicationWindow {
                                         LV.Label {
                                             width: 62
                                             style: caption
-                                            text: modelData.time
+                                            text: historyRow.modelData.time
                                         }
 
                                         LV.Label {
                                             width: 230
                                             style: description
                                             elide: Text.ElideRight
-                                            text: modelData.section + " / " + modelData.type
+                                            text: historyRow.modelData.section + " / " + historyRow.modelData.type
                                         }
 
                                         LV.Label {
                                             width: Math.max(90, logRow.width - 62 - 230 - (LV.Theme.gap6 * 2))
                                             style: body
                                             elide: Text.ElideRight
-                                            text: modelData.detail
+                                            text: historyRow.modelData.detail
                                         }
                                     }
                                 }
@@ -298,6 +301,7 @@ LV.ApplicationWindow {
 
                     delegate: LV.AppCard {
                         id: sectionCard
+                        required property var modelData
                         width: sectionColumn.width
                         title: modelData.title
                         subtitle: modelData.subtitle
@@ -305,7 +309,7 @@ LV.ApplicationWindow {
                         Loader {
                             id: sampleLoader
                             width: sectionCard.width - (sectionCard.cardPadding * 2)
-                            source: modelData.source
+                            source: sectionCard.modelData.source
                         }
 
                         Connections {
@@ -313,7 +317,7 @@ LV.ApplicationWindow {
                             ignoreUnknownSignals: true
 
                             function onEventRaised(triggerName, detail) {
-                                root.pushEvent(modelData.title, triggerName, detail)
+                                root.pushEvent(sectionCard.modelData.title, triggerName, detail)
                             }
                         }
                     }

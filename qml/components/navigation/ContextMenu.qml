@@ -1,6 +1,6 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls as Controls
-import QtQuick.Layouts
 import LVRS 1.0
 
 Controls.Popup {

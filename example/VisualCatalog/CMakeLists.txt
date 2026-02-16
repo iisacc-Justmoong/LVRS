@@ -33,13 +33,7 @@ target_link_libraries(LVRSExampleVisualCatalog
 )
 
 lvrs_configure_qml_app(LVRSExampleVisualCatalog)
-
-set_target_properties(LVRSExampleVisualCatalog PROPERTIES
-    MACOSX_BUNDLE OFF
-    WIN32_EXECUTABLE TRUE
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    OUTPUT_NAME "LVRSExampleVisualCatalog"
-)
+lvrs_configure_example_target(LVRSExampleVisualCatalog)
 
 add_custom_target(run_LVRSExampleVisualCatalog
     COMMAND $<TARGET_FILE:LVRSExampleVisualCatalog>

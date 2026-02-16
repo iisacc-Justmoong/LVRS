@@ -67,6 +67,31 @@ function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
     endif()
 endfunction()
 
+function(lvrs_configure_example_target target)
+    if(NOT TARGET "${target}")
+        message(FATAL_ERROR "lvrs_configure_example_target() target not found: ${target}")
+    endif()
+
+    if(NOT DEFINED LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR OR LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR STREQUAL "")
+        set(_lvrs_example_runtime_output_dir "${CMAKE_BINARY_DIR}/bin")
+    else()
+        set(_lvrs_example_runtime_output_dir "${LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR}")
+    endif()
+
+    set_target_properties("${target}" PROPERTIES
+        MACOSX_BUNDLE OFF
+        WIN32_EXECUTABLE TRUE
+        RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
+    )
+
+    if(LVRS_INSTALL_EXAMPLES)
+        install(TARGETS "${target}"
+            BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
+    endif()
+endfunction()
+
 function(_lvrs_internal_known_runtime_platforms out_var)
     if(DEFINED LVRS_RUNTIME_PLATFORMS)
         set(${out_var} ${LVRS_RUNTIME_PLATFORMS} PARENT_SCOPE)
@@ -1311,17 +1336,13 @@ function(lvrs_configure_qml_app target)
     _lvrs_internal_apply_safe_default_output_dirs("${target}")
     _lvrs_internal_maybe_link_static_lvrs_plugin("${target}")
 
-    # Allow qmlimportscanner and IDE tooling to discover installed LVRS module
-    # metadata for downstream package consumers. For in-tree builds this can emit
-    # early "qmldir not found" warnings before the module output directory exists.
-    get_target_property(_lvrs_package_target_imported LVRS::LVRS IMPORTED)
-    if(_lvrs_package_target_imported)
-        if(DEFINED LVRS_QML_IMPORT_PATH)
-            _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_IMPORT_PATH}")
-        endif()
-        if(DEFINED LVRS_QML_MODULE_PATH)
-            _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_MODULE_PATH}")
-        endif()
+    # Allow qmlimportscanner/qmllint and IDE tooling to discover LVRS module
+    # metadata for both in-tree builds and downstream package consumers.
+    if(DEFINED LVRS_QML_IMPORT_PATH)
+        _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_IMPORT_PATH}")
+    endif()
+    if(DEFINED LVRS_QML_MODULE_PATH)
+        _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_MODULE_PATH}")
     endif()
 
     set(_lvrs_is_ios_simulator FALSE)

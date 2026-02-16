@@ -33,6 +33,7 @@ target_link_libraries(LVRSExampleAndroidHello
 )
 
 lvrs_configure_qml_app(LVRSExampleAndroidHello)
+lvrs_configure_example_target(LVRSExampleAndroidHello)
 
 add_custom_target(run_LVRSExampleAndroidHello
     COMMAND $<TARGET_FILE:LVRSExampleAndroidHello>

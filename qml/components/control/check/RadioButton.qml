@@ -66,8 +66,10 @@ AbstractButton {
         Layout.alignment: Qt.AlignVCenter
 
         Rectangle {
-            width: control.indicatorSize
-            height: control.indicatorSize
+            implicitWidth: control.indicatorSize
+            implicitHeight: control.indicatorSize
+            Layout.preferredWidth: control.indicatorSize
+            Layout.preferredHeight: control.indicatorSize
             radius: width / 2
             color: control.indicatorColor
             antialiasing: true

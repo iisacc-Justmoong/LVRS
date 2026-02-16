@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import LVRS 1.0
@@ -111,7 +112,7 @@ Item {
             icon2: control.toolbarIcon2
             icon3: control.toolbarIcon3
             interactive: control.interactive
-            onIconClicked: control.toolbarIconTriggered(index, source)
+            onIconClicked: (index, source) => control.toolbarIconTriggered(index, source)
         }
 
         Repeater {

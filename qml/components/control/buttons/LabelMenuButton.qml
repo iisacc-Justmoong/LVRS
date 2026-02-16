@@ -51,8 +51,6 @@ AbstractButton {
             source: control.renderedIndicatorSource
             sourceSize.width: Theme.iconSm
             sourceSize.height: Theme.iconSm
-            width: Theme.iconSm
-            height: Theme.iconSm
             fillMode: Image.PreserveAspectFit
             smooth: true
             Layout.preferredWidth: Theme.iconSm
