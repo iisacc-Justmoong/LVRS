@@ -37,6 +37,9 @@ On completion, `ApplicationWindow`:
 
 Navigation and scaffold aliases:
 - `navIndex`, `navigationEnabled`, `navTitle`, `navWidth`, `headerActions`, `pageRouter`
+- `scaffoldLayoutMode`, `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`
+- `scaffoldCompactSpacingEnabled`, `scaffoldCompactSpacingBreakpoint`
+- `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
 
 Sizing and platform:
 - `platform`, `isMobilePlatform`, `isDesktopPlatform`

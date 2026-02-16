@@ -23,6 +23,10 @@ Item {
     property int mobileDesktopMinWidth: 1200
     property bool preferBottomNavigation: true
     property int bottomNavigationMaxItems: 5
+    property bool compactSpacingEnabled: true
+    property int compactSpacingBreakpoint: 900
+    property real navRailMaxWidthRatio: 0.32
+    property int drawerMarginSafety: Theme.gap16
     property Component navDelegate: null
     property Component navHeader: null
     property Component navFooter: null
@@ -65,6 +69,14 @@ Item {
     property bool _adaptiveUpdateInProgress: false
     property string lastRejectedLayoutTransition: ""
     property string lastRejectedNavigationTransition: ""
+    readonly property bool compactSpacing: root.compactSpacingEnabled
+        && (root.mobileLayout || root.width < root.compactSpacingBreakpoint)
+    readonly property int adaptiveOuterMargin: root.compactSpacing ? Theme.gap8 : Theme.radiusXl
+    readonly property int adaptiveNavigationInset: root.compactSpacing ? Theme.gap12 : Theme.gap16
+    readonly property int adaptiveContentInset: root.compactSpacing ? Theme.gap10 : Theme.radiusLg
+    readonly property int adaptiveBottomInset: root.compactSpacing ? Theme.gap6 : Theme.gap8
+    readonly property int effectiveNavRailWidth: root.resolveNavRailWidth()
+    readonly property int effectiveNavDrawerWidth: root.resolveDrawerWidth()
     readonly property var effectiveRoutes: root.collectEffectiveRoutes()
     readonly property bool internalPageStackEnabled: root.useInternalPageStack && root.effectiveRoutes.length > 0
     readonly property var activePageRouter: root.resolveRouter()
@@ -145,14 +157,42 @@ Item {
         return token === "android" || token === "ios"
     }
 
+    function resolveNavRailWidth() {
+        if (!root.navigationRailEnabled)
+            return 0
+
+        var ratio = Number(root.navRailMaxWidthRatio)
+        if (!isFinite(ratio) || ratio <= 0)
+            ratio = 0.32
+
+        var ratioWidth = Math.floor(root.width * ratio)
+        var availableWidth = Math.max(140, Math.floor(root.width - (root.adaptiveOuterMargin * 2) - Theme.gap24))
+        var capped = Math.min(root.navWidth, ratioWidth, availableWidth)
+        return Math.max(140, capped)
+    }
+
+    function resolveDrawerWidth() {
+        var safety = Number(root.drawerMarginSafety)
+        if (!isFinite(safety) || safety < 0)
+            safety = 0
+
+        var availableWidth = Math.max(160, Math.floor(root.width - safety))
+        var capped = Math.min(root.navDrawerWidth, availableWidth)
+        return Math.max(160, capped)
+    }
+
     function requestedNavigationModeForProfile(profile) {
         if (!root.hasNav)
             return "none"
+
+        var canUseBottomNavigation = root.preferBottomNavigation
+                && root.navModelCount() > 0
+                && root.navModelCount() <= root.bottomNavigationMaxItems
+
         if (profile === "desktop-wide")
             return "rail"
-        if (profile.indexOf("mobile-") === 0
-                && root.preferBottomNavigation
-                && root.navModelCount() <= root.bottomNavigationMaxItems) {
+        if (canUseBottomNavigation
+                && (profile.indexOf("mobile-") === 0 || profile === "desktop-compact")) {
             return "bottom"
         }
         return "drawer"
@@ -582,6 +622,7 @@ Item {
             title: root.headerTitle
             subtitle: root.headerSubtitle
             menuVisible: root.drawerNavigationEnabled
+            compact: root.compactSpacing
             Layout.fillWidth: true
             Layout.preferredHeight: implicitHeight
             onMenuClicked: {
@@ -597,20 +638,20 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.radiusXl
+                anchors.margins: root.adaptiveOuterMargin
                 spacing: Theme.gap12
 
                 Rectangle {
                     id: navRail
                     visible: root.navigationRailEnabled
-                    Layout.preferredWidth: root.navigationRailEnabled ? root.navWidth : 0
+                    Layout.preferredWidth: root.navigationRailEnabled ? root.effectiveNavRailWidth : 0
                     Layout.fillHeight: true
                     radius: Theme.radiusLg
                     color: Theme.surfaceSolid
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: Theme.gap16
+                        anchors.margins: root.adaptiveNavigationInset
                         spacing: Theme.gap12
 
                         Loader {
@@ -655,7 +696,7 @@ Item {
                     Item {
                         id: contentHost
                         anchors.fill: parent
-                        anchors.margins: Theme.radiusLg
+                        anchors.margins: root.adaptiveContentInset
 
                         PageRouter {
                             id: internalPageRouter
@@ -684,15 +725,15 @@ Item {
             visible: root.bottomNavigationEnabled
             Layout.fillWidth: true
             Layout.preferredHeight: visible ? Theme.controlHeightMd + Theme.gap16 : 0
-            Layout.leftMargin: Theme.radiusXl
-            Layout.rightMargin: Theme.radiusXl
-            Layout.bottomMargin: Theme.radiusXl
+            Layout.leftMargin: root.adaptiveOuterMargin
+            Layout.rightMargin: root.adaptiveOuterMargin
+            Layout.bottomMargin: root.adaptiveOuterMargin
             radius: Theme.radiusLg
             color: Theme.surfaceSolid
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.gap8
+                anchors.margins: root.adaptiveBottomInset
                 spacing: Theme.gap4
 
                 Repeater {
@@ -705,7 +746,7 @@ Item {
 
     Drawer {
         id: navDrawer
-        width: root.navDrawerWidth
+        width: root.effectiveNavDrawerWidth
         height: root.height
         edge: Qt.LeftEdge
         modal: true
@@ -717,7 +758,7 @@ Item {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Theme.radiusXl
+            anchors.margins: root.adaptiveNavigationInset
             spacing: Theme.gap12
 
             Label {

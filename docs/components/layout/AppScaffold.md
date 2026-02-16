@@ -7,6 +7,13 @@ Main layout scaffold: header, nav rail/drawer, and content area.
 ## Navigation Integration
 - `pageRouter`: if set and `navModel` items include `path`, clicking updates router.
 
+## Adaptive Layout Controls
+- `layoutMode`: `auto`, `mobile`, `desktop`.
+- `preferBottomNavigation` + `bottomNavigationMaxItems`: controls whether bottom navigation is used, including the `desktop-compact` profile.
+- `compactSpacingEnabled` + `compactSpacingBreakpoint`: shrinks outer margins/content insets/drawer insets on narrow or mobile layouts.
+- `navRailMaxWidthRatio`: caps rail width by viewport ratio.
+- `drawerMarginSafety`: keeps a safety gap so the drawer does not over-cover narrow viewports.
+
 ## Usage
 ```qml
 LV.AppScaffold {

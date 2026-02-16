@@ -67,6 +67,100 @@ function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
     endif()
 endfunction()
 
+function(_lvrs_internal_target_supports_link_options target out_var)
+    get_target_property(_lvrs_target_type "${target}" TYPE)
+    if(_lvrs_target_type STREQUAL "EXECUTABLE"
+       OR _lvrs_target_type STREQUAL "SHARED_LIBRARY"
+       OR _lvrs_target_type STREQUAL "MODULE_LIBRARY")
+        set(${out_var} TRUE PARENT_SCOPE)
+    else()
+        set(${out_var} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(lvrs_apply_platform_build_optimizations target)
+    if(NOT TARGET "${target}")
+        message(FATAL_ERROR "lvrs_apply_platform_build_optimizations() target not found: ${target}")
+    endif()
+
+    if(DEFINED LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS
+       AND NOT LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+        return()
+    endif()
+
+    get_target_property(_lvrs_platform_optimizations_applied
+        "${target}" _LVRS_PLATFORM_OPTIMIZATIONS_APPLIED)
+    if(_lvrs_platform_optimizations_applied)
+        return()
+    endif()
+
+    _lvrs_internal_detect_target_runtime_platform(_lvrs_target_platform)
+    _lvrs_internal_target_supports_link_options("${target}" _lvrs_supports_link_options)
+
+    if(MSVC)
+        target_compile_options("${target}" PRIVATE
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/Gy>"
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/Gw>"
+        )
+
+        if(_lvrs_supports_link_options AND _lvrs_target_platform STREQUAL "windows")
+            target_link_options("${target}" PRIVATE
+                "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/OPT:REF>"
+                "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/OPT:ICF>"
+            )
+        endif()
+    else()
+        target_compile_options("${target}" PRIVATE
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-ffunction-sections>"
+            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-fdata-sections>"
+        )
+
+        if(_lvrs_supports_link_options)
+            if(_lvrs_target_platform STREQUAL "linux"
+               OR _lvrs_target_platform STREQUAL "android"
+               OR _lvrs_target_platform STREQUAL "wasm")
+                target_link_options("${target}" PRIVATE
+                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-Wl,--gc-sections>"
+                )
+            elseif(_lvrs_target_platform STREQUAL "macos"
+                   OR _lvrs_target_platform STREQUAL "ios")
+                target_link_options("${target}" PRIVATE
+                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-Wl,-dead_strip>"
+                )
+            endif()
+        endif()
+    endif()
+
+    set(_lvrs_enable_ipo TRUE)
+    if(DEFINED LVRS_ENABLE_IPO AND NOT LVRS_ENABLE_IPO)
+        set(_lvrs_enable_ipo FALSE)
+    endif()
+
+    if(_lvrs_enable_ipo)
+        get_property(_lvrs_ipo_support_checked GLOBAL PROPERTY _LVRS_IPO_SUPPORT_CHECKED)
+        if(NOT _lvrs_ipo_support_checked)
+            include(CheckIPOSupported)
+            check_ipo_supported(RESULT _lvrs_ipo_supported OUTPUT _lvrs_ipo_output LANGUAGES CXX)
+            set_property(GLOBAL PROPERTY _LVRS_IPO_SUPPORT_CHECKED TRUE)
+            if(_lvrs_ipo_supported)
+                set_property(GLOBAL PROPERTY _LVRS_IPO_SUPPORTED TRUE)
+            else()
+                set_property(GLOBAL PROPERTY _LVRS_IPO_SUPPORTED FALSE)
+                set_property(GLOBAL PROPERTY _LVRS_IPO_OUTPUT "${_lvrs_ipo_output}")
+            endif()
+        endif()
+
+        get_property(_lvrs_ipo_supported GLOBAL PROPERTY _LVRS_IPO_SUPPORTED)
+        if(_lvrs_ipo_supported)
+            set_property(TARGET "${target}" PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+            set_property(TARGET "${target}" PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+            set_property(TARGET "${target}" PROPERTY INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE)
+        endif()
+    endif()
+
+    set_property(TARGET "${target}" PROPERTY _LVRS_PLATFORM_OPTIMIZATIONS_APPLIED TRUE)
+endfunction()
+
 function(lvrs_configure_example_target target)
     if(NOT TARGET "${target}")
         message(FATAL_ERROR "lvrs_configure_example_target() target not found: ${target}")
@@ -78,17 +172,55 @@ function(lvrs_configure_example_target target)
         set(_lvrs_example_runtime_output_dir "${LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR}")
     endif()
 
-    set_target_properties("${target}" PROPERTIES
-        MACOSX_BUNDLE OFF
-        WIN32_EXECUTABLE TRUE
-        RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
-    )
+    _lvrs_internal_detect_target_runtime_platform(_lvrs_example_target_platform)
+
+    # Apply platform-specific executable flags so each OS keeps its native
+    # packaging/runtime shape while desktop targets share a predictable bin dir.
+    if(_lvrs_example_target_platform STREQUAL "windows")
+        set_target_properties("${target}" PROPERTIES
+            WIN32_EXECUTABLE TRUE
+            RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
+        )
+    elseif(_lvrs_example_target_platform STREQUAL "macos")
+        set_target_properties("${target}" PROPERTIES
+            MACOSX_BUNDLE OFF
+            RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
+        )
+    elseif(_lvrs_example_target_platform STREQUAL "linux")
+        set_target_properties("${target}" PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
+        )
+    elseif(_lvrs_example_target_platform STREQUAL "ios")
+        set_target_properties("${target}" PROPERTIES
+            MACOSX_BUNDLE TRUE
+        )
+    elseif(_lvrs_example_target_platform STREQUAL "android")
+        # Keep Android packaging defaults generated by Qt.
+    elseif(_lvrs_example_target_platform STREQUAL "wasm")
+        # Keep Emscripten toolchain output layout.
+    else()
+        set_target_properties("${target}" PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
+        )
+    endif()
+
+    lvrs_apply_platform_build_optimizations("${target}")
 
     if(LVRS_INSTALL_EXAMPLES)
-        install(TARGETS "${target}"
-            BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
+        if(_lvrs_example_target_platform STREQUAL "ios")
+            install(TARGETS "${target}"
+                BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+            )
+        elseif(_lvrs_example_target_platform STREQUAL "android")
+            install(TARGETS "${target}"
+                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            )
+        else()
+            install(TARGETS "${target}"
+                BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+                RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            )
+        endif()
     endif()
 endfunction()
 
@@ -694,6 +826,36 @@ function(lvrs_create_framework_bootstrap_targets)
         endif()
     endif()
 
+    set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+        set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations
+            "${LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations
+            "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}")
+    elseif(DEFINED LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+        if(LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+            set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "ON")
+        else()
+            set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "OFF")
+        endif()
+    endif()
+
+    set(_lvrs_bootstrap_lvrs_enable_ipo "")
+    if(DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_IPO)
+        set(_lvrs_bootstrap_lvrs_enable_ipo "${LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}" STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_enable_ipo "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}")
+    elseif(DEFINED LVRS_ENABLE_IPO)
+        if(LVRS_ENABLE_IPO)
+            set(_lvrs_bootstrap_lvrs_enable_ipo "ON")
+        else()
+            set(_lvrs_bootstrap_lvrs_enable_ipo "OFF")
+        endif()
+    endif()
+
     set(_lvrs_bootstrap_android_sdk_root "")
     if(DEFINED LVRS_BOOTSTRAP_ANDROID_SDK_ROOT AND NOT LVRS_BOOTSTRAP_ANDROID_SDK_ROOT STREQUAL "")
         set(_lvrs_bootstrap_android_sdk_root "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}")
@@ -811,6 +973,8 @@ function(lvrs_create_framework_bootstrap_targets)
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=${_lvrs_bootstrap_lvrs_build_shared_libs}"
                 "-DLVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE=${_lvrs_bootstrap_lvrs_install_qml_module}"
                 "-DLVRS_BOOTSTRAP_LVRS_ENFORCE_VULKAN=${_lvrs_bootstrap_lvrs_enforce_vulkan}"
+                "-DLVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS=${_lvrs_bootstrap_lvrs_enable_platform_build_optimizations}"
+                "-DLVRS_BOOTSTRAP_LVRS_ENABLE_IPO=${_lvrs_bootstrap_lvrs_enable_ipo}"
                 "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_IOS_ARCHITECTURES=${_lvrs_ios_architectures}"
@@ -1014,6 +1178,36 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
             set(_lvrs_bootstrap_lvrs_build_shared_libs "$ENV{LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}")
         endif()
 
+        set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "")
+        if(DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+            set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations
+                "${LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}
+               AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}" STREQUAL "")
+            set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations
+                "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}")
+        elseif(DEFINED LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+            if(LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)
+                set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "ON")
+            else()
+                set(_lvrs_bootstrap_lvrs_enable_platform_build_optimizations "OFF")
+            endif()
+        endif()
+
+        set(_lvrs_bootstrap_lvrs_enable_ipo "")
+        if(DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_IPO)
+            set(_lvrs_bootstrap_lvrs_enable_ipo "${LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}")
+        elseif(DEFINED ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}
+               AND NOT "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}" STREQUAL "")
+            set(_lvrs_bootstrap_lvrs_enable_ipo "$ENV{LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}")
+        elseif(DEFINED LVRS_ENABLE_IPO)
+            if(LVRS_ENABLE_IPO)
+                set(_lvrs_bootstrap_lvrs_enable_ipo "ON")
+            else()
+                set(_lvrs_bootstrap_lvrs_enable_ipo "OFF")
+            endif()
+        endif()
+
         set(_lvrs_ios_architectures "")
         if(DEFINED LVRS_BOOTSTRAP_IOS_ARCHITECTURES)
             set(_lvrs_ios_architectures "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}")
@@ -1061,6 +1255,8 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=${_lvrs_bootstrap_lvrs_build_shared_libs}"
+                "-DLVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS=${_lvrs_bootstrap_lvrs_enable_platform_build_optimizations}"
+                "-DLVRS_BOOTSTRAP_LVRS_ENABLE_IPO=${_lvrs_bootstrap_lvrs_enable_ipo}"
                 "-DLVRS_BOOTSTRAP_IOS_ARCHITECTURES=${_lvrs_ios_architectures}"
                 -P "${_lvrs_bootstrap_script}"
             USES_TERMINAL
@@ -1335,6 +1531,7 @@ function(lvrs_configure_qml_app target)
     target_link_libraries("${target}" PRIVATE LVRS::LVRS)
     _lvrs_internal_apply_safe_default_output_dirs("${target}")
     _lvrs_internal_maybe_link_static_lvrs_plugin("${target}")
+    lvrs_apply_platform_build_optimizations("${target}")
 
     # Allow qmlimportscanner/qmllint and IDE tooling to discover LVRS module
     # metadata for both in-tree builds and downstream package consumers.

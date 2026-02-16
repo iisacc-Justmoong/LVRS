@@ -9,6 +9,12 @@ ToolBar {
     property string title: ""
     property string subtitle: ""
     property bool menuVisible: false
+    property bool compact: false
+    property int contentHorizontalPadding: compact ? Theme.gap10 : Theme.gap16
+    property int contentVerticalPadding: compact ? Theme.gap10 : Theme.gap16
+    property int rowSpacing: compact ? Theme.gap8 : Theme.gap12
+    property int actionSpacing: compact ? Theme.gap6 : Theme.gap8
+    property int menuButtonPadding: compact ? Theme.gap8 : Theme.gap10
 
     signal menuClicked()
 
@@ -24,14 +30,17 @@ ToolBar {
     RowLayout {
         id: contentRow
         anchors.fill: parent
-        anchors.margins: Theme.gap16
-        spacing: Theme.gap12
+        anchors.leftMargin: root.contentHorizontalPadding
+        anchors.rightMargin: root.contentHorizontalPadding
+        anchors.topMargin: root.contentVerticalPadding
+        anchors.bottomMargin: root.contentVerticalPadding
+        spacing: root.rowSpacing
 
         ToolButton {
             id: menuButton
             visible: root.menuVisible
             text: "Menu"
-            padding: Theme.gap10
+            padding: root.menuButtonPadding
 
             contentItem: Label {
                 style: description
@@ -73,7 +82,7 @@ ToolBar {
 
         RowLayout {
             id: actionRow
-            spacing: Theme.gap8
+            spacing: root.actionSpacing
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
     }

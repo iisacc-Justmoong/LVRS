@@ -19,6 +19,10 @@ LV.ApplicationWindow {
     scaffoldLayoutMode: "auto"
     scaffoldPreferBottomNavigation: true
     scaffoldBottomNavigationMaxItems: 5
+    scaffoldCompactSpacingEnabled: true
+    scaffoldCompactSpacingBreakpoint: 1040
+    scaffoldNavRailMaxWidthRatio: 0.3
+    scaffoldDrawerMarginSafety: LV.Theme.gap24
     title: "LVRS Visual Catalog"
     subtitle: "Developer-focused design system console"
     navItems: LV.AppState.navItems
@@ -26,6 +30,7 @@ LV.ApplicationWindow {
     readonly property int catalogOuterMargin: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap16
     readonly property int catalogSectionGap: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
+    readonly property int catalogCardInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
 
     readonly property var accentPreviewTokens: [
         { name: "accentTransparent", hex: "transparent", color: LV.Theme.accentTransparent },
@@ -166,6 +171,20 @@ LV.ApplicationWindow {
                 count += 1
         }
         return count
+    }
+
+    function responsiveColumns(availableWidth, minimumCellWidth, minimumColumns, maximumColumns) {
+        const widthValue = Math.max(1, Number(availableWidth || 0))
+        const cellWidth = Math.max(1, Number(minimumCellWidth || 1))
+        const lowerBound = Math.max(1, Number(minimumColumns || 1))
+        let resolved = Math.max(lowerBound, Math.floor(widthValue / cellWidth))
+
+        if (maximumColumns !== undefined && maximumColumns !== null) {
+            const upperBound = Number(maximumColumns)
+            if (upperBound > 0)
+                resolved = Math.min(resolved, upperBound)
+        }
+        return resolved
     }
 
     function categoryForEvent(type) {
@@ -510,7 +529,7 @@ LV.ApplicationWindow {
 
                         Column {
                             anchors.fill: parent
-                            anchors.margins: LV.Theme.gap12
+                            anchors.margins: root.catalogCardInset
                             spacing: LV.Theme.gap8
 
                             LV.Label {
@@ -542,7 +561,7 @@ LV.ApplicationWindow {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: LV.Theme.gap12
+                        anchors.margins: root.catalogCardInset
                         spacing: LV.Theme.gap8
 
                         LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Typography" }
@@ -564,7 +583,7 @@ LV.ApplicationWindow {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: LV.Theme.gap12
+                        anchors.margins: root.catalogCardInset
                         spacing: LV.Theme.gap10
 
                         LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Button States" }
@@ -752,7 +771,7 @@ LV.ApplicationWindow {
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: LV.Theme.gap12
+                        anchors.margins: root.catalogCardInset
                         spacing: LV.Theme.gap10
 
                         LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Input Components" }
@@ -792,7 +811,7 @@ LV.ApplicationWindow {
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: LV.Theme.gap12
+                        anchors.margins: root.catalogCardInset
                         spacing: LV.Theme.gap10
 
                         LV.Label {
@@ -855,7 +874,9 @@ LV.ApplicationWindow {
 
                         GridLayout {
                             width: parent.width
-                            columns: root.width >= 1320 ? 4 : (root.width >= 1024 ? 3 : 2)
+                            columns: root.catalogCompactLayout
+                                ? 1
+                                : root.responsiveColumns(width - (LV.Theme.gap10 * 2), 220, 2, 4)
                             rowSpacing: LV.Theme.gap10
                             columnSpacing: LV.Theme.gap10
 
@@ -874,7 +895,7 @@ LV.ApplicationWindow {
 
                                     Column {
                                         anchors.fill: parent
-                                        anchors.margins: LV.Theme.gap10
+                                        anchors.margins: root.catalogCardInset
                                         spacing: LV.Theme.gap6
 
                                         Rectangle {
@@ -917,7 +938,7 @@ LV.ApplicationWindow {
 
                         Column {
                             anchors.fill: parent
-                            anchors.margins: LV.Theme.gap12
+                            anchors.margins: root.catalogCardInset
                             spacing: LV.Theme.gap6
 
                             LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Event Monitor" }
@@ -933,7 +954,7 @@ LV.ApplicationWindow {
 
                         Flow {
                             anchors.fill: parent
-                            anchors.margins: LV.Theme.gap10
+                            anchors.margins: root.catalogCardInset
                             spacing: LV.Theme.gap8
 
                             LV.LabelButton { text: "All"; tone: root.runtimeFilter === "all" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "all" }
@@ -962,7 +983,7 @@ LV.ApplicationWindow {
                         Flickable {
                             id: runtimeViewport
                             anchors.fill: parent
-                            anchors.margins: LV.Theme.gap8
+                            anchors.margins: root.catalogCardInset
                             clip: true
                             contentWidth: width
                             contentHeight: runtimeColumn.implicitHeight
@@ -990,7 +1011,7 @@ LV.ApplicationWindow {
                                         Column {
                                             id: rowCol
                                             anchors.fill: parent
-                                            anchors.margins: LV.Theme.gap8
+                                            anchors.margins: root.catalogCardInset
                                             spacing: LV.Theme.gap4
 
                                             LV.Label {

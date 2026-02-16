@@ -48,6 +48,8 @@ ctest --test-dir build --output-on-failure
 - `LVRS_BUILD_TESTS` (`OFF`): build and register tests.
 - `LVRS_INSTALL_QML_MODULE` (`ON`): install QML module artifacts (`qmldir`, qmltypes, plugin, QML files) under `<prefix>/lib/qt6/qml/LVRS`.
 - `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when the platform-fixed graphics backend requirements are missing.
+- `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (`ON`): apply platform-specific release/relwithdebinfo/minsizerel compile+link optimization flags.
+- `LVRS_ENABLE_IPO` (`ON`): enable interprocedural optimization (LTO) for release-like configs when toolchain support is available.
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
 - `LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS` (`ON`): generate `bootstrap_lvrs_*` framework multi-platform targets.
 - `LVRS_BOOTSTRAP_INSTALL_ROOT` (`<build>/lvrs-install`): install root used by `bootstrap_lvrs_*`.
@@ -86,11 +88,13 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 - `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
 - `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
 - `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
+- `scaffoldCompactSpacingEnabled` + `scaffoldCompactSpacingBreakpoint`
+- `scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`
 - runtime state flags: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
 State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) in `LV.AppScaffold`.
 `LV.ApplicationWindow` page-stack API: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
-Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured.
+Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`
@@ -134,6 +138,8 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_WASM_HOST` / `LVRS_BOOTSTRAP_WASM_PORT` / `LVRS_BOOTSTRAP_WASM_OPEN_BROWSER` (WASM launch server/browser behavior)
 - `LVRS_IOS_SIMULATOR_NAME` (default: `iPhone 17 Pro`)
 - `LVRS_ANDROID_EMULATOR_SERIAL` (default: `emulator-5554`)
+- `LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (propagate `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` into bootstrap reconfigure)
+- `LVRS_BOOTSTRAP_LVRS_ENABLE_IPO` (propagate `LVRS_ENABLE_IPO` into bootstrap reconfigure)
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
 LVRS package config exports platform/toolchain hint variables for scripts:
 - `LVRS_LAYOUT_VERSION`

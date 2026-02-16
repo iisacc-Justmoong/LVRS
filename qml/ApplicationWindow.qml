@@ -51,6 +51,10 @@ Controls.ApplicationWindow {
     property alias scaffoldMobileDesktopMinWidth: scaffold.mobileDesktopMinWidth
     property alias scaffoldPreferBottomNavigation: scaffold.preferBottomNavigation
     property alias scaffoldBottomNavigationMaxItems: scaffold.bottomNavigationMaxItems
+    property alias scaffoldCompactSpacingEnabled: scaffold.compactSpacingEnabled
+    property alias scaffoldCompactSpacingBreakpoint: scaffold.compactSpacingBreakpoint
+    property alias scaffoldNavRailMaxWidthRatio: scaffold.navRailMaxWidthRatio
+    property alias scaffoldDrawerMarginSafety: scaffold.drawerMarginSafety
     property alias navDelegate: scaffold.navDelegate
     property alias navHeader: scaffold.navHeader
     property alias navFooter: scaffold.navFooter

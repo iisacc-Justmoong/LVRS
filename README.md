@@ -114,11 +114,13 @@ On the configured host desktop platform, the matching runtime target directly la
 - `scaffoldLayoutPlatform` (platform token override; default `Qt.platform.os`)
 - `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
 - `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
+- `scaffoldCompactSpacingEnabled` + `scaffoldCompactSpacingBreakpoint`
+- `scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`
 - runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
 State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.AppScaffold`.
 Page-stack API on `LV.ApplicationWindow`: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
-By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows.
+By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
 - `bootstrap_<YourTarget>_linux`
@@ -197,6 +199,10 @@ At runtime, graphics backend selection is bootstrapped through `backend/runtime/
 
 Build-time backend enforcement is controlled by:
 - `LVRS_ENFORCE_VULKAN` (default `ON`)
+
+Build-time optimization policy is controlled by:
+- `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (default `ON`)
+- `LVRS_ENABLE_IPO` (default `ON`)
 
 When enabled, configure fails if:
 - The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` and Vulkan runtime for Windows/Linux/Android).

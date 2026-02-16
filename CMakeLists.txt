@@ -30,6 +30,14 @@ option(LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS
 option(LVRS_FORCE_X86_QT_TOOLS "Deprecated option (ignored): Apple x86 paths are disabled" OFF)
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
+option(LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS
+    "Apply platform-specific release optimization flags (compile/link) to LVRS targets"
+    ON
+)
+option(LVRS_ENABLE_IPO
+    "Enable interprocedural optimization (LTO) for release-like configurations when supported"
+    ON
+)
 
 unset(LVRS_DEFAULT_BUILD_EXAMPLES)
 unset(LVRS_DEFAULT_INSTALL_EXAMPLES)
@@ -322,6 +330,11 @@ qt_add_qml_module(LVRSCore
 set_target_properties(LVRSCore PROPERTIES
     QT_QML_MODULE_NO_IMPORT_SCAN TRUE
 )
+
+lvrs_apply_platform_build_optimizations(LVRSCore)
+if(TARGET LVRSCoreplugin)
+    lvrs_apply_platform_build_optimizations(LVRSCoreplugin)
+endif()
 
 if(TARGET LVRSCoreplugin)
     add_library(LVRSplugin ALIAS LVRSCoreplugin)
