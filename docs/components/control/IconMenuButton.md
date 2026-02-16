@@ -7,7 +7,7 @@ Location: `qml/components/control/buttons/IconMenuButton.qml`
 ## Purpose
 
 - Provide compact menu-trigger button for icon-centric surfaces.
-- Apply consistent tone-aware policy to both main icon and chevron indicator.
+- Use project-structure fallback for main icon and tone-aware policy for chevron indicator.
 
 ## API
 
@@ -35,7 +35,7 @@ Layout:
 1. explicit `iconSource`
 2. explicit `iconName`
 3. grouped `icon.name`
-4. tone/disabled fallback icon
+4. default fallback icon (`projectStructure`)
 
 ## Usage
 

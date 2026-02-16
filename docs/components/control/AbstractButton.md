@@ -33,6 +33,7 @@ Location: `qml/components/control/buttons/AbstractButton.qml`
 - Hover/focus are disabled when `effectiveEnabled == false`.
 - Disabled state installs a blocking `MouseArea` to prevent accidental event propagation.
 - `Default` and `Borderless` pressed state uses `Theme.accentBlueMuted`.
+- `Default` tone base fill is `Theme.panelBackground12`, disabled fill is `Theme.panelBackground04`.
 
 ## Usage
 
@@ -49,7 +50,7 @@ LV.AbstractButton {
 
 - Tone-specific text/background colors are derived by readonly computed properties.
 - Derived button components override sizing/layout while inheriting interaction and tone policy.
-- `contentItem` defaults to `LV.Label` (`description` style) centered both axes.
+- `contentItem` defaults to `LV.Label` (`body` style) centered both axes.
 
 ## Advanced Example: Tone Override with Custom Colors
 

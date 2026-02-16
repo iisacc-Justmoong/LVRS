@@ -6,7 +6,7 @@ Location: `qml/components/control/buttons/IconButton.qml`
 
 ## Purpose
 
-- Provide compact icon action button with tone-aware icon fallback.
+- Provide compact icon action button with project-structure fallback icon.
 - Support icon source by URL, icon name token, or glyph text.
 
 ## API
@@ -34,7 +34,7 @@ Layout:
 1. explicit `iconSource`
 2. explicit `iconName`
 3. `icon.name` from grouped icon API
-4. tone-based default icon
+4. default fallback icon (`projectStructure`)
 
 Rendered source is normalized through `SvgManager.icon(...)` and refreshed by `SvgManager.revision`.
 

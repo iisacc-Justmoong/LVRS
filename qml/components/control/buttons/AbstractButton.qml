@@ -28,7 +28,9 @@ Controls.AbstractButton {
             return Theme.danger
         if (tone === AbstractButton.Borderless)
             return "transparent"
-        return Theme.surfaceSolid
+        if (tone === AbstractButton.Disabled)
+            return Theme.panelBackground04
+        return Theme.panelBackground12
     }
     readonly property color toneBackgroundColorHover: {
         if (tone === AbstractButton.Primary)
@@ -58,7 +60,7 @@ Controls.AbstractButton {
     property color backgroundColor: control.toneBackgroundColor
     property color backgroundColorHover: control.toneBackgroundColorHover
     property color backgroundColorPressed: control.toneBackgroundColorPressed
-    property color backgroundColorDisabled: Theme.subSurface
+    property color backgroundColorDisabled: Theme.panelBackground04
 
     hoverEnabled: control.effectiveEnabled
     focusPolicy: control.effectiveEnabled ? Qt.StrongFocus : Qt.NoFocus
@@ -80,7 +82,7 @@ Controls.AbstractButton {
 
 
     contentItem: Label {
-        style: description
+        style: body
         text: control.text
         color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
         horizontalAlignment: Text.AlignHCenter

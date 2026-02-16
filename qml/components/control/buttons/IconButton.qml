@@ -7,17 +7,8 @@ AbstractButton {
 
     tone: AbstractButton.Primary
     readonly property int figmaButtonHeight: Theme.gap20
-    readonly property string iconNameDefault: "viewMoreSymbolicDefault"
-    readonly property string iconNameBorderless: "viewMoreSymbolicBorderless"
-    readonly property string iconNameDisabled: "viewMoreSymbolicDisabled"
-    readonly property url iconSourceDefault: Theme.iconPath(control.iconNameDefault)
-    readonly property url iconSourceBorderless: Theme.iconPath(control.iconNameBorderless)
-    readonly property url iconSourceDisabled: Theme.iconPath(control.iconNameDisabled)
-    readonly property url toneIconSource: !control.effectiveEnabled
-        ? control.iconSourceDisabled
-        : control.tone === AbstractButton.Borderless
-            ? control.iconSourceBorderless
-            : control.iconSourceDefault
+    readonly property string fallbackIconName: "projectStructure"
+    readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)
 
     property url url: ""
     property alias iconSource: control.url
@@ -41,7 +32,7 @@ AbstractButton {
         ? control.url
         : control.resolvedIconName.length > 0
             ? Theme.iconPath(control.resolvedIconName)
-            : control.toneIconSource
+            : control.fallbackIconSource
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0

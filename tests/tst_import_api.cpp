@@ -827,6 +827,10 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
+    property string expectedFallbackIcon: iconRoot + "projectStructure.svg"
+    property color transparentColor: "transparent"
+
     LV.LabelButton { id: labelButton; text: "Button"; tone: LV.AbstractButton.Primary; visible: false }
     LV.IconButton { id: iconButton; tone: LV.AbstractButton.Primary; visible: false }
     LV.LabelMenuButton { id: labelMenuButton; text: "Open"; tone: LV.AbstractButton.Primary; visible: false }
@@ -890,6 +894,34 @@ Item {
         && Math.abs(iconButtonDisabled.height - LV.Theme.gap20) < 0.01
         && Math.abs(labelMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
         && Math.abs(iconMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
+        && labelButtonDefault.backgroundColor === LV.Theme.panelBackground12
+        && iconButtonDefault.backgroundColor === LV.Theme.panelBackground12
+        && labelMenuButtonDefault.backgroundColor === LV.Theme.panelBackground12
+        && iconMenuButtonDefault.backgroundColor === LV.Theme.panelBackground12
+        && labelButtonBorderless.backgroundColor === transparentColor
+        && iconButtonBorderless.backgroundColor === transparentColor
+        && labelButtonDisabled.backgroundColorDisabled === LV.Theme.panelBackground04
+        && iconButtonDisabled.backgroundColorDisabled === LV.Theme.panelBackground04
+        && iconButton.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconButtonDefault.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconButtonBorderless.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconButtonDestructive.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconButtonDisabled.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconMenuButton.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconMenuButtonDefault.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconMenuButtonBorderless.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconMenuButtonDestructive.resolvedIconSource.toString() === expectedFallbackIcon
+        && iconMenuButtonDisabled.resolvedIconSource.toString() === expectedFallbackIcon
+        && labelMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
+        && labelMenuButtonDefault.resolvedIndicatorName === "panDownSymbolicDefault"
+        && labelMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
+        && labelMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
+        && labelMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"
+        && iconMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
+        && iconMenuButtonDefault.resolvedIndicatorName === "panDownSymbolicDefault"
+        && iconMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
+        && iconMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
+        && iconMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"
 }
 )";
 
