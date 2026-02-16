@@ -22,40 +22,14 @@ Location: `qml/Theme.qml`
 
 ## Accent Palette
 
-The following accent tokens map to all extracted iconset colors.
+Accent colors are now split into two layers:
 
-- `accentTransparent`
-- `accentWhite`
-- `accentGrayLight`
-- `accentBlue`
-- `accentRed`
-- `accentSlate`
-- `accentGreen`
-- `accentBlueMuted`
-- `accentOrangeMuted`
-- `accentGreenMuted`
-- `accentYellow`
-- `accentRedBrownDark`
-- `accentGray`
-- `accentYellowMuted`
-- `accentBrownMuted`
-- `accentPurple`
-- `accentBrownDarker`
-- `accentCharcoal`
-- `accentGrayPale`
-- `accentBlueBright`
-- `accentPurpleDarker`
-- `accentGrayBright`
-- `accentRose`
-- `accentRoseDarker`
-- `accentGrayMuted`
-- `accentGreenBright`
-- `accentRedMuted`
-- `accentRedDark`
-- `accentRedDarker`
-- `accentSlateMuted`
-- `accentSlateDarker`
-- `accentGreenDarker`
+- Legacy semantic accent tokens (for stable component styling): `accentBlue`, `accentRed`, `accentGreen`, `accentSlateMuted`, etc.
+- Full extracted iconset palette: `accentIconPaletteTokens` (`[{ name, hex, color }]`).
+
+`accentIconPaletteTokens` is generated from `resources/iconset/*.svg` fill/stroke color values.
+Current snapshot includes `386` unique colors across `2182` icons.
+New non-semantic colors are exposed as deterministic descriptive names (for example `accentDeepRed`, `accentDarkerYellow`, `accentLightOrangeVividBirch`).
 
 ## Important Mappings
 

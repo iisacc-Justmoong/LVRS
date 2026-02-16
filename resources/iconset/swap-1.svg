@@ -1,0 +1,22 @@
+<svg width="25" height="65" viewBox="0 0 25 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.200256" y="0.200501" width="24.4194" height="64.4415" rx="4.20794" stroke="#7B61FF" stroke-width="0.400757" stroke-dasharray="2 2"/>
+<path d="M18.9111 10.9099L15.4104 7.40918L11.9096 10.9099" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M15.4103 7.94385V17.4106" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.90906 13.9102L9.40982 17.4109L12.9106 13.9102" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.40942 16.8487V7.40918" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M18.9119 30.9202L15.4111 27.4194L11.9103 30.9202" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M15.411 27.9546V37.4213" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.9093 33.9209L9.41006 37.4217L12.9108 33.9209" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9.40991 36.859V27.4194" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-linecap="round" stroke-linejoin="round"/>
+<g clip-path="url(#clip0_210_13829)">
+<path d="M18.9119 50.9309L15.4111 47.4302L11.9103 50.9309" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M15.4108 47.9653V57.4321" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M5.90906 53.9316L9.40982 57.4324L12.9106 53.9316" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M9.40991 56.8697V47.4302" stroke="white" stroke-opacity="0.8" stroke-width="1.00189" stroke-miterlimit="10" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_210_13829">
+<rect width="16.0035" height="16.0035" fill="white" transform="translate(4.40802 44.4302)"/>
+</clipPath>
+</defs>
+</svg>

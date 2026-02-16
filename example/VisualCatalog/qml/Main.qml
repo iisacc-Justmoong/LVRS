@@ -32,40 +32,7 @@ LV.ApplicationWindow {
     readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogCardInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
 
-    readonly property var accentPreviewTokens: [
-        { name: "accentTransparent", hex: "transparent", color: LV.Theme.accentTransparent },
-        { name: "accentWhite", hex: "#FFFFFF", color: LV.Theme.accentWhite },
-        { name: "accentGrayLight", hex: "#CED0D6", color: LV.Theme.accentGrayLight },
-        { name: "accentBlue", hex: "#548AF7", color: LV.Theme.accentBlue },
-        { name: "accentRed", hex: "#DB5C5C", color: LV.Theme.accentRed },
-        { name: "accentSlate", hex: "#43454A", color: LV.Theme.accentSlate },
-        { name: "accentGreen", hex: "#57965C", color: LV.Theme.accentGreen },
-        { name: "accentBlueMuted", hex: "#25324D", color: LV.Theme.accentBlueMuted },
-        { name: "accentOrangeMuted", hex: "#C77D55", color: LV.Theme.accentOrangeMuted },
-        { name: "accentGreenMuted", hex: "#253627", color: LV.Theme.accentGreenMuted },
-        { name: "accentYellow", hex: "#F2C55C", color: LV.Theme.accentYellow },
-        { name: "accentRedBrownDark", hex: "#402929", color: LV.Theme.accentRedBrownDark },
-        { name: "accentGray", hex: "#868A91", color: LV.Theme.accentGray },
-        { name: "accentYellowMuted", hex: "#D6AE58", color: LV.Theme.accentYellowMuted },
-        { name: "accentBrownMuted", hex: "#45322B", color: LV.Theme.accentBrownMuted },
-        { name: "accentPurple", hex: "#A571E6", color: LV.Theme.accentPurple },
-        { name: "accentBrownDarker", hex: "#3D3223", color: LV.Theme.accentBrownDarker },
-        { name: "accentCharcoal", hex: "#1E1F22", color: LV.Theme.accentCharcoal },
-        { name: "accentGrayPale", hex: "#B4B8BF", color: LV.Theme.accentGrayPale },
-        { name: "accentBlueBright", hex: "#3574F0", color: LV.Theme.accentBlueBright },
-        { name: "accentPurpleDarker", hex: "#2F2936", color: LV.Theme.accentPurpleDarker },
-        { name: "accentGrayBright", hex: "#F0F1F2", color: LV.Theme.accentGrayBright },
-        { name: "accentRose", hex: "#E55765", color: LV.Theme.accentRose },
-        { name: "accentRoseDarker", hex: "#5E3838", color: LV.Theme.accentRoseDarker },
-        { name: "accentGrayMuted", hex: "#5A5D63", color: LV.Theme.accentGrayMuted },
-        { name: "accentGreenBright", hex: "#55A76A", color: LV.Theme.accentGreenBright },
-        { name: "accentRedMuted", hex: "#BD5757", color: LV.Theme.accentRedMuted },
-        { name: "accentRedDark", hex: "#9C4E4E", color: LV.Theme.accentRedDark },
-        { name: "accentRedDarker", hex: "#7A4343", color: LV.Theme.accentRedDarker },
-        { name: "accentSlateMuted", hex: "#6F737A", color: LV.Theme.accentSlateMuted },
-        { name: "accentSlateDarker", hex: "#6C707E", color: LV.Theme.accentSlateDarker },
-        { name: "accentGreenDarker", hex: "#375239", color: LV.Theme.accentGreenDarker }
-    ]
+    readonly property var accentPreviewTokens: LV.Theme.accentIconPaletteTokens
 
     readonly property var runtimeSnapshot: LV.AppState.runtimeSnapshot
     readonly property var viewStateSnapshot: LV.AppState.viewStateSnapshot
