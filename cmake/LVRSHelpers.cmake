@@ -1554,7 +1554,7 @@ function(lvrs_configure_qml_app target)
 
     # Ensure static QML plugins referenced by LVRS imports are linked/imported
     # when the consuming target is finalized.
-    if(COMMAND qt_import_qml_plugins)
+    if(COMMAND qt_import_qml_plugins AND LVRS_STATIC_QML_PLUGIN_REQUIRED)
         qt_import_qml_plugins("${target}")
     endif()
 
