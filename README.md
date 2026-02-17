@@ -16,7 +16,7 @@ The framework target itself does not build an application executable; all runnab
 - Qt 6.5+
 - Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`
 - Qt `Test` module only when `LVRS_BUILD_TESTS=ON`
-- Vulkan SDK/runtime available to CMake when `LVRS_ENFORCE_VULKAN=ON` (default)
+- `LVRS_ENFORCE_VULKAN` validates fixed backend Qt features (macOS/iOS: Metal, Windows/Android: Vulkan). Linux uses Qt default backend.
 
 ## Quick Install (Clone -> Install -> Use)
 
@@ -26,8 +26,10 @@ cd LVRS
 ./install.sh
 ```
 
-`install.sh` now performs a single multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for all runtime platforms in one run.
-Default install layout is `<prefix>/platforms/<platform>` for `macos`, `linux`, `windows`, `ios`, `android`, `wasm`.
+`install.sh` runs `bootstrap_lvrs_all` and installs LVRS with a host-first default.
+By default, bootstrap targets include only the host platform package.
+Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to expand bootstrap/install platforms explicitly.
+Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
@@ -193,7 +195,8 @@ Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matchi
 At runtime, graphics backend selection is bootstrapped through `backend/runtime/appbootstrap.*` from each app entrypoint.
 
 - macOS/iOS: Metal is fixed.
-- Windows/Linux/Android: Vulkan is fixed and runtime loader availability is validated on desktop Vulkan platforms.
+- Windows/Android: Vulkan is fixed and runtime loader availability is validated.
+- Linux: Qt default backend selection is used.
 - Other platforms: Qt default backend selection is used as fallback.
 - If a fixed backend cannot be initialized, app startup fails fast with a clear error message.
 
@@ -205,7 +208,7 @@ Build-time optimization policy is controlled by:
 - `LVRS_ENABLE_IPO` (default `ON`)
 
 When enabled, configure fails if:
-- The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` and Vulkan runtime for Windows/Linux/Android).
+- The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` for Windows/Android).
 
 ## Project Layout
 

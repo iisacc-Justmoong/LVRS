@@ -15,6 +15,7 @@ Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
   --build-dir <path>   Deprecated. Build directory is fixed to <repo>/build
   --build-type <type>  CMake build type (default: Release)
+  --platforms <list>   Bootstrap platforms (comma/semicolon list; default: host only)
   --clean              Deprecated no-op (clean reinstall is always enabled)
   --without-examples   Disable host configure-time example targets
   --without-tests      Disable host configure-time test targets
@@ -44,13 +45,18 @@ detect_host_platform() {
 detect_bootstrap_framework_platforms() {
     host_platform="$1"
     case "${host_platform}" in
-        macos|linux|windows)
-            echo "${host_platform};ios;android;wasm"
+        macos|linux|windows|ios|android|wasm)
+            echo "${host_platform}"
             ;;
         *)
-            echo "ios;android;wasm"
+            # Unknown host: keep legacy superset so caller can override explicitly.
+            echo "macos;linux;windows;ios;android;wasm"
             ;;
     esac
+}
+
+normalize_platform_list() {
+    echo "$1" | tr ',' ';'
 }
 
 lvrs_clean_recreate_dir() {
@@ -113,7 +119,12 @@ BUILD_EXAMPLES=1
 BUILD_TESTS=1
 HOST_PLATFORM="$(detect_host_platform)"
 HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
-BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
+BOOTSTRAP_FRAMEWORK_PLATFORMS="${LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS:-}"
+if [ -z "${BOOTSTRAP_FRAMEWORK_PLATFORMS}" ]; then
+    BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
+else
+    BOOTSTRAP_FRAMEWORK_PLATFORMS="$(normalize_platform_list "${BOOTSTRAP_FRAMEWORK_PLATFORMS}")"
+fi
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -135,6 +146,11 @@ while [ "$#" -gt 0 ]; do
         --build-type)
             [ "$#" -ge 2 ] || { echo "Missing value for --build-type" >&2; exit 1; }
             BUILD_TYPE="$2"
+            shift 2
+            ;;
+        --platforms)
+            [ "$#" -ge 2 ] || { echo "Missing value for --platforms" >&2; exit 1; }
+            BOOTSTRAP_FRAMEWORK_PLATFORMS="$(normalize_platform_list "$2")"
             shift 2
             ;;
         --clean)
@@ -179,7 +195,9 @@ done
 
 PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
 HOST_INSTALL_PREFIX="${PLATFORM_INSTALL_ROOT}/${HOST_PLATFORM}"
-BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
+if [ -z "${BOOTSTRAP_FRAMEWORK_PLATFORMS}" ]; then
+    BOOTSTRAP_FRAMEWORK_PLATFORMS="$(detect_bootstrap_framework_platforms "${HOST_PLATFORM}")"
+fi
 
 SOURCE_INSTALL_DIR="${INSTALL_PREFIX}/src/LVRS"
 PACKAGE_CONFIG_DIR="${HOST_INSTALL_PREFIX}/lib/cmake/LVRS"

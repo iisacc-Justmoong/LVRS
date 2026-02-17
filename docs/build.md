@@ -6,7 +6,9 @@
 ./install.sh
 ```
 
-The installer runs one multi-platform bootstrap build (`bootstrap_lvrs_all`) and installs LVRS for every runtime platform in one pass.
+The installer runs `bootstrap_lvrs_all` with a host-first default platform set.
+By default, only the host platform package is bootstrapped/installed.
+Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to include additional runtime platforms explicitly.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
@@ -47,7 +49,7 @@ ctest --test-dir build --output-on-failure
 - `LVRS_BUILD_EXAMPLES` (`OFF`): build runnable examples.
 - `LVRS_BUILD_TESTS` (`OFF`): build and register tests.
 - `LVRS_INSTALL_QML_MODULE` (`ON`): install QML module artifacts (`qmldir`, qmltypes, plugin, QML files) under `<prefix>/lib/qt6/qml/LVRS`.
-- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when the platform-fixed graphics backend requirements are missing.
+- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when fixed graphics backend Qt feature requirements are missing.
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (`ON`): apply platform-specific release/relwithdebinfo/minsizerel compile+link optimization flags.
 - `LVRS_ENABLE_IPO` (`ON`): enable interprocedural optimization (LTO) for release-like configs when toolchain support is available.
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
@@ -168,7 +170,8 @@ Framework-only bootstrap targets are generated at project root:
 - `bootstrap_lvrs_android`
 - `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
-`bootstrap_lvrs_all` configures each platform build under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
+`bootstrap_lvrs_all` builds the selected framework bootstrap platform set under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
+Default framework bootstrap platform set is host-only unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is provided.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`.
 
@@ -177,19 +180,21 @@ For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOT
 At configure time, when `LVRS_ENFORCE_VULKAN=ON`:
 
 - macOS/iOS must provide Qt Metal support (`QT_FEATURE_metal >= 0`).
-- Windows/Linux/Android must provide Qt Vulkan support (`QT_FEATURE_vulkan >= 0`) and a linkable Vulkan runtime target (`Vulkan::Vulkan`).
+- Windows/Android must provide Qt Vulkan support (`QT_FEATURE_vulkan >= 0`).
+- `Vulkan::Vulkan` is used when discoverable for Vulkan-fixed targets, but absence at configure time is treated as warning and runtime loader discovery is used instead.
 
 At runtime:
 
 - macOS/iOS are fixed to Metal.
-- Windows/Linux/Android are fixed to Vulkan.
+- Windows/Android are fixed to Vulkan.
+- Linux uses Qt default backend selection.
 - Other platforms use Qt default backend selection as fallback.
 - Startup fails fast if a fixed backend cannot be initialized.
 
 ## Notes
 
 - Qt 6.5+ with `Quick` and `QuickControls2` is required.
-- Vulkan and Qt feature checks happen in `CMakeLists.txt`.
+- Fixed backend Qt feature checks happen in `CMakeLists.txt`.
 - Backend selection logic lives in `backend/runtime/vulkanbootstrap.cpp`.
 - Downstream app bootstrap template is provided at `main.cpp` (not built by default).
 - Recommended reusable bootstrap API is `backend/runtime/appbootstrap.h`.

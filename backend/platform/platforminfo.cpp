@@ -181,7 +181,7 @@ QString graphicsBackendForPlatformToken(const QString &platform)
     if (platform == kPlatformMacos() || platform == kPlatformIos())
         return QStringLiteral("metal");
 
-    if (platform == kPlatformWindows() || platform == kPlatformLinux() || platform == kPlatformAndroid())
+    if (platform == kPlatformWindows() || platform == kPlatformAndroid())
         return QStringLiteral("vulkan");
 
     return QStringLiteral("default");

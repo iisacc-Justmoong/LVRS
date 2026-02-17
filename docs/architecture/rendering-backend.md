@@ -16,7 +16,8 @@ Location: `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`
 ## Platform Backend Matrix
 
 - macOS / iOS: Metal required.
-- Windows / Linux / Android: Vulkan required.
+- Windows / Android: Vulkan required.
+- Linux: Qt default backend selection.
 - Other targets: no hard override; Qt default backend selection is used.
 
 If a required backend is unavailable, bootstrap returns `ok == false` with error message.
@@ -25,7 +26,7 @@ If a required backend is unavailable, bootstrap returns `ok == false` with error
 
 CMake option: `LVRS_ENFORCE_VULKAN` (default `ON`)
 
-When enabled, configuration fails early if required backend capability cannot be validated for target platform.
+When enabled, configuration fails early if fixed backend Qt capability cannot be validated for target platform.
 This moves failures from runtime to configure/build phase.
 
 ## Runtime Diagnostics
@@ -64,7 +65,8 @@ Before shipping, validate one real device/simulator per target family:
 
 - macOS: confirm Metal backend selection and stable startup.
 - iOS: confirm Metal path and text rendering quality.
-- Windows/Linux: confirm Vulkan loader discovery and startup.
+- Windows: confirm Vulkan loader discovery and startup.
+- Linux: confirm stable startup with Qt default backend selection.
 - Android: confirm Vulkan-capable device behavior and fallback policy.
 
 ## Deployment Troubleshooting
@@ -73,7 +75,7 @@ If startup fails at bootstrap stage:
 
 - inspect bootstrap error string first,
 - verify Qt build includes required rendering backend feature,
-- verify runtime loader/driver presence for Vulkan targets,
+- verify runtime loader/driver presence for Vulkan targets (Windows/Android),
 - confirm no environment override is forcing incompatible graphics API.
 
 ## Operational Recommendation

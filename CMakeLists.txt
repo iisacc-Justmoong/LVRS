@@ -33,7 +33,10 @@ option(LVRS_AUTO_FALLBACK_X86_QT_TOOLS
     ON
 )
 option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
-option(LVRS_ENFORCE_VULKAN "Fail configure if Vulkan-capable Qt/runtime are unavailable" ON)
+option(LVRS_ENFORCE_VULKAN
+    "Fail configure if required fixed graphics backend Qt features are unavailable"
+    ON
+)
 option(LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS
     "Apply platform-specific release optimization flags (compile/link) to LVRS targets"
     ON
@@ -125,7 +128,7 @@ endfunction()
 set(LVRS_FORCED_BACKEND "default")
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
     set(LVRS_FORCED_BACKEND "metal")
-elseif(WIN32 OR ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif(WIN32 OR ANDROID)
     set(LVRS_FORCED_BACKEND "vulkan")
 endif()
 
@@ -416,30 +419,13 @@ if(TARGET LVRSCoreplugin_init)
     add_library(LVRSplugin_init ALIAS LVRSCoreplugin_init)
 endif()
 
-if(LVRS_FORCED_BACKEND STREQUAL "vulkan")
-    if(TARGET Vulkan::Headers)
-        set(LVRS_VULKAN_TARGET Vulkan::Headers)
-    elseif(TARGET Vulkan::Vulkan)
-        set(LVRS_VULKAN_TARGET Vulkan::Vulkan)
-    else()
-        find_path(LVRS_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
-        if(NOT LVRS_VULKAN_INCLUDE_DIR)
-            message(FATAL_ERROR "Vulkan headers are required on this platform, but vulkan/vulkan.h could not be found.")
-        endif()
-        add_library(LVRSVulkanHeaders INTERFACE)
-        target_include_directories(LVRSVulkanHeaders INTERFACE "${LVRS_VULKAN_INCLUDE_DIR}")
-        add_library(Vulkan::Headers ALIAS LVRSVulkanHeaders)
-        set(LVRS_VULKAN_TARGET Vulkan::Headers)
-        message(STATUS "Using header-only Vulkan dependency from: ${LVRS_VULKAN_INCLUDE_DIR}")
-    endif()
-endif()
-
 if(LVRS_ENFORCE_VULKAN)
     if(LVRS_FORCED_BACKEND STREQUAL "vulkan")
         if(NOT TARGET Vulkan::Vulkan)
-            message(FATAL_ERROR
-                "LVRS_ENFORCE_VULKAN=ON requires a linkable Vulkan runtime target (Vulkan::Vulkan) on this platform. "
-                "Current configure only resolved header-only Vulkan.")
+            message(WARNING
+                "LVRS_ENFORCE_VULKAN=ON: Vulkan::Vulkan was not discovered at configure time. "
+                "LVRS will continue because runtime Vulkan loader discovery is handled dynamically "
+                "in backend/runtime/vulkanbootstrap.cpp.")
         endif()
 
         _lvrs_detect_qt_feature(vulkan _lvrs_qt_vulkan_feature _lvrs_qtgui_config_header)

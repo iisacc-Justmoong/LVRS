@@ -127,7 +127,7 @@ GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
         QStringLiteral("Metal backend is required on macOS/iOS, but this Qt build has no Metal support.");
     return result;
 
-#elif defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
+#elif defined(Q_OS_WIN) || defined(Q_OS_ANDROID)
 #if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
     qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("vulkan"));
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
