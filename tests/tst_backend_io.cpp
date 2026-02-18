@@ -256,6 +256,8 @@ void BackendIoTests::backend_async_delay_distribution_and_read_cache_contract()
     Backend backend;
     backend.setAsyncMaxConcurrency(1);
     QCOMPARE(backend.asyncMaxConcurrency(), 1);
+    backend.setReadTextCacheTtlMs(150);
+    QCOMPARE(backend.readTextCacheTtlMs(), 150);
 
     QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
     QVERIFY(finishedSpy.isValid());
@@ -311,7 +313,9 @@ void BackendIoTests::backend_async_delay_distribution_and_read_cache_contract()
     QVERIFY(delayedArgs.size() >= 7);
     QCOMPARE(delayedArgs.at(1).toString(), QStringLiteral("dispatchTask"));
     QVERIFY(delayedArgs.at(3).toBool());
-    QVERIFY(delayedArgs.at(6).toLongLong() >= 300);
+    QVERIFY(delayedArgs.at(6).toLongLong() < 220);
+    QCOMPARE(delayedArgs.at(4).toMap().value(QStringLiteral("delayMs")).toInt(), 0);
+    QCOMPARE(delayedArgs.at(4).toMap().value(QStringLiteral("requestedDelayMs")).toInt(), 320);
 
     QElapsedTimer cacheTimer;
     cacheTimer.start();
@@ -327,6 +331,15 @@ void BackendIoTests::backend_async_delay_distribution_and_read_cache_contract()
     QCOMPARE(cachedReadArgs.at(1).toString(), QStringLiteral("readTextFile"));
     QVERIFY(cachedReadArgs.at(3).toBool());
     QCOMPARE(cachedReadArgs.at(4).toMap().value(QStringLiteral("cached")).toBool(), true);
+
+    QTest::qWait(220);
+    const qulonglong expiredReadId = backend.readTextFileAsync(filePath);
+    QTRY_VERIFY(hasFinishedRequest(expiredReadId));
+    const QList<QVariant> expiredReadArgs = finishedArgsFor(expiredReadId);
+    QVERIFY(expiredReadArgs.size() >= 7);
+    QCOMPARE(expiredReadArgs.at(1).toString(), QStringLiteral("readTextFile"));
+    QVERIFY(expiredReadArgs.at(3).toBool());
+    QCOMPARE(expiredReadArgs.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
 
     QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
 }

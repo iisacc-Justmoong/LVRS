@@ -4,7 +4,6 @@
 #include <QHash>
 #include <QMetaObject>
 #include <QPointer>
-#include <QStringList>
 #include <QThreadPool>
 #include <QVariantList>
 #include <QVariantMap>
@@ -26,6 +25,7 @@ class Backend : public QObject
     Q_PROPERTY(QVariantMap lastHookedInputState READ lastHookedInputState NOTIFY hookedEventsChanged)
     Q_PROPERTY(int asyncJobsInFlight READ asyncJobsInFlight NOTIFY asyncJobsInFlightChanged)
     Q_PROPERTY(int asyncMaxConcurrency READ asyncMaxConcurrency WRITE setAsyncMaxConcurrency NOTIFY asyncMaxConcurrencyChanged)
+    Q_PROPERTY(int readTextCacheTtlMs READ readTextCacheTtlMs WRITE setReadTextCacheTtlMs NOTIFY readTextCacheTtlMsChanged)
 
 public:
     explicit Backend(QObject *parent = nullptr);
@@ -57,6 +57,8 @@ public:
     int asyncJobsInFlight() const;
     int asyncMaxConcurrency() const;
     void setAsyncMaxConcurrency(int value);
+    int readTextCacheTtlMs() const;
+    void setReadTextCacheTtlMs(int value);
 
 signals:
     void lastErrorChanged();
@@ -65,6 +67,7 @@ signals:
     void hookedEventCapacityChanged();
     void asyncJobsInFlightChanged();
     void asyncMaxConcurrencyChanged();
+    void readTextCacheTtlMsChanged();
     void asyncRequestQueued(qulonglong requestId,
                             const QString &operation,
                             const QString &subject);
@@ -81,6 +84,7 @@ private:
         QString text;
         qint64 size = -1;
         qint64 lastModifiedMs = -1;
+        qint64 cachedAtMs = -1;
     };
 
     qulonglong beginAsyncRequest(const QString &operation, const QString &subject);
@@ -93,10 +97,11 @@ private:
                             qint64 elapsedMs);
     void setAsyncJobsInFlight(int value);
     QString normalizePathForCache(const QString &path) const;
+    bool isReadCacheEntryExpired(const ReadCacheEntry &entry, qint64 nowMs) const;
+    void pruneExpiredReadTextCache(qint64 nowMs);
     bool tryReadTextCache(const QString &path, QString *text);
     void updateReadTextCache(const QString &path, const QString &text);
     void invalidateReadTextCache(const QString &path);
-    void trimReadTextCache();
     RuntimeEvents *resolveRuntimeEvents() const;
     void appendHookedEvent(const QVariantMap &eventData);
     void setLastError(const QString &message);
@@ -113,8 +118,7 @@ private:
     QMetaObject::Connection m_runtimeDestroyedConnection;
     QThreadPool m_asyncThreadPool;
     QHash<QString, ReadCacheEntry> m_readTextCache;
-    QStringList m_readTextCacheOrder;
-    int m_readTextCacheCapacity = 256;
+    int m_readTextCacheTtlMs = 15000;
     int m_asyncJobsInFlight = 0;
     int m_asyncMaxConcurrency = 0;
     qulonglong m_asyncNextRequestId = 0;

@@ -11,7 +11,6 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QThread>
-#include <QTimer>
 
 #include <functional>
 
@@ -20,6 +19,8 @@ namespace {
 constexpr int kAsyncThreadExpiryTimeoutMs = 5000;
 constexpr int kIoTaskPriority = 1;
 constexpr int kUtilityTaskPriority = 0;
+constexpr int kReadTextCacheMinTtlMs = 100;
+constexpr int kReadTextCacheMaxTtlMs = 60 * 60 * 1000;
 
 struct SaveTextOutcome {
     bool ok = false;
@@ -205,17 +206,13 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
     const qint64 byteCount = text.toUtf8().size();
 
     if (path.trimmed().isEmpty()) {
-        QTimer::singleShot(0,
-                           this,
-                           [this, requestId, pathCopy]() {
-                               finishAsyncRequest(requestId,
-                                                  QStringLiteral("saveTextFile"),
-                                                  pathCopy,
-                                                  false,
-                                                  QVariantMap(),
-                                                  QStringLiteral("Empty path"),
-                                                  0);
-                           });
+        finishAsyncRequest(requestId,
+                           QStringLiteral("saveTextFile"),
+                           pathCopy,
+                           false,
+                           QVariantMap(),
+                           QStringLiteral("Empty path"),
+                           0);
         return requestId;
     }
 
@@ -261,37 +258,29 @@ qulonglong Backend::readTextFileAsync(const QString &path)
     const QString pathCopy = path;
 
     if (path.trimmed().isEmpty()) {
-        QTimer::singleShot(0,
-                           this,
-                           [this, requestId, pathCopy]() {
-                               finishAsyncRequest(requestId,
-                                                  QStringLiteral("readTextFile"),
-                                                  pathCopy,
-                                                  false,
-                                                  QVariantMap(),
-                                                  QStringLiteral("Empty path"),
-                                                  0);
-                           });
+        finishAsyncRequest(requestId,
+                           QStringLiteral("readTextFile"),
+                           pathCopy,
+                           false,
+                           QVariantMap(),
+                           QStringLiteral("Empty path"),
+                           0);
         return requestId;
     }
 
     QString cachedText;
     if (tryReadTextCache(pathCopy, &cachedText)) {
-        QTimer::singleShot(0,
-                           this,
-                           [this, requestId, pathCopy, cachedText]() {
-                               QVariantMap result;
-                               result.insert(QStringLiteral("text"), cachedText);
-                               result.insert(QStringLiteral("length"), cachedText.length());
-                               result.insert(QStringLiteral("cached"), true);
-                               finishAsyncRequest(requestId,
-                                                  QStringLiteral("readTextFile"),
-                                                  pathCopy,
-                                                  true,
-                                                  result,
-                                                  QString(),
-                                                  0);
-                           });
+        QVariantMap result;
+        result.insert(QStringLiteral("text"), cachedText);
+        result.insert(QStringLiteral("length"), cachedText.length());
+        result.insert(QStringLiteral("cached"), true);
+        finishAsyncRequest(requestId,
+                           QStringLiteral("readTextFile"),
+                           pathCopy,
+                           true,
+                           result,
+                           QString(),
+                           0);
         return requestId;
     }
 
@@ -341,17 +330,13 @@ qulonglong Backend::ensureDirAsync(const QString &path)
     const QString pathCopy = path;
 
     if (path.trimmed().isEmpty()) {
-        QTimer::singleShot(0,
-                           this,
-                           [this, requestId, pathCopy]() {
-                               finishAsyncRequest(requestId,
-                                                  QStringLiteral("ensureDir"),
-                                                  pathCopy,
-                                                  false,
-                                                  QVariantMap(),
-                                                  QStringLiteral("Empty path"),
-                                                  0);
-                           });
+        finishAsyncRequest(requestId,
+                           QStringLiteral("ensureDir"),
+                           pathCopy,
+                           false,
+                           QVariantMap(),
+                           QStringLiteral("Empty path"),
+                           0);
         return requestId;
     }
 
@@ -395,58 +380,37 @@ qulonglong Backend::dispatchAsyncTask(const QString &taskName, const QVariantMap
     const QString operation = QStringLiteral("dispatchTask");
     const qulonglong requestId = beginAsyncRequest(operation, normalizedTaskName);
     const QVariantMap payloadCopy = payload;
-    const int clampedDelayMs = qBound(0, delayMs, 60 * 60 * 1000);
-    const qint64 queuedMs = QDateTime::currentMSecsSinceEpoch();
+    const int requestedDelayMs = qBound(0, delayMs, 60 * 60 * 1000);
 
     QPointer<QCoreApplication> appGuard(QCoreApplication::instance());
     QPointer<Backend> backendGuard(this);
-    const auto enqueueRunnable = [this,
-                                  appGuard,
-                                  backendGuard,
-                                  requestId,
-                                  normalizedTaskName,
-                                  payloadCopy,
-                                  clampedDelayMs,
-                                  queuedMs,
-                                  operation]() {
-        m_asyncThreadPool.start(new LambdaRunnable(
-            [appGuard,
-             backendGuard,
-             requestId,
-             normalizedTaskName,
-             payloadCopy,
-             clampedDelayMs,
-             queuedMs,
-             operation]() {
-                QVariantMap result = payloadCopy;
-                result.insert(QStringLiteral("taskName"), normalizedTaskName);
-                result.insert(QStringLiteral("delayMs"), clampedDelayMs);
+    m_asyncThreadPool.start(new LambdaRunnable(
+        [appGuard, backendGuard, requestId, normalizedTaskName, payloadCopy, requestedDelayMs, operation]() {
+            const qint64 startedMs = QDateTime::currentMSecsSinceEpoch();
+            QVariantMap result = payloadCopy;
+            result.insert(QStringLiteral("taskName"), normalizedTaskName);
+            result.insert(QStringLiteral("delayMs"), 0);
+            result.insert(QStringLiteral("requestedDelayMs"), requestedDelayMs);
 
-                const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - queuedMs);
-                if (!appGuard)
-                    return;
+            const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - startedMs);
+            if (!appGuard)
+                return;
 
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, normalizedTaskName, result, elapsedMs]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               normalizedTaskName,
-                                                                               true,
-                                                                               result,
-                                                                               QString(),
-                                                                               elapsedMs);
-                                          },
-                                          Qt::QueuedConnection);
-            }),
-                              kUtilityTaskPriority);
-    };
-
-    if (clampedDelayMs > 0)
-        QTimer::singleShot(clampedDelayMs, this, enqueueRunnable);
-    else
-        enqueueRunnable();
+            QMetaObject::invokeMethod(appGuard.data(),
+                                      [backendGuard, requestId, operation, normalizedTaskName, result, elapsedMs]() {
+                                          if (!backendGuard)
+                                              return;
+                                          backendGuard->finishAsyncRequest(requestId,
+                                                                           operation,
+                                                                           normalizedTaskName,
+                                                                           true,
+                                                                           result,
+                                                                           QString(),
+                                                                           elapsedMs);
+                                      },
+                                      Qt::QueuedConnection);
+        }),
+                          kUtilityTaskPriority);
     return requestId;
 }
 
@@ -647,6 +611,22 @@ void Backend::setAsyncMaxConcurrency(int value)
     emit asyncMaxConcurrencyChanged();
 }
 
+int Backend::readTextCacheTtlMs() const
+{
+    return m_readTextCacheTtlMs;
+}
+
+void Backend::setReadTextCacheTtlMs(int value)
+{
+    const int next = qBound(kReadTextCacheMinTtlMs, value, kReadTextCacheMaxTtlMs);
+    if (m_readTextCacheTtlMs == next)
+        return;
+
+    m_readTextCacheTtlMs = next;
+    pruneExpiredReadTextCache(QDateTime::currentMSecsSinceEpoch());
+    emit readTextCacheTtlMsChanged();
+}
+
 qulonglong Backend::beginAsyncRequest(const QString &operation, const QString &subject)
 {
     const qulonglong requestId = ++m_asyncNextRequestId;
@@ -692,29 +672,53 @@ QString Backend::normalizePathForCache(const QString &path) const
     return QDir::cleanPath(trimmed);
 }
 
+bool Backend::isReadCacheEntryExpired(const ReadCacheEntry &entry, qint64 nowMs) const
+{
+    if (entry.cachedAtMs < 0)
+        return true;
+    if (m_readTextCacheTtlMs <= 0)
+        return true;
+    return (nowMs - entry.cachedAtMs) >= m_readTextCacheTtlMs;
+}
+
+void Backend::pruneExpiredReadTextCache(qint64 nowMs)
+{
+    for (auto it = m_readTextCache.begin(); it != m_readTextCache.end(); ) {
+        if (isReadCacheEntryExpired(it.value(), nowMs))
+            it = m_readTextCache.erase(it);
+        else
+            ++it;
+    }
+}
+
 bool Backend::tryReadTextCache(const QString &path, QString *text)
 {
     const QString key = normalizePathForCache(path);
     if (key.isEmpty())
         return false;
 
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    pruneExpiredReadTextCache(nowMs);
+
     auto it = m_readTextCache.constFind(key);
     if (it == m_readTextCache.constEnd())
         return false;
+
+    if (isReadCacheEntryExpired(it.value(), nowMs)) {
+        m_readTextCache.remove(key);
+        return false;
+    }
 
     const FileState state = inspectFileState(key);
     if (!state.ok
         || state.size != it.value().size
         || state.lastModifiedMs != it.value().lastModifiedMs) {
         m_readTextCache.remove(key);
-        m_readTextCacheOrder.removeAll(key);
         return false;
     }
 
     if (text)
         *text = it.value().text;
-    m_readTextCacheOrder.removeAll(key);
-    m_readTextCacheOrder.append(key);
     return true;
 }
 
@@ -730,15 +734,16 @@ void Backend::updateReadTextCache(const QString &path, const QString &text)
         return;
     }
 
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    pruneExpiredReadTextCache(nowMs);
+
     ReadCacheEntry entry;
     entry.text = text;
     entry.size = state.size;
     entry.lastModifiedMs = state.lastModifiedMs;
+    entry.cachedAtMs = nowMs;
 
     m_readTextCache.insert(key, entry);
-    m_readTextCacheOrder.removeAll(key);
-    m_readTextCacheOrder.append(key);
-    trimReadTextCache();
 }
 
 void Backend::invalidateReadTextCache(const QString &path)
@@ -747,16 +752,6 @@ void Backend::invalidateReadTextCache(const QString &path)
     if (key.isEmpty())
         return;
     m_readTextCache.remove(key);
-    m_readTextCacheOrder.removeAll(key);
-}
-
-void Backend::trimReadTextCache()
-{
-    const int capacity = qMax(1, m_readTextCacheCapacity);
-    while (m_readTextCacheOrder.size() > capacity) {
-        const QString oldest = m_readTextCacheOrder.takeFirst();
-        m_readTextCache.remove(oldest);
-    }
 }
 
 RuntimeEvents *Backend::resolveRuntimeEvents() const
