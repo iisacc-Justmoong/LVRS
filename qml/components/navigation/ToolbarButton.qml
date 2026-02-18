@@ -10,7 +10,7 @@ IconButton {
 
     readonly property bool active: toolbar && toolbar.activeButton === control
 
-    tone: active ? AbstractButton.Primary : AbstractButton.Borderless
+    tone: active ? AbstractButton.Default : AbstractButton.Borderless
 
     onClicked: {
         if (toolbar && toolbar.requestActivate)
