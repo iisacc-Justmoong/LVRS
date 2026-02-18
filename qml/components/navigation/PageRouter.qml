@@ -19,8 +19,13 @@ Item {
     property bool registerAsGlobalNavigator: true
     property bool enforcePageViewport: true
     property bool isolateInactivePages: true
+    property int retainInactivePageCount: 0
+    property int routeResolveCacheCapacity: 256
     property var _trackedViewIds: []
     property bool _presentationSyncScheduled: false
+    property var _routeResolveCache: ({})
+    property var _routeResolveCacheOrder: []
+    property string _routeResolveSignature: ""
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
@@ -92,16 +97,20 @@ Item {
             return
 
         var topIndex = stackView.depth - 1
+        var retainDepth = Math.max(0, retainInactivePageCount)
+        var keepFromIndex = Math.max(0, topIndex - retainDepth)
         for (var i = 0; i < stackView.depth; i++) {
             var page = stackView.get(i)
             if (!page)
                 continue
 
-            var active = i === topIndex
+            var active = i >= keepFromIndex
             if (page.visible !== undefined)
                 page.visible = active
             if (page.enabled !== undefined)
                 page.enabled = active
+            if (page.opacity !== undefined)
+                page.opacity = active ? 1.0 : 0.0
             if (!active && page.focus !== undefined)
                 page.focus = false
         }
@@ -199,6 +208,12 @@ Item {
     }
 
     function normalizePath(path) {
+        if (typeof RouteMatcher !== "undefined"
+                && RouteMatcher
+                && RouteMatcher.normalizePath) {
+            return RouteMatcher.normalizePath(String(path === undefined || path === null ? "" : path))
+        }
+
         var value = String(path || "/")
         if (!value.startsWith("/"))
             value = "/" + value
@@ -208,6 +223,15 @@ Item {
     }
 
     function matchRoute(path, routePath) {
+        if (typeof RouteMatcher !== "undefined"
+                && RouteMatcher
+                && RouteMatcher.match) {
+            var nativeResult = RouteMatcher.match(path, routePath)
+            if (nativeResult && nativeResult.matched)
+                return nativeResult.params
+            return null
+        }
+
         var normalizedPath = normalizePath(path)
         var normalizedRoute = normalizePath(routePath)
         if (normalizedRoute === "/")
@@ -245,10 +269,60 @@ Item {
         return params
     }
 
+    function clearRouteResolveCache() {
+        _routeResolveCache = ({})
+        _routeResolveCacheOrder = []
+    }
+
+    function touchRouteResolveCacheKey(key) {
+        var index = _routeResolveCacheOrder.indexOf(key)
+        if (index >= 0)
+            _routeResolveCacheOrder.splice(index, 1)
+        _routeResolveCacheOrder.push(key)
+    }
+
+    function putRouteResolveCache(pathKey, entry) {
+        _routeResolveCache[pathKey] = entry
+        touchRouteResolveCacheKey(pathKey)
+
+        var cap = Math.max(16, routeResolveCacheCapacity)
+        while (_routeResolveCacheOrder.length > cap) {
+            var oldest = _routeResolveCacheOrder.shift()
+            if (oldest !== undefined)
+                delete _routeResolveCache[oldest]
+        }
+    }
+
+    function routeResolveSignature() {
+        if (!routes)
+            return "none"
+        var list = routes.length !== undefined ? routes : routes
+        var count = list.length !== undefined ? list.length : list.count
+        var tokens = []
+        tokens.push(String(count))
+        for (var i = 0; i < count; i++) {
+            var route = list.length !== undefined ? list[i] : list.get(i)
+            tokens.push(route && route.path ? String(route.path) : "")
+        }
+        return tokens.join("|")
+    }
+
     function resolveRoute(path) {
         var normalizedPath = normalizePath(path)
         if (!routes)
             return null
+        var signature = routeResolveSignature()
+        if (_routeResolveSignature !== signature) {
+            _routeResolveSignature = signature
+            clearRouteResolveCache()
+        }
+
+        var cached = _routeResolveCache[normalizedPath]
+        if (cached !== undefined) {
+            touchRouteResolveCacheKey(normalizedPath)
+            return cached
+        }
+
         var list = routes.length !== undefined ? routes : routes
         var count = list.length !== undefined ? list.length : list.count
         for (var i = 0; i < count; i++) {
@@ -256,9 +330,13 @@ Item {
             if (!route || !route.path)
                 continue
             var params = matchRoute(normalizedPath, route.path)
-            if (params !== null)
-                return { route: route, params: params }
+            if (params !== null) {
+                var resolved = { route: route, params: params }
+                putRouteResolveCache(normalizedPath, resolved)
+                return resolved
+            }
         }
+        putRouteResolveCache(normalizedPath, null)
         return null
     }
 
@@ -391,6 +469,16 @@ Item {
     }
 
     property bool _syncingPath: false
+
+    onRoutesChanged: {
+        _routeResolveSignature = ""
+        clearRouteResolveCache()
+    }
+
+    onRouteResolveCacheCapacityChanged: {
+        if (_routeResolveCacheOrder.length > Math.max(16, routeResolveCacheCapacity))
+            clearRouteResolveCache()
+    }
 
     onPathChanged: {
         if (_syncingPath)

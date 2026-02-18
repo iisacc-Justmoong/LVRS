@@ -2,7 +2,16 @@
 
 #include <QQuickWindow>
 #include <QSurfaceFormat>
+#include <QWindow>
 #include <QtGlobal>
+
+namespace {
+
+constexpr int kFramesInFlightMin = 1;
+constexpr int kFramesInFlightMax = 3;
+constexpr int kInactiveMsaaSamplesMax = 16;
+
+} // namespace
 
 RenderQuality::RenderQuality(QObject *parent)
     : QObject(parent)
@@ -122,6 +131,7 @@ void RenderQuality::setMsaaSamples(int value)
         return;
     m_msaaSamples = next;
     emit msaaSamplesChanged();
+    updateWindowPowerMode();
 }
 
 bool RenderQuality::nativeTextRendering() const
@@ -138,6 +148,81 @@ void RenderQuality::setNativeTextRendering(bool value)
         return;
     m_nativeTextRendering = next;
     emit nativeTextRenderingChanged();
+}
+
+int RenderQuality::framesInFlight() const
+{
+    return m_framesInFlight;
+}
+
+void RenderQuality::setFramesInFlight(int value)
+{
+    const int next = qBound(kFramesInFlightMin, value, kFramesInFlightMax);
+    if (m_framesInFlight == next)
+        return;
+    m_framesInFlight = next;
+    emit framesInFlightChanged();
+}
+
+bool RenderQuality::partialUpdateEnabled() const
+{
+    return m_partialUpdateEnabled;
+}
+
+void RenderQuality::setPartialUpdateEnabled(bool value)
+{
+    if (m_partialUpdateEnabled == value)
+        return;
+    m_partialUpdateEnabled = value;
+    emit partialUpdateEnabledChanged();
+}
+
+bool RenderQuality::batchRenderingEnabled() const
+{
+    return m_batchRenderingEnabled;
+}
+
+void RenderQuality::setBatchRenderingEnabled(bool value)
+{
+    if (m_batchRenderingEnabled == value)
+        return;
+    m_batchRenderingEnabled = value;
+    emit batchRenderingEnabledChanged();
+}
+
+bool RenderQuality::inactiveRenderDowngradeEnabled() const
+{
+    return m_inactiveRenderDowngradeEnabled;
+}
+
+void RenderQuality::setInactiveRenderDowngradeEnabled(bool value)
+{
+    if (m_inactiveRenderDowngradeEnabled == value)
+        return;
+    m_inactiveRenderDowngradeEnabled = value;
+    emit inactiveRenderDowngradeEnabledChanged();
+    updateWindowPowerMode();
+    updateSceneSupersamplingActive();
+}
+
+int RenderQuality::inactiveMsaaSamples() const
+{
+    return m_inactiveMsaaSamples;
+}
+
+void RenderQuality::setInactiveMsaaSamples(int value)
+{
+    const int next = qBound(0, value, kInactiveMsaaSamplesMax);
+    if (m_inactiveMsaaSamples == next)
+        return;
+    m_inactiveMsaaSamples = next;
+    emit inactiveMsaaSamplesChanged();
+    updateWindowPowerMode();
+}
+
+bool RenderQuality::powerSaveActive() const
+{
+    return m_powerSaveActive;
 }
 
 qreal RenderQuality::effectiveSupersampleScale() const
@@ -187,6 +272,7 @@ void RenderQuality::bindWindow(QObject *window)
     }
 
     if (m_boundWindow == quickWindow) {
+        updateWindowPowerMode();
         updateSceneSupersamplingActive();
         return;
     }
@@ -196,15 +282,36 @@ void RenderQuality::bindWindow(QObject *window)
     m_boundWindowWidthConnection = connect(m_boundWindow,
                                            &QQuickWindow::widthChanged,
                                            this,
-                                           [this]() { updateSceneSupersamplingActive(); });
+                                           [this]() {
+                                               updateWindowPowerMode();
+                                               updateSceneSupersamplingActive();
+                                           });
     m_boundWindowHeightConnection = connect(m_boundWindow,
                                             &QQuickWindow::heightChanged,
                                             this,
-                                            [this]() { updateSceneSupersamplingActive(); });
+                                            [this]() {
+                                                updateWindowPowerMode();
+                                                updateSceneSupersamplingActive();
+                                            });
+    m_boundWindowVisibilityConnection = connect(m_boundWindow,
+                                                &QWindow::visibilityChanged,
+                                                this,
+                                                [this](QWindow::Visibility) {
+                                                    updateWindowPowerMode();
+                                                    updateSceneSupersamplingActive();
+                                                });
+    m_boundWindowActiveConnection = connect(m_boundWindow,
+                                            &QWindow::activeChanged,
+                                            this,
+                                            [this]() {
+                                                updateWindowPowerMode();
+                                                updateSceneSupersamplingActive();
+                                            });
     m_boundWindowDestroyedConnection = connect(m_boundWindow,
                                                &QObject::destroyed,
                                                this,
                                                [this]() { detachWindowBinding(); });
+    updateWindowPowerMode();
     updateSceneSupersamplingActive();
 }
 
@@ -229,18 +336,25 @@ void RenderQuality::applyWindow(QObject *window)
         quickWindow->setFormat(format);
     }
 
-    quickWindow->setPersistentGraphics(true);
-    quickWindow->setPersistentSceneGraph(true);
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+    updateWindowPowerMode();
     updateSceneSupersamplingActive();
 }
 
 void RenderQuality::applyGlobalDefaults()
 {
-    configureGlobalDefaults(m_msaaSamples, kTextVectorFirstEnabled);
+    configureGlobalDefaults(m_msaaSamples,
+                            kTextVectorFirstEnabled,
+                            m_framesInFlight,
+                            m_partialUpdateEnabled,
+                            m_batchRenderingEnabled);
 }
 
-void RenderQuality::configureGlobalDefaults(int msaaSamples, bool nativeTextRendering)
+void RenderQuality::configureGlobalDefaults(int msaaSamples,
+                                            bool nativeTextRendering,
+                                            int framesInFlight,
+                                            bool partialUpdateEnabled,
+                                            bool batchRenderingEnabled)
 {
     Q_UNUSED(nativeTextRendering)
 
@@ -257,6 +371,27 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples, bool nativeTextRend
     if (qEnvironmentVariableIsEmpty("QSG_RENDER_LOOP"))
         qputenv("QSG_RENDER_LOOP", QByteArrayLiteral("threaded"));
 
+    if (qEnvironmentVariableIsEmpty("QSG_RHI_FRAMES_IN_FLIGHT")) {
+        const int clampedFrames = qBound(kFramesInFlightMin, framesInFlight, kFramesInFlightMax);
+        qputenv("QSG_RHI_FRAMES_IN_FLIGHT", QByteArray::number(clampedFrames));
+    }
+
+    if (partialUpdateEnabled) {
+        if (qEnvironmentVariableIsEmpty("QSG_PARTIAL_UPDATE"))
+            qputenv("QSG_PARTIAL_UPDATE", QByteArrayLiteral("1"));
+        if (qEnvironmentVariableIsEmpty("QSG_NO_FULL_REDRAW"))
+            qputenv("QSG_NO_FULL_REDRAW", QByteArrayLiteral("1"));
+    }
+
+    if (batchRenderingEnabled) {
+        if (qEnvironmentVariableIsEmpty("QSG_BATCH_RENDERER"))
+            qputenv("QSG_BATCH_RENDERER", QByteArrayLiteral("1"));
+        if (qEnvironmentVariableIsEmpty("QSG_ATLAS_WIDTH"))
+            qputenv("QSG_ATLAS_WIDTH", QByteArrayLiteral("2048"));
+        if (qEnvironmentVariableIsEmpty("QSG_ATLAS_HEIGHT"))
+            qputenv("QSG_ATLAS_HEIGHT", QByteArrayLiteral("2048"));
+    }
+
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     const int minimumSamples = kAntialiasingEnabled ? 2 : 0;
     const int samples = qBound(minimumSamples, msaaSamples, 16);
@@ -271,10 +406,46 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples, bool nativeTextRend
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
 }
 
+void RenderQuality::updateWindowPowerMode()
+{
+    if (!m_boundWindow) {
+        if (m_powerSaveActive) {
+            m_powerSaveActive = false;
+            emit powerSaveActiveChanged();
+        }
+        return;
+    }
+
+    bool nextPowerSave = false;
+    if (m_inactiveRenderDowngradeEnabled) {
+        const QWindow::Visibility visibility = m_boundWindow->visibility();
+        nextPowerSave = (visibility == QWindow::Hidden || visibility == QWindow::Minimized);
+    }
+
+    if (m_powerSaveActive != nextPowerSave) {
+        m_powerSaveActive = nextPowerSave;
+        emit powerSaveActiveChanged();
+    }
+
+    const int minimumActiveSamples = kAntialiasingEnabled ? 2 : 0;
+    const int activeSamples = qBound(minimumActiveSamples, m_msaaSamples, 16);
+    const int inactiveSamples = qBound(0, m_inactiveMsaaSamples, 16);
+    const int targetSamples = m_powerSaveActive ? qMin(activeSamples, inactiveSamples) : activeSamples;
+
+    QSurfaceFormat format = m_boundWindow->format();
+    if (format.samples() != targetSamples) {
+        format.setSamples(targetSamples);
+        m_boundWindow->setFormat(format);
+    }
+
+    m_boundWindow->setPersistentGraphics(!m_powerSaveActive);
+    m_boundWindow->setPersistentSceneGraph(!m_powerSaveActive);
+}
+
 void RenderQuality::updateSceneSupersamplingActive()
 {
     bool next = false;
-    if (m_boundWindow)
+    if (m_boundWindow && !m_powerSaveActive)
         next = shouldUseSceneSupersampling(m_boundWindow->width(), m_boundWindow->height());
     if (m_sceneSupersamplingActive == next)
         return;
@@ -292,11 +463,23 @@ void RenderQuality::detachWindowBinding()
         disconnect(m_boundWindowHeightConnection);
         m_boundWindowHeightConnection = QMetaObject::Connection();
     }
+    if (m_boundWindowVisibilityConnection) {
+        disconnect(m_boundWindowVisibilityConnection);
+        m_boundWindowVisibilityConnection = QMetaObject::Connection();
+    }
+    if (m_boundWindowActiveConnection) {
+        disconnect(m_boundWindowActiveConnection);
+        m_boundWindowActiveConnection = QMetaObject::Connection();
+    }
     if (m_boundWindowDestroyedConnection) {
         disconnect(m_boundWindowDestroyedConnection);
         m_boundWindowDestroyedConnection = QMetaObject::Connection();
     }
     m_boundWindow.clear();
+    if (m_powerSaveActive) {
+        m_powerSaveActive = false;
+        emit powerSaveActiveChanged();
+    }
     if (m_sceneSupersamplingActive) {
         m_sceneSupersamplingActive = false;
         emit sceneSupersamplingActiveChanged();

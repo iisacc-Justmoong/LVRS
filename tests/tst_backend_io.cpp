@@ -28,6 +28,8 @@ private slots:
     void backend_event_hook_receives_runtime_events();
     void backend_async_concurrency_and_io_contract();
     void backend_async_delay_distribution_and_read_cache_contract();
+    void backend_performance_metrics_and_trace_contract();
+    void backend_p1_scheduler_backpressure_cancel_and_cache_capacity_contract();
 };
 
 void BackendIoTests::backend_file_roundtrip_and_errors()
@@ -342,6 +344,243 @@ void BackendIoTests::backend_async_delay_distribution_and_read_cache_contract()
     QCOMPARE(expiredReadArgs.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
 
     QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
+}
+
+void BackendIoTests::backend_performance_metrics_and_trace_contract()
+{
+    Backend backend;
+    backend.setAsyncMaxConcurrency(1);
+    backend.setPerformanceTraceCapacity(512);
+    QCOMPARE(backend.performanceTraceCapacity(), 512);
+
+    QSignalSpy traceSpy(&backend, &Backend::performanceTraceChanged);
+    QSignalSpy metricsSpy(&backend, &Backend::performanceMetricsChanged);
+    QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
+    QVERIFY(traceSpy.isValid());
+    QVERIFY(metricsSpy.isValid());
+    QVERIFY(finishedSpy.isValid());
+
+    auto hasFinishedRequest = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return true;
+        }
+        return false;
+    };
+
+    const qulonglong taskA = backend.dispatchAsyncTask(QStringLiteral("perf-task-a"),
+                                                       QVariantMap { { QStringLiteral("kind"), QStringLiteral("a") } },
+                                                       0);
+    const qulonglong taskB = backend.dispatchAsyncTask(QStringLiteral("perf-task-b"),
+                                                       QVariantMap { { QStringLiteral("kind"), QStringLiteral("b") } },
+                                                       0);
+    QTRY_VERIFY(hasFinishedRequest(taskA));
+    QTRY_VERIFY(hasFinishedRequest(taskB));
+    QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
+
+    const QVariantMap metrics = backend.performanceMetrics();
+    QCOMPARE(metrics.value(QStringLiteral("schema")).toString(), QStringLiteral("lvrs.performance.v1"));
+    QCOMPARE(metrics.value(QStringLiteral("component")).toString(), QStringLiteral("Backend"));
+    QCOMPARE(metrics.value(QStringLiteral("asyncMaxConcurrency")).toInt(), 1);
+    QVERIFY(metrics.contains(QStringLiteral("asyncQueueDepth")));
+    QVERIFY(metrics.contains(QStringLiteral("asyncQueuePeakDepth")));
+    QVERIFY(metrics.contains(QStringLiteral("performanceTraceCount")));
+
+    const QVariantMap byOperation = metrics.value(QStringLiteral("asyncLatencyByOperation")).toMap();
+    QVERIFY(byOperation.contains(QStringLiteral("dispatchTask")));
+    const QVariantMap dispatchLatency = byOperation.value(QStringLiteral("dispatchTask")).toMap();
+    QVERIFY(dispatchLatency.value(QStringLiteral("count")).toULongLong() >= 2);
+    QVERIFY(dispatchLatency.contains(QStringLiteral("avgMs")));
+    QVERIFY(dispatchLatency.contains(QStringLiteral("p95Ms")));
+    QVERIFY(dispatchLatency.contains(QStringLiteral("p99Ms")));
+
+    const QVariantList trace = backend.recentPerformanceTrace();
+    QVERIFY(trace.size() >= 6);
+
+    bool hasQueued = false;
+    bool hasStarted = false;
+    bool hasFinished = false;
+    qulonglong prevSequence = 0;
+    for (const QVariant &entryValue : trace) {
+        const QVariantMap entry = entryValue.toMap();
+        const qulonglong sequence = entry.value(QStringLiteral("sequence")).toULongLong();
+        QVERIFY(sequence > prevSequence);
+        prevSequence = sequence;
+        const QString phase = entry.value(QStringLiteral("phase")).toString();
+        if (phase == QStringLiteral("queued"))
+            hasQueued = true;
+        if (phase == QStringLiteral("started"))
+            hasStarted = true;
+        if (phase == QStringLiteral("finished"))
+            hasFinished = true;
+    }
+    QVERIFY(hasQueued);
+    QVERIFY(hasStarted);
+    QVERIFY(hasFinished);
+    QVERIFY(traceSpy.count() >= 6);
+    QVERIFY(metricsSpy.count() >= 1);
+
+    backend.clearPerformanceTrace();
+    QCOMPARE(backend.performanceTraceCount(), 0);
+}
+
+void BackendIoTests::backend_p1_scheduler_backpressure_cancel_and_cache_capacity_contract()
+{
+    Backend backend;
+    backend.setAsyncMaxConcurrency(3);
+    backend.setAsyncQueueDepthLimit(1);
+    backend.setReadTextCacheTtlMs(10000);
+    backend.setReadTextCacheCapacityBytes(64);
+    QCOMPARE(backend.asyncQueueDepthLimit(), 1);
+    QCOMPARE(backend.readTextCacheCapacityBytes(), 64);
+    QVERIFY(backend.asyncIoMaxConcurrency() >= 1);
+    QVERIFY(backend.asyncUtilityMaxConcurrency() >= 1);
+    QVERIFY(backend.asyncRenderMaxConcurrency() >= 1);
+
+    QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
+    QVERIFY(finishedSpy.isValid());
+
+    auto hasFinishedRequest = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return true;
+        }
+        return false;
+    };
+
+    auto finishedArgsFor = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return args;
+        }
+        return QList<QVariant>();
+    };
+
+    const qulonglong coalesceLeaderId = backend.dispatchAsyncTask(
+        QStringLiteral("utility:coalesce-leader"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("utility") },
+            { QStringLiteral("workMs"), 300 },
+            { QStringLiteral("coalesce"), true },
+            { QStringLiteral("coalesceKey"), QStringLiteral("group-a") }
+        });
+    const qulonglong coalesceFollowerId = backend.dispatchAsyncTask(
+        QStringLiteral("utility:coalesce-follower"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("utility") },
+            { QStringLiteral("coalesce"), true },
+            { QStringLiteral("coalesceKey"), QStringLiteral("group-a") }
+        });
+
+    QTRY_VERIFY(hasFinishedRequest(coalesceFollowerId));
+    const QList<QVariant> coalesceFollowerArgs = finishedArgsFor(coalesceFollowerId);
+    QVERIFY(coalesceFollowerArgs.size() >= 7);
+    QVERIFY(coalesceFollowerArgs.at(3).toBool());
+    QVERIFY(coalesceFollowerArgs.at(4).toMap().value(QStringLiteral("coalesced")).toBool());
+    QCOMPARE(coalesceFollowerArgs.at(4).toMap().value(QStringLiteral("mergedIntoRequestId")).toULongLong(),
+             coalesceLeaderId);
+
+    const qulonglong queuedUtilityId = backend.dispatchAsyncTask(
+        QStringLiteral("utility:queued"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("utility") },
+            { QStringLiteral("workMs"), 300 },
+            { QStringLiteral("coalesce"), false }
+        });
+    const qulonglong droppedUtilityId = backend.dispatchAsyncTask(
+        QStringLiteral("utility:dropped"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("utility") },
+            { QStringLiteral("workMs"), 50 },
+            { QStringLiteral("coalesce"), false }
+        });
+
+    QTRY_VERIFY(hasFinishedRequest(droppedUtilityId));
+    const QList<QVariant> droppedArgs = finishedArgsFor(droppedUtilityId);
+    QVERIFY(droppedArgs.size() >= 7);
+    QVERIFY(!droppedArgs.at(3).toBool());
+    QCOMPARE(droppedArgs.at(5).toString(), QStringLiteral("Backpressure queue limit exceeded"));
+
+    const qulonglong renderTaskId = backend.dispatchAsyncTask(
+        QStringLiteral("render:frame-prep"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("render") },
+            { QStringLiteral("workMs"), 50 }
+        });
+    QTRY_VERIFY(hasFinishedRequest(renderTaskId));
+    const QList<QVariant> renderArgs = finishedArgsFor(renderTaskId);
+    QVERIFY(renderArgs.size() >= 7);
+    QVERIFY(renderArgs.at(3).toBool());
+    QCOMPARE(renderArgs.at(4).toMap().value(QStringLiteral("lane")).toString(), QStringLiteral("render"));
+
+    QTRY_VERIFY(hasFinishedRequest(coalesceLeaderId));
+    QTRY_VERIFY(hasFinishedRequest(queuedUtilityId));
+
+    const qulonglong cancellableTaskId = backend.dispatchAsyncTask(
+        QStringLiteral("utility:cancellable"),
+        QVariantMap {
+            { QStringLiteral("lane"), QStringLiteral("utility") },
+            { QStringLiteral("workMs"), 800 },
+            { QStringLiteral("coalesce"), false }
+        });
+    QVERIFY(backend.cancelAsyncRequest(cancellableTaskId, QStringLiteral("test-cancel")));
+
+    QTRY_VERIFY(hasFinishedRequest(cancellableTaskId));
+    const QList<QVariant> canceledArgs = finishedArgsFor(cancellableTaskId);
+    QVERIFY(canceledArgs.size() >= 7);
+    QVERIFY(!canceledArgs.at(3).toBool());
+    QCOMPARE(canceledArgs.at(5).toString(), QStringLiteral("test-cancel"));
+    QVERIFY(canceledArgs.at(4).toMap().value(QStringLiteral("canceled")).toBool());
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString fileA = tempDir.path() + "/cache-a.txt";
+    const QString fileB = tempDir.path() + "/cache-b.txt";
+    const QString textA = QStringLiteral("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    const QString textB = QStringLiteral("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    QVERIFY(backend.saveTextFile(fileA, textA));
+    QVERIFY(backend.saveTextFile(fileB, textB));
+    QTest::qWait(5);
+    QFile mutateA(fileA);
+    QVERIFY(mutateA.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate));
+    QVERIFY(mutateA.write((textA + QStringLiteral("!")).toUtf8()) > 0);
+    mutateA.close();
+    QFile mutateB(fileB);
+    QVERIFY(mutateB.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate));
+    QVERIFY(mutateB.write((textB + QStringLiteral("!")).toUtf8()) > 0);
+    mutateB.close();
+
+    const qulonglong readA1 = backend.readTextFileAsync(fileA);
+    QTRY_VERIFY(hasFinishedRequest(readA1));
+    const QList<QVariant> readA1Args = finishedArgsFor(readA1);
+    QVERIFY(readA1Args.size() >= 7);
+    QVERIFY(readA1Args.at(3).toBool());
+    QCOMPARE(readA1Args.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
+
+    const qulonglong readB1 = backend.readTextFileAsync(fileB);
+    QTRY_VERIFY(hasFinishedRequest(readB1));
+    const QList<QVariant> readB1Args = finishedArgsFor(readB1);
+    QVERIFY(readB1Args.size() >= 7);
+    QVERIFY(readB1Args.at(3).toBool());
+    QCOMPARE(readB1Args.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
+
+    QVERIFY(backend.readTextCacheEntryCount() <= 1);
+    QVERIFY(backend.readTextCacheBytes() <= backend.readTextCacheCapacityBytes());
+
+    const qulonglong readA2 = backend.readTextFileAsync(fileA);
+    QTRY_VERIFY(hasFinishedRequest(readA2));
+    const QList<QVariant> readA2Args = finishedArgsFor(readA2);
+    QVERIFY(readA2Args.size() >= 7);
+    QVERIFY(readA2Args.at(3).toBool());
+    QCOMPARE(readA2Args.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
+
+    const QVariantMap metrics = backend.performanceMetrics();
+    QCOMPARE(metrics.value(QStringLiteral("asyncQueueDepthLimit")).toInt(), 1);
+    QVERIFY(metrics.value(QStringLiteral("asyncBackpressureDropCount")).toULongLong() >= 1);
+    QVERIFY(metrics.value(QStringLiteral("asyncMergedRequestCount")).toULongLong() >= 1);
+    QVERIFY(metrics.value(QStringLiteral("asyncCanceledRequestCount")).toULongLong() >= 1);
+    QCOMPARE(metrics.value(QStringLiteral("readTextCacheCapacityBytes")).toLongLong(),
+             backend.readTextCacheCapacityBytes());
 }
 
 QTEST_MAIN(BackendIoTests)

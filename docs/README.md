@@ -10,6 +10,8 @@ The primary objective is operational clarity: each document should answer what A
 3. `docs/mvvm.md`
 4. `docs/architecture/event-pipeline.md`
 5. `docs/architecture/rendering-backend.md`
+6. `docs/architecture/performance-observability.md`
+7. `docs/performance-baseline-p0.md`
 
 ## Documentation Contract
 
@@ -33,6 +35,11 @@ This structure is intentional so the same question can be answered consistently 
 
 - `docs/architecture/event-pipeline.md`
 - `docs/architecture/rendering-backend.md`
+- `docs/architecture/performance-observability.md`
+
+## Performance Baseline
+
+- `docs/performance-baseline-p0.md`
 
 ## Backend Singletons
 
@@ -41,6 +48,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/RuntimeEvents.md`
 - `docs/backend/RenderQuality.md`
 - `docs/backend/RenderMonitor.md`
+- `docs/backend/RouteMatcher.md`
 - `docs/backend/PageMonitor.md`
 - `docs/backend/ViewStateTracker.md`
 - `docs/backend/ViewModels.md`

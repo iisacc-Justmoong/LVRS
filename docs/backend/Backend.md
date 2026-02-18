@@ -33,7 +33,23 @@ It is intentionally simple: transport and bounded caching, not policy-heavy anal
 | `lastHookedEvent` | `map` | Most recent mirrored event (with `hookEpochMs`). | Empty before first event. |
 | `lastHookedInputState` | `map` | Latest input snapshot from payload/runtime fallback. | May be stale when unhooked. |
 | `asyncJobsInFlight` | `int` | Number of queued/running async requests. | Lower-bounded to `0`. |
-| `asyncMaxConcurrency` | `int` | Worker-pool max parallelism for async dispatch. | Clamped `[1, 64]`. |
+| `asyncMaxConcurrency` | `int` | Global async concurrency budget used to derive lane pools. | Clamped `[1, 64]`. |
+| `asyncIoMaxConcurrency` | `int` | Derived concurrency of IO lane pool. | Lower-bounded to `1`. |
+| `asyncUtilityMaxConcurrency` | `int` | Derived concurrency of utility lane pool. | Lower-bounded to `1`. |
+| `asyncRenderMaxConcurrency` | `int` | Derived concurrency of render lane pool. | Lower-bounded to `1`. |
+| `asyncQueueDepth` | `int` | Current queued request count across lanes. | Lower-bounded to `0`. |
+| `asyncQueuePeakDepth` | `int` | Peak observed queue depth since process start. | Monotonic increasing. |
+| `asyncQueueDepthLimit` | `int` | Per-lane queued depth limit for backpressure. | Clamped `[1, 16384]`. |
+| `asyncBackpressureDropCount` | `uint64` | Number of requests rejected by backpressure. | Monotonic increasing. |
+| `asyncMergedRequestCount` | `uint64` | Number of requests merged by coalescing. | Monotonic increasing. |
+| `asyncCanceledRequestCount` | `uint64` | Number of requests finalized as canceled. | Monotonic increasing. |
+| `performanceMetrics` | `map` | Aggregated async latency/queue metrics snapshot. | Schema: `lvrs.performance.v1`. |
+| `performanceTraceCapacity` | `int` | Max retained performance trace events. | Clamped `[128, 16384]`. |
+| `performanceTraceCount` | `int` | Current retained performance trace events. | Bounded by capacity. |
+| `readTextCacheTtlMs` | `int` | TTL for in-memory text read cache. | Clamped `[100, 3600000]`. |
+| `readTextCacheCapacityBytes` | `int64` | Max memory budget for text cache. | Clamped `[64, 536870912]`. |
+| `readTextCacheBytes` | `int64` | Current text cache memory usage. | Lower-bounded to `0`. |
+| `readTextCacheEntryCount` | `int` | Current text cache entry count. | Lower-bounded to `0`. |
 
 ## 3. Method Contract (Detailed)
 
@@ -99,16 +115,56 @@ Failure cases:
 #### `dispatchAsyncTask(taskName, payload = {}, delayMs = 0): qulonglong`
 
 - General-purpose async task dispatcher for UI orchestration.
-- Runs on worker pool, optional delay (`delayMs` clamped `[0, 3600000]`).
+- Routes to lane pool by `payload.lane` or task-name prefix:
+  - `io`
+  - `utility`
+  - `render`
+- Runs with immediate execution by default (`delayMs` remains metadata compatibility field).
+- Optional `payload.workMs` simulates bounded background work for orchestration/testing.
+- Supports coalescing:
+  - set `payload.coalesce=true` (default),
+  - set `payload.coalesceKey` to merge duplicate queued work.
+- Backpressure is applied when lane queue depth exceeds `asyncQueueDepthLimit`.
+- `delayMs` is accepted as metadata input (`requestedDelayMs`) for compatibility.
 - Returns request id immediately.
 - Completion `result` map echoes payload and appends:
   - `taskName`
-  - `delayMs`
+  - `delayMs` (always `0`)
+  - `requestedDelayMs`
+  - `lane`
+  - `coalesced`
+  - `mergedIntoRequestId` (when merged)
 
 #### `setAsyncMaxConcurrency(value): void`
 
-- Controls worker pool parallelism.
-- Useful when UI workload requires deterministic throttling.
+- Controls global concurrency budget.
+- Runtime derives per-lane pool sizes (`io/utility/render`) from this value.
+
+#### `setAsyncQueueDepthLimit(value): void`
+
+- Controls lane-level queued depth backpressure threshold.
+- Requests beyond limit are rejected with backpressure error.
+
+#### `cancelAsyncRequest(requestId, reason = "Canceled by request"): bool`
+
+- Marks request cancellation token.
+- If request did not start, finishes immediately as canceled.
+- If already running, final completion is normalized to canceled outcome.
+
+#### `setPerformanceTraceCapacity(value): void`
+
+- Controls retained P0 timeline trace size.
+- Older entries are evicted FIFO when capacity shrinks.
+
+#### `setReadTextCacheTtlMs(value): void`
+
+- Controls TTL-based cache expiry for `readTextFile*`.
+- Expired entries are pruned on access/update.
+
+#### `setReadTextCacheCapacityBytes(value): void`
+
+- Controls read-cache memory budget in bytes.
+- Cache uses TTL + LRU-like oldest-access eviction when over budget.
 
 ### 3.3 Runtime hook lifecycle APIs
 
@@ -160,6 +216,34 @@ Includes:
 - Returns live runtime input state if runtime pointer is available.
 - Else returns last cached input state.
 
+#### `performanceMetrics(): map`
+
+Includes:
+
+- schema/component/epoch,
+- `asyncJobsInFlight`, `asyncMaxConcurrency`,
+- `asyncIoMaxConcurrency`, `asyncUtilityMaxConcurrency`, `asyncRenderMaxConcurrency`,
+- `asyncQueueDepth`, `asyncQueuePeakDepth`, `asyncQueueDepthLimit`,
+- `asyncBackpressureDropCount`, `asyncMergedRequestCount`, `asyncCanceledRequestCount`,
+- `performanceTraceCount`, `performanceTraceCapacity`,
+- `readTextCacheTtlMs`, `readTextCacheCapacityBytes`, `readTextCacheBytes`, `readTextCacheEntryCount`,
+- `asyncLaneMetrics` (`io/utility/render` queued/running/max/peak),
+- per-operation latency summary (`avg`, `p50`, `p95`, `p99`, `max`, `failureRate`).
+
+#### `recentPerformanceTrace(limit = -1): list`
+
+- Returns newest performance timeline events.
+- Event schema: `lvrs.performance.trace.v1`.
+- Typical phases:
+  - `queued`
+  - `started`
+  - `finished`
+  - `canceled`
+
+#### `clearPerformanceTrace(): void`
+
+- Clears retained performance timeline events.
+
 ## 4. Mirrored Cache Semantics
 
 Each mirrored event:
@@ -174,6 +258,13 @@ Eviction policy:
 
 - strict FIFO by insertion order,
 - decrements per-type counters for dropped entries.
+
+Performance trace semantics:
+
+- append-only sequence ids (`sequence`) in process scope,
+- bounded FIFO retention by `performanceTraceCapacity`,
+- phase ordering per request: `queued -> started -> finished`,
+- cancellation is represented by `canceled` trace and `finished(canceled=true)`.
 
 ## 5. Error Model
 
@@ -276,7 +367,8 @@ After modifications:
 2. capacity clamp + eviction behavior remains deterministic,
 3. async queue emits queued/finished signals with stable schema,
 4. summary map includes expected keys,
-5. file save/read failure paths still set `lastError`.
+5. file save/read failure paths still set `lastError`,
+6. performance trace sequence remains monotonic.
 
 ## 9. Validation Checklist
 

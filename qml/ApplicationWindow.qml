@@ -41,6 +41,10 @@ Controls.ApplicationWindow {
     property bool windowDragHandleEnabled: isDesktopPlatform
     property int windowDragHandleHeight: 28
     property int windowDragHandleTopMargin: 0
+    property bool inactiveRenderDowngradeEnabled: true
+    property int inactiveRenderMsaaSamples: 0
+    property int pageRouterRetainInactivePages: 0
+    property int pageRouterCacheCapacity: 256
 
     property string subtitle: ""
     property var navItems: []
@@ -138,12 +142,21 @@ Controls.ApplicationWindow {
     }
 
     onVisibleChanged: {
+        RenderQuality.applyWindow(windowRoot)
         if (visible)
             applyNativeWindowStyle()
     }
     onWindowColorChanged: applyNativeWindowStyle()
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
     onSolidChromeChanged: applyNativeWindowStyle()
+    onInactiveRenderDowngradeEnabledChanged: {
+        RenderQuality.inactiveRenderDowngradeEnabled = inactiveRenderDowngradeEnabled
+        RenderQuality.applyWindow(windowRoot)
+    }
+    onInactiveRenderMsaaSamplesChanged: {
+        RenderQuality.inactiveMsaaSamples = inactiveRenderMsaaSamples
+        RenderQuality.applyWindow(windowRoot)
+    }
     onAutoAttachRuntimeEventsChanged: {
         if (!autoAttachRuntimeEvents)
             return
@@ -804,6 +817,8 @@ Controls.ApplicationWindow {
                                     anchors.fill: parent
                                     visible: root.internalPageStackEnabled
                                     enabled: visible
+                                    retainInactivePageCount: windowRoot.pageRouterRetainInactivePages
+                                    routeResolveCacheCapacity: windowRoot.pageRouterCacheCapacity
                                     routes: root.effectiveRoutes
                                     initialPath: root.internalPageStackEnabled ? root.initialPath : ""
                                     registerAsGlobalNavigator: root.internalPageStackEnabled && root.internalRouterRegisterAsGlobalNavigator
@@ -972,6 +987,8 @@ Controls.ApplicationWindow {
     QtObject {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
+            RenderQuality.inactiveRenderDowngradeEnabled = windowRoot.inactiveRenderDowngradeEnabled
+            RenderQuality.inactiveMsaaSamples = windowRoot.inactiveRenderMsaaSamples
             RenderQuality.applyWindow(windowRoot)
             SvgManager.ensureMinimumScale(windowRoot.effectiveSupersampleScale)
             if (windowRoot.autoAttachRuntimeEvents) {

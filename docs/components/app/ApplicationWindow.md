@@ -64,6 +64,10 @@ Order matters because:
 |---|---|
 | `effectiveSupersampleScale` | Mirrors backend effective policy value. |
 | `sceneSupersamplingActive` | Backend-computed activation flag for scene layer supersampling. |
+| `inactiveRenderDowngradeEnabled` | Hidden/minimized 윈도우 렌더 비용 강등 정책 토글. |
+| `inactiveRenderMsaaSamples` | 강등 모드에서 사용할 MSAA 샘플 목표값. |
+| `pageRouterRetainInactivePages` | 내부 `PageRouter`가 유지할 비활성 페이지 깊이. |
+| `pageRouterCacheCapacity` | 내부 `PageRouter` route-resolve 캐시 용량. |
 | supersample host `layer.textureSize` | Resolved through `RenderQuality.resolveLayerTextureSize(...)`. |
 
 ### 3.4 Runtime/global event bridge

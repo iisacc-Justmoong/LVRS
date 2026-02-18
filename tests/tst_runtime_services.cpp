@@ -310,6 +310,8 @@ void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()
 {
     RenderingMonitor monitor;
     QQuickWindow window;
+    monitor.setFrameSampleCapacity(64);
+    monitor.setDroppedFrameThresholdMs(1.0);
     monitor.attachWindow(&window);
     QVERIFY(monitor.active());
     QCOMPARE(monitor.frameCount(), 0u);
@@ -320,10 +322,24 @@ void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()
     QVERIFY(monitor.frameCount() >= 2);
     QVERIFY(monitor.lastFrameMs() >= 0.0);
     QVERIFY(monitor.fps() >= 0.0);
+    QVERIFY(monitor.avgFrameMs() >= 0.0);
+    QVERIFY(monitor.p95FrameMs() >= 0.0);
+    QVERIFY(monitor.p99FrameMs() >= 0.0);
+    QVERIFY(monitor.recentSampleCount() >= 1);
+    QVERIFY(monitor.droppedFrameCount() >= 1);
+
+    const QVariantMap snapshot = monitor.performanceSnapshot();
+    QCOMPARE(snapshot.value(QStringLiteral("schema")).toString(), QStringLiteral("lvrs.performance.v1"));
+    QCOMPARE(snapshot.value(QStringLiteral("component")).toString(), QStringLiteral("RenderMonitor"));
+    QVERIFY(snapshot.contains(QStringLiteral("p95FrameMs")));
+    QVERIFY(snapshot.contains(QStringLiteral("p99FrameMs")));
+    QVERIFY(snapshot.contains(QStringLiteral("droppedFrameCount")));
 
     monitor.reset();
     QCOMPARE(monitor.frameCount(), 0u);
     QCOMPARE(monitor.lastFrameMs(), 0.0);
+    QCOMPARE(monitor.avgFrameMs(), 0.0);
+    QCOMPARE(monitor.recentSampleCount(), 0);
 
     monitor.stop();
     QVERIFY(!monitor.active());
@@ -338,8 +354,17 @@ void RuntimeServicesTests::render_monitor_active_signal_and_destroy_path()
     RenderingMonitor monitor;
     QSignalSpy activeSpy(&monitor, &RenderingMonitor::activeChanged);
     QSignalSpy statsSpy(&monitor, &RenderingMonitor::statsChanged);
+    QSignalSpy thresholdSpy(&monitor, &RenderingMonitor::droppedFrameThresholdMsChanged);
+    QSignalSpy capacitySpy(&monitor, &RenderingMonitor::frameSampleCapacityChanged);
     QVERIFY(activeSpy.isValid());
     QVERIFY(statsSpy.isValid());
+    QVERIFY(thresholdSpy.isValid());
+    QVERIFY(capacitySpy.isValid());
+
+    monitor.setDroppedFrameThresholdMs(2.0);
+    monitor.setFrameSampleCapacity(32);
+    QCOMPARE(thresholdSpy.count(), 1);
+    QCOMPARE(capacitySpy.count(), 1);
 
     auto *window = new QQuickWindow;
     monitor.attachWindow(window);

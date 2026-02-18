@@ -29,6 +29,12 @@ class RenderQuality : public QObject
     Q_PROPERTY(qreal maximumSupersampleScale READ maximumSupersampleScale CONSTANT)
     Q_PROPERTY(int msaaSamples READ msaaSamples WRITE setMsaaSamples NOTIFY msaaSamplesChanged)
     Q_PROPERTY(bool nativeTextRendering READ nativeTextRendering WRITE setNativeTextRendering NOTIFY nativeTextRenderingChanged)
+    Q_PROPERTY(int framesInFlight READ framesInFlight WRITE setFramesInFlight NOTIFY framesInFlightChanged)
+    Q_PROPERTY(bool partialUpdateEnabled READ partialUpdateEnabled WRITE setPartialUpdateEnabled NOTIFY partialUpdateEnabledChanged)
+    Q_PROPERTY(bool batchRenderingEnabled READ batchRenderingEnabled WRITE setBatchRenderingEnabled NOTIFY batchRenderingEnabledChanged)
+    Q_PROPERTY(bool inactiveRenderDowngradeEnabled READ inactiveRenderDowngradeEnabled WRITE setInactiveRenderDowngradeEnabled NOTIFY inactiveRenderDowngradeEnabledChanged)
+    Q_PROPERTY(int inactiveMsaaSamples READ inactiveMsaaSamples WRITE setInactiveMsaaSamples NOTIFY inactiveMsaaSamplesChanged)
+    Q_PROPERTY(bool powerSaveActive READ powerSaveActive NOTIFY powerSaveActiveChanged)
 
 public:
     static constexpr bool kVectorFirstEnabled = true;
@@ -67,6 +73,18 @@ public:
     bool nativeTextRendering() const;
     void setNativeTextRendering(bool value);
 
+    int framesInFlight() const;
+    void setFramesInFlight(int value);
+    bool partialUpdateEnabled() const;
+    void setPartialUpdateEnabled(bool value);
+    bool batchRenderingEnabled() const;
+    void setBatchRenderingEnabled(bool value);
+    bool inactiveRenderDowngradeEnabled() const;
+    void setInactiveRenderDowngradeEnabled(bool value);
+    int inactiveMsaaSamples() const;
+    void setInactiveMsaaSamples(int value);
+    bool powerSaveActive() const;
+
     Q_INVOKABLE qreal effectiveSupersampleScale() const;
     Q_INVOKABLE bool shouldUseSceneSupersampling(int width, int height) const;
     Q_INVOKABLE QSize resolveLayerTextureSize(int width, int height, bool sceneSupersamplingActive = true) const;
@@ -75,7 +93,11 @@ public:
     Q_INVOKABLE void applyWindow(QObject *window);
     Q_INVOKABLE void applyGlobalDefaults();
 
-    static void configureGlobalDefaults(int msaaSamples = 4, bool nativeTextRendering = true);
+    static void configureGlobalDefaults(int msaaSamples = 4,
+                                        bool nativeTextRendering = true,
+                                        int framesInFlight = 2,
+                                        bool partialUpdateEnabled = true,
+                                        bool batchRenderingEnabled = true);
 
 signals:
     void enabledChanged();
@@ -84,8 +106,15 @@ signals:
     void sceneSupersamplingActiveChanged();
     void msaaSamplesChanged();
     void nativeTextRenderingChanged();
+    void framesInFlightChanged();
+    void partialUpdateEnabledChanged();
+    void batchRenderingEnabledChanged();
+    void inactiveRenderDowngradeEnabledChanged();
+    void inactiveMsaaSamplesChanged();
+    void powerSaveActiveChanged();
 
 private:
+    void updateWindowPowerMode();
     void updateSceneSupersamplingActive();
     void detachWindowBinding();
 
@@ -98,8 +127,16 @@ private:
     int m_sceneSupersamplePixelBudget = kSceneSupersamplePixelBudget;
     int m_msaaSamples = 4;
     bool m_nativeTextRendering = true;
+    int m_framesInFlight = 2;
+    bool m_partialUpdateEnabled = true;
+    bool m_batchRenderingEnabled = true;
+    bool m_inactiveRenderDowngradeEnabled = true;
+    int m_inactiveMsaaSamples = 2;
+    bool m_powerSaveActive = false;
     QPointer<QQuickWindow> m_boundWindow;
     QMetaObject::Connection m_boundWindowWidthConnection;
     QMetaObject::Connection m_boundWindowHeightConnection;
+    QMetaObject::Connection m_boundWindowVisibilityConnection;
+    QMetaObject::Connection m_boundWindowActiveConnection;
     QMetaObject::Connection m_boundWindowDestroyedConnection;
 };

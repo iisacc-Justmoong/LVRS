@@ -9,6 +9,7 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appbootstrap.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appentry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
@@ -28,6 +29,7 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appbootstrap.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appentry.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.h
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate_macros.h

@@ -18,6 +18,7 @@ private slots:
     void route_params_are_passed_to_target_component();
     void component_navigation_keeps_path_stack_in_sync();
     void route_pages_are_isolated_and_forced_to_viewport();
+    void page_router_retain_inactive_depth_contract();
     void page_router_updates_view_state_tracker_from_stack();
     void global_navigator_allows_one_line_navigation();
     void global_navigator_falls_back_to_previous_router();
@@ -257,6 +258,78 @@ Item {
     QTRY_VERIFY(root->property("secondVisibleAfterPush").toBool());
     QTRY_VERIFY(root->property("secondFillsViewport").toBool());
     QTRY_VERIFY(root->property("secondAnchoredToOrigin").toBool());
+}
+
+void PageRouterTests::page_router_retain_inactive_depth_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 360
+    height: 240
+
+    property var pageAItem: null
+    property var pageBItem: null
+    property var pageCItem: null
+    property int depth: router.depth
+    property bool pageAHiddenOnDepth3: pageAItem ? !pageAItem.visible : false
+    property bool pageBVisibleOnDepth3: pageBItem ? pageBItem.visible : false
+    property bool pageCVisibleOnDepth3: pageCItem ? pageCItem.visible : false
+
+    Component {
+        id: pageA
+        Item { Component.onCompleted: root.pageAItem = this }
+    }
+
+    Component {
+        id: pageB
+        Item { Component.onCompleted: root.pageBItem = this }
+    }
+
+    Component {
+        id: pageC
+        Item { Component.onCompleted: root.pageCItem = this }
+    }
+
+    LV.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/a"
+        retainInactivePageCount: 1
+        routeResolveCacheCapacity: 64
+        routes: [
+            { path: "/a", component: pageA },
+            { path: "/b", component: pageB },
+            { path: "/c", component: pageC }
+        ]
+    }
+
+    function openB() {
+        router.go("/b")
+    }
+
+    function openC() {
+        router.go("/c")
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("depth").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "openB"));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "openC"));
+    QTRY_COMPARE(root->property("depth").toInt(), 3);
+    QTRY_VERIFY(root->property("pageAHiddenOnDepth3").toBool());
+    QTRY_VERIFY(root->property("pageBVisibleOnDepth3").toBool());
+    QTRY_VERIFY(root->property("pageCVisibleOnDepth3").toBool());
 }
 
 void PageRouterTests::page_router_updates_view_state_tracker_from_stack()

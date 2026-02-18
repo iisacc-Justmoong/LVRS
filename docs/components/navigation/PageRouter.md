@@ -34,6 +34,8 @@ Behavior flags:
 - `registerAsGlobalNavigator`
 - `enforcePageViewport`
 - `isolateInactivePages`
+- `retainInactivePageCount`
+- `routeResolveCacheCapacity`
 
 Signals:
 
@@ -99,6 +101,12 @@ Presentation flow:
 
 - When `enforcePageViewport == true`, new page items are constrained to router viewport.
 - When `isolateInactivePages == true`, only top page stays visible/enabled.
+- `retainInactivePageCount > 0`이면 top 아래 N개 페이지를 함께 유지하고 나머지는 culling한다.
+
+Route resolve flow:
+
+- 경로 정규화/매칭은 `RouteMatcher`(C++ 싱글턴) 우선 경로를 사용한다.
+- `routeResolveCacheCapacity` 기반의 route-resolve LRU 캐시로 반복 탐색 비용을 줄인다.
 
 Tracker flow:
 
@@ -131,6 +139,7 @@ LV.PageRouter {
 - route not matched: verify normalized path and segment token syntax (`[id]`, `[...path]`),
 - no page item shown: verify route has `component` or `source`,
 - model binding absent: verify `viewModelKey/modelKey` exists in `ViewModels` registry.
+- route 변경 후 이전 매칭이 남는 경우: `routes` 변경 시 cache는 자동 비우기 된다.
 
 ## Route Authoring Guidelines
 

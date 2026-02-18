@@ -7,6 +7,7 @@
 #include <QtPlugin>
 
 #include "backend/navigation/pagemonitor.h"
+#include "backend/navigation/routematcher.h"
 #include "backend/navigation/viewstatetracker.h"
 #include "backend/state/viewmodelregistry.h"
 
@@ -54,6 +55,7 @@ private slots:
     void page_monitor_signal_contract_and_normalization();
     void view_state_tracker_syncs_stack_and_status();
     void view_state_tracker_disable_override_changes_active_target();
+    void route_matcher_normalization_and_param_contract();
     void viewmodels_registry_binding_ownership_and_write_permissions();
     void viewmodels_registry_rebinding_clears_stale_ownership();
     void viewmodels_registry_tracks_keys_and_ownership();
@@ -195,6 +197,32 @@ void NavigationStateTests::view_state_tracker_disable_override_changes_active_ta
     QCOMPARE(tracker.loadedCount(), 0);
     QCOMPARE(tracker.currentActiveView(), QString());
     QVERIFY(stackSpy.count() >= 3);
+}
+
+void NavigationStateTests::route_matcher_normalization_and_param_contract()
+{
+    RouteMatcher matcher;
+
+    QCOMPARE(matcher.normalizePath(QString()), QStringLiteral("/"));
+    QCOMPARE(matcher.normalizePath(QStringLiteral("reports/")), QStringLiteral("/reports"));
+    QCOMPARE(matcher.normalizePath(QStringLiteral("/runs/123/")), QStringLiteral("/runs/123"));
+
+    const QVariantMap rootMatch = matcher.match(QStringLiteral("/"), QStringLiteral("/"));
+    QVERIFY(rootMatch.value(QStringLiteral("matched")).toBool());
+    QVERIFY(rootMatch.value(QStringLiteral("params")).toMap().isEmpty());
+
+    const QVariantMap paramMatch = matcher.match(QStringLiteral("/runs/42"), QStringLiteral("/runs/[id]"));
+    QVERIFY(paramMatch.value(QStringLiteral("matched")).toBool());
+    QCOMPARE(paramMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("id")).toString(),
+             QStringLiteral("42"));
+
+    const QVariantMap restMatch = matcher.match(QStringLiteral("/logs/a/b/c"), QStringLiteral("/logs/[...path]"));
+    QVERIFY(restMatch.value(QStringLiteral("matched")).toBool());
+    QCOMPARE(restMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("path")).toString(),
+             QStringLiteral("a/b/c"));
+
+    const QVariantMap noMatch = matcher.match(QStringLiteral("/runs"), QStringLiteral("/runs/[id]"));
+    QVERIFY(!noMatch.value(QStringLiteral("matched")).toBool());
 }
 
 void NavigationStateTests::viewmodels_registry_binding_ownership_and_write_permissions()

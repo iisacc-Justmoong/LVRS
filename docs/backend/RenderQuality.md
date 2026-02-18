@@ -40,6 +40,12 @@ Its job is to keep vector-first quality guarantees while bounding latency cost f
 | `maximumSupersampleScale` | `real` | constant | `3.0` | None. |
 | `msaaSamples` | `int` | read/write | Clamped to `[2,16]` when antialiasing is enabled. | Negative/zero values become `2`. |
 | `nativeTextRendering` | `bool` | read/write (policy-clamped) | Enforced `true`; API remains for compatibility. | Write `false` is ignored by policy. |
+| `framesInFlight` | `int` | read/write | RHI frames-in-flight hint used during global defaults bootstrap. | Clamped `[1,3]`. |
+| `partialUpdateEnabled` | `bool` | read/write | Enables dirty-region/partial-update environment hints. | Effective when set before app bootstrap. |
+| `batchRenderingEnabled` | `bool` | read/write | Enables batching/atlas environment hints. | Effective when set before app bootstrap. |
+| `inactiveRenderDowngradeEnabled` | `bool` | read/write | Enables hidden/minimized window render-cost downgrade. | Runtime-toggle supported. |
+| `inactiveMsaaSamples` | `int` | read/write | Target MSAA sample count while power-save mode is active. | Clamped `[0,16]`. |
+| `powerSaveActive` | `bool` | read-only | True when bound window is hidden/minimized and downgrade policy is active. | Cleared on unbind/destroy. |
 
 ## 3. Method Contract (Detailed)
 
@@ -111,12 +117,15 @@ Per-window quality application:
 
 - Calls static default configuration with current runtime msaa setting.
 
-### `configureGlobalDefaults(msaaSamples = 4, nativeTextRendering = true)` (static)
+### `configureGlobalDefaults(msaaSamples = 4, nativeTextRendering = true, framesInFlight = 2, partialUpdateEnabled = true, batchRenderingEnabled = true)` (static)
 
 Global process-level defaults:
 
 - HiDPI env hints (`QT_ENABLE_HIGHDPI_SCALING`, rounding policy),
 - antialiasing method hint (`QSG_ANTIALIASING_METHOD=msaa`),
+- frames-in-flight hint (`QSG_RHI_FRAMES_IN_FLIGHT`),
+- partial update hints (`QSG_PARTIAL_UPDATE`, `QSG_NO_FULL_REDRAW`) when enabled,
+- batch/atlas hints (`QSG_BATCH_RENDERER`, `QSG_ATLAS_WIDTH`, `QSG_ATLAS_HEIGHT`) when enabled,
 - render-loop / software-render fallback defaults when unset,
 - default `QSurfaceFormat` sample/depth/stencil floors,
 - native text render type enforcement.
@@ -141,6 +150,8 @@ Global process-level defaults:
 |---|---|
 | bind small window (`640x360`) | `sceneSupersamplingActive=true` |
 | resize to large (`1480x980`) | flips to `false` |
+| minimize/hide bound window with downgrade enabled | `powerSaveActive=true`, persistent graphics/scenegraph disabled |
+| restore bound window visibility | `powerSaveActive=false`, persistent graphics/scenegraph re-enabled |
 | unbind | `false` |
 | destroy bound window | `false` + connections released |
 | applyWindow(null) | no-op |
