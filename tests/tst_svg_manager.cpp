@@ -60,13 +60,13 @@ void SvgManagerTests::svg_manager_generates_png_and_clamps()
     QVERIFY(manager.lastError().isEmpty());
 
     manager.setVectorFirst(false);
-    QCOMPARE(manager.vectorFirst(), true);
+    QCOMPARE(manager.vectorFirst(), false);
     const QString vectorB = manager.icon(svgUrl, 16, 3.0);
-    QCOMPARE(vectorB, svgUrl);
+    QVERIFY(vectorB.startsWith(QStringLiteral("data:image/png;base64,")));
 
     const quint64 revisionBeforeClear = manager.revision();
     manager.clearCache();
-    QCOMPARE(manager.revision(), revisionBeforeClear);
+    QCOMPARE(manager.revision(), revisionBeforeClear + 1);
     QVERIFY(manager.deviceScale() >= 1.0);
 }
 
@@ -112,10 +112,10 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
     QCOMPARE(manager.lastError(), QString());
 
     manager.setVectorFirst(false);
-    QCOMPARE(vectorSpy.count(), 0);
-    QCOMPARE(manager.vectorFirst(), true);
+    QCOMPARE(vectorSpy.count(), 1);
+    QCOMPARE(manager.vectorFirst(), false);
     const QString vectorAgain = manager.icon(dataUrl, 24, 0.0);
-    QCOMPARE(vectorAgain, dataUrl);
+    QVERIFY(vectorAgain.startsWith(QStringLiteral("data:image/png;base64,")));
     QCOMPARE(manager.lastError(), QString());
 
     QTemporaryFile file;
@@ -124,16 +124,16 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
     QVERIFY(file.write(svg) > 0);
     file.flush();
     const QString fileVector = manager.icon(QUrl::fromLocalFile(file.fileName()).toString(), 18, 2.0);
-    QVERIFY(fileVector.endsWith(QStringLiteral(".svg"), Qt::CaseInsensitive));
+    QVERIFY(fileVector.startsWith(QStringLiteral("data:image/png;base64,")));
 
     const quint64 revisionBefore = manager.revision();
     manager.clearCache();
-    QCOMPARE(manager.revision(), revisionBefore);
+    QCOMPARE(manager.revision(), revisionBefore + 1);
 
     const quint64 revisionAfterFirstClear = manager.revision();
     manager.clearCache();
     QCOMPARE(manager.revision(), revisionAfterFirstClear);
-    QCOMPARE(revisionSpy.count(), 0);
+    QCOMPARE(revisionSpy.count(), 2);
 }
 
 QTEST_MAIN(SvgManagerTests)

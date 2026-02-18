@@ -81,8 +81,8 @@ void RenderQualityTests::render_quality_bounds_and_window_apply()
     QCOMPARE(quality.supersampleScale(), quality.minimumSupersampleScale());
 
     quality.setEnabled(false);
-    QCOMPARE(quality.enabled(), true);
-    QCOMPARE(quality.effectiveSupersampleScale(), RenderQuality::kForcedSupersampleScale);
+    QCOMPARE(quality.enabled(), false);
+    QCOMPARE(quality.effectiveSupersampleScale(), 1.0);
     quality.setEnabled(true);
     quality.setSupersampleScale(1.0);
     QCOMPARE(quality.effectiveSupersampleScale(), RenderQuality::kForcedSupersampleScale);
@@ -145,7 +145,7 @@ void RenderQualityTests::render_quality_signal_and_global_defaults()
     quality.setEnabled(true);
     QCOMPARE(enabledSpy.count(), 0);
     quality.setEnabled(false);
-    QCOMPARE(enabledSpy.count(), 0);
+    QCOMPARE(enabledSpy.count(), 1);
 
     quality.setSupersampleScale(3.0);
     QCOMPARE(scaleSpy.count(), 0);
@@ -167,8 +167,8 @@ void RenderQualityTests::render_quality_signal_and_global_defaults()
     quality.setNativeTextRendering(true);
     QCOMPARE(textSpy.count(), 0);
     quality.setNativeTextRendering(false);
-    QCOMPARE(textSpy.count(), 0);
-    QCOMPARE(quality.nativeTextRendering(), true);
+    QCOMPARE(textSpy.count(), 1);
+    QCOMPARE(quality.nativeTextRendering(), false);
 
     quality.setFramesInFlight(3);
     QCOMPARE(framesSpy.count(), 1);
@@ -201,7 +201,7 @@ void RenderQualityTests::render_quality_signal_and_global_defaults()
     QVERIFY(applied.samples() >= 12);
     QVERIFY(applied.depthBufferSize() >= 24);
     QVERIFY(applied.stencilBufferSize() >= 8);
-    QCOMPARE(QQuickWindow::textRenderType(), QQuickWindow::NativeTextRendering);
+    QCOMPARE(QQuickWindow::textRenderType(), QQuickWindow::QtTextRendering);
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_FRAMES_IN_FLIGHT"), 3);
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_PIPELINE_CACHE_LOAD"), 1);
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_PIPELINE_CACHE_SAVE"), 1);

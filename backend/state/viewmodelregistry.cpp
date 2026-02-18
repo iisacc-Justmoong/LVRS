@@ -47,7 +47,8 @@ void ViewModelRegistry::set(const QString &key, QObject *object)
     if (changed)
         emit keysChanged();
 
-    maybeDisposeOwned(previous, normalized);
+    if (changed && previous != object)
+        maybeDisposeOwned(previous, normalized);
     prune();
 }
 

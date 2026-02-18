@@ -390,6 +390,11 @@ void NavigationStateTests::viewmodels_registry_signal_and_prune_contract()
     registry.set(QStringLiteral("owned"), owned);
     QCOMPARE(keysSpy.count(), 5);
     QVERIFY(owned->parent() == &registry);
+    registry.set(QStringLiteral("owned"), owned);
+    QCOMPARE(keysSpy.count(), 5);
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+    QCoreApplication::processEvents();
+    QVERIFY(!ownedGuard.isNull());
 
     auto *trigger = new QObject;
     registry.set(QStringLiteral("trigger"), trigger);

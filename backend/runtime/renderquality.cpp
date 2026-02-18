@@ -167,13 +167,9 @@ bool RenderQuality::enabled() const
 
 void RenderQuality::setEnabled(bool value)
 {
-    Q_UNUSED(value)
-
-    // HiRes is enforced framework-wide at renderer policy level.
-    const bool next = true;
-    if (m_enabled == next)
+    if (m_enabled == value)
         return;
-    m_enabled = next;
+    m_enabled = value;
     emit enabledChanged();
     emit effectiveSupersampleScaleChanged();
     updateSceneSupersamplingActive();
@@ -186,10 +182,9 @@ qreal RenderQuality::supersampleScale() const
 
 void RenderQuality::setSupersampleScale(qreal value)
 {
-    Q_UNUSED(value)
-
-    // Supersample scale is fixed to @3x.
-    const qreal next = kForcedSupersampleScale;
+    if (!qIsFinite(value))
+        return;
+    const qreal next = qBound(m_minimumSupersampleScale, value, m_maximumSupersampleScale);
     if (qFuzzyCompare(m_supersampleScale, next))
         return;
     m_supersampleScale = next;
@@ -231,13 +226,13 @@ bool RenderQuality::nativeTextRendering() const
 
 void RenderQuality::setNativeTextRendering(bool value)
 {
-    Q_UNUSED(value)
-
-    const bool next = kTextVectorFirstEnabled;
-    if (m_nativeTextRendering == next)
+    if (m_nativeTextRendering == value)
         return;
-    m_nativeTextRendering = next;
+    m_nativeTextRendering = value;
     emit nativeTextRenderingChanged();
+    QQuickWindow::setTextRenderType(m_nativeTextRendering
+                                        ? QQuickWindow::NativeTextRendering
+                                        : QQuickWindow::QtTextRendering);
 }
 
 int RenderQuality::framesInFlight() const
@@ -836,7 +831,9 @@ void RenderQuality::applyWindow(QObject *window)
 
     applyGraphicsConfiguration(quickWindow);
 
-    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+    QQuickWindow::setTextRenderType(m_nativeTextRendering
+                                        ? QQuickWindow::NativeTextRendering
+                                        : QQuickWindow::QtTextRendering);
     updateWindowPowerMode();
     updateSceneSupersamplingActive();
 }
@@ -844,7 +841,7 @@ void RenderQuality::applyWindow(QObject *window)
 void RenderQuality::applyGlobalDefaults()
 {
     configureGlobalDefaults(m_msaaSamples,
-                            kTextVectorFirstEnabled,
+                            m_nativeTextRendering,
                             m_framesInFlight,
                             m_partialUpdateEnabled,
                             m_batchRenderingEnabled);
@@ -856,8 +853,6 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
                                             bool partialUpdateEnabled,
                                             bool batchRenderingEnabled)
 {
-    Q_UNUSED(nativeTextRendering)
-
     if (kHiDpiEnabled) {
         qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArrayLiteral("1"));
         qputenv("QT_SCALE_FACTOR_ROUNDING_POLICY", QByteArrayLiteral("PassThrough"));
@@ -908,7 +903,9 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
         format.setStencilBufferSize(8);
     QSurfaceFormat::setDefaultFormat(format);
 
-    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+    QQuickWindow::setTextRenderType(nativeTextRendering
+                                        ? QQuickWindow::NativeTextRendering
+                                        : QQuickWindow::QtTextRendering);
 }
 
 void RenderQuality::updateWindowPowerMode()

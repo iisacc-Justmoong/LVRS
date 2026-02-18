@@ -35,7 +35,8 @@ QString SvgManager::icon(const QString &svgUrl, int logicalSize, qreal scale)
             setLastError(QStringLiteral("Malformed SVG data URL"));
             return QString();
         }
-        return trimmedUrl;
+        if (m_vectorFirst)
+            return trimmedUrl;
     }
 
     const int targetLogicalSize = qBound(1, logicalSize, 2048);
@@ -128,13 +129,9 @@ bool SvgManager::vectorFirst() const
 
 void SvgManager::setVectorFirst(bool value)
 {
-    Q_UNUSED(value)
-
-    // SVG rendering is enforced as vector-only policy.
-    const bool next = true;
-    if (m_vectorFirst == next)
+    if (m_vectorFirst == value)
         return;
-    m_vectorFirst = next;
+    m_vectorFirst = value;
     m_cache.clear();
     m_cacheOrder.clear();
     m_sourcePayloadCache.clear();
