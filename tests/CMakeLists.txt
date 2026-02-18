@@ -1,4 +1,6 @@
 function(uifw_add_test test_name test_source)
+    cmake_parse_arguments(UIFW_TEST "" "" "LABELS" ${ARGN})
+
     add_executable(${test_name} ${test_source})
     target_link_libraries(${test_name}
         PRIVATE
@@ -7,6 +9,21 @@ function(uifw_add_test test_name test_source)
             Qt6::QuickControls2
             LVRSCore
     )
+    target_compile_definitions(${test_name}
+        PRIVATE
+            LVRS_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+    if(NOT LVRS_SANITIZER STREQUAL "none")
+        target_compile_options(${test_name}
+            PRIVATE
+                -fno-omit-frame-pointer
+                -fsanitize=${LVRS_SANITIZER}
+        )
+        target_link_options(${test_name}
+            PRIVATE
+                -fsanitize=${LVRS_SANITIZER}
+        )
+    endif()
     if(LVRS_STATIC_QML_PLUGIN_REQUIRED)
         target_link_libraries(${test_name}
             PRIVATE
@@ -15,9 +32,17 @@ function(uifw_add_test test_name test_source)
         )
     endif()
     add_test(NAME ${test_name} COMMAND ${test_name})
-    set_tests_properties(${test_name} PROPERTIES
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic"
-    )
+    set(_uifw_test_env "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic")
+    if(UIFW_TEST_LABELS)
+        set_tests_properties(${test_name} PROPERTIES
+            ENVIRONMENT "${_uifw_test_env}"
+            LABELS "${UIFW_TEST_LABELS}"
+        )
+    else()
+        set_tests_properties(${test_name} PROPERTIES
+            ENVIRONMENT "${_uifw_test_env}"
+        )
+    endif()
 endfunction()
 
 uifw_add_test(LVRSTests_layout tst_layout.cpp)
@@ -38,3 +63,6 @@ uifw_add_test(LVRSTests_page_router tst_page_router.cpp)
 uifw_add_test(LVRSTests_code_editor tst_code_editor.cpp)
 uifw_add_test(LVRSTests_text_editor tst_text_editor.cpp)
 uifw_add_test(LVRSTests_text_markup tst_text_markup.cpp)
+uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
+uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
+uifw_add_test(LVRSTests_soak_runtime tst_soak_runtime.cpp LABELS "p4;quality;soak;long")

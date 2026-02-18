@@ -26,11 +26,12 @@ Location: `qml/ApplicationWindow.qml`
 On `Component.onCompleted`, shell performs:
 
 1. `FontPolicy.enforceApplicationFallback()`,
-2. `RenderQuality.applyWindow(windowRoot)`,
-3. `SvgManager.ensureMinimumScale(effectiveSupersampleScale)`,
-4. runtime daemon start/attach by default (`autoAttachRuntimeEvents`, default: `globalEventListenersEnabled`),
-5. optional backend mirror hook (`autoHookBackendUserEvents`, default `false`),
-6. native window style application and deferred refresh.
+2. optional device-tier preset apply (`RenderQuality.applyDeviceTierPreset(...)`),
+3. `RenderQuality.applyWindow(windowRoot)`,
+4. `SvgManager.ensureMinimumScale(effectiveSupersampleScale)`,
+5. runtime daemon start/attach by default (`autoAttachRuntimeEvents`, default: `globalEventListenersEnabled`),
+6. optional backend mirror hook (`autoHookBackendUserEvents`, default `false`),
+7. native window style application and deferred refresh.
 
 Order matters because:
 
@@ -66,9 +67,12 @@ Order matters because:
 | `sceneSupersamplingActive` | Backend-computed activation flag for scene layer supersampling. |
 | `inactiveRenderDowngradeEnabled` | Hidden/minimized 윈도우 렌더 비용 강등 정책 토글. |
 | `inactiveRenderMsaaSamples` | 강등 모드에서 사용할 MSAA 샘플 목표값. |
+| `autoApplyDeviceTierPreset` | 시작 시 디바이스 등급 프리셋 자동 적용 여부. |
+| `forcedDeviceTierPreset` | 프리셋 강제값(`-1`은 자동 탐지). |
 | `pageRouterRetainInactivePages` | 내부 `PageRouter`가 유지할 비활성 페이지 깊이. |
 | `pageRouterCacheCapacity` | 내부 `PageRouter` route-resolve 캐시 용량. |
 | supersample host `layer.textureSize` | Resolved through `RenderQuality.resolveLayerTextureSize(...)`. |
+| supersample host `layer.mipmap` | `RenderQuality.mipmapEnabled` 정책을 직접 반영. |
 
 ### 3.4 Runtime/global event bridge
 

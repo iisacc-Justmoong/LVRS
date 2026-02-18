@@ -320,63 +320,64 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
         return requestId;
     }
 
-    QPointer<QCoreApplication> appGuard(QCoreApplication::instance());
     QPointer<Backend> backendGuard(this);
     threadPoolForLane(lane).start(new LambdaRunnable(
-        [appGuard, backendGuard, cancelToken, requestId, pathCopy, textCopy, byteCount, operation]() {
-            if (cancelToken && cancelToken->loadAcquire() != 0) {
-                if (!appGuard)
+        [backendGuard, cancelToken, requestId, pathCopy, textCopy, byteCount, operation]() {
+            auto queueStarted = [&backendGuard, requestId, operation, pathCopy](qint64 startedMs) {
+                if (!backendGuard)
                     return;
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              QVariantMap canceledResult;
-                                              canceledResult.insert(QStringLiteral("canceled"), true);
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               pathCopy,
-                                                                               false,
-                                                                               canceledResult,
-                                                                               QStringLiteral("Canceled by request"),
-                                                                               0);
-                                          },
-                                          Qt::QueuedConnection);
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "markAsyncRequestStartedFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(qint64, startedMs));
+            };
+            auto queueFinished = [&backendGuard, requestId, operation, pathCopy](bool ok,
+                                                                                  const QVariantMap &result,
+                                                                                  const QString &error,
+                                                                                  qint64 elapsedMs,
+                                                                                  ReadCacheAction cacheAction,
+                                                                                  const QString &readCacheText = QString()) {
+                if (!backendGuard)
+                    return;
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "completeAsyncRequestFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(bool, ok),
+                                          Q_ARG(QVariantMap, result),
+                                          Q_ARG(QString, error),
+                                          Q_ARG(qint64, elapsedMs),
+                                          Q_ARG(int, static_cast<int>(cacheAction)),
+                                          Q_ARG(QString, readCacheText));
+            };
+
+            if (cancelToken && cancelToken->loadAcquire() != 0) {
+                QVariantMap canceledResult;
+                canceledResult.insert(QStringLiteral("canceled"), true);
+                queueFinished(false,
+                              canceledResult,
+                              QStringLiteral("Canceled by request"),
+                              0,
+                              ReadCacheAction::None);
                 return;
             }
 
             const qint64 startedMs = QDateTime::currentMSecsSinceEpoch();
-            if (backendGuard) {
-                QMetaObject::invokeMethod(backendGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy, startedMs]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              backendGuard->markAsyncRequestStarted(requestId,
-                                                                                    operation,
-                                                                                    pathCopy,
-                                                                                    startedMs);
-                                          },
-                                          Qt::QueuedConnection);
-            }
+            queueStarted(startedMs);
 
             if (cancelToken && cancelToken->loadAcquire() != 0) {
-                if (!appGuard)
-                    return;
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              QVariantMap canceledResult;
-                                              canceledResult.insert(QStringLiteral("canceled"), true);
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               pathCopy,
-                                                                               false,
-                                                                               canceledResult,
-                                                                               QStringLiteral("Canceled by request"),
-                                                                               0);
-                                          },
-                                          Qt::QueuedConnection);
+                QVariantMap canceledResult;
+                canceledResult.insert(QStringLiteral("canceled"), true);
+                queueFinished(false,
+                              canceledResult,
+                              QStringLiteral("Canceled by request"),
+                              0,
+                              ReadCacheAction::None);
                 return;
             }
 
@@ -386,25 +387,12 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
             QVariantMap result;
             result.insert(QStringLiteral("bytes"), byteCount);
 
-            if (!appGuard)
-                return;
-            QMetaObject::invokeMethod(appGuard.data(),
-                                      [backendGuard, requestId, operation, pathCopy, textCopy, outcome, result, elapsedMs]() {
-                                          if (!backendGuard)
-                                              return;
-                                          if (outcome.ok)
-                                              backendGuard->updateReadTextCache(pathCopy, textCopy);
-                                          else
-                                              backendGuard->invalidateReadTextCache(pathCopy);
-                                          backendGuard->finishAsyncRequest(requestId,
-                                                                           operation,
-                                                                           pathCopy,
-                                                                           outcome.ok,
-                                                                           result,
-                                                                           outcome.error,
-                                                                           elapsedMs);
-                                      },
-                                      Qt::QueuedConnection);
+            queueFinished(outcome.ok,
+                          result,
+                          outcome.error,
+                          elapsedMs,
+                          outcome.ok ? ReadCacheAction::Update : ReadCacheAction::Invalidate,
+                          outcome.ok ? textCopy : QString());
         }),
                           taskPriorityForLane(lane));
     return requestId;
@@ -458,44 +446,55 @@ qulonglong Backend::readTextFileAsync(const QString &path)
         return requestId;
     }
 
-    QPointer<QCoreApplication> appGuard(QCoreApplication::instance());
     QPointer<Backend> backendGuard(this);
     threadPoolForLane(lane).start(new LambdaRunnable(
-        [appGuard, backendGuard, cancelToken, requestId, pathCopy, operation]() {
-            if (cancelToken && cancelToken->loadAcquire() != 0) {
-                if (!appGuard)
+        [backendGuard, cancelToken, requestId, pathCopy, operation]() {
+            auto queueStarted = [&backendGuard, requestId, operation, pathCopy](qint64 startedMs) {
+                if (!backendGuard)
                     return;
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              QVariantMap canceledResult;
-                                              canceledResult.insert(QStringLiteral("canceled"), true);
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               pathCopy,
-                                                                               false,
-                                                                               canceledResult,
-                                                                               QStringLiteral("Canceled by request"),
-                                                                               0);
-                                          },
-                                          Qt::QueuedConnection);
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "markAsyncRequestStartedFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(qint64, startedMs));
+            };
+            auto queueFinished = [&backendGuard, requestId, operation, pathCopy](bool ok,
+                                                                                  const QVariantMap &result,
+                                                                                  const QString &error,
+                                                                                  qint64 elapsedMs,
+                                                                                  ReadCacheAction cacheAction,
+                                                                                  const QString &readCacheText = QString()) {
+                if (!backendGuard)
+                    return;
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "completeAsyncRequestFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(bool, ok),
+                                          Q_ARG(QVariantMap, result),
+                                          Q_ARG(QString, error),
+                                          Q_ARG(qint64, elapsedMs),
+                                          Q_ARG(int, static_cast<int>(cacheAction)),
+                                          Q_ARG(QString, readCacheText));
+            };
+
+            if (cancelToken && cancelToken->loadAcquire() != 0) {
+                QVariantMap canceledResult;
+                canceledResult.insert(QStringLiteral("canceled"), true);
+                queueFinished(false,
+                              canceledResult,
+                              QStringLiteral("Canceled by request"),
+                              0,
+                              ReadCacheAction::None);
                 return;
             }
 
             const qint64 startedMs = QDateTime::currentMSecsSinceEpoch();
-            if (backendGuard) {
-                QMetaObject::invokeMethod(backendGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy, startedMs]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              backendGuard->markAsyncRequestStarted(requestId,
-                                                                                    operation,
-                                                                                    pathCopy,
-                                                                                    startedMs);
-                                          },
-                                          Qt::QueuedConnection);
-            }
+            queueStarted(startedMs);
             const ReadTextOutcome outcome = readTextFileSync(pathCopy);
             const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - startedMs);
 
@@ -506,25 +505,12 @@ qulonglong Backend::readTextFileAsync(const QString &path)
                 result.insert(QStringLiteral("cached"), false);
             }
 
-            if (!appGuard)
-                return;
-            QMetaObject::invokeMethod(appGuard.data(),
-                                      [backendGuard, requestId, operation, pathCopy, outcome, result, elapsedMs]() {
-                                          if (!backendGuard)
-                                              return;
-                                          if (outcome.ok)
-                                              backendGuard->updateReadTextCache(pathCopy, outcome.text);
-                                          else
-                                              backendGuard->invalidateReadTextCache(pathCopy);
-                                          backendGuard->finishAsyncRequest(requestId,
-                                                                           operation,
-                                                                           pathCopy,
-                                                                           outcome.ok,
-                                                                           result,
-                                                                           outcome.error,
-                                                                           elapsedMs);
-                                      },
-                                      Qt::QueuedConnection);
+            queueFinished(outcome.ok,
+                          result,
+                          outcome.error,
+                          elapsedMs,
+                          outcome.ok ? ReadCacheAction::Update : ReadCacheAction::Invalidate,
+                          outcome.ok ? outcome.text : QString());
         }),
                           taskPriorityForLane(lane));
     return requestId;
@@ -562,65 +548,62 @@ qulonglong Backend::ensureDirAsync(const QString &path)
         return requestId;
     }
 
-    QPointer<QCoreApplication> appGuard(QCoreApplication::instance());
     QPointer<Backend> backendGuard(this);
     threadPoolForLane(lane).start(new LambdaRunnable(
-        [appGuard, backendGuard, cancelToken, requestId, pathCopy, operation]() {
-            if (cancelToken && cancelToken->loadAcquire() != 0) {
-                if (!appGuard)
+        [backendGuard, cancelToken, requestId, pathCopy, operation]() {
+            auto queueStarted = [&backendGuard, requestId, operation, pathCopy](qint64 startedMs) {
+                if (!backendGuard)
                     return;
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              QVariantMap canceledResult;
-                                              canceledResult.insert(QStringLiteral("canceled"), true);
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               pathCopy,
-                                                                               false,
-                                                                               canceledResult,
-                                                                               QStringLiteral("Canceled by request"),
-                                                                               0);
-                                          },
-                                          Qt::QueuedConnection);
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "markAsyncRequestStartedFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(qint64, startedMs));
+            };
+            auto queueFinished = [&backendGuard, requestId, operation, pathCopy](bool ok,
+                                                                                  const QVariantMap &result,
+                                                                                  const QString &error,
+                                                                                  qint64 elapsedMs) {
+                if (!backendGuard)
+                    return;
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "completeAsyncRequestFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, pathCopy),
+                                          Q_ARG(bool, ok),
+                                          Q_ARG(QVariantMap, result),
+                                          Q_ARG(QString, error),
+                                          Q_ARG(qint64, elapsedMs),
+                                          Q_ARG(int, static_cast<int>(ReadCacheAction::None)),
+                                          Q_ARG(QString, QString()));
+            };
+
+            if (cancelToken && cancelToken->loadAcquire() != 0) {
+                QVariantMap canceledResult;
+                canceledResult.insert(QStringLiteral("canceled"), true);
+                queueFinished(false,
+                              canceledResult,
+                              QStringLiteral("Canceled by request"),
+                              0);
                 return;
             }
 
             const qint64 startedMs = QDateTime::currentMSecsSinceEpoch();
-            if (backendGuard) {
-                QMetaObject::invokeMethod(backendGuard.data(),
-                                          [backendGuard, requestId, operation, pathCopy, startedMs]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              backendGuard->markAsyncRequestStarted(requestId,
-                                                                                    operation,
-                                                                                    pathCopy,
-                                                                                    startedMs);
-                                          },
-                                          Qt::QueuedConnection);
-            }
+            queueStarted(startedMs);
             const EnsureDirOutcome outcome = ensureDirSync(pathCopy);
             const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - startedMs);
 
             QVariantMap result;
             result.insert(QStringLiteral("ensured"), outcome.ok);
 
-            if (!appGuard)
-                return;
-            QMetaObject::invokeMethod(appGuard.data(),
-                                      [backendGuard, requestId, operation, pathCopy, outcome, result, elapsedMs]() {
-                                          if (!backendGuard)
-                                              return;
-                                          backendGuard->finishAsyncRequest(requestId,
-                                                                           operation,
-                                                                           pathCopy,
-                                                                           outcome.ok,
-                                                                           result,
-                                                                           outcome.error,
-                                                                           elapsedMs);
-                                      },
-                                      Qt::QueuedConnection);
+            queueFinished(outcome.ok,
+                          result,
+                          outcome.error,
+                          elapsedMs);
         }),
                           taskPriorityForLane(lane));
     return requestId;
@@ -691,11 +674,9 @@ qulonglong Backend::dispatchAsyncTask(const QString &taskName, const QVariantMap
         m_dispatchCoalesceKeyByRequest.insert(requestId, coalesceKey);
     }
 
-    QPointer<QCoreApplication> appGuard(QCoreApplication::instance());
     QPointer<Backend> backendGuard(this);
     threadPoolForLane(lane).start(new LambdaRunnable(
-        [appGuard,
-         backendGuard,
+        [backendGuard,
          cancelToken,
          requestId,
          normalizedTaskName,
@@ -705,40 +686,49 @@ qulonglong Backend::dispatchAsyncTask(const QString &taskName, const QVariantMap
          lane,
          operation,
          coalesceKey]() {
-            if (cancelToken && cancelToken->loadAcquire() != 0) {
-                if (!appGuard)
+            auto queueStarted = [&backendGuard, requestId, operation, normalizedTaskName](qint64 startedMs) {
+                if (!backendGuard)
                     return;
-                QMetaObject::invokeMethod(appGuard.data(),
-                                          [backendGuard, requestId, operation, normalizedTaskName]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              QVariantMap canceledResult;
-                                              canceledResult.insert(QStringLiteral("canceled"), true);
-                                              backendGuard->finishAsyncRequest(requestId,
-                                                                               operation,
-                                                                               normalizedTaskName,
-                                                                               false,
-                                                                               canceledResult,
-                                                                               QStringLiteral("Canceled by request"),
-                                                                               0);
-                                          },
-                                          Qt::QueuedConnection);
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "markAsyncRequestStartedFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, normalizedTaskName),
+                                          Q_ARG(qint64, startedMs));
+            };
+            auto queueFinished = [&backendGuard, requestId, operation, normalizedTaskName](bool ok,
+                                                                                            const QVariantMap &result,
+                                                                                            const QString &error,
+                                                                                            qint64 elapsedMs) {
+                if (!backendGuard)
+                    return;
+                QMetaObject::invokeMethod(backendGuard.data(),
+                                          "completeAsyncRequestFromWorker",
+                                          Qt::QueuedConnection,
+                                          Q_ARG(qulonglong, requestId),
+                                          Q_ARG(QString, operation),
+                                          Q_ARG(QString, normalizedTaskName),
+                                          Q_ARG(bool, ok),
+                                          Q_ARG(QVariantMap, result),
+                                          Q_ARG(QString, error),
+                                          Q_ARG(qint64, elapsedMs),
+                                          Q_ARG(int, static_cast<int>(ReadCacheAction::None)),
+                                          Q_ARG(QString, QString()));
+            };
+
+            if (cancelToken && cancelToken->loadAcquire() != 0) {
+                QVariantMap canceledResult;
+                canceledResult.insert(QStringLiteral("canceled"), true);
+                queueFinished(false,
+                              canceledResult,
+                              QStringLiteral("Canceled by request"),
+                              0);
                 return;
             }
 
             const qint64 startedMs = QDateTime::currentMSecsSinceEpoch();
-            if (backendGuard) {
-                QMetaObject::invokeMethod(backendGuard.data(),
-                                          [backendGuard, requestId, operation, normalizedTaskName, startedMs]() {
-                                              if (!backendGuard)
-                                                  return;
-                                              backendGuard->markAsyncRequestStarted(requestId,
-                                                                                    operation,
-                                                                                    normalizedTaskName,
-                                                                                    startedMs);
-                                          },
-                                          Qt::QueuedConnection);
-            }
+            queueStarted(startedMs);
 
             if (requestedWorkMs > 0)
                 QThread::msleep(static_cast<unsigned long>(requestedWorkMs));
@@ -754,22 +744,10 @@ qulonglong Backend::dispatchAsyncTask(const QString &taskName, const QVariantMap
                 result.insert(QStringLiteral("coalesceKey"), coalesceKey);
 
             const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - startedMs);
-            if (!appGuard)
-                return;
-
-            QMetaObject::invokeMethod(appGuard.data(),
-                                      [backendGuard, requestId, operation, normalizedTaskName, result, elapsedMs]() {
-                                          if (!backendGuard)
-                                              return;
-                                          backendGuard->finishAsyncRequest(requestId,
-                                                                           operation,
-                                                                           normalizedTaskName,
-                                                                           true,
-                                                                           result,
-                                                                           QString(),
-                                                                           elapsedMs);
-                                      },
-                                      Qt::QueuedConnection);
+            queueFinished(true,
+                          result,
+                          QString(),
+                          elapsedMs);
         }),
                           taskPriorityForLane(lane));
     return requestId;
@@ -1239,6 +1217,39 @@ qulonglong Backend::beginAsyncRequest(const QString &operation,
                                { QStringLiteral("laneQueueDepth"), laneQueueDepth(lane) }
                            });
     return requestId;
+}
+
+void Backend::markAsyncRequestStartedFromWorker(qulonglong requestId,
+                                                const QString &operation,
+                                                const QString &subject,
+                                                qint64 startedEpochMs)
+{
+    markAsyncRequestStarted(requestId, operation, subject, startedEpochMs);
+}
+
+void Backend::completeAsyncRequestFromWorker(qulonglong requestId,
+                                             const QString &operation,
+                                             const QString &subject,
+                                             bool ok,
+                                             const QVariantMap &result,
+                                             const QString &error,
+                                             qint64 elapsedMs,
+                                             int readCacheAction,
+                                             const QString &readCacheText)
+{
+    switch (static_cast<ReadCacheAction>(readCacheAction)) {
+    case ReadCacheAction::Update:
+        updateReadTextCache(subject, readCacheText);
+        break;
+    case ReadCacheAction::Invalidate:
+        invalidateReadTextCache(subject);
+        break;
+    case ReadCacheAction::None:
+    default:
+        break;
+    }
+
+    finishAsyncRequest(requestId, operation, subject, ok, result, error, elapsedMs);
 }
 
 void Backend::finishAsyncRequest(qulonglong requestId,

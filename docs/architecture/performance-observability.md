@@ -102,3 +102,11 @@ Expected order per request:
 1. Capture `Backend.performanceMetrics()` and `RenderMonitor.performanceSnapshot()` together for a measurement window.
 2. Export `Backend.recentPerformanceTrace()` for queue/wait bottleneck analysis.
 3. Compare p95/p99 across revisions, not only averages.
+
+## P4 Quality Gate Integration
+
+P4 automated quality gate consumes this schema through:
+
+- `tests/tst_performance_gate.cpp` (p95/p99 regression check),
+- `tests/ci/run_p4_quality.sh` (PR gate entrypoint),
+- `tests/ci/run_p4_sanitizers.sh` (sanitizer matrix with the same metrics contract).

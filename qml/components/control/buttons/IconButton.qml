@@ -52,11 +52,12 @@ AbstractButton {
 
         Image {
             visible: control.iconGlyph.length === 0
-            source: control.resolvedIconSource
+            source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
             sourceSize.width: control.iconSourceSize
             sourceSize.height: control.iconSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
+            mipmap: RenderQuality.mipmapEnabled
             Layout.preferredWidth: control.iconSize
             Layout.preferredHeight: control.iconSize
             Layout.minimumWidth: control.iconSize

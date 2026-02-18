@@ -135,7 +135,28 @@ signals:
                               const QString &subject,
                               const QString &reason);
 
+private slots:
+    void markAsyncRequestStartedFromWorker(qulonglong requestId,
+                                           const QString &operation,
+                                           const QString &subject,
+                                           qint64 startedEpochMs);
+    void completeAsyncRequestFromWorker(qulonglong requestId,
+                                        const QString &operation,
+                                        const QString &subject,
+                                        bool ok,
+                                        const QVariantMap &result,
+                                        const QString &error,
+                                        qint64 elapsedMs,
+                                        int readCacheAction,
+                                        const QString &readCacheText);
+
 private:
+    enum class ReadCacheAction : int {
+        None = 0,
+        Update = 1,
+        Invalidate = 2
+    };
+
     enum class AsyncLane {
         Io = 0,
         Utility = 1,

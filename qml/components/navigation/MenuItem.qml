@@ -108,11 +108,12 @@ AbstractButton {
                     anchors.centerIn: parent
                     width: control.iconSize
                     height: control.iconSize
-                    source: control.resolvedIconSource
+                    source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
                     sourceSize.width: control.iconSourceSize
                     sourceSize.height: control.iconSourceSize
                     fillMode: Image.PreserveAspectFit
                     smooth: true
+                    mipmap: RenderQuality.mipmapEnabled
                 }
 
                 Item {

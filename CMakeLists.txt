@@ -45,9 +45,39 @@ option(LVRS_ENABLE_IPO
     "Enable interprocedural optimization (LTO) for release-like configurations when supported"
     ON
 )
+set(LVRS_SANITIZER "none" CACHE STRING
+    "Enable sanitizer instrumentation (none,address,thread,undefined)"
+)
+set_property(CACHE LVRS_SANITIZER PROPERTY STRINGS none address thread undefined)
 
 unset(LVRS_DEFAULT_BUILD_EXAMPLES)
 unset(LVRS_DEFAULT_INSTALL_EXAMPLES)
+
+set(_lvrs_supported_sanitizers none address thread undefined)
+if(NOT LVRS_SANITIZER IN_LIST _lvrs_supported_sanitizers)
+    message(FATAL_ERROR
+        "Unsupported LVRS_SANITIZER='${LVRS_SANITIZER}'. "
+        "Use one of: none, address, thread, undefined."
+    )
+endif()
+unset(_lvrs_supported_sanitizers)
+
+if(NOT LVRS_SANITIZER STREQUAL "none")
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        message(FATAL_ERROR
+            "LVRS_SANITIZER=${LVRS_SANITIZER} requires Clang or GCC family compilers."
+        )
+    endif()
+
+    set(LVRS_SANITIZER_COMPILE_OPTIONS
+        -fno-omit-frame-pointer
+        -fsanitize=${LVRS_SANITIZER}
+    )
+    set(LVRS_SANITIZER_LINK_OPTIONS
+        -fsanitize=${LVRS_SANITIZER}
+    )
+    message(STATUS "LVRS sanitizer instrumentation enabled: ${LVRS_SANITIZER}")
+endif()
 
 set(LVRS_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/LVRS")
 set(LVRS_QML_MODULE_INSTALL_BASE "${CMAKE_INSTALL_LIBDIR}/qt6/qml")
@@ -353,6 +383,11 @@ set_target_properties(LVRSCore PROPERTIES
     EXPORT_NAME "LVRS"
 )
 add_library(LVRS::LVRS ALIAS LVRSCore)
+
+if(DEFINED LVRS_SANITIZER_COMPILE_OPTIONS)
+    target_compile_options(LVRSCore PRIVATE ${LVRS_SANITIZER_COMPILE_OPTIONS})
+    target_link_options(LVRSCore PRIVATE ${LVRS_SANITIZER_LINK_OPTIONS})
+endif()
 
 if(LVRS_APPLE_AGL_SHIM_ACTIVE)
     target_link_options(LVRSCore INTERFACE

@@ -1,21 +1,109 @@
 #include "backend/runtime/renderquality.h"
 
+#include <QDir>
+#include <QFileInfo>
+#include <QQuickGraphicsConfiguration>
 #include <QQuickWindow>
+#include <QStandardPaths>
 #include <QSurfaceFormat>
+#include <QThread>
+#include <QUrl>
 #include <QWindow>
 #include <QtGlobal>
+
+#include <cmath>
 
 namespace {
 
 constexpr int kFramesInFlightMin = 1;
 constexpr int kFramesInFlightMax = 3;
 constexpr int kInactiveMsaaSamplesMax = 16;
+constexpr qreal kDynamicScaleMin = 1.0;
+constexpr qreal kDynamicScaleMax = 4.0;
+constexpr qreal kDynamicScaleStepMin = 0.05;
+constexpr qreal kDynamicScaleStepMax = 1.0;
+constexpr double kDynamicFrameTargetMinMs = 8.0;
+constexpr double kDynamicFrameTargetMaxMs = 50.0;
+constexpr double kDynamicFrameHysteresisMinMs = 0.5;
+constexpr double kDynamicFrameHysteresisMaxMs = 10.0;
+constexpr int kDynamicDownshiftTriggerFrames = 3;
+constexpr int kDynamicUpshiftTriggerFrames = 30;
+
+QString normalizeTextureExtension(const QString &value)
+{
+    QString normalized = value.trimmed().toLower();
+    while (normalized.startsWith(QLatin1Char('.')))
+        normalized.remove(0, 1);
+    return normalized;
+}
+
+bool extensionListContains(const QStringList &extensions, const QString &suffix)
+{
+    const QString normalizedSuffix = normalizeTextureExtension(suffix);
+    if (normalizedSuffix.isEmpty())
+        return false;
+
+    for (const QString &item : extensions) {
+        if (normalizeTextureExtension(item) == normalizedSuffix)
+            return true;
+    }
+    return false;
+}
+
+QString pathWithoutSuffix(const QString &path)
+{
+    const int slashIndex = path.lastIndexOf(QLatin1Char('/'));
+    const int dotIndex = path.lastIndexOf(QLatin1Char('.'));
+    if (dotIndex <= slashIndex)
+        return QString();
+    return path.left(dotIndex);
+}
+
+QString resolveDefaultPsoCacheFilePath()
+{
+    const QString explicitFile = qEnvironmentVariable("LVRS_PSO_CACHE_FILE").trimmed();
+    if (!explicitFile.isEmpty())
+        return explicitFile;
+
+    QString cacheDir = qEnvironmentVariable("LVRS_PSO_CACHE_DIR").trimmed();
+    if (cacheDir.isEmpty())
+        cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (cacheDir.isEmpty())
+        cacheDir = QDir::tempPath() + QStringLiteral("/lvrs-cache");
+
+    QDir dir(cacheDir);
+    if (!dir.exists())
+        dir.mkpath(QStringLiteral("."));
+    return dir.filePath(QStringLiteral("lvrs_scenegraph_pso.cache"));
+}
+
+RenderQuality::DeviceTier inferDeviceTier()
+{
+    int threads = QThread::idealThreadCount();
+    if (threads <= 0)
+        threads = 4;
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    if (threads <= 6)
+        return RenderQuality::LowTier;
+    if (threads <= 8)
+        return RenderQuality::BalancedTier;
+    return RenderQuality::HighTier;
+#else
+    if (threads <= 4)
+        return RenderQuality::LowTier;
+    if (threads <= 10)
+        return RenderQuality::BalancedTier;
+    return RenderQuality::HighTier;
+#endif
+}
 
 } // namespace
 
 RenderQuality::RenderQuality(QObject *parent)
     : QObject(parent)
 {
+    m_psoCacheFile = resolvedPsoCacheFile();
 }
 
 bool RenderQuality::vectorFirst() const
@@ -87,6 +175,7 @@ void RenderQuality::setEnabled(bool value)
         return;
     m_enabled = next;
     emit enabledChanged();
+    emit effectiveSupersampleScaleChanged();
     updateSceneSupersamplingActive();
 }
 
@@ -105,6 +194,7 @@ void RenderQuality::setSupersampleScale(qreal value)
         return;
     m_supersampleScale = next;
     emit supersampleScaleChanged();
+    emit effectiveSupersampleScaleChanged();
     updateSceneSupersamplingActive();
 }
 
@@ -225,11 +315,253 @@ bool RenderQuality::powerSaveActive() const
     return m_powerSaveActive;
 }
 
+bool RenderQuality::psoCacheEnabled() const
+{
+    return m_psoCacheEnabled;
+}
+
+void RenderQuality::setPsoCacheEnabled(bool value)
+{
+    if (m_psoCacheEnabled == value)
+        return;
+    m_psoCacheEnabled = value;
+    emit psoCacheEnabledChanged();
+    applyGraphicsConfiguration(m_boundWindow);
+}
+
+bool RenderQuality::psoCacheLoadEnabled() const
+{
+    return m_psoCacheLoadEnabled;
+}
+
+void RenderQuality::setPsoCacheLoadEnabled(bool value)
+{
+    if (m_psoCacheLoadEnabled == value)
+        return;
+    m_psoCacheLoadEnabled = value;
+    emit psoCacheLoadEnabledChanged();
+    applyGraphicsConfiguration(m_boundWindow);
+}
+
+bool RenderQuality::psoCacheSaveEnabled() const
+{
+    return m_psoCacheSaveEnabled;
+}
+
+void RenderQuality::setPsoCacheSaveEnabled(bool value)
+{
+    if (m_psoCacheSaveEnabled == value)
+        return;
+    m_psoCacheSaveEnabled = value;
+    emit psoCacheSaveEnabledChanged();
+    applyGraphicsConfiguration(m_boundWindow);
+}
+
+QString RenderQuality::psoCacheFile() const
+{
+    return m_psoCacheFile;
+}
+
+void RenderQuality::setPsoCacheFile(const QString &value)
+{
+    const QString next = value.trimmed().isEmpty() ? resolvedPsoCacheFile() : value.trimmed();
+    if (m_psoCacheFile == next)
+        return;
+    m_psoCacheFile = next;
+    emit psoCacheFileChanged();
+    applyGraphicsConfiguration(m_boundWindow);
+}
+
+bool RenderQuality::depthBufferFor2D() const
+{
+    return m_depthBufferFor2D;
+}
+
+void RenderQuality::setDepthBufferFor2D(bool value)
+{
+    if (m_depthBufferFor2D == value)
+        return;
+    m_depthBufferFor2D = value;
+    emit depthBufferFor2DChanged();
+    applyGraphicsConfiguration(m_boundWindow);
+}
+
+bool RenderQuality::mipmapEnabled() const
+{
+    return m_mipmapEnabled;
+}
+
+void RenderQuality::setMipmapEnabled(bool value)
+{
+    if (m_mipmapEnabled == value)
+        return;
+    m_mipmapEnabled = value;
+    emit mipmapEnabledChanged();
+}
+
+bool RenderQuality::textureCompressionEnabled() const
+{
+    return m_textureCompressionEnabled;
+}
+
+void RenderQuality::setTextureCompressionEnabled(bool value)
+{
+    if (m_textureCompressionEnabled == value)
+        return;
+    m_textureCompressionEnabled = value;
+    emit textureCompressionEnabledChanged();
+}
+
+QStringList RenderQuality::compressedTextureExtensions() const
+{
+    return m_compressedTextureExtensions;
+}
+
+void RenderQuality::setCompressedTextureExtensions(const QStringList &value)
+{
+    QStringList next;
+    next.reserve(value.size());
+    for (const QString &raw : value) {
+        const QString normalized = normalizeTextureExtension(raw);
+        if (normalized.isEmpty())
+            continue;
+        if (!next.contains(normalized))
+            next.append(normalized);
+    }
+
+    if (next.isEmpty()) {
+        next = { QStringLiteral("ktx2"), QStringLiteral("ktx"), QStringLiteral("dds") };
+    }
+
+    if (m_compressedTextureExtensions == next)
+        return;
+
+    m_compressedTextureExtensions = next;
+    emit compressedTextureExtensionsChanged();
+}
+
+bool RenderQuality::dynamicResolutionEnabled() const
+{
+    return m_dynamicResolutionEnabled;
+}
+
+void RenderQuality::setDynamicResolutionEnabled(bool value)
+{
+    if (m_dynamicResolutionEnabled == value)
+        return;
+    m_dynamicResolutionEnabled = value;
+    resetDynamicResolutionController();
+    if (!m_dynamicResolutionEnabled)
+        setDynamicResolutionScaleInternal(m_dynamicResolutionMaxScale);
+    emit dynamicResolutionEnabledChanged();
+}
+
+qreal RenderQuality::dynamicResolutionScale() const
+{
+    return m_dynamicResolutionScale;
+}
+
+qreal RenderQuality::dynamicResolutionMinScale() const
+{
+    return m_dynamicResolutionMinScale;
+}
+
+void RenderQuality::setDynamicResolutionMinScale(qreal value)
+{
+    const qreal next = qBound(kDynamicScaleMin, value, kDynamicScaleMax);
+    if (qFuzzyCompare(m_dynamicResolutionMinScale, next))
+        return;
+
+    m_dynamicResolutionMinScale = next;
+    if (m_dynamicResolutionMaxScale < m_dynamicResolutionMinScale) {
+        m_dynamicResolutionMaxScale = m_dynamicResolutionMinScale;
+        emit dynamicResolutionMaxScaleChanged();
+    }
+    emit dynamicResolutionMinScaleChanged();
+    setDynamicResolutionScaleInternal(m_dynamicResolutionScale);
+}
+
+qreal RenderQuality::dynamicResolutionMaxScale() const
+{
+    return m_dynamicResolutionMaxScale;
+}
+
+void RenderQuality::setDynamicResolutionMaxScale(qreal value)
+{
+    const qreal next = qBound(kDynamicScaleMin, value, kDynamicScaleMax);
+    if (qFuzzyCompare(m_dynamicResolutionMaxScale, next))
+        return;
+
+    m_dynamicResolutionMaxScale = next;
+    if (m_dynamicResolutionMinScale > m_dynamicResolutionMaxScale) {
+        m_dynamicResolutionMinScale = m_dynamicResolutionMaxScale;
+        emit dynamicResolutionMinScaleChanged();
+    }
+    emit dynamicResolutionMaxScaleChanged();
+    setDynamicResolutionScaleInternal(m_dynamicResolutionScale);
+}
+
+qreal RenderQuality::dynamicResolutionStep() const
+{
+    return m_dynamicResolutionStep;
+}
+
+void RenderQuality::setDynamicResolutionStep(qreal value)
+{
+    const qreal next = qBound(kDynamicScaleStepMin, value, kDynamicScaleStepMax);
+    if (qFuzzyCompare(m_dynamicResolutionStep, next))
+        return;
+    m_dynamicResolutionStep = next;
+    emit dynamicResolutionStepChanged();
+}
+
+double RenderQuality::dynamicResolutionTargetFrameMs() const
+{
+    return m_dynamicResolutionTargetFrameMs;
+}
+
+void RenderQuality::setDynamicResolutionTargetFrameMs(double value)
+{
+    const double next = qBound(kDynamicFrameTargetMinMs, value, kDynamicFrameTargetMaxMs);
+    if (qFuzzyCompare(m_dynamicResolutionTargetFrameMs, next))
+        return;
+    m_dynamicResolutionTargetFrameMs = next;
+    emit dynamicResolutionTargetFrameMsChanged();
+}
+
+double RenderQuality::dynamicResolutionHysteresisMs() const
+{
+    return m_dynamicResolutionHysteresisMs;
+}
+
+void RenderQuality::setDynamicResolutionHysteresisMs(double value)
+{
+    const double next = qBound(kDynamicFrameHysteresisMinMs, value, kDynamicFrameHysteresisMaxMs);
+    if (qFuzzyCompare(m_dynamicResolutionHysteresisMs, next))
+        return;
+    m_dynamicResolutionHysteresisMs = next;
+    emit dynamicResolutionHysteresisMsChanged();
+}
+
+int RenderQuality::detectedDeviceTier() const
+{
+    return m_detectedDeviceTier;
+}
+
+int RenderQuality::activeDeviceTier() const
+{
+    return m_activeDeviceTier;
+}
+
 qreal RenderQuality::effectiveSupersampleScale() const
 {
     if (!kSupersamplingEnabled || !m_enabled)
         return 1.0;
-    return kForcedSupersampleScale;
+
+    qreal effectiveScale = m_supersampleScale;
+    if (m_dynamicResolutionEnabled)
+        effectiveScale = qMin(effectiveScale, m_dynamicResolutionScale);
+    return qBound(1.0, effectiveScale, m_supersampleScale);
 }
 
 bool RenderQuality::shouldUseSceneSupersampling(int width, int height) const
@@ -261,6 +593,157 @@ QSize RenderQuality::resolveLayerTextureSize(int width, int height, bool sceneSu
     const int scaledWidth = qMax(1, qRound(static_cast<qreal>(baseWidth) * scale));
     const int scaledHeight = qMax(1, qRound(static_cast<qreal>(baseHeight) * scale));
     return QSize(scaledWidth, scaledHeight);
+}
+
+QString RenderQuality::resolveTextureSource(const QString &source) const
+{
+    const QString trimmed = source.trimmed();
+    if (trimmed.isEmpty() || !m_textureCompressionEnabled || m_compressedTextureExtensions.isEmpty())
+        return trimmed;
+
+    auto resolveCandidatePath = [this](const QString &path) {
+        const QFileInfo info(path);
+        const QString suffix = normalizeTextureExtension(info.suffix());
+        if (suffix.isEmpty() || extensionListContains(m_compressedTextureExtensions, suffix))
+            return QString();
+
+        const QString base = pathWithoutSuffix(path);
+        if (base.isEmpty())
+            return QString();
+
+        for (const QString &rawExtension : m_compressedTextureExtensions) {
+            const QString extension = normalizeTextureExtension(rawExtension);
+            if (extension.isEmpty())
+                continue;
+            const QString candidate = base + QStringLiteral(".") + extension;
+            if (QFileInfo::exists(candidate))
+                return candidate;
+        }
+        return QString();
+    };
+
+    if (trimmed.startsWith(QStringLiteral(":/"))) {
+        const QString candidate = resolveCandidatePath(trimmed);
+        return candidate.isEmpty() ? trimmed : candidate;
+    }
+
+    if (trimmed.startsWith(QStringLiteral("qrc:/"))) {
+        const QString qrcPath = QStringLiteral(":") + trimmed.mid(4);
+        const QString candidate = resolveCandidatePath(qrcPath);
+        if (candidate.isEmpty())
+            return trimmed;
+        return QStringLiteral("qrc") + candidate.mid(1);
+    }
+
+    const QUrl parsed = QUrl::fromUserInput(trimmed);
+    if (parsed.isValid() && parsed.isLocalFile()) {
+        const QString candidate = resolveCandidatePath(parsed.toLocalFile());
+        return candidate.isEmpty() ? trimmed : QUrl::fromLocalFile(candidate).toString();
+    }
+
+    if (parsed.isValid() && !parsed.scheme().isEmpty())
+        return trimmed;
+
+    const QString candidate = resolveCandidatePath(trimmed);
+    return candidate.isEmpty() ? trimmed : candidate;
+}
+
+void RenderQuality::sampleFrameTime(double frameMs)
+{
+    if (!m_dynamicResolutionEnabled || !m_enabled || m_powerSaveActive)
+        return;
+    if (!std::isfinite(frameMs) || frameMs <= 0.0)
+        return;
+
+    const double upperBound = m_dynamicResolutionTargetFrameMs + m_dynamicResolutionHysteresisMs;
+    const double lowerBound = qMax(1.0, m_dynamicResolutionTargetFrameMs - m_dynamicResolutionHysteresisMs);
+
+    if (frameMs > upperBound) {
+        m_dynamicOverBudgetStreak += 1;
+        m_dynamicUnderBudgetStreak = 0;
+    } else if (frameMs < lowerBound) {
+        m_dynamicUnderBudgetStreak += 1;
+        m_dynamicOverBudgetStreak = 0;
+    } else {
+        m_dynamicOverBudgetStreak = 0;
+        m_dynamicUnderBudgetStreak = 0;
+        return;
+    }
+
+    if (m_dynamicOverBudgetStreak >= kDynamicDownshiftTriggerFrames) {
+        setDynamicResolutionScaleInternal(m_dynamicResolutionScale - m_dynamicResolutionStep);
+        m_dynamicOverBudgetStreak = 0;
+    } else if (m_dynamicUnderBudgetStreak >= kDynamicUpshiftTriggerFrames) {
+        setDynamicResolutionScaleInternal(m_dynamicResolutionScale + m_dynamicResolutionStep);
+        m_dynamicUnderBudgetStreak = 0;
+    }
+}
+
+void RenderQuality::applyDeviceTierPreset(int tier)
+{
+    int resolvedTier = tier;
+    if (resolvedTier < static_cast<int>(LowTier) || resolvedTier > static_cast<int>(HighTier))
+        resolvedTier = m_detectedDeviceTier;
+
+    switch (static_cast<DeviceTier>(resolvedTier)) {
+    case LowTier:
+        setMsaaSamples(2);
+        setFramesInFlight(1);
+        setPartialUpdateEnabled(true);
+        setBatchRenderingEnabled(true);
+        setInactiveMsaaSamples(0);
+        setMipmapEnabled(false);
+        setTextureCompressionEnabled(true);
+        setDepthBufferFor2D(false);
+        setDynamicResolutionMinScale(1.25);
+        setDynamicResolutionMaxScale(2.0);
+        setDynamicResolutionStep(0.20);
+        setDynamicResolutionTargetFrameMs(20.0);
+        setDynamicResolutionHysteresisMs(2.5);
+        setDynamicResolutionEnabled(true);
+        break;
+    case HighTier:
+        setMsaaSamples(8);
+        setFramesInFlight(3);
+        setPartialUpdateEnabled(true);
+        setBatchRenderingEnabled(true);
+        setInactiveMsaaSamples(2);
+        setMipmapEnabled(true);
+        setTextureCompressionEnabled(true);
+        setDepthBufferFor2D(false);
+        setDynamicResolutionMinScale(2.0);
+        setDynamicResolutionMaxScale(3.0);
+        setDynamicResolutionStep(0.25);
+        setDynamicResolutionTargetFrameMs(16.6);
+        setDynamicResolutionHysteresisMs(2.0);
+        setDynamicResolutionEnabled(false);
+        break;
+    case BalancedTier:
+    default:
+        setMsaaSamples(4);
+        setFramesInFlight(2);
+        setPartialUpdateEnabled(true);
+        setBatchRenderingEnabled(true);
+        setInactiveMsaaSamples(1);
+        setMipmapEnabled(true);
+        setTextureCompressionEnabled(true);
+        setDepthBufferFor2D(false);
+        setDynamicResolutionMinScale(1.5);
+        setDynamicResolutionMaxScale(3.0);
+        setDynamicResolutionStep(0.25);
+        setDynamicResolutionTargetFrameMs(16.6);
+        setDynamicResolutionHysteresisMs(2.0);
+        setDynamicResolutionEnabled(true);
+        break;
+    }
+
+    if (m_activeDeviceTier != resolvedTier) {
+        m_activeDeviceTier = resolvedTier;
+        emit activeDeviceTierChanged();
+    }
+
+    if (m_boundWindow)
+        applyWindow(m_boundWindow);
 }
 
 void RenderQuality::bindWindow(QObject *window)
@@ -307,6 +790,21 @@ void RenderQuality::bindWindow(QObject *window)
                                                 updateWindowPowerMode();
                                                 updateSceneSupersamplingActive();
                                             });
+    m_boundWindowFrameSwappedConnection = connect(m_boundWindow,
+                                                  &QQuickWindow::frameSwapped,
+                                                  this,
+                                                  [this]() {
+                                                      if (!m_dynamicResolutionEnabled || m_powerSaveActive)
+                                                          return;
+                                                      if (!m_dynamicFrameTimer.isValid()) {
+                                                          m_dynamicFrameTimer.start();
+                                                          return;
+                                                      }
+
+                                                      const qint64 elapsedMs = m_dynamicFrameTimer.restart();
+                                                      if (elapsedMs > 0)
+                                                          sampleFrameTime(static_cast<double>(elapsedMs));
+                                                  });
     m_boundWindowDestroyedConnection = connect(m_boundWindow,
                                                &QObject::destroyed,
                                                this,
@@ -335,6 +833,8 @@ void RenderQuality::applyWindow(QObject *window)
         format.setSamples(samples);
         quickWindow->setFormat(format);
     }
+
+    applyGraphicsConfiguration(quickWindow);
 
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
     updateWindowPowerMode();
@@ -375,6 +875,11 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
         const int clampedFrames = qBound(kFramesInFlightMin, framesInFlight, kFramesInFlightMax);
         qputenv("QSG_RHI_FRAMES_IN_FLIGHT", QByteArray::number(clampedFrames));
     }
+
+    if (qEnvironmentVariableIsEmpty("QSG_RHI_PIPELINE_CACHE_LOAD"))
+        qputenv("QSG_RHI_PIPELINE_CACHE_LOAD", QByteArrayLiteral("1"));
+    if (qEnvironmentVariableIsEmpty("QSG_RHI_PIPELINE_CACHE_SAVE"))
+        qputenv("QSG_RHI_PIPELINE_CACHE_SAVE", QByteArrayLiteral("1"));
 
     if (partialUpdateEnabled) {
         if (qEnvironmentVariableIsEmpty("QSG_PARTIAL_UPDATE"))
@@ -425,6 +930,7 @@ void RenderQuality::updateWindowPowerMode()
     if (m_powerSaveActive != nextPowerSave) {
         m_powerSaveActive = nextPowerSave;
         emit powerSaveActiveChanged();
+        resetDynamicResolutionController();
     }
 
     const int minimumActiveSamples = kAntialiasingEnabled ? 2 : 0;
@@ -471,6 +977,10 @@ void RenderQuality::detachWindowBinding()
         disconnect(m_boundWindowActiveConnection);
         m_boundWindowActiveConnection = QMetaObject::Connection();
     }
+    if (m_boundWindowFrameSwappedConnection) {
+        disconnect(m_boundWindowFrameSwappedConnection);
+        m_boundWindowFrameSwappedConnection = QMetaObject::Connection();
+    }
     if (m_boundWindowDestroyedConnection) {
         disconnect(m_boundWindowDestroyedConnection);
         m_boundWindowDestroyedConnection = QMetaObject::Connection();
@@ -484,4 +994,67 @@ void RenderQuality::detachWindowBinding()
         m_sceneSupersamplingActive = false;
         emit sceneSupersamplingActiveChanged();
     }
+    resetDynamicResolutionController();
+}
+
+RenderQuality::DeviceTier RenderQuality::detectDeviceTierForSystem()
+{
+    return inferDeviceTier();
+}
+
+void RenderQuality::applyGraphicsConfiguration(QQuickWindow *window)
+{
+    if (!window)
+        return;
+
+    QQuickGraphicsConfiguration configuration = window->graphicsConfiguration();
+    configuration.setDepthBufferFor2D(m_depthBufferFor2D);
+    configuration.setDebugLayer(false);
+    configuration.setDebugMarkers(false);
+    configuration.setTimestamps(false);
+    configuration.setPreferSoftwareDevice(false);
+    configuration.setAutomaticPipelineCache(m_psoCacheEnabled);
+
+    if (m_psoCacheEnabled) {
+        const QString cacheFile = resolvedPsoCacheFile();
+        configuration.setPipelineCacheLoadFile(m_psoCacheLoadEnabled ? cacheFile : QString());
+        configuration.setPipelineCacheSaveFile(m_psoCacheSaveEnabled ? cacheFile : QString());
+    } else {
+        configuration.setPipelineCacheLoadFile(QString());
+        configuration.setPipelineCacheSaveFile(QString());
+    }
+
+    window->setGraphicsConfiguration(configuration);
+}
+
+qreal RenderQuality::clampedDynamicScale(qreal value) const
+{
+    const qreal minScale = qBound(kDynamicScaleMin, m_dynamicResolutionMinScale, kDynamicScaleMax);
+    const qreal maxScale = qBound(minScale, m_dynamicResolutionMaxScale, kDynamicScaleMax);
+    return qBound(minScale, value, maxScale);
+}
+
+void RenderQuality::setDynamicResolutionScaleInternal(qreal value)
+{
+    const qreal next = clampedDynamicScale(value);
+    if (qFuzzyCompare(m_dynamicResolutionScale, next))
+        return;
+
+    m_dynamicResolutionScale = next;
+    emit dynamicResolutionScaleChanged();
+    emit effectiveSupersampleScaleChanged();
+    updateSceneSupersamplingActive();
+}
+
+void RenderQuality::resetDynamicResolutionController()
+{
+    m_dynamicFrameTimer.invalidate();
+    m_dynamicOverBudgetStreak = 0;
+    m_dynamicUnderBudgetStreak = 0;
+}
+
+QString RenderQuality::resolvedPsoCacheFile() const
+{
+    const QString configured = m_psoCacheFile.trimmed();
+    return configured.isEmpty() ? resolveDefaultPsoCacheFilePath() : configured;
 }

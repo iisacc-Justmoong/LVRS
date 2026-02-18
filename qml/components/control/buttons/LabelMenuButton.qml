@@ -46,11 +46,12 @@ AbstractButton {
         }
 
         Image {
-            source: control.renderedIndicatorSource
+            source: RenderQuality.resolveTextureSource(control.renderedIndicatorSource)
             sourceSize.width: control.indicatorSourceSize
             sourceSize.height: control.indicatorSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
+            mipmap: RenderQuality.mipmapEnabled
             Layout.preferredWidth: Theme.iconSm
             Layout.preferredHeight: Theme.iconSm
             Layout.minimumWidth: Theme.iconSm

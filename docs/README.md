@@ -12,6 +12,7 @@ The primary objective is operational clarity: each document should answer what A
 5. `docs/architecture/rendering-backend.md`
 6. `docs/architecture/performance-observability.md`
 7. `docs/performance-baseline-p0.md`
+8. `docs/quality-automation-p4.md`
 
 ## Documentation Contract
 
@@ -40,6 +41,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Performance Baseline
 
 - `docs/performance-baseline-p0.md`
+- `docs/quality-automation-p4.md`
 
 ## Backend Singletons
 

@@ -91,13 +91,14 @@ Item {
                     Image {
                         anchors.centerIn: parent
                         visible: slotButton.slotIconSource.length > 0
-                        source: slotButton.slotIconSource
+                        source: RenderQuality.resolveTextureSource(slotButton.slotIconSource)
                         sourceSize.width: control.iconSourceSize
                         sourceSize.height: control.iconSourceSize
                         width: control.iconSize
                         height: control.iconSize
                         fillMode: Image.PreserveAspectFit
                         smooth: true
+                        mipmap: RenderQuality.mipmapEnabled
                     }
                 }
 

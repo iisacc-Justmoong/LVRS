@@ -42,6 +42,8 @@ Examples:
 
 If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
 This keeps text/MSAA defaults aligned with backend policy.
+Global defaults also seed GPU pipeline-cache env hints (`QSG_RHI_PIPELINE_CACHE_LOAD/SAVE`).
+Per-window PSO cache file binding and device-tier presets are then applied at `RenderQuality.applyWindow(...)` / `RenderQuality.applyDeviceTierPreset(...)`.
 
 ## Failure Handling Guidance
 

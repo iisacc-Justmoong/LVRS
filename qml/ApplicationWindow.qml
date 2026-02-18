@@ -43,6 +43,8 @@ Controls.ApplicationWindow {
     property int windowDragHandleTopMargin: 0
     property bool inactiveRenderDowngradeEnabled: true
     property int inactiveRenderMsaaSamples: 0
+    property bool autoApplyDeviceTierPreset: true
+    property int forcedDeviceTierPreset: -1
     property int pageRouterRetainInactivePages: 0
     property int pageRouterCacheCapacity: 256
 
@@ -155,6 +157,18 @@ Controls.ApplicationWindow {
     }
     onInactiveRenderMsaaSamplesChanged: {
         RenderQuality.inactiveMsaaSamples = inactiveRenderMsaaSamples
+        RenderQuality.applyWindow(windowRoot)
+    }
+    onAutoApplyDeviceTierPresetChanged: {
+        if (!autoApplyDeviceTierPreset)
+            return
+        RenderQuality.applyDeviceTierPreset(forcedDeviceTierPreset)
+        RenderQuality.applyWindow(windowRoot)
+    }
+    onForcedDeviceTierPresetChanged: {
+        if (!autoApplyDeviceTierPreset)
+            return
+        RenderQuality.applyDeviceTierPreset(forcedDeviceTierPreset)
         RenderQuality.applyWindow(windowRoot)
     }
     onAutoAttachRuntimeEventsChanged: {
@@ -918,7 +932,7 @@ Controls.ApplicationWindow {
         anchors.margins: windowRoot.safeMargin
         layer.enabled: windowRoot.sceneSupersamplingActive
         layer.smooth: layer.enabled
-        layer.mipmap: false
+        layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
 
         AdaptiveLayoutHost {
@@ -987,6 +1001,8 @@ Controls.ApplicationWindow {
     QtObject {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
+            if (windowRoot.autoApplyDeviceTierPreset)
+                RenderQuality.applyDeviceTierPreset(windowRoot.forcedDeviceTierPreset)
             RenderQuality.inactiveRenderDowngradeEnabled = windowRoot.inactiveRenderDowngradeEnabled
             RenderQuality.inactiveMsaaSamples = windowRoot.inactiveRenderMsaaSamples
             RenderQuality.applyWindow(windowRoot)

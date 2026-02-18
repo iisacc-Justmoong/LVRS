@@ -52,6 +52,7 @@ ctest --test-dir build --output-on-failure
 - `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when fixed graphics backend Qt feature requirements are missing.
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (`ON`): apply platform-specific release/relwithdebinfo/minsizerel compile+link optimization flags.
 - `LVRS_ENABLE_IPO` (`ON`): enable interprocedural optimization (LTO) for release-like configs when toolchain support is available.
+- `LVRS_SANITIZER` (`none`): sanitizer instrumentation (`none`, `address`, `thread`, `undefined`).
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
 - `LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS` (`ON`): generate `bootstrap_lvrs_*` framework multi-platform targets.
 - `LVRS_BOOTSTRAP_INSTALL_ROOT` (`<build>/lvrs-install`): install root used by `bootstrap_lvrs_*`.
@@ -210,6 +211,24 @@ ctest --test-dir build --output-on-failure
 ```
 
 If test targets are not present, keep `ctest` but allow no-test pass semantics or gate it behind a project option.
+
+## P4 Quality Automation Commands
+
+P4 quality automation scripts are shipped under `tests/ci/`.
+
+```bash
+# PR gate (performance + visual)
+./tests/ci/run_p4_quality.sh
+
+# Sanitizer matrix
+./tests/ci/run_p4_sanitizers.sh address
+./tests/ci/run_p4_sanitizers.sh undefined
+
+# Soak batch
+LVRS_SOAK_ITERATIONS=5000 ./tests/ci/run_p4_soak.sh
+```
+
+Detailed contracts and thresholds are documented in `docs/quality-automation-p4.md`.
 
 ## Packaging Checklist
 

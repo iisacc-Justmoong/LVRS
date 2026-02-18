@@ -38,6 +38,7 @@ Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp`
 - Optional `RenderQuality::configureGlobalDefaults()`.
 - Optional `QQuickStyle::setStyle(quickStyleName)`.
 - Optional graphics backend bootstrap and diagnostics logging.
+- Initializes default GPU cache hints (`QSG_RHI_PIPELINE_CACHE_LOAD/SAVE`) through `RenderQuality` global defaults path.
 
 ## What `postApplicationBootstrap` Does
 

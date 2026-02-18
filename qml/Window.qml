@@ -28,6 +28,8 @@ QtQuickWindow.Window {
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
     property bool autoApplyRenderQuality: true
+    property bool autoApplyDeviceTierPreset: true
+    property int forcedDeviceTierPreset: -1
     property bool autoAttachRuntimeEvents: false
 
     readonly property real effectiveSupersampleScale: autoApplyRenderQuality && RenderQuality.enabled
@@ -75,8 +77,23 @@ QtQuickWindow.Window {
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
     onSolidChromeChanged: applyNativeWindowStyle()
     onAutoApplyRenderQualityChanged: {
-        if (autoApplyRenderQuality)
+        if (autoApplyRenderQuality) {
+            if (autoApplyDeviceTierPreset)
+                RenderQuality.applyDeviceTierPreset(forcedDeviceTierPreset)
             RenderQuality.applyWindow(root)
+        }
+    }
+    onAutoApplyDeviceTierPresetChanged: {
+        if (!autoApplyRenderQuality || !autoApplyDeviceTierPreset)
+            return
+        RenderQuality.applyDeviceTierPreset(forcedDeviceTierPreset)
+        RenderQuality.applyWindow(root)
+    }
+    onForcedDeviceTierPresetChanged: {
+        if (!autoApplyRenderQuality || !autoApplyDeviceTierPreset)
+            return
+        RenderQuality.applyDeviceTierPreset(forcedDeviceTierPreset)
+        RenderQuality.applyWindow(root)
     }
     onAutoAttachRuntimeEventsChanged: {
         if (!autoAttachRuntimeEvents)
@@ -91,7 +108,7 @@ QtQuickWindow.Window {
         anchors.margins: root.safeMargin
         layer.enabled: root.sceneSupersamplingActive
         layer.smooth: layer.enabled
-        layer.mipmap: false
+        layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
     }
 
@@ -99,6 +116,8 @@ QtQuickWindow.Window {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
             if (root.autoApplyRenderQuality) {
+                if (root.autoApplyDeviceTierPreset)
+                    RenderQuality.applyDeviceTierPreset(root.forcedDeviceTierPreset)
                 RenderQuality.applyWindow(root)
                 SvgManager.ensureMinimumScale(root.effectiveSupersampleScale)
             }

@@ -100,13 +100,14 @@ AbstractButton {
                     id: iconImage
                     anchors.centerIn: parent
                     visible: control.iconGlyph.length === 0 && control.resolvedIconSource.toString().length > 0
-                    source: control.resolvedIconSource
+                    source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
                     sourceSize.width: control.iconSourceSize
                     sourceSize.height: control.iconSourceSize
                     width: control.iconSize
                     height: control.iconSize
                     fillMode: Image.PreserveAspectFit
                     smooth: true
+                    mipmap: RenderQuality.mipmapEnabled
                 }
 
                 Label {
