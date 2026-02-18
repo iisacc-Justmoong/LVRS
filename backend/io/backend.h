@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QMetaObject>
 #include <QPointer>
+#include <QStringList>
 #include <QThreadPool>
 #include <QVariantList>
 #include <QVariantMap>
@@ -76,6 +77,12 @@ signals:
                               qint64 elapsedMs);
 
 private:
+    struct ReadCacheEntry {
+        QString text;
+        qint64 size = -1;
+        qint64 lastModifiedMs = -1;
+    };
+
     qulonglong beginAsyncRequest(const QString &operation, const QString &subject);
     void finishAsyncRequest(qulonglong requestId,
                             const QString &operation,
@@ -85,6 +92,11 @@ private:
                             const QString &error,
                             qint64 elapsedMs);
     void setAsyncJobsInFlight(int value);
+    QString normalizePathForCache(const QString &path) const;
+    bool tryReadTextCache(const QString &path, QString *text);
+    void updateReadTextCache(const QString &path, const QString &text);
+    void invalidateReadTextCache(const QString &path);
+    void trimReadTextCache();
     RuntimeEvents *resolveRuntimeEvents() const;
     void appendHookedEvent(const QVariantMap &eventData);
     void setLastError(const QString &message);
@@ -100,6 +112,9 @@ private:
     QMetaObject::Connection m_runtimeEventConnection;
     QMetaObject::Connection m_runtimeDestroyedConnection;
     QThreadPool m_asyncThreadPool;
+    QHash<QString, ReadCacheEntry> m_readTextCache;
+    QStringList m_readTextCacheOrder;
+    int m_readTextCacheCapacity = 256;
     int m_asyncJobsInFlight = 0;
     int m_asyncMaxConcurrency = 0;
     qulonglong m_asyncNextRequestId = 0;

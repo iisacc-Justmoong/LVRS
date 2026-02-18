@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
+#include <QFile>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QQuickWindow>
@@ -26,6 +27,7 @@ private slots:
     void backend_error_signal_and_directory_idempotence();
     void backend_event_hook_receives_runtime_events();
     void backend_async_concurrency_and_io_contract();
+    void backend_async_delay_distribution_and_read_cache_contract();
 };
 
 void BackendIoTests::backend_file_roundtrip_and_errors()
@@ -247,6 +249,86 @@ void BackendIoTests::backend_async_concurrency_and_io_contract()
     QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
     QVERIFY(queuedSpy.count() >= 6);
     QVERIFY(finishedSpy.count() >= 6);
+}
+
+void BackendIoTests::backend_async_delay_distribution_and_read_cache_contract()
+{
+    Backend backend;
+    backend.setAsyncMaxConcurrency(1);
+    QCOMPARE(backend.asyncMaxConcurrency(), 1);
+
+    QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
+    QVERIFY(finishedSpy.isValid());
+
+    auto hasFinishedRequest = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return true;
+        }
+        return false;
+    };
+
+    auto finishedArgsFor = [&finishedSpy](qulonglong requestId) {
+        for (const QList<QVariant> &args : finishedSpy) {
+            if (args.size() >= 7 && args.at(0).toULongLong() == requestId)
+                return args;
+        }
+        return QList<QVariant>();
+    };
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString filePath = tempDir.path() + "/distribution.txt";
+    QFile seedFile(filePath);
+    QVERIFY(seedFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QVERIFY(seedFile.write("delay-distribution-check") > 0);
+    seedFile.close();
+
+    QElapsedTimer timer;
+    timer.start();
+    const qulonglong delayedId = backend.dispatchAsyncTask(QStringLiteral("delayed-task"),
+                                                           QVariantMap(),
+                                                           320);
+    const qulonglong readId = backend.readTextFileAsync(filePath);
+
+    QTRY_VERIFY(hasFinishedRequest(readId));
+    const qint64 firstReadElapsedMs = timer.elapsed();
+    QVERIFY2(firstReadElapsedMs < 260,
+             qPrintable(QStringLiteral("Expected read to bypass delayed-task queue blocking (<260ms), elapsed=%1ms")
+                            .arg(firstReadElapsedMs)));
+
+    const QList<QVariant> firstReadArgs = finishedArgsFor(readId);
+    QVERIFY(firstReadArgs.size() >= 7);
+    QCOMPARE(firstReadArgs.at(1).toString(), QStringLiteral("readTextFile"));
+    QVERIFY(firstReadArgs.at(3).toBool());
+    QCOMPARE(firstReadArgs.at(4).toMap().value(QStringLiteral("text")).toString(),
+             QStringLiteral("delay-distribution-check"));
+    QCOMPARE(firstReadArgs.at(4).toMap().value(QStringLiteral("cached")).toBool(), false);
+
+    QTRY_VERIFY(hasFinishedRequest(delayedId));
+    const QList<QVariant> delayedArgs = finishedArgsFor(delayedId);
+    QVERIFY(delayedArgs.size() >= 7);
+    QCOMPARE(delayedArgs.at(1).toString(), QStringLiteral("dispatchTask"));
+    QVERIFY(delayedArgs.at(3).toBool());
+    QVERIFY(delayedArgs.at(6).toLongLong() >= 300);
+
+    QElapsedTimer cacheTimer;
+    cacheTimer.start();
+    const qulonglong cachedReadId = backend.readTextFileAsync(filePath);
+    QTRY_VERIFY(hasFinishedRequest(cachedReadId));
+    const qint64 cachedReadElapsedMs = cacheTimer.elapsed();
+    QVERIFY2(cachedReadElapsedMs < 120,
+             qPrintable(QStringLiteral("Expected cache hit to complete quickly (<120ms), elapsed=%1ms")
+                            .arg(cachedReadElapsedMs)));
+
+    const QList<QVariant> cachedReadArgs = finishedArgsFor(cachedReadId);
+    QVERIFY(cachedReadArgs.size() >= 7);
+    QCOMPARE(cachedReadArgs.at(1).toString(), QStringLiteral("readTextFile"));
+    QVERIFY(cachedReadArgs.at(3).toBool());
+    QCOMPARE(cachedReadArgs.at(4).toMap().value(QStringLiteral("cached")).toBool(), true);
+
+    QTRY_COMPARE(backend.asyncJobsInFlight(), 0);
 }
 
 QTEST_MAIN(BackendIoTests)
