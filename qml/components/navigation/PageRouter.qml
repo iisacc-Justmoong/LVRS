@@ -23,6 +23,8 @@ Item {
     property int routeResolveCacheCapacity: 256
     property var _trackedViewIds: []
     property bool _presentationSyncScheduled: false
+    property bool _routeResolverDirty: true
+    property bool _routeResolverSyncScheduled: false
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
@@ -239,18 +241,46 @@ Item {
         return routes[index]
     }
 
-    function syncRouteResolverRoutes() {
+    function markRouteResolverDirty() {
+        _routeResolverDirty = true
+    }
+
+    function syncRouteResolverRoutes(forceSync) {
         if (!routeResolver || !routeResolver.updateRoutes)
             return
-        routeResolver.cacheCapacity = Math.max(16, routeResolveCacheCapacity)
+
+        var nextCapacity = Math.max(16, routeResolveCacheCapacity)
+        if (routeResolver.cacheCapacity !== nextCapacity)
+            routeResolver.cacheCapacity = nextCapacity
+
+        if (!forceSync && !_routeResolverDirty)
+            return
+
         routeResolver.updateRoutes(routes)
+        _routeResolverDirty = false
+    }
+
+    function scheduleRouteResolverSync() {
+        markRouteResolverDirty()
+        if (_routeResolverSyncScheduled)
+            return
+
+        _routeResolverSyncScheduled = true
+        Qt.callLater(function() {
+            _routeResolverSyncScheduled = false
+            syncRouteResolverRoutes(false)
+        })
+    }
+
+    function ensureRouteResolverReady() {
+        syncRouteResolverRoutes(false)
     }
 
     function resolveRoute(path) {
         if (!routes)
             return null
 
-        syncRouteResolverRoutes()
+        ensureRouteResolverReady()
         var nativeResolved = routeResolver.resolve(path)
         if (!nativeResolved || !nativeResolved.matched)
             return null
@@ -332,7 +362,7 @@ Item {
     Component.onCompleted: {
         if (registerAsGlobalNavigator)
             Navigator.registerRouter(root)
-        syncRouteResolverRoutes()
+        syncRouteResolverRoutes(true)
         if (initialPath)
             setRoot(initialPath)
         else {
@@ -363,28 +393,28 @@ Item {
     property bool _syncingPath: false
 
     onRoutesChanged: {
-        syncRouteResolverRoutes()
+        scheduleRouteResolverSync()
     }
 
-    onRouteResolveCacheCapacityChanged: syncRouteResolverRoutes()
+    onRouteResolveCacheCapacityChanged: syncRouteResolverRoutes(false)
 
     Connections {
         target: (root.routes && root.routes.countChanged !== undefined) ? root.routes : null
         ignoreUnknownSignals: true
         function onCountChanged() {
-            root.syncRouteResolverRoutes()
+            root.scheduleRouteResolverSync()
         }
         function onDataChanged() {
-            root.syncRouteResolverRoutes()
+            root.scheduleRouteResolverSync()
         }
         function onModelReset() {
-            root.syncRouteResolverRoutes()
+            root.scheduleRouteResolverSync()
         }
         function onRowsInserted() {
-            root.syncRouteResolverRoutes()
+            root.scheduleRouteResolverSync()
         }
         function onRowsRemoved() {
-            root.syncRouteResolverRoutes()
+            root.scheduleRouteResolverSync()
         }
     }
 

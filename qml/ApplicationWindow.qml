@@ -33,8 +33,9 @@ Controls.ApplicationWindow {
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
-    property bool globalEventListenersEnabled: true
-    // Runtime daemon attach is useful for global listeners and is enabled by default.
+    // Keep release defaults conservative: opt in when global listeners are required.
+    property bool globalEventListenersEnabled: false
+    // Runtime daemon attach remains opt-in via this property or global listener enablement.
     property bool autoAttachRuntimeEvents: globalEventListenersEnabled
     // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
     property bool autoHookBackendUserEvents: false
@@ -143,6 +144,11 @@ Controls.ApplicationWindow {
         return false
     }
 
+    function ensureRuntimeEventsAttached() {
+        RuntimeEvents.start()
+        RuntimeEvents.attachWindow(windowRoot)
+    }
+
     onVisibleChanged: {
         RenderQuality.applyWindow(windowRoot)
         if (visible)
@@ -174,8 +180,7 @@ Controls.ApplicationWindow {
     onAutoAttachRuntimeEventsChanged: {
         if (!autoAttachRuntimeEvents)
             return
-        RuntimeEvents.start()
-        RuntimeEvents.attachWindow(windowRoot)
+        windowRoot.ensureRuntimeEventsAttached()
     }
     onAutoHookBackendUserEventsChanged: {
         if (!autoHookBackendUserEvents)
@@ -1008,8 +1013,7 @@ Controls.ApplicationWindow {
             RenderQuality.applyWindow(windowRoot)
             SvgManager.ensureMinimumScale(windowRoot.effectiveSupersampleScale)
             if (windowRoot.autoAttachRuntimeEvents) {
-                RuntimeEvents.start()
-                RuntimeEvents.attachWindow(windowRoot)
+                windowRoot.ensureRuntimeEventsAttached()
             }
             if (windowRoot.autoHookBackendUserEvents) {
                 if (!Backend.hookUserEvents())

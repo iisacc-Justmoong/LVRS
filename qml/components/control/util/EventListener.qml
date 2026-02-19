@@ -218,6 +218,15 @@ Item {
             root.forceActiveFocus()
     }
 
+    function ensureGlobalRuntimeEventsAttached() {
+        if (!root.enabled || !root.isGlobalPointerTrigger(root.trigger) || !RuntimeEvents)
+            return
+        if (root.window)
+            RuntimeEvents.attachWindow(root.window)
+        else
+            RuntimeEvents.start()
+    }
+
     function fire(eventData) {
         if (!root.enabled || !root.action)
             return
@@ -227,10 +236,18 @@ Item {
         callback(eventData !== undefined ? eventData : root.payload)
     }
 
-    onTriggerChanged: root.ensureKeyFocus()
-    onEnabledChanged: root.ensureKeyFocus()
+    onTriggerChanged: {
+        root.ensureKeyFocus()
+        root.ensureGlobalRuntimeEventsAttached()
+    }
+    onEnabledChanged: {
+        root.ensureKeyFocus()
+        root.ensureGlobalRuntimeEventsAttached()
+    }
+    onWindowChanged: root.ensureGlobalRuntimeEventsAttached()
     Component.onCompleted: {
         root.ensureKeyFocus()
+        root.ensureGlobalRuntimeEventsAttached()
     }
 
     Connections {

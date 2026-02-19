@@ -158,6 +158,7 @@ LV.ApplicationWindow {
     width: 240
     height: 140
     autoAttachRuntimeEvents: true
+    globalEventListenersEnabled: true
     visible: false
     title: "ApplicationWindowGlobalSignalTest"
 

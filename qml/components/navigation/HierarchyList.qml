@@ -46,6 +46,10 @@ Item {
     default property alias items: manualColumn.data
 
     property var _generatedItems: []
+    property var _itemsCache: []
+    property bool _itemsCacheDirty: true
+    property bool _rebuildScheduled: false
+    property bool _normalizeScheduled: false
 
     Component {
         id: generatedItemComponent
@@ -111,7 +115,34 @@ Item {
         return item.generatedByTreeModel !== true
     }
 
+    function invalidateItemsCache() {
+        _itemsCacheDirty = true
+    }
+
+    function scheduleRebuildTreeItems() {
+        if (_rebuildScheduled)
+            return
+        _rebuildScheduled = true
+        Qt.callLater(function() {
+            _rebuildScheduled = false
+            control.rebuildTreeItems()
+        })
+    }
+
+    function scheduleNormalizeActiveItem() {
+        if (_normalizeScheduled)
+            return
+        _normalizeScheduled = true
+        Qt.callLater(function() {
+            _normalizeScheduled = false
+            control.normalizeActiveItem()
+        })
+    }
+
     function collectItems() {
+        if (!_itemsCacheDirty)
+            return _itemsCache
+
         const source = usingTreeModel ? generatedColumn : manualColumn
         const result = []
         for (let i = 0; i < source.children.length; i++) {
@@ -119,7 +150,9 @@ Item {
             if (child && child.__isHierarchyItem === true)
                 result.push(child)
         }
-        return result
+        _itemsCache = result
+        _itemsCacheDirty = false
+        return _itemsCache
     }
 
     function indexOfItemInList(currentItems, item) {
@@ -522,13 +555,14 @@ Item {
                 item.destroy()
         }
         _generatedItems = []
+        invalidateItemsCache()
     }
 
     function rebuildTreeItems() {
         clearGeneratedItems()
 
         if (!usingTreeModel) {
-            Qt.callLater(normalizeActiveItem)
+            scheduleNormalizeActiveItem()
             return
         }
 
@@ -564,7 +598,8 @@ Item {
                 _generatedItems.push(item)
         }
 
-        Qt.callLater(normalizeActiveItem)
+        invalidateItemsCache()
+        scheduleNormalizeActiveItem()
     }
 
     function expandAll() {
@@ -680,26 +715,27 @@ Item {
         return false
     }
 
-    onModelChanged: Qt.callLater(rebuildTreeItems)
-    onChildrenRoleChanged: Qt.callLater(rebuildTreeItems)
-    onItemIdRoleChanged: Qt.callLater(rebuildTreeItems)
-    onItemKeyRoleChanged: Qt.callLater(rebuildTreeItems)
-    onLabelRoleChanged: Qt.callLater(rebuildTreeItems)
-    onIconNameRoleChanged: Qt.callLater(rebuildTreeItems)
-    onIconSourceRoleChanged: Qt.callLater(rebuildTreeItems)
-    onIconGlyphRoleChanged: Qt.callLater(rebuildTreeItems)
-    onEnabledRoleChanged: Qt.callLater(rebuildTreeItems)
-    onExpandedRoleChanged: Qt.callLater(rebuildTreeItems)
-    onSelectedRoleChanged: Qt.callLater(rebuildTreeItems)
-    onShowChevronRoleChanged: Qt.callLater(rebuildTreeItems)
-    onAutoExpandDepthChanged: Qt.callLater(rebuildTreeItems)
-    onGeneratedIndentStepChanged: Qt.callLater(rebuildTreeItems)
-    onGeneratedRowHeightChanged: Qt.callLater(rebuildTreeItems)
-    onGeneratedItemWidthChanged: Qt.callLater(rebuildTreeItems)
-    onGeneratedIconSizeChanged: Qt.callLater(rebuildTreeItems)
-    onGeneratedChevronSizeChanged: Qt.callLater(rebuildTreeItems)
-    onActiveItemIdChanged: Qt.callLater(normalizeActiveItem)
-    onActiveItemKeyChanged: Qt.callLater(normalizeActiveItem)
+    onUsingTreeModelChanged: invalidateItemsCache()
+    onModelChanged: scheduleRebuildTreeItems()
+    onChildrenRoleChanged: scheduleRebuildTreeItems()
+    onItemIdRoleChanged: scheduleRebuildTreeItems()
+    onItemKeyRoleChanged: scheduleRebuildTreeItems()
+    onLabelRoleChanged: scheduleRebuildTreeItems()
+    onIconNameRoleChanged: scheduleRebuildTreeItems()
+    onIconSourceRoleChanged: scheduleRebuildTreeItems()
+    onIconGlyphRoleChanged: scheduleRebuildTreeItems()
+    onEnabledRoleChanged: scheduleRebuildTreeItems()
+    onExpandedRoleChanged: scheduleRebuildTreeItems()
+    onSelectedRoleChanged: scheduleRebuildTreeItems()
+    onShowChevronRoleChanged: scheduleRebuildTreeItems()
+    onAutoExpandDepthChanged: scheduleRebuildTreeItems()
+    onGeneratedIndentStepChanged: scheduleRebuildTreeItems()
+    onGeneratedRowHeightChanged: scheduleRebuildTreeItems()
+    onGeneratedItemWidthChanged: scheduleRebuildTreeItems()
+    onGeneratedIconSizeChanged: scheduleRebuildTreeItems()
+    onGeneratedChevronSizeChanged: scheduleRebuildTreeItems()
+    onActiveItemIdChanged: scheduleNormalizeActiveItem()
+    onActiveItemKeyChanged: scheduleNormalizeActiveItem()
 
     implicitWidth: usingTreeModel ? generatedColumn.implicitWidth : manualColumn.implicitWidth
     implicitHeight: usingTreeModel ? generatedColumn.implicitHeight : manualColumn.implicitHeight
@@ -752,16 +788,18 @@ Item {
     Connections {
         target: manualColumn
         function onChildrenChanged() {
+            control.invalidateItemsCache()
             if (!control.usingTreeModel)
-                Qt.callLater(control.normalizeActiveItem)
+                control.scheduleNormalizeActiveItem()
         }
     }
 
     Connections {
         target: generatedColumn
         function onChildrenChanged() {
+            control.invalidateItemsCache()
             if (control.usingTreeModel)
-                Qt.callLater(control.normalizeActiveItem)
+                control.scheduleNormalizeActiveItem()
         }
     }
 

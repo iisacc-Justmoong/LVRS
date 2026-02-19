@@ -79,10 +79,10 @@ LV.ApplicationWindow {
         && matchesMedia("bottom-nav")
         && !matchesMedia("rail-nav")
     property bool qualityReady: LV.RenderQuality.enabled && LV.RenderQuality.supersampleScale >= 3.0
-    property bool backendOptimizationDefaultsReady: autoAttachRuntimeEvents
+    property bool backendOptimizationDefaultsReady: !autoAttachRuntimeEvents
         && autoAttachRuntimeEvents === globalEventListenersEnabled
         && !autoHookBackendUserEvents
-        && globalEventListenersEnabled
+        && !globalEventListenersEnabled
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
