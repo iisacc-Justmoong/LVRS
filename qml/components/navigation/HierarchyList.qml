@@ -36,8 +36,10 @@ Item {
     property bool autoExpandAncestorsOnActivate: true
 
     readonly property bool usingTreeModel: modelCount(model) > 0
-    readonly property int itemCount: collectItems().length
-    readonly property int visibleItemCount: collectVisibleItems(false).length
+    property int _itemCountInternal: 0
+    property int _visibleItemCountInternal: 0
+    readonly property int itemCount: _itemCountInternal
+    readonly property int visibleItemCount: _visibleItemCountInternal
 
     signal activeChanged(var item, int itemId, int index)
     signal expansionChanged(var item, bool expanded, int index)
@@ -46,10 +48,10 @@ Item {
     default property alias items: manualColumn.data
 
     property var _generatedItems: []
-    property var _itemsCache: []
-    property bool _itemsCacheDirty: true
     property bool _rebuildScheduled: false
     property bool _normalizeScheduled: false
+    property bool _refreshScheduled: false
+    property bool _applyingActiveState: false
 
     Component {
         id: generatedItemComponent
@@ -85,26 +87,26 @@ Item {
         return !!value
     }
 
-    function modelCount(model) {
-        if (model === undefined || model === null)
+    function modelCount(modelData) {
+        if (modelData === undefined || modelData === null)
             return 0
-        if (Array.isArray(model))
-            return model.length
-        if (model.length !== undefined)
-            return Math.max(0, Number(model.length) || 0)
-        if (model.count !== undefined)
-            return Math.max(0, Number(model.count) || 0)
+        if (Array.isArray(modelData))
+            return modelData.length
+        if (modelData.length !== undefined)
+            return Math.max(0, Number(modelData.length) || 0)
+        if (modelData.count !== undefined)
+            return Math.max(0, Number(modelData.count) || 0)
         return 0
     }
 
-    function modelAt(model, index) {
-        if (model === undefined || model === null)
+    function modelAt(modelData, index) {
+        if (modelData === undefined || modelData === null)
             return null
-        if (Array.isArray(model))
-            return model[index]
-        if (model.get !== undefined)
-            return model.get(index)
-        return model[index]
+        if (Array.isArray(modelData))
+            return modelData[index]
+        if (modelData.get !== undefined)
+            return modelData.get(index)
+        return modelData[index]
     }
 
     function isManagedItem(item) {
@@ -115,44 +117,16 @@ Item {
         return item.generatedByTreeModel !== true
     }
 
-    function invalidateItemsCache() {
-        _itemsCacheDirty = true
-    }
-
-    function scheduleRebuildTreeItems() {
-        if (_rebuildScheduled)
-            return
-        _rebuildScheduled = true
-        Qt.callLater(function() {
-            _rebuildScheduled = false
-            control.rebuildTreeItems()
-        })
-    }
-
-    function scheduleNormalizeActiveItem() {
-        if (_normalizeScheduled)
-            return
-        _normalizeScheduled = true
-        Qt.callLater(function() {
-            _normalizeScheduled = false
-            control.normalizeActiveItem()
-        })
-    }
-
     function collectItems() {
-        if (!_itemsCacheDirty)
-            return _itemsCache
-
         const source = usingTreeModel ? generatedColumn : manualColumn
         const result = []
-        for (let i = 0; i < source.children.length; i++) {
-            const child = source.children[i]
+        const children = source.children
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
             if (child && child.__isHierarchyItem === true)
                 result.push(child)
         }
-        _itemsCache = result
-        _itemsCacheDirty = false
-        return _itemsCache
+        return result
     }
 
     function indexOfItemInList(currentItems, item) {
@@ -222,6 +196,21 @@ Item {
         return true
     }
 
+    function collectVisibleItems(enabledOnly) {
+        const result = []
+        const currentItems = collectItems()
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+            if (enabledOnly && !item.enabled)
+                continue
+            if (isItemVisibleInList(currentItems, item, i))
+                result.push(item)
+        }
+        return result
+    }
+
     function expandAncestorsForIndexInList(currentItems, itemIndex) {
         if (!autoExpandAncestorsOnActivate || itemIndex <= 0)
             return
@@ -242,19 +231,67 @@ Item {
         }
     }
 
-    function collectVisibleItems(enabledOnly) {
-        const result = []
+    function scheduleRefreshState() {
+        if (_refreshScheduled)
+            return
+        _refreshScheduled = true
+        Qt.callLater(function() {
+            _refreshScheduled = false
+            control.refreshState()
+        })
+    }
+
+    function refreshState() {
         const currentItems = collectItems()
+        let visibleCount = 0
+
         for (let i = 0; i < currentItems.length; i++) {
             const item = currentItems[i]
             if (!item)
                 continue
-            if (enabledOnly && !item.enabled)
-                continue
-            if (isItemVisibleInList(currentItems, item, i))
-                result.push(item)
+
+            if (item.hierarchyList !== control)
+                item.hierarchyList = control
+
+            const isVisible = isItemVisibleInList(currentItems, item, i)
+            if (item._rowVisibleInternal !== isVisible)
+                item._rowVisibleInternal = isVisible
+            if (isVisible)
+                visibleCount++
         }
-        return result
+
+        if (_itemCountInternal !== currentItems.length)
+            _itemCountInternal = currentItems.length
+        if (_visibleItemCountInternal !== visibleCount)
+            _visibleItemCountInternal = visibleCount
+
+        const activeIndex = indexOfItemInList(currentItems, activeItem)
+        if (activeItem
+                && (activeIndex < 0
+                    || !activeItem.enabled
+                    || !isItemVisibleInList(currentItems, activeItem, activeIndex))) {
+            scheduleNormalizeActiveItem()
+        }
+    }
+
+    function scheduleRebuildTreeItems() {
+        if (_rebuildScheduled)
+            return
+        _rebuildScheduled = true
+        Qt.callLater(function() {
+            _rebuildScheduled = false
+            control.rebuildTreeItems()
+        })
+    }
+
+    function scheduleNormalizeActiveItem() {
+        if (_normalizeScheduled)
+            return
+        _normalizeScheduled = true
+        Qt.callLater(function() {
+            _normalizeScheduled = false
+            control.normalizeActiveItem()
+        })
     }
 
     function indexOfItem(item) {
@@ -317,18 +354,47 @@ Item {
             return
         if (item.hierarchyList !== control)
             item.hierarchyList = control
-        normalizeActiveItem()
+        scheduleRefreshState()
+        scheduleNormalizeActiveItem()
     }
 
     function notifyExpansionChanged(item) {
         if (!item || !isManagedItem(item))
             return
+
         const currentItems = collectItems()
         const index = indexOfItemInList(currentItems, item)
         expansionChanged(item, !!item.expanded, index)
+        scheduleRefreshState()
+
         const activeIndex = indexOfItemInList(currentItems, activeItem)
         if (activeItem && !isItemVisibleInList(currentItems, activeItem, activeIndex))
             requestActivate(item)
+    }
+
+    function applyActiveState(item, index, emitSignal) {
+        const nextItem = item || null
+        const nextIndex = nextItem ? index : -1
+        const nextId = nextItem ? effectiveItemId(nextItem, nextIndex) : -1
+        const nextKey = nextItem ? effectiveItemKey(nextItem, nextIndex) : ""
+
+        const changed = activeItem !== nextItem || activeItemId !== nextId || activeItemKey !== nextKey
+        if (!changed)
+            return false
+
+        _applyingActiveState = true
+        activeItem = nextItem
+        activeItemId = nextId
+        activeItemKey = nextKey
+        _applyingActiveState = false
+
+        if (nextItem)
+            ensureVisibleRequested(nextItem.y, nextItem.height)
+
+        if (emitSignal)
+            activeChanged(nextItem, nextId, nextIndex)
+
+        return true
     }
 
     function requestActivate(item) {
@@ -346,20 +412,11 @@ Item {
         if (!isItemVisibleInList(currentItems, item, index))
             return
 
-        const nextId = effectiveItemId(item, index)
-        const nextKey = effectiveItemKey(item, index)
-        if (activeItem === item && activeItemId === nextId && activeItemKey === nextKey)
-            return
-
-        activeItem = item
-        activeItemId = nextId
-        activeItemKey = nextKey
-        ensureVisibleRequested(item.y, item.height)
-
-        if (keyboardNavigationEnabled && !control.activeFocus)
+        const changed = applyActiveState(item, index, true)
+        if (changed && keyboardNavigationEnabled && !control.activeFocus)
             control.forceActiveFocus()
 
-        activeChanged(item, activeItemId, index)
+        scheduleRefreshState()
     }
 
     function activateById(itemId) {
@@ -381,9 +438,8 @@ Item {
     function normalizeActiveItem() {
         const currentItems = collectItems()
         if (currentItems.length === 0) {
-            activeItem = null
-            activeItemId = -1
-            activeItemKey = ""
+            applyActiveState(null, -1, false)
+            scheduleRefreshState()
             return
         }
 
@@ -409,20 +465,17 @@ Item {
         if (!targetItem || !targetItem.enabled)
             targetItem = firstEnabledItemInList(currentItems)
 
-        const targetIndex = indexOfItemInList(currentItems, targetItem)
+        let targetIndex = indexOfItemInList(currentItems, targetItem)
         if (targetIndex >= 0)
             expandAncestorsForIndexInList(currentItems, targetIndex)
 
-        if (targetItem && !isItemVisibleInList(currentItems, targetItem, targetIndex))
+        if (targetItem && !isItemVisibleInList(currentItems, targetItem, targetIndex)) {
             targetItem = firstEnabledItemInList(currentItems)
+            targetIndex = indexOfItemInList(currentItems, targetItem)
+        }
 
-        const finalIndex = indexOfItemInList(currentItems, targetItem)
-        activeItem = targetItem
-        activeItemId = targetItem ? effectiveItemId(targetItem, finalIndex) : -1
-        activeItemKey = targetItem ? effectiveItemKey(targetItem, finalIndex) : ""
-
-        if (targetItem)
-            ensureVisibleRequested(targetItem.y, targetItem.height)
+        applyActiveState(targetItem, targetIndex, false)
+        scheduleRefreshState()
     }
 
     function flattenTreeNodes(nodes, depth, parentKey, parentPath, sink) {
@@ -555,7 +608,7 @@ Item {
                 item.destroy()
         }
         _generatedItems = []
-        invalidateItemsCache()
+        scheduleRefreshState()
     }
 
     function rebuildTreeItems() {
@@ -598,7 +651,7 @@ Item {
                 _generatedItems.push(item)
         }
 
-        invalidateItemsCache()
+        scheduleRefreshState()
         scheduleNormalizeActiveItem()
     }
 
@@ -609,6 +662,7 @@ Item {
             if (item && item.showChevron && !item.expanded)
                 item.expanded = true
         }
+        scheduleRefreshState()
     }
 
     function collapseAll(keepRootExpanded) {
@@ -621,6 +675,7 @@ Item {
             const indent = Math.max(0, item.indentLevel !== undefined ? item.indentLevel : 0)
             item.expanded = keepRoot && indent === 0
         }
+        scheduleRefreshState()
         normalizeActiveItem()
     }
 
@@ -685,6 +740,7 @@ Item {
 
         if (activeItem.showChevron && activeItem.expanded) {
             activeItem.expanded = false
+            scheduleRefreshState()
             return true
         }
 
@@ -703,6 +759,7 @@ Item {
 
         if (activeItem.showChevron && !activeItem.expanded) {
             activeItem.expanded = true
+            scheduleRefreshState()
             return true
         }
 
@@ -715,7 +772,10 @@ Item {
         return false
     }
 
-    onUsingTreeModelChanged: invalidateItemsCache()
+    onUsingTreeModelChanged: {
+        scheduleRebuildTreeItems()
+        scheduleRefreshState()
+    }
     onModelChanged: scheduleRebuildTreeItems()
     onChildrenRoleChanged: scheduleRebuildTreeItems()
     onItemIdRoleChanged: scheduleRebuildTreeItems()
@@ -734,8 +794,19 @@ Item {
     onGeneratedItemWidthChanged: scheduleRebuildTreeItems()
     onGeneratedIconSizeChanged: scheduleRebuildTreeItems()
     onGeneratedChevronSizeChanged: scheduleRebuildTreeItems()
-    onActiveItemIdChanged: scheduleNormalizeActiveItem()
-    onActiveItemKeyChanged: scheduleNormalizeActiveItem()
+
+    onActiveItemChanged: {
+        if (!_applyingActiveState)
+            scheduleNormalizeActiveItem()
+    }
+    onActiveItemIdChanged: {
+        if (!_applyingActiveState)
+            scheduleNormalizeActiveItem()
+    }
+    onActiveItemKeyChanged: {
+        if (!_applyingActiveState)
+            scheduleNormalizeActiveItem()
+    }
 
     implicitWidth: usingTreeModel ? generatedColumn.implicitWidth : manualColumn.implicitWidth
     implicitHeight: usingTreeModel ? generatedColumn.implicitHeight : manualColumn.implicitHeight
@@ -788,7 +859,7 @@ Item {
     Connections {
         target: manualColumn
         function onChildrenChanged() {
-            control.invalidateItemsCache()
+            control.scheduleRefreshState()
             if (!control.usingTreeModel)
                 control.scheduleNormalizeActiveItem()
         }
@@ -797,7 +868,7 @@ Item {
     Connections {
         target: generatedColumn
         function onChildrenChanged() {
-            control.invalidateItemsCache()
+            control.scheduleRefreshState()
             if (control.usingTreeModel)
                 control.scheduleNormalizeActiveItem()
         }
@@ -809,6 +880,7 @@ Item {
                 control.rebuildTreeItems()
             else
                 control.normalizeActiveItem()
+            control.scheduleRefreshState()
         }
     }
 }

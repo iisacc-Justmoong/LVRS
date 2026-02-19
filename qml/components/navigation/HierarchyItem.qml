@@ -45,7 +45,8 @@ AbstractButton {
     property color rowBackgroundColor: resolvedSelected ? Theme.accentOverlay : "transparent"
     property color rowBackgroundColorHover: resolvedSelected ? Theme.accentOverlay : Theme.surfaceGhost
     property color rowBackgroundColorPressed: resolvedSelected ? Theme.accentOverlay : Theme.surfaceAlt
-    readonly property bool rowVisible: hierarchyList ? hierarchyList.isItemVisible(control) : true
+    property bool _rowVisibleInternal: true
+    readonly property bool rowVisible: _rowVisibleInternal
 
     readonly property int computedLeftPadding: baseLeftPadding + Math.max(0, indentLevel) * indentStep
     readonly property string resolvedIconName: {
@@ -198,14 +199,28 @@ AbstractButton {
         }
     }
 
-    onShowChevronChanged: chevronCanvas.requestPaint()
+    onIndentLevelChanged: {
+        if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
+            control.hierarchyList.scheduleRefreshState()
+    }
+    onShowChevronChanged: {
+        chevronCanvas.requestPaint()
+        if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
+            control.hierarchyList.scheduleRefreshState()
+    }
     onExpandedChanged: {
         chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)
             control.hierarchyList.notifyExpansionChanged(control)
     }
     onChevronColorChanged: chevronCanvas.requestPaint()
-    onEnabledChanged: chevronCanvas.requestPaint()
+    onEnabledChanged: {
+        chevronCanvas.requestPaint()
+        if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
+            control.hierarchyList.scheduleRefreshState()
+        if (!control.enabled && control.hierarchyList && control.hierarchyList.scheduleNormalizeActiveItem)
+            control.hierarchyList.scheduleNormalizeActiveItem()
+    }
 
     QtObject {
         Component.onCompleted: {
