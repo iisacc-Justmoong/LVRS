@@ -48,10 +48,28 @@ Item {
     default property alias items: manualColumn.data
 
     property var _generatedItems: []
+    property var _itemsCache: []
+    property bool _itemsDirty: true
+    property bool _lookupDirty: true
+    property var _idIndexMap: ({})
+    property var _keyIndexMap: ({})
+    property var _visibilityFlags: []
+    property var _visibleItemIndices: []
+    property var _visibleEnabledItemIndices: []
+    property bool _visibilityCacheInitialized: false
     property bool _rebuildScheduled: false
     property bool _normalizeScheduled: false
     property bool _refreshScheduled: false
+    property int _pendingRefreshFrom: -1
+    property int _pendingRefreshTo: -1
+    property bool _fullRefreshRequested: true
     property bool _applyingActiveState: false
+    property bool _isRefreshing: false
+    property int _rebuildRevision: 0
+    property var _rebuildDescriptors: []
+    property int _rebuildDescriptorIndex: 0
+    property int _rebuildChunkSize: 240
+    property bool _isBuildingGeneratedItems: false
 
     Component {
         id: generatedItemComponent
@@ -117,19 +135,55 @@ Item {
         return item.generatedByTreeModel !== true
     }
 
+    function normalizeFromIndex(indexValue) {
+        const numericIndex = Number(indexValue)
+        if (!Number.isFinite(numericIndex))
+            return 0
+        return Math.max(0, Math.trunc(numericIndex))
+    }
+
+    function normalizeToIndex(indexValue) {
+        const numericIndex = Number(indexValue)
+        if (!Number.isFinite(numericIndex))
+            return -1
+        return Math.max(-1, Math.trunc(numericIndex))
+    }
+
+    function markItemsDirty(fullRefreshRequested) {
+        _itemsDirty = true
+        _lookupDirty = true
+        if (fullRefreshRequested === undefined || fullRefreshRequested)
+            _fullRefreshRequested = true
+    }
+
     function collectItems() {
-        const source = usingTreeModel ? generatedColumn : manualColumn
-        const result = []
-        const children = source.children
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i]
-            if (child && child.__isHierarchyItem === true)
-                result.push(child)
+        if (_itemsDirty) {
+            const source = usingTreeModel ? generatedColumn : manualColumn
+            const rebuilt = []
+            const children = source.children
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i]
+                if (child && child.__isHierarchyItem === true)
+                    rebuilt.push(child)
+            }
+            _itemsCache = rebuilt
+            _itemsDirty = false
         }
-        return result
+        return _itemsCache
+    }
+
+    function itemIndentLevel(item) {
+        const rawIndent = item && item.indentLevel !== undefined ? item.indentLevel : 0
+        const numericIndent = Number(rawIndent)
+        if (!Number.isFinite(numericIndent))
+            return 0
+        return Math.max(0, Math.trunc(numericIndent))
     }
 
     function indexOfItemInList(currentItems, item) {
+        if (!item)
+            return -1
+
         for (let i = 0; i < currentItems.length; i++) {
             if (currentItems[i] === item)
                 return i
@@ -155,6 +209,51 @@ Item {
         return null
     }
 
+    function idLookupKey(itemId) {
+        if (itemId === undefined)
+            return "undefined:"
+        if (itemId === null)
+            return "null:"
+        const typeName = typeof itemId
+        return typeName + ":" + String(itemId)
+    }
+
+    function rebuildLookupMaps(currentItems) {
+        const idMap = ({})
+        const keyMap = ({})
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+
+            const resolvedId = effectiveItemId(item, i)
+            const resolvedIdKey = idLookupKey(resolvedId)
+            if (idMap[resolvedIdKey] === undefined)
+                idMap[resolvedIdKey] = i
+
+            const resolvedItemKey = effectiveItemKey(item, i)
+            if (resolvedItemKey.length > 0 && keyMap[resolvedItemKey] === undefined)
+                keyMap[resolvedItemKey] = i
+        }
+        _idIndexMap = idMap
+        _keyIndexMap = keyMap
+        _lookupDirty = false
+    }
+
+    function ensureStateUpToDate() {
+        if (_isRefreshing)
+            return
+
+        if (_itemsDirty || _fullRefreshRequested || _pendingRefreshFrom >= 0 || _refreshScheduled) {
+            _refreshScheduled = false
+            refreshState()
+            return
+        }
+
+        if (_lookupDirty)
+            rebuildLookupMaps(collectItems())
+    }
+
     function firstEnabledItemInList(currentItems) {
         for (let i = 0; i < currentItems.length; i++) {
             const item = currentItems[i]
@@ -173,20 +272,20 @@ Item {
         return null
     }
 
-    function isItemVisibleInList(currentItems, item, itemIndex) {
+    function computeItemVisibilityInList(currentItems, item, itemIndex) {
         if (!item || !isManagedItem(item))
             return false
         if (itemIndex <= 0)
             return true
 
-        const currentIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
+        const currentIndent = itemIndentLevel(item)
         if (currentIndent === 0)
             return true
 
         let requiredIndent = currentIndent
         for (let i = itemIndex - 1; i >= 0 && requiredIndent > 0; i--) {
             const candidate = currentItems[i]
-            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
+            const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < requiredIndent) {
                 if (candidate.showChevron && !candidate.expanded)
                     return false
@@ -196,16 +295,149 @@ Item {
         return true
     }
 
-    function collectVisibleItems(enabledOnly) {
+    function isItemVisibleInList(currentItems, item, itemIndex) {
+        if (!item || !isManagedItem(item))
+            return false
+
+        if (itemIndex >= 0 && itemIndex < _visibilityFlags.length && currentItems[itemIndex] === item) {
+            if (_pendingRefreshFrom < 0)
+                return !!_visibilityFlags[itemIndex]
+
+            const pendingTo = _pendingRefreshTo < 0 ? currentItems.length - 1 : _pendingRefreshTo
+            if (itemIndex < _pendingRefreshFrom || itemIndex > pendingTo)
+                return !!_visibilityFlags[itemIndex]
+        }
+
+        return computeItemVisibilityInList(currentItems, item, itemIndex)
+    }
+
+    function patchIndexRange(existingIndices, fromIndex, toIndex, replacementIndices) {
+        const current = Array.isArray(existingIndices) ? existingIndices : []
+        const replacement = Array.isArray(replacementIndices) ? replacementIndices : []
         const result = []
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
+        for (let i = 0; i < current.length; i++) {
+            const index = current[i]
+            if (index < fromIndex)
+                result.push(index)
+        }
+        for (let i = 0; i < replacement.length; i++)
+            result.push(replacement[i])
+        for (let i = 0; i < current.length; i++) {
+            const index = current[i]
+            if (index > toIndex)
+                result.push(index)
+        }
+        return result
+    }
+
+    function seedVisibilityState(currentItems, startIndex, visibleByDepth, expandedByDepth) {
+        if (startIndex <= 0 || currentItems.length === 0)
+            return
+
+        const clampedStart = Math.max(0, Math.min(startIndex, currentItems.length - 1))
+        let requiredIndent = itemIndentLevel(currentItems[clampedStart])
+        for (let i = clampedStart - 1; i >= 0 && requiredIndent > 0; i--) {
+            const candidate = currentItems[i]
+            const candidateIndent = itemIndentLevel(candidate)
+            if (candidateIndent < requiredIndent) {
+                visibleByDepth[candidateIndent] = !!_visibilityFlags[i]
+                expandedByDepth[candidateIndent] = !candidate.showChevron || !!candidate.expanded
+                requiredIndent = candidateIndent
+            }
+        }
+    }
+
+    function refreshVisibleRange(currentItems, startIndex, endIndex) {
+        if (currentItems.length === 0) {
+            _visibilityFlags = []
+            _visibleItemIndices = []
+            _visibleEnabledItemIndices = []
+            _visibilityCacheInitialized = false
+            _itemCountInternal = 0
+            _visibleItemCountInternal = 0
+            return
+        }
+
+        let fromIndex = Math.max(0, Math.min(startIndex, currentItems.length - 1))
+        let toIndex = endIndex < 0 ? currentItems.length - 1 : Math.max(fromIndex, Math.min(endIndex, currentItems.length - 1))
+
+        if (_visibilityFlags.length !== currentItems.length || !_visibilityCacheInitialized) {
+            const seededVisibility = new Array(currentItems.length)
+            for (let i = 0; i < seededVisibility.length; i++)
+                seededVisibility[i] = false
+            _visibilityFlags = seededVisibility
+            _visibleItemIndices = []
+            _visibleEnabledItemIndices = []
+            fromIndex = 0
+            toIndex = currentItems.length - 1
+        }
+
+        const visibleByDepth = []
+        const expandedByDepth = []
+        seedVisibilityState(currentItems, fromIndex, visibleByDepth, expandedByDepth)
+
+        const rangeVisible = []
+        const rangeVisibleEnabled = []
+
+        for (let i = fromIndex; i <= toIndex; i++) {
             const item = currentItems[i]
-            if (!item)
+            if (!item) {
+                _visibilityFlags[i] = false
                 continue
-            if (enabledOnly && !item.enabled)
+            }
+
+            if (item.hierarchyList !== control)
+                item.hierarchyList = control
+
+            const indent = itemIndentLevel(item)
+            if (visibleByDepth.length > indent) {
+                visibleByDepth.length = indent
+                expandedByDepth.length = indent
+            }
+
+            let rowVisible = true
+            if (indent > 0 && expandedByDepth.length >= indent) {
+                const parentVisible = visibleByDepth[indent - 1]
+                const parentExpanded = expandedByDepth[indent - 1]
+                if (parentVisible !== undefined && parentExpanded !== undefined)
+                    rowVisible = !!parentVisible && !!parentExpanded
+            }
+
+            _visibilityFlags[i] = rowVisible
+            if (item._rowVisibleInternal !== rowVisible)
+                item._rowVisibleInternal = rowVisible
+
+            visibleByDepth[indent] = rowVisible
+            expandedByDepth[indent] = !item.showChevron || !!item.expanded
+
+            if (rowVisible) {
+                rangeVisible.push(i)
+                if (item.enabled)
+                    rangeVisibleEnabled.push(i)
+            }
+        }
+
+        _visibleItemIndices = patchIndexRange(_visibleItemIndices, fromIndex, toIndex, rangeVisible)
+        _visibleEnabledItemIndices = patchIndexRange(_visibleEnabledItemIndices, fromIndex, toIndex, rangeVisibleEnabled)
+        _visibilityCacheInitialized = true
+
+        if (_itemCountInternal !== currentItems.length)
+            _itemCountInternal = currentItems.length
+        if (_visibleItemCountInternal !== _visibleItemIndices.length)
+            _visibleItemCountInternal = _visibleItemIndices.length
+    }
+
+    function collectVisibleItems(enabledOnly) {
+        ensureStateUpToDate()
+        const currentItems = collectItems()
+        const visibleIndices = enabledOnly ? _visibleEnabledItemIndices : _visibleItemIndices
+        const result = []
+        for (let i = 0; i < visibleIndices.length; i++) {
+            const itemIndex = visibleIndices[i]
+            if (itemIndex < 0 || itemIndex >= currentItems.length)
                 continue
-            if (isItemVisibleInList(currentItems, item, i))
+            const item = currentItems[itemIndex]
+            if (item)
                 result.push(item)
         }
         return result
@@ -213,25 +445,60 @@ Item {
 
     function expandAncestorsForIndexInList(currentItems, itemIndex) {
         if (!autoExpandAncestorsOnActivate || itemIndex <= 0)
-            return
+            return -1
 
         const item = currentItems[itemIndex]
         if (!item)
-            return
+            return -1
 
-        let requiredIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
+        let earliestChangedIndex = -1
+        let requiredIndent = itemIndentLevel(item)
         for (let i = itemIndex - 1; i >= 0 && requiredIndent > 0; i--) {
             const candidate = currentItems[i]
-            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
+            const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < requiredIndent) {
-                if (candidate.showChevron && !candidate.expanded)
+                if (candidate.showChevron && !candidate.expanded) {
                     candidate.expanded = true
+                    if (earliestChangedIndex < 0 || i < earliestChangedIndex)
+                        earliestChangedIndex = i
+                }
                 requiredIndent = candidateIndent
             }
         }
+        return earliestChangedIndex
     }
 
-    function scheduleRefreshState() {
+    function descendantRangeEndInList(currentItems, itemIndex) {
+        if (itemIndex < 0 || itemIndex >= currentItems.length)
+            return itemIndex
+
+        const parentIndent = itemIndentLevel(currentItems[itemIndex])
+        let descendantEnd = itemIndex
+        for (let i = itemIndex + 1; i < currentItems.length; i++) {
+            const candidateIndent = itemIndentLevel(currentItems[i])
+            if (candidateIndent <= parentIndent)
+                break
+            descendantEnd = i
+        }
+        return descendantEnd
+    }
+
+    function scheduleRefreshState(fromIndex, toIndex) {
+        const normalizedFrom = normalizeFromIndex(fromIndex)
+        const normalizedTo = normalizeToIndex(toIndex)
+
+        if (_pendingRefreshFrom < 0) {
+            _pendingRefreshFrom = normalizedFrom
+            _pendingRefreshTo = normalizedTo
+        } else {
+            if (normalizedFrom < _pendingRefreshFrom)
+                _pendingRefreshFrom = normalizedFrom
+            if (_pendingRefreshTo < 0 || normalizedTo < 0)
+                _pendingRefreshTo = -1
+            else if (normalizedTo > _pendingRefreshTo)
+                _pendingRefreshTo = normalizedTo
+        }
+
         if (_refreshScheduled)
             return
         _refreshScheduled = true
@@ -242,35 +509,51 @@ Item {
     }
 
     function refreshState() {
-        const currentItems = collectItems()
-        let visibleCount = 0
+        if (_isRefreshing)
+            return
 
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (!item)
-                continue
+        _isRefreshing = true
+        try {
+            const currentItems = collectItems()
+            if (_lookupDirty)
+                rebuildLookupMaps(currentItems)
 
-            if (item.hierarchyList !== control)
-                item.hierarchyList = control
+            if (currentItems.length === 0) {
+                _visibilityFlags = []
+                _visibleItemIndices = []
+                _visibleEnabledItemIndices = []
+                _visibilityCacheInitialized = false
+                _itemCountInternal = 0
+                _visibleItemCountInternal = 0
+                if (activeItem)
+                    scheduleNormalizeActiveItem()
+                _fullRefreshRequested = false
+                _pendingRefreshFrom = -1
+                _pendingRefreshTo = -1
+                return
+            }
 
-            const isVisible = isItemVisibleInList(currentItems, item, i)
-            if (item._rowVisibleInternal !== isVisible)
-                item._rowVisibleInternal = isVisible
-            if (isVisible)
-                visibleCount++
-        }
+            let fromIndex = _pendingRefreshFrom
+            let toIndex = _pendingRefreshTo
+            _pendingRefreshFrom = -1
+            _pendingRefreshTo = -1
 
-        if (_itemCountInternal !== currentItems.length)
-            _itemCountInternal = currentItems.length
-        if (_visibleItemCountInternal !== visibleCount)
-            _visibleItemCountInternal = visibleCount
+            if (_fullRefreshRequested || fromIndex < 0) {
+                fromIndex = 0
+                toIndex = -1
+                _fullRefreshRequested = false
+            }
 
-        const activeIndex = indexOfItemInList(currentItems, activeItem)
-        if (activeItem
-                && (activeIndex < 0
-                    || !activeItem.enabled
-                    || !isItemVisibleInList(currentItems, activeItem, activeIndex))) {
-            scheduleNormalizeActiveItem()
+            refreshVisibleRange(currentItems, normalizeFromIndex(fromIndex), normalizeToIndex(toIndex))
+
+            const activeIndex = indexOfItemInList(currentItems, activeItem)
+            const activeVisible = activeIndex >= 0 && activeIndex < _visibilityFlags.length
+                ? !!_visibilityFlags[activeIndex]
+                : false
+            if (activeItem && (activeIndex < 0 || !activeItem.enabled || !activeVisible))
+                scheduleNormalizeActiveItem()
+        } finally {
+            _isRefreshing = false
         }
     }
 
@@ -299,9 +582,12 @@ Item {
     }
 
     function isItemVisible(item) {
+        ensureStateUpToDate()
         const currentItems = collectItems()
         const itemIndex = indexOfItemInList(currentItems, item)
-        return isItemVisibleInList(currentItems, item, itemIndex)
+        if (itemIndex < 0 || itemIndex >= _visibilityFlags.length)
+            return false
+        return !!_visibilityFlags[itemIndex]
     }
 
     function effectiveItemId(item, index) {
@@ -326,15 +612,25 @@ Item {
     }
 
     function resolveById(itemId) {
-        return resolveByIdInList(collectItems(), itemId)
+        ensureStateUpToDate()
+        const currentItems = collectItems()
+        const lookupIndex = _idIndexMap[idLookupKey(itemId)]
+        if (lookupIndex === undefined || lookupIndex < 0 || lookupIndex >= currentItems.length)
+            return null
+        return currentItems[lookupIndex] || null
     }
 
     function resolveByKey(itemKey) {
+        ensureStateUpToDate()
         const normalizedKey = itemKey === undefined || itemKey === null ? "" : String(itemKey).trim()
         if (normalizedKey.length === 0)
             return null
 
-        return resolveByKeyInList(collectItems(), normalizedKey)
+        const currentItems = collectItems()
+        const lookupIndex = _keyIndexMap[normalizedKey]
+        if (lookupIndex === undefined || lookupIndex < 0 || lookupIndex >= currentItems.length)
+            return null
+        return currentItems[lookupIndex] || null
     }
 
     function firstEnabledItem() {
@@ -352,9 +648,20 @@ Item {
     function registerItem(item) {
         if (!item || !isManagedItem(item))
             return
+        if (_isBuildingGeneratedItems && item.generatedByTreeModel === true)
+            return
         if (item.hierarchyList !== control)
             item.hierarchyList = control
-        scheduleRefreshState()
+
+        const currentItems = collectItems()
+        const itemIndex = indexOfItemInList(currentItems, item)
+        if (itemIndex >= 0) {
+            _lookupDirty = true
+            scheduleRefreshState(itemIndex, itemIndex)
+        } else {
+            markItemsDirty(true)
+            scheduleRefreshState()
+        }
         scheduleNormalizeActiveItem()
     }
 
@@ -365,7 +672,16 @@ Item {
         const currentItems = collectItems()
         const index = indexOfItemInList(currentItems, item)
         expansionChanged(item, !!item.expanded, index)
-        scheduleRefreshState()
+        if (index >= 0) {
+            const descendantEnd = descendantRangeEndInList(currentItems, index)
+            const refreshFrom = index + 1
+            if (refreshFrom <= descendantEnd)
+                scheduleRefreshState(refreshFrom, descendantEnd)
+            else
+                scheduleRefreshState(index, index)
+        } else {
+            scheduleRefreshState()
+        }
 
         const activeIndex = indexOfItemInList(currentItems, activeItem)
         if (activeItem && !isItemVisibleInList(currentItems, activeItem, activeIndex))
@@ -408,15 +724,20 @@ Item {
         if (index < 0)
             return
 
-        expandAncestorsForIndexInList(currentItems, index)
+        const expandedAncestorIndex = expandAncestorsForIndexInList(currentItems, index)
+        if (expandedAncestorIndex >= 0) {
+            const expandedRangeEnd = descendantRangeEndInList(currentItems, expandedAncestorIndex)
+            const refreshFrom = expandedAncestorIndex + 1
+            if (refreshFrom <= expandedRangeEnd)
+                scheduleRefreshState(refreshFrom, expandedRangeEnd)
+        }
+
         if (!isItemVisibleInList(currentItems, item, index))
             return
 
         const changed = applyActiveState(item, index, true)
         if (changed && keyboardNavigationEnabled && !control.activeFocus)
             control.forceActiveFocus()
-
-        scheduleRefreshState()
     }
 
     function activateById(itemId) {
@@ -436,6 +757,7 @@ Item {
     }
 
     function normalizeActiveItem() {
+        ensureStateUpToDate()
         const currentItems = collectItems()
         if (currentItems.length === 0) {
             applyActiveState(null, -1, false)
@@ -475,7 +797,6 @@ Item {
         }
 
         applyActiveState(targetItem, targetIndex, false)
-        scheduleRefreshState()
     }
 
     function flattenTreeNodes(nodes, depth, parentKey, parentPath, sink) {
@@ -602,28 +923,41 @@ Item {
     }
 
     function clearGeneratedItems() {
+        _isBuildingGeneratedItems = false
         for (let i = 0; i < _generatedItems.length; i++) {
             const item = _generatedItems[i]
             if (item)
                 item.destroy()
         }
         _generatedItems = []
+        markItemsDirty(true)
         scheduleRefreshState()
     }
 
-    function rebuildTreeItems() {
-        clearGeneratedItems()
+    function scheduleRebuildChunk(revision) {
+        Qt.callLater(function() {
+            control.buildGeneratedItemChunk(revision)
+        })
+    }
 
-        if (!usingTreeModel) {
+    function buildGeneratedItemChunk(revision) {
+        if (revision !== _rebuildRevision)
+            return
+
+        _isBuildingGeneratedItems = true
+        const descriptors = _rebuildDescriptors
+        if (!Array.isArray(descriptors) || descriptors.length === 0) {
+            _isBuildingGeneratedItems = false
+            _rebuildDescriptors = []
+            _rebuildDescriptorIndex = 0
             scheduleNormalizeActiveItem()
             return
         }
 
-        const flattened = []
-        flattenTreeNodes(model, 0, "", "", flattened)
-
-        for (let i = 0; i < flattened.length; i++) {
-            const descriptor = flattened[i]
+        const startIndex = _rebuildDescriptorIndex
+        const endExclusive = Math.min(startIndex + _rebuildChunkSize, descriptors.length)
+        for (let i = startIndex; i < endExclusive; i++) {
+            const descriptor = descriptors[i]
             const item = generatedItemComponent.createObject(generatedColumn, {
                                                                  generatedByTreeModel: true,
                                                                  hierarchyList: control,
@@ -651,8 +985,40 @@ Item {
                 _generatedItems.push(item)
         }
 
+        _rebuildDescriptorIndex = endExclusive
+        markItemsDirty(true)
         scheduleRefreshState()
+
+        if (_rebuildDescriptorIndex < descriptors.length) {
+            scheduleRebuildChunk(revision)
+            return
+        }
+
+        _isBuildingGeneratedItems = false
+        _rebuildDescriptors = []
+        _rebuildDescriptorIndex = 0
         scheduleNormalizeActiveItem()
+    }
+
+    function rebuildTreeItems() {
+        _rebuildRevision = _rebuildRevision + 1
+        const revision = _rebuildRevision
+        _rebuildDescriptors = []
+        _rebuildDescriptorIndex = 0
+        _isBuildingGeneratedItems = false
+
+        clearGeneratedItems()
+
+        if (!usingTreeModel) {
+            scheduleNormalizeActiveItem()
+            return
+        }
+
+        const flattened = []
+        flattenTreeNodes(model, 0, "", "", flattened)
+        _rebuildDescriptors = flattened
+        _rebuildDescriptorIndex = 0
+        scheduleRebuildChunk(revision)
     }
 
     function expandAll() {
@@ -685,10 +1051,10 @@ Item {
         if (itemIndex <= 0)
             return null
 
-        const currentIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
+        const currentIndent = itemIndentLevel(item)
         for (let i = itemIndex - 1; i >= 0; i--) {
             const candidate = currentItems[i]
-            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
+            const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < currentIndent)
                 return candidate
         }
@@ -701,10 +1067,10 @@ Item {
         if (itemIndex < 0)
             return null
 
-        const currentIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
+        const currentIndent = itemIndentLevel(item)
         for (let i = itemIndex + 1; i < currentItems.length; i++) {
             const candidate = currentItems[i]
-            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
+            const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent <= currentIndent)
                 break
             if (candidateIndent === currentIndent + 1
@@ -740,7 +1106,6 @@ Item {
 
         if (activeItem.showChevron && activeItem.expanded) {
             activeItem.expanded = false
-            scheduleRefreshState()
             return true
         }
 
@@ -759,7 +1124,6 @@ Item {
 
         if (activeItem.showChevron && !activeItem.expanded) {
             activeItem.expanded = true
-            scheduleRefreshState()
             return true
         }
 
@@ -773,27 +1137,28 @@ Item {
     }
 
     onUsingTreeModelChanged: {
+        markItemsDirty(true)
         scheduleRebuildTreeItems()
         scheduleRefreshState()
     }
-    onModelChanged: scheduleRebuildTreeItems()
-    onChildrenRoleChanged: scheduleRebuildTreeItems()
-    onItemIdRoleChanged: scheduleRebuildTreeItems()
-    onItemKeyRoleChanged: scheduleRebuildTreeItems()
-    onLabelRoleChanged: scheduleRebuildTreeItems()
-    onIconNameRoleChanged: scheduleRebuildTreeItems()
-    onIconSourceRoleChanged: scheduleRebuildTreeItems()
-    onIconGlyphRoleChanged: scheduleRebuildTreeItems()
-    onEnabledRoleChanged: scheduleRebuildTreeItems()
-    onExpandedRoleChanged: scheduleRebuildTreeItems()
-    onSelectedRoleChanged: scheduleRebuildTreeItems()
-    onShowChevronRoleChanged: scheduleRebuildTreeItems()
-    onAutoExpandDepthChanged: scheduleRebuildTreeItems()
-    onGeneratedIndentStepChanged: scheduleRebuildTreeItems()
-    onGeneratedRowHeightChanged: scheduleRebuildTreeItems()
-    onGeneratedItemWidthChanged: scheduleRebuildTreeItems()
-    onGeneratedIconSizeChanged: scheduleRebuildTreeItems()
-    onGeneratedChevronSizeChanged: scheduleRebuildTreeItems()
+    onModelChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onChildrenRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onItemIdRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onItemKeyRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onLabelRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onIconNameRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onIconSourceRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onIconGlyphRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onEnabledRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onExpandedRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onSelectedRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onShowChevronRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onAutoExpandDepthChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onGeneratedIndentStepChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onGeneratedRowHeightChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onGeneratedItemWidthChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onGeneratedIconSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onGeneratedChevronSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
 
     onActiveItemChanged: {
         if (!_applyingActiveState)
@@ -859,6 +1224,7 @@ Item {
     Connections {
         target: manualColumn
         function onChildrenChanged() {
+            control.markItemsDirty(true)
             control.scheduleRefreshState()
             if (!control.usingTreeModel)
                 control.scheduleNormalizeActiveItem()
@@ -868,6 +1234,7 @@ Item {
     Connections {
         target: generatedColumn
         function onChildrenChanged() {
+            control.markItemsDirty(true)
             control.scheduleRefreshState()
             if (control.usingTreeModel)
                 control.scheduleNormalizeActiveItem()
@@ -876,6 +1243,7 @@ Item {
 
     QtObject {
         Component.onCompleted: {
+            control.markItemsDirty(true)
             if (control.usingTreeModel)
                 control.rebuildTreeItems()
             else
