@@ -23,9 +23,6 @@ Item {
     property int routeResolveCacheCapacity: 256
     property var _trackedViewIds: []
     property bool _presentationSyncScheduled: false
-    property var _routeResolveCache: ({})
-    property var _routeResolveCacheOrder: []
-    property string _routeResolveSignature: ""
 
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
@@ -222,171 +219,60 @@ Item {
         return value
     }
 
-    function matchRoute(path, routePath) {
-        if (typeof RouteMatcher !== "undefined"
-                && RouteMatcher
-                && RouteMatcher.match) {
-            var nativeResult = RouteMatcher.match(path, routePath)
-            if (nativeResult && nativeResult.matched)
-                return nativeResult.params
-            return null
-        }
-
-        var normalizedPath = normalizePath(path)
-        var normalizedRoute = normalizePath(routePath)
-        if (normalizedRoute === "/")
-            return normalizedPath === "/" ? ({}) : null
-
-        var pathSegments = normalizedPath.slice(1).split("/")
-        var routeSegments = normalizedRoute.slice(1).split("/")
-        var params = {}
-        var pIndex = 0
-
-        for (var rIndex = 0; rIndex < routeSegments.length; rIndex++) {
-            var segment = routeSegments[rIndex]
-            var isParam = segment.startsWith("[") && segment.endsWith("]")
-            if (isParam) {
-                var key = segment.slice(1, -1)
-                if (key.startsWith("...")) {
-                    var restKey = key.slice(3)
-                    params[restKey] = pathSegments.slice(pIndex).join("/")
-                    pIndex = pathSegments.length
-                    return pIndex <= pathSegments.length ? params : null
-                }
-                if (pIndex >= pathSegments.length)
-                    return null
-                params[key] = pathSegments[pIndex]
-                pIndex += 1
-                continue
-            }
-            if (pIndex >= pathSegments.length || pathSegments[pIndex] !== segment)
-                return null
-            pIndex += 1
-        }
-
-        if (pIndex !== pathSegments.length)
-            return null
-        return params
-    }
-
-    function clearRouteResolveCache() {
-        _routeResolveCache = ({})
-        _routeResolveCacheOrder = []
-    }
-
-    function touchRouteResolveCacheKey(key) {
-        var index = _routeResolveCacheOrder.indexOf(key)
-        if (index >= 0)
-            _routeResolveCacheOrder.splice(index, 1)
-        _routeResolveCacheOrder.push(key)
-    }
-
-    function putRouteResolveCache(pathKey, entry) {
-        _routeResolveCache[pathKey] = entry
-        touchRouteResolveCacheKey(pathKey)
-
-        var cap = Math.max(16, routeResolveCacheCapacity)
-        while (_routeResolveCacheOrder.length > cap) {
-            var oldest = _routeResolveCacheOrder.shift()
-            if (oldest !== undefined)
-                delete _routeResolveCache[oldest]
-        }
-    }
-
-    function routeResolveSignature() {
+    function routeModelCount() {
         if (!routes)
-            return "none"
-        var list = routes.length !== undefined ? routes : routes
-        var count = list.length !== undefined ? list.length : list.count
-        var tokens = []
-        tokens.push(String(count))
-        for (var i = 0; i < count; i++) {
-            var route = list.length !== undefined ? list[i] : list.get(i)
-            tokens.push(route && route.path ? String(route.path) : "")
-        }
-        return tokens.join("|")
+            return 0
+        if (routes.length !== undefined)
+            return Math.max(0, Number(routes.length) || 0)
+        if (routes.count !== undefined)
+            return Math.max(0, Number(routes.count) || 0)
+        return 0
+    }
+
+    function routeModelAt(index) {
+        if (!routes || index < 0)
+            return null
+        if (routes.length !== undefined)
+            return routes[index]
+        if (routes.get !== undefined)
+            return routes.get(index)
+        return routes[index]
+    }
+
+    function syncRouteResolverRoutes() {
+        if (!routeResolver || !routeResolver.updateRoutes)
+            return
+        routeResolver.cacheCapacity = Math.max(16, routeResolveCacheCapacity)
+        routeResolver.updateRoutes(routes)
     }
 
     function resolveRoute(path) {
-        var normalizedPath = normalizePath(path)
         if (!routes)
             return null
-        var signature = routeResolveSignature()
-        if (_routeResolveSignature !== signature) {
-            _routeResolveSignature = signature
-            clearRouteResolveCache()
+
+        syncRouteResolverRoutes()
+        var nativeResolved = routeResolver.resolve(path)
+        if (!nativeResolved || !nativeResolved.matched)
+            return null
+
+        var routeIndex = nativeResolved.index !== undefined ? Number(nativeResolved.index) : -1
+        if (routeIndex < 0 || routeIndex >= routeModelCount())
+            return null
+
+        var route = routeModelAt(routeIndex)
+        if (!route || !route.path)
+            return null
+
+        return {
+            route: route,
+            params: nativeResolved.params !== undefined ? nativeResolved.params : ({})
         }
-
-        var cached = _routeResolveCache[normalizedPath]
-        if (cached !== undefined) {
-            touchRouteResolveCacheKey(normalizedPath)
-            return cached
-        }
-
-        var list = routes.length !== undefined ? routes : routes
-        var count = list.length !== undefined ? list.length : list.count
-        for (var i = 0; i < count; i++) {
-            var route = list.length !== undefined ? list[i] : list.get(i)
-            if (!route || !route.path)
-                continue
-            var params = matchRoute(normalizedPath, route.path)
-            if (params !== null) {
-                var resolved = { route: route, params: params }
-                putRouteResolveCache(normalizedPath, resolved)
-                return resolved
-            }
-        }
-        putRouteResolveCache(normalizedPath, null)
-        return null
-    }
-
-    function routeViewModelKey(route, params) {
-        if (!route || typeof route !== "object")
-            return ""
-        if (route.viewModelKey !== undefined && route.viewModelKey !== null && String(route.viewModelKey).trim().length > 0)
-            return String(route.viewModelKey).trim()
-        if (route.modelKey !== undefined && route.modelKey !== null && String(route.modelKey).trim().length > 0)
-            return String(route.modelKey).trim()
-        if (params && params.viewModelKey !== undefined && params.viewModelKey !== null && String(params.viewModelKey).trim().length > 0)
-            return String(params.viewModelKey).trim()
-        if (params && params.modelKey !== undefined && params.modelKey !== null && String(params.modelKey).trim().length > 0)
-            return String(params.modelKey).trim()
-        return ""
-    }
-
-    function routeViewId(pathValue, route, params, fallbackIndex) {
-        if (route && route.viewId !== undefined && route.viewId !== null && String(route.viewId).trim().length > 0)
-            return String(route.viewId).trim()
-        if (params && params.viewId !== undefined && params.viewId !== null && String(params.viewId).trim().length > 0)
-            return String(params.viewId).trim()
-        if (pathValue !== undefined && pathValue !== null && String(pathValue).trim().length > 0)
-            return String(pathValue).trim()
-        return "_component_" + fallbackIndex
-    }
-
-    function routeWritable(route, params) {
-        if (route && route.writable !== undefined)
-            return !!route.writable
-        if (route && route.modelWritable !== undefined)
-            return !!route.modelWritable
-        if (params && params.writable !== undefined)
-            return !!params.writable
-        if (params && params.modelWritable !== undefined)
-            return !!params.modelWritable
-        return false
     }
 
     function bindRouteViewModel(pathValue, route, params, fallbackIndex) {
-        if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.bindView)
+        if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.bindRouteViewModel)
             return
-
-        var key = routeViewModelKey(route, params)
-        if (!key)
-            return
-
-        var viewId = routeViewId(pathValue, route, params, fallbackIndex)
-        var writable = routeWritable(route, params)
-        ViewModels.bindView(viewId, key, writable)
+        ViewModels.bindRouteViewModel(pathValue, route, params, fallbackIndex)
     }
 
     function navigate(path, params, mode) {
@@ -446,6 +332,7 @@ Item {
     Component.onCompleted: {
         if (registerAsGlobalNavigator)
             Navigator.registerRouter(root)
+        syncRouteResolverRoutes()
         if (initialPath)
             setRoot(initialPath)
         else {
@@ -460,6 +347,11 @@ Item {
             Navigator.unregisterRouter(root)
     }
 
+    RouteResolver {
+        id: routeResolver
+        cacheCapacity: Math.max(16, root.routeResolveCacheCapacity)
+    }
+
     StackView {
         id: stackView
         anchors.fill: parent
@@ -471,13 +363,29 @@ Item {
     property bool _syncingPath: false
 
     onRoutesChanged: {
-        _routeResolveSignature = ""
-        clearRouteResolveCache()
+        syncRouteResolverRoutes()
     }
 
-    onRouteResolveCacheCapacityChanged: {
-        if (_routeResolveCacheOrder.length > Math.max(16, routeResolveCacheCapacity))
-            clearRouteResolveCache()
+    onRouteResolveCacheCapacityChanged: syncRouteResolverRoutes()
+
+    Connections {
+        target: (root.routes && root.routes.countChanged !== undefined) ? root.routes : null
+        ignoreUnknownSignals: true
+        function onCountChanged() {
+            root.syncRouteResolverRoutes()
+        }
+        function onDataChanged() {
+            root.syncRouteResolverRoutes()
+        }
+        function onModelReset() {
+            root.syncRouteResolverRoutes()
+        }
+        function onRowsInserted() {
+            root.syncRouteResolverRoutes()
+        }
+        function onRowsRemoved() {
+            root.syncRouteResolverRoutes()
+        }
     }
 
     onPathChanged: {

@@ -1,7 +1,60 @@
 #include "backend/state/viewmodelregistry.h"
 
 #include <QByteArray>
+#include <QJSValue>
 #include <QSet>
+
+namespace {
+
+QVariant entryValueByKey(const QVariant &entry, const QString &key)
+{
+    if (!entry.isValid() || entry.isNull() || key.isEmpty())
+        return QVariant();
+
+    if (entry.userType() == qMetaTypeId<QJSValue>()) {
+        const QJSValue value = entry.value<QJSValue>();
+        if (value.isObject())
+            return value.property(key).toVariant();
+        return QVariant();
+    }
+
+    if (entry.canConvert<QVariantMap>())
+        return entry.toMap().value(key);
+
+    if (entry.canConvert<QObject *>()) {
+        QObject *object = entry.value<QObject *>();
+        if (!object)
+            return QVariant();
+        return object->property(key.toUtf8().constData());
+    }
+
+    return QVariant();
+}
+
+QString firstNonEmptyToken(const QVariant &entry, const QStringList &keys)
+{
+    for (const QString &key : keys) {
+        const QString token = entryValueByKey(entry, key).toString().trimmed();
+        if (!token.isEmpty())
+            return token;
+    }
+    return QString();
+}
+
+bool firstBoolToken(const QVariant &entry, const QStringList &keys, bool *value)
+{
+    for (const QString &key : keys) {
+        const QVariant candidate = entryValueByKey(entry, key);
+        if (!candidate.isValid() || candidate.isNull())
+            continue;
+        if (value)
+            *value = candidate.toBool();
+        return true;
+    }
+    return false;
+}
+
+} // namespace
 
 ViewModelRegistry::ViewModelRegistry(QObject *parent)
     : QObject(parent)
@@ -14,10 +67,7 @@ QObject *ViewModelRegistry::get(const QString &key) const
     if (normalized.isEmpty())
         return nullptr;
 
-    auto it = m_entries.constFind(normalized);
-    if (it == m_entries.constEnd())
-        return nullptr;
-    return it.value();
+    return objectForKey(normalized);
 }
 
 void ViewModelRegistry::set(const QString &key, QObject *object)
@@ -65,7 +115,7 @@ void ViewModelRegistry::remove(const QString &key)
     QObject *object = it.value();
     m_entries.erase(it);
     emit keysChanged();
-    pruneBindingsAndOwners(m_entries.keys());
+    pruneBindingsAndOwners();
     maybeDisposeOwned(object);
 }
 
@@ -122,7 +172,7 @@ bool ViewModelRegistry::bindView(const QString &viewId, const QString &key, bool
         return false;
     }
 
-    if (!keyExists(normalizedKey)) {
+    if (!objectForKey(normalizedKey)) {
         setLastError(QStringLiteral("ViewModel key is not registered"));
         return false;
     }
@@ -260,7 +310,7 @@ bool ViewModelRegistry::canWrite(const QString &viewId, const QString &key) cons
     const QString targetKey = resolveKeyForWrite(normalizedView, key);
     if (targetKey.isEmpty())
         return false;
-    if (!keyExists(targetKey))
+    if (!objectForKey(targetKey))
         return false;
 
     const QString owner = m_owners.value(targetKey);
@@ -299,14 +349,9 @@ bool ViewModelRegistry::updatePropertyByKey(const QString &viewId,
         return false;
     }
 
-    if (!canWrite(normalizedView, targetKey)) {
+    QObject *object = objectForKey(targetKey);
+    if (!object || m_owners.value(targetKey) != normalizedView) {
         setLastError(QStringLiteral("View has no write permission for the model"));
-        return false;
-    }
-
-    QObject *object = get(targetKey);
-    if (!object) {
-        setLastError(QStringLiteral("ViewModel key is not registered"));
         return false;
     }
 
@@ -330,12 +375,58 @@ QVariant ViewModelRegistry::readProperty(const QString &viewId, const QString &p
     if (normalizedProperty.isEmpty())
         return QVariant();
 
-    QObject *object = getForView(viewId);
+    const QString normalizedView = normalizeToken(viewId);
+    if (normalizedView.isEmpty())
+        return QVariant();
+
+    const QString targetKey = m_viewBindings.value(normalizedView);
+    if (targetKey.isEmpty())
+        return QVariant();
+
+    QObject *object = objectForKey(targetKey);
     if (!object)
         return QVariant();
 
     const QByteArray propertyName = normalizedProperty.toUtf8();
     return object->property(propertyName.constData());
+}
+
+bool ViewModelRegistry::bindRouteViewModel(const QVariant &pathValue,
+                                           const QVariant &routeEntry,
+                                           const QVariant &paramsValue,
+                                           int fallbackIndex)
+{
+    const QString routeKey = firstNonEmptyToken(routeEntry,
+                                                {QStringLiteral("viewModelKey"),
+                                                 QStringLiteral("modelKey")});
+    const QString paramsKey = firstNonEmptyToken(paramsValue,
+                                                 {QStringLiteral("viewModelKey"),
+                                                  QStringLiteral("modelKey")});
+    const QString targetKey = !routeKey.isEmpty() ? routeKey : paramsKey;
+    if (targetKey.isEmpty())
+        return false;
+
+    QString viewId = firstNonEmptyToken(routeEntry, {QStringLiteral("viewId")});
+    if (viewId.isEmpty())
+        viewId = firstNonEmptyToken(paramsValue, {QStringLiteral("viewId")});
+    if (viewId.isEmpty())
+        viewId = normalizeToken(pathValue.toString());
+    if (viewId.isEmpty())
+        viewId = QStringLiteral("_component_%1").arg(qMax(0, fallbackIndex));
+
+    bool writable = false;
+    bool hasWritable = firstBoolToken(routeEntry,
+                                      {QStringLiteral("writable"),
+                                       QStringLiteral("modelWritable")},
+                                      &writable);
+    if (!hasWritable) {
+        firstBoolToken(paramsValue,
+                       {QStringLiteral("writable"),
+                        QStringLiteral("modelWritable")},
+                       &writable);
+    }
+
+    return bindView(viewId, targetKey, writable);
 }
 
 QStringList ViewModelRegistry::views() const
@@ -377,11 +468,11 @@ void ViewModelRegistry::setLastError(const QString &message)
     emit lastErrorChanged();
 }
 
-void ViewModelRegistry::pruneBindingsAndOwners(const QStringList &validKeys)
+void ViewModelRegistry::pruneBindingsAndOwners()
 {
     bool bindingsChanged = false;
     for (auto it = m_viewBindings.begin(); it != m_viewBindings.end(); ) {
-        if (!validKeys.contains(it.value())) {
+        if (!objectForKey(it.value())) {
             it = m_viewBindings.erase(it);
             bindingsChanged = true;
         } else {
@@ -391,7 +482,7 @@ void ViewModelRegistry::pruneBindingsAndOwners(const QStringList &validKeys)
 
     bool ownershipChangedFlag = false;
     for (auto it = m_owners.begin(); it != m_owners.end(); ) {
-        if (!validKeys.contains(it.key())) {
+        if (!objectForKey(it.key())) {
             it = m_owners.erase(it);
             ownershipChangedFlag = true;
         } else {
@@ -403,12 +494,6 @@ void ViewModelRegistry::pruneBindingsAndOwners(const QStringList &validKeys)
         emit viewsChanged();
     if (ownershipChangedFlag)
         emit ownershipChanged();
-}
-
-bool ViewModelRegistry::keyExists(const QString &key) const
-{
-    auto it = m_entries.constFind(key);
-    return it != m_entries.constEnd() && it.value();
 }
 
 QString ViewModelRegistry::resolveKeyForWrite(const QString &viewId, const QString &key) const
@@ -436,7 +521,15 @@ void ViewModelRegistry::prune()
     }
     if (changed)
         emit keysChanged();
-    pruneBindingsAndOwners(m_entries.keys());
+    pruneBindingsAndOwners();
+}
+
+QObject *ViewModelRegistry::objectForKey(const QString &normalizedKey) const
+{
+    auto it = m_entries.constFind(normalizedKey);
+    if (it == m_entries.constEnd())
+        return nullptr;
+    return it.value();
 }
 
 bool ViewModelRegistry::hasReference(QObject *object, const QString &exceptKey) const

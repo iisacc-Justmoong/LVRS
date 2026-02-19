@@ -7,6 +7,8 @@
 #include <QSet>
 #include <QStringList>
 
+#include <list>
+
 class QNetworkAccessManager;
 class QNetworkReply;
 class QUrl;
@@ -68,7 +70,8 @@ private:
 
     QNetworkAccessManager *m_network = nullptr;
     QHash<QString, QString> m_cache;
-    QStringList m_cacheOrder;
+    std::list<QString> m_cacheOrder;
+    QHash<QString, std::list<QString>::iterator> m_cacheOrderIter;
     QHash<QString, QByteArray> m_sourcePayloadCache;
     QSet<QString> m_pendingSourceUrls;
     QString m_lastError;

@@ -64,8 +64,10 @@ private:
     void setActive(bool next);
     void resetMetrics();
     void detachWindow();
-    void updateAggregates();
-    static double percentileValue(QVector<double> values, double percentile);
+    void appendFrameSample(double sampleMs);
+    QVector<double> sampleValues() const;
+    void updatePercentiles(bool force);
+    static double percentileValueFromSorted(const QVector<double> &sortedValues, double percentile);
 
     QPointer<QQuickWindow> m_window;
     QElapsedTimer m_frameTimer;
@@ -79,5 +81,10 @@ private:
     double m_droppedFrameThresholdMs = 20.0;
     int m_frameSampleCapacity = 240;
     QVector<double> m_recentFrameSamplesMs;
+    int m_sampleCount = 0;
+    int m_nextSampleIndex = 0;
+    double m_sampleSumMs = 0.0;
+    int m_framesSincePercentileUpdate = 0;
+    bool m_percentilesDirty = false;
     quint64 m_frameCount = 0;
 };

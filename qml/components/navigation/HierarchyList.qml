@@ -122,23 +122,7 @@ Item {
         return result
     }
 
-    function collectVisibleItems(enabledOnly) {
-        const result = []
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (!item)
-                continue
-            if (enabledOnly && !item.enabled)
-                continue
-            if (isItemVisible(item))
-                result.push(item)
-        }
-        return result
-    }
-
-    function indexOfItem(item) {
-        const currentItems = collectItems()
+    function indexOfItemInList(currentItems, item) {
         for (let i = 0; i < currentItems.length; i++) {
             if (currentItems[i] === item)
                 return i
@@ -146,12 +130,45 @@ Item {
         return -1
     }
 
-    function isItemVisible(item) {
+    function resolveByIdInList(currentItems, itemId) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (effectiveItemId(item, i) === itemId)
+                return item
+        }
+        return null
+    }
+
+    function resolveByKeyInList(currentItems, normalizedKey) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (effectiveItemKey(item, i) === normalizedKey)
+                return item
+        }
+        return null
+    }
+
+    function firstEnabledItemInList(currentItems) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (item && item.enabled)
+                return item
+        }
+        return currentItems.length > 0 ? currentItems[0] : null
+    }
+
+    function firstInitiallySelectedItemInList(currentItems) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (item && item.selected)
+                return item
+        }
+        return null
+    }
+
+    function isItemVisibleInList(currentItems, item, itemIndex) {
         if (!item || !isManagedItem(item))
             return false
-
-        const currentItems = collectItems()
-        const itemIndex = indexOfItem(item)
         if (itemIndex <= 0)
             return true
 
@@ -170,6 +187,51 @@ Item {
             }
         }
         return true
+    }
+
+    function expandAncestorsForIndexInList(currentItems, itemIndex) {
+        if (!autoExpandAncestorsOnActivate || itemIndex <= 0)
+            return
+
+        const item = currentItems[itemIndex]
+        if (!item)
+            return
+
+        let requiredIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
+        for (let i = itemIndex - 1; i >= 0 && requiredIndent > 0; i--) {
+            const candidate = currentItems[i]
+            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
+            if (candidateIndent < requiredIndent) {
+                if (candidate.showChevron && !candidate.expanded)
+                    candidate.expanded = true
+                requiredIndent = candidateIndent
+            }
+        }
+    }
+
+    function collectVisibleItems(enabledOnly) {
+        const result = []
+        const currentItems = collectItems()
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+            if (enabledOnly && !item.enabled)
+                continue
+            if (isItemVisibleInList(currentItems, item, i))
+                result.push(item)
+        }
+        return result
+    }
+
+    function indexOfItem(item) {
+        return indexOfItemInList(collectItems(), item)
+    }
+
+    function isItemVisible(item) {
+        const currentItems = collectItems()
+        const itemIndex = indexOfItemInList(currentItems, item)
+        return isItemVisibleInList(currentItems, item, itemIndex)
     }
 
     function effectiveItemId(item, index) {
@@ -194,13 +256,7 @@ Item {
     }
 
     function resolveById(itemId) {
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (effectiveItemId(item, i) === itemId)
-                return item
-        }
-        return null
+        return resolveByIdInList(collectItems(), itemId)
     }
 
     function resolveByKey(itemKey) {
@@ -208,54 +264,19 @@ Item {
         if (normalizedKey.length === 0)
             return null
 
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (effectiveItemKey(item, i) === normalizedKey)
-                return item
-        }
-        return null
+        return resolveByKeyInList(collectItems(), normalizedKey)
     }
 
     function firstEnabledItem() {
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (item && item.enabled)
-                return item
-        }
-        return currentItems.length > 0 ? currentItems[0] : null
+        return firstEnabledItemInList(collectItems())
     }
 
     function firstInitiallySelectedItem() {
-        const currentItems = collectItems()
-        for (let i = 0; i < currentItems.length; i++) {
-            const item = currentItems[i]
-            if (item && item.selected)
-                return item
-        }
-        return null
+        return firstInitiallySelectedItemInList(collectItems())
     }
 
     function expandAncestorsForIndex(itemIndex) {
-        if (!autoExpandAncestorsOnActivate || itemIndex <= 0)
-            return
-
-        const currentItems = collectItems()
-        const item = currentItems[itemIndex]
-        if (!item)
-            return
-
-        let requiredIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
-        for (let i = itemIndex - 1; i >= 0 && requiredIndent > 0; i--) {
-            const candidate = currentItems[i]
-            const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
-            if (candidateIndent < requiredIndent) {
-                if (candidate.showChevron && !candidate.expanded)
-                    candidate.expanded = true
-                requiredIndent = candidateIndent
-            }
-        }
+        expandAncestorsForIndexInList(collectItems(), itemIndex)
     }
 
     function registerItem(item) {
@@ -269,9 +290,11 @@ Item {
     function notifyExpansionChanged(item) {
         if (!item || !isManagedItem(item))
             return
-        const index = indexOfItem(item)
+        const currentItems = collectItems()
+        const index = indexOfItemInList(currentItems, item)
         expansionChanged(item, !!item.expanded, index)
-        if (activeItem && !isItemVisible(activeItem))
+        const activeIndex = indexOfItemInList(currentItems, activeItem)
+        if (activeItem && !isItemVisibleInList(currentItems, activeItem, activeIndex))
             requestActivate(item)
     }
 
@@ -281,12 +304,13 @@ Item {
         if (item.hierarchyList !== control)
             item.hierarchyList = control
 
-        const index = indexOfItem(item)
+        const currentItems = collectItems()
+        const index = indexOfItemInList(currentItems, item)
         if (index < 0)
             return
 
-        expandAncestorsForIndex(index)
-        if (!isItemVisible(item))
+        expandAncestorsForIndexInList(currentItems, index)
+        if (!isItemVisibleInList(currentItems, item, index))
             return
 
         const nextId = effectiveItemId(item, index)
@@ -338,28 +362,28 @@ Item {
 
         let targetItem = activeItem
         if (activeItemKey.length > 0) {
-            const byKey = resolveByKey(activeItemKey)
+            const byKey = resolveByKeyInList(currentItems, activeItemKey)
             if (byKey)
                 targetItem = byKey
         } else if (activeItemId >= 0) {
-            const byId = resolveById(activeItemId)
+            const byId = resolveByIdInList(currentItems, activeItemId)
             if (byId)
                 targetItem = byId
         }
 
-        if (!targetItem || currentItems.indexOf(targetItem) === -1 || !targetItem.enabled)
-            targetItem = firstInitiallySelectedItem()
+        if (!targetItem || indexOfItemInList(currentItems, targetItem) === -1 || !targetItem.enabled)
+            targetItem = firstInitiallySelectedItemInList(currentItems)
         if (!targetItem || !targetItem.enabled)
-            targetItem = firstEnabledItem()
+            targetItem = firstEnabledItemInList(currentItems)
 
-        const targetIndex = indexOfItem(targetItem)
+        const targetIndex = indexOfItemInList(currentItems, targetItem)
         if (targetIndex >= 0)
-            expandAncestorsForIndex(targetIndex)
+            expandAncestorsForIndexInList(currentItems, targetIndex)
 
-        if (targetItem && !isItemVisible(targetItem))
-            targetItem = firstEnabledItem()
+        if (targetItem && !isItemVisibleInList(currentItems, targetItem, targetIndex))
+            targetItem = firstEnabledItemInList(currentItems)
 
-        const finalIndex = indexOfItem(targetItem)
+        const finalIndex = indexOfItemInList(currentItems, targetItem)
         activeItem = targetItem
         activeItemId = targetItem ? effectiveItemId(targetItem, finalIndex) : -1
         activeItemKey = targetItem ? effectiveItemKey(targetItem, finalIndex) : ""
@@ -566,11 +590,11 @@ Item {
     }
 
     function parentItem(item) {
-        const itemIndex = indexOfItem(item)
+        const currentItems = collectItems()
+        const itemIndex = indexOfItemInList(currentItems, item)
         if (itemIndex <= 0)
             return null
 
-        const currentItems = collectItems()
         const currentIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
         for (let i = itemIndex - 1; i >= 0; i--) {
             const candidate = currentItems[i]
@@ -582,19 +606,22 @@ Item {
     }
 
     function firstChildItem(item) {
-        const itemIndex = indexOfItem(item)
+        const currentItems = collectItems()
+        const itemIndex = indexOfItemInList(currentItems, item)
         if (itemIndex < 0)
             return null
 
-        const currentItems = collectItems()
         const currentIndent = Math.max(0, item && item.indentLevel !== undefined ? item.indentLevel : 0)
         for (let i = itemIndex + 1; i < currentItems.length; i++) {
             const candidate = currentItems[i]
             const candidateIndent = Math.max(0, candidate && candidate.indentLevel !== undefined ? candidate.indentLevel : 0)
             if (candidateIndent <= currentIndent)
                 break
-            if (candidateIndent === currentIndent + 1 && candidate.enabled && isItemVisible(candidate))
+            if (candidateIndent === currentIndent + 1
+                    && candidate.enabled
+                    && isItemVisibleInList(currentItems, candidate, i)) {
                 return candidate
+            }
         }
         return null
     }

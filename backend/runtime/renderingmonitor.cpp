@@ -4,11 +4,17 @@
 #include <cmath>
 #include <QDateTime>
 #include <QQuickWindow>
-#include <numeric>
+
+namespace {
+
+constexpr int kPercentileRecomputeFrameInterval = 8;
+
+} // namespace
 
 RenderingMonitor::RenderingMonitor(QObject *parent)
     : QObject(parent)
 {
+    m_recentFrameSamplesMs.reserve(m_frameSampleCapacity);
 }
 
 void RenderingMonitor::attachWindow(QObject *window)
@@ -65,7 +71,7 @@ QVariantMap RenderingMonitor::performanceSnapshot() const
     snapshot.insert(QStringLiteral("frameCount"), QVariant::fromValue(m_frameCount));
     snapshot.insert(QStringLiteral("droppedFrameCount"), QVariant::fromValue(m_droppedFrameCount));
     snapshot.insert(QStringLiteral("droppedFrameThresholdMs"), m_droppedFrameThresholdMs);
-    snapshot.insert(QStringLiteral("recentSampleCount"), m_recentFrameSamplesMs.size());
+    snapshot.insert(QStringLiteral("recentSampleCount"), m_sampleCount);
     snapshot.insert(QStringLiteral("frameSampleCapacity"), m_frameSampleCapacity);
     return snapshot;
 }
@@ -118,7 +124,8 @@ void RenderingMonitor::setDroppedFrameThresholdMs(double value)
 
     m_droppedFrameThresholdMs = next;
     m_droppedFrameCount = 0;
-    for (double sample : m_recentFrameSamplesMs) {
+    const QVector<double> values = sampleValues();
+    for (double sample : values) {
         if (sample >= m_droppedFrameThresholdMs)
             m_droppedFrameCount += 1;
     }
@@ -138,10 +145,26 @@ void RenderingMonitor::setFrameSampleCapacity(int value)
     if (m_frameSampleCapacity == next)
         return;
 
+    QVector<double> values = sampleValues();
+    if (values.size() > next)
+        values = values.mid(values.size() - next);
+
     m_frameSampleCapacity = next;
-    while (m_recentFrameSamplesMs.size() > m_frameSampleCapacity)
-        m_recentFrameSamplesMs.removeFirst();
-    updateAggregates();
+    m_recentFrameSamplesMs = values;
+    m_recentFrameSamplesMs.reserve(m_frameSampleCapacity);
+    m_sampleCount = m_recentFrameSamplesMs.size();
+    m_nextSampleIndex = m_sampleCount < m_frameSampleCapacity ? m_sampleCount : 0;
+
+    m_sampleSumMs = 0.0;
+    for (double sample : m_recentFrameSamplesMs)
+        m_sampleSumMs += sample;
+    m_avgFrameMs = m_sampleCount > 0
+        ? (m_sampleSumMs / static_cast<double>(m_sampleCount))
+        : 0.0;
+
+    m_percentilesDirty = true;
+    m_framesSincePercentileUpdate = kPercentileRecomputeFrameInterval;
+    updatePercentiles(true);
 
     emit frameSampleCapacityChanged();
     emit statsChanged();
@@ -149,7 +172,7 @@ void RenderingMonitor::setFrameSampleCapacity(int value)
 
 int RenderingMonitor::recentSampleCount() const
 {
-    return m_recentFrameSamplesMs.size();
+    return m_sampleCount;
 }
 
 quint64 RenderingMonitor::frameCount() const
@@ -171,12 +194,10 @@ void RenderingMonitor::handleFrameSwapped()
     if (elapsed > 0) {
         m_lastFrameMs = static_cast<double>(elapsed);
         m_fps = 1000.0 / m_lastFrameMs;
-        m_recentFrameSamplesMs.append(m_lastFrameMs);
-        while (m_recentFrameSamplesMs.size() > m_frameSampleCapacity)
-            m_recentFrameSamplesMs.removeFirst();
+        appendFrameSample(m_lastFrameMs);
         if (m_lastFrameMs >= m_droppedFrameThresholdMs)
             m_droppedFrameCount += 1;
-        updateAggregates();
+        updatePercentiles(false);
     }
     m_frameCount += 1;
 
@@ -207,6 +228,12 @@ void RenderingMonitor::resetMetrics()
     m_p99FrameMs = 0.0;
     m_droppedFrameCount = 0;
     m_recentFrameSamplesMs.clear();
+    m_recentFrameSamplesMs.reserve(m_frameSampleCapacity);
+    m_sampleCount = 0;
+    m_nextSampleIndex = 0;
+    m_sampleSumMs = 0.0;
+    m_framesSincePercentileUpdate = 0;
+    m_percentilesDirty = false;
     m_frameCount = 0;
     emit statsChanged();
 }
@@ -219,32 +246,83 @@ void RenderingMonitor::detachWindow()
     m_window.clear();
 }
 
-void RenderingMonitor::updateAggregates()
+void RenderingMonitor::appendFrameSample(double sampleMs)
 {
-    if (m_recentFrameSamplesMs.isEmpty()) {
-        m_avgFrameMs = 0.0;
+    if (m_frameSampleCapacity <= 0)
+        return;
+
+    if (m_recentFrameSamplesMs.size() < m_frameSampleCapacity) {
+        m_recentFrameSamplesMs.append(sampleMs);
+        m_sampleCount = m_recentFrameSamplesMs.size();
+        m_nextSampleIndex = m_sampleCount < m_frameSampleCapacity ? m_sampleCount : 0;
+        m_sampleSumMs += sampleMs;
+    } else {
+        const double replaced = m_recentFrameSamplesMs.at(m_nextSampleIndex);
+        m_recentFrameSamplesMs[m_nextSampleIndex] = sampleMs;
+        m_nextSampleIndex = (m_nextSampleIndex + 1) % m_frameSampleCapacity;
+        m_sampleCount = m_frameSampleCapacity;
+        m_sampleSumMs += (sampleMs - replaced);
+    }
+
+    m_avgFrameMs = m_sampleCount > 0
+        ? (m_sampleSumMs / static_cast<double>(m_sampleCount))
+        : 0.0;
+    m_percentilesDirty = true;
+    m_framesSincePercentileUpdate += 1;
+}
+
+QVector<double> RenderingMonitor::sampleValues() const
+{
+    QVector<double> values;
+    if (m_sampleCount <= 0)
+        return values;
+
+    values.reserve(m_sampleCount);
+    if (m_sampleCount < m_frameSampleCapacity || m_recentFrameSamplesMs.size() < m_frameSampleCapacity) {
+        for (int i = 0; i < m_sampleCount && i < m_recentFrameSamplesMs.size(); ++i)
+            values.append(m_recentFrameSamplesMs.at(i));
+        return values;
+    }
+
+    for (int i = 0; i < m_sampleCount; ++i) {
+        const int index = (m_nextSampleIndex + i) % m_frameSampleCapacity;
+        values.append(m_recentFrameSamplesMs.at(index));
+    }
+    return values;
+}
+
+void RenderingMonitor::updatePercentiles(bool force)
+{
+    if (!m_percentilesDirty && !force)
+        return;
+
+    if (!force && m_framesSincePercentileUpdate < kPercentileRecomputeFrameInterval)
+        return;
+
+    QVector<double> values = sampleValues();
+    if (values.isEmpty()) {
         m_p95FrameMs = 0.0;
         m_p99FrameMs = 0.0;
+        m_percentilesDirty = false;
+        m_framesSincePercentileUpdate = 0;
         return;
     }
 
-    const double total = std::accumulate(m_recentFrameSamplesMs.constBegin(),
-                                         m_recentFrameSamplesMs.constEnd(),
-                                         0.0);
-    m_avgFrameMs = total / static_cast<double>(m_recentFrameSamplesMs.size());
-    m_p95FrameMs = percentileValue(m_recentFrameSamplesMs, 95.0);
-    m_p99FrameMs = percentileValue(m_recentFrameSamplesMs, 99.0);
+    std::sort(values.begin(), values.end());
+    m_p95FrameMs = percentileValueFromSorted(values, 95.0);
+    m_p99FrameMs = percentileValueFromSorted(values, 99.0);
+    m_percentilesDirty = false;
+    m_framesSincePercentileUpdate = 0;
 }
 
-double RenderingMonitor::percentileValue(QVector<double> values, double percentile)
+double RenderingMonitor::percentileValueFromSorted(const QVector<double> &sortedValues, double percentile)
 {
-    if (values.isEmpty())
+    if (sortedValues.isEmpty())
         return 0.0;
 
-    std::sort(values.begin(), values.end());
     const double clamped = qBound(0.0, percentile, 100.0);
     const int index = qBound(0,
-                             static_cast<int>(std::ceil((clamped / 100.0) * values.size())) - 1,
-                             values.size() - 1);
-    return values.at(index);
+                             static_cast<int>(std::ceil((clamped / 100.0) * sortedValues.size())) - 1,
+                             sortedValues.size() - 1);
+    return sortedValues.at(index);
 }

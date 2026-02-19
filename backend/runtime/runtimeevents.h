@@ -13,6 +13,8 @@
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
+#include <deque>
+
 class QQuickWindow;
 class QQuickItem;
 
@@ -293,7 +295,7 @@ private:
     qint64 m_daemonBootEpochMs = 0;
     quint64 m_eventSequence = 0;
     QVariantMap m_lastEvent;
-    QVariantList m_recentEvents;
+    std::deque<QVariantMap> m_recentEvents;
     int m_recentEventCapacity = 256;
     int m_highFrequencyEventMinIntervalMs = 33;
     int m_runtimeStateSignalMinIntervalMs = 33;

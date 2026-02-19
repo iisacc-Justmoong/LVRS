@@ -43,6 +43,7 @@ Item {
     property var activeButton: null
     property var activeButtonId: -1
     property int activeIndex: -1
+    property bool _normalizeScheduled: false
 
     signal activeChanged(var button, var buttonId, int index)
     signal buttonTriggered(var button, var buttonId, int index, var item)
@@ -215,15 +216,7 @@ Item {
         return result
     }
 
-    function buttonAt(index) {
-        const buttons = collectButtons()
-        if (index < 0 || index >= buttons.length)
-            return null
-        return buttons[index]
-    }
-
-    function indexOfButton(button) {
-        const buttons = collectButtons()
+    function indexOfButtonInList(buttons, button) {
         for (let i = 0; i < buttons.length; i++) {
             if (buttons[i] === button)
                 return i
@@ -231,8 +224,7 @@ Item {
         return -1
     }
 
-    function resolveById(buttonId) {
-        const buttons = collectButtons()
+    function resolveByIdInList(buttons, buttonId) {
         for (let i = 0; i < buttons.length; i++) {
             const button = buttons[i]
             if (button && button.buttonId === buttonId)
@@ -241,10 +233,9 @@ Item {
         return null
     }
 
-    function firstSelectedButton() {
+    function firstSelectedButtonInList(buttons) {
         if (!usingItemModel)
             return null
-        const buttons = collectButtons()
         for (let i = 0; i < buttons.length; i++) {
             const button = buttons[i]
             const entry = itemAt(i)
@@ -254,8 +245,7 @@ Item {
         return null
     }
 
-    function firstEnabledButton() {
-        const buttons = collectButtons()
+    function firstEnabledButtonInList(buttons) {
         for (let i = 0; i < buttons.length; i++) {
             const button = buttons[i]
             if (button && button.enabled)
@@ -264,12 +254,35 @@ Item {
         return buttons.length > 0 ? buttons[0] : null
     }
 
+    function buttonAt(index) {
+        const buttons = collectButtons()
+        if (index < 0 || index >= buttons.length)
+            return null
+        return buttons[index]
+    }
+
+    function indexOfButton(button) {
+        return indexOfButtonInList(collectButtons(), button)
+    }
+
+    function resolveById(buttonId) {
+        return resolveByIdInList(collectButtons(), buttonId)
+    }
+
+    function firstSelectedButton() {
+        return firstSelectedButtonInList(collectButtons())
+    }
+
+    function firstEnabledButton() {
+        return firstEnabledButtonInList(collectButtons())
+    }
+
     function registerButton(button) {
         if (!button)
             return
         if (button.toolbar !== control)
             button.toolbar = control
-        normalizeActiveButton()
+        scheduleNormalizeActiveButton()
     }
 
     function emitEntryEvents(index, entry, buttonId) {
@@ -337,7 +350,8 @@ Item {
         if (button.toolbar !== control)
             button.toolbar = control
 
-        const index = indexOfButton(button)
+        const buttons = collectButtons()
+        const index = indexOfButtonInList(buttons, button)
         if (index < 0)
             return
 
@@ -368,18 +382,28 @@ Item {
 
         let targetButton = activeButton
         if (activeButtonId !== undefined && activeButtonId !== null) {
-            const byId = resolveById(activeButtonId)
+            const byId = resolveByIdInList(buttons, activeButtonId)
             if (byId)
                 targetButton = byId
         }
-        if (!targetButton || buttons.indexOf(targetButton) === -1 || !targetButton.enabled)
-            targetButton = firstSelectedButton()
-        if (!targetButton || buttons.indexOf(targetButton) === -1 || !targetButton.enabled)
-            targetButton = firstEnabledButton()
+        if (!targetButton || indexOfButtonInList(buttons, targetButton) === -1 || !targetButton.enabled)
+            targetButton = firstSelectedButtonInList(buttons)
+        if (!targetButton || indexOfButtonInList(buttons, targetButton) === -1 || !targetButton.enabled)
+            targetButton = firstEnabledButtonInList(buttons)
 
         activeButton = targetButton
         activeButtonId = targetButton ? targetButton.buttonId : -1
-        activeIndex = targetButton ? indexOfButton(targetButton) : -1
+        activeIndex = targetButton ? indexOfButtonInList(buttons, targetButton) : -1
+    }
+
+    function scheduleNormalizeActiveButton() {
+        if (_normalizeScheduled)
+            return
+        _normalizeScheduled = true
+        Qt.callLater(function() {
+            _normalizeScheduled = false
+            normalizeActiveButton()
+        })
     }
 
     function triggerIndex(index) {
@@ -390,8 +414,8 @@ Item {
         return true
     }
 
-    onActiveButtonIdChanged: Qt.callLater(normalizeActiveButton)
-    onButtonItemsChanged: Qt.callLater(normalizeActiveButton)
+    onActiveButtonIdChanged: scheduleNormalizeActiveButton()
+    onButtonItemsChanged: scheduleNormalizeActiveButton()
 
     implicitWidth: rowContainer.implicitWidth + (horizontalPadding * 2)
     implicitHeight: rowContainer.implicitHeight + (verticalPadding * 2)
@@ -442,14 +466,14 @@ Item {
     Connections {
         target: modelButtons
         function onChildrenChanged() {
-            Qt.callLater(control.normalizeActiveButton)
+            control.scheduleNormalizeActiveButton()
         }
     }
 
     Connections {
         target: manualButtons
         function onChildrenChanged() {
-            Qt.callLater(control.normalizeActiveButton)
+            control.scheduleNormalizeActiveButton()
         }
     }
 

@@ -384,14 +384,14 @@ void RuntimeEvents::setRecentEventCapacity(int value)
         return;
     m_recentEventCapacity = next;
     emit recentEventCapacityChanged();
-    while (m_recentEvents.size() > m_recentEventCapacity)
-        m_recentEvents.removeFirst();
+    while (m_recentEvents.size() > static_cast<std::size_t>(m_recentEventCapacity))
+        m_recentEvents.pop_front();
     emit eventLogChanged();
 }
 
 int RuntimeEvents::recentEventCount() const
 {
-    return m_recentEvents.size();
+    return static_cast<int>(m_recentEvents.size());
 }
 
 bool RuntimeEvents::applicationActive() const
@@ -706,12 +706,16 @@ QVariantMap RuntimeEvents::daemonHealth() const
 
 QVariantList RuntimeEvents::recentEvents() const
 {
-    return m_recentEvents;
+    QVariantList events;
+    events.reserve(static_cast<int>(m_recentEvents.size()));
+    for (const QVariantMap &entry : m_recentEvents)
+        events.append(entry);
+    return events;
 }
 
 void RuntimeEvents::clearRecentEvents()
 {
-    if (m_recentEvents.isEmpty())
+    if (m_recentEvents.empty())
         return;
     m_recentEvents.clear();
     emit eventLogChanged();
@@ -1448,9 +1452,9 @@ void RuntimeEvents::pushRecentEvent(const QVariantMap &eventData)
 {
     if (m_recentEventCapacity <= 0)
         return;
-    while (m_recentEvents.size() >= m_recentEventCapacity)
-        m_recentEvents.removeFirst();
-    m_recentEvents.append(eventData);
+    while (m_recentEvents.size() >= static_cast<std::size_t>(m_recentEventCapacity))
+        m_recentEvents.pop_front();
+    m_recentEvents.push_back(eventData);
 }
 
 QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal globalY) const

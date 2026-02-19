@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QUrl>
 
+#include <iterator>
+
 SvgManager::SvgManager(QObject *parent)
     : QObject(parent)
     , m_network(new QNetworkAccessManager(this))
@@ -95,10 +97,11 @@ qreal SvgManager::deviceScale() const
 
 void SvgManager::clearCache()
 {
-    if (m_cache.isEmpty() && m_cacheOrder.isEmpty() && m_sourcePayloadCache.isEmpty())
+    if (m_cache.isEmpty() && m_cacheOrder.empty() && m_sourcePayloadCache.isEmpty())
         return;
     m_cache.clear();
     m_cacheOrder.clear();
+    m_cacheOrderIter.clear();
     m_sourcePayloadCache.clear();
     m_revision += 1;
     emit revisionChanged();
@@ -134,6 +137,7 @@ void SvgManager::setVectorFirst(bool value)
     m_vectorFirst = value;
     m_cache.clear();
     m_cacheOrder.clear();
+    m_cacheOrderIter.clear();
     m_sourcePayloadCache.clear();
     m_pendingSourceUrls.clear();
     m_revision += 1;
@@ -188,8 +192,10 @@ void SvgManager::setCacheSize(int value)
     if (m_cacheSize == 0) {
         clearCache();
     } else {
-        while (m_cacheOrder.size() > m_cacheSize) {
-            const QString oldest = m_cacheOrder.takeFirst();
+        while (m_cacheOrder.size() > static_cast<std::size_t>(m_cacheSize)) {
+            const QString oldest = m_cacheOrder.front();
+            m_cacheOrder.pop_front();
+            m_cacheOrderIter.remove(oldest);
             m_cache.remove(oldest);
         }
     }
@@ -370,21 +376,29 @@ void SvgManager::insertCache(const QString &key, const QString &value)
     }
 
     m_cache.insert(key, value);
-    m_cacheOrder.append(key);
+    m_cacheOrder.push_back(key);
+    m_cacheOrderIter.insert(key, std::prev(m_cacheOrder.end()));
 
-    while (m_cacheOrder.size() > m_cacheSize) {
-        const QString oldest = m_cacheOrder.takeFirst();
+    while (m_cacheOrder.size() > static_cast<std::size_t>(m_cacheSize)) {
+        const QString oldest = m_cacheOrder.front();
+        m_cacheOrder.pop_front();
+        m_cacheOrderIter.remove(oldest);
         m_cache.remove(oldest);
     }
 }
 
 void SvgManager::touchCacheKey(const QString &key)
 {
-    const int index = m_cacheOrder.indexOf(key);
-    if (index < 0)
+    auto it = m_cacheOrderIter.find(key);
+    if (it == m_cacheOrderIter.end())
         return;
-    m_cacheOrder.removeAt(index);
-    m_cacheOrder.append(key);
+
+    auto node = it.value();
+    if (node == std::prev(m_cacheOrder.end()))
+        return;
+
+    m_cacheOrder.splice(m_cacheOrder.end(), m_cacheOrder, node);
+    m_cacheOrderIter[key] = std::prev(m_cacheOrder.end());
 }
 
 QString SvgManager::makeCacheKey(const QString &sourceUrl, int logicalSize, qreal scale) const

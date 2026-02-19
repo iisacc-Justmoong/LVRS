@@ -14,6 +14,7 @@
 #include <QtQml/qqml.h>
 
 #include <array>
+#include <deque>
 
 class RuntimeEvents;
 
@@ -208,7 +209,7 @@ private:
                                 const QString &subject,
                                 const QVariantMap &detail = QVariantMap());
     QVariantMap buildLatencySummary(const QString &operation) const;
-    static qint64 percentileValue(QList<qint64> values, double percentile);
+    static qint64 percentileValue(std::deque<qint64> values, double percentile);
     QString normalizePathForCache(const QString &path) const;
     bool isReadCacheEntryExpired(const ReadCacheEntry &entry, qint64 nowMs) const;
     void pruneExpiredReadTextCache(qint64 nowMs);
@@ -224,7 +225,7 @@ private:
     QString m_lastError;
     bool m_userEventHooked = false;
     int m_hookedEventCapacity = 2048;
-    QVariantList m_hookedEvents;
+    std::deque<QVariantMap> m_hookedEvents;
     QVariantMap m_lastHookedEvent;
     QVariantMap m_lastHookedInputState;
     QHash<QString, int> m_hookedTypeCounts;
@@ -247,10 +248,10 @@ private:
     QSet<qulonglong> m_asyncActiveRequestIds;
     QHash<QString, qulonglong> m_dispatchCoalescedLeaderByKey;
     QHash<qulonglong, QString> m_dispatchCoalesceKeyByRequest;
-    QHash<QString, QList<qint64>> m_asyncLatencySamplesByOperation;
+    QHash<QString, std::deque<qint64>> m_asyncLatencySamplesByOperation;
     QHash<QString, quint64> m_asyncOperationCountByOperation;
     QHash<QString, quint64> m_asyncOperationFailureCountByOperation;
-    QVariantList m_performanceTrace;
+    std::deque<QVariantMap> m_performanceTrace;
     int m_performanceTraceCapacity = 2048;
     int m_asyncQueueDepth = 0;
     int m_asyncQueuePeakDepth = 0;

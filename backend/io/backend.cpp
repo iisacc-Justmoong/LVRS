@@ -73,6 +73,7 @@ void releaseThreadLocalIoBuffer(QByteArray &&buffer)
 
 struct SaveTextOutcome {
     bool ok = false;
+    qint64 bytesWritten = 0;
     QString error;
 };
 
@@ -107,27 +108,21 @@ SaveTextOutcome saveTextFileSync(const QString &path, const QString &text)
         return outcome;
     }
 
-    const qint64 estimatedBytes = static_cast<qint64>(text.size()) * 3;
-    QByteArray data = estimatedBytes >= kReadTextLargePayloadThresholdBytes
-        ? acquireThreadLocalIoBuffer(static_cast<qsizetype>(estimatedBytes))
-        : QByteArray();
-    data = text.toUtf8();
+    const QByteArray data = text.toUtf8();
 
     if (file.write(data) != data.size()) {
         outcome.error = file.errorString();
         file.cancelWriting();
-        releaseThreadLocalIoBuffer(std::move(data));
         return outcome;
     }
 
     if (!file.commit()) {
         outcome.error = file.errorString();
-        releaseThreadLocalIoBuffer(std::move(data));
         return outcome;
     }
 
-    releaseThreadLocalIoBuffer(std::move(data));
     outcome.ok = true;
+    outcome.bytesWritten = data.size();
     return outcome;
 }
 
@@ -294,7 +289,6 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
     const qulonglong requestId = beginAsyncRequest(operation, path, lane);
     const QString pathCopy = path;
     const QString textCopy = text;
-    const qint64 byteCount = text.toUtf8().size();
     const QSharedPointer<QAtomicInt> cancelToken = m_asyncCancelTokenByRequest.value(requestId);
 
     if (path.trimmed().isEmpty()) {
@@ -322,7 +316,7 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
 
     QPointer<Backend> backendGuard(this);
     threadPoolForLane(lane).start(new LambdaRunnable(
-        [backendGuard, cancelToken, requestId, pathCopy, textCopy, byteCount, operation]() {
+        [backendGuard, cancelToken, requestId, pathCopy, textCopy, operation]() {
             auto queueStarted = [&backendGuard, requestId, operation, pathCopy](qint64 startedMs) {
                 if (!backendGuard)
                     return;
@@ -385,7 +379,7 @@ qulonglong Backend::saveTextFileAsync(const QString &path, const QString &text)
             const qint64 elapsedMs = qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - startedMs);
 
             QVariantMap result;
-            result.insert(QStringLiteral("bytes"), byteCount);
+            result.insert(QStringLiteral("bytes"), outcome.bytesWritten);
 
             queueFinished(outcome.ok,
                           result,
@@ -822,7 +816,7 @@ void Backend::unhookUserEvents()
 
 void Backend::clearHookedUserEvents()
 {
-    if (m_hookedEvents.isEmpty() && m_lastHookedEvent.isEmpty() && m_lastHookedInputState.isEmpty())
+    if (m_hookedEvents.empty() && m_lastHookedEvent.isEmpty() && m_lastHookedInputState.isEmpty())
         return;
 
     m_hookedEvents.clear();
@@ -834,22 +828,30 @@ void Backend::clearHookedUserEvents()
 
 QVariantList Backend::hookedUserEvents(int limit) const
 {
-    if (limit <= 0 || limit >= m_hookedEvents.size())
-        return m_hookedEvents;
+    QVariantList result;
+    if (m_hookedEvents.empty())
+        return result;
 
-    QVariantList subset;
-    const int start = m_hookedEvents.size() - limit;
-    subset.reserve(limit);
-    for (int i = start; i < m_hookedEvents.size(); ++i)
-        subset.append(m_hookedEvents.at(i));
-    return subset;
+    const int total = static_cast<int>(m_hookedEvents.size());
+    if (limit <= 0 || limit >= total) {
+        result.reserve(total);
+        for (const QVariantMap &entry : m_hookedEvents)
+            result.append(entry);
+        return result;
+    }
+
+    const int start = total - limit;
+    result.reserve(limit);
+    for (int i = start; i < total; ++i)
+        result.append(m_hookedEvents.at(static_cast<std::size_t>(i)));
+    return result;
 }
 
 QVariantMap Backend::hookedUserEventSummary() const
 {
     QVariantMap summary;
     summary.insert(QStringLiteral("hooked"), m_userEventHooked);
-    summary.insert(QStringLiteral("eventCount"), m_hookedEvents.size());
+    summary.insert(QStringLiteral("eventCount"), static_cast<int>(m_hookedEvents.size()));
     summary.insert(QStringLiteral("capacity"), m_hookedEventCapacity);
     summary.insert(QStringLiteral("lastEvent"), m_lastHookedEvent);
     summary.insert(QStringLiteral("input"), currentUserInputState());
@@ -874,20 +876,28 @@ QVariantMap Backend::currentUserInputState() const
 
 QVariantList Backend::recentPerformanceTrace(int limit) const
 {
-    if (limit <= 0 || limit >= m_performanceTrace.size())
-        return m_performanceTrace;
+    QVariantList result;
+    if (m_performanceTrace.empty())
+        return result;
 
-    QVariantList subset;
-    const int start = m_performanceTrace.size() - limit;
-    subset.reserve(limit);
-    for (int i = start; i < m_performanceTrace.size(); ++i)
-        subset.append(m_performanceTrace.at(i));
-    return subset;
+    const int total = static_cast<int>(m_performanceTrace.size());
+    if (limit <= 0 || limit >= total) {
+        result.reserve(total);
+        for (const QVariantMap &entry : m_performanceTrace)
+            result.append(entry);
+        return result;
+    }
+
+    const int start = total - limit;
+    result.reserve(limit);
+    for (int i = start; i < total; ++i)
+        result.append(m_performanceTrace.at(static_cast<std::size_t>(i)));
+    return result;
 }
 
 void Backend::clearPerformanceTrace()
 {
-    if (m_performanceTrace.isEmpty())
+    if (m_performanceTrace.empty())
         return;
     m_performanceTrace.clear();
     emit performanceTraceChanged();
@@ -948,7 +958,7 @@ bool Backend::userEventHooked() const
 
 int Backend::hookedEventCount() const
 {
-    return m_hookedEvents.size();
+    return static_cast<int>(m_hookedEvents.size());
 }
 
 int Backend::hookedEventCapacity() const
@@ -966,8 +976,9 @@ void Backend::setHookedEventCapacity(int value)
     emit hookedEventCapacityChanged();
 
     bool dropped = false;
-    while (m_hookedEvents.size() > m_hookedEventCapacity) {
-        const QVariantMap droppedEvent = m_hookedEvents.takeFirst().toMap();
+    while (m_hookedEvents.size() > static_cast<std::size_t>(m_hookedEventCapacity)) {
+        const QVariantMap droppedEvent = m_hookedEvents.front();
+        m_hookedEvents.pop_front();
         const QString droppedType = droppedEvent.value(QStringLiteral("type")).toString();
         if (!droppedType.isEmpty()) {
             const int current = m_hookedTypeCounts.value(droppedType, 0);
@@ -1075,7 +1086,7 @@ QVariantMap Backend::performanceMetrics() const
     metrics.insert(QStringLiteral("asyncBackpressureDropCount"), QVariant::fromValue(m_asyncBackpressureDropCount));
     metrics.insert(QStringLiteral("asyncMergedRequestCount"), QVariant::fromValue(m_asyncMergedRequestCount));
     metrics.insert(QStringLiteral("asyncCanceledRequestCount"), QVariant::fromValue(m_asyncCanceledRequestCount));
-    metrics.insert(QStringLiteral("performanceTraceCount"), m_performanceTrace.size());
+    metrics.insert(QStringLiteral("performanceTraceCount"), static_cast<int>(m_performanceTrace.size()));
     metrics.insert(QStringLiteral("performanceTraceCapacity"), m_performanceTraceCapacity);
     metrics.insert(QStringLiteral("readTextCacheTtlMs"), m_readTextCacheTtlMs);
     metrics.insert(QStringLiteral("readTextCacheCapacityBytes"), QVariant::fromValue(m_readTextCacheCapacityBytes));
@@ -1114,8 +1125,8 @@ void Backend::setPerformanceTraceCapacity(int value)
     if (m_performanceTraceCapacity == next)
         return;
     m_performanceTraceCapacity = next;
-    while (m_performanceTrace.size() > m_performanceTraceCapacity)
-        m_performanceTrace.removeFirst();
+    while (m_performanceTrace.size() > static_cast<std::size_t>(m_performanceTraceCapacity))
+        m_performanceTrace.pop_front();
     emit performanceTraceCapacityChanged();
     emit performanceTraceChanged();
     emit performanceMetricsChanged();
@@ -1123,7 +1134,7 @@ void Backend::setPerformanceTraceCapacity(int value)
 
 int Backend::performanceTraceCount() const
 {
-    return m_performanceTrace.size();
+    return static_cast<int>(m_performanceTrace.size());
 }
 
 void Backend::setAsyncMaxConcurrency(int value)
@@ -1402,10 +1413,10 @@ void Backend::recordAsyncLatencySample(const QString &operation, qint64 totalLat
     const QString key = operation.trimmed().isEmpty()
         ? QStringLiteral("unknown")
         : operation.trimmed();
-    QList<qint64> &samples = m_asyncLatencySamplesByOperation[key];
-    samples.append(qMax<qint64>(0, totalLatencyMs));
-    while (samples.size() > m_asyncLatencySampleCapacity)
-        samples.removeFirst();
+    std::deque<qint64> &samples = m_asyncLatencySamplesByOperation[key];
+    samples.push_back(qMax<qint64>(0, totalLatencyMs));
+    while (samples.size() > static_cast<std::size_t>(m_asyncLatencySampleCapacity))
+        samples.pop_front();
 
     m_asyncOperationCountByOperation.insert(key, m_asyncOperationCountByOperation.value(key, 0) + 1);
     if (!ok)
@@ -1427,10 +1438,10 @@ void Backend::appendPerformanceTrace(const QString &phase,
     entry.insert(QStringLiteral("operation"), operation);
     entry.insert(QStringLiteral("subject"), subject);
     entry.insert(QStringLiteral("detail"), detail);
-    m_performanceTrace.append(entry);
+    m_performanceTrace.push_back(entry);
 
-    while (m_performanceTrace.size() > m_performanceTraceCapacity)
-        m_performanceTrace.removeFirst();
+    while (m_performanceTrace.size() > static_cast<std::size_t>(m_performanceTraceCapacity))
+        m_performanceTrace.pop_front();
 
     emit performanceTraceChanged();
 }
@@ -1438,8 +1449,8 @@ void Backend::appendPerformanceTrace(const QString &phase,
 QVariantMap Backend::buildLatencySummary(const QString &operation) const
 {
     QVariantMap summary;
-    const QList<qint64> samples = m_asyncLatencySamplesByOperation.value(operation);
-    if (samples.isEmpty()) {
+    const std::deque<qint64> samples = m_asyncLatencySamplesByOperation.value(operation);
+    if (samples.empty()) {
         summary.insert(QStringLiteral("count"), QVariant::fromValue(m_asyncOperationCountByOperation.value(operation, 0)));
         summary.insert(QStringLiteral("failureCount"), QVariant::fromValue(m_asyncOperationFailureCountByOperation.value(operation, 0)));
         summary.insert(QStringLiteral("avgMs"), 0.0);
@@ -1451,11 +1462,11 @@ QVariantMap Backend::buildLatencySummary(const QString &operation) const
         return summary;
     }
 
-    const double total = std::accumulate(samples.constBegin(), samples.constEnd(), 0.0);
+    const double total = std::accumulate(samples.begin(), samples.end(), 0.0);
     const qint64 p50 = percentileValue(samples, 50.0);
     const qint64 p95 = percentileValue(samples, 95.0);
     const qint64 p99 = percentileValue(samples, 99.0);
-    const qint64 maxValue = *std::max_element(samples.constBegin(), samples.constEnd());
+    const qint64 maxValue = *std::max_element(samples.begin(), samples.end());
     const quint64 count = m_asyncOperationCountByOperation.value(operation, samples.size());
     const quint64 failureCount = m_asyncOperationFailureCountByOperation.value(operation, 0);
     const double failureRate = count > 0
@@ -1465,7 +1476,7 @@ QVariantMap Backend::buildLatencySummary(const QString &operation) const
     summary.insert(QStringLiteral("count"), QVariant::fromValue(count));
     summary.insert(QStringLiteral("failureCount"), QVariant::fromValue(failureCount));
     summary.insert(QStringLiteral("failureRate"), failureRate);
-    summary.insert(QStringLiteral("sampleSize"), samples.size());
+    summary.insert(QStringLiteral("sampleSize"), static_cast<int>(samples.size()));
     summary.insert(QStringLiteral("avgMs"), total / static_cast<double>(samples.size()));
     summary.insert(QStringLiteral("p50Ms"), QVariant::fromValue(p50));
     summary.insert(QStringLiteral("p95Ms"), QVariant::fromValue(p95));
@@ -1474,17 +1485,18 @@ QVariantMap Backend::buildLatencySummary(const QString &operation) const
     return summary;
 }
 
-qint64 Backend::percentileValue(QList<qint64> values, double percentile)
+qint64 Backend::percentileValue(std::deque<qint64> values, double percentile)
 {
-    if (values.isEmpty())
+    if (values.empty())
         return 0;
 
     std::sort(values.begin(), values.end());
     const double clamped = qBound(0.0, percentile, 100.0);
+    const int count = static_cast<int>(values.size());
     const int index = qBound(0,
-                             static_cast<int>(std::ceil((clamped / 100.0) * values.size())) - 1,
-                             values.size() - 1);
-    return values.at(index);
+                             static_cast<int>(std::ceil((clamped / 100.0) * static_cast<double>(count))) - 1,
+                             count - 1);
+    return values.at(static_cast<std::size_t>(index));
 }
 
 const char *Backend::laneName(AsyncLane lane)
@@ -1822,10 +1834,11 @@ void Backend::appendHookedEvent(const QVariantMap &eventData)
         m_lastHookedInputState = m_runtimeEvents->inputState();
 
     m_lastHookedEvent = hookedEvent;
-    m_hookedEvents.append(hookedEvent);
+    m_hookedEvents.push_back(hookedEvent);
 
-    while (m_hookedEvents.size() > m_hookedEventCapacity) {
-        const QVariantMap droppedEvent = m_hookedEvents.takeFirst().toMap();
+    while (m_hookedEvents.size() > static_cast<std::size_t>(m_hookedEventCapacity)) {
+        const QVariantMap droppedEvent = m_hookedEvents.front();
+        m_hookedEvents.pop_front();
         const QString droppedType = droppedEvent.value(QStringLiteral("type")).toString();
         if (!droppedType.isEmpty()) {
             const int current = m_hookedTypeCounts.value(droppedType, 0);

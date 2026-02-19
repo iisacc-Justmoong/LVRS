@@ -12,6 +12,7 @@ Item {
     property color backgroundColor: Theme.panelBackground08
     property color borderColor: Theme.panelBackground12
     property bool forceBorderlessTone: true
+    property bool _syncScheduled: false
 
     readonly property int segmentCount: collectSegmentButtons().length
     default property alias buttons: segmentRow.data
@@ -40,6 +41,16 @@ Item {
             applySegmentStyle(segments[i])
     }
 
+    function scheduleSyncSegmentStyles() {
+        if (_syncScheduled)
+            return
+        _syncScheduled = true
+        Qt.callLater(function() {
+            _syncScheduled = false
+            syncSegmentStyles()
+        })
+    }
+
     implicitWidth: segmentRow.implicitWidth + (horizontalPadding * 2)
     implicitHeight: segmentRow.implicitHeight + (verticalPadding * 2)
 
@@ -62,12 +73,12 @@ Item {
         spacing: control.spacing
     }
 
-    onForceBorderlessToneChanged: Qt.callLater(control.syncSegmentStyles)
+    onForceBorderlessToneChanged: scheduleSyncSegmentStyles()
 
     Connections {
         target: segmentRow
         function onChildrenChanged() {
-            Qt.callLater(control.syncSegmentStyles)
+            control.scheduleSyncSegmentStyles()
         }
     }
 

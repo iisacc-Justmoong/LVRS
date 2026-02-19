@@ -42,6 +42,10 @@ public:
                                          const QString &property,
                                          const QVariant &value);
     Q_INVOKABLE QVariant readProperty(const QString &viewId, const QString &property) const;
+    Q_INVOKABLE bool bindRouteViewModel(const QVariant &pathValue,
+                                        const QVariant &routeEntry,
+                                        const QVariant &paramsValue,
+                                        int fallbackIndex = 0);
 
     QStringList keys() const;
     QStringList views() const;
@@ -59,8 +63,8 @@ private:
     static QString normalizeToken(const QString &value);
 
     void setLastError(const QString &message);
-    void pruneBindingsAndOwners(const QStringList &validKeys);
-    bool keyExists(const QString &key) const;
+    void pruneBindingsAndOwners();
+    QObject *objectForKey(const QString &normalizedKey) const;
     QString resolveKeyForWrite(const QString &viewId, const QString &key) const;
 
     void prune();

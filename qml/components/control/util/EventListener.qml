@@ -95,16 +95,19 @@ Item {
             modifiers: modifiers,
             isGlobal: true
         }
-        if (root.includeUiHit)
-            data.ui = root.resolveUiAt(x, y)
+        let inputState = undefined
         if (root.includeInputState)
-            data.input = root.resolveInputState()
+            inputState = root.resolveInputState()
+        if (root.includeUiHit)
+            data.ui = root.resolveUiAt(x, y, inputState)
+        if (root.includeInputState)
+            data.input = inputState
         if (root.includeBackendSummary)
             data.backend = root.resolveBackendSummary()
         return data
     }
 
-    function resolveUiAt(globalX, globalY) {
+    function resolveUiAt(globalX, globalY, inputState) {
         if (!root.includeUiHit)
             return ({})
         if (RuntimeEvents && RuntimeEvents.hitTestUiAt) {
@@ -114,8 +117,8 @@ Item {
         }
         if (!root.includeInputState)
             return ({})
-        const inputState = root.resolveInputState()
-        const pointerUi = inputState && inputState.pointerUi ? inputState.pointerUi : ({})
+        const resolvedInputState = inputState !== undefined ? inputState : root.resolveInputState()
+        const pointerUi = resolvedInputState && resolvedInputState.pointerUi ? resolvedInputState.pointerUi : ({})
         return root.mapHasEntries(pointerUi) ? pointerUi : ({})
     }
 
@@ -156,10 +159,13 @@ Item {
             modifiers: mouse && mouse.modifiers !== undefined ? mouse.modifiers : Qt.NoModifier,
             isGlobal: false
         }
-        if (root.includeUiHit)
-            data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y)
+        let inputState = undefined
         if (root.includeInputState)
-            data.input = root.resolveInputState()
+            inputState = root.resolveInputState()
+        if (root.includeUiHit)
+            data.ui = root.resolveUiAt(globalPoint.x, globalPoint.y, inputState)
+        if (root.includeInputState)
+            data.input = inputState
         if (root.includeBackendSummary)
             data.backend = root.resolveBackendSummary()
         return data
