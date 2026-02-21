@@ -1,0 +1,364 @@
+
+####### Expanded from @PACKAGE_INIT@ by configure_package_config_file() #######
+####### Any changes to this file will be overwritten by the next CMake run ####
+####### The input file was LVRSConfig.cmake.in                            ########
+
+get_filename_component(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
+
+macro(set_and_check _var _file)
+  set(${_var} "${_file}")
+  if(NOT EXISTS "${_file}")
+    message(FATAL_ERROR "File or directory ${_file} referenced by variable ${_var} does not exist !")
+  endif()
+endmacro()
+
+macro(check_required_components _NAME)
+  foreach(comp ${${_NAME}_FIND_COMPONENTS})
+    if(NOT ${_NAME}_${comp}_FOUND)
+      if(${_NAME}_FIND_REQUIRED_${comp})
+        set(${_NAME}_FOUND FALSE)
+      endif()
+    endif()
+  endforeach()
+endmacro()
+
+####################################################################################
+
+set(LVRS_LAYOUT_VERSION "1")
+set(LVRS_RUNTIME_PLATFORMS
+    macos
+    linux
+    windows
+    ios
+    android
+    wasm
+)
+
+function(_lvrs_config_detect_platform out_var)
+    set(_lvrs_platform unknown)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        set(_lvrs_platform android)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set(_lvrs_platform ios)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+        set(_lvrs_platform wasm)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        if(CMAKE_OSX_SYSROOT MATCHES "iphone")
+            set(_lvrs_platform ios)
+        else()
+            set(_lvrs_platform macos)
+        endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(_lvrs_platform windows)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(_lvrs_platform linux)
+    endif()
+    set(${out_var} "${_lvrs_platform}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_config_default_android_sdk_hint out_var)
+    set(_lvrs_sdk_hint "")
+    if(DEFINED ENV{ANDROID_SDK_ROOT} AND IS_DIRECTORY "$ENV{ANDROID_SDK_ROOT}")
+        set(_lvrs_sdk_hint "$ENV{ANDROID_SDK_ROOT}")
+    elseif(DEFINED ENV{ANDROID_HOME} AND IS_DIRECTORY "$ENV{ANDROID_HOME}")
+        set(_lvrs_sdk_hint "$ENV{ANDROID_HOME}")
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        if(IS_DIRECTORY "$ENV{HOME}/Library/Android/sdk")
+            set(_lvrs_sdk_hint "$ENV{HOME}/Library/Android/sdk")
+        endif()
+    else()
+        if(IS_DIRECTORY "$ENV{HOME}/Android/Sdk")
+            set(_lvrs_sdk_hint "$ENV{HOME}/Android/Sdk")
+        endif()
+    endif()
+    set(${out_var} "${_lvrs_sdk_hint}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_config_default_android_ndk_hint sdk_root out_var)
+    set(_lvrs_ndk_hint "")
+    if(DEFINED ENV{CMAKE_ANDROID_NDK} AND IS_DIRECTORY "$ENV{CMAKE_ANDROID_NDK}")
+        set(_lvrs_ndk_hint "$ENV{CMAKE_ANDROID_NDK}")
+    elseif(DEFINED ENV{ANDROID_NDK_ROOT} AND IS_DIRECTORY "$ENV{ANDROID_NDK_ROOT}")
+        set(_lvrs_ndk_hint "$ENV{ANDROID_NDK_ROOT}")
+    elseif(DEFINED ENV{ANDROID_NDK_HOME} AND IS_DIRECTORY "$ENV{ANDROID_NDK_HOME}")
+        set(_lvrs_ndk_hint "$ENV{ANDROID_NDK_HOME}")
+    elseif(NOT "${sdk_root}" STREQUAL "" AND IS_DIRECTORY "${sdk_root}/ndk")
+        file(GLOB _lvrs_ndk_versions LIST_DIRECTORIES true "${sdk_root}/ndk/*")
+        set(_lvrs_ndk_dirs "")
+        foreach(_lvrs_ndk_version_dir IN LISTS _lvrs_ndk_versions)
+            if(IS_DIRECTORY "${_lvrs_ndk_version_dir}")
+                list(APPEND _lvrs_ndk_dirs "${_lvrs_ndk_version_dir}")
+            endif()
+        endforeach()
+        if(_lvrs_ndk_dirs)
+            list(SORT _lvrs_ndk_dirs)
+            list(REVERSE _lvrs_ndk_dirs)
+            list(GET _lvrs_ndk_dirs 0 _lvrs_ndk_hint)
+        endif()
+    endif()
+    set(${out_var} "${_lvrs_ndk_hint}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_config_default_emsdk_hint out_var)
+    set(_lvrs_emsdk_hint "")
+    if(DEFINED ENV{EMSDK} AND IS_DIRECTORY "$ENV{EMSDK}")
+        set(_lvrs_emsdk_hint "$ENV{EMSDK}")
+    endif()
+    set(${out_var} "${_lvrs_emsdk_hint}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_config_resolve_qt_prefix_candidate candidate out_var)
+    set(_lvrs_resolved_prefix "")
+    if(candidate STREQUAL "")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    if(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/lib/cmake/Qt6/Qt6Config.cmake")
+        set(_lvrs_resolved_prefix "${candidate}")
+    elseif(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/Qt6Config.cmake")
+        get_filename_component(_lvrs_resolved_prefix "${candidate}/../../.." ABSOLUTE)
+    elseif(candidate MATCHES "Qt6Config\\.cmake$" AND EXISTS "${candidate}")
+        get_filename_component(_lvrs_qt6_dir "${candidate}" DIRECTORY)
+        get_filename_component(_lvrs_resolved_prefix "${_lvrs_qt6_dir}/../../.." ABSOLUTE)
+        unset(_lvrs_qt6_dir)
+    endif()
+
+    set(${out_var} "${_lvrs_resolved_prefix}" PARENT_SCOPE)
+endfunction()
+
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
+    _lvrs_config_detect_platform(_lvrs_dispatch_platform)
+    if(_lvrs_dispatch_platform STREQUAL "unknown")
+        message(FATAL_ERROR
+            "LVRS root package dispatcher could not infer runtime platform from "
+            "CMAKE_SYSTEM_NAME='${CMAKE_SYSTEM_NAME}' and CMAKE_OSX_SYSROOT='${CMAKE_OSX_SYSROOT}'.")
+    endif()
+
+    set(_lvrs_dispatch_prefix "${CMAKE_CURRENT_LIST_DIR}/platforms/${_lvrs_dispatch_platform}")
+    set(_lvrs_dispatch_config "${_lvrs_dispatch_prefix}/lib/cmake/LVRS/LVRSConfig.cmake")
+    if(NOT EXISTS "${_lvrs_dispatch_config}")
+        message(FATAL_ERROR
+            "LVRS root package dispatcher did not find platform config: ${_lvrs_dispatch_config}")
+    endif()
+
+    set(LVRS_ACTIVE_PLATFORM "${_lvrs_dispatch_platform}")
+    set(LVRS_ACTIVE_PREFIX "${_lvrs_dispatch_prefix}")
+    include("${_lvrs_dispatch_config}")
+    return()
+endif()
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
+
+include("${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
+
+set(LVRS_ACTIVE_PREFIX "${PACKAGE_PREFIX_DIR}")
+if(NOT DEFINED LVRS_ACTIVE_PLATFORM OR LVRS_ACTIVE_PLATFORM STREQUAL "")
+    _lvrs_config_detect_platform(_lvrs_local_platform)
+    set(LVRS_ACTIVE_PLATFORM "${_lvrs_local_platform}")
+    unset(_lvrs_local_platform)
+endif()
+
+set(LVRS_QML_IMPORT_PATH "${PACKAGE_PREFIX_DIR}/lib/qt6/qml")
+set(LVRS_QML_MODULE_PATH "${PACKAGE_PREFIX_DIR}/lib/qt6/qml/LVRS")
+
+if(DEFINED LVRS_QT_HOST_PREFIX_HINT AND NOT LVRS_QT_HOST_PREFIX_HINT STREQUAL "")
+    set(LVRS_QT_HOST_PREFIX_HINT "${LVRS_QT_HOST_PREFIX_HINT}")
+elseif(DEFINED ENV{LVRS_QT_HOST_PREFIX_HINT} AND NOT "$ENV{LVRS_QT_HOST_PREFIX_HINT}" STREQUAL "")
+    set(LVRS_QT_HOST_PREFIX_HINT "$ENV{LVRS_QT_HOST_PREFIX_HINT}")
+else()
+    set(LVRS_QT_HOST_PREFIX_HINT "")
+endif()
+if(DEFINED LVRS_QT_IOS_PREFIX_HINT AND NOT LVRS_QT_IOS_PREFIX_HINT STREQUAL "")
+    set(LVRS_QT_IOS_PREFIX_HINT "${LVRS_QT_IOS_PREFIX_HINT}")
+elseif(DEFINED ENV{LVRS_QT_IOS_PREFIX_HINT} AND NOT "$ENV{LVRS_QT_IOS_PREFIX_HINT}" STREQUAL "")
+    set(LVRS_QT_IOS_PREFIX_HINT "$ENV{LVRS_QT_IOS_PREFIX_HINT}")
+else()
+    set(LVRS_QT_IOS_PREFIX_HINT "")
+endif()
+if(DEFINED LVRS_QT_ANDROID_PREFIX_HINT AND NOT LVRS_QT_ANDROID_PREFIX_HINT STREQUAL "")
+    set(LVRS_QT_ANDROID_PREFIX_HINT "${LVRS_QT_ANDROID_PREFIX_HINT}")
+elseif(DEFINED ENV{LVRS_QT_ANDROID_PREFIX_HINT} AND NOT "$ENV{LVRS_QT_ANDROID_PREFIX_HINT}" STREQUAL "")
+    set(LVRS_QT_ANDROID_PREFIX_HINT "$ENV{LVRS_QT_ANDROID_PREFIX_HINT}")
+else()
+    set(LVRS_QT_ANDROID_PREFIX_HINT "")
+endif()
+if(DEFINED LVRS_QT_WASM_PREFIX_HINT AND NOT LVRS_QT_WASM_PREFIX_HINT STREQUAL "")
+    set(LVRS_QT_WASM_PREFIX_HINT "${LVRS_QT_WASM_PREFIX_HINT}")
+elseif(DEFINED ENV{LVRS_QT_WASM_PREFIX_HINT} AND NOT "$ENV{LVRS_QT_WASM_PREFIX_HINT}" STREQUAL "")
+    set(LVRS_QT_WASM_PREFIX_HINT "$ENV{LVRS_QT_WASM_PREFIX_HINT}")
+else()
+    set(LVRS_QT_WASM_PREFIX_HINT "")
+endif()
+
+set(_lvrs_qt_version_root "")
+if(DEFINED Qt6_DIR AND NOT Qt6_DIR STREQUAL "")
+    _lvrs_config_resolve_qt_prefix_candidate("${Qt6_DIR}" _lvrs_qt_current_prefix)
+    if(NOT _lvrs_qt_current_prefix STREQUAL "")
+        set(LVRS_QT_HOST_PREFIX_HINT "${_lvrs_qt_current_prefix}")
+        get_filename_component(_lvrs_qt_version_root "${LVRS_QT_HOST_PREFIX_HINT}" DIRECTORY)
+    endif()
+    unset(_lvrs_qt_current_prefix)
+endif()
+
+if(NOT _lvrs_qt_version_root STREQUAL "")
+    if(LVRS_QT_IOS_PREFIX_HINT STREQUAL "")
+        _lvrs_config_resolve_qt_prefix_candidate("${_lvrs_qt_version_root}/ios" _lvrs_qt_ios_prefix)
+        if(NOT _lvrs_qt_ios_prefix STREQUAL "")
+            set(LVRS_QT_IOS_PREFIX_HINT "${_lvrs_qt_ios_prefix}")
+        endif()
+        unset(_lvrs_qt_ios_prefix)
+    endif()
+
+    if(LVRS_QT_ANDROID_PREFIX_HINT STREQUAL "")
+        _lvrs_config_resolve_qt_prefix_candidate("${_lvrs_qt_version_root}/android_arm64_v8a" _lvrs_qt_android_prefix)
+        if(_lvrs_qt_android_prefix STREQUAL "")
+            _lvrs_config_resolve_qt_prefix_candidate("${_lvrs_qt_version_root}/android" _lvrs_qt_android_prefix)
+        endif()
+        if(NOT _lvrs_qt_android_prefix STREQUAL "")
+            set(LVRS_QT_ANDROID_PREFIX_HINT "${_lvrs_qt_android_prefix}")
+        endif()
+        unset(_lvrs_qt_android_prefix)
+    endif()
+
+    if(LVRS_QT_WASM_PREFIX_HINT STREQUAL "")
+        set(_lvrs_qt_wasm_candidates
+            wasm_singlethread
+            wasm_multithread
+            wasm_32
+            wasm
+        )
+        foreach(_lvrs_wasm_candidate IN LISTS _lvrs_qt_wasm_candidates)
+            _lvrs_config_resolve_qt_prefix_candidate(
+                "${_lvrs_qt_version_root}/${_lvrs_wasm_candidate}"
+                _lvrs_qt_wasm_prefix
+            )
+            if(NOT _lvrs_qt_wasm_prefix STREQUAL "")
+                set(LVRS_QT_WASM_PREFIX_HINT "${_lvrs_qt_wasm_prefix}")
+                break()
+            endif()
+        endforeach()
+        unset(_lvrs_qt_wasm_prefix)
+        unset(_lvrs_wasm_candidate)
+        unset(_lvrs_qt_wasm_candidates)
+    endif()
+
+    if(LVRS_QT_WASM_PREFIX_HINT STREQUAL "")
+        file(GLOB _lvrs_qt_platform_dirs LIST_DIRECTORIES true "${_lvrs_qt_version_root}/*")
+        foreach(_lvrs_qt_platform_dir IN LISTS _lvrs_qt_platform_dirs)
+            if(NOT IS_DIRECTORY "${_lvrs_qt_platform_dir}")
+                continue()
+            endif()
+            get_filename_component(_lvrs_qt_platform_name "${_lvrs_qt_platform_dir}" NAME)
+            string(TOLOWER "${_lvrs_qt_platform_name}" _lvrs_qt_platform_name_lower)
+            if(NOT _lvrs_qt_platform_name_lower MATCHES "(wasm|emscripten)")
+                continue()
+            endif()
+            _lvrs_config_resolve_qt_prefix_candidate(
+                "${_lvrs_qt_platform_dir}"
+                _lvrs_qt_wasm_prefix
+            )
+            if(NOT _lvrs_qt_wasm_prefix STREQUAL "")
+                set(LVRS_QT_WASM_PREFIX_HINT "${_lvrs_qt_wasm_prefix}")
+                break()
+            endif()
+        endforeach()
+        unset(_lvrs_qt_wasm_prefix)
+        unset(_lvrs_qt_platform_dir)
+        unset(_lvrs_qt_platform_dirs)
+        unset(_lvrs_qt_platform_name)
+        unset(_lvrs_qt_platform_name_lower)
+    endif()
+endif()
+unset(_lvrs_qt_version_root)
+
+_lvrs_config_default_android_sdk_hint(_lvrs_android_sdk_hint)
+set(LVRS_ANDROID_SDK_HINT "${_lvrs_android_sdk_hint}")
+_lvrs_config_default_android_ndk_hint("${LVRS_ANDROID_SDK_HINT}" _lvrs_android_ndk_hint)
+set(LVRS_ANDROID_NDK_HINT "${_lvrs_android_ndk_hint}")
+_lvrs_config_default_emsdk_hint(_lvrs_emsdk_hint)
+set(LVRS_EMSDK_HINT "${_lvrs_emsdk_hint}")
+unset(_lvrs_android_sdk_hint)
+unset(_lvrs_android_ndk_hint)
+unset(_lvrs_emsdk_hint)
+
+# Qt's qml plugin auto-link path expects a plain target name ("LVRSCoreplugin")
+# from LVRS module metadata. Provide a compatibility imported target so downstream
+# projects do not need to define custom aliases.
+if(NOT TARGET LVRSCoreplugin)
+    if(TARGET LVRS::LVRSCoreplugin)
+        add_library(LVRSCoreplugin INTERFACE IMPORTED)
+        set_target_properties(LVRSCoreplugin PROPERTIES
+            INTERFACE_LINK_LIBRARIES "LVRS::LVRSCoreplugin"
+        )
+    else()
+        set(_lvrs_plugin_location "")
+        set(_lvrs_plugin_candidates
+            "${LVRS_QML_MODULE_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${LVRS_QML_MODULE_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            "${LVRS_QML_MODULE_PATH}/LVRSCoreplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+
+        foreach(_lvrs_plugin_candidate IN LISTS _lvrs_plugin_candidates)
+            if(EXISTS "${_lvrs_plugin_candidate}")
+                set(_lvrs_plugin_location "${_lvrs_plugin_candidate}")
+                break()
+            endif()
+        endforeach()
+
+        if(_lvrs_plugin_location STREQUAL "")
+            file(GLOB _lvrs_plugin_globbed
+                "${LVRS_QML_MODULE_PATH}/*LVRSCoreplugin*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                "${LVRS_QML_MODULE_PATH}/*LVRSCoreplugin*${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
+            list(SORT _lvrs_plugin_globbed)
+            if(_lvrs_plugin_globbed)
+                list(GET _lvrs_plugin_globbed 0 _lvrs_plugin_location)
+            endif()
+        endif()
+
+        if(NOT _lvrs_plugin_location STREQUAL "")
+            add_library(LVRSCoreplugin UNKNOWN IMPORTED)
+            set_target_properties(LVRSCoreplugin PROPERTIES
+                IMPORTED_LOCATION "${_lvrs_plugin_location}"
+                INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+            )
+        else()
+            add_library(LVRSCoreplugin INTERFACE IMPORTED)
+            set_target_properties(LVRSCoreplugin PROPERTIES
+                INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+            )
+        endif()
+
+        unset(_lvrs_plugin_candidate)
+        unset(_lvrs_plugin_candidates)
+        unset(_lvrs_plugin_globbed)
+        unset(_lvrs_plugin_location)
+    endif()
+endif()
+
+if(NOT TARGET LVRS::LVRSCoreplugin)
+    add_library(LVRS::LVRSCoreplugin INTERFACE IMPORTED)
+    if(TARGET LVRSCoreplugin)
+        set_target_properties(LVRS::LVRSCoreplugin PROPERTIES
+            INTERFACE_LINK_LIBRARIES "LVRSCoreplugin"
+        )
+    else()
+        set_target_properties(LVRS::LVRSCoreplugin PROPERTIES
+            INTERFACE_LINK_LIBRARIES "LVRS::LVRS"
+        )
+    endif()
+endif()
+
+if(NOT TARGET LVRSCoreplugin)
+    add_library(LVRSCoreplugin INTERFACE IMPORTED)
+    set_target_properties(LVRSCoreplugin PROPERTIES
+        INTERFACE_LINK_LIBRARIES "LVRS::LVRSCoreplugin"
+    )
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/LVRSHelpers.cmake")
+
+check_required_components(LVRS)

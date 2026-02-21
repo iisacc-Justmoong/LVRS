@@ -1,0 +1,1231 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "RuntimeEvents"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "RuntimeEvents",
+            "enums": [
+                {
+                    "isClass": false,
+                    "isFlag": false,
+                    "name": "CaptureProfile",
+                    "values": [
+                        "FullCapture",
+                        "BalancedCapture",
+                        "LowLatencyCapture"
+                    ]
+                }
+            ],
+            "lineNumber": 21,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "key",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 30,
+                    "name": "isKeyPressed",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "index": 31,
+                    "name": "inputState",
+                    "returnType": "QVariantMap"
+                },
+                {
+                    "access": "public",
+                    "index": 32,
+                    "name": "start",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 33,
+                    "name": "stop",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "window",
+                            "type": "QObject*"
+                        }
+                    ],
+                    "index": 34,
+                    "name": "attachWindow",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 35,
+                    "name": "markActivity",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 36,
+                    "name": "resetCounters",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 37,
+                    "name": "snapshot",
+                    "returnType": "QVariantMap"
+                },
+                {
+                    "access": "public",
+                    "index": 38,
+                    "name": "daemonHealth",
+                    "returnType": "QVariantMap"
+                },
+                {
+                    "access": "public",
+                    "index": 39,
+                    "name": "recentEvents",
+                    "returnType": "QVariantList"
+                },
+                {
+                    "access": "public",
+                    "index": 40,
+                    "name": "clearRecentEvents",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "globalX",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "globalY",
+                            "type": "qreal"
+                        }
+                    ],
+                    "index": 41,
+                    "name": "hitTestUiAt",
+                    "returnType": "QVariantMap"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "name": "running",
+                    "notify": "runningChanged",
+                    "read": "running",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "name": "keyPressCount",
+                    "notify": "keyboardChanged",
+                    "read": "keyPressCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "name": "keyReleaseCount",
+                    "notify": "keyboardChanged",
+                    "read": "keyReleaseCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "name": "lastKey",
+                    "notify": "keyboardChanged",
+                    "read": "lastKey",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "name": "lastKeyText",
+                    "notify": "keyboardChanged",
+                    "read": "lastKeyText",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "name": "lastKeyModifiers",
+                    "notify": "keyboardChanged",
+                    "read": "lastKeyModifiers",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 6,
+                    "name": "anyKeyPressed",
+                    "notify": "keyboardChanged",
+                    "read": "anyKeyPressed",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 7,
+                    "name": "pressedKeys",
+                    "notify": "keyboardChanged",
+                    "read": "pressedKeys",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QStringList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 8,
+                    "name": "pressedKeyCodes",
+                    "notify": "keyboardChanged",
+                    "read": "pressedKeyCodes",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 9,
+                    "name": "mouseMoveCount",
+                    "notify": "mouseChanged",
+                    "read": "mouseMoveCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 10,
+                    "name": "mousePressCount",
+                    "notify": "mouseChanged",
+                    "read": "mousePressCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 11,
+                    "name": "mouseReleaseCount",
+                    "notify": "mouseChanged",
+                    "read": "mouseReleaseCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 12,
+                    "name": "lastMouseX",
+                    "notify": "mouseChanged",
+                    "read": "lastMouseX",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 13,
+                    "name": "lastMouseY",
+                    "notify": "mouseChanged",
+                    "read": "lastMouseY",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 14,
+                    "name": "lastMouseButtons",
+                    "notify": "mouseChanged",
+                    "read": "lastMouseButtons",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 15,
+                    "name": "lastMouseModifiers",
+                    "notify": "mouseChanged",
+                    "read": "lastMouseModifiers",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 16,
+                    "name": "mouseButtonPressed",
+                    "notify": "mouseChanged",
+                    "read": "mouseButtonPressed",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 17,
+                    "name": "pointerUi",
+                    "notify": "mouseChanged",
+                    "read": "pointerUi",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantMap",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 18,
+                    "name": "lastMousePressEpochMs",
+                    "notify": "mouseChanged",
+                    "read": "lastMousePressEpochMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 19,
+                    "name": "lastMouseReleaseEpochMs",
+                    "notify": "mouseChanged",
+                    "read": "lastMouseReleaseEpochMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 20,
+                    "name": "mousePressElapsedMs",
+                    "notify": "daemonStateChanged",
+                    "read": "mousePressElapsedMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 21,
+                    "name": "mouseReleaseElapsedMs",
+                    "notify": "daemonStateChanged",
+                    "read": "mouseReleaseElapsedMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 22,
+                    "name": "activePressDurationMs",
+                    "notify": "daemonStateChanged",
+                    "read": "activePressDurationMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 23,
+                    "name": "pressedMouseButtonNames",
+                    "notify": "mouseChanged",
+                    "read": "pressedMouseButtonNames",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QStringList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 24,
+                    "name": "activeModifiers",
+                    "notify": "daemonStateChanged",
+                    "read": "activeModifiers",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 25,
+                    "name": "activeModifierNames",
+                    "notify": "daemonStateChanged",
+                    "read": "activeModifierNames",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QStringList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 26,
+                    "name": "inputStateMap",
+                    "notify": "daemonStateChanged",
+                    "read": "inputState",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantMap",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 27,
+                    "name": "uiCreatedCount",
+                    "notify": "uiChanged",
+                    "read": "uiCreatedCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 28,
+                    "name": "uiShownCount",
+                    "notify": "uiChanged",
+                    "read": "uiShownCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 29,
+                    "name": "uiHiddenCount",
+                    "notify": "uiChanged",
+                    "read": "uiHiddenCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 30,
+                    "name": "uiDestroyedCount",
+                    "notify": "uiChanged",
+                    "read": "uiDestroyedCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 31,
+                    "name": "lastUiEvent",
+                    "notify": "uiChanged",
+                    "read": "lastUiEvent",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 32,
+                    "name": "lastUiObjectName",
+                    "notify": "uiChanged",
+                    "read": "lastUiObjectName",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 33,
+                    "name": "lastUiClassName",
+                    "notify": "uiChanged",
+                    "read": "lastUiClassName",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 34,
+                    "name": "idle",
+                    "notify": "idleChanged",
+                    "read": "idle",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 35,
+                    "name": "idleTimeoutMs",
+                    "notify": "idleTimeoutMsChanged",
+                    "read": "idleTimeoutMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setIdleTimeoutMs"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 36,
+                    "name": "idleForMs",
+                    "notify": "idleForMsChanged",
+                    "read": "idleForMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 37,
+                    "name": "lastActivityEpochMs",
+                    "notify": "lastActivityChanged",
+                    "read": "lastActivityEpochMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 38,
+                    "name": "pid",
+                    "read": "pid",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 39,
+                    "name": "processName",
+                    "read": "processName",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 40,
+                    "name": "osName",
+                    "read": "osName",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 41,
+                    "name": "daemonBootEpochMs",
+                    "read": "daemonBootEpochMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 42,
+                    "name": "eventSequence",
+                    "notify": "daemonStateChanged",
+                    "read": "eventSequence",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 43,
+                    "name": "lastEvent",
+                    "notify": "daemonStateChanged",
+                    "read": "lastEvent",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantMap",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 44,
+                    "name": "recentEventCapacity",
+                    "notify": "recentEventCapacityChanged",
+                    "read": "recentEventCapacity",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setRecentEventCapacity"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 45,
+                    "name": "recentEventCount",
+                    "notify": "eventLogChanged",
+                    "read": "recentEventCount",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 46,
+                    "name": "applicationActive",
+                    "notify": "osChanged",
+                    "read": "applicationActive",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 47,
+                    "name": "osSampleIntervalMs",
+                    "notify": "osSampleIntervalMsChanged",
+                    "read": "osSampleIntervalMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setOsSampleIntervalMs"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 48,
+                    "name": "uptimeMs",
+                    "notify": "osStatsChanged",
+                    "read": "uptimeMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 49,
+                    "name": "rssBytes",
+                    "notify": "osStatsChanged",
+                    "read": "rssBytes",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint64",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 50,
+                    "name": "captureProfile",
+                    "notify": "captureProfileChanged",
+                    "read": "captureProfile",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setCaptureProfile"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 51,
+                    "name": "pointerHitTestingEnabled",
+                    "notify": "pointerHitTestingEnabledChanged",
+                    "read": "pointerHitTestingEnabled",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "write": "setPointerHitTestingEnabled"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 52,
+                    "name": "pointerHitTestMinIntervalMs",
+                    "notify": "pointerHitTestMinIntervalMsChanged",
+                    "read": "pointerHitTestMinIntervalMs",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setPointerHitTestMinIntervalMs"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 53,
+                    "name": "uiTrackingEnabled",
+                    "notify": "uiTrackingEnabledChanged",
+                    "read": "uiTrackingEnabled",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "write": "setUiTrackingEnabled"
+                }
+            ],
+            "qualifiedClassName": "RuntimeEvents",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "name": "daemonStateChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "name": "runningChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "name": "keyboardChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "key",
+                            "type": "int"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        },
+                        {
+                            "name": "autoRepeat",
+                            "type": "bool"
+                        },
+                        {
+                            "name": "text",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 3,
+                    "name": "keyPressed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "key",
+                            "type": "int"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        },
+                        {
+                            "name": "autoRepeat",
+                            "type": "bool"
+                        },
+                        {
+                            "name": "text",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 4,
+                    "name": "keyReleased",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "name": "mouseChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "x",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "y",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "buttons",
+                            "type": "int"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 6,
+                    "name": "mouseMoved",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "x",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "y",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "buttons",
+                            "type": "int"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 7,
+                    "name": "mousePressed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "x",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "y",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "buttons",
+                            "type": "int"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 8,
+                    "name": "mouseReleased",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "x",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "y",
+                            "type": "qreal"
+                        },
+                        {
+                            "name": "modifiers",
+                            "type": "int"
+                        },
+                        {
+                            "name": "reason",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 9,
+                    "name": "contextRequested",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 10,
+                    "name": "uiChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "eventType",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "objectName",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "className",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "visible",
+                            "type": "bool"
+                        }
+                    ],
+                    "index": 11,
+                    "name": "uiEvent",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 12,
+                    "name": "idleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 13,
+                    "name": "idleTimeoutMsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 14,
+                    "name": "idleForMsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 15,
+                    "name": "lastActivityChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 16,
+                    "name": "idleEntered",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 17,
+                    "name": "idleExited",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 18,
+                    "name": "osChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 19,
+                    "name": "osSampleIntervalMsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 20,
+                    "name": "osStatsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "state",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 21,
+                    "name": "osApplicationStateChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "eventData",
+                            "type": "QVariantMap"
+                        }
+                    ],
+                    "index": 22,
+                    "name": "eventRecorded",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 23,
+                    "name": "eventLogChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 24,
+                    "name": "recentEventCapacityChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "epochMs",
+                            "type": "qint64"
+                        },
+                        {
+                            "name": "uptimeMs",
+                            "type": "qint64"
+                        },
+                        {
+                            "name": "eventSequence",
+                            "type": "quint64"
+                        }
+                    ],
+                    "index": 25,
+                    "name": "daemonHeartbeat",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 26,
+                    "name": "captureProfileChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 27,
+                    "name": "pointerHitTestingEnabledChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 28,
+                    "name": "pointerHitTestMinIntervalMsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 29,
+                    "name": "uiTrackingEnabledChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "runtimeevents.h",
+    "outputRevision": 68
+}

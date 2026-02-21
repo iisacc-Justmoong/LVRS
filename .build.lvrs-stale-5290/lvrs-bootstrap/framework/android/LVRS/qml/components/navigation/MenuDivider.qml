@@ -1,0 +1,34 @@
+import QtQuick
+import LVRS 1.0
+
+Item {
+    id: control
+
+    // axis: "horizontal" | "vertical"
+    property string axis: "horizontal"
+    property color dividerColor: Theme.contextMenuDivider
+    property int thickness: 1
+    property int crossPadding: 1
+    property int lineLength: 220
+
+    readonly property bool verticalAxis: {
+        const normalized = axis === undefined || axis === null
+            ? ""
+            : String(axis).trim().toLowerCase()
+        return normalized === "vertical"
+    }
+
+    implicitWidth: verticalAxis ? (thickness + (crossPadding * 2)) : lineLength
+    implicitHeight: verticalAxis ? lineLength : (thickness + (crossPadding * 2))
+
+    Rectangle {
+        anchors.centerIn: parent
+        width: control.verticalAxis ? control.thickness : parent.width
+        height: control.verticalAxis ? parent.height : control.thickness
+        color: control.dividerColor
+    }
+}
+
+// API usage (external):
+// import LVRS 1.0 as LV
+// LV.MenuDivider { axis: "horizontal" }

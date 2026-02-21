@@ -1,0 +1,11 @@
+Target dependency graph (4 targets)
+Target 'ALL_BUILD' in project 'lto-test'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'lto-test'
+➜ Explicit dependency on target 'boo' in project 'lto-test'
+➜ Explicit dependency on target 'foo' in project 'lto-test'
+Target 'boo' in project 'lto-test'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'lto-test'
+➜ Explicit dependency on target 'foo' in project 'lto-test'
+Target 'foo' in project 'lto-test'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'lto-test'
+Target 'ZERO_CHECK' in project 'lto-test' (no dependencies)

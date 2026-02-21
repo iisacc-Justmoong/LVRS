@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

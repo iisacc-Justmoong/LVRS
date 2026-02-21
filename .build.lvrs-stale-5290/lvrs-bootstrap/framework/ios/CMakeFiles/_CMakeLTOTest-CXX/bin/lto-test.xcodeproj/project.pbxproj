@@ -1,0 +1,961 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		5DCA5DE822DA20E6C7B73927 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4069A590484A4CD78011E061 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				1A971BF5FA3D6DA0B85DD65C /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		70EB848AAAB266426F911134 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 68CF0D02FBBC4B5FA0BAEC40 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				70FC6096AD6630F525517E55 /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				5CEF5A4258B4438E889C2668 /* PBXTargetDependency */,
+				DAD4000D57804A63A6FC998D /* PBXTargetDependency */,
+				D07FFDCCE3694479AF915C8D /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		6A6E271E07174DF9819DD793 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = AEFB3ED16211488BB17312DC /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/Info.plist */; };
+		6AF96DCBCF9D49D4BBCAA396 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp */ = {isa = PBXBuildFile; fileRef = 15C2321D055C44B7A7524668 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp */; };
+		9DC8D1477AB044BA898EBDC3 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist */ = {isa = PBXBuildFile; fileRef = E58F7B5CF42841ACA8D4DF98 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist */; };
+		CD2CCFB30DA9430E80F63E31 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp */ = {isa = PBXBuildFile; fileRef = 7A6D5C013B7245D8A4B505B5 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp */; };
+		E2AE2B054A57476192D76A7E /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = C90B04FE2A014571A66D9A42 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */; };
+		E7FE7516EEBE4704B3182AD0 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 0FEE676CF9614C05AE6A2CF9 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		5508A85279164438946A2AA6 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		8292135E7F7845BDB8EF74E1 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		C0B0C266AB104517B7796821 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		C76606E7652948D5A9BD3097 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		2023BA5E9A9B4CD491AD06A6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 005A735EEF736C69F8E972B4;
+			remoteInfo = foo;
+		};
+		7348176A08A44814BDF80CE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7A9DD540B4DA2E4137D495C0;
+			remoteInfo = boo;
+		};
+		787A06BB93654099B05EC751 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5DCA5DE822DA20E6C7B73927;
+			remoteInfo = ZERO_CHECK;
+		};
+		86BD8EB3642047CD92C8E522 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 005A735EEF736C69F8E972B4;
+			remoteInfo = foo;
+		};
+		8DE4135FC4F14702A085013E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5DCA5DE822DA20E6C7B73927;
+			remoteInfo = ZERO_CHECK;
+		};
+		9B79CD8AC15F498BAA8E0890 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E117E078011B43A6A299EB94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5DCA5DE822DA20E6C7B73927;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0FEE676CF9614C05AE6A2CF9 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		15C2321D055C44B7A7524668 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = main.cpp; sourceTree = SOURCE_ROOT; };
+		2360E1DB17F245C599683AFA /* foo */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libfoo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		52226814323845C5BE9F5E38 /* boo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = boo; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A6D5C013B7245D8A4B505B5 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = foo.cpp; path = foo.cpp; sourceTree = SOURCE_ROOT; };
+		AEFB3ED16211488BB17312DC /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/Info.plist"; sourceTree = "<absolute>"; };
+		C90B04FE2A014571A66D9A42 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		CF7D689BD9834E9EA08CEA63 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		E58F7B5CF42841ACA8D4DF98 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; name = Info.plist; path = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist"; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8BED04E0662A4B448151397F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB543D758A2B4557AD02965F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		014CAAAA5632429FA3DA4D1B /* boo */ = {
+			isa = PBXGroup;
+			children = (
+				7FAAA769F4D84273AEAE759E /* Resources */,
+				12916F243C404459B27D4787 /* Source Files */,
+				C90B04FE2A014571A66D9A42 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */,
+			);
+			name = boo;
+			sourceTree = "<group>";
+		};
+		12916F243C404459B27D4787 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				15C2321D055C44B7A7524668 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		2A0DFB80397E47A9A55B4AED /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				52226814323845C5BE9F5E38 /* boo */,
+				2360E1DB17F245C599683AFA /* foo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2A6B43B608DA41DEAF60148C /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				7A6D5C013B7245D8A4B505B5 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		2C0EC6590C8D44B58B08F63F /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		68DAB81DF710486E904E074B /* foo */ = {
+			isa = PBXGroup;
+			children = (
+				E3310DF88D6D4C7BB051D7A6 /* Resources */,
+				2A6B43B608DA41DEAF60148C /* Source Files */,
+				0FEE676CF9614C05AE6A2CF9 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */,
+			);
+			name = foo;
+			sourceTree = "<group>";
+		};
+		7FAAA769F4D84273AEAE759E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E58F7B5CF42841ACA8D4DF98 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		9D4CA58A14AD44D7978F3343 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A04D19DADE9D4844AF6DF21B = {
+			isa = PBXGroup;
+			children = (
+				F9B6321EE3F945BA967CB679 /* ALL_BUILD */,
+				014CAAAA5632429FA3DA4D1B /* boo */,
+				68DAB81DF710486E904E074B /* foo */,
+				2A0DFB80397E47A9A55B4AED /* Products */,
+				9D4CA58A14AD44D7978F3343 /* Frameworks */,
+				AA043BB2632E464BB82C4C54 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		AA043BB2632E464BB82C4C54 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		E3310DF88D6D4C7BB051D7A6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AEFB3ED16211488BB17312DC /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		F9B6321EE3F945BA967CB679 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				2C0EC6590C8D44B58B08F63F /* CMake Rules */,
+				CF7D689BD9834E9EA08CEA63 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		005A735EEF736C69F8E972B4 /* foo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B716A3DAFBAD46ABB37972E6 /* Build configuration list for PBXNativeTarget "foo" */;
+			buildPhases = (
+				75A53ECC7F914C7FAAC218F4 /* Sources */,
+				FB543D758A2B4557AD02965F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AEF02F6CA9664397818C233B /* PBXTargetDependency */,
+			);
+			name = foo;
+			productName = foo;
+			productReference = 2360E1DB17F245C599683AFA /* foo */;
+			productType = "com.apple.product-type.library.static";
+		};
+		7A9DD540B4DA2E4137D495C0 /* boo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 536FAA6562594ABDAD88439A /* Build configuration list for PBXNativeTarget "boo" */;
+			buildPhases = (
+				AEC9D78920A74355BAB12494 /* Sources */,
+				8BED04E0662A4B448151397F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8103DF8459B94436884DD8FF /* PBXTargetDependency */,
+				0AAA99AA628B4A63BB4EFC72 /* PBXTargetDependency */,
+			);
+			name = boo;
+			productName = boo;
+			productReference = 52226814323845C5BE9F5E38 /* boo */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E117E078011B43A6A299EB94 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2620;
+			};
+			buildConfigurationList = DE95FB90E2AD406E9D780074 /* Build configuration list for PBXProject "lto-test" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				8292135E7F7845BDB8EF74E1 /* Debug */,
+				C0B0C266AB104517B7796821 /* Release */,
+				5508A85279164438946A2AA6 /* MinSizeRel */,
+				C76606E7652948D5A9BD3097 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = A04D19DADE9D4844AF6DF21B;
+			projectDirPath = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src";
+			projectRoot = "";
+			targets = (
+				70EB848AAAB266426F911134 /* ALL_BUILD */,
+				7A9DD540B4DA2E4137D495C0 /* boo */,
+				005A735EEF736C69F8E972B4 /* foo */,
+				5DCA5DE822DA20E6C7B73927 /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1A971BF5FA3D6DA0B85DD65C /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  make -f /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  make -f /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  make -f /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  make -f /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		70FC6096AD6630F525517E55 /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		75A53ECC7F914C7FAAC218F4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD2CCFB30DA9430E80F63E31 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AEC9D78920A74355BAB12494 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6AF96DCBCF9D49D4BBCAA396 /* /Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0AAA99AA628B4A63BB4EFC72 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 005A735EEF736C69F8E972B4 /* foo */;
+			targetProxy = 86BD8EB3642047CD92C8E522 /* PBXContainerItemProxy */;
+		};
+		5CEF5A4258B4438E889C2668 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5DCA5DE822DA20E6C7B73927 /* ZERO_CHECK */;
+			targetProxy = 787A06BB93654099B05EC751 /* PBXContainerItemProxy */;
+		};
+		8103DF8459B94436884DD8FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5DCA5DE822DA20E6C7B73927 /* ZERO_CHECK */;
+			targetProxy = 9B79CD8AC15F498BAA8E0890 /* PBXContainerItemProxy */;
+		};
+		AEF02F6CA9664397818C233B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5DCA5DE822DA20E6C7B73927 /* ZERO_CHECK */;
+			targetProxy = 8DE4135FC4F14702A085013E /* PBXContainerItemProxy */;
+		};
+		D07FFDCCE3694479AF915C8D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 005A735EEF736C69F8E972B4 /* foo */;
+			targetProxy = 2023BA5E9A9B4CD491AD06A6 /* PBXContainerItemProxy */;
+		};
+		DAD4000D57804A63A6FC998D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7A9DD540B4DA2E4137D495C0 /* boo */;
+			targetProxy = 7348176A08A44814BDF80CE3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		06AED4BA65234C4D99DE3319 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build";
+			};
+			name = Release;
+		};
+		1E183E6E1C6E48FDB84C32B7 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		260FE6E53A0D4FD9B99FFE72 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		36C938B0DC0E46959150B730 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist";
+				INSTALL_PATH = "";
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "   '-flto=thin' ";
+				OTHER_LDFLAGS = (" '-Wl,-headerpad_max_install_names'","/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Debug${EFFECTIVE_PLATFORM_NAME}/libfoo.a","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = boo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/boo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		37F90EB98D8B498F9A75CCD2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		3AF7FF83E5D04510B72A43FD /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		3B0BB6658E4341BE8DC5C53E /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		42D76A2964B24348B8D9E289 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		525547D7A9F647F38873A054 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build";
+			};
+			name = RelWithDebInfo;
+		};
+		53CF26453FC646928B0358FC /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		78D17F986AF248DEA98F417D /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-flto=thin' ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = foo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/foo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		856AE0D5FC7D4D518A4BD342 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-flto=thin' ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = foo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/foo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		885A4632640B467ABB4B0644 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SYMROOT = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build";
+			};
+			name = Debug;
+		};
+		8B084DF3920E4A26ADE97351 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Debug${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "   '-flto=thin' ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = foo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/foo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		C83F983D57824A58B9FAFCA4 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build";
+			};
+			name = MinSizeRel;
+		};
+		D39D06B88E234881BB563235 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		EAB068621AC34B15BDB755FD /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/MinSizeRel${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist";
+				INSTALL_PATH = "";
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-flto=thin' ";
+				OTHER_LDFLAGS = (" '-Wl,-headerpad_max_install_names'","/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/MinSizeRel${EFFECTIVE_PLATFORM_NAME}/libfoo.a","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = boo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/boo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		FDE180F8580B4144AD7CB7F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-flto=thin' ";
+				OTHER_LIBTOOLFLAGS = ("");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = foo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/foo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		FEBF0A41B40B4E6E8B02B247 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Release${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist";
+				INSTALL_PATH = "";
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-flto=thin' ";
+				OTHER_LDFLAGS = (" '-Wl,-headerpad_max_install_names'","/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/Release${EFFECTIVE_PLATFORM_NAME}/libfoo.a","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = boo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/boo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		FF5A1F845C8B4EB6A3ADEBEF /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/Info.plist";
+				INSTALL_PATH = "";
+				LLVM_LTO = YES_THIN;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-flto=thin' ";
+				OTHER_LDFLAGS = (" '-Wl,-headerpad_max_install_names'","/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/RelWithDebInfo${EFFECTIVE_PLATFORM_NAME}/libfoo.a","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = boo;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/build/boo.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4069A590484A4CD78011E061 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37F90EB98D8B498F9A75CCD2 /* Debug */,
+				42D76A2964B24348B8D9E289 /* Release */,
+				53CF26453FC646928B0358FC /* MinSizeRel */,
+				3B0BB6658E4341BE8DC5C53E /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		536FAA6562594ABDAD88439A /* Build configuration list for PBXNativeTarget "boo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				36C938B0DC0E46959150B730 /* Debug */,
+				FEBF0A41B40B4E6E8B02B247 /* Release */,
+				EAB068621AC34B15BDB755FD /* MinSizeRel */,
+				FF5A1F845C8B4EB6A3ADEBEF /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		68CF0D02FBBC4B5FA0BAEC40 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				260FE6E53A0D4FD9B99FFE72 /* Debug */,
+				D39D06B88E234881BB563235 /* Release */,
+				3AF7FF83E5D04510B72A43FD /* MinSizeRel */,
+				1E183E6E1C6E48FDB84C32B7 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B716A3DAFBAD46ABB37972E6 /* Build configuration list for PBXNativeTarget "foo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B084DF3920E4A26ADE97351 /* Debug */,
+				FDE180F8580B4144AD7CB7F6 /* Release */,
+				78D17F986AF248DEA98F417D /* MinSizeRel */,
+				856AE0D5FC7D4D518A4BD342 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DE95FB90E2AD406E9D780074 /* Build configuration list for PBXProject "lto-test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				885A4632640B467ABB4B0644 /* Debug */,
+				06AED4BA65234C4D99DE3319 /* Release */,
+				C83F983D57824A58B9FAFCA4 /* MinSizeRel */,
+				525547D7A9F647F38873A054 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E117E078011B43A6A299EB94 /* Project object */;
+}

@@ -1,0 +1,232 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "SvgManager"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "SvgManager",
+            "lineNumber": 16,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "svgUrl",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "logicalSize",
+                            "type": "int"
+                        },
+                        {
+                            "name": "scale",
+                            "type": "qreal"
+                        }
+                    ],
+                    "index": 6,
+                    "name": "icon",
+                    "returnType": "QString"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "svgUrl",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "logicalSize",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 7,
+                    "isCloned": true,
+                    "name": "icon",
+                    "returnType": "QString"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "svgUrl",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 8,
+                    "isCloned": true,
+                    "name": "icon",
+                    "returnType": "QString"
+                },
+                {
+                    "access": "public",
+                    "index": 9,
+                    "name": "deviceScale",
+                    "returnType": "qreal"
+                },
+                {
+                    "access": "public",
+                    "index": 10,
+                    "name": "clearCache",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "value",
+                            "type": "qreal"
+                        }
+                    ],
+                    "index": 11,
+                    "name": "ensureMinimumScale",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "name": "lastError",
+                    "notify": "lastErrorChanged",
+                    "read": "lastError",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "name": "vectorFirst",
+                    "notify": "vectorFirstChanged",
+                    "read": "vectorFirst",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "write": "setVectorFirst"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "name": "minimumScale",
+                    "notify": "minimumScaleChanged",
+                    "read": "minimumScale",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false,
+                    "write": "setMinimumScale"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "name": "maximumScale",
+                    "notify": "maximumScaleChanged",
+                    "read": "maximumScale",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false,
+                    "write": "setMaximumScale"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "name": "cacheSize",
+                    "notify": "cacheSizeChanged",
+                    "read": "cacheSize",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setCacheSize"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "name": "revision",
+                    "notify": "revisionChanged",
+                    "read": "revision",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "quint64",
+                    "user": false
+                }
+            ],
+            "qualifiedClassName": "SvgManager",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "name": "lastErrorChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "name": "vectorFirstChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "name": "minimumScaleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "name": "maximumScaleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "name": "cacheSizeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "name": "revisionChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "svgmanager.h",
+    "outputRevision": 68
+}
