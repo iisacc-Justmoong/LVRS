@@ -15,7 +15,7 @@ Options:
   --prefix <path>      Install prefix (default: ~/.local/LVRS)
   --build-dir <path>   Deprecated. Build directory is fixed to <repo>/build
   --build-type <type>  CMake build type (default: Release)
-  --platforms <list>   Bootstrap platforms (comma/semicolon list; default: host only)
+  --platforms <list>   Bootstrap platforms (comma/semicolon list; default: all runtime platforms)
   --clean              Deprecated no-op (clean reinstall is always enabled)
   --without-examples   Disable host configure-time example targets
   --without-tests      Disable host configure-time test targets
@@ -43,20 +43,271 @@ detect_host_platform() {
 }
 
 detect_bootstrap_framework_platforms() {
-    host_platform="$1"
-    case "${host_platform}" in
-        macos|linux|windows|ios|android|wasm)
-            echo "${host_platform}"
-            ;;
-        *)
-            # Unknown host: keep legacy superset so caller can override explicitly.
-            echo "macos;linux;windows;ios;android;wasm"
-            ;;
-    esac
+    # Default is all known runtime platforms. Actual buildability is resolved
+    # by framework bootstrap targets (toolchain/Qt kit availability).
+    echo "macos;linux;windows;ios;android;wasm"
 }
 
 normalize_platform_list() {
     echo "$1" | tr ',' ';'
+}
+
+append_unique_platform() {
+    platform_list="$1"
+    platform_name="$2"
+
+    case ";${platform_list};" in
+        *";${platform_name};"*)
+            echo "${platform_list}"
+            ;;
+        *)
+            if [ -z "${platform_list}" ]; then
+                echo "${platform_name}"
+            else
+                echo "${platform_list};${platform_name}"
+            fi
+            ;;
+    esac
+}
+
+lvrs_is_qt_prefix_dir() {
+    qt_prefix="$1"
+    [ -d "${qt_prefix}" ] || return 1
+
+    if [ -f "${qt_prefix}/lib/cmake/Qt6/Qt6Config.cmake" ] \
+        || [ -f "${qt_prefix}/Qt6Config.cmake" ] \
+        || [ -e "${qt_prefix}/bin/qtpaths" ]; then
+        return 0
+    fi
+
+    return 1
+}
+
+resolve_qt_prefix_candidate() {
+    qt_candidate="$1"
+    if [ -z "${qt_candidate}" ]; then
+        return 1
+    fi
+
+    if lvrs_is_qt_prefix_dir "${qt_candidate}"; then
+        echo "${qt_candidate}"
+        return 0
+    fi
+
+    if [ -d "${qt_candidate}" ] && [ -f "${qt_candidate}/Qt6Config.cmake" ]; then
+        (cd "${qt_candidate}/../../.." 2>/dev/null && pwd)
+        return $?
+    fi
+
+    case "${qt_candidate}" in
+        *Qt6Config.cmake)
+            if [ -f "${qt_candidate}" ]; then
+                qt_candidate_dir=$(dirname "${qt_candidate}")
+                (cd "${qt_candidate_dir}/../../.." 2>/dev/null && pwd)
+                return $?
+            fi
+            ;;
+    esac
+
+    return 1
+}
+
+iterate_prefix_path_entries() {
+    prefix_list="$1"
+    case "${prefix_list}" in
+        *";"*)
+            printf '%s' "${prefix_list}" | tr ';' '\n'
+            ;;
+        *":"*)
+            printf '%s' "${prefix_list}" | tr ':' '\n'
+            ;;
+        *)
+            printf '%s\n' "${prefix_list}"
+            ;;
+    esac
+}
+
+detect_qt_prefix_for_platform() {
+    platform="$1"
+    qt_hint=""
+
+    case "${platform}" in
+        macos) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_MACOS:-}" ;;
+        linux) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_LINUX:-}" ;;
+        windows) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_WINDOWS:-}" ;;
+        ios) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_IOS:-}" ;;
+        android) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_ANDROID:-}" ;;
+        wasm) qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX_WASM:-}" ;;
+    esac
+
+    if [ -z "${qt_hint}" ]; then
+        qt_hint="${LVRS_BOOTSTRAP_QT_PREFIX:-}"
+    fi
+    if [ -z "${qt_hint}" ]; then
+        case "${platform}" in
+            ios) qt_hint="${LVRS_QT_IOS_PREFIX_HINT:-}" ;;
+            android) qt_hint="${LVRS_QT_ANDROID_PREFIX_HINT:-}" ;;
+            wasm) qt_hint="${LVRS_QT_WASM_PREFIX_HINT:-}" ;;
+        esac
+    fi
+
+    if [ -n "${qt_hint}" ]; then
+        resolved_qt_hint="$(resolve_qt_prefix_candidate "${qt_hint}" || true)"
+        if [ -n "${resolved_qt_hint}" ]; then
+            echo "${resolved_qt_hint}"
+            return 0
+        fi
+    fi
+
+    if [ -n "${CMAKE_PREFIX_PATH:-}" ]; then
+        old_ifs="${IFS}"
+        IFS='
+'
+        for prefix_candidate in $(iterate_prefix_path_entries "${CMAKE_PREFIX_PATH}"); do
+            resolved_prefix="$(resolve_qt_prefix_candidate "${prefix_candidate}" || true)"
+            if [ -n "${resolved_prefix}" ]; then
+                echo "${resolved_prefix}"
+                IFS="${old_ifs}"
+                return 0
+            fi
+        done
+        IFS="${old_ifs}"
+    fi
+
+    return 1
+}
+
+lvrs_qt_kit_exists() {
+    qt_version_root="$1"
+    shift
+
+    for qt_dir_name in "$@"; do
+        if lvrs_is_qt_prefix_dir "${qt_version_root}/${qt_dir_name}"; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+lvrs_detect_android_sdk_root() {
+    if [ -n "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT:-}" ] && [ -d "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}" ]; then
+        echo "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}"
+        return 0
+    fi
+    if [ -n "${ANDROID_SDK_ROOT:-}" ] && [ -d "${ANDROID_SDK_ROOT}" ]; then
+        echo "${ANDROID_SDK_ROOT}"
+        return 0
+    fi
+    if [ -n "${ANDROID_HOME:-}" ] && [ -d "${ANDROID_HOME}" ]; then
+        echo "${ANDROID_HOME}"
+        return 0
+    fi
+
+    if [ -d "${HOME}/Library/Android/sdk" ]; then
+        echo "${HOME}/Library/Android/sdk"
+        return 0
+    fi
+    if [ -d "${HOME}/Android/Sdk" ]; then
+        echo "${HOME}/Android/Sdk"
+        return 0
+    fi
+
+    return 1
+}
+
+lvrs_detect_android_ndk_root() {
+    sdk_root="$1"
+
+    if [ -n "${LVRS_BOOTSTRAP_ANDROID_NDK:-}" ] && [ -d "${LVRS_BOOTSTRAP_ANDROID_NDK}" ]; then
+        echo "${LVRS_BOOTSTRAP_ANDROID_NDK}"
+        return 0
+    fi
+    if [ -n "${CMAKE_ANDROID_NDK:-}" ] && [ -d "${CMAKE_ANDROID_NDK}" ]; then
+        echo "${CMAKE_ANDROID_NDK}"
+        return 0
+    fi
+    if [ -n "${ANDROID_NDK_ROOT:-}" ] && [ -d "${ANDROID_NDK_ROOT}" ]; then
+        echo "${ANDROID_NDK_ROOT}"
+        return 0
+    fi
+    if [ -n "${ANDROID_NDK_HOME:-}" ] && [ -d "${ANDROID_NDK_HOME}" ]; then
+        echo "${ANDROID_NDK_HOME}"
+        return 0
+    fi
+
+    if [ -n "${sdk_root}" ] && [ -d "${sdk_root}/ndk" ]; then
+        newest_ndk="$(find "${sdk_root}/ndk" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | head -n 1)"
+        if [ -n "${newest_ndk}" ] && [ -d "${newest_ndk}" ]; then
+            echo "${newest_ndk}"
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+lvrs_android_ready() {
+    sdk_root="$(lvrs_detect_android_sdk_root || true)"
+    [ -n "${sdk_root}" ] || return 1
+
+    ndk_root="$(lvrs_detect_android_ndk_root "${sdk_root}" || true)"
+    [ -n "${ndk_root}" ] || return 1
+
+    return 0
+}
+
+lvrs_detect_emsdk_root() {
+    if [ -n "${LVRS_BOOTSTRAP_EMSDK_ROOT:-}" ] && [ -d "${LVRS_BOOTSTRAP_EMSDK_ROOT}" ]; then
+        echo "${LVRS_BOOTSTRAP_EMSDK_ROOT}"
+        return 0
+    fi
+    if [ -n "${EMSDK:-}" ] && [ -d "${EMSDK}" ]; then
+        echo "${EMSDK}"
+        return 0
+    fi
+    if [ -d "${HOME}/emsdk" ]; then
+        echo "${HOME}/emsdk"
+        return 0
+    fi
+    if [ -d "${HOME}/.emsdk" ]; then
+        echo "${HOME}/.emsdk"
+        return 0
+    fi
+    if [ -d "/opt/emsdk" ]; then
+        echo "/opt/emsdk"
+        return 0
+    fi
+
+    return 1
+}
+
+lvrs_emscripten_toolchain_exists() {
+    if [ -n "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE:-}" ] \
+        && [ -f "${LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE}" ]; then
+        return 0
+    fi
+
+    emsdk_root="$(lvrs_detect_emsdk_root || true)"
+    if [ -z "${emsdk_root}" ]; then
+        return 1
+    fi
+
+    for candidate in \
+        "${emsdk_root}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" \
+        "${emsdk_root}/fastcomp/emscripten/cmake/Modules/Platform/Emscripten.cmake" \
+        "${emsdk_root}/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+    do
+        if [ -f "${candidate}" ]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+lvrs_wasm_ready() {
+    lvrs_emscripten_toolchain_exists
 }
 
 lvrs_clean_recreate_dir() {
@@ -92,6 +343,40 @@ lvrs_clean_recreate_dir() {
     if ! cmake -E rm -rf "${stale_dir}"; then
         echo "[LVRS] Warning: stale ${target_name} directory remains: ${stale_dir}" >&2
         echo "[LVRS] New ${target_name} directory is clean; continuing reinstall." >&2
+    fi
+
+    return 0
+}
+
+lvrs_remove_path() {
+    target_path="$1"
+    target_name="$2"
+
+    if [ ! -e "${target_path}" ]; then
+        return 0
+    fi
+
+    if cmake -E rm -rf "${target_path}"; then
+        return 0
+    fi
+
+    parent_dir=$(dirname "${target_path}")
+    base_name=$(basename "${target_path}")
+    stale_path="${parent_dir}/.${base_name}.lvrs-stale-$$"
+
+    if [ -e "${stale_path}" ]; then
+        cmake -E rm -rf "${stale_path}" || true
+    fi
+
+    if ! mv "${target_path}" "${stale_path}"; then
+        echo "[LVRS] Failed to relocate ${target_name}: ${target_path}" >&2
+        echo "[LVRS] Check running processes that keep the path busy, then retry." >&2
+        return 1
+    fi
+
+    if ! cmake -E rm -rf "${stale_path}"; then
+        echo "[LVRS] Warning: stale ${target_name} remains: ${stale_path}" >&2
+        echo "[LVRS] Fresh install can continue; remove stale path manually if needed." >&2
     fi
 
     return 0
@@ -226,13 +511,18 @@ if ! lvrs_clean_recreate_dir "${BUILD_DIR}" "build"; then
 fi
 
 echo "[LVRS] Cleaning previous LVRS install artifacts..."
-cmake -E rm -rf \
+for _lvrs_path in \
     "${INSTALL_PREFIX}/platforms" \
     "${INSTALL_PREFIX}/include/LVRS" \
     "${INSTALL_PREFIX}/lib/cmake/LVRS" \
     "${INSTALL_PREFIX}/lib/qt6/qml/LVRS" \
     "${INSTALL_PREFIX}/lib/AGL.framework" \
     "${SOURCE_INSTALL_DIR}"
+do
+    if ! lvrs_remove_path "${_lvrs_path}" "${_lvrs_path}"; then
+        exit 1
+    fi
+done
 for _lvrs_binary in \
     "${INSTALL_PREFIX}/lib/libLVRS.dylib" \
     "${INSTALL_PREFIX}/lib/libLVRS.so" \
@@ -240,8 +530,8 @@ for _lvrs_binary in \
     "${INSTALL_PREFIX}/lib/LVRS.lib" \
     "${INSTALL_PREFIX}/bin/LVRS.dll"
 do
-    if [ -e "${_lvrs_binary}" ]; then
-        cmake -E rm -f "${_lvrs_binary}"
+    if ! lvrs_remove_path "${_lvrs_binary}" "${_lvrs_binary}"; then
+        exit 1
     fi
 done
 
@@ -289,21 +579,22 @@ if [ "${SOURCE_SNAPSHOT}" -eq 1 ]; then
     cmake -E rm -rf "${SOURCE_INSTALL_DIR}"
     cmake -E make_directory "${SOURCE_INSTALL_DIR}"
 
-    for entry in "${PROJECT_ROOT}"/*; do
-        if [ -f "${entry}" ]; then
-            cmake -E copy "${entry}" "${SOURCE_INSTALL_DIR}/"
-        fi
-    done
-
-    for entry in "${PROJECT_ROOT}"/*; do
-        [ -d "${entry}" ] || continue
+    # Include both regular and dot-prefixed top-level source entries.
+    # Exclude generated/local workspace directories explicitly.
+    for entry in "${PROJECT_ROOT}"/* "${PROJECT_ROOT}"/.[!.]* "${PROJECT_ROOT}"/..?*; do
+        [ -e "${entry}" ] || continue
         name=$(basename "${entry}")
         case "${name}" in
             .git|build|build-*|cmake-build-*|.idea|.vscode)
                 continue
                 ;;
         esac
-        cmake -E copy_directory "${entry}" "${SOURCE_INSTALL_DIR}/${name}"
+
+        if [ -d "${entry}" ]; then
+            cmake -E copy_directory "${entry}" "${SOURCE_INSTALL_DIR}/${name}"
+        else
+            cmake -E copy "${entry}" "${SOURCE_INSTALL_DIR}/"
+        fi
     done
 
     if command -v git >/dev/null 2>&1 && git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then

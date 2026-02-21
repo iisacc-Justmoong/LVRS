@@ -252,12 +252,10 @@ function(_lvrs_internal_framework_bootstrap_platforms out_var)
     endif()
 
     if(_lvrs_platforms_raw STREQUAL "")
-        _lvrs_internal_detect_host_runtime_platform(_lvrs_host_platform)
-        if(_lvrs_host_platform STREQUAL "unknown")
-            _lvrs_internal_known_runtime_platforms(_lvrs_platforms)
-        else()
-            set(_lvrs_platforms "${_lvrs_host_platform}")
-        endif()
+        # Framework bootstrap defaults to all supported runtime platforms.
+        # Individual targets can still be skipped later when a matching Qt kit
+        # is not available on the current machine.
+        _lvrs_internal_known_runtime_platforms(_lvrs_platforms)
     else()
         string(REPLACE "," ";" _lvrs_platforms "${_lvrs_platforms_raw}")
     endif()
@@ -359,7 +357,9 @@ function(_lvrs_internal_platform_qt_dir_candidates platform out_var)
     elseif(platform STREQUAL "android")
         set(_lvrs_candidates android_arm64_v8a android)
     elseif(platform STREQUAL "wasm")
-        set(_lvrs_candidates wasm_singlethread wasm_multithread wasm_32 wasm)
+        # Prefer multithread kits first because singlethread kits can omit APIs
+        # such as QThreadPool that LVRS currently uses.
+        set(_lvrs_candidates wasm_multithread wasm_singlethread wasm_32 wasm)
     else()
         set(_lvrs_candidates)
     endif()
@@ -933,6 +933,16 @@ function(lvrs_create_framework_bootstrap_targets)
         endif()
         _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
         _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
+        if(_lvrs_qt_prefix STREQUAL "")
+            string(TOUPPER "${_lvrs_platform}" _lvrs_platform_upper)
+            message(STATUS
+                "LVRS framework bootstrap targets: skipping '${_lvrs_platform}' "
+                "(Qt kit not found). Set LVRS_BOOTSTRAP_QT_PREFIX_${_lvrs_platform_upper} "
+                "or install the matching Qt platform kit."
+            )
+            unset(_lvrs_platform_upper)
+            continue()
+        endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
 
