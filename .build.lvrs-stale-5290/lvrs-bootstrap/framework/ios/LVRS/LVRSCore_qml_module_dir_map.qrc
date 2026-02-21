@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/">
-    <file alias="/qt/qml/LVRS">/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/LVRS</file>
-
-  </qresource>
-</RCC>

@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/LVRS">
-    <file alias="qmldir">/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/android/LVRS/qmldir</file>
-  </qresource>
-</RCC>
-

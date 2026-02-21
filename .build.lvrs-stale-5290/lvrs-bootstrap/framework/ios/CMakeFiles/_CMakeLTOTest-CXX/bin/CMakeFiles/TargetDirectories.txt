@@ -1,4 +1,0 @@
-/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
-/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
-/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/ALL_BUILD.dir
-/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/ios/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/ZERO_CHECK.dir

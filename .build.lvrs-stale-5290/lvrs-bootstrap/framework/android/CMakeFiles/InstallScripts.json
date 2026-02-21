@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Volumes/Storage/static/InfraSystem/LVRS/build/lvrs-bootstrap/framework/android/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
