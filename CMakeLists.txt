@@ -32,7 +32,6 @@ option(LVRS_AUTO_FALLBACK_X86_QT_TOOLS
     "On Apple hosts, fallback Qt host tools to x86_64 when native arm64 tool execution fails"
     ON
 )
-option(LVRS_ENABLE_APPLE_GL_LINK_SHIM "Provide a minimal AGL shim only for Apple linker compatibility" ON)
 option(LVRS_ENFORCE_VULKAN
     "Fail configure if required fixed graphics backend Qt features are unavailable"
     ON
@@ -82,7 +81,6 @@ endif()
 set(LVRS_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/LVRS")
 set(LVRS_QML_MODULE_INSTALL_BASE "${CMAKE_INSTALL_LIBDIR}/qt6/qml")
 set(LVRS_QML_MODULE_INSTALL_DIR "${LVRS_QML_MODULE_INSTALL_BASE}/LVRS")
-set(LVRS_APPLE_FRAMEWORK_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
 set(LVRS_QML_IMPORT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 set(LVRS_QML_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/LVRS")
 set(LVRS_RUNTIME_PLATFORMS
@@ -98,8 +96,6 @@ set(LVRS_BOOTSTRAP_INSTALL_ROOT
     CACHE PATH
     "Root directory where bootstrap_lvrs_* installs per-platform LVRS packages"
 )
-set(LVRS_APPLE_AGL_SHIM_ACTIVE OFF)
-set(LVRS_APPLE_AGL_FRAMEWORK_ROOT "")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake)
 
@@ -108,6 +104,32 @@ if(LVRS_BUILD_TESTS)
     find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
 endif()
 find_package(Vulkan QUIET)
+
+if(APPLE)
+    function(_lvrs_strip_agl_from_target target_name)
+        if(NOT TARGET "${target_name}")
+            return()
+        endif()
+
+        foreach(_lvrs_prop IN ITEMS INTERFACE_LINK_LIBRARIES INTERFACE_LINK_OPTIONS)
+            get_target_property(_lvrs_values "${target_name}" "${_lvrs_prop}")
+            if(NOT _lvrs_values)
+                continue()
+            endif()
+
+            set(_lvrs_original_values "${_lvrs_values}")
+            list(FILTER _lvrs_values EXCLUDE REGEX "(^|[ /])AGL($|[ /.])|AGL\\.framework")
+            if(NOT _lvrs_values STREQUAL _lvrs_original_values)
+                set_target_properties("${target_name}" PROPERTIES "${_lvrs_prop}" "${_lvrs_values}")
+            endif()
+        endforeach()
+    endfunction()
+
+    _lvrs_strip_agl_from_target(WrapOpenGL::WrapOpenGL)
+    _lvrs_strip_agl_from_target(Qt6::Gui)
+    _lvrs_strip_agl_from_target(Qt6::OpenGL)
+    _lvrs_strip_agl_from_target(Qt6::Quick)
+endif()
 
 if(COMMAND qt_policy)
     qt_policy(SET QTP0004 NEW)
@@ -160,83 +182,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
     set(LVRS_FORCED_BACKEND "metal")
 elseif(WIN32 OR ANDROID)
     set(LVRS_FORCED_BACKEND "vulkan")
-endif()
-
-if(APPLE AND NOT IOS AND LVRS_ENABLE_APPLE_GL_LINK_SHIM)
-    if(NOT EXISTS "/System/Library/Frameworks/AGL.framework/AGL")
-        set(_uifw_framework_root "${CMAKE_CURRENT_BINARY_DIR}/frameworks")
-        set(_uifw_agl_framework "${_uifw_framework_root}/AGL.framework")
-        set(_uifw_agl_versions "${_uifw_agl_framework}/Versions")
-        set(_uifw_agl_version_a "${_uifw_agl_versions}/A")
-        set(_uifw_agl_binary "${_uifw_agl_version_a}/AGL")
-
-        file(MAKE_DIRECTORY "${_uifw_agl_version_a}/Headers")
-        file(MAKE_DIRECTORY "${_uifw_agl_version_a}/Resources")
-        set(_uifw_agl_rebuild FALSE)
-        if(EXISTS "${_uifw_agl_binary}")
-            execute_process(
-                COMMAND lipo -info "${_uifw_agl_binary}"
-                OUTPUT_VARIABLE _uifw_agl_lipo_info
-                RESULT_VARIABLE _uifw_agl_lipo_result
-            )
-            if(NOT _uifw_agl_lipo_result EQUAL 0)
-                set(_uifw_agl_rebuild TRUE)
-            elseif(CMAKE_OSX_ARCHITECTURES)
-                foreach(_uifw_arch IN LISTS CMAKE_OSX_ARCHITECTURES)
-                    if(NOT _uifw_agl_lipo_info MATCHES "${_uifw_arch}")
-                        set(_uifw_agl_rebuild TRUE)
-                    endif()
-                endforeach()
-            endif()
-        else()
-            set(_uifw_agl_rebuild TRUE)
-        endif()
-
-        if(_uifw_agl_rebuild)
-            set(_uifw_agl_stub "${CMAKE_CURRENT_BINARY_DIR}/agl_stub.cpp")
-            file(WRITE "${_uifw_agl_stub}" "void _uifw_dummy_agl(void) {}\n")
-            set(_uifw_agl_arch_flags "")
-            if(CMAKE_OSX_ARCHITECTURES)
-                foreach(_uifw_arch IN LISTS CMAKE_OSX_ARCHITECTURES)
-                    list(APPEND _uifw_agl_arch_flags -arch "${_uifw_arch}")
-                endforeach()
-            endif()
-            execute_process(
-                COMMAND "${CMAKE_CXX_COMPILER}" ${_uifw_agl_arch_flags} -dynamiclib "${_uifw_agl_stub}" -install_name "@rpath/AGL.framework/Versions/A/AGL" -o "${_uifw_agl_binary}"
-                RESULT_VARIABLE _uifw_agl_build_result
-            )
-            if(NOT _uifw_agl_build_result EQUAL 0)
-                message(FATAL_ERROR "Failed to build Apple GL link shim")
-            endif()
-            file(WRITE "${_uifw_agl_version_a}/Headers/AGL.h" "void _uifw_dummy_agl(void);\n")
-            file(WRITE "${_uifw_agl_version_a}/Resources/Info.plist" "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\"><dict><key>CFBundleName</key><string>AGL</string></dict></plist>\n")
-        endif()
-        if(NOT EXISTS "${_uifw_agl_versions}/Current")
-            file(CREATE_LINK "A" "${_uifw_agl_versions}/Current" SYMBOLIC)
-        endif()
-        if(EXISTS "${_uifw_agl_framework}/AGL" OR IS_SYMLINK "${_uifw_agl_framework}/AGL")
-            file(REMOVE "${_uifw_agl_framework}/AGL")
-        endif()
-        file(CREATE_LINK "Versions/Current/AGL" "${_uifw_agl_framework}/AGL" SYMBOLIC)
-        if(EXISTS "${_uifw_agl_framework}/Headers" OR IS_SYMLINK "${_uifw_agl_framework}/Headers")
-            file(REMOVE "${_uifw_agl_framework}/Headers")
-        endif()
-        if(EXISTS "${_uifw_agl_framework}/Headers")
-            file(REMOVE_RECURSE "${_uifw_agl_framework}/Headers")
-        endif()
-        file(CREATE_LINK "Versions/Current/Headers" "${_uifw_agl_framework}/Headers" SYMBOLIC)
-        if(EXISTS "${_uifw_agl_framework}/Resources" OR IS_SYMLINK "${_uifw_agl_framework}/Resources")
-            file(REMOVE "${_uifw_agl_framework}/Resources")
-        endif()
-        if(EXISTS "${_uifw_agl_framework}/Resources")
-            file(REMOVE_RECURSE "${_uifw_agl_framework}/Resources")
-        endif()
-        file(CREATE_LINK "Versions/Current/Resources" "${_uifw_agl_framework}/Resources" SYMBOLIC)
-        set(LVRS_APPLE_AGL_SHIM_ACTIVE ON)
-        set(LVRS_APPLE_AGL_FRAMEWORK_ROOT "${_uifw_framework_root}")
-        set(CMAKE_FRAMEWORK_PATH "${_uifw_framework_root}" ${CMAKE_FRAMEWORK_PATH})
-        add_link_options("-F${_uifw_framework_root}")
-    endif()
 endif()
 
 if(APPLE)
@@ -387,15 +332,6 @@ add_library(LVRS::LVRS ALIAS LVRSCore)
 if(DEFINED LVRS_SANITIZER_COMPILE_OPTIONS)
     target_compile_options(LVRSCore PRIVATE ${LVRS_SANITIZER_COMPILE_OPTIONS})
     target_link_options(LVRSCore PRIVATE ${LVRS_SANITIZER_LINK_OPTIONS})
-endif()
-
-if(LVRS_APPLE_AGL_SHIM_ACTIVE)
-    target_link_options(LVRSCore INTERFACE
-        $<BUILD_INTERFACE:-F${LVRS_APPLE_AGL_FRAMEWORK_ROOT}>
-        $<BUILD_INTERFACE:-Wl,-rpath,${LVRS_APPLE_AGL_FRAMEWORK_ROOT}>
-        $<INSTALL_INTERFACE:-F$<INSTALL_PREFIX>/${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}>
-        $<INSTALL_INTERFACE:-Wl,-rpath,$<INSTALL_PREFIX>/${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}>
-    )
 endif()
 
 set(LVRS_STATIC_QML_PLUGIN_REQUIRED OFF)
@@ -564,13 +500,6 @@ if(LVRS_INSTALL_QML_MODULE)
         DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/LVRS/"
         DESTINATION "${LVRS_QML_MODULE_INSTALL_DIR}"
         PATTERN "*LVRSCoreplugin*" EXCLUDE
-    )
-endif()
-
-if(LVRS_APPLE_AGL_SHIM_ACTIVE)
-    install(
-        DIRECTORY "${LVRS_APPLE_AGL_FRAMEWORK_ROOT}/AGL.framework"
-        DESTINATION "${LVRS_APPLE_FRAMEWORK_INSTALL_DIR}"
     )
 endif()
 

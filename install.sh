@@ -516,7 +516,6 @@ for _lvrs_path in \
     "${INSTALL_PREFIX}/include/LVRS" \
     "${INSTALL_PREFIX}/lib/cmake/LVRS" \
     "${INSTALL_PREFIX}/lib/qt6/qml/LVRS" \
-    "${INSTALL_PREFIX}/lib/AGL.framework" \
     "${SOURCE_INSTALL_DIR}"
 do
     if ! lvrs_remove_path "${_lvrs_path}" "${_lvrs_path}"; then

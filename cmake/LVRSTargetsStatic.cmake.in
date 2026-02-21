@@ -19,12 +19,6 @@ if(NOT TARGET LVRS::LVRS)
         _qt_qml_module_plugin_target "LVRSCoreplugin"
     )
 
-    if(@LVRS_APPLE_AGL_SHIM_ACTIVE@)
-        set_property(TARGET LVRS::LVRS APPEND PROPERTY INTERFACE_LINK_OPTIONS
-            "-F${_IMPORT_PREFIX}/@CMAKE_INSTALL_LIBDIR@"
-            "-Wl,-rpath,${_IMPORT_PREFIX}/@CMAKE_INSTALL_LIBDIR@"
-        )
-    endif()
 endif()
 
 set(_LVRS_QML_MODULE_PATH "${_IMPORT_PREFIX}/@LVRS_QML_MODULE_INSTALL_DIR@")
