@@ -5,18 +5,34 @@ import LVRS 1.0
 FocusScope {
     id: control
 
+    // Expose the underlying TextEdit for full platform-native property access.
+    readonly property alias editorItem: editor
     property alias text: editor.text
     property alias readOnly: editor.readOnly
+    property alias activeFocusOnPress: editor.activeFocusOnPress
     property alias cursorPosition: editor.cursorPosition
+    property alias cursorRectangle: editor.cursorRectangle
+    property alias cursorDelegate: editor.cursorDelegate
     property alias selectionStart: editor.selectionStart
     property alias selectionEnd: editor.selectionEnd
+    property alias selectedText: editor.selectedText
     property alias length: editor.length
     property alias selectByMouse: editor.selectByMouse
+    property alias selectByKeyboard: editor.selectByKeyboard
+    property alias mouseSelectionMode: editor.mouseSelectionMode
     property alias persistentSelection: editor.persistentSelection
     property alias overwriteMode: editor.overwriteMode
+    property alias textMargin: editor.textMargin
     property alias inputMethodHints: editor.inputMethodHints
+    property alias inputMethodComposing: editor.inputMethodComposing
     property alias tabStopDistance: editor.tabStopDistance
     property alias baseUrl: editor.baseUrl
+    property alias textDocument: editor.textDocument
+    property alias hoveredLink: editor.hoveredLink
+    property alias contentWidth: editor.contentWidth
+    property alias contentHeight: editor.contentHeight
+    property alias lineCount: editor.lineCount
+    property alias canPaste: editor.canPaste
 
     readonly property int wrapMode: editor.wrapMode
     readonly property int textFormat: editor.textFormat
@@ -82,6 +98,30 @@ FocusScope {
 
     function clear() {
         editor.text = ""
+    }
+
+    function select(start, end) {
+        editor.select(start, end)
+    }
+
+    function selectAll() {
+        editor.selectAll()
+    }
+
+    function deselect() {
+        editor.deselect()
+    }
+
+    function cut() {
+        editor.cut()
+    }
+
+    function copy() {
+        editor.copy()
+    }
+
+    function paste() {
+        editor.paste()
     }
 
     function undo() {
@@ -162,7 +202,9 @@ FocusScope {
                 lineHeightMode: TextEdit.FixedHeight
                 lineHeight: control.textLineBoxHeight
                 renderType: TextEdit.QtRendering
+                activeFocusOnPress: true
                 cursorVisible: control.enabled && activeFocus && !readOnly
+                selectByKeyboard: true
                 selectByMouse: true
                 persistentSelection: true
                 activeFocusOnTab: true

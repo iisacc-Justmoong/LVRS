@@ -9,19 +9,28 @@ use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const DEFAULT_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "macos;linux;windows;ios;android;wasm";
+const ENV_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS";
+const ENV_LVRS_ROOT: &str = "LVRS_ROOT";
+const ENV_LVRS_PROJECT_ROOT: &str = "LVRS_PROJECT_ROOT";
 
 pub fn run(args: InstallArgs, _verbose: u8) -> Result<()> {
+    run_internal(args, _verbose, None)
+}
+
+pub fn run_with_project_root(args: InstallArgs, _verbose: u8, project_root: PathBuf) -> Result<()> {
+    run_internal(args, _verbose, Some(project_root))
+}
+
+fn run_internal(
+    args: InstallArgs,
+    _verbose: u8,
+    project_root_override: Option<PathBuf>,
+) -> Result<()> {
     if args.force_x86_qt_tools {
         bail!("[LVRS] --force-x86-qt-tools is unsupported. Apple x86 paths are disabled.");
     }
 
-    let cwd = env::current_dir().context("failed to read current working directory")?;
-    let project_root = find_project_root(&cwd).with_context(|| {
-        format!(
-            "failed to locate LVRS repository root from {} (expected CMakeLists.txt, qml, backend)",
-            cwd.display()
-        )
-    })?;
+    let project_root = resolve_project_root(project_root_override)?;
 
     let build_dir = project_root.join("build");
     validate_deprecated_build_dir(args.build_dir.as_deref(), &project_root)?;
@@ -33,10 +42,8 @@ pub fn run(args: InstallArgs, _verbose: u8) -> Result<()> {
     let platform_install_root = install_prefix.join("platforms");
     let host_platform = detect_host_platform();
     let host_install_prefix = platform_install_root.join(&host_platform);
-    let bootstrap_framework_platforms = normalize_platform_list(
-        args.platforms
-            .unwrap_or_else(|| DEFAULT_BOOTSTRAP_FRAMEWORK_PLATFORMS.to_string()),
-    );
+    let bootstrap_framework_platforms =
+        resolve_bootstrap_framework_platforms(args.platforms.as_deref());
 
     let build_type = args
         .build_type
@@ -216,6 +223,21 @@ fn normalize_platform_list(input: String) -> String {
     input.replace(',', ";")
 }
 
+fn resolve_bootstrap_framework_platforms(cli_platforms: Option<&str>) -> String {
+    if let Some(value) = cli_platforms {
+        return normalize_platform_list(value.to_string());
+    }
+
+    if let Ok(value) = env::var(ENV_BOOTSTRAP_FRAMEWORK_PLATFORMS) {
+        let trimmed = value.trim();
+        if !trimmed.is_empty() {
+            return normalize_platform_list(trimmed.to_string());
+        }
+    }
+
+    DEFAULT_BOOTSTRAP_FRAMEWORK_PLATFORMS.to_string()
+}
+
 fn validate_deprecated_build_dir(build_dir: Option<&Path>, project_root: &Path) -> Result<()> {
     let Some(value) = build_dir else {
         return Ok(());
@@ -251,6 +273,76 @@ fn has_sentinels(path: &Path) -> bool {
     path.join("CMakeLists.txt").exists()
         && path.join("qml").is_dir()
         && path.join("backend").is_dir()
+}
+
+fn resolve_project_root(project_root_override: Option<PathBuf>) -> Result<PathBuf> {
+    if let Some(path) = project_root_override {
+        return validate_project_root_candidate(path, "bootstrap override");
+    }
+
+    if let Some(path) = resolve_root_from_env() {
+        return validate_project_root_candidate(path, "environment");
+    }
+
+    let cwd = env::current_dir().context("failed to read current working directory")?;
+    if let Some(path) = find_project_root(&cwd) {
+        return Ok(path);
+    }
+
+    if let Ok(executable) = env::current_exe() {
+        if let Some(start) = executable.parent() {
+            if let Some(path) = find_project_root(start) {
+                return Ok(path);
+            }
+        }
+    }
+
+    let manifest_hint = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
+    if let Some(path) = find_project_root(&manifest_hint) {
+        return Ok(path);
+    }
+
+    bail!(
+        "failed to locate LVRS repository root from {} (expected CMakeLists.txt, qml, backend). Set {} to repository root when launching outside the tree.",
+        cwd.display(),
+        ENV_LVRS_ROOT
+    )
+}
+
+fn resolve_root_from_env() -> Option<PathBuf> {
+    for env_name in [ENV_LVRS_ROOT, ENV_LVRS_PROJECT_ROOT] {
+        if let Ok(value) = env::var(env_name) {
+            let trimmed = value.trim();
+            if !trimmed.is_empty() {
+                return Some(PathBuf::from(trimmed));
+            }
+        }
+    }
+    None
+}
+
+fn validate_project_root_candidate(candidate: PathBuf, source: &str) -> Result<PathBuf> {
+    let normalized = if candidate.is_absolute() {
+        candidate
+    } else {
+        env::current_dir()
+            .context("failed to read current working directory")?
+            .join(candidate)
+    };
+
+    if has_sentinels(&normalized) {
+        return Ok(normalized);
+    }
+
+    if let Some(path) = find_project_root(&normalized) {
+        return Ok(path);
+    }
+
+    bail!(
+        "invalid LVRS project root from {}: {} (expected CMakeLists.txt, qml, backend)",
+        source,
+        normalized.display()
+    )
 }
 
 fn ensure_cmake_available() -> Result<()> {

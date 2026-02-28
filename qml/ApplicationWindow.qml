@@ -14,6 +14,7 @@ Controls.ApplicationWindow {
     readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
     readonly property bool backendMobilePlatform: Platform.mobile
     readonly property Item overlayLayer: Controls.Overlay.overlay
+    readonly property Item nativeWindowContentRoot: windowRoot.contentItem ? windowRoot.contentItem.parent : null
 
     readonly property int compact: 0
     readonly property int medium: 1
@@ -127,6 +128,8 @@ Controls.ApplicationWindow {
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
     color: windowRoot.windowColor
+    palette.window: windowRoot.windowColor
+    palette.base: windowRoot.windowColor
 
     background: Rectangle {
         x: 0
@@ -162,6 +165,91 @@ Controls.ApplicationWindow {
         property: "leftPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
+
+    Binding {
+        target: windowRoot.contentItem
+        property: "x"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled && windowRoot.contentItem !== null
+    }
+
+    Binding {
+        target: windowRoot.contentItem
+        property: "y"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled && windowRoot.contentItem !== null
+    }
+
+    Binding {
+        target: windowRoot.contentItem
+        property: "width"
+        value: windowRoot.width
+        when: windowRoot.fullWindowAreaOnMobileEnabled && windowRoot.contentItem !== null
+    }
+
+    Binding {
+        target: windowRoot.contentItem
+        property: "height"
+        value: windowRoot.height
+        when: windowRoot.fullWindowAreaOnMobileEnabled && windowRoot.contentItem !== null
+    }
+
+    Item {
+        id: mobileSafeAreaBackdrop
+        parent: windowRoot.nativeWindowContentRoot
+        visible: parent !== null && windowRoot.fullWindowAreaOnMobileEnabled
+        z: 9000
+        anchors.fill: parent
+
+        readonly property real resolvedContentX: windowRoot.contentItem ? windowRoot.contentItem.x : 0
+        readonly property real resolvedContentY: windowRoot.contentItem ? windowRoot.contentItem.y : 0
+        readonly property real resolvedContentRight: windowRoot.contentItem
+            ? windowRoot.contentItem.x + windowRoot.contentItem.width
+            : width
+        readonly property real resolvedContentBottom: windowRoot.contentItem
+            ? windowRoot.contentItem.y + windowRoot.contentItem.height
+            : height
+        readonly property real leftInset: Math.max(0, Math.ceil(resolvedContentX))
+        readonly property real topInset: Math.max(0, Math.ceil(resolvedContentY))
+        readonly property real rightInset: Math.max(0, Math.ceil(width - resolvedContentRight))
+        readonly property real bottomInset: Math.max(0, Math.ceil(height - resolvedContentBottom))
+
+        Rectangle {
+            x: 0
+            y: 0
+            width: parent.width
+            height: mobileSafeAreaBackdrop.topInset
+            visible: height > 0
+            color: windowRoot.windowColor
+        }
+
+        Rectangle {
+            x: 0
+            y: mobileSafeAreaBackdrop.topInset
+            width: mobileSafeAreaBackdrop.leftInset
+            height: Math.max(0, parent.height - mobileSafeAreaBackdrop.topInset - mobileSafeAreaBackdrop.bottomInset)
+            visible: width > 0 && height > 0
+            color: windowRoot.windowColor
+        }
+
+        Rectangle {
+            x: parent.width - mobileSafeAreaBackdrop.rightInset
+            y: mobileSafeAreaBackdrop.topInset
+            width: mobileSafeAreaBackdrop.rightInset
+            height: Math.max(0, parent.height - mobileSafeAreaBackdrop.topInset - mobileSafeAreaBackdrop.bottomInset)
+            visible: width > 0 && height > 0
+            color: windowRoot.windowColor
+        }
+
+        Rectangle {
+            x: 0
+            y: parent.height - mobileSafeAreaBackdrop.bottomInset
+            width: parent.width
+            height: mobileSafeAreaBackdrop.bottomInset
+            visible: height > 0
+            color: windowRoot.windowColor
+        }
     }
 
     function mergePolicyMaps(basePolicy, overridePolicy) {

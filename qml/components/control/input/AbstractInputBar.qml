@@ -4,15 +4,45 @@ import LVRS 1.0
 FocusScope {
     id: control
 
+    // Expose the underlying TextInput for full platform-native property access.
+    readonly property alias inputItem: inputField
     property alias text: inputField.text
+    property alias displayText: inputField.displayText
+    property alias preeditText: inputField.preeditText
+    property alias length: inputField.length
     property alias placeholderText: placeholderLabel.text
     property alias readOnly: inputField.readOnly
     property alias echoMode: inputField.echoMode
     property alias validator: inputField.validator
+    property alias inputMask: inputField.inputMask
     property alias maximumLength: inputField.maximumLength
+    property alias acceptableInput: inputField.acceptableInput
     property alias inputMethodHints: inputField.inputMethodHints
+    property alias inputMethodComposing: inputField.inputMethodComposing
+    property alias activeFocusOnPress: inputField.activeFocusOnPress
     property alias selectByMouse: inputField.selectByMouse
+    property alias selectByKeyboard: inputField.selectByKeyboard
+    property alias mouseSelectionMode: inputField.mouseSelectionMode
+    property alias persistentSelection: inputField.persistentSelection
     property alias cursorPosition: inputField.cursorPosition
+    property alias cursorRectangle: inputField.cursorRectangle
+    property alias selectionStart: inputField.selectionStart
+    property alias selectionEnd: inputField.selectionEnd
+    property alias selectedText: inputField.selectedText
+    property alias autoScroll: inputField.autoScroll
+    property alias overwriteMode: inputField.overwriteMode
+    property alias canPaste: inputField.canPaste
+    property alias canUndo: inputField.canUndo
+    property alias canRedo: inputField.canRedo
+    property alias cursorDelegate: inputField.cursorDelegate
+    property alias renderType: inputField.renderType
+    property alias passwordCharacter: inputField.passwordCharacter
+    property alias passwordMaskDelay: inputField.passwordMaskDelay
+    property alias horizontalAlignment: inputField.horizontalAlignment
+    property alias verticalAlignment: inputField.verticalAlignment
+    property alias wrapMode: inputField.wrapMode
+    property alias contentWidth: inputField.contentWidth
+    property alias contentHeight: inputField.contentHeight
 
     property int fieldMinHeight: Theme.controlHeightMd
     property int insetHorizontal: Theme.gap12
@@ -29,8 +59,6 @@ FocusScope {
     property real placeholderOpacity: 1.0
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
-    property Component cursorDelegate: null
-
     property color backgroundColor: Theme.subSurface
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
@@ -54,6 +82,48 @@ FocusScope {
 
     function forceInputFocus() {
         inputField.forceActiveFocus()
+    }
+
+    function select(start, end) {
+        inputField.select(start, end)
+    }
+
+    function selectAll() {
+        inputField.selectAll()
+    }
+
+    function deselect() {
+        inputField.deselect()
+    }
+
+    function cut() {
+        inputField.cut()
+    }
+
+    function copy() {
+        inputField.copy()
+    }
+
+    function paste() {
+        inputField.paste()
+    }
+
+    function undo() {
+        if (inputField.canUndo)
+            inputField.undo()
+    }
+
+    function redo() {
+        if (inputField.canRedo)
+            inputField.redo()
+    }
+
+    function remove(start, end) {
+        inputField.remove(start, end)
+    }
+
+    function insert(position, value) {
+        inputField.insert(position, String(value))
     }
 
     implicitHeight: Math.max(fieldMinHeight, contentBoxHeight)
@@ -138,7 +208,6 @@ FocusScope {
         color: control.enabled ? control.textColor : control.textColorDisabled
         selectionColor: control.selectionColor
         selectedTextColor: control.selectedTextColor
-        cursorDelegate: control.cursorDelegate
         cursorVisible: control.focused && control.enabled && !readOnly
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
@@ -148,6 +217,8 @@ FocusScope {
         font.preferShaping: true
         verticalAlignment: TextInput.AlignVCenter
         renderType: TextInput.QtRendering
+        activeFocusOnPress: true
+        selectByKeyboard: true
         activeFocusOnTab: true
         clip: true
         selectByMouse: true
