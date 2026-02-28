@@ -358,7 +358,16 @@ target_include_directories(LVRSCore
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/LVRS>
 )
 
+set(_lvrs_qml_module_options "")
+if(LVRS_BUILD_SHARED_LIBS)
+    # Shared LVRS builds register QML types directly from LVRSCore. Disabling
+    # the companion plugin avoids runtime plugin probing that can re-import the
+    # same LVRS module from filesystem and trigger duplicate type registration.
+    list(APPEND _lvrs_qml_module_options NO_PLUGIN)
+endif()
+
 qt_add_qml_module(LVRSCore
+    ${_lvrs_qml_module_options}
     URI LVRS
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
@@ -371,6 +380,7 @@ qt_add_qml_module(LVRSCore
     RESOURCES
         ${LVRS_RESOURCE_FILES}
 )
+unset(_lvrs_qml_module_options)
 
 # LVRSCore is a library target; QML plugin import scanning is performed on
 # consuming app targets via lvrs_configure_qml_app().

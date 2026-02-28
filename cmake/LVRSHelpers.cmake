@@ -1549,13 +1549,18 @@ function(lvrs_configure_qml_app target)
     lvrs_apply_platform_build_optimizations("${target}")
 
     # Allow qmlimportscanner/qmllint and IDE tooling to discover LVRS module
-    # metadata for both in-tree builds and downstream package consumers.
-    if(DEFINED LVRS_QML_IMPORT_PATH)
-        _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_IMPORT_PATH}")
+    # metadata while avoiding duplicate LVRS roots (root + module directory).
+    set(_lvrs_qml_metadata_root "")
+    if(DEFINED LVRS_QML_IMPORT_PATH AND IS_DIRECTORY "${LVRS_QML_IMPORT_PATH}")
+        set(_lvrs_qml_metadata_root "${LVRS_QML_IMPORT_PATH}")
+    elseif(DEFINED LVRS_QML_MODULE_PATH AND IS_DIRECTORY "${LVRS_QML_MODULE_PATH}")
+        # Compatibility fallback for older package layouts.
+        set(_lvrs_qml_metadata_root "${LVRS_QML_MODULE_PATH}")
     endif()
-    if(DEFINED LVRS_QML_MODULE_PATH)
-        _lvrs_internal_append_unique_qml_import_path("${target}" "${LVRS_QML_MODULE_PATH}")
+    if(NOT _lvrs_qml_metadata_root STREQUAL "")
+        _lvrs_internal_append_unique_qml_import_path("${target}" "${_lvrs_qml_metadata_root}")
     endif()
+    unset(_lvrs_qml_metadata_root)
 
     set(_lvrs_is_ios_simulator FALSE)
     if(IOS AND CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
