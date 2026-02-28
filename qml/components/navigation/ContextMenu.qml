@@ -17,12 +17,46 @@ Controls.Popup {
     property color dividerColor: Theme.contextMenuDivider
     property real menuOpacity: 1.0
     property bool enableOpenBounce: true
+    property bool autoTuneByBackend: true
     property int openBounceDuration: 170
     property int openSettleDuration: 110
     property real openStartScale: 0.78
     property real openOvershootScale: 1.06
     property real openAnchorX: 0
     property real openAnchorY: 0
+    property real openStartX: 0
+    property real openStartY: 0
+    property real openOvershootX: 0
+    property real openOvershootY: 0
+    property real openTargetX: 0
+    property real openTargetY: 0
+    readonly property var backendRuntimeProfile: Platform.runtimeProfile(Platform.canonicalOs)
+    readonly property bool backendTransitionReady: backendRuntimeProfile.backendFeatureReady !== false
+    readonly property real backendTransitionSpeedFactor: {
+        if (!autoTuneByBackend)
+            return 1.0
+        const backendName = backendRuntimeProfile.backend !== undefined && backendRuntimeProfile.backend !== null
+            ? String(backendRuntimeProfile.backend).toLowerCase()
+            : "default"
+        const mobile = backendRuntimeProfile.mobile === true
+        if (mobile && backendName === "vulkan")
+            return 0.82
+        if (mobile)
+            return 0.90
+        if (backendName === "default")
+            return 0.88
+        return 1.0
+    }
+    readonly property bool resolvedOpenBounceEnabled: enableOpenBounce
+        && (!autoTuneByBackend || backendTransitionReady)
+    readonly property int resolvedOpenBounceDuration: Math.max(0, Math.round(openBounceDuration * backendTransitionSpeedFactor))
+    readonly property int resolvedOpenSettleDuration: Math.max(0, Math.round(openSettleDuration * backendTransitionSpeedFactor))
+    readonly property real resolvedOpenStartScale: Math.max(0.01, autoTuneByBackend && backendRuntimeProfile.mobile === true
+        ? (openStartScale + 0.04)
+        : openStartScale)
+    readonly property real resolvedOpenOvershootScale: Math.max(1.0, autoTuneByBackend && backendRuntimeProfile.mobile === true
+        ? (openOvershootScale - 0.02)
+        : openOvershootScale)
     readonly property color resolvedMenuColor:
         Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
 
@@ -32,6 +66,7 @@ Controls.Popup {
     modal: true
     dim: false
     focus: true
+    transformOrigin: Item.TopLeft
     padding: Theme.gap4
     closePolicy: Controls.Popup.CloseOnEscape
         | Controls.Popup.CloseOnPressOutside
@@ -59,41 +94,70 @@ Controls.Popup {
         }
     }
 
-    transform: Scale {
-        id: openBounceTransform
-        origin.x: control.openAnchorX
-        origin.y: control.openAnchorY
-        xScale: 1.0
-        yScale: 1.0
-    }
-
     enter: Transition {
-        enabled: control.enableOpenBounce
         ParallelAnimation {
             NumberAnimation {
                 target: control
                 property: "opacity"
                 from: 0.0
                 to: 1.0
-                duration: control.openBounceDuration
+                duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenBounceDuration : 0
                 easing.type: Easing.OutCubic
             }
 
             SequentialAnimation {
                 NumberAnimation {
-                    target: openBounceTransform
-                    properties: "xScale,yScale"
-                    from: control.openStartScale
-                    to: control.openOvershootScale
-                    duration: control.openBounceDuration
+                    target: control
+                    property: "scale"
+                    from: control.resolvedOpenBounceEnabled ? control.resolvedOpenStartScale : 1.0
+                    to: control.resolvedOpenBounceEnabled ? control.resolvedOpenOvershootScale : 1.0
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenBounceDuration : 0
                     easing.type: Easing.OutCubic
                 }
 
                 NumberAnimation {
-                    target: openBounceTransform
-                    properties: "xScale,yScale"
+                    target: control
+                    property: "scale"
                     to: 1.0
-                    duration: control.openSettleDuration
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenSettleDuration : 0
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            SequentialAnimation {
+                NumberAnimation {
+                    target: control
+                    property: "x"
+                    from: control.openStartX
+                    to: control.openOvershootX
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenBounceDuration : 0
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: control
+                    property: "x"
+                    to: control.openTargetX
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenSettleDuration : 0
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            SequentialAnimation {
+                NumberAnimation {
+                    target: control
+                    property: "y"
+                    from: control.openStartY
+                    to: control.openOvershootY
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenBounceDuration : 0
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: control
+                    property: "y"
+                    to: control.openTargetY
+                    duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenSettleDuration : 0
                     easing.type: Easing.OutCubic
                 }
             }
@@ -392,10 +456,18 @@ Controls.Popup {
             px = Math.max(0, Math.min(px, parent.width - targetWidth))
             py = Math.max(0, Math.min(py, parent.height - targetHeight))
         }
-        x = Math.round(px)
-        y = Math.round(py)
-        openAnchorX = Math.max(0, Math.min(targetWidth, xPos - x))
-        openAnchorY = Math.max(0, Math.min(targetHeight, yPos - y))
+        openTargetX = Math.round(px)
+        openTargetY = Math.round(py)
+        x = openTargetX
+        y = openTargetY
+        openAnchorX = Math.max(0, Math.min(targetWidth, xPos - openTargetX))
+        openAnchorY = Math.max(0, Math.min(targetHeight, yPos - openTargetY))
+        const startScale = resolvedOpenBounceEnabled ? resolvedOpenStartScale : 1.0
+        const overshootScale = resolvedOpenBounceEnabled ? resolvedOpenOvershootScale : 1.0
+        openStartX = openTargetX + openAnchorX * (1.0 - startScale)
+        openStartY = openTargetY + openAnchorY * (1.0 - startScale)
+        openOvershootX = openTargetX + openAnchorX * (1.0 - overshootScale)
+        openOvershootY = openTargetY + openAnchorY * (1.0 - overshootScale)
         // Defer open to avoid immediate close when called from press handlers.
         Qt.callLater(function() {
             control.open()

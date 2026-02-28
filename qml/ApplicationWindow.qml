@@ -98,6 +98,24 @@ Controls.ApplicationWindow {
     readonly property bool adaptiveBottomNavigation: scaffold.bottomNavigationEnabled
     property var lastGlobalPressedEventData: ({})
     property var lastGlobalContextEventData: ({})
+    property bool useBackendAdaptivePolicy: true
+    property var backendAdaptivePolicyOverrides: ({})
+    readonly property var backendRuntimeProfile: Platform.runtimeProfile(platform)
+    readonly property var backendAdaptivePolicyDefaults: resolveBackendAdaptivePolicy(backendRuntimeProfile)
+    readonly property var backendAdaptivePolicy: useBackendAdaptivePolicy
+        ? mergePolicyMaps(backendAdaptivePolicyDefaults, backendAdaptivePolicyOverrides)
+        : ({})
+    readonly property int backendWideBreakpoint: backendAdaptiveNumber("wideBreakpoint", 980, 600)
+    readonly property int backendNavWidth: backendAdaptiveNumber("navWidth", 220, 140)
+    readonly property int backendNavDrawerWidth: backendAdaptiveNumber("navDrawerWidth", 240, 160)
+    readonly property int backendMobileDesktopMinWidth: backendAdaptiveNumber("mobileDesktopMinWidth", 1200, 800)
+    readonly property int backendBottomNavigationMaxItems: backendAdaptiveNumber("bottomNavigationMaxItems", 5, 1)
+    readonly property int backendCompactSpacingBreakpoint: backendAdaptiveNumber("compactSpacingBreakpoint", 900, 480)
+    readonly property real backendNavRailMaxWidthRatio: backendAdaptiveNumber("navRailMaxWidthRatio", 0.32, 0.10)
+    readonly property int backendDrawerMarginSafety: backendAdaptiveNumber("drawerMarginSafety", Theme.gap16, 0)
+    readonly property int backendDrawerEnterDuration: backendAdaptiveNumber("drawerEnterDuration", 170, 0)
+    readonly property int backendDrawerExitDuration: backendAdaptiveNumber("drawerExitDuration", 130, 0)
+    readonly property bool backendAnimatedTransitions: backendAdaptiveBool("enableAnimatedTransitions", true)
 
     signal navActivated(int index, var item)
     signal globalPressedEvent(var eventData)
@@ -144,6 +162,68 @@ Controls.ApplicationWindow {
         property: "leftPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
+
+    function mergePolicyMaps(basePolicy, overridePolicy) {
+        const merged = ({})
+        if (basePolicy && typeof basePolicy === "object") {
+            for (const key in basePolicy)
+                merged[key] = basePolicy[key]
+        }
+        if (overridePolicy && typeof overridePolicy === "object") {
+            for (const overrideKey in overridePolicy) {
+                if (overridePolicy[overrideKey] !== undefined)
+                    merged[overrideKey] = overridePolicy[overrideKey]
+            }
+        }
+        return merged
+    }
+
+    function backendAdaptiveNumber(key, fallback, minimum) {
+        if (!useBackendAdaptivePolicy)
+            return fallback
+        const value = backendAdaptivePolicy && backendAdaptivePolicy[key] !== undefined
+            ? Number(backendAdaptivePolicy[key])
+            : NaN
+        if (!isFinite(value))
+            return fallback
+        if (minimum !== undefined)
+            return Math.max(minimum, value)
+        return value
+    }
+
+    function backendAdaptiveBool(key, fallback) {
+        if (!useBackendAdaptivePolicy)
+            return fallback
+        if (!backendAdaptivePolicy || backendAdaptivePolicy[key] === undefined)
+            return fallback
+        return !!backendAdaptivePolicy[key]
+    }
+
+    function resolveBackendAdaptivePolicy(profile) {
+        const safeProfile = profile && typeof profile === "object" ? profile : ({})
+        const mobile = safeProfile.mobile === true
+        const backendReady = safeProfile.backendFeatureReady !== false
+        const knownTarget = safeProfile.known === true
+        const backendName = safeProfile.backend !== undefined && safeProfile.backend !== null
+            ? String(safeProfile.backend).toLowerCase()
+            : "default"
+        const gpuAccelerated = backendName === "metal" || backendName === "vulkan"
+        const transitionScale = backendReady && gpuAccelerated ? 1.0 : 0.85
+
+        return {
+            wideBreakpoint: mobile ? 940 : 980,
+            navWidth: mobile ? 208 : 220,
+            navDrawerWidth: mobile ? 252 : 240,
+            mobileDesktopMinWidth: mobile ? 1080 : 1200,
+            bottomNavigationMaxItems: mobile ? 4 : 5,
+            compactSpacingBreakpoint: mobile ? 840 : 900,
+            navRailMaxWidthRatio: mobile ? 0.34 : 0.32,
+            drawerMarginSafety: mobile ? Theme.gap20 : Theme.gap16,
+            drawerEnterDuration: Math.round(170 * transitionScale),
+            drawerExitDuration: Math.round(130 * transitionScale),
+            enableAnimatedTransitions: backendReady && knownTarget
+        }
     }
 
     function matchesMedia(rule) {
@@ -247,19 +327,22 @@ Controls.ApplicationWindow {
             property bool navigationEnabled: true
             property string navTitle: "Navigation"
             property bool navTitleVisible: true
-            property int navWidth: 220
-            property int navDrawerWidth: 240
-            property int wideBreakpoint: 980
+            property int navWidth: windowRoot.backendNavWidth
+            property int navDrawerWidth: windowRoot.backendNavDrawerWidth
+            property int wideBreakpoint: windowRoot.backendWideBreakpoint
             property string layoutMode: "auto" // auto, mobile, desktop
             property string layoutPlatform: Qt.platform.os
             property bool forceDesktopOnLargeMobile: false
-            property int mobileDesktopMinWidth: 1200
+            property int mobileDesktopMinWidth: windowRoot.backendMobileDesktopMinWidth
             property bool preferBottomNavigation: true
-            property int bottomNavigationMaxItems: 5
+            property int bottomNavigationMaxItems: windowRoot.backendBottomNavigationMaxItems
             property bool compactSpacingEnabled: true
-            property int compactSpacingBreakpoint: 900
-            property real navRailMaxWidthRatio: 0.32
-            property int drawerMarginSafety: Theme.gap16
+            property int compactSpacingBreakpoint: windowRoot.backendCompactSpacingBreakpoint
+            property real navRailMaxWidthRatio: windowRoot.backendNavRailMaxWidthRatio
+            property int drawerMarginSafety: windowRoot.backendDrawerMarginSafety
+            property int drawerEnterDuration: windowRoot.backendDrawerEnterDuration
+            property int drawerExitDuration: windowRoot.backendDrawerExitDuration
+            property bool animatedTransitions: windowRoot.backendAnimatedTransitions
             property Component navDelegate: null
             property Component navHeader: null
             property Component navFooter: null
@@ -931,7 +1014,24 @@ Controls.ApplicationWindow {
                 edge: Qt.LeftEdge
                 modal: true
                 interactive: root.drawerNavigationEnabled
-        
+                enter: Transition {
+                    NumberAnimation {
+                        property: "x"
+                        from: -navDrawer.width
+                        to: 0
+                        duration: root.animatedTransitions ? root.drawerEnterDuration : 0
+                        easing.type: Easing.OutCubic
+                    }
+                }
+                exit: Transition {
+                    NumberAnimation {
+                        property: "x"
+                        to: -navDrawer.width
+                        duration: root.animatedTransitions ? root.drawerExitDuration : 0
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
                 background: Rectangle {
                     color: Theme.surfaceSolid
                 }
