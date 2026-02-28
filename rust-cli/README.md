@@ -11,6 +11,7 @@ cargo run -- doctor
 
 ## Commands
 
+- `bootstrap`: run desktop/mobile all-platform bootstrap install flow with `main.cpp` Main-entry defaults.
 - `doctor`: baseline workspace checks for local development.
 - `platform`: prints runtime platform information.
 - `echo <message>`: simple plumbing check.

@@ -21,6 +21,9 @@ pub enum Command {
     /// Install LVRS framework packages (replacement of install.sh).
     Install(InstallArgs),
 
+    /// Bootstrap desktop/mobile multi-platform setup from Main entrypoint defaults.
+    Bootstrap(BootstrapArgs),
+
     /// Run baseline workspace checks for CLI development.
     Doctor,
 
@@ -76,4 +79,14 @@ pub struct InstallArgs {
     /// Additional arguments passed to cmake configure after `--`
     #[arg(last = true)]
     pub cmake_args: Vec<String>,
+}
+
+#[derive(Debug, Args)]
+pub struct BootstrapArgs {
+    /// Include wasm in the default bootstrap platform matrix
+    #[arg(long = "with-wasm")]
+    pub with_wasm: bool,
+
+    #[command(flatten)]
+    pub install: InstallArgs,
 }
