@@ -44,9 +44,20 @@ AbstractButton {
         : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
     readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
-    property color rowBackgroundColor: resolvedSelected ? Theme.accentOverlay : "transparent"
-    property color rowBackgroundColorHover: resolvedSelected ? Theme.accentOverlay : Theme.surfaceGhost
-    property color rowBackgroundColorPressed: resolvedSelected ? Theme.accentOverlay : Theme.surfaceAlt
+    readonly property int stateIdle: 0
+    readonly property int stateHover: 1
+    readonly property int stateActive: 2
+    readonly property int interactionState: resolvedSelected
+        ? stateActive
+        : (enabled && hovered ? stateHover : stateIdle)
+    readonly property string interactionStateName: interactionState === stateActive
+        ? "Active"
+        : (interactionState === stateHover ? "Hover" : "Idle")
+    readonly property bool isHoverState: interactionState === stateHover
+    readonly property bool isActiveState: interactionState === stateActive
+    property color rowBackgroundColor: isActiveState ? Theme.accentOverlay : "transparent"
+    property color rowBackgroundColorHover: isActiveState ? Theme.accentOverlay : Theme.surfaceGhost
+    property color rowBackgroundColorPressed: isActiveState ? Theme.accentOverlay : Theme.surfaceAlt
     property bool _rowVisibleInternal: true
     readonly property bool rowVisible: _rowVisibleInternal
 
@@ -62,6 +73,7 @@ AbstractButton {
             : ""
 
     tone: AbstractButton.Borderless
+    state: control.interactionStateName
     leftPadding: computedLeftPadding
     rightPadding: rowRightPadding
     topPadding: 0

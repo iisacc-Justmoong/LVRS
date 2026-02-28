@@ -18,6 +18,7 @@ FocusScope {
     property int insetHorizontal: Theme.gap12
     property int insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
+    property int centeredTextHeight: 16
 
     property int cornerRadius: Theme.radiusMd
 
@@ -44,7 +45,8 @@ FocusScope {
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
-    readonly property int textLineBoxHeight: Math.max(Theme.textBodyLineHeight, Math.ceil(inputMetrics.lineSpacing))
+    readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
+    readonly property int centeredTextY: Math.max(0, Math.floor((height - textLineBoxHeight) / 2))
     readonly property int contentBoxHeight: textLineBoxHeight + insetVertical * 2
 
     signal accepted(string text)
@@ -57,15 +59,6 @@ FocusScope {
     implicitHeight: Math.max(fieldMinHeight, contentBoxHeight)
     implicitWidth: Math.max(Theme.inputMinWidth, inputField.implicitWidth + leftInset + rightInset)
     activeFocusOnTab: true
-
-    FontMetrics {
-        id: inputMetrics
-        font.family: inputField.font.family
-        font.pixelSize: inputField.font.pixelSize
-        font.weight: inputField.font.weight
-        font.styleName: inputField.font.styleName
-        font.letterSpacing: inputField.font.letterSpacing
-    }
 
     Rectangle {
         id: backgroundRect
@@ -136,11 +129,12 @@ FocusScope {
 
     TextInput {
         id: inputField
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: control.leftInset
         anchors.rightMargin: control.rightInset
-        anchors.topMargin: control.insetVertical
-        anchors.bottomMargin: control.insetVertical
+        y: control.centeredTextY
+        height: control.textLineBoxHeight
         color: control.enabled ? control.textColor : control.textColorDisabled
         selectionColor: control.selectionColor
         selectedTextColor: control.selectedTextColor
@@ -153,7 +147,7 @@ FocusScope {
         font.letterSpacing: Theme.textBodyLetterSpacing
         font.preferShaping: true
         verticalAlignment: TextInput.AlignVCenter
-        renderType: TextInput.NativeRendering
+        renderType: TextInput.QtRendering
         activeFocusOnTab: true
         clip: true
         selectByMouse: true
@@ -172,7 +166,8 @@ FocusScope {
         id: placeholderLabel
         anchors.left: inputField.left
         anchors.right: inputField.right
-        anchors.verticalCenter: inputField.verticalCenter
+        y: control.centeredTextY
+        height: control.textLineBoxHeight
         color: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
         opacity: control.placeholderOpacity
         font.family: inputField.font.family
@@ -181,6 +176,9 @@ FocusScope {
         elide: Text.ElideRight
         visible: inputField.text.length === 0 && inputField.preeditText.length === 0
         verticalAlignment: Text.AlignVCenter
+        lineHeightMode: Text.FixedHeight
+        lineHeight: control.textLineBoxHeight
+        renderType: Text.QtRendering
     }
 
     MouseArea {

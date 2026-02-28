@@ -53,14 +53,17 @@ FocusScope {
     property string fontStyleName: Theme.textBodyStyleName
     property real fontLetterSpacing: Theme.textBodyLetterSpacing
     property real textLineHeight: Theme.textBodyLineHeight
+    property int centeredTextHeight: 16
 
     readonly property bool focused: activeFocus || editor.activeFocus
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property int headerBlockHeight: showSnippetHeader ? (headerHeight + headerSpacing) : 0
     readonly property int topInset: insetVertical + headerBlockHeight
     readonly property int resolvedEditorHeight: Math.max(fieldMinHeight, editorHeight)
-    readonly property int resolvedTextLineHeight: Math.max(1, Math.ceil(textLineHeight))
-    readonly property int textLineBoxHeight: Math.max(resolvedTextLineHeight, Math.ceil(editorFontMetrics.lineSpacing))
+    readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
+    readonly property int editorContentAreaHeight: Math.max(0, resolvedEditorHeight - topInset - insetVertical)
+    readonly property int centeredTextY: topInset
+        + Math.max(0, Math.floor((editorContentAreaHeight - textLineBoxHeight) / 2))
 
     signal textEdited(string text)
     signal submitted(string text)
@@ -99,15 +102,6 @@ FocusScope {
                    )
     implicitHeight: resolvedEditorHeight
     activeFocusOnTab: true
-
-    FontMetrics {
-        id: editorFontMetrics
-        font.family: control.fontFamily
-        font.pixelSize: control.fontPixelSize
-        font.weight: control.fontWeight
-        font.styleName: control.fontStyleName
-        font.letterSpacing: control.fontLetterSpacing
-    }
 
     Rectangle {
         anchors.fill: parent
@@ -151,9 +145,9 @@ FocusScope {
                 id: editor
                 objectName: "codeTextEdit"
                 x: control.insetHorizontal
-                y: control.topInset
+                y: control.centeredTextY
                 width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: Math.max(control.textLineBoxHeight, contentHeight)
+                height: Math.max(control.textLineBoxHeight, Math.ceil(contentHeight))
                 wrapMode: TextEdit.NoWrap
                 textFormat: TextEdit.PlainText
                 color: control.enabled ? control.textColor : control.textColorDisabled
@@ -165,7 +159,9 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
-                renderType: TextEdit.NativeRendering
+                lineHeightMode: TextEdit.FixedHeight
+                lineHeight: control.textLineBoxHeight
+                renderType: TextEdit.QtRendering
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true
@@ -210,12 +206,15 @@ FocusScope {
             anchors.top: parent.top
             anchors.leftMargin: control.insetHorizontal
             anchors.rightMargin: control.insetHorizontal
-            anchors.topMargin: control.topInset
+            anchors.topMargin: control.centeredTextY
             text: control.placeholderText
             color: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
             opacity: control.placeholderOpacity
             visible: control.empty
             wrapMode: Text.WordWrap
+            lineHeightMode: Text.FixedHeight
+            lineHeight: control.textLineBoxHeight
+            renderType: Text.QtRendering
         }
 
         MouseArea {

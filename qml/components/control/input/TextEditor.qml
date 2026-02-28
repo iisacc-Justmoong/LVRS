@@ -47,6 +47,7 @@ FocusScope {
     property string fontStyleName: Theme.textBodyStyleName
     property real fontLetterSpacing: Theme.textBodyLetterSpacing
     property real textLineHeight: Theme.textBodyLineHeight
+    property int centeredTextHeight: 16
 
     property color textColor: Theme.textPrimary
     property color textColorDisabled: Theme.textOctonary
@@ -63,8 +64,7 @@ FocusScope {
     readonly property int resolvedTextFormat: TextEdit.PlainText
     readonly property int effectiveWrapMode: enforceModeDefaults ? resolvedWrapMode : wrapMode
     readonly property int effectiveTextFormat: enforceModeDefaults ? resolvedTextFormat : textFormat
-    readonly property int resolvedTextLineHeight: Math.max(1, Math.ceil(textLineHeight))
-    readonly property int textLineBoxHeight: Math.max(resolvedTextLineHeight, Math.ceil(editorFontMetrics.lineSpacing))
+    readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
 
     readonly property string normalizedInput: TextMarkup.normalize(editor.text)
     readonly property string renderedOutput: TextMarkup.renderHtml(editor.text)
@@ -74,6 +74,10 @@ FocusScope {
         ? Math.max(outputMinHeight, previewText.implicitHeight + insetVertical * 2)
         : 0
     readonly property int resolvedEditorHeight: Math.max(fieldMinHeight, editorHeight)
+    readonly property int centeredTextY: Math.max(
+        insetVertical,
+        Math.floor((resolvedEditorHeight - textLineBoxHeight) / 2)
+    )
     readonly property bool focused: activeFocus || editor.activeFocus
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property bool canUndo: editor.canUndo
@@ -118,15 +122,6 @@ FocusScope {
                     + (previewVisible ? outputSpacing + previewHeight : 0)
     activeFocusOnTab: true
 
-    FontMetrics {
-        id: editorFontMetrics
-        font.family: control.fontFamily
-        font.pixelSize: control.fontPixelSize
-        font.weight: control.fontWeight
-        font.styleName: control.fontStyleName
-        font.letterSpacing: control.fontLetterSpacing
-    }
-
     Item {
         id: editArea
         anchors.left: parent.left
@@ -160,9 +155,9 @@ FocusScope {
                 id: editor
                 objectName: "editorTextEdit"
                 x: control.insetHorizontal
-                y: control.insetVertical
+                y: control.centeredTextY
                 width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: Math.max(control.textLineBoxHeight, contentHeight)
+                height: Math.max(control.textLineBoxHeight, Math.ceil(contentHeight))
                 wrapMode: control.effectiveWrapMode
                 textFormat: control.effectiveTextFormat
                 color: control.enabled ? control.textColor : control.textColorDisabled
@@ -174,7 +169,9 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
-                renderType: TextEdit.NativeRendering
+                lineHeightMode: TextEdit.FixedHeight
+                lineHeight: control.textLineBoxHeight
+                renderType: TextEdit.QtRendering
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true
@@ -219,12 +216,15 @@ FocusScope {
             anchors.top: parent.top
             anchors.leftMargin: control.insetHorizontal
             anchors.rightMargin: control.insetHorizontal
-            anchors.topMargin: control.insetVertical
+            anchors.topMargin: control.centeredTextY
             text: control.placeholderText
             color: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
             opacity: control.placeholderOpacity
             visible: control.empty
             wrapMode: Text.WordWrap
+            lineHeightMode: Text.FixedHeight
+            lineHeight: control.textLineBoxHeight
+            renderType: Text.QtRendering
         }
 
         MouseArea {
