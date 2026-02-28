@@ -51,6 +51,9 @@ FocusScope {
     property int insetHorizontal: Theme.gap10
     property int insetVertical: Theme.gap8
     property int headerSpacing: Theme.gap4
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
     property int cornerRadius: Theme.radiusMd
 
     property color textColor: Theme.textPrimary
@@ -61,6 +64,8 @@ FocusScope {
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
+    property color backgroundColorHover: Theme.surfaceAlt
+    property color backgroundColorPressed: Theme.accentBlueMuted
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
     property color headerTextColor: Theme.textTertiary
@@ -74,6 +79,8 @@ FocusScope {
     property int centeredTextHeight: 16
 
     readonly property bool focused: activeFocus || editor.activeFocus
+    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
+    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property int headerBlockHeight: showSnippetHeader ? (headerHeight + headerSpacing) : 0
     readonly property int topInset: insetVertical + headerBlockHeight
@@ -82,6 +89,15 @@ FocusScope {
     readonly property int editorContentAreaHeight: Math.max(0, resolvedEditorHeight - topInset - insetVertical)
     readonly property int centeredTextY: topInset
         + Math.max(0, Math.floor((editorContentAreaHeight - textLineBoxHeight) / 2))
+    readonly property color resolvedBackgroundColor: !control.enabled
+        ? control.backgroundColorDisabled
+        : control.pressed
+            ? control.backgroundColorPressed
+            : control.focused
+                ? control.backgroundColorFocused
+                : control.hovered
+                    ? control.backgroundColorHover
+                    : control.backgroundColor
 
     signal textEdited(string text)
     signal submitted(string text)
@@ -138,6 +154,12 @@ FocusScope {
         control.submitted(editor.text)
     }
 
+    function resolvedRectangleRadius(rectWidth, rectHeight, fallbackRadius) {
+        if (shapeStyle === shapeCylinder)
+            return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
+        return fallbackRadius
+    }
+
     implicitWidth: Math.max(
                        Theme.inputMinWidth,
                        editor.implicitWidth + insetHorizontal * 2
@@ -147,8 +169,8 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        radius: control.cornerRadius
-        color: control.backgroundColor
+        radius: control.resolvedRectangleRadius(width, height, control.cornerRadius)
+        color: control.resolvedBackgroundColor
 
         Label {
             id: snippetMeta
@@ -261,9 +283,11 @@ FocusScope {
         }
 
         MouseArea {
+            id: interactionArea
             anchors.fill: parent
             enabled: control.enabled && !control.preferNativeGestures
             acceptedButtons: Qt.LeftButton
+            hoverEnabled: enabled
             cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
             onPressed: function(mouse) {
                 if (control.autoFocusOnPress)

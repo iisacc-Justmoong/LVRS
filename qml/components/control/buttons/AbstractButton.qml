@@ -12,8 +12,11 @@ Controls.AbstractButton {
         Destructive,
         Disabled
     }
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
 
     property int tone: AbstractButton.Default
+    property int shapeStyle: shapeRoundRect
     property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
 
     readonly property color toneTextColor: {
@@ -53,6 +56,9 @@ Controls.AbstractButton {
     horizontalPadding: Theme.gap14
     verticalPadding: Theme.gap10
     property int cornerRadius: Theme.radiusMd
+    readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, Math.min(width, height) / 2)
+        : cornerRadius
 
     property color textColor: control.toneTextColor
     property color textColorDisabled: Theme.textOctonary
@@ -91,7 +97,7 @@ Controls.AbstractButton {
     }
 
     background: Rectangle {
-        radius: control.cornerRadius
+        radius: control.resolvedCornerRadius
         antialiasing: true
         color: !control.effectiveEnabled
             ? control.backgroundColorDisabled

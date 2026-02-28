@@ -37,6 +37,9 @@ Controls.ApplicationWindow {
         : 1.0
     property bool forceFullWindowAreaOnMobile: true
     readonly property bool fullWindowAreaOnMobileEnabled: forceFullWindowAreaOnMobile && backendMobilePlatform
+    property bool mobileDisplayCoverageOverrideEnabled: true
+    property bool mobileFullscreenVisibilityOverride: true
+    property bool mobileFullscreenGeometryHintOverride: true
     // Keep view composition identical across platforms; only apply when explicitly enabled.
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
@@ -351,6 +354,24 @@ Controls.ApplicationWindow {
         return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
     }
 
+    function applyMobileDisplayCoverageOverride() {
+        if (!windowRoot.mobileDisplayCoverageOverrideEnabled || !windowRoot.fullWindowAreaOnMobileEnabled)
+            return
+
+        if (windowRoot.mobileFullscreenGeometryHintOverride)
+            windowRoot.setFlag(Qt.MaximizeUsingFullscreenGeometryHint, true)
+
+        if (!windowRoot.mobileFullscreenVisibilityOverride || !windowRoot.visible)
+            return
+
+        if (windowRoot.visibility !== Window.FullScreen) {
+            if (typeof windowRoot.showFullScreen === "function")
+                windowRoot.showFullScreen()
+            else
+                windowRoot.visibility = Window.FullScreen
+        }
+    }
+
     function requestWindowMove() {
         if (typeof windowRoot.startSystemMove === "function")
             return !!windowRoot.startSystemMove()
@@ -363,10 +384,15 @@ Controls.ApplicationWindow {
     }
 
     onVisibleChanged: {
+        applyMobileDisplayCoverageOverride()
         RenderQuality.applyWindow(windowRoot)
         if (visible)
             applyNativeWindowStyle()
     }
+    onFullWindowAreaOnMobileEnabledChanged: applyMobileDisplayCoverageOverride()
+    onMobileDisplayCoverageOverrideEnabledChanged: applyMobileDisplayCoverageOverride()
+    onMobileFullscreenVisibilityOverrideChanged: applyMobileDisplayCoverageOverride()
+    onMobileFullscreenGeometryHintOverrideChanged: applyMobileDisplayCoverageOverride()
     onWindowColorChanged: applyNativeWindowStyle()
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
     onSolidChromeChanged: applyNativeWindowStyle()
@@ -1293,7 +1319,9 @@ Controls.ApplicationWindow {
                     Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
             }
             Debug.log("ApplicationWindow", "supersample-scale", windowRoot.effectiveSupersampleScale)
+            windowRoot.applyMobileDisplayCoverageOverride()
             windowRoot.applyNativeWindowStyle()
+            Qt.callLater(windowRoot.applyMobileDisplayCoverageOverride)
             Qt.callLater(windowRoot.applyNativeWindowStyle)
         }
     }

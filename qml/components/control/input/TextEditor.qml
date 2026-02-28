@@ -49,6 +49,9 @@ FocusScope {
     property int editorHeight: fieldMinHeight
     property int insetHorizontal: Theme.gap10
     property int insetVertical: Theme.gap8
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
     property int cornerRadius: Theme.radiusMd
     property bool showScrollBar: true
     property bool autoFocusOnPress: true
@@ -75,6 +78,8 @@ FocusScope {
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
+    property color backgroundColorHover: Theme.surfaceAlt
+    property color backgroundColorPressed: Theme.accentBlueMuted
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
 
@@ -97,9 +102,20 @@ FocusScope {
         Math.floor((resolvedEditorHeight - textLineBoxHeight) / 2)
     )
     readonly property bool focused: activeFocus || editor.activeFocus
+    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
+    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property bool canUndo: editor.canUndo
     readonly property bool canRedo: editor.canRedo
+    readonly property color resolvedEditAreaBackgroundColor: !control.enabled
+        ? control.backgroundColorDisabled
+        : control.pressed
+            ? control.backgroundColorPressed
+            : control.focused
+                ? control.backgroundColorFocused
+                : control.hovered
+                    ? control.backgroundColorHover
+                    : control.backgroundColor
 
     signal textEdited(string text)
     signal submitted(string text)
@@ -156,6 +172,12 @@ FocusScope {
         control.submitted(editor.text)
     }
 
+    function resolvedRectangleRadius(rectWidth, rectHeight, fallbackRadius) {
+        if (shapeStyle === shapeCylinder)
+            return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
+        return fallbackRadius
+    }
+
     implicitWidth: Math.max(
                        Theme.inputMinWidth,
                        editor.implicitWidth + control.insetHorizontal * 2
@@ -173,8 +195,8 @@ FocusScope {
 
         Rectangle {
             anchors.fill: parent
-            radius: control.cornerRadius
-            color: control.backgroundColor
+            radius: control.resolvedRectangleRadius(width, height, control.cornerRadius)
+            color: control.resolvedEditAreaBackgroundColor
         }
 
         Flickable {
@@ -271,9 +293,11 @@ FocusScope {
         }
 
         MouseArea {
+            id: interactionArea
             anchors.fill: parent
             enabled: control.enabled && !control.preferNativeGestures
             acceptedButtons: Qt.LeftButton
+            hoverEnabled: enabled
             cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
             onPressed: function(mouse) {
                 if (control.autoFocusOnPress)
@@ -291,7 +315,7 @@ FocusScope {
         anchors.topMargin: control.outputSpacing
         visible: control.previewVisible
         height: control.previewHeight
-        radius: control.cornerRadius
+        radius: control.resolvedRectangleRadius(width, height, control.cornerRadius)
         color: control.outputBackgroundColor
 
         Flickable {

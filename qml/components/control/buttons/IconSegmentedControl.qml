@@ -4,6 +4,10 @@ import LVRS 1.0
 Item {
     id: control
 
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+
+    property int shapeStyle: shapeRoundRect
     property int horizontalPadding: Theme.gap4
     property int verticalPadding: Theme.gap4
     property int spacing: Theme.gap2
@@ -13,6 +17,9 @@ Item {
     property color borderColor: Theme.panelBackground12
     property bool forceBorderlessTone: true
     property bool _syncScheduled: false
+    readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, Math.min(width, height) / 2)
+        : cornerRadius
 
     readonly property int segmentCount: collectSegmentButtons().length
     default property alias buttons: segmentRow.data
@@ -57,7 +64,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: control.backgroundColor
-        radius: control.cornerRadius
+        radius: control.resolvedCornerRadius
         border.width: control.borderWidth
         border.color: control.borderColor
         antialiasing: true

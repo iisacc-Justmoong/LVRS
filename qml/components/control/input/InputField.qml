@@ -15,6 +15,8 @@ AbstractInputBar {
     property color searchIconColor: Theme.descriptionColor
     property real searchIconStrokeWidth: 1.5
     property color clearIconBackgroundColor: Theme.descriptionColor
+    property color clearIconBackgroundColorHover: Qt.lighter(clearIconBackgroundColor, 1.08)
+    property color clearIconBackgroundColorPressed: Qt.darker(clearIconBackgroundColor, 1.14)
     property color clearIconBackgroundColorDisabled: Theme.disabledColor
     property color clearIconForegroundColor: Theme.panelBackground10
 
@@ -37,6 +39,8 @@ AbstractInputBar {
     placeholderOpacity: 1.0
 
     backgroundColor: Theme.panelBackground10
+    backgroundColorHover: Theme.panelBackground11
+    backgroundColorPressed: Theme.panelBackground12
     backgroundColorFocused: Theme.panelBackground10
     backgroundColorDisabled: Theme.panelBackground10
 
@@ -82,9 +86,15 @@ AbstractInputBar {
         width: control.showClearButton ? Theme.iconSm : 0
         height: Theme.iconSm
         visible: width > 0
-        readonly property color backgroundColor: control.enabled
-            ? control.clearIconBackgroundColor
-            : control.clearIconBackgroundColorDisabled
+        readonly property bool hovered: clearInteractionArea.containsMouse && clearInteractionArea.enabled
+        readonly property bool pressed: clearInteractionArea.pressed && clearInteractionArea.enabled
+        readonly property color backgroundColor: !control.enabled
+            ? control.clearIconBackgroundColorDisabled
+            : clearButton.pressed
+                ? control.clearIconBackgroundColorPressed
+                : clearButton.hovered
+                    ? control.clearIconBackgroundColorHover
+                    : control.clearIconBackgroundColor
 
         Rectangle {
             id: clearIconBubble
@@ -117,9 +127,11 @@ AbstractInputBar {
         }
 
         MouseArea {
+            id: clearInteractionArea
             anchors.fill: parent
             enabled: control.showClearButton
             acceptedButtons: Qt.LeftButton
+            hoverEnabled: enabled
             onClicked: {
                 control.text = ""
                 control.forceInputFocus()

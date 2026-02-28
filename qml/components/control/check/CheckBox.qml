@@ -8,6 +8,9 @@ AbstractButton {
     checkable: true
     tone: AbstractButton.Borderless
 
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
     property int boxSize: 17
     property real boxRadius: 3.5
     property color checkColor: Theme.bodyColor
@@ -29,6 +32,23 @@ AbstractButton {
     property color innerShadowStrongColor: "#1A000000"
 
     readonly property bool showInnerShadow: !(control.checked && control.enabled)
+    readonly property color resolvedCheckedFillColor: !control.enabled
+        ? control.disabledCheckedColor
+        : control.down
+            ? Qt.darker(control.checkedColor, 1.2)
+            : control.hovered
+                ? Qt.darker(control.checkedColor, 1.08)
+                : control.checkedColor
+    readonly property color resolvedUncheckedFillColor: !control.enabled
+        ? control.disabledUncheckedColor
+        : control.down
+            ? Qt.darker(control.uncheckedColor, 1.18)
+            : control.hovered
+                ? Qt.darker(control.uncheckedColor, 1.06)
+                : control.uncheckedColor
+    readonly property real resolvedBoxRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, boxSize / 2)
+        : boxRadius
     readonly property real resolvedBoxBorderWidth: control.checked
         ? (control.enabled ? control.boxBorderWidthCheckedEnabled : control.boxBorderWidthCheckedDisabled)
         : (control.enabled ? control.boxBorderWidthUncheckedEnabled : control.boxBorderWidthUncheckedDisabled)
@@ -59,10 +79,8 @@ AbstractButton {
             implicitHeight: control.boxSize
             Layout.preferredWidth: control.boxSize
             Layout.preferredHeight: control.boxSize
-            radius: control.boxRadius
-            color: control.enabled
-                ? (control.checked ? control.checkedColor : control.uncheckedColor)
-                : (control.checked ? control.disabledCheckedColor : control.disabledUncheckedColor)
+            radius: control.resolvedBoxRadius
+            color: control.checked ? control.resolvedCheckedFillColor : control.resolvedUncheckedFillColor
             border.width: control.resolvedBoxBorderWidth
             border.color: control.resolvedBoxBorderColor
             antialiasing: true

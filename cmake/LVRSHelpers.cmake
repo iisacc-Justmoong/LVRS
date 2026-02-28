@@ -28,6 +28,35 @@ function(_lvrs_internal_apply_safe_default_output_dirs target)
     endif()
 endfunction()
 
+function(_lvrs_internal_stage_example_binary_to_source_bin target runtime_platform)
+    if(NOT TARGET "${target}")
+        message(FATAL_ERROR "_lvrs_internal_stage_example_binary_to_source_bin() target not found: ${target}")
+    endif()
+
+    if(runtime_platform STREQUAL "ios"
+       OR runtime_platform STREQUAL "android"
+       OR runtime_platform STREQUAL "wasm")
+        return()
+    endif()
+
+    get_target_property(_lvrs_source_stage_configured "${target}" _LVRS_EXAMPLE_SOURCE_BIN_STAGE_CONFIGURED)
+    if(_lvrs_source_stage_configured)
+        return()
+    endif()
+
+    set(_lvrs_source_bin_dir "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+    add_custom_command(TARGET "${target}" POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${_lvrs_source_bin_dir}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "$<TARGET_FILE:${target}>"
+            "${_lvrs_source_bin_dir}/$<TARGET_FILE_NAME:${target}>"
+        COMMENT "Stage ${target} into ${_lvrs_source_bin_dir}"
+        VERBATIM
+    )
+
+    set_property(TARGET "${target}" PROPERTY _LVRS_EXAMPLE_SOURCE_BIN_STAGE_CONFIGURED TRUE)
+endfunction()
+
 function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
     set(_lvrs_plugin_target "")
     if(TARGET LVRSCoreplugin)
@@ -203,6 +232,8 @@ function(lvrs_configure_example_target target)
             RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
         )
     endif()
+
+    _lvrs_internal_stage_example_binary_to_source_bin("${target}" "${_lvrs_example_target_platform}")
 
     lvrs_apply_platform_build_optimizations("${target}")
 

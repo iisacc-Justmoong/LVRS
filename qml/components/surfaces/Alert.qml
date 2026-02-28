@@ -20,6 +20,10 @@ Item {
     property bool useOverlayLayer: true
     property int maxWidth: Theme.dialogMaxWidth
     property int minWidth: Theme.dialogMinWidth
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
+    property int cardCornerRadius: Theme.radiusLg
     property color backdropColor: Theme.overlayBackdrop
     property color cardBackgroundColor: root.useVerticalActionLayout ? Theme.panelBackground07 : Theme.panelBackground08
     property color appIconBackgroundColor: "#C9D4DB"
@@ -43,6 +47,9 @@ Item {
     readonly property bool hasSecondaryAction: root.resolvedButtonCount >= 2
     readonly property bool hasTertiaryAction: root.resolvedButtonCount >= 3
     readonly property bool useVerticalActionLayout: root.hasTertiaryAction
+    readonly property real resolvedCardCornerRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, Math.min(alertCard.width, alertCard.height) / 2)
+        : cardCornerRadius
 
     signal primaryClicked()
     signal secondaryClicked()
@@ -94,7 +101,7 @@ Item {
                         Math.max(root.minWidth,
                                  Math.min(root.preferredWidth,
                                           root.width - (root.sidePadding * 2))))
-        radius: Theme.radiusLg
+        radius: root.resolvedCardCornerRadius
         color: root.cardBackgroundColor
         antialiasing: true
         anchors.horizontalCenter: parent.horizontalCenter

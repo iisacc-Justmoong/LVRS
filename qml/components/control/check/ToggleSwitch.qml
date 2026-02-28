@@ -6,20 +6,41 @@ Controls.Switch {
     id: control
 
     text: ""
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
 
+    property int shapeStyle: shapeRoundRect
     property int trackWidth: Theme.toggleTrackWidth
     property int trackHeight: Theme.controlHeightSm
     property int trackPadding: Theme.gap2
     property int knobSize: Theme.controlIndicatorSize
     property int transitionDuration: Theme.toggleTransitionDuration
+    property real trackCornerRadius: trackHeight / 2
 
     property color onColor: Theme.accent
     property color offColor: Theme.panelBackground12
+    property color onColorHover: Qt.darker(onColor, 1.08)
+    property color onColorPressed: Qt.darker(onColor, 1.18)
+    property color offColorHover: Qt.lighter(offColor, 1.08)
+    property color offColorPressed: Qt.darker(offColor, 1.12)
     property color disabledTrackColor: Theme.surfaceAlt
     property color trackShadowColor: Theme.shadowStrong
     property color knobFillColor: Theme.textPrimary
     readonly property int knobXOff: trackPadding
     readonly property int knobXOn: Math.max(trackPadding, trackWidth - knobSize - trackPadding)
+    readonly property color resolvedTrackColor: !control.enabled
+        ? control.disabledTrackColor
+        : control.checked
+            ? (control.down ? control.onColorPressed
+                            : (control.hovered ? control.onColorHover : control.onColor))
+            : (control.down ? control.offColorPressed
+                            : (control.hovered ? control.offColorHover : control.offColor))
+
+    function resolvedTrackRadius(rectWidth, rectHeight) {
+        if (shapeStyle === shapeCylinder)
+            return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
+        return trackCornerRadius
+    }
 
     spacing: text.length > 0 ? Theme.gap8 : Theme.gapNone
     leftPadding: 0
@@ -38,7 +59,7 @@ Controls.Switch {
         Rectangle {
             anchors.fill: parent
             anchors.topMargin: 1
-            radius: height / 2
+            radius: control.resolvedTrackRadius(width, height)
             color: control.trackShadowColor
             opacity: 0.3
         }
@@ -46,12 +67,8 @@ Controls.Switch {
         Rectangle {
             id: track
             anchors.fill: parent
-            radius: height / 2
-            color: !control.enabled
-                ? control.disabledTrackColor
-                : control.checked
-                    ? control.onColor
-                    : control.offColor
+            radius: control.resolvedTrackRadius(width, height)
+            color: control.resolvedTrackColor
             antialiasing: true
         }
 

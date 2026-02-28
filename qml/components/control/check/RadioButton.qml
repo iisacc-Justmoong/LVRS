@@ -22,9 +22,16 @@ AbstractButton {
     property color dotColor: Theme.textPrimary
     property color dotColorDisabled: Theme.textSeptenary
 
-    readonly property color indicatorColor: control.enabled
-        ? (control.checked ? control.onColor : control.offColor)
-        : (control.checked ? control.onColorDisabled : control.offColorDisabled)
+    readonly property color indicatorColor: {
+        const baseColor = control.checked ? control.onColor : control.offColor
+        if (!control.enabled)
+            return control.checked ? control.onColorDisabled : control.offColorDisabled
+        if (control.down)
+            return Qt.darker(baseColor, 1.2)
+        if (control.hovered)
+            return Qt.darker(baseColor, 1.08)
+        return baseColor
+    }
     readonly property color indicatorDotColor: control.enabled ? control.dotColor : control.dotColorDisabled
 
     onStateChanged: {

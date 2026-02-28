@@ -6,10 +6,17 @@ import LVRS 1.0
 Rectangle {
     id: root
 
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
+    property int cornerRadius: Theme.radiusLg
     property string title: ""
     property string subtitle: ""
     readonly property int cardPadding: Theme.gap18
     readonly property int sectionSpacing: Theme.gap10
+    readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, Math.min(width, height) / 2)
+        : cornerRadius
 
     default property alias content: contentSlot.data
 
@@ -25,7 +32,7 @@ Rectangle {
                     + Math.max(1, contentSlot.childrenRect.height)
     clip: true
 
-    radius: Theme.radiusLg
+    radius: resolvedCornerRadius
     color: Theme.surfaceSolid
 
     ColumnLayout {

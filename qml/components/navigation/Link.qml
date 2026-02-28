@@ -13,6 +13,7 @@ AbstractButton {
 
     property color linkColor: Theme.accent
     property color hoverColor: Theme.textPrimary
+    property color pressedColor: Qt.darker(linkColor, 1.2)
     property color disabledColor: Theme.textTertiary
     property bool underline: false
 
@@ -66,7 +67,8 @@ AbstractButton {
             visible: contentSlot.children.length === 0
             text: control.text
             color: control.enabled
-                ? (control.hovered ? control.hoverColor : control.linkColor)
+                ? (control.down ? control.pressedColor
+                                : (control.hovered ? control.hoverColor : control.linkColor))
                 : control.disabledColor
             font.underline: control.underline
             anchors.verticalCenter: parent.verticalCenter

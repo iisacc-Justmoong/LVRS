@@ -6,8 +6,11 @@ Item {
     // Size constants for API usage: LV.ProgressBar { size: regular }
     readonly property int large: 0
     readonly property int regular: 1
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
 
     property int size: large
+    property int shapeStyle: shapeRoundRect
     property real startValue: 0
     property real endValue: 100
     property real currentValue: 0
@@ -26,13 +29,19 @@ Item {
         return Math.max(0, Math.min(1, (currentValue - startValue) / valueRange))
     }
 
+    function resolvedRadius(rectWidth, rectHeight) {
+        if (shapeStyle === shapeCylinder)
+            return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
+        return cornerRadius
+    }
+
     implicitWidth: 100
     implicitHeight: barHeight
 
     Rectangle {
         id: track
         anchors.fill: parent
-        radius: control.cornerRadius
+        radius: control.resolvedRadius(width, height)
         color: control.trackColor
         antialiasing: true
     }
@@ -43,7 +52,7 @@ Item {
         y: 0
         width: track.width * control.progress
         height: track.height
-        radius: control.cornerRadius
+        radius: control.resolvedRadius(width, height)
         color: control.fillColor
         antialiasing: true
         visible: width > 0
@@ -51,7 +60,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: control.cornerRadius
+        radius: control.resolvedRadius(width, height)
         color: "transparent"
         border.width: 1
         border.color: "#14000000"

@@ -54,6 +54,9 @@ FocusScope {
     property int centeredTextHeight: 16
     property bool preferNativeGestures: Platform.mobile
 
+    readonly property int shapeRoundRect: 0
+    readonly property int shapeCylinder: 1
+    property int shapeStyle: shapeRoundRect
     property int cornerRadius: Theme.radiusMd
 
     property color textColor: Theme.textPrimary
@@ -64,6 +67,8 @@ FocusScope {
     property color selectionColor: Theme.accent
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
+    property color backgroundColorHover: Theme.surfaceAlt
+    property color backgroundColorPressed: Theme.accentBlueMuted
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
 
@@ -77,9 +82,23 @@ FocusScope {
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
+    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
+    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
     readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
     readonly property int centeredTextY: Math.max(0, Math.floor((height - textLineBoxHeight) / 2))
     readonly property int contentBoxHeight: textLineBoxHeight + insetVertical * 2
+    readonly property color resolvedBackgroundColor: !control.enabled
+        ? control.backgroundColorDisabled
+        : control.pressed
+            ? control.backgroundColorPressed
+            : control.focused
+                ? control.backgroundColorFocused
+                : control.hovered
+                    ? control.backgroundColorHover
+                    : control.backgroundColor
+    readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
+        ? Math.max(0, Math.min(width, height) / 2)
+        : cornerRadius
 
     signal accepted(string text)
     signal textEdited(string text)
@@ -137,8 +156,8 @@ FocusScope {
     Rectangle {
         id: backgroundRect
         anchors.fill: parent
-        radius: control.cornerRadius
-        color: control.backgroundColor
+        radius: control.resolvedCornerRadius
+        color: control.resolvedBackgroundColor
 
         Item {
             id: leadingHost
@@ -256,9 +275,11 @@ FocusScope {
     }
 
     MouseArea {
+        id: interactionArea
         anchors.fill: parent
         enabled: control.enabled && !control.preferNativeGestures
         acceptedButtons: Qt.LeftButton
+        hoverEnabled: enabled
         cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
         onPressed: function(mouse) {
             if (!control.enabled)
