@@ -44,6 +44,8 @@ FocusScope {
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
+    readonly property int textLineBoxHeight: Math.max(Theme.textBodyLineHeight, Math.ceil(inputMetrics.lineSpacing))
+    readonly property int contentBoxHeight: textLineBoxHeight + insetVertical * 2
 
     signal accepted(string text)
     signal textEdited(string text)
@@ -52,9 +54,18 @@ FocusScope {
         inputField.forceActiveFocus()
     }
 
-    implicitHeight: Math.max(fieldMinHeight, inputField.implicitHeight + insetVertical * 2)
+    implicitHeight: Math.max(fieldMinHeight, contentBoxHeight)
     implicitWidth: Math.max(Theme.inputMinWidth, inputField.implicitWidth + leftInset + rightInset)
     activeFocusOnTab: true
+
+    FontMetrics {
+        id: inputMetrics
+        font.family: inputField.font.family
+        font.pixelSize: inputField.font.pixelSize
+        font.weight: inputField.font.weight
+        font.styleName: inputField.font.styleName
+        font.letterSpacing: inputField.font.letterSpacing
+    }
 
     Rectangle {
         id: backgroundRect
@@ -138,7 +149,11 @@ FocusScope {
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
         font.weight: Theme.textBodyWeight
+        font.styleName: Theme.textBodyStyleName
+        font.letterSpacing: Theme.textBodyLetterSpacing
         font.preferShaping: true
+        verticalAlignment: TextInput.AlignVCenter
+        renderType: TextInput.NativeRendering
         activeFocusOnTab: true
         clip: true
         selectByMouse: true

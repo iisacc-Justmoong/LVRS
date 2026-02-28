@@ -180,6 +180,36 @@ Item {
         return Math.max(0, Math.trunc(numericIndent))
     }
 
+    function itemHasChildrenAtIndexInList(currentItems, itemIndex) {
+        if (itemIndex < 0 || itemIndex >= currentItems.length - 1)
+            return false
+
+        const item = currentItems[itemIndex]
+        const nextItem = currentItems[itemIndex + 1]
+        if (!item || !nextItem)
+            return false
+
+        return itemIndentLevel(nextItem) > itemIndentLevel(item)
+    }
+
+    function itemCanExpandInList(currentItems, item, itemIndex) {
+        if (!item || !item.showChevron)
+            return false
+        return itemHasChildrenAtIndexInList(currentItems, itemIndex)
+    }
+
+    function syncItemChildPresence(currentItems) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i]
+            if (!item || item.hasChildItems === undefined)
+                continue
+
+            const hasChildren = itemHasChildrenAtIndexInList(currentItems, i)
+            if (item.hasChildItems !== hasChildren)
+                item.hasChildItems = hasChildren
+        }
+    }
+
     function indexOfItemInList(currentItems, item) {
         if (!item)
             return -1
@@ -287,7 +317,7 @@ Item {
             const candidate = currentItems[i]
             const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < requiredIndent) {
-                if (candidate.showChevron && !candidate.expanded)
+                if (itemCanExpandInList(currentItems, candidate, i) && !candidate.expanded)
                     return false
                 requiredIndent = candidateIndent
             }
@@ -341,7 +371,7 @@ Item {
             const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < requiredIndent) {
                 visibleByDepth[candidateIndent] = !!_visibilityFlags[i]
-                expandedByDepth[candidateIndent] = !candidate.showChevron || !!candidate.expanded
+                expandedByDepth[candidateIndent] = !itemCanExpandInList(currentItems, candidate, i) || !!candidate.expanded
                 requiredIndent = candidateIndent
             }
         }
@@ -371,6 +401,8 @@ Item {
             fromIndex = 0
             toIndex = currentItems.length - 1
         }
+
+        syncItemChildPresence(currentItems)
 
         const visibleByDepth = []
         const expandedByDepth = []
@@ -408,7 +440,7 @@ Item {
                 item._rowVisibleInternal = rowVisible
 
             visibleByDepth[indent] = rowVisible
-            expandedByDepth[indent] = !item.showChevron || !!item.expanded
+            expandedByDepth[indent] = !itemCanExpandInList(currentItems, item, i) || !!item.expanded
 
             if (rowVisible) {
                 rangeVisible.push(i)
@@ -457,7 +489,7 @@ Item {
             const candidate = currentItems[i]
             const candidateIndent = itemIndentLevel(candidate)
             if (candidateIndent < requiredIndent) {
-                if (candidate.showChevron && !candidate.expanded) {
+                if (itemCanExpandInList(currentItems, candidate, i) && !candidate.expanded) {
                     candidate.expanded = true
                     if (earliestChangedIndex < 0 || i < earliestChangedIndex)
                         earliestChangedIndex = i
@@ -877,9 +909,10 @@ Item {
             const hasChildren = modelCount(childNodes) > 0
 
             const explicitChevron = isObjectNode ? roleValue(node, showChevronRole, undefined) : undefined
-            const showChevron = explicitChevron === undefined || explicitChevron === null
-                ? hasChildren
+            const showChevronRequested = explicitChevron === undefined || explicitChevron === null
+                ? true
                 : !!explicitChevron
+            const showChevron = hasChildren && showChevronRequested
 
             const rawIndentLevel = isObjectNode
                 ? roleValue(node, "indentLevel",
@@ -909,6 +942,7 @@ Item {
                           iconSource: iconSource,
                           iconGlyph: iconGlyph,
                           showChevron: showChevron,
+                          hasChildren: hasChildren,
                           expanded: expanded,
                           selected: selected,
                           enabled: enabled,
@@ -971,6 +1005,7 @@ Item {
                                                                  iconSource: descriptor.iconSource,
                                                                  iconGlyph: descriptor.iconGlyph,
                                                                  showChevron: descriptor.showChevron,
+                                                                 hasChildItems: descriptor.hasChildren,
                                                                  expanded: descriptor.expanded,
                                                                  selected: descriptor.selected,
                                                                  enabled: descriptor.enabled,
@@ -1025,7 +1060,7 @@ Item {
         const currentItems = collectItems()
         for (let i = 0; i < currentItems.length; i++) {
             const item = currentItems[i]
-            if (item && item.showChevron && !item.expanded)
+            if (item && itemCanExpandInList(currentItems, item, i) && !item.expanded)
                 item.expanded = true
         }
         scheduleRefreshState()
@@ -1036,7 +1071,7 @@ Item {
         const currentItems = collectItems()
         for (let i = 0; i < currentItems.length; i++) {
             const item = currentItems[i]
-            if (!item || !item.showChevron)
+            if (!item || !itemCanExpandInList(currentItems, item, i))
                 continue
             const indent = Math.max(0, item.indentLevel !== undefined ? item.indentLevel : 0)
             item.expanded = keepRoot && indent === 0
@@ -1104,7 +1139,12 @@ Item {
         if (!activeItem)
             return false
 
-        if (activeItem.showChevron && activeItem.expanded) {
+        const currentItems = collectItems()
+        const activeIndex = indexOfItemInList(currentItems, activeItem)
+        if (activeIndex < 0)
+            return false
+
+        if (itemCanExpandInList(currentItems, activeItem, activeIndex) && activeItem.expanded) {
             activeItem.expanded = false
             return true
         }
@@ -1122,7 +1162,12 @@ Item {
         if (!activeItem)
             return false
 
-        if (activeItem.showChevron && !activeItem.expanded) {
+        const currentItems = collectItems()
+        const activeIndex = indexOfItemInList(currentItems, activeItem)
+        if (activeIndex < 0)
+            return false
+
+        if (itemCanExpandInList(currentItems, activeItem, activeIndex) && !activeItem.expanded) {
             activeItem.expanded = true
             return true
         }

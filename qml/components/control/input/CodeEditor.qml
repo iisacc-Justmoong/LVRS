@@ -52,12 +52,15 @@ FocusScope {
     property int fontWeight: Theme.textBodyWeight
     property string fontStyleName: Theme.textBodyStyleName
     property real fontLetterSpacing: Theme.textBodyLetterSpacing
+    property real textLineHeight: Theme.textBodyLineHeight
 
     readonly property bool focused: activeFocus || editor.activeFocus
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property int headerBlockHeight: showSnippetHeader ? (headerHeight + headerSpacing) : 0
     readonly property int topInset: insetVertical + headerBlockHeight
     readonly property int resolvedEditorHeight: Math.max(fieldMinHeight, editorHeight)
+    readonly property int resolvedTextLineHeight: Math.max(1, Math.ceil(textLineHeight))
+    readonly property int textLineBoxHeight: Math.max(resolvedTextLineHeight, Math.ceil(editorFontMetrics.lineSpacing))
 
     signal textEdited(string text)
     signal submitted(string text)
@@ -97,6 +100,15 @@ FocusScope {
     implicitHeight: resolvedEditorHeight
     activeFocusOnTab: true
 
+    FontMetrics {
+        id: editorFontMetrics
+        font.family: control.fontFamily
+        font.pixelSize: control.fontPixelSize
+        font.weight: control.fontWeight
+        font.styleName: control.fontStyleName
+        font.letterSpacing: control.fontLetterSpacing
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: control.cornerRadius
@@ -126,7 +138,7 @@ FocusScope {
             interactive: contentHeight > height || contentWidth > width
             boundsBehavior: Flickable.StopAtBounds
             contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
-            contentHeight: Math.max(height, editor.y + editor.paintedHeight + control.insetVertical)
+            contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
 
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
@@ -141,7 +153,7 @@ FocusScope {
                 x: control.insetHorizontal
                 y: control.topInset
                 width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: paintedHeight + 2
+                height: Math.max(control.textLineBoxHeight, contentHeight)
                 wrapMode: TextEdit.NoWrap
                 textFormat: TextEdit.PlainText
                 color: control.enabled ? control.textColor : control.textColorDisabled
@@ -153,6 +165,7 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
+                renderType: TextEdit.NativeRendering
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true

@@ -63,6 +63,8 @@ FocusScope {
     readonly property int resolvedTextFormat: TextEdit.PlainText
     readonly property int effectiveWrapMode: enforceModeDefaults ? resolvedWrapMode : wrapMode
     readonly property int effectiveTextFormat: enforceModeDefaults ? resolvedTextFormat : textFormat
+    readonly property int resolvedTextLineHeight: Math.max(1, Math.ceil(textLineHeight))
+    readonly property int textLineBoxHeight: Math.max(resolvedTextLineHeight, Math.ceil(editorFontMetrics.lineSpacing))
 
     readonly property string normalizedInput: TextMarkup.normalize(editor.text)
     readonly property string renderedOutput: TextMarkup.renderHtml(editor.text)
@@ -116,6 +118,15 @@ FocusScope {
                     + (previewVisible ? outputSpacing + previewHeight : 0)
     activeFocusOnTab: true
 
+    FontMetrics {
+        id: editorFontMetrics
+        font.family: control.fontFamily
+        font.pixelSize: control.fontPixelSize
+        font.weight: control.fontWeight
+        font.styleName: control.fontStyleName
+        font.letterSpacing: control.fontLetterSpacing
+    }
+
     Item {
         id: editArea
         anchors.left: parent.left
@@ -136,7 +147,7 @@ FocusScope {
             interactive: contentHeight > height || contentWidth > width
             boundsBehavior: Flickable.StopAtBounds
             contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
-            contentHeight: Math.max(height, editor.y + editor.paintedHeight + control.insetVertical)
+            contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
 
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
@@ -151,7 +162,7 @@ FocusScope {
                 x: control.insetHorizontal
                 y: control.insetVertical
                 width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: paintedHeight + 2
+                height: Math.max(control.textLineBoxHeight, contentHeight)
                 wrapMode: control.effectiveWrapMode
                 textFormat: control.effectiveTextFormat
                 color: control.enabled ? control.textColor : control.textColorDisabled
@@ -163,6 +174,7 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
+                renderType: TextEdit.NativeRendering
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true

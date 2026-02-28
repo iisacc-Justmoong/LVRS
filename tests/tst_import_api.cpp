@@ -26,6 +26,7 @@ private slots:
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
+    void hierarchy_chevron_requires_children_loads();
     void button_padding_matches_figma_spec();
     void input_field_figma_contract_loads();
     void toggle_switch_figma_color_contract_loads();
@@ -825,6 +826,63 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("rowClickToggleBlocked").toBool());
+}
+
+void ImportApiTests::hierarchy_chevron_requires_children_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 260
+    height: 220
+
+    LV.HierarchyList {
+        id: list
+        visible: false
+
+        LV.HierarchyItem {
+            id: parentItem
+            label: "Parent"
+            indentLevel: 0
+            showChevron: true
+            expanded: true
+        }
+
+        LV.HierarchyItem {
+            id: childLeaf
+            label: "Child Leaf"
+            indentLevel: 1
+            showChevron: true
+        }
+
+        LV.HierarchyItem {
+            id: rootLeaf
+            label: "Root Leaf"
+            indentLevel: 0
+            showChevron: true
+        }
+    }
+
+    property bool chevronRuleReady:
+        list.itemCount === 3
+        && parentItem.hasChildItems
+        && parentItem.effectiveShowChevron
+        && !childLeaf.hasChildItems
+        && !childLeaf.effectiveShowChevron
+        && !rootLeaf.hasChildItems
+        && !rootLeaf.effectiveShowChevron
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("chevronRuleReady").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()

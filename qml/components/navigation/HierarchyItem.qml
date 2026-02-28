@@ -20,6 +20,8 @@ AbstractButton {
     property url iconSource: ""
     property string iconGlyph: ""
     property bool showChevron: true
+    property bool hasChildItems: true
+    readonly property bool effectiveShowChevron: showChevron && hasChildItems
     property bool expanded: false
     property bool selected: false
 
@@ -154,7 +156,7 @@ AbstractButton {
             Layout.preferredWidth: control.chevronSize
             Layout.preferredHeight: control.chevronSize
             Layout.alignment: Qt.AlignVCenter
-            visible: control.showChevron
+            visible: control.effectiveShowChevron
 
             Canvas {
                 id: chevronCanvas
@@ -164,7 +166,7 @@ AbstractButton {
                 onPaint: {
                     const ctx = getContext("2d")
                     ctx.clearRect(0, 0, width, height)
-                    if (!control.showChevron)
+                    if (!control.effectiveShowChevron)
                         return
 
                     ctx.beginPath()
@@ -187,7 +189,7 @@ AbstractButton {
 
             MouseArea {
                 anchors.fill: parent
-                enabled: control.showChevron && control.enabled
+                enabled: control.effectiveShowChevron && control.enabled
                 acceptedButtons: Qt.LeftButton
                 onClicked: function(mouse) {
                     mouse.accepted = true
@@ -204,6 +206,11 @@ AbstractButton {
             control.hierarchyList.scheduleRefreshState()
     }
     onShowChevronChanged: {
+        chevronCanvas.requestPaint()
+        if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
+            control.hierarchyList.scheduleRefreshState()
+    }
+    onHasChildItemsChanged: {
         chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
