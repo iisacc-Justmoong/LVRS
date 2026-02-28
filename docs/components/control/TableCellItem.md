@@ -20,6 +20,14 @@ Location: `qml/components/control/display/TableCellItem.qml`
 - `showDivider`
 - `clipContent`
 - `textStyle` (Label style enum value)
+- `inputable` (default `false`; toggles inline input overlay at text bounds)
+- `inputResult` (latest editable string value)
+
+Input events:
+
+- `inputEdited(text)`
+- `inputSubmitted(text)`
+- `applyInputResult(value)` returns normalized `string`
 
 Resolved read-only values:
 
@@ -50,6 +58,7 @@ LV.TableCellItem {
 - `itemData` supports object keys such as `label`, `text`, `title`.
 - If object keys are missing, component-level fallback props are used.
 - Divider and text rendering stay dense (`24px` cell height, ellipsis text).
+- When `inputable` is enabled, `InputField` overlays the text area and keeps geometry aligned with the original label slot.
 
 ## Practical Tip
 

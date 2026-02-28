@@ -31,6 +31,7 @@ private slots:
     void hierarchy_row_click_only_activates_not_toggles();
     void hierarchy_chevron_requires_children_loads();
     void hierarchy_item_hover_and_active_state_visual_contract_loads();
+    void hierarchy_item_inputable_overlay_contract_loads();
     void button_padding_matches_figma_spec();
     void input_field_figma_contract_loads();
     void toggle_switch_figma_color_contract_loads();
@@ -415,6 +416,18 @@ import LVRS as LV
 Item {
     width: 640
     height: 420
+    property int activationAttempts: 0
+
+    function tryActivateLeaf() {
+        if (hierarchy.activeListItemKey === "leaf-a1")
+            return
+        if (activationAttempts >= 40)
+            return
+        activationAttempts += 1
+        const activated = hierarchy.activateListItemByKey("leaf-a1")
+        if (!activated)
+            Qt.callLater(tryActivateLeaf)
+    }
 
     LV.Hierarchy {
         id: hierarchy
@@ -424,6 +437,7 @@ Item {
         model: [
             {
                 key: "root",
+                depth: 0,
                 itemId: 10,
                 text: "Root",
                 icon: "viewMoreSymbolicDefault",
@@ -431,16 +445,18 @@ Item {
                 children: [
                     {
                         key: "child-a",
+                        depth: 1,
                         itemId: 11,
                         text: "Child A",
                         icon: "viewMoreSymbolicDefault",
                         expanded: false,
                         children: [
-                            { key: "leaf-a1", itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" }
+                            { key: "leaf-a1", depth: 2, itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" }
                         ]
                     },
                     {
                         key: "child-b",
+                        depth: 1,
                         itemId: 20,
                         text: "Child B",
                         icon: "viewMoreSymbolicDisabled"
@@ -451,9 +467,7 @@ Item {
     }
 
     Component.onCompleted: {
-        Qt.callLater(function() {
-            hierarchy.activateListItemByKey("leaf-a1")
-        })
+        Qt.callLater(tryActivateLeaf)
     }
 
     property bool treeApiReady:
@@ -531,22 +545,26 @@ Item {
         model: [
             {
                 key: "root",
+                depth: 0,
                 label: "Root",
                 iconName: "projectStructure",
                 expanded: true,
                 children: [
                     {
                         key: "child",
+                        depth: 1,
                         label: "Child",
                         iconName: "viewMoreSymbolicDefault",
                         children: [
                             {
                                 key: "grand",
+                                depth: 2,
                                 label: "Grand",
                                 iconName: "viewMoreSymbolicBorderless",
                                 children: [
                                     {
                                         key: "great",
+                                        depth: 3,
                                         label: "Great",
                                         iconName: "viewMoreSymbolicDisabled"
                                     }
@@ -591,9 +609,9 @@ Item {
             && grandItem.indentLevel === 2
             && greatItem.indentLevel === 3
             && rootItem.computedLeftPadding === 8
-            && childItem.computedLeftPadding === 21
-            && grandItem.computedLeftPadding === 34
-            && greatItem.computedLeftPadding === 47
+            && childItem.computedLeftPadding === 16
+            && grandItem.computedLeftPadding === 24
+            && greatItem.computedLeftPadding === 32
             && activatedGreat
             && hierarchyList.activeItemKey === "great"
             && childItem.expanded
@@ -637,11 +655,12 @@ Item {
         model: [
             {
                 key: "root",
+                depth: 0,
                 label: "Root",
                 iconName: "projectStructure",
                 expanded: true,
                 children: [
-                    { key: "child", label: "Child", iconName: "viewMoreSymbolicDefault" }
+                    { key: "child", depth: 1, label: "Child", iconName: "viewMoreSymbolicDefault" }
                 ]
             }
         ]
@@ -793,6 +812,9 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    id: root
+    property int rowProbeAttempts: 0
+
     LV.Hierarchy {
         id: hierarchy
         width: 260
@@ -800,11 +822,12 @@ Item {
         model: [
             {
                 key: "root",
+                depth: 0,
                 label: "Root",
                 expanded: true,
                 selected: true,
                 children: [
-                    { key: "child", label: "Child" }
+                    { key: "child", depth: 1, label: "Child" }
                 ]
             }
         ]
@@ -812,17 +835,22 @@ Item {
 
     property bool rowClickToggleBlocked: false
 
-    Component.onCompleted: {
-        Qt.callLater(function() {
-            const row = hierarchy.activeListItem
-            if (!row || !row.clicked) {
-                rowClickToggleBlocked = false
-                return
+    function evaluateRowClickToggle() {
+        const row = hierarchy.activeListItem
+        if (!row || !row.clicked) {
+            if (rowProbeAttempts < 40) {
+                rowProbeAttempts += 1
+                Qt.callLater(evaluateRowClickToggle)
             }
-            const wasExpanded = !!row.expanded
-            row.clicked()
-            rowClickToggleBlocked = (row.expanded === wasExpanded)
-        })
+            return
+        }
+        const wasExpanded = !!row.expanded
+        row.clicked()
+        rowClickToggleBlocked = (row.expanded === wasExpanded)
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(evaluateRowClickToggle)
     }
 }
 )";
@@ -989,6 +1017,65 @@ Window {
     const QColor activeRenderedColor = activeBackground->property("color").value<QColor>();
     const QColor expectedActiveColor = itemBObject->property("backgroundColor").value<QColor>();
     QCOMPARE(activeRenderedColor, expectedActiveColor);
+}
+
+void ImportApiTests::hierarchy_item_inputable_overlay_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property int editedCount: 0
+    property int submittedCount: 0
+    property string editedValue: ""
+    property string submittedValue: ""
+    property string applyResult: ""
+
+    LV.HierarchyItem {
+        id: item
+        visible: false
+        label: "Node"
+        onInputEdited: function(text) {
+            root.editedCount += 1
+            root.editedValue = text
+        }
+        onInputSubmitted: function(text) {
+            root.submittedCount += 1
+            root.submittedValue = text
+        }
+    }
+
+    Component.onCompleted: {
+        item.inputable = true
+        item.applyInputResult("Node 2")
+        applyResult = item.applyInputResult("Node 3")
+        item.inputEdited("Node 4")
+        item.inputSubmitted("Node 5")
+    }
+
+    property bool contractReady:
+        item.inputable === true
+        && item.rowHeight === 20
+        && item.indentStep === 8
+        && applyResult === "Node 3"
+        && item.inputResult === "Node 3"
+        && item.label === "Node 3"
+        && editedCount === 1
+        && submittedCount === 1
+        && editedValue === "Node 4"
+        && submittedValue === "Node 5"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()
@@ -1451,6 +1538,25 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    id: root
+
+    property bool defaultsCaptured: false
+    property int cellEditedCount: 0
+    property int cellSubmittedCount: 0
+    property string cellEditedValue: ""
+    property string cellSubmittedValue: ""
+    property int rowEditedColumn: -1
+    property int rowSubmittedColumn: -1
+    property string rowEditedValue: ""
+    property string rowSubmittedValue: ""
+    property int tableEditedRow: -1
+    property int tableEditedColumn: -1
+    property int tableSubmittedRow: -1
+    property int tableSubmittedColumn: -1
+    property string tableEditedValue: ""
+    property string tableSubmittedValue: ""
+    property string cellApplyResult: ""
+
     LV.TableCellItem {
         id: singleCell
         visible: false
@@ -1459,6 +1565,14 @@ Item {
             dividerColor: LV.Theme.panelBackground03,
             textColor: LV.Theme.bodyColor
         })
+        onInputEdited: function(text) {
+            root.cellEditedCount += 1
+            root.cellEditedValue = text
+        }
+        onInputSubmitted: function(text) {
+            root.cellSubmittedCount += 1
+            root.cellSubmittedValue = text
+        }
     }
 
     LV.TableHeader {
@@ -1478,9 +1592,17 @@ Item {
         width: 717
         cellItems: [
             { text: "Renderer" },
-            { text: "Active" },
+            { text: "Active", inputable: true },
             "Core"
         ]
+        onCellInputEdited: function(columnIndex, text) {
+            root.rowEditedColumn = columnIndex
+            root.rowEditedValue = text
+        }
+        onCellInputSubmitted: function(columnIndex, text) {
+            root.rowSubmittedColumn = columnIndex
+            root.rowSubmittedValue = text
+        }
     }
 
     LV.Table {
@@ -1499,25 +1621,72 @@ Item {
                 { text: "Core" }
             ]
         ]
+        onCellInputEdited: function(rowIndex, columnIndex, text) {
+            root.tableEditedRow = rowIndex
+            root.tableEditedColumn = columnIndex
+            root.tableEditedValue = text
+        }
+        onCellInputSubmitted: function(rowIndex, columnIndex, text) {
+            root.tableSubmittedRow = rowIndex
+            root.tableSubmittedColumn = columnIndex
+            root.tableSubmittedValue = text
+        }
+    }
+
+    Component.onCompleted: {
+        defaultsCaptured = !singleCell.inputable && !row.inputable && !table.inputable
+
+        singleCell.inputable = true
+        singleCell.applyInputResult("Renderer v2")
+        singleCell.inputEdited("Renderer v3")
+        singleCell.inputSubmitted("Renderer v4")
+        cellApplyResult = singleCell.applyInputResult("Renderer v5")
+
+        row.cellInputEdited(1, "Active v2")
+        row.cellInputSubmitted(2, "Core v2")
+
+        table.cellInputEdited(0, 1, "Active v3")
+        table.cellInputSubmitted(0, 2, "Core v3")
     }
 
     property bool tableCellContractReady:
-        singleCell.resolvedText === "Renderer"
+        defaultsCaptured
+        && singleCell.resolvedText === "Renderer"
+        && cellApplyResult === "Renderer v5"
+        && singleCell.inputResult === "Renderer v5"
         && singleCell.resolvedDividerColor === LV.Theme.panelBackground03
         && singleCell.resolvedTextColor === LV.Theme.bodyColor
+        && cellEditedCount === 1
+        && cellSubmittedCount === 1
+        && cellEditedValue === "Renderer v3"
+        && cellSubmittedValue === "Renderer v4"
         && header.resolvedColumnCount === 3
         && header.columnText(0) === "Name"
         && header.columnText(1) === "State"
         && header.columnText(2) === "Owner"
         && header.separatorColor === LV.Theme.panelBackground10
         && row.resolvedCellCount === 3
+        && row.cellInputable(0) === false
+        && row.cellInputable(1) === true
         && row.cellText(0) === "Renderer"
         && row.cellText(1) === "Active"
         && row.cellText(2) === "Core"
         && row.dividerColor === LV.Theme.panelBackground03
+        && rowEditedColumn === 1
+        && rowEditedValue === "Active v2"
+        && rowSubmittedColumn === 2
+        && rowSubmittedValue === "Core v2"
         && table.resolvedHeaderCount === 3
         && table.rowDividerColor === LV.Theme.panelBackground03
         && table.headerSeparatorColor === LV.Theme.panelBackground10
+        && table.rowInputable(({ inputable: true })) === true
+        && table.rowInputable(({ })) === false
+        && tableEditedRow === 0
+        && tableEditedColumn === 1
+        && tableEditedValue === "Active v3"
+        && tableSubmittedRow === 0
+        && tableSubmittedColumn === 2
+        && tableSubmittedValue === "Core v3"
 }
 )";
 
@@ -1536,10 +1705,27 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    id: root
+
+    property bool listDefaultsCaptured: false
+    property string listApplyResult: ""
+    property int listEditedCount: 0
+    property int listSubmittedCount: 0
+    property string listEditedValue: ""
+    property string listSubmittedValue: ""
+
     LV.ListItem {
         id: listItem
         label: "Label"
         visible: false
+        onInputEdited: function(text) {
+            root.listEditedCount += 1
+            root.listEditedValue = text
+        }
+        onInputSubmitted: function(text) {
+            root.listSubmittedCount += 1
+            root.listSubmittedValue = text
+        }
     }
 
     LV.ListFooter {
@@ -1550,8 +1736,23 @@ Item {
         button3: ({ "type": "menu", "iconName": "viewMoreSymbolicDefault", "enabled": false })
     }
 
+    Component.onCompleted: {
+        listDefaultsCaptured = !listItem.inputable
+        listItem.inputable = true
+        listApplyResult = listItem.applyInputResult("Label 2")
+        listItem.inputEdited("Label 3")
+        listItem.inputSubmitted("Label 4")
+    }
+
     property bool contractReady:
-        listItem.label === "Label"
+        listDefaultsCaptured
+        && listApplyResult === "Label 2"
+        && listItem.inputResult === "Label 2"
+        && listItem.label === "Label 2"
+        && listEditedCount === 1
+        && listSubmittedCount === 1
+        && listEditedValue === "Label 3"
+        && listSubmittedValue === "Label 4"
         && listItem.horizontalPadding === LV.Theme.gap4
         && listItem.verticalPadding === LV.Theme.gap2
         && Math.abs(listItem.separatorHeight - 1) < 0.01

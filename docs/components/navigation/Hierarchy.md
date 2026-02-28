@@ -35,6 +35,8 @@ Toolbar aliases:
 Behavior aliases:
 
 - `autoExpandDepth`
+- `depthRole`
+- `inferDepthFromStructure`
 - `keyboardListNavigationEnabled`
 
 Optional footer:
@@ -75,9 +77,10 @@ LV.Hierarchy {
     model: [
         {
             key: "root",
+            depth: 0,
             label: "Root",
             expanded: true,
-            children: [{ key: "child", label: "Child" }]
+            children: [{ key: "child", depth: 1, label: "Child" }]
         }
     ]
     footerVisible: true

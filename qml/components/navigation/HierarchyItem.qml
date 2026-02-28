@@ -24,10 +24,15 @@ AbstractButton {
     readonly property bool effectiveShowChevron: showChevron && hasChildItems
     property bool expanded: false
     property bool selected: false
+    property bool inputable: false
+    property string inputResult: control.text
+
+    signal inputEdited(string text)
+    signal inputSubmitted(string text)
 
     property int indentLevel: 0
-    property int indentStep: 13
-    property int rowHeight: 28
+    property int indentStep: 8
+    property int rowHeight: 20
     property int itemWidth: 200
     property int iconSize: 16
     property int chevronSize: 16
@@ -76,6 +81,21 @@ AbstractButton {
             ? Theme.iconPath(resolvedIconName)
             : ""
 
+    function normalizedText(value) {
+        if (value === undefined || value === null)
+            return ""
+        return String(value)
+    }
+
+    function applyInputResult(value) {
+        const normalized = normalizedText(value)
+        if (control.text !== normalized)
+            control.text = normalized
+        if (control.inputResult !== normalized)
+            control.inputResult = normalized
+        return normalized
+    }
+
     tone: AbstractButton.Borderless
     state: control.interactionStateName
     leftPadding: computedLeftPadding
@@ -83,6 +103,7 @@ AbstractButton {
     topPadding: 0
     bottomPadding: 0
     spacing: Theme.gapNone
+    cornerRadius: Theme.radiusControl
     implicitHeight: rowHeight
     implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
     width: parent ? parent.width : implicitWidth
@@ -104,7 +125,7 @@ AbstractButton {
     }
 
     contentItem: RowLayout {
-        spacing: Theme.gap14
+        spacing: Theme.gapNone
 
         RowLayout {
             Layout.fillWidth: true
@@ -153,18 +174,66 @@ AbstractButton {
                 }
             }
 
-            Label {
-                id: labelNode
+            Item {
+                id: labelHost
                 Layout.fillWidth: true
-                style: body
-                text: control.text
-                color: control.enabled ? control.textColorNormal : control.textColorDisabled
-                font.weight: Font.Normal
-                font.styleName: "Regular"
-                lineHeight: 16
-                lineHeightMode: Text.FixedHeight
-                elide: Text.ElideRight
-                verticalAlignment: Text.AlignVCenter
+                implicitHeight: 20
+
+                Label {
+                    id: labelNode
+                    anchors.fill: parent
+                    style: body
+                    text: control.inputResult
+                    color: control.enabled ? control.textColorNormal : control.textColorDisabled
+                    font.pixelSize: 13
+                    font.weight: Font.Normal
+                    font.styleName: "Regular"
+                    lineHeight: 16
+                    lineHeightMode: Text.FixedHeight
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    visible: !control.inputable
+                }
+
+                Loader {
+                    id: labelInputLoader
+                    anchors.fill: parent
+                    active: control.inputable
+                    visible: control.inputable
+                    sourceComponent: Component {
+                        InputField {
+                            enabled: control.enabled
+                            backgroundColor: "transparent"
+                            backgroundColorHover: "transparent"
+                            backgroundColorPressed: "transparent"
+                            backgroundColorFocused: "transparent"
+                            backgroundColorDisabled: "transparent"
+                            placeholderText: ""
+                            clearButtonVisible: false
+                            fieldMinHeight: 20
+                            centeredTextHeight: 16
+                            insetHorizontal: 0
+                            insetVertical: 0
+                            sideSpacing: 0
+                            cornerRadius: 0
+                            textColor: control.textColorNormal
+                            textColorDisabled: control.textColorDisabled
+                            placeholderColor: control.textColorDisabled
+                            placeholderColorDisabled: control.textColorDisabled
+
+                            onTextEdited: {
+                                const value = control.applyInputResult(text)
+                                control.inputEdited(value)
+                            }
+                            onAccepted: control.inputSubmitted(control.applyInputResult(text))
+                        }
+                    }
+
+                    onLoaded: {
+                        if (item)
+                            item.text = control.inputResult
+                    }
+                }
             }
         }
 
@@ -214,6 +283,25 @@ AbstractButton {
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
     }
+    onTextChanged: {
+        const normalized = control.normalizedText(control.text)
+        if (control.inputResult !== normalized)
+            control.inputResult = normalized
+        if (labelInputLoader.status === Loader.Ready
+            && labelInputLoader.item
+            && !labelInputLoader.item.activeFocus
+            && labelInputLoader.item.text !== normalized) {
+            labelInputLoader.item.text = normalized
+        }
+    }
+    onInputableChanged: {
+        if (control.inputable
+            && labelInputLoader.status === Loader.Ready
+            && labelInputLoader.item
+            && !labelInputLoader.item.activeFocus) {
+            labelInputLoader.item.text = control.inputResult
+        }
+    }
     onExpandedChanged: {
         if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)
             control.hierarchyList.notifyExpansionChanged(control)
@@ -235,4 +323,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.HierarchyItem { label: "Main Camera"; iconGlyph: "■"; indentLevel: 1; showChevron: true }
+// LV.HierarchyItem { label: "Main Camera"; iconGlyph: "■"; indentLevel: 1; showChevron: true; inputable: true }

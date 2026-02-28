@@ -10,6 +10,8 @@ AbstractButton {
     property string iconName: ""
     property bool selected: false
     property bool showChevron: false
+    property bool inputable: false
+    property string inputResult: control.label
 
     property int rowHorizontalPadding: Theme.gap4
     property int rowVerticalPadding: Theme.gap2
@@ -19,6 +21,24 @@ AbstractButton {
     property color listBackgroundColor: "transparent"
     property color separatorColor: "#1A000000"
     property real separatorOpacity: 0.5
+
+    signal inputEdited(string text)
+    signal inputSubmitted(string text)
+
+    function normalizedText(value) {
+        if (value === undefined || value === null)
+            return ""
+        return String(value)
+    }
+
+    function applyInputResult(value) {
+        const normalized = normalizedText(value)
+        if (control.label !== normalized)
+            control.label = normalized
+        if (control.inputResult !== normalized)
+            control.inputResult = normalized
+        return normalized
+    }
 
     tone: AbstractButton.Borderless
     horizontalPadding: control.rowHorizontalPadding
@@ -40,15 +60,61 @@ AbstractButton {
         id: contentColumn
         spacing: control.separatorTopSpacing
 
-        Label {
-            id: labelItem
-            style: body
-            text: control.label
-            color: control.effectiveEnabled ? Theme.bodyColor : Theme.disabledColor
+        Item {
             width: parent.width
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
+            implicitHeight: labelItem.implicitHeight
+
+            Label {
+                id: labelItem
+                anchors.fill: parent
+                style: body
+                text: control.inputResult
+                color: control.effectiveEnabled ? Theme.bodyColor : Theme.disabledColor
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+                visible: !control.inputable
+            }
+
+            Loader {
+                id: overlayInputLoader
+                anchors.fill: parent
+                active: control.inputable
+                visible: control.inputable
+                sourceComponent: Component {
+                    InputField {
+                        enabled: control.effectiveEnabled
+                        backgroundColor: "transparent"
+                        backgroundColorHover: "transparent"
+                        backgroundColorPressed: "transparent"
+                        backgroundColorFocused: "transparent"
+                        backgroundColorDisabled: "transparent"
+                        placeholderText: ""
+                        clearButtonVisible: false
+                        fieldMinHeight: 16
+                        centeredTextHeight: 16
+                        insetHorizontal: 0
+                        insetVertical: 0
+                        sideSpacing: 0
+                        cornerRadius: 0
+                        textColor: Theme.bodyColor
+                        textColorDisabled: Theme.disabledColor
+                        placeholderColor: Theme.disabledColor
+                        placeholderColorDisabled: Theme.disabledColor
+
+                        onTextEdited: {
+                            const value = control.applyInputResult(text)
+                            control.inputEdited(value)
+                        }
+                        onAccepted: control.inputSubmitted(control.applyInputResult(text))
+                    }
+                }
+
+                onLoaded: {
+                    if (item)
+                        item.text = control.inputResult
+                }
+            }
         }
 
         Rectangle {
@@ -58,8 +124,28 @@ AbstractButton {
             opacity: control.separatorOpacity
         }
     }
+
+    onLabelChanged: {
+        const normalized = control.normalizedText(control.label)
+        if (control.inputResult !== normalized)
+            control.inputResult = normalized
+        if (overlayInputLoader.status === Loader.Ready
+            && overlayInputLoader.item
+            && !overlayInputLoader.item.activeFocus
+            && overlayInputLoader.item.text !== normalized) {
+            overlayInputLoader.item.text = normalized
+        }
+    }
+    onInputableChanged: {
+        if (control.inputable
+            && overlayInputLoader.status === Loader.Ready
+            && overlayInputLoader.item
+            && !overlayInputLoader.item.activeFocus) {
+            overlayInputLoader.item.text = control.inputResult
+        }
+    }
 }
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.ListItem { label: "Label" }
+// LV.ListItem { label: "Label"; inputable: true }

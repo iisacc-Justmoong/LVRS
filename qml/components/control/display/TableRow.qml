@@ -12,6 +12,10 @@ Item {
     property int contentSpacing: Theme.gap8
     property color dividerColor: Theme.panelBackground03
     property color textColor: Theme.bodyColor
+    property bool inputable: false
+
+    signal cellInputEdited(int columnIndex, string text)
+    signal cellInputSubmitted(int columnIndex, string text)
 
     readonly property var resolvedCellSource: {
         if (control.cellItems !== undefined && control.cellItems !== null)
@@ -60,6 +64,13 @@ Item {
         return entry.label || entry.text || entry.title || "Text"
     }
 
+    function cellInputable(index) {
+        const entry = cellAt(index)
+        if (entry && typeof entry === "object" && Object.prototype.hasOwnProperty.call(entry, "inputable"))
+            return !!entry.inputable
+        return control.inputable
+    }
+
     implicitWidth: 717
     implicitHeight: cellHeight
 
@@ -81,6 +92,13 @@ Item {
                 dividerColor: control.dividerColor
                 textColor: control.textColor
                 clipContent: true
+                inputable: control.cellInputable(index)
+                onInputEdited: function(text) {
+                    control.cellInputEdited(index, text)
+                }
+                onInputSubmitted: function(text) {
+                    control.cellInputSubmitted(index, text)
+                }
             }
         }
     }
@@ -88,4 +106,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableRow { cellItems: [{ text: "Text" }, { text: "Text" }, { text: "Text" }] }
+// LV.TableRow { cellItems: [{ text: "Text" }, { text: "Text" }, { text: "Text" }]; inputable: true }

@@ -18,11 +18,18 @@ Location: `qml/components/control/display/TableRow.qml`
 - `contentSpacing`
 - `dividerColor`
 - `textColor`
+- `inputable` (default `false`; row-level editable default for cells)
+
+Signals:
+
+- `cellInputEdited(columnIndex, text)`
+- `cellInputSubmitted(columnIndex, text)`
 
 Helper methods:
 
 - `cellAt(index)`
 - `cellText(index)`
+- `cellInputable(index)`
 
 Computed:
 
@@ -49,6 +56,7 @@ LV.TableRow {
 - `cellItems` is the primary contract; legacy `cells` remains fallback.
 - Each entry is forwarded to `TableCellItem.itemData`.
 - Cell text resolves from primitive values or object fallback keys (`label/text/title`).
+- Cell inputability resolves by `entry.inputable` override first, then row-level `inputable`.
 - Row spacing is computed from available width and fixed cell width.
 - Spacing never goes negative (`Math.max(0, computed)`).
 

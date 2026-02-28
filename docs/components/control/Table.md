@@ -31,12 +31,19 @@ Visual:
 - `dividerColor` (legacy alias for row divider baseline)
 - `rowDividerColor`
 - `headerSeparatorColor`
+- `inputable` (default `false`; table-level editable default for body cells)
+
+Signals:
+
+- `cellInputEdited(rowIndex, columnIndex, text)`
+- `cellInputSubmitted(rowIndex, columnIndex, text)`
 
 Helper methods:
 
 - `rowAt(index)`
 - `columnCountForRow(rowEntry)`
 - `autoCellWidth(rowEntry)`
+- `rowInputable(rowEntry)`
 
 ## Usage
 
@@ -60,6 +67,7 @@ LV.Table {
 
 - Header source resolves from `headerCellItems` first, then `headerColumns`.
 - Row entries are forwarded to `TableRow.cellItems` and each cell to `TableCellItem.itemData`.
+- Editable behavior propagates `Table.inputable -> TableRow.inputable -> TableCellItem.inputable` unless per-row/per-cell override is provided.
 - Header and row counts are resolved for both JS arrays and model-like objects.
 - Row delegates compute width either from fixed `cellWidth` or auto-fit formula.
 - Table container clips content and enforces internal divider contract.

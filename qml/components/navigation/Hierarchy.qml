@@ -21,6 +21,8 @@ Rectangle {
     property alias model: hierarchyList.model
     property alias treeModel: hierarchyList.model
     property alias autoExpandDepth: hierarchyList.autoExpandDepth
+    property alias depthRole: hierarchyList.depthRole
+    property alias inferDepthFromStructure: hierarchyList.inferDepthFromStructure
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     default property alias listItems: hierarchyList.items
 
@@ -168,7 +170,7 @@ Rectangle {
 //         { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
 //     ]
 //     model: [
-//         { key: "root", label: "Root", expanded: true, children: [{ key: "child", label: "Child" }] }
+//         { key: "root", depth: 0, label: "Root", expanded: true, children: [{ key: "child", depth: 1, label: "Child" }] }
 //     ]
 //     footerVisible: true
 //     footerButton1: ({ type: "icon", iconName: "projectStructure" })

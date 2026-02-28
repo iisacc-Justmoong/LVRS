@@ -26,13 +26,15 @@ Display:
 - `hasChildItems`
 - `effectiveShowChevron` (readonly)
 - `expanded`, `selected`
+- `inputable` (default `false`; enables inline input overlay at label bounds)
+- `inputResult` (latest editable label string)
 
 Layout:
 
-- `indentLevel`, `indentStep`, `computedLeftPadding`
-- `rowHeight`, `itemWidth`
+- `indentLevel`, `indentStep` (default `8`), `computedLeftPadding`
+- `rowHeight` (default `20`), `itemWidth` (default `200`)
 - `iconSize`, `chevronSize`
-- `baseLeftPadding`, `rowRightPadding`, `leadingSpacing`
+- `baseLeftPadding` (default `8`), `rowRightPadding` (default `8`), `leadingSpacing` (default `2`)
 
 State visuals:
 
@@ -40,12 +42,19 @@ State visuals:
 - `rowBackgroundColor`, `rowBackgroundColorHover`, `rowBackgroundColorPressed`
 - `rowVisible` (readonly, from `_rowVisibleInternal`)
 
+Input events:
+
+- `inputEdited(text)`
+- `inputSubmitted(text)`
+- `applyInputResult(value)` returns normalized `string`
+
 ## Behavior Contract
 
 - Row click calls `hierarchyList.requestActivate(control)` when available.
 - Chevron click toggles `expanded` and requests activation.
 - Chevron visibility is gated by `showChevron && hasChildItems`.
 - Property changes notify list helper hooks (`scheduleRefreshState`, `notifyExpansionChanged`, `scheduleNormalizeActiveItem`).
+- When `inputable` is `true`, the label region is overlaid by `InputField` in the same geometry and exposes edited text through `inputResult`.
 
 ## Usage
 

@@ -24,6 +24,10 @@ Item {
     property color dividerColor: Theme.panelBackground03
     property color rowDividerColor: dividerColor
     property color headerSeparatorColor: Theme.panelBackground10
+    property bool inputable: false
+
+    signal cellInputEdited(int rowIndex, int columnIndex, string text)
+    signal cellInputSubmitted(int rowIndex, int columnIndex, string text)
 
     readonly property var resolvedHeaderSource: {
         if (control.headerCellItems !== undefined && control.headerCellItems !== null)
@@ -76,6 +80,12 @@ Item {
         return Math.max(1, Math.floor(tableFrame.width / count))
     }
 
+    function rowInputable(rowEntry) {
+        if (rowEntry && typeof rowEntry === "object" && Object.prototype.hasOwnProperty.call(rowEntry, "inputable"))
+            return !!rowEntry.inputable
+        return control.inputable
+    }
+
     implicitWidth: 405
     implicitHeight: tableHeader.implicitHeight + (resolvedRowCount * rowHeight)
 
@@ -114,6 +124,13 @@ Item {
                     cellHeight: control.rowHeight
                     dividerColor: control.rowDividerColor
                     textColor: control.cellTextColor
+                    inputable: control.rowInputable(rowData)
+                    onCellInputEdited: function(columnIndex, text) {
+                        control.cellInputEdited(index, columnIndex, text)
+                    }
+                    onCellInputSubmitted: function(columnIndex, text) {
+                        control.cellInputSubmitted(index, columnIndex, text)
+                    }
                 }
             }
         }
@@ -122,4 +139,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.Table { headerCellItems: [{ label: "Column" }, { label: "Column" }, { label: "Column" }]; rows: [[{ text: "A" }, { text: "B" }, { text: "C" }]] }
+// LV.Table { headerCellItems: [{ label: "Column" }, { label: "Column" }, { label: "Column" }]; rows: [[{ text: "A" }, { text: "B" }, { text: "C" }]]; inputable: true }

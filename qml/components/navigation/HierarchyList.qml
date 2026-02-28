@@ -26,9 +26,11 @@ Item {
     property string expandedRole: "expanded"
     property string selectedRole: "selected"
     property string showChevronRole: "showChevron"
+    property string depthRole: "depth"
+    property bool inferDepthFromStructure: false
     property int autoExpandDepth: 1
 
-    property int generatedIndentStep: 13
+    property int generatedIndentStep: 8
     property int generatedRowHeight: 28
     property int generatedItemWidth: 200
     property int generatedIconSize: 16
@@ -103,6 +105,29 @@ Item {
             return true
         }
         return !!value
+    }
+
+    function normalizedDepth(rawDepth, fallbackDepth) {
+        const numericDepth = Number(rawDepth)
+        if (Number.isFinite(numericDepth))
+            return Math.max(0, Math.trunc(numericDepth))
+        return Math.max(0, Math.trunc(fallbackDepth))
+    }
+
+    function resolvedIndentLevel(node, fallbackDepth) {
+        if (!node || typeof node !== "object")
+            return normalizedDepth(fallbackDepth, 0)
+
+        const explicitIndentLevel = roleValue(node, "indentLevel", undefined)
+        if (explicitIndentLevel !== undefined && explicitIndentLevel !== null)
+            return normalizedDepth(explicitIndentLevel, fallbackDepth)
+
+        const explicitDepth = roleValue(node, depthRole, undefined)
+        if (explicitDepth !== undefined && explicitDepth !== null)
+            return normalizedDepth(explicitDepth, fallbackDepth)
+
+        const structuralDepth = inferDepthFromStructure ? fallbackDepth : 0
+        return normalizedDepth(structuralDepth, 0)
     }
 
     function modelCount(modelData) {
@@ -781,9 +806,20 @@ Item {
     }
 
     function activateByKey(itemKey) {
-        const item = resolveByKey(itemKey)
-        if (!item)
+        const normalizedKey = itemKey === undefined || itemKey === null ? "" : String(itemKey).trim()
+        if (normalizedKey.length === 0)
             return false
+
+        const item = resolveByKey(normalizedKey)
+        if (!item) {
+            if (usingTreeModel && (_isBuildingGeneratedItems || _rebuildScheduled || _itemsDirty)) {
+                Qt.callLater(function() {
+                    control.activateByKey(normalizedKey)
+                })
+            }
+            return false
+        }
+
         requestActivate(item)
         return activeItem === item
     }
@@ -914,14 +950,9 @@ Item {
                 : !!explicitChevron
             const showChevron = hasChildren && showChevronRequested
 
-            const rawIndentLevel = isObjectNode
-                ? roleValue(node, "indentLevel",
-                            roleValue(node, "depth", depth))
-                : depth
-            const numericIndentLevel = Number(rawIndentLevel)
-            const indentLevel = Number.isFinite(numericIndentLevel)
-                ? Math.max(0, Math.trunc(numericIndentLevel))
-                : Math.max(0, depth)
+            const indentLevel = isObjectNode
+                ? resolvedIndentLevel(node, depth)
+                : normalizedDepth(inferDepthFromStructure ? depth : 0, 0)
 
             const parentItemKeyRaw = isObjectNode ? roleValue(node, "parentKey", parentKey) : parentKey
             const parentItemKey = parentItemKeyRaw === undefined || parentItemKeyRaw === null
@@ -984,7 +1015,7 @@ Item {
             _isBuildingGeneratedItems = false
             _rebuildDescriptors = []
             _rebuildDescriptorIndex = 0
-            scheduleNormalizeActiveItem()
+            normalizeActiveItem()
             return
         }
 
@@ -1032,7 +1063,7 @@ Item {
         _isBuildingGeneratedItems = false
         _rebuildDescriptors = []
         _rebuildDescriptorIndex = 0
-        scheduleNormalizeActiveItem()
+        normalizeActiveItem()
     }
 
     function rebuildTreeItems() {
@@ -1302,7 +1333,7 @@ Item {
 // import LVRS 1.0 as LV
 // LV.HierarchyList {
 //     model: [
-//         { key: "world", label: "World", expanded: true,
-//           children: [{ key: "camera", label: "Camera" }] }
+//         { key: "world", depth: 0, label: "World", expanded: true,
+//           children: [{ key: "camera", depth: 1, label: "Camera" }] }
 //     ]
 // }

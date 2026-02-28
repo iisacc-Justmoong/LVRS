@@ -17,11 +17,13 @@ Model and roles:
 - `model` (main tree input), `treeModel` (compat alias)
 - `childrenRole`, `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
 - `enabledRole`, `expandedRole`, `selectedRole`, `showChevronRole`
+- `depthRole` (default `depth`)
+- `inferDepthFromStructure` (default `false`)
 - `autoExpandDepth`
 
 Generated row defaults:
 
-- `generatedIndentStep`, `generatedRowHeight`, `generatedItemWidth`
+- `generatedIndentStep` (default `8`), `generatedRowHeight`, `generatedItemWidth`
 - `generatedIconSize`, `generatedChevronSize`
 
 State:
@@ -52,6 +54,7 @@ Primary methods:
 
 - `model` is present: list generates managed `HierarchyItem` instances.
 - `model` is empty: uses manually slotted `items` as managed rows.
+- Indentation uses explicit model depth (`indentLevel` first, then `depthRole`); structural inference is optional via `inferDepthFromStructure`.
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Visibility is computed from ancestor expansion state and cached incrementally.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
@@ -65,9 +68,10 @@ LV.HierarchyList {
     model: [
         {
             key: "root",
+            depth: 0,
             label: "Root",
             children: [
-                { key: "child", label: "Child" }
+                { key: "child", depth: 1, label: "Child" }
             ]
         }
     ]
