@@ -13,6 +13,8 @@ The primary objective is operational clarity: each document should answer what A
 6. `docs/architecture/performance-observability.md`
 7. `docs/performance-baseline-p0.md`
 8. `docs/quality-automation-p4.md`
+9. `Chnagelog.md`
+10. `rust-cli/README.md`
 
 ## Documentation Contract
 
@@ -42,6 +44,11 @@ This structure is intentional so the same question can be answered consistently 
 
 - `docs/performance-baseline-p0.md`
 - `docs/quality-automation-p4.md`
+
+## Change Records and Tooling
+
+- `Chnagelog.md` (repo root): commit-trace change summary by date.
+- `rust-cli/README.md` (repo root): `lvrs` CLI entrypoints (`install`, `bootstrap`, `doctor`, `platform`).
 
 ## Backend Singletons
 
@@ -125,6 +132,9 @@ This structure is intentional so the same question can be answered consistently 
 
 - How to inspect runtime behavior and debug output?  
   Start with `docs/backend/RuntimeEvents.md`, `docs/backend/Debug.md`, and `docs/backend/DebugOutput.md`.
+
+- How to run install/bootstrap with current workflow?  
+  Start with `docs/build.md`, then `rust-cli/README.md`.
 
 ## Publishing Notes for Static Site Generators
 

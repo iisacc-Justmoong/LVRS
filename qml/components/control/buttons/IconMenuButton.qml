@@ -39,9 +39,9 @@ AbstractButton {
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
     readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
     readonly property string indicatorNameDefault: "generalchevronDown"
-    readonly property string indicatorNameBorderless: "generalchevronDown"
-    readonly property string indicatorNameAccent: "generalchevronDown"
-    readonly property string indicatorNameDisabled: "generalchevronDown"
+    readonly property string indicatorNameBorderless: "generalchevronDownBorderless"
+    readonly property string indicatorNameAccent: "generalchevronDownAccent"
+    readonly property string indicatorNameDisabled: "generalchevronDownDisabled"
     readonly property string resolvedIndicatorName: !control.effectiveEnabled
         ? control.indicatorNameDisabled
         : control.tone === AbstractButton.Borderless

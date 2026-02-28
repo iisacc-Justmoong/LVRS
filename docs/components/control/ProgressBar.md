@@ -2,38 +2,40 @@
 
 Location: `qml/components/control/display/ProgressBar.qml`
 
-`ProgressBar` is a lightweight value-range visualizer for dashboard/status surfaces.
+`ProgressBar` is a lightweight range-based progress indicator.
 
 ## Purpose
 
-- Render normalized progress from arbitrary numeric range.
-- Provide compact size presets with customizable colors.
+- Render normalized progress from custom numeric ranges.
+- Support compact size presets and shape policy.
 
-## API
+## Core API
 
-Size constants:
+Size and shape:
 
-- `large`
-- `regular`
+- `size` (`large`, `regular`)
+- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
+- `cornerRadius`
+- `barHeight` (readonly)
 
-Range/value:
+Range:
 
 - `startValue`
 - `endValue`
 - `currentValue`
+- `valueRange` (readonly)
+- `progress` (readonly, clamped to `0..1`)
 
-Visual:
+Colors:
 
 - `trackColor`
 - `fillColor`
-- `cornerRadius`
-- `largeHeight`, `regularHeight`
 
-Computed:
+## Behavior Contract
 
-- `barHeight`
-- `valueRange`
-- `progress` (clamped to `[0, 1]`)
+- `progress = (currentValue - startValue) / (endValue - startValue)` with clamping.
+- Near-zero range falls back to binary output (`0` or `1`).
+- Cylinder shape uses min(width,height)/2 radius.
 
 ## Usage
 
@@ -41,38 +43,10 @@ Computed:
 import LVRS 1.0 as LV
 
 LV.ProgressBar {
-    width: 200
+    width: 180
     size: regular
     startValue: 0
     endValue: 100
-    currentValue: 72
+    currentValue: 64
 }
 ```
-
-## How It Works
-
-- Progress uses normalized fraction `(current - start) / (end - start)` with clamp.
-- Zero/near-zero range falls back to binary result (0 or 1).
-- Fill rect width is `track.width * progress`.
-
-## Advanced Example: Non-Zero Range Base
-
-```qml
-import LVRS 1.0 as LV
-
-LV.ProgressBar {
-    startValue: 40
-    endValue: 80
-    currentValue: 52
-}
-```
-
-This renders progress as `(52-40)/(80-40)=0.3`.
-
-## FAQ
-
-Q. Why does fill disappear at low values?  
-A. Width is proportional to normalized progress. Near-zero values may render as subpixel and appear invisible.
-
-Q. Can it represent countdown style?  
-A. Yes. Set `startValue > endValue` and update `currentValue` accordingly, then verify expected normalization.

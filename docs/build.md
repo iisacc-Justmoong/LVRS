@@ -6,12 +6,35 @@
 ./install.sh
 ```
 
-The installer runs `bootstrap_lvrs_all` with a host-first default platform set.
-By default, only the host platform package is bootstrapped/installed.
-Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to include additional runtime platforms explicitly.
+`install.sh` is now a thin wrapper around Rust CLI `lvrs install`.
+- If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`.
+- If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
+- If neither is available, install exits with guidance to build CLI first.
+
+The install flow builds `bootstrap_lvrs_all`.
+By default, framework bootstrap platform set is `macos;linux;windows;ios;android;wasm`.
+Platforms without a matching Qt kit are skipped during bootstrap target generation.
+Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to constrain/override the platform set.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
+
+## Rust CLI Entry Points
+
+Direct CLI invocation (without wrapper):
+
+```bash
+cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install
+```
+
+Main-entrypoint bootstrap profile:
+
+```bash
+cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- bootstrap
+```
+
+`lvrs bootstrap` defaults to desktop+mobile (`macos;linux;windows;ios;android`) and adds wasm only with `--with-wasm` (unless `--platforms` is explicitly set).
+Before running, it validates `main.cpp` contains the expected LVRS bootstrap entry markers (`runBootstrappedQmlApp`, `rootObject = QStringLiteral("Main")`).
 
 ## Configure
 
@@ -172,7 +195,8 @@ Framework-only bootstrap targets are generated at project root:
 - `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_all` builds the selected framework bootstrap platform set under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
-Default framework bootstrap platform set is host-only unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is provided.
+Default framework bootstrap platform set is all runtime platforms (`macos;linux;windows;ios;android;wasm`) unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is provided.
+Any platform without a discoverable Qt kit is skipped with a configure-time status message.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`.
 

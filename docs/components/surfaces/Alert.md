@@ -2,21 +2,20 @@
 
 Location: `qml/components/surfaces/Alert.qml`
 
-`Alert` is a centered overlay dialog surface with configurable 1/2/3 action layouts.
+`Alert` is an overlay dialog surface with 1/2/3-action layouts.
 
 ## Purpose
 
-- Provide app-level blocking/attention dialog.
-- Support primary/secondary/tertiary action patterns in one component.
+- Provide centralized alert UI with explicit action layout rules.
+- Support overlay-layer reparenting and optional backdrop dismiss.
 
-## API
+## Core API
 
-State and text:
+State and content:
 
 - `open`
+- `title`, `message`
 - `buttonCount` (`0=auto`, `2`, `3`)
-- `title`
-- `message`
 - `primaryText`, `secondaryText`, `tertiaryText`
 - `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`
 
@@ -25,17 +24,18 @@ Behavior:
 - `dismissOnBackground`
 - `useOverlayLayer`
 
-Sizing/visual:
+Sizing and style:
 
 - `minWidth`, `maxWidth`, `preferredWidth`
-- `backdropColor`
-- `cardBackgroundColor`
+- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
+- `cardCornerRadius`, `resolvedCardCornerRadius`
+- `backdropColor`, `cardBackgroundColor`
 - `appIconBackgroundColor`, `appIconFrameColor`, `appIconInnerColor`
 
-Derived layout flags:
+Resolved layout flags:
 
-- `hasSecondaryAction`
-- `hasTertiaryAction`
+- `resolvedButtonCount`
+- `hasSecondaryAction`, `hasTertiaryAction`
 - `useVerticalActionLayout`
 
 Signals:
@@ -45,15 +45,20 @@ Signals:
 - `tertiaryClicked()`
 - `dismissed()`
 
-## Action Layout Rules
+## Layout Rules
 
-- `buttonCount == 3` -> vertical three-button stack
-- `buttonCount == 2` -> horizontal two-button row
-- `buttonCount == 0` (auto) + tertiary present -> vertical three-button stack
-- `buttonCount == 0` (auto) + tertiary absent + secondary present -> horizontal two-button row
-- only primary -> single full-width primary button
+- explicit `buttonCount: 3` -> vertical 3-button layout
+- explicit `buttonCount: 2` -> horizontal 2-button layout
+- `buttonCount: 0` (auto):
+  - tertiary text exists -> vertical layout
+  - secondary text exists -> horizontal 2-button layout
+  - otherwise -> single primary button
 
-When `buttonCount` is explicit (`2` or `3`), empty `secondaryText`/`tertiaryText` is automatically replaced with `"Button"` to keep the action count contract intact.
+## Behavior Contract
+
+- On open, component can reparent to `Controls.Overlay.overlay`.
+- Backdrop click closes only when `dismissOnBackground == true`.
+- Action buttons emit signals only; close behavior is controlled by caller state.
 
 ## Usage
 
@@ -61,47 +66,11 @@ When `buttonCount` is explicit (`2` or `3`), empty `secondaryText`/`tertiaryText
 import LVRS 1.0 as LV
 
 LV.Alert {
-    open: state.showDeleteDialog
+    open: true
     buttonCount: 2
-    title: "Delete Scene?"
+    title: "Delete item?"
     message: "This action cannot be undone."
     primaryText: "Delete"
     secondaryText: "Cancel"
-    onPrimaryClicked: confirmDelete()
-    onSecondaryClicked: state.showDeleteDialog = false
 }
 ```
-
-## How It Works
-
-- When open, component re-parents to overlay layer when configured.
-- Backdrop click dismiss behavior is opt-in (`dismissOnBackground`).
-- Card background defaults differ by action layout to keep contrast stable.
-
-## Advanced Example: Three-Action Vertical Layout
-
-```qml
-import LVRS 1.0 as LV
-
-LV.Alert {
-    open: true
-    buttonCount: 3
-    title: "Unsaved Changes"
-    message: "Choose how to proceed."
-    primaryText: "Save"
-    secondaryText: "Discard"
-    tertiaryText: "Cancel"
-}
-```
-
-## Operational Notes
-
-- `buttonCount`가 `2`/`3`으로 명시되면 해당 값이 레이아웃을 우선 결정한다.
-- `buttonCount == 0`(auto)에서는 `tertiaryText` 존재 여부가 수직/수평 레이아웃을 결정한다.
-- Use `dismissed()` to unify background-dismiss state cleanup.
-- Keep `open` as single source of truth in app state store to avoid stale overlay visibility.
-
-## Failure Pattern
-
-Maintaining separate local `open` flags in multiple components can desynchronize dialog state.
-Use a single app-level source of truth for alert visibility.

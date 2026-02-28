@@ -2,16 +2,14 @@
 
 Location: `qml/components/control/check/CheckBox.qml`
 
-`CheckBox` is a compact checkable control with optional text label.
-Current defaults are aligned to Figma node `44:724` (`State=On/Off` x `Available=True/False`).
+`CheckBox` is a custom-painted checkbox (`AbstractButton` based) with deterministic state visuals.
 
 ## Purpose
 
-- Provide deterministic check indicator rendering independent of platform style.
-- Match Figma checkbox states with explicit color and border contracts.
-- Support explicit palette overrides for checked/unchecked/disabled states.
+- Keep checkbox visuals independent from platform style variance.
+- Expose explicit checked/unchecked + enabled/disabled palette and border policy.
 
-## API
+## Core API
 
 State:
 
@@ -19,33 +17,32 @@ State:
 - `enabled` (inherited)
 - `text` (inherited)
 
-Visual customization:
+Shape and metrics:
 
-- `boxSize`
-- `boxRadius`
-- `checkColor`
-- `checkedColor`
-- `uncheckedColor`
-- `disabledCheckedColor`
-- `disabledUncheckedColor`
-- `checkMarkColorDisabled`
+- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
+- `boxSize`, `boxRadius`
 - `checkMarkStrokeWidth`
-- `boxBorderWidthCheckedEnabled`
-- `boxBorderWidthCheckedDisabled`
-- `boxBorderWidthUncheckedEnabled`
-- `boxBorderWidthUncheckedDisabled`
-- `boxBorderColorCheckedEnabled`
-- `boxBorderColorCheckedDisabled`
-- `boxBorderColorUncheckedEnabled`
-- `boxBorderColorUncheckedDisabled`
-- `innerShadowSoftColor`
-- `innerShadowStrongColor`
 
-Resolved read-only state:
+Palette and border:
 
+- `checkedColor`, `uncheckedColor`
+- `disabledCheckedColor`, `disabledUncheckedColor`
+- `checkColor`, `checkMarkColorDisabled`
+- `boxBorderWidth*`, `boxBorderColor*`
+- `innerShadowSoftColor`, `innerShadowStrongColor`
+
+Resolved values:
+
+- `resolvedCheckedFillColor`, `resolvedUncheckedFillColor`
+- `resolvedBoxRadius`
+- `resolvedBoxBorderWidth`, `resolvedBoxBorderColor`
 - `showInnerShadow`
-- `resolvedBoxBorderWidth`
-- `resolvedBoxBorderColor`
+
+## Behavior Contract
+
+- `checkable: true`, `tone: Borderless`, transparent background layers.
+- Checkmark is drawn by `Canvas` and repainted on state/color/stroke changes.
+- `showInnerShadow` is disabled only when checked+enabled.
 
 ## Usage
 
@@ -53,41 +50,7 @@ Resolved read-only state:
 import LVRS 1.0 as LV
 
 LV.CheckBox {
-    text: "Remember me"
+    text: "Remember"
     checked: true
 }
 ```
-
-## How It Works
-
-- Component is `checkable` and borderless by default.
-- Indicator box uses explicit state mapping:
-  - Checked + enabled: accent fill, no border, no inner shadow.
-  - Checked + disabled: `panelBackground12` fill, `0.5` border, inner shadow.
-  - Unchecked + enabled: `bodyColor` fill, `0.5` border, inner shadow.
-  - Unchecked + disabled: `panelBackground12` fill, no border, inner shadow.
-- Check mark is painted by `Canvas` and repainted on checked/enabled/color/stroke changes.
-- Label uses body typography (`12 / Medium`) with color mapping:
-  - Enabled: `Theme.bodyColor`
-  - Disabled: `Theme.disabledColor`
-- Background interaction states stay transparent so only indicator/label visuals are rendered.
-
-## Advanced Example: Custom Checkmark Weight
-
-```qml
-import LVRS 1.0 as LV
-
-LV.CheckBox {
-    text: "Strict validation"
-    checkMarkStrokeWidth: 2
-    checkedColor: "#3A8DFF"
-}
-```
-
-## Troubleshooting
-
-If checkmark appears clipped, verify control/container height and custom `boxSize` combination.
-
-## State Management Recommendation
-
-For dynamic lists, bind each checkbox directly to model index properties to avoid stale closure/index bugs during reorder operations.

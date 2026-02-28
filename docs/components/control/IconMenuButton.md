@@ -2,40 +2,48 @@
 
 Location: `qml/components/control/buttons/IconMenuButton.qml`
 
-`IconMenuButton` combines a main icon and trailing menu indicator chevron.
+`IconMenuButton` is an icon-first menu trigger with a trailing chevron indicator.
 
 ## Purpose
 
-- Provide compact menu-trigger button for icon-centric surfaces.
-- Use project-structure fallback for main icon and tone-aware policy for chevron indicator.
+- Provide compact menu trigger for icon-centric toolbars.
+- Keep icon fallback and indicator rendering deterministic.
 
-## API
+## Core API
 
-Main icon API:
+Main icon:
 
-- `iconSource` (alias)
+- `iconSource` (alias of `url`)
 - `iconName`
-- `iconGlyph`
+- `iconGlyph` (text glyph fallback)
 - `iconSize`
 
-Indicator behavior:
+Indicator:
 
-- indicator name is computed from tone + effective enabled state
-- rendered indicator source uses `SvgManager.icon(...)`
+- tone/enable-aware indicator selection (`resolvedIndicatorName`)
+- rendered from `Theme.iconPath(...)`
+- indicator source uses supersampling-aware `sourceSize`
+
+Indicator icon mapping:
+
+- default: `generalchevronDown`
+- borderless: `generalchevronDownBorderless`
+- primary/destructive: `generalchevronDownAccent`
+- disabled: `generalchevronDownDisabled`
 
 Layout:
 
-- fixed height: `Theme.gap20`
+- fixed `figmaButtonHeight` (`Theme.gap20`)
 - `horizontalPadding: Theme.gap2`
 - `verticalPadding: Theme.gap2`
 - `spacing: Theme.gap4`
 
-## Main Icon Resolution Order
+## Icon Resolution Order
 
-1. explicit `iconSource`
-2. explicit `iconName`
-3. grouped `icon.name`
-4. default fallback icon (`projectStructure`)
+1. `iconSource` (`url`)
+2. `iconName`
+3. grouped `icon.name` (if provided by parent style object)
+4. fallback icon (`projectStructure`)
 
 ## Usage
 
@@ -44,25 +52,6 @@ import LVRS 1.0 as LV
 
 LV.IconMenuButton {
     tone: LV.AbstractButton.Default
-    iconName: "viewMoreSymbolicDefault"
+    iconName: "projectStructure"
 }
 ```
-
-## Practical Notes
-
-- `IconMenuButton` is best for compact menu affordances where text labels are unnecessary.
-- For text-first menus, use `LabelMenuButton` for clearer affordance.
-
-## FAQ
-
-Q. Which icon wins when both `iconSource` and `iconName` are set?  
-A. `iconSource` has higher priority.
-
-Q. Is text label supported?  
-A. No explicit text label is part of this component contract. For text + indicator, use `LabelMenuButton`.
-
-## Validation Checklist
-
-- main icon fallback order works for empty/partial inputs,
-- indicator icon changes correctly on tone/enable transitions,
-- compact geometry remains stable in toolbar rows.

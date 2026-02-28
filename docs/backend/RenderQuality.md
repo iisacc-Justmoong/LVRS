@@ -2,33 +2,33 @@
 
 Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
 
-`RenderQuality`는 LVRS의 렌더 품질·GPU 비용·전력/성능 균형 정책을 담당하는 QML 싱글턴이다.
+`RenderQuality` is a QML singleton responsible for LVRS rendering quality, GPU cost, and power/performance balance policy.
 
-## 1. 책임 범위
+## 1. Responsibility Scope
 
-`RenderQuality`가 직접 관리하는 항목은 다음과 같다.
+`RenderQuality` directly manages the following:
 
-- 장면 supersampling 활성/비활성 결정
-- MSAA, frames-in-flight, partial update, batch renderer 기본 정책
-- 윈도우 비활성 시 렌더 강등(power-save) 정책
-- PSO(pipeline state object) 캐시 적용 정책
-- 텍스처 압축 후보 선택 및 밉맵 사용 정책
-- DRS(dynamic resolution scaling) 제어기
-- 디바이스 등급별 프리셋(low/balanced/high)
+- scene supersampling enable/disable decisions
+- baseline policy for MSAA, frames-in-flight, partial update, and batch renderer
+- render downgrade (power-save) policy when a window is inactive
+- PSO (pipeline state object) cache policy
+- compressed texture candidate selection and mipmap usage policy
+- DRS (dynamic resolution scaling) controller
+- device-tier presets (low/balanced/high)
 
-## 2. P3 구현 매핑
+## 2. P3 Implementation Mapping
 
-| P3 ID | 구현 지점 | 동작 |
+| P3 ID | Implementation Location | Behavior |
 |---|---|---|
-| `P3-01` | `applyGraphicsConfiguration`, `configureGlobalDefaults` | `QQuickGraphicsConfiguration`의 automatic pipeline cache + load/save 파일 적용, 전역 `QSG_RHI_PIPELINE_CACHE_LOAD/SAVE` 기본값 설정 |
-| `P3-02` | `resolveTextureSource`, QML `Image.mipmap` 바인딩 | 동일 경로의 압축 텍스처(`ktx2/ktx/dds`) 자동 선택, 레이어/아이콘 밉맵 정책 통합 |
-| `P3-03` | `applyGraphicsConfiguration` | `depthBufferFor2D`, debug/timestamp 비활성 정책으로 2D 패스 상태전환 부담 축소 |
-| `P3-04` | `sampleFrameTime`, `frameSwapped` 연결 | 히스테리시스 기반 DRS scale up/down 제어 |
-| `P3-05` | `detectDeviceTierForSystem`, `applyDeviceTierPreset` | CPU thread 기반 등급 추정 + low/balanced/high 프리셋 적용 |
+| `P3-01` | `applyGraphicsConfiguration`, `configureGlobalDefaults` | apply automatic pipeline cache + load/save files on `QQuickGraphicsConfiguration`, and set global `QSG_RHI_PIPELINE_CACHE_LOAD/SAVE` defaults |
+| `P3-02` | `resolveTextureSource`, QML `Image.mipmap` binding | auto-select compressed textures (`ktx2/ktx/dds`) at the same path and unify mipmap policy for layers/icons |
+| `P3-03` | `applyGraphicsConfiguration` | reduce 2D pass state-transition overhead via `depthBufferFor2D` and debug/timestamp disable policy |
+| `P3-04` | `sampleFrameTime`, `frameSwapped` hookup | hysteresis-based DRS scale up/down control |
+| `P3-05` | `detectDeviceTierForSystem`, `applyDeviceTierPreset` | CPU-thread-based tier estimation + low/balanced/high preset application |
 
-## 3. 핵심 프로퍼티 계약
+## 3. Core Property Contracts
 
-### 3.1 GPU 캐시/파이프라인
+### 3.1 GPU cache/pipeline
 
 - `psoCacheEnabled`
 - `psoCacheLoadEnabled`
@@ -36,16 +36,16 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 - `psoCacheFile`
 - `depthBufferFor2D`
 
-`applyWindow()`가 호출되면 위 값이 `QQuickWindow::graphicsConfiguration()`에 즉시 반영된다.
+When `applyWindow()` is called, the values above are immediately applied to `QQuickWindow::graphicsConfiguration()`.
 
-### 3.2 텍스처 정책
+### 3.2 Texture policy
 
 - `mipmapEnabled`
 - `textureCompressionEnabled`
-- `compressedTextureExtensions` (기본: `ktx2`, `ktx`, `dds`)
+- `compressedTextureExtensions` (default: `ktx2`, `ktx`, `dds`)
 - `resolveTextureSource(source)`
 
-`resolveTextureSource()`는 로컬 파일/qrc 경로에서 압축 확장자 파일이 실제로 존재할 때만 후보를 치환한다.
+`resolveTextureSource()` replaces candidates only when compressed extension files actually exist on local file/qrc paths.
 
 ### 3.3 DRS
 
@@ -57,52 +57,52 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 - `dynamicResolutionTargetFrameMs`
 - `dynamicResolutionHysteresisMs`
 
-`effectiveSupersampleScaleValue`는 DRS 활성 시 동적으로 변하며, QML 바인딩 업데이트를 위해 `NOTIFY` 신호를 사용한다.
+`effectiveSupersampleScaleValue` changes dynamically when DRS is enabled and uses a `NOTIFY` signal to update QML bindings.
 
-### 3.4 디바이스 프리셋
+### 3.4 Device presets
 
-- `detectedDeviceTier` (상수)
+- `detectedDeviceTier` (constant)
 - `activeDeviceTier`
 - `applyDeviceTierPreset(tier = -1)`
 
-`tier=-1`이면 자동 탐지 등급을 적용한다.
+If `tier=-1`, the automatically detected device tier is applied.
 
-## 4. DRS 동작 규칙
+## 4. DRS Behavior Rules
 
-1. `frameSwapped` 시점 프레임 간격(ms)을 샘플링한다.
-2. `target + hysteresis` 초과 프레임이 누적되면 scale down 한다.
-3. `target - hysteresis` 미만 프레임이 충분히 누적되면 scale up 한다.
-4. scale은 `[dynamicResolutionMinScale, dynamicResolutionMaxScale]` 내에서만 변경된다.
-5. 윈도우가 power-save 상태면 DRS 샘플링을 중단한다.
+1. Sample frame interval (ms) at `frameSwapped` timing.
+2. Scale down when frames above `target + hysteresis` accumulate.
+3. Scale up when enough frames below `target - hysteresis` accumulate.
+4. Scale changes are constrained to `[dynamicResolutionMinScale, dynamicResolutionMaxScale]`.
+5. Stop DRS sampling while the window is in power-save state.
 
-## 5. 프리셋 표준
+## 5. Preset Standards
 
-| 프리셋 | 의도 | 기본값 요약 |
+| Preset | Intent | Default Summary |
 |---|---|---|
-| `LowTier` | 저사양 안정성 우선 | `MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off` |
-| `BalancedTier` | 기본 균형 모드 | `MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on` |
-| `HighTier` | 화질 우선 | `MSAA=8`, `framesInFlight=3`, `DRS off`, `mipmap on` |
+| `LowTier` | prioritize low-end stability | `MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off` |
+| `BalancedTier` | default balanced mode | `MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on` |
+| `HighTier` | prioritize image quality | `MSAA=8`, `framesInFlight=3`, `DRS off`, `mipmap on` |
 
-## 6. QML 적용 포인트
+## 6. QML Integration Points
 
 - `qml/ApplicationWindow.qml`
 - `qml/Window.qml`
-- 주요 아이콘 컴포넌트(`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
+- major icon components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
 
-적용 내용:
+Applied behavior:
 
-- 레이어 `layer.mipmap: RenderQuality.mipmapEnabled`
-- 이미지 `source: RenderQuality.resolveTextureSource(...)`
-- 시작 시 `RenderQuality.applyDeviceTierPreset(...)`
+- layer: `layer.mipmap: RenderQuality.mipmapEnabled`
+- image source: `source: RenderQuality.resolveTextureSource(...)`
+- startup preset apply: `RenderQuality.applyDeviceTierPreset(...)`
 
-## 7. 검증 명령
+## 7. Verification Commands
 
 - `cmake --build build-codex --target LVRSTests_render_quality`
 - `./build-codex/tests/LVRSTests_render_quality -txt`
 
-P3 회귀 검증 테스트: `render_quality_gpu_policy_pso_texture_and_drs_contract()`
+P3 regression validation test: `render_quality_gpu_policy_pso_texture_and_drs_contract()`
 
-## 8. 관련 문서
+## 8. Related Documents
 
 - `docs/components/app/ApplicationWindow.md`
 - `docs/architecture/rendering-backend.md`

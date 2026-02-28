@@ -2,46 +2,53 @@
 
 Location: `qml/components/control/input/TextEditor.qml`
 
-`TextEditor` is the multi-line rich/plain editor with optional rendered preview output.
+`TextEditor` is a multi-line editor with optional rendered preview pane.
 
 ## Purpose
 
-- Provide stable multi-line editing in fixed viewport height.
-- Support mode-driven text normalization and preview rendering.
-- Isolate nested scroll and IME behavior for robust input handling.
+- Provide stable multi-line editing with fixed edit viewport.
+- Expose rendered output (`TextMarkup`) for preview-driven flows.
 
-## API
+## Core API
 
-Mode constants:
+Mode and compatibility:
 
-- `plainTextMode`
-- `markdownMode`
-- `richTextMode`
+- constants: `plainTextMode`, `markdownMode`, `richTextMode`
+- `mode`, `enforceModeDefaults`
+- `wrapMode`, `textFormat`
+- resolved: `effectiveWrapMode`, `effectiveTextFormat`
 
-Mode/control properties:
+Editor aliases:
 
-- `mode`
-- `enforceModeDefaults`
-- `wrapMode`
-- `textFormat`
+- `editorItem` (readonly alias)
+- `text`, `readOnly`, `cursorPosition`, `selectionStart`, `selectionEnd`, `selectedText`
+- `contentWidth`, `contentHeight`, `lineCount`, `textDocument`, `canPaste`
 
-Editing API:
+Preview:
 
-- `text`, `placeholderText`, `readOnly`
-- `cursorPosition`, `selectionStart`, `selectionEnd`
-- `selectByMouse`, `persistentSelection`, `overwriteMode`
+- `showRenderedOutput`
+- `renderedOutput`, `renderedPlainText`, `normalizedInput` (readonly)
+- `outputSpacing`, `outputMinHeight`, `previewHeight` (readonly)
+- `outputBackgroundColor`, `outputTextColor`
 
-Layout/preview:
+Layout/visual:
 
 - `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`
-- `showRenderedOutput`, `outputMinHeight`, `previewHeight`
-- `showScrollBar`, `autoFocusOnPress`
+- `insetHorizontal`, `insetVertical`
+- `shapeStyle`, `cornerRadius`
+- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`
 
-Signals/methods:
+Signals and methods:
 
-- `textEdited(text)`
-- `submitted(text)`
-- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`, `submit()`
+- `textEdited(text)`, `submitted(text)`
+- `forceEditorFocus()`, `insertText(value)`, `clear()`, `select()`, `selectAll()`, `deselect()`, `cut()`, `copy()`, `paste()`, `undo()`, `redo()`, `submit()`
+
+## Behavior Contract
+
+- Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
+- Preview pane is shown only when `showRenderedOutput == true`.
+- Includes `InputMethodGuard` and two `WheelScrollGuard` instances (edit pane + preview pane).
+- Current defaults force plain text wrapping (`resolvedWrapMode`, `resolvedTextFormat`) unless component logic is changed.
 
 ## Usage
 
@@ -49,56 +56,7 @@ Signals/methods:
 import LVRS 1.0 as LV
 
 LV.TextEditor {
-    mode: markdownMode
-    editorHeight: 240
+    text: "# Title"
     showRenderedOutput: true
-    onSubmitted: save(text)
 }
 ```
-
-## How It Works
-
-- Editing happens inside `Flickable` with fixed outer height; content grows internally.
-- `Ctrl+Enter` or `Cmd+Enter` emits `submitted`.
-- Preview text is produced through `TextMarkup.renderHtml(text)`.
-- `InputMethodGuard` and `WheelScrollGuard` are embedded for composition safety and scroll isolation.
-
-## Advanced Example: Submission Shortcut Workflow
-
-```qml
-import LVRS 1.0 as LV
-
-LV.TextEditor {
-    mode: plainTextMode
-    onSubmitted: function(text) {
-        console.log("submit", text.length)
-    }
-}
-```
-
-Submit is triggered by `Ctrl+Enter` or `Cmd+Enter`.
-
-## Practical Notes
-
-- Keep preview enabled only when users need immediate rendered feedback.
-- For large documents, monitor scroll behavior and ensure parent containers do not also capture wheel events.
-
-## Recipe: Markdown Preview Toggle
-
-```qml
-import LVRS 1.0 as LV
-
-Item {
-    property bool previewOn: true
-
-    LV.TextEditor {
-        mode: markdownMode
-        showRenderedOutput: previewOn
-    }
-}
-```
-
-## Failure Pattern
-
-Large markdown previews can increase layout work.
-For very large documents, provide manual preview toggle or lazy preview update policy.

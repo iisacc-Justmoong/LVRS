@@ -1,53 +1,85 @@
-# Chnagelog
+# Changelog
 
-## 2026-02-14 (토)
+## 2026-02-15 ~ 2026-02-28 (Sun-Sat)
 
-요약이다. 어제(2026-02-14) 하루 동안 총 23개의 커밋이 있었고, QML 앱 구성 자동화, 렌더링 백엔드 정책 강화, 런타임 이벤트 콘솔 전환, 대규모 아이콘셋 추가, UI 테마/톤 명명 정리, 신규 컴포넌트(Hierarchy 등) 도입이 한날에 집중적으로 반영되었다. 주요 변경은 `CMakeLists.txt`, `cmake/`, `backend/runtime/`, `qml/`, `docs/`, `resources/iconset/`에 분산되어 있다.
+Summary: A total of 61 commits were accumulated from 2026-02-15 to 2026-02-28. The main themes were migration of the installation flow to a Rust CLI, refinement of multi-platform bootstrap behavior, compatibility refactoring of QML components, routing/hierarchy navigation performance improvements, and expansion of P4 quality automation. Changes were concentrated in `rust-cli/`, `install.sh`, `cmake/`, `qml/components/`, `tests/`, and `docs/`.
 
-변경 범위 개요이다.
-- 빌드/설치: QML 앱 구성 함수(`lvrs_configure_qml_app`, `lvrs_add_qml_app`) 추가와 설치 스크립트 확장, 정적 플러그인 처리/모듈 탐지 보강.
-- 그래픽스 백엔드: Vulkan 강제 및 런타임 검증, macOS/iOS Metal 강제 정책 추가, Vulkan bootstrap 유틸리티 도입.
-- 런타임 이벤트/콘솔: RuntimeEvents 기능 확대, 입력 상태 추적 강화, Runtime Event Daemon Console로 전환.
-- UI/QML: Main.qml 구조 재편, Hierarchy 컴포넌트 추가, 버튼/메뉴/알림 스타일 정비, 테마 색상 네이밍 전면 정리.
-- 리소스: 대규모 아이콘셋 추가 및 기존 아이콘 리네임.
-- 문서/예제/테스트: 문서 대규모 보강 및 예제/테스트 업데이트.
+Scope overview:
+- Install/bootstrap: `install.sh` was converted to a Rust CLI wrapper (`lvrs install`), and `bootstrap`/`doctor`/`platform` commands were added.
+- Multi-platform policy: bootstrap targets including WASM and the export/launch flow were strengthened, and automatic hint injection for Qt/SDK/NDK/emsdk was refined.
+- QML/components: compatibility refactoring was applied to input/check/button/surface/navigation components, and Hierarchy chevron visibility was corrected based on `hasChildItems`.
+- Routing/state: `RouteResolver` was introduced, and `HierarchyList` state management was optimized for cleaner path resolution/cache behavior and tree interaction.
+- Quality/observability: P4 quality automation scripts (performance/visual/soak/sanitizer) and related tests/baseline docs were expanded.
+- Platform compatibility: recurring cleanup around Apple AGL warning paths and iconset structure reduced build/runtime noise.
 
-커밋별 변경 추적이다. (각 커밋의 diff 통계를 확인하여 요약함)
-- d1d20717: QML 앱 구성 자동화(`lvrs_add_qml_app`)와 설치 스크립트 확장. CMake 도우미/정적 타깃 템플릿 추가, 문서 갱신, 런타임 서비스 테스트 보강.
-- e16cccd: 원격 master 병합 커밋. LICENSE 변경 포함.
-- 0d2060d: `lvrs_configure_qml_app` 도입, QML 예제 프로젝트 구성 정비, LVRSConfig 확장, 문서/예제 정리.
-- bedbbb3: LICENSE 업데이트.
-- 22a13b0: 플랫폼별 렌더링 백엔드 선택 정책 강화, Vulkan 검증 확대, macOS/iOS Metal 강제 정책 문서 반영.
-- 4465254: 기존 `Main.qml` 기반 카탈로그 제거 및 VisualCatalog로 이관, AppBootstrap/AppEntry 추가, 디버그 로거 확장, 다수 테스트/문서 갱신.
-- f9100c0: 이벤트 모니터 데이터 구조를 `ListModel`로 전환하여 성능/관리성 개선.
-- 06478ff: `LVRS`를 `LVRSCore`로 리팩터링, 이벤트 모니터 기능 추가, 컴포넌트 연계 강화.
-- e8d405d: 새로운 QML 컨트롤 다수 추가, RuntimeEvents/Backend 확장, 이벤트 파이프라인 및 렌더링 정책 문서 추가.
-- db3b178: RuntimeEvents 입력 상태 추적을 상세화하고 EventListener 연동 확대, 테스트 보강.
-- 0cd35a3: Design System Console를 Runtime Event Daemon Console로 교체, 실시간 모니터링/필터링/요약 기능 추가.
-- dd3f32a: Hierarchy 컴포넌트 추가 및 버튼 스타일 일관화, RuntimeEvents/Alert/ContextMenu 다수 수정.
-- 4d72b86: Hierarchy 초기 추가 및 관련 컴포넌트/문서 업데이트.
-- 954bfd8: TextEditor/ContextMenu/Alert 등 UI 스타일 정비와 아이콘 색상 표준화.
-- 058d6fa: Vulkan 지원 강제 옵션과 Qt Vulkan 기능 탐지 로직 추가.
-- 208c807: Vulkan bootstrap 유틸리티 도입, 메인/예제에서 중복 로직 제거.
-- 7e12fc4: 메인과 예제에서 Vulkan 백엔드 강제, Apple GL 링크 처리 변경.
-- 2ea2160: 네임스페이스 `UIF` -> `LV` 전면 전환.
-- 8cb923f: `Main.qml`/`Theme.qml`의 accent 색상 명칭을 사람이 이해하기 쉬운 이름으로 리팩터링.
-- 92f8615: `Accent` 톤을 `Primary`로 변경하고 관련 문서/예제/QML 전반 갱신.
-- 1825f4b: `Theme.qml`에서 `accent` -> `primary` 명칭 변경 및 팔레트 확장.
-- e706ad1: 아이콘셋 추가 및 리네임.
-- 315dd82: 대규모 아이콘 리소스 추가.
+Key commit groups (representative commits):
+- 2026-02-15 platform bootstrap expansion: `9c31546`, `d9a189e`, `cfc6aeb`, `fefebfa`, `ed431a0`, `4646fa2`, `85fefb1`, `e93699c`.
+- 2026-02-16 large UI/docs cleanup: `f81f159`, `74526ca`, `db79cec`, `39f0fff`, `b6a7d43`, `eb8edb2`.
+- 2026-02-18 quality automation and runtime performance observability: `4bb8fe5`, `eb4b1bd`, `8dada65`, `39b43fe`, `f1bd142`.
+- 2026-02-19 routing/Hierarchy performance improvements: `a77d21b`, `b8f846a`, `628e2b1`, `ebfc355`.
+- 2026-02-21 iconset/platform warning cleanup: `cf892bb`, `b18271e`, `3f73532`.
+- 2026-02-28 full Rust CLI adoption and compatibility refactor: `868a0a7`, `e355f24`, `5823419`, `8516dd3`, `dbd539d`, `953e78b`.
 
-핵심 파일 변동 포인트이다.
-- `CMakeLists.txt`: Vulkan 강제/검증 옵션, QML 앱 구성 함수 통합, 플랫폼 런타임 옵션 정비.
-- `cmake/LVRSHelpers.cmake`, `cmake/LVRSConfig.cmake.in`, `cmake/LVRSTargetsStatic.cmake.in`, `cmake/LVRSAppEntryPoint.cpp.in`: QML 앱 자동화와 정적 플러그인 처리 지원.
-- `backend/runtime/`: `vulkanbootstrap` 도입, `appbootstrap`/`appentry` 추가, `runtimeevents` 확장.
-- `qml/Main.qml`: Runtime Event Console로 전환 및 모니터링 UI 대규모 재구성.
-- `qml/components/navigation/Hierarchy*.qml`: Hierarchy 트리 네비게이션 구성 추가.
-- `qml/components/control/*`, `qml/components/surfaces/*`: 버튼/알림/입력 컴포넌트 스타일 및 동작 정비.
-- `resources/iconset/`: 신규 아이콘 대량 추가 및 기존 아이콘 리네임.
-- `docs/`: 빌드/백엔드/컴포넌트 문서 대규모 수정 및 신규 문서 추가.
-- `install.sh`: 설치 워크플로우 옵션 확장 및 스냅샷 지원.
+Key file touchpoints:
+- `rust-cli/src/*`, `rust-cli/README.md`: new and expanded install/bootstrap/diagnostic CLI.
+- `install.sh`: moved from a shell-based installer to a CLI wrapper entrypoint.
+- `CMakeLists.txt`, `cmake/LVRSHelpers.cmake`, `cmake/LVRSConfig.cmake.in`: strengthened QML module metadata compatibility, framework bootstrap targets, and platform hint/registry propagation.
+- `qml/components/control/*`, `qml/components/navigation/*`, `qml/components/surfaces/*`, `qml/ApplicationWindow.qml`: compatibility refactoring and chevron/input behavior adjustments.
+- `tests/ci/*`, `tests/tst_*`: expanded P4 quality gates and regression/performance coverage.
+- `docs/*`: strengthened build/architecture/component docs and refined API descriptions.
 
-검증 메모이다.
-- 오늘 작업은 커밋 로그와 diff 통계를 기준으로 추적되었고, 개별 커밋의 변경 파일과 규모를 확인했다.
-- 자동 테스트 프레임워크가 없으므로, 필요 시 수동 빌드(`cmake -S . -B build`, `cmake --build build`)와 실행(`./build/LVRS`)으로 정상 동작을 확인하는 단계가 후속으로 필요하다.
+Verification notes:
+- This section was aggregated and summarized from `git log --since=2026-02-15` and per-commit changed file lists (`--name-only`).
+- Current installation behavior was cross-checked between `install.sh` and `rust-cli/src/commands/{install,bootstrap}.rs`.
+
+## 2026-02-14 (Sat)
+
+Summary: On 2026-02-14, 23 commits were made. QML app composition automation, rendering backend policy hardening, runtime event console transition, large iconset additions, UI theme/tone naming cleanup, and new component introduction (including Hierarchy) were concentrated in one day. Major changes were spread across `CMakeLists.txt`, `cmake/`, `backend/runtime/`, `qml/`, `docs/`, and `resources/iconset/`.
+
+Scope overview:
+- Build/install: added QML app composition functions (`lvrs_configure_qml_app`, `lvrs_add_qml_app`), expanded install scripts, and improved static plugin/module detection.
+- Graphics backend: added Vulkan enforcement/runtime validation, macOS/iOS Metal enforcement policy, and Vulkan bootstrap utility.
+- Runtime events/console: expanded RuntimeEvents capabilities, improved input state tracking, and switched to Runtime Event Daemon Console.
+- UI/QML: reorganized `Main.qml`, added Hierarchy components, refined button/menu/alert styling, and comprehensively cleaned theme color naming.
+- Resources: added a large iconset and renamed existing icons.
+- Docs/examples/tests: broad documentation reinforcement and updates to examples/tests.
+
+Commit-by-commit trace (summarized from each commit's diff stats):
+- d1d20717: QML app composition automation (`lvrs_add_qml_app`) and install script expansion. Added CMake helpers/static target templates, updated docs, and improved runtime service tests.
+- e16cccd: merge from remote master branch. Includes LICENSE changes.
+- 0d2060d: introduced `lvrs_configure_qml_app`, reorganized QML example project setup, expanded LVRSConfig, and cleaned docs/examples.
+- bedbbb3: LICENSE update.
+- 22a13b0: strengthened per-platform rendering backend selection policy, expanded Vulkan validation, and documented macOS/iOS Metal enforcement.
+- 4465254: removed the old `Main.qml`-based catalog and migrated to VisualCatalog, added AppBootstrap/AppEntry, expanded debug logger, and updated many tests/docs.
+- f9100c0: converted event monitor data structure to `ListModel` for improved performance/manageability.
+- 06478ff: refactored `LVRS` to `LVRSCore`, added event monitor functionality, and strengthened component integration.
+- e8d405d: added many new QML controls, expanded RuntimeEvents/Backend, and added event pipeline/render policy docs.
+- db3b178: made RuntimeEvents input-state tracking more detailed, expanded EventListener integration, and strengthened tests.
+- 0cd35a3: replaced Design System Console with Runtime Event Daemon Console, adding real-time monitoring/filtering/summary features.
+- dd3f32a: added Hierarchy components and button style consistency updates, plus broad RuntimeEvents/Alert/ContextMenu changes.
+- 4d72b86: initial Hierarchy addition and related component/doc updates.
+- 954bfd8: style refinements for TextEditor/ContextMenu/Alert and icon color standardization.
+- 058d6fa: added Vulkan enforcement option and Qt Vulkan feature detection logic.
+- 208c807: introduced Vulkan bootstrap utility and removed duplicated logic in main/examples.
+- 7e12fc4: enforced Vulkan backend in main/examples and changed Apple GL link handling.
+- 2ea2160: full namespace migration from `UIF` to `LV`.
+- 8cb923f: refactored accent color naming in `Main.qml`/`Theme.qml` to clearer names.
+- 92f8615: renamed `Accent` tone to `Primary` and updated related docs/examples/QML broadly.
+- 1825f4b: renamed `accent` to `primary` in `Theme.qml` and expanded palette definitions.
+- e706ad1: iconset additions and renames.
+- 315dd82: large icon resource addition.
+
+Key file touchpoints:
+- `CMakeLists.txt`: Vulkan enforcement/validation options, integrated QML app composition functions, and runtime platform option cleanup.
+- `cmake/LVRSHelpers.cmake`, `cmake/LVRSConfig.cmake.in`, `cmake/LVRSTargetsStatic.cmake.in`, `cmake/LVRSAppEntryPoint.cpp.in`: QML app automation and static plugin handling support.
+- `backend/runtime/`: introduced `vulkanbootstrap`, added `appbootstrap`/`appentry`, and expanded `runtimeevents`.
+- `qml/Main.qml`: switched to Runtime Event Console and significantly restructured monitoring UI.
+- `qml/components/navigation/Hierarchy*.qml`: added Hierarchy tree navigation composition.
+- `qml/components/control/*`, `qml/components/surfaces/*`: styling and behavior improvements for button/alert/input components.
+- `resources/iconset/`: large new icon additions and existing icon renames.
+- `docs/`: broad build/backend/component documentation updates and new docs.
+- `install.sh`: expanded install workflow options and snapshot support.
+
+Verification notes:
+- Work was tracked using commit logs and diff stats, with per-commit changed files and change size reviewed.
+- Because no automated test framework is globally configured, manual build/run validation may be required when needed (`cmake -S . -B build`, `cmake --build build`, `./build/LVRS`).

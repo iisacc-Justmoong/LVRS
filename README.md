@@ -26,9 +26,11 @@ cd LVRS
 ./install.sh
 ```
 
-`install.sh` runs `bootstrap_lvrs_all` and installs LVRS with a host-first default.
-By default, bootstrap targets include only the host platform package.
-Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to expand bootstrap/install platforms explicitly.
+`install.sh` is a wrapper around Rust CLI `lvrs install`.
+If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
+The install flow builds `bootstrap_lvrs_all`.
+By default, bootstrap targets include the full runtime platform set (`macos;linux;windows;ios;android;wasm`), and platforms without a discoverable Qt kit are skipped.
+Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to override bootstrap/install platforms explicitly.
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
@@ -187,6 +189,8 @@ For framework-only multi-platform install, LVRS also generates:
 - `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/framework/...`, build `LVRSCore`, and install each platform package into `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>` (default: `<build>/lvrs-install/<platform>`).
+Default framework bootstrap platform set is all runtime platforms unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is set.
+Any platform without a matching Qt kit is skipped with a configure-time status message.
 Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
 

@@ -20,8 +20,12 @@ Controls.ApplicationWindow {
     readonly property int medium: 1
     readonly property int expanded: 2
 
-    readonly property int widthClass: width < 600 ? compact : (width < 1000 ? medium : expanded)
-    readonly property int heightClass: height < 600 ? compact : (height < 900 ? medium : expanded)
+    readonly property int layoutClassWidth: width
+    readonly property int layoutClassHeight: mobileOversizedHeightActive
+        ? mobileLayoutViewportHeight
+        : height
+    readonly property int widthClass: layoutClassWidth < 600 ? compact : (layoutClassWidth < 1000 ? medium : expanded)
+    readonly property int heightClass: layoutClassHeight < 600 ? compact : (layoutClassHeight < 900 ? medium : expanded)
 
     readonly property bool isCompact: widthClass === compact || heightClass === compact
     readonly property bool isExpanded: widthClass === expanded && heightClass === expanded
@@ -40,6 +44,29 @@ Controls.ApplicationWindow {
     property bool mobileDisplayCoverageOverrideEnabled: true
     property bool mobileFullscreenVisibilityOverride: true
     property bool mobileFullscreenGeometryHintOverride: true
+    property bool mobileOversizedHeightEnabled: true
+    property int mobileOversizedHeight: 16384
+    property int mobileLayoutHeightHint: 0
+    readonly property bool mobileOversizedHeightActive: mobileOversizedHeightEnabled && fullWindowAreaOnMobileEnabled
+    readonly property int mobileLayoutViewportHeight: {
+        var hintedHeight = Number(mobileLayoutHeightHint)
+        if (isFinite(hintedHeight) && hintedHeight > 0)
+            return Math.max(mobileMinHeight, Math.round(hintedHeight))
+
+        var screenHeight = Number(Screen.height)
+        if (!isFinite(screenHeight) || screenHeight < 1)
+            screenHeight = mobileMinHeight
+        return Math.max(mobileMinHeight, Math.round(screenHeight))
+    }
+    readonly property int mobileOversizedWindowHeight: mobileOversizedHeightActive
+        ? Math.max(mobileLayoutViewportHeight, mobileOversizedHeight)
+        : height
+    readonly property int mobileTopMarginFill: mobileOversizedHeightActive
+        ? Math.max(0, Math.floor((mobileOversizedWindowHeight - mobileLayoutViewportHeight) * 0.5))
+        : 0
+    readonly property int mobileBottomMarginFill: mobileOversizedHeightActive
+        ? Math.max(0, mobileOversizedWindowHeight - mobileLayoutViewportHeight - mobileTopMarginFill)
+        : 0
     // Keep view composition identical across platforms; only apply when explicitly enabled.
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
@@ -140,6 +167,14 @@ Controls.ApplicationWindow {
         width: windowRoot.width
         height: windowRoot.height
         color: windowRoot.windowColor
+    }
+
+    Binding {
+        target: windowRoot
+        property: "height"
+        value: windowRoot.mobileOversizedWindowHeight
+        when: windowRoot.mobileOversizedHeightActive
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     Binding {
@@ -1191,9 +1226,37 @@ Controls.ApplicationWindow {
     }
 
     Item {
-        id: supersampleHost
+        id: mobileMarginFillLayer
+        visible: windowRoot.mobileOversizedHeightActive
+        z: 1
         anchors.fill: parent
-        anchors.margins: windowRoot.safeMargin
+
+        Rectangle {
+            x: 0
+            y: 0
+            width: parent.width
+            height: windowRoot.mobileTopMarginFill
+            visible: height > 0
+            color: windowRoot.windowColor
+        }
+
+        Rectangle {
+            x: 0
+            y: parent.height - windowRoot.mobileBottomMarginFill
+            width: parent.width
+            height: windowRoot.mobileBottomMarginFill
+            visible: height > 0
+            color: windowRoot.windowColor
+        }
+    }
+
+    Item {
+        id: supersampleHost
+        z: 2
+        x: windowRoot.safeMargin
+        y: windowRoot.safeMargin + windowRoot.mobileTopMarginFill
+        width: Math.max(1, windowRoot.width - windowRoot.safeMargin * 2)
+        height: Math.max(1, windowRoot.height - windowRoot.safeMargin * 2 - windowRoot.mobileTopMarginFill - windowRoot.mobileBottomMarginFill)
         layer.enabled: windowRoot.sceneSupersamplingActive
         layer.smooth: layer.enabled
         layer.mipmap: RenderQuality.mipmapEnabled

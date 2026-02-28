@@ -2,39 +2,46 @@
 
 Location: `qml/components/control/input/CodeEditor.qml`
 
-`CodeEditor` is a snippet-oriented editor specialized for code input (`PlainText + NoWrap`).
+`CodeEditor` is a code-oriented editor (`TextEdit.NoWrap`, `TextEdit.PlainText`) with optional snippet header.
 
 ## Purpose
 
-- Keep code entry deterministic with monospaced defaults.
-- Provide optional snippet header metadata.
-- Preserve stable component height under large content.
+- Keep monospaced code editing deterministic.
+- Provide snippet metadata header (`title/language`).
+- Expose low-level `TextEdit` API through aliases.
 
-## API
+## Core API
 
-Core editing:
+Primary aliases:
 
-- `text`, `placeholderText`, `readOnly`
-- `cursorPosition`, `selectionStart`, `selectionEnd`
-- `selectByMouse`, `persistentSelection`, `overwriteMode`
+- `editorItem` (readonly alias)
+- `text`, `readOnly`, `cursorPosition`, `selectionStart`, `selectionEnd`, `selectedText`
+- `contentWidth`, `contentHeight`, `lineCount`, `textDocument`, `canPaste`
 
-Snippet header:
+Code-specific:
 
-- `snippetTitle`
-- `snippetLanguage`
-- `showSnippetHeader`
+- readonly `wrapMode` (`NoWrap`)
+- readonly `textFormat` (`PlainText`)
+- `snippetTitle`, `snippetLanguage`, `showSnippetHeader`
 
-Layout:
+Layout/visual:
 
 - `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`
 - `headerHeight`, `headerSpacing`, `topInset`
-- `showScrollBar`, `autoFocusOnPress`
+- `insetHorizontal`, `insetVertical`
+- `shapeStyle`, `cornerRadius`
+- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`
 
-Signals/methods:
+Signals and methods:
 
-- `textEdited(text)`
-- `submitted(text)`
-- `forceEditorFocus()`, `insertText(value)`, `clear()`, `undo()`, `redo()`, `submit()`
+- `textEdited(text)`, `submitted(text)`
+- `forceEditorFocus()`, `insertText(value)`, `clear()`, `select()`, `selectAll()`, `deselect()`, `cut()`, `copy()`, `paste()`, `undo()`, `redo()`, `submit()`
+
+## Behavior Contract
+
+- Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
+- Header area height is included in top inset only when `showSnippetHeader` is true.
+- Includes `InputMethodGuard` + `WheelScrollGuard` for IME/scroll safety.
 
 ## Usage
 
@@ -47,50 +54,3 @@ LV.CodeEditor {
     text: "int main() { return 0; }"
 }
 ```
-
-## How It Works
-
-- Uses `TextEdit.NoWrap` + plain text format by contract.
-- Monospace font default is platform-aware (`Menlo` on macOS, `Monospace` otherwise).
-- Embedded `InputMethodGuard` and `WheelScrollGuard` provide text integrity and nested scroll safety.
-
-## Advanced Example: Read-Only Snippet View
-
-```qml
-import LVRS 1.0 as LV
-
-LV.CodeEditor {
-    snippetTitle: "Build Command"
-    snippetLanguage: "bash"
-    readOnly: true
-    text: "cmake -S . -B build && cmake --build build"
-}
-```
-
-## Troubleshooting
-
-If horizontal scrolling feels inconsistent, verify parent scroll containers are guarded by `WheelScrollGuard`.
-
-## Recipe: Controlled Submit with Validation
-
-```qml
-import LVRS 1.0 as LV
-
-LV.CodeEditor {
-    id: editor
-    snippetTitle: "policy.json"
-
-    onSubmitted: function(text) {
-        try {
-            JSON.parse(text)
-            savePolicy(text)
-        } catch (e) {
-            console.warn("invalid json")
-        }
-    }
-}
-```
-
-## Operational Tip
-
-For auditability, pair `CodeEditor` submission with explicit version metadata in surrounding view model.

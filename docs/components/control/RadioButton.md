@@ -2,33 +2,37 @@
 
 Location: `qml/components/control/check/RadioButton.qml`
 
-`RadioButton` is a compact radio selector with compatibility aliases for legacy API names.
-Current default color mapping is aligned to Figma node `44:630`.
+`RadioButton` is a compact circular selector with legacy compatibility aliases.
 
 ## Purpose
 
-- Provide deterministic circular indicator + optional text.
-- Keep backward compatibility through `state`/`available` aliases.
+- Provide deterministic radio indicator visuals.
+- Keep old API (`state`, `available`) compatible with canonical Qt properties.
 
-## API
+## Core API
 
-Primary state API:
+Canonical state:
 
-- `checked`
-- `enabled`
-- `text`
+- `checked`, `enabled`, `text`
 
 Compatibility aliases:
 
 - `state` <-> `checked`
 - `available` <-> `enabled`
 
-Visual API:
+Visual:
 
 - `indicatorSize`, `dotSize`
 - `onColor`, `offColor`
 - `onColorDisabled`, `offColorDisabled`
 - `dotColor`, `dotColorDisabled`
+- resolved: `indicatorColor`, `indicatorDotColor`
+
+## Behavior Contract
+
+- Alias pairs are synchronized both directions (`onStateChanged`, `onCheckedChanged`, `onAvailableChanged`, `onEnabledChanged`).
+- Indicator color reacts to hover/down when enabled.
+- Component uses transparent background policy (`tone: Borderless`).
 
 ## Usage
 
@@ -40,33 +44,3 @@ LV.RadioButton {
     checked: true
 }
 ```
-
-## How It Works
-
-- Alias synchronization handlers keep `state` and `checked` mirrored.
-- Effective colors are computed from `enabled + checked` combination.
-- Default state color matrix:
-  - `checked + enabled`: `Theme.accent` + dot `Theme.textPrimary`
-  - `checked + disabled`: `Theme.panelBackground12` + dot `Theme.textSeptenary`
-  - `unchecked + enabled`: `Theme.textPrimary`
-  - `unchecked + disabled`: `Theme.panelBackground12`
-- Background visuals remain transparent to avoid button-like surface styling.
-
-## Advanced Example: Legacy Alias Interop
-
-```qml
-import LVRS 1.0 as LV
-
-LV.RadioButton {
-    text: "Legacy Option"
-    state: true
-    available: true
-}
-```
-
-Both alias and canonical properties stay synchronized by internal change handlers.
-
-## Grouping Recommendation
-
-Use `ButtonGroup` for mutually exclusive option sets.
-Without grouping, multiple radio buttons can be checked simultaneously if state logic is not wired externally.

@@ -1,25 +1,25 @@
-# P4 품질 자동화 운영 가이드
+# P4 Quality Automation Operations Guide
 
 Location: `tests/` / `tests/ci/` / `CMakeLists.txt`
 
-본 문서는 P4 단계에서 도입된 성능·시각·안정성 자동화 체계를 정의한다.
+This document defines the performance, visual, and stability automation framework introduced at P4.
 
-## 1. P4 상태
+## 1. P4 Status
 
-| ID | 항목 | 구현 상태 | 구현 지점 |
+| ID | Item | Implementation Status | Implementation Location |
 |---|---|---|---|
-| `P4-01` | 성능 회귀 CI(p95/p99 임계치) | 완료 | `tests/tst_performance_gate.cpp`, `tests/ci/run_p4_quality.sh` |
-| `P4-02` | 시각 회귀(골든 이미지) | 완료 | `tests/tst_visual_regression.cpp`, `tests/golden/visual_baseline_scene.png` |
-| `P4-03` | TSAN/ASAN/UBSAN 파이프라인 | 완료 | `CMakeLists.txt` (`LVRS_SANITIZER`), `tests/ci/run_p4_sanitizers.sh` |
-| `P4-04` | 장시간 soak test 자동화 | 완료 | `tests/tst_soak_runtime.cpp`, `tests/ci/run_p4_soak.sh` |
+| `P4-01` | Performance regression CI (p95/p99 thresholds) | Complete | `tests/tst_performance_gate.cpp`, `tests/ci/run_p4_quality.sh` |
+| `P4-02` | Visual regression (golden image) | Complete | `tests/tst_visual_regression.cpp`, `tests/golden/visual_baseline_scene.png` |
+| `P4-03` | TSAN/ASAN/UBSAN pipeline | Complete | `CMakeLists.txt` (`LVRS_SANITIZER`), `tests/ci/run_p4_sanitizers.sh` |
+| `P4-04` | Long-running soak test automation | Complete | `tests/tst_soak_runtime.cpp`, `tests/ci/run_p4_soak.sh` |
 
-## 2. 테스트 타깃 요약
+## 2. Test Target Summary
 
 ### `LVRSTests_performance_gate`
 
-- 목적: `dispatchTask` 지연 분포의 회귀를 p95/p99 임계치로 차단.
-- 방법: 다회 라운드 측정 후 median(p95), median(p99) 기준 판정.
-- 주요 환경변수:
+- Purpose: block regressions in the `dispatchTask` latency distribution using p95/p99 thresholds.
+- Method: evaluate multiple measurement rounds and gate by median(p95), median(p99).
+- Key environment variables:
   - `LVRS_PERF_GATE_ROUNDS`
   - `LVRS_PERF_GATE_TASKS`
   - `LVRS_PERF_GATE_WORK_MS`
@@ -28,26 +28,26 @@ Location: `tests/` / `tests/ci/` / `CMakeLists.txt`
 
 ### `LVRSTests_visual_regression`
 
-- 목적: 기준 장면 렌더 결과와 골든 이미지 비교.
-- 방법: 픽셀 채널 오차 허용치 기반 mismatch ratio 계산.
-- 주요 환경변수:
+- Purpose: compare rendered output of the baseline scene against a golden image.
+- Method: compute mismatch ratio using per-channel pixel tolerance.
+- Key environment variables:
   - `LVRS_VISUAL_DIFF_CHANNEL_TOLERANCE`
   - `LVRS_VISUAL_DIFF_RATIO_MAX`
-  - `LVRS_UPDATE_GOLDEN=1` (골든 갱신)
+  - `LVRS_UPDATE_GOLDEN=1` (update golden)
 
 ### `LVRSTests_soak_runtime`
 
-- 목적: 반복 IO+async 부하에서 큐 누수/캐시 초과/지연 열화 감시.
-- 방법: 반복 작업 후 queue drain, backpressure drop, p99 상한, cache/trace 한계 검증.
-- 주요 환경변수:
+- Purpose: monitor queue leaks, cache overflow, and latency degradation under repeated IO+async load.
+- Method: after repeated work, validate queue drain, backpressure drops, p99 upper bound, and cache/trace limits.
+- Key environment variables:
   - `LVRS_SOAK_ITERATIONS`
   - `LVRS_SOAK_WORK_MS`
   - `LVRS_SOAK_TIMEOUT_MS`
   - `LVRS_SOAK_P99_LIMIT_MS`
 
-## 3. 라벨 체계
+## 3. Label Scheme
 
-P4 테스트는 CTest 라벨로 분류된다.
+P4 tests are categorized by CTest labels.
 
 - `p4`
 - `quality`
@@ -57,26 +57,26 @@ P4 테스트는 CTest 라벨로 분류된다.
 - `soak`
 - `long`
 
-권장 실행:
+Recommended execution:
 
-- PR/일반 게이트: `ctest -L p4 -LE long`
-- 주간 soak: `ctest -L soak`
+- PR/general gate: `ctest -L p4 -LE long`
+- Weekly soak: `ctest -L soak`
 
-## 4. 실행 스크립트
+## 4. Execution Scripts
 
-### 4.1 PR 품질 게이트
+### 4.1 PR Quality Gate
 
 ```bash
 ./tests/ci/run_p4_quality.sh
 ```
 
-동작:
+Behavior:
 
-1. 테스트 빌드 구성
-2. P4 게이트 타깃 빌드
-3. `p4` 라벨 중 `long` 제외 테스트 실행
+1. Configure a test build.
+2. Build P4 gate targets.
+3. Run `p4` label tests excluding `long`.
 
-### 4.2 Sanitizer 매트릭스
+### 4.2 Sanitizer Matrix
 
 ```bash
 ./tests/ci/run_p4_sanitizers.sh address
@@ -84,30 +84,30 @@ P4 테스트는 CTest 라벨로 분류된다.
 ./tests/ci/run_p4_sanitizers.sh thread
 ```
 
-동작:
+Behavior:
 
-1. `LVRS_SANITIZER` 기반 별도 빌드 구성
-2. 핵심 안정성/P4 테스트 빌드
-3. CTest 실행 및 sanitizer 런타임 옵션 적용
+1. Configure a dedicated build using `LVRS_SANITIZER`.
+2. Build core stability/P4 test targets.
+3. Run CTest with sanitizer runtime options.
 
-### 4.3 Soak 배치
+### 4.3 Soak Batch
 
 ```bash
 LVRS_SOAK_ITERATIONS=5000 ./tests/ci/run_p4_soak.sh
 ```
 
-동작:
+Behavior:
 
-1. soak 전용 빌드 구성
-2. soak 테스트 타깃 빌드
-3. `soak` 라벨 테스트 실행
+1. Configure a soak-specific build.
+2. Build soak test targets.
+3. Run tests with the `soak` label.
 
-## 5. CMake sanitizer 옵션
+## 5. CMake Sanitizer Option
 
-- 신규 옵션: `LVRS_SANITIZER`
-- 허용값: `none`, `address`, `thread`, `undefined`
+- New option: `LVRS_SANITIZER`
+- Allowed values: `none`, `address`, `thread`, `undefined`
 
-예시:
+Example:
 
 ```bash
 cmake -S . -B build-asan -DLVRS_BUILD_TESTS=ON -DLVRS_SANITIZER=address
@@ -115,18 +115,18 @@ cmake --build build-asan --target LVRSTests_backend_io
 ctest --test-dir build-asan --output-on-failure -R LVRSTests_backend_io
 ```
 
-## 6. 골든 이미지 운영 규칙
+## 6. Golden Image Operation Rules
 
-- 골든 파일 경로: `tests/golden/visual_baseline_scene.png`
-- UI 의도 변경 시에만 `LVRS_UPDATE_GOLDEN=1`로 갱신한다.
-- 골든 갱신 PR에는 diff 근거(변경 의도)를 반드시 포함한다.
+- Golden file path: `tests/golden/visual_baseline_scene.png`
+- Update with `LVRS_UPDATE_GOLDEN=1` only when the UI change is intentional.
+- PRs that update the golden image must include the reason/evidence for the diff.
 
-## 7. 완료 정의
+## 7. Definition of Done
 
-P4 완료 판정은 다음을 모두 만족할 때 성립한다.
+P4 is considered complete only when all of the following pass.
 
-1. `run_p4_quality.sh` 성공
-2. `run_p4_sanitizers.sh address` 성공
-3. `run_p4_sanitizers.sh undefined` 성공
-4. `run_p4_soak.sh` 성공(정책 반복 횟수 기준)
-5. 골든 이미지 비교 실패 0건
+1. `run_p4_quality.sh`
+2. `run_p4_sanitizers.sh address`
+3. `run_p4_sanitizers.sh undefined`
+4. `run_p4_soak.sh` (under policy-defined iteration count)
+5. zero golden-image comparison failures

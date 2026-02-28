@@ -1086,16 +1086,16 @@ Item {
         && iconMenuButtonBorderless.resolvedIconSource.toString() === expectedFallbackIcon
         && iconMenuButtonDestructive.resolvedIconSource.toString() === expectedFallbackIcon
         && iconMenuButtonDisabled.resolvedIconSource.toString() === expectedFallbackIcon
-        && labelMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
+        && labelMenuButton.resolvedIndicatorName === "generalchevronDownAccent"
         && labelMenuButtonDefault.resolvedIndicatorName === "generalchevronDown"
-        && labelMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
-        && labelMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
-        && labelMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"
-        && iconMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
+        && labelMenuButtonBorderless.resolvedIndicatorName === "generalchevronDownBorderless"
+        && labelMenuButtonDestructive.resolvedIndicatorName === "generalchevronDownAccent"
+        && labelMenuButtonDisabled.resolvedIndicatorName === "generalchevronDownDisabled"
+        && iconMenuButton.resolvedIndicatorName === "generalchevronDownAccent"
         && iconMenuButtonDefault.resolvedIndicatorName === "generalchevronDown"
-        && iconMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
-        && iconMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
-        && iconMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"
+        && iconMenuButtonBorderless.resolvedIndicatorName === "generalchevronDownBorderless"
+        && iconMenuButtonDestructive.resolvedIndicatorName === "generalchevronDownAccent"
+        && iconMenuButtonDisabled.resolvedIndicatorName === "generalchevronDownDisabled"
 }
 )";
 

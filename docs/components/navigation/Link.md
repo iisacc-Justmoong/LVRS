@@ -2,14 +2,14 @@
 
 Location: `qml/components/navigation/Link.qml`
 
-`Link` is a click-to-navigation control that wraps route/component navigation into a button-like API.
+`Link` is a navigation trigger component built on `AbstractButton`.
 
 ## Purpose
 
-- Provide declarative navigation trigger without direct router method calls in each click handler.
-- Support route path navigation and component-target navigation in one component.
+- Provide declarative route/component navigation without per-view router boilerplate.
+- Support both path navigation and component navigation with optional replace semantics.
 
-## API
+## Core API
 
 Routing:
 
@@ -22,30 +22,28 @@ Routing:
 
 Visual:
 
-- `linkColor`
-- `hoverColor`
-- `disabledColor`
+- `linkColor`, `hoverColor`, `pressedColor`, `disabledColor`
 - `underline`
 
 Content:
 
 - default `content` slot
-- fallback text rendering when no slot child exists
+- text fallback label when slot is empty
 
-## Router Resolution
+## Behavior Contract
 
-`Link` chooses router in this order:
+Router resolution order:
 
-1. explicit `router` property
+1. `router`
 2. `Navigator.router`
-3. no-op if unresolved
+3. no-op when unresolved
 
-## Navigation Behavior
+Navigation behavior:
 
 - if `targetComponent` is set:
-  - `replace == true` -> `replaceWith(component, params)`
-  - else -> `goTo(component, params)`
-- else route path:
+  - `replace == true` -> `replaceWith(targetComponent, params)`
+  - else -> `goTo(targetComponent, params)`
+- else if `href` exists:
   - `replace == true` -> `replace(href, params)`
   - else -> `go(href, params)`
 
@@ -56,44 +54,6 @@ import LVRS 1.0 as LV
 
 LV.Link {
     href: "/reports"
-    text: "Open Reports"
-    underline: true
+    text: "Reports"
 }
 ```
-
-## Advanced Example: Component Navigation Replacement
-
-```qml
-import QtQuick
-import LVRS 1.0 as LV
-
-Item {
-    Component { id: inspectorPage; Rectangle {} }
-
-    LV.Link {
-        targetComponent: inspectorPage
-        replace: true
-        params: ({ source: "sidebar" })
-        text: "Open Inspector"
-    }
-}
-```
-
-## Common Mistake
-
-When no explicit `router` is provided, navigation silently no-ops if `Navigator.router` is not registered.
-Ensure router registration exists in nested/embedded navigation setups.
-
-## Recipe: Route Replace for Wizard Step
-
-```qml
-import LVRS 1.0 as LV
-
-LV.Link {
-    href: "/wizard/step-2"
-    replace: true
-    text: "Next"
-}
-```
-
-Use `replace` to prevent back-stack noise in linear wizard flows.
