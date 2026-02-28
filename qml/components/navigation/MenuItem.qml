@@ -32,6 +32,9 @@ AbstractButton {
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
+    readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale))
+    readonly property string chevronIconName: "generalchevronDown"
+    readonly property url chevronIconSource: Theme.iconPath(control.chevronIconName)
 
     readonly property bool isSelected: state === selectedState
     readonly property bool isInactive: state === inactiveState
@@ -65,6 +68,15 @@ AbstractButton {
         : isInactive
             ? Theme.contextMenuItemInactiveBackground
             : "transparent"
+    readonly property real resolvedChevronRotation: {
+        if (control.resolvedSelectionDirection === control.directionLeft)
+            return 90
+        if (control.resolvedSelectionDirection === control.directionUp)
+            return 180
+        if (control.resolvedSelectionDirection === control.directionDown)
+            return 0
+        return -90
+    }
 
     tone: AbstractButton.Borderless
     horizontalPadding: Theme.gap4
@@ -163,56 +175,24 @@ AbstractButton {
                 lineHeightMode: Text.FixedHeight
             }
 
-            Canvas {
-                id: chevronCanvas
+            Image {
+                id: chevronIcon
                 visible: control.showChevron
                 Layout.preferredWidth: control.chevronSize
                 Layout.preferredHeight: control.chevronSize
                 Layout.alignment: Qt.AlignVCenter
-                implicitWidth: control.chevronSize
-                implicitHeight: control.chevronSize
-                antialiasing: true
-
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    if (!control.showChevron)
-                        return
-
-                    ctx.beginPath()
-                    if (control.resolvedSelectionDirection === control.directionLeft) {
-                        ctx.moveTo(width * 0.62, height * 0.28)
-                        ctx.lineTo(width * 0.42, height * 0.5)
-                        ctx.lineTo(width * 0.62, height * 0.72)
-                    } else if (control.resolvedSelectionDirection === control.directionUp) {
-                        ctx.moveTo(width * 0.28, height * 0.62)
-                        ctx.lineTo(width * 0.5, height * 0.42)
-                        ctx.lineTo(width * 0.72, height * 0.62)
-                    } else if (control.resolvedSelectionDirection === control.directionDown) {
-                        ctx.moveTo(width * 0.28, height * 0.38)
-                        ctx.lineTo(width * 0.5, height * 0.58)
-                        ctx.lineTo(width * 0.72, height * 0.38)
-                    } else {
-                        ctx.moveTo(width * 0.38, height * 0.28)
-                        ctx.lineTo(width * 0.58, height * 0.5)
-                        ctx.lineTo(width * 0.38, height * 0.72)
-                    }
-                    ctx.lineWidth = 1.6
-                    ctx.lineCap = "round"
-                    ctx.lineJoin = "round"
-                    ctx.strokeStyle = control.isInactive
-                        ? control.chevronColor
-                        : (control.effectiveEnabled ? control.chevronColor : Theme.disabledColor)
-                    ctx.stroke()
-                }
+                source: RenderQuality.resolveTextureSource(control.chevronIconSource)
+                sourceSize.width: control.chevronSourceSize
+                sourceSize.height: control.chevronSourceSize
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: RenderQuality.mipmapEnabled
+                rotation: control.resolvedChevronRotation
+                transformOrigin: Item.Center
+                opacity: control.isInactive ? 1.0 : (control.effectiveEnabled ? 1.0 : 0.45)
             }
         }
     }
-
-    onChevronColorChanged: chevronCanvas.requestPaint()
-    onShowChevronChanged: chevronCanvas.requestPaint()
-    onEnabledChanged: chevronCanvas.requestPaint()
-    onSelectionDirectionChanged: chevronCanvas.requestPaint()
 }
 
 // API usage (external):

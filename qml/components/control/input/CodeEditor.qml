@@ -18,7 +18,8 @@ FocusScope {
     property alias selectedText: editor.selectedText
     property alias length: editor.length
     property alias selectByMouse: editor.selectByMouse
-    property alias selectByKeyboard: editor.selectByKeyboard
+    // Compatibility flag: native TextEdit keyboard selection is OS-managed.
+    property bool selectByKeyboard: true
     property alias mouseSelectionMode: editor.mouseSelectionMode
     property alias persistentSelection: editor.persistentSelection
     property alias overwriteMode: editor.overwriteMode
@@ -42,6 +43,7 @@ FocusScope {
     property bool showSnippetHeader: true
     property bool showScrollBar: true
     property bool autoFocusOnPress: true
+    property bool preferNativeGestures: Platform.mobile
 
     property int fieldMinHeight: Theme.controlHeightMd * 4
     property int editorHeight: fieldMinHeight
@@ -169,7 +171,8 @@ FocusScope {
             id: flickable
             anchors.fill: parent
             clip: true
-            interactive: contentHeight > height || contentWidth > width
+            interactive: (contentHeight > height || contentWidth > width)
+                         && (!control.preferNativeGestures || !editor.activeFocus)
             boundsBehavior: Flickable.StopAtBounds
             contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
             contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
@@ -199,12 +202,9 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
-                lineHeightMode: TextEdit.FixedHeight
-                lineHeight: control.textLineBoxHeight
                 renderType: TextEdit.QtRendering
                 activeFocusOnPress: true
                 cursorVisible: control.enabled && activeFocus && !readOnly
-                selectByKeyboard: true
                 selectByMouse: true
                 persistentSelection: true
                 activeFocusOnTab: true
@@ -236,6 +236,7 @@ FocusScope {
         }
 
         WheelScrollGuard {
+            enabled: !control.preferNativeGestures
             anchors.fill: parent
             targetFlickable: flickable
             consumeInside: true
@@ -261,7 +262,7 @@ FocusScope {
 
         MouseArea {
             anchors.fill: parent
-            enabled: control.enabled
+            enabled: control.enabled && !control.preferNativeGestures
             acceptedButtons: Qt.LeftButton
             cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
             onPressed: function(mouse) {

@@ -21,7 +21,10 @@ FocusScope {
     property alias inputMethodComposing: inputField.inputMethodComposing
     property alias activeFocusOnPress: inputField.activeFocusOnPress
     property alias selectByMouse: inputField.selectByMouse
-    property alias selectByKeyboard: inputField.selectByKeyboard
+    // TextInput does not expose selectByKeyboard as a writable QML property.
+    // Keep this compatibility flag so external callers can set/read it without
+    // breaking, while native keyboard selection remains OS-managed.
+    property bool selectByKeyboard: true
     property alias mouseSelectionMode: inputField.mouseSelectionMode
     property alias persistentSelection: inputField.persistentSelection
     property alias cursorPosition: inputField.cursorPosition
@@ -49,6 +52,7 @@ FocusScope {
     property int insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
     property int centeredTextHeight: 16
+    property bool preferNativeGestures: Platform.mobile
 
     property int cornerRadius: Theme.radiusMd
 
@@ -218,7 +222,6 @@ FocusScope {
         verticalAlignment: TextInput.AlignVCenter
         renderType: TextInput.QtRendering
         activeFocusOnPress: true
-        selectByKeyboard: true
         activeFocusOnTab: true
         clip: true
         selectByMouse: true
@@ -254,7 +257,7 @@ FocusScope {
 
     MouseArea {
         anchors.fill: parent
-        enabled: control.enabled
+        enabled: control.enabled && !control.preferNativeGestures
         acceptedButtons: Qt.LeftButton
         cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
         onPressed: function(mouse) {

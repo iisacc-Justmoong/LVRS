@@ -43,6 +43,10 @@ AbstractButton {
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
+    readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale))
+    readonly property string chevronIconName: "generalchevronDown"
+    readonly property url chevronIconSource: Theme.iconPath(control.chevronIconName)
+    readonly property real resolvedChevronRotation: control.expanded ? 0 : -90
     readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
     readonly property int stateIdle: 0
     readonly property int stateHover: 1
@@ -170,33 +174,18 @@ AbstractButton {
             Layout.alignment: Qt.AlignVCenter
             visible: control.effectiveShowChevron
 
-            Canvas {
-                id: chevronCanvas
+            Image {
+                id: chevronIcon
                 anchors.fill: parent
-                antialiasing: true
-
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    if (!control.effectiveShowChevron)
-                        return
-
-                    ctx.beginPath()
-                    if (control.expanded) {
-                        ctx.moveTo(width * 0.28, height * 0.38)
-                        ctx.lineTo(width * 0.5, height * 0.6)
-                        ctx.lineTo(width * 0.72, height * 0.38)
-                    } else {
-                        ctx.moveTo(width * 0.38, height * 0.28)
-                        ctx.lineTo(width * 0.58, height * 0.5)
-                        ctx.lineTo(width * 0.38, height * 0.72)
-                    }
-                    ctx.lineWidth = 1.5
-                    ctx.lineCap = "round"
-                    ctx.lineJoin = "round"
-                    ctx.strokeStyle = control.enabled ? control.chevronColor : control.textColorDisabled
-                    ctx.stroke()
-                }
+                source: RenderQuality.resolveTextureSource(control.chevronIconSource)
+                sourceSize.width: control.chevronSourceSize
+                sourceSize.height: control.chevronSourceSize
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: RenderQuality.mipmapEnabled
+                rotation: control.resolvedChevronRotation
+                transformOrigin: Item.Center
+                opacity: control.enabled ? 1.0 : 0.45
             }
 
             MouseArea {
@@ -218,23 +207,18 @@ AbstractButton {
             control.hierarchyList.scheduleRefreshState()
     }
     onShowChevronChanged: {
-        chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
     }
     onHasChildItemsChanged: {
-        chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
     }
     onExpandedChanged: {
-        chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)
             control.hierarchyList.notifyExpansionChanged(control)
     }
-    onChevronColorChanged: chevronCanvas.requestPaint()
     onEnabledChanged: {
-        chevronCanvas.requestPaint()
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
         if (!control.enabled && control.hierarchyList && control.hierarchyList.scheduleNormalizeActiveItem)
