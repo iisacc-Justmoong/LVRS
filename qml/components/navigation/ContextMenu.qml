@@ -16,6 +16,13 @@ Controls.Popup {
     property color menuColor: Theme.contextMenuSurface
     property color dividerColor: Theme.contextMenuDivider
     property real menuOpacity: 1.0
+    property bool enableOpenBounce: true
+    property int openBounceDuration: 170
+    property int openSettleDuration: 110
+    property real openStartScale: 0.78
+    property real openOvershootScale: 1.06
+    property real openAnchorX: 0
+    property real openAnchorY: 0
     readonly property color resolvedMenuColor:
         Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
 
@@ -48,6 +55,47 @@ Controls.Popup {
                     && mouse.y <= control.y + control.height
                 if (!insidePopup)
                     control.close()
+            }
+        }
+    }
+
+    transform: Scale {
+        id: openBounceTransform
+        origin.x: control.openAnchorX
+        origin.y: control.openAnchorY
+        xScale: 1.0
+        yScale: 1.0
+    }
+
+    enter: Transition {
+        enabled: control.enableOpenBounce
+        ParallelAnimation {
+            NumberAnimation {
+                target: control
+                property: "opacity"
+                from: 0.0
+                to: 1.0
+                duration: control.openBounceDuration
+                easing.type: Easing.OutCubic
+            }
+
+            SequentialAnimation {
+                NumberAnimation {
+                    target: openBounceTransform
+                    properties: "xScale,yScale"
+                    from: control.openStartScale
+                    to: control.openOvershootScale
+                    duration: control.openBounceDuration
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: openBounceTransform
+                    properties: "xScale,yScale"
+                    to: 1.0
+                    duration: control.openSettleDuration
+                    easing.type: Easing.OutCubic
+                }
             }
         }
     }
@@ -346,6 +394,8 @@ Controls.Popup {
         }
         x = Math.round(px)
         y = Math.round(py)
+        openAnchorX = Math.max(0, Math.min(targetWidth, xPos - x))
+        openAnchorY = Math.max(0, Math.min(targetHeight, yPos - y))
         // Defer open to avoid immediate close when called from press handlers.
         Qt.callLater(function() {
             control.open()

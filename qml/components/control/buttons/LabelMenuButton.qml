@@ -7,7 +7,7 @@ AbstractButton {
 
     tone: AbstractButton.Primary
     readonly property int figmaButtonHeight: Theme.gap20
-    readonly property string indicatorNameDefault: "panDownSymbolicDefault"
+    readonly property string indicatorNameDefault: "generalchevronDown"
     readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
     readonly property string indicatorNameAccent: "panDownSymbolicAccent"
     readonly property string indicatorNameDisabled: "panDownSymbolicDisabled"

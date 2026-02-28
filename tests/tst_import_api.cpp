@@ -3,6 +3,9 @@
 #include <QQmlEngine>
 #include <QCoreApplication>
 #include <QDir>
+#include <QGuiApplication>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QtPlugin>
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -27,6 +30,7 @@ private slots:
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void hierarchy_chevron_requires_children_loads();
+    void hierarchy_item_hover_and_active_state_visual_contract_loads();
     void button_padding_matches_figma_spec();
     void input_field_figma_contract_loads();
     void toggle_switch_figma_color_contract_loads();
@@ -885,6 +889,108 @@ Item {
     QTRY_VERIFY(root->property("chevronRuleReady").toBool());
 }
 
+void ImportApiTests::hierarchy_item_hover_and_active_state_visual_contract_loads()
+{
+    const QString requestedPlatform = qEnvironmentVariable("QT_QPA_PLATFORM").trimmed();
+    if (requestedPlatform.compare(QStringLiteral("offscreen"), Qt::CaseInsensitive) == 0
+        || QGuiApplication::platformName().compare(QStringLiteral("offscreen"), Qt::CaseInsensitive) == 0) {
+        QSKIP("Hover pointer delivery is unavailable on offscreen platform plugin");
+    }
+
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Window
+import LVRS as LV
+
+Window {
+    id: root
+    width: 320
+    height: 200
+    visible: true
+
+    LV.HierarchyList {
+        id: list
+        objectName: "hierarchyList"
+        anchors.fill: parent
+        keyboardNavigationEnabled: false
+
+        LV.HierarchyItem {
+            id: itemA
+            objectName: "itemA"
+            itemKey: "itemA"
+            label: "Item A"
+            showChevron: false
+            hasChildItems: false
+            selected: true
+        }
+
+        LV.HierarchyItem {
+            id: itemB
+            objectName: "itemB"
+            itemKey: "itemB"
+            label: "Item B"
+            showChevron: false
+            hasChildItems: false
+        }
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    auto *list = root->findChild<QObject *>(QStringLiteral("hierarchyList"));
+    QVERIFY(list);
+    auto *itemAObject = root->findChild<QObject *>(QStringLiteral("itemA"));
+    auto *itemBObject = root->findChild<QObject *>(QStringLiteral("itemB"));
+    QVERIFY(itemAObject);
+    QVERIFY(itemBObject);
+    auto *itemA = qobject_cast<QQuickItem *>(itemAObject);
+    auto *itemB = qobject_cast<QQuickItem *>(itemBObject);
+    QVERIFY(itemA);
+    QVERIFY(itemB);
+
+    QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemAObject);
+    QTRY_COMPARE(itemAObject->property("state").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Idle"));
+    QVERIFY(!itemBObject->property("isHoverState").toBool());
+    QVERIFY(!itemBObject->property("isActiveState").toBool());
+
+    const QPointF hoverPoint = itemB->mapToScene(QPointF(itemB->width() * 0.5, itemB->height() * 0.5));
+    const QPoint hoverPointInt(qRound(hoverPoint.x()), qRound(hoverPoint.y()));
+    QTest::mouseMove(window, hoverPointInt, 10);
+
+    QTRY_VERIFY(itemBObject->property("isHoverState").toBool());
+    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Hover"));
+
+    QObject *hoverBackground = itemBObject->property("background").value<QObject *>();
+    QVERIFY(hoverBackground);
+    const QColor hoverRenderedColor = hoverBackground->property("color").value<QColor>();
+    const QColor expectedHoverColor = itemBObject->property("backgroundColorHover").value<QColor>();
+    QCOMPARE(hoverRenderedColor, expectedHoverColor);
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, hoverPointInt, 10);
+
+    QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemBObject);
+    QTRY_VERIFY(itemBObject->property("isActiveState").toBool());
+    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Active"));
+    QTRY_VERIFY(!itemAObject->property("isActiveState").toBool());
+
+    QObject *activeBackground = itemBObject->property("background").value<QObject *>();
+    QVERIFY(activeBackground);
+    const QColor activeRenderedColor = activeBackground->property("color").value<QColor>();
+    const QColor expectedActiveColor = itemBObject->property("backgroundColor").value<QColor>();
+    QCOMPARE(activeRenderedColor, expectedActiveColor);
+}
+
 void ImportApiTests::button_padding_matches_figma_spec()
 {
     QQmlEngine engine;
@@ -981,12 +1087,12 @@ Item {
         && iconMenuButtonDestructive.resolvedIconSource.toString() === expectedFallbackIcon
         && iconMenuButtonDisabled.resolvedIconSource.toString() === expectedFallbackIcon
         && labelMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
-        && labelMenuButtonDefault.resolvedIndicatorName === "panDownSymbolicDefault"
+        && labelMenuButtonDefault.resolvedIndicatorName === "generalchevronDown"
         && labelMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
         && labelMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
         && labelMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"
         && iconMenuButton.resolvedIndicatorName === "panDownSymbolicAccent"
-        && iconMenuButtonDefault.resolvedIndicatorName === "panDownSymbolicDefault"
+        && iconMenuButtonDefault.resolvedIndicatorName === "generalchevronDown"
         && iconMenuButtonBorderless.resolvedIndicatorName === "panDownSymbolicBorderless"
         && iconMenuButtonDestructive.resolvedIndicatorName === "panDownSymbolicAccent"
         && iconMenuButtonDisabled.resolvedIndicatorName === "panDownSymbolicDisabled"

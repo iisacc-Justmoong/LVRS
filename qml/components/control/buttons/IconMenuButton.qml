@@ -38,7 +38,7 @@ AbstractButton {
         : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
     readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
-    readonly property string indicatorNameDefault: "panDownSymbolicDefault"
+    readonly property string indicatorNameDefault: "generalchevronDown"
     readonly property string indicatorNameBorderless: "panDownSymbolicBorderless"
     readonly property string indicatorNameAccent: "panDownSymbolicAccent"
     readonly property string indicatorNameDisabled: "panDownSymbolicDisabled"

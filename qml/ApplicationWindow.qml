@@ -12,6 +12,8 @@ Controls.ApplicationWindow {
     readonly property string platform: Qt.platform.os
     readonly property bool isMobilePlatform: platform === "android" || platform === "ios"
     readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
+    readonly property bool backendMobilePlatform: Platform.mobile
+    readonly property Item overlayLayer: Controls.Overlay.overlay
 
     readonly property int compact: 0
     readonly property int medium: 1
@@ -27,6 +29,13 @@ Controls.ApplicationWindow {
     property int desktopMinHeight: 600
     property int mobileMinWidth: 360
     property int mobileMinHeight: 640
+    property bool useBackendMobileScale: true
+    property real mobileViewScale: 1.5
+    readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
+        ? Math.max(1.0, mobileViewScale)
+        : 1.0
+    property bool forceFullWindowAreaOnMobile: true
+    readonly property bool fullWindowAreaOnMobileEnabled: forceFullWindowAreaOnMobile && backendMobilePlatform
     // Keep view composition identical across platforms; only apply when explicitly enabled.
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
@@ -100,6 +109,42 @@ Controls.ApplicationWindow {
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
     color: windowRoot.windowColor
+
+    background: Rectangle {
+        x: 0
+        y: 0
+        width: windowRoot.width
+        height: windowRoot.height
+        color: windowRoot.windowColor
+    }
+
+    Binding {
+        target: windowRoot
+        property: "topPadding"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
+
+    Binding {
+        target: windowRoot
+        property: "rightPadding"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
+
+    Binding {
+        target: windowRoot
+        property: "bottomPadding"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
+
+    Binding {
+        target: windowRoot
+        property: "leftPadding"
+        value: 0
+        when: windowRoot.fullWindowAreaOnMobileEnabled
+    }
 
     function matchesMedia(rule) {
         if (!rule)
@@ -940,16 +985,54 @@ Controls.ApplicationWindow {
         layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
 
-        AdaptiveLayoutHost {
-            id: scaffold
-            anchors.fill: parent
-            navModel: windowRoot.navItems
-            layoutPlatform: windowRoot.platform
-            onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
-            onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
-            onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
-            onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
+        Item {
+            id: scaledContentHost
+            x: 0
+            y: 0
+            width: Math.max(1, Math.round(parent.width / windowRoot.effectiveMobileViewScale))
+            height: Math.max(1, Math.round(parent.height / windowRoot.effectiveMobileViewScale))
+            scale: windowRoot.effectiveMobileViewScale
+            transformOrigin: Item.TopLeft
+
+            AdaptiveLayoutHost {
+                id: scaffold
+                anchors.fill: parent
+                navModel: windowRoot.navItems
+                layoutPlatform: windowRoot.platform
+                onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
+                onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
+                onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
+                onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
+            }
         }
+    }
+
+    Binding {
+        target: windowRoot.overlayLayer
+        property: "scale"
+        value: windowRoot.effectiveMobileViewScale
+        when: windowRoot.overlayLayer !== null && windowRoot.effectiveMobileViewScale !== 1.0
+    }
+
+    Binding {
+        target: windowRoot.overlayLayer
+        property: "transformOrigin"
+        value: Item.TopLeft
+        when: windowRoot.overlayLayer !== null && windowRoot.effectiveMobileViewScale !== 1.0
+    }
+
+    Binding {
+        target: windowRoot.overlayLayer
+        property: "width"
+        value: Math.max(1, Math.round(windowRoot.width / windowRoot.effectiveMobileViewScale))
+        when: windowRoot.overlayLayer !== null && windowRoot.effectiveMobileViewScale !== 1.0
+    }
+
+    Binding {
+        target: windowRoot.overlayLayer
+        property: "height"
+        value: Math.max(1, Math.round(windowRoot.height / windowRoot.effectiveMobileViewScale))
+        when: windowRoot.overlayLayer !== null && windowRoot.effectiveMobileViewScale !== 1.0
     }
 
     EventListener {

@@ -8,6 +8,7 @@ QtQuickWindow.Window {
     readonly property string platform: Qt.platform.os
     readonly property bool isMobilePlatform: platform === "android" || platform === "ios"
     readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
+    readonly property bool backendMobilePlatform: Platform.mobile
 
     readonly property int compact: 0
     readonly property int medium: 1
@@ -22,6 +23,11 @@ QtQuickWindow.Window {
     property int desktopMinHeight: 240
     property int mobileMinWidth: 320
     property int mobileMinHeight: 240
+    property bool useBackendMobileScale: true
+    property real mobileViewScale: 1.5
+    readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
+        ? Math.max(1.0, mobileViewScale)
+        : 1.0
     property bool usePlatformSafeMargin: false
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
     property color windowColor: Theme.window
@@ -38,7 +44,7 @@ QtQuickWindow.Window {
     readonly property bool sceneSupersamplingActive: autoApplyRenderQuality
         && RenderQuality.sceneSupersamplingActive
 
-    default property alias content: contentHost.data
+    default property alias content: scaledContentHost.data
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
@@ -110,6 +116,16 @@ QtQuickWindow.Window {
         layer.smooth: layer.enabled
         layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
+
+        Item {
+            id: scaledContentHost
+            x: 0
+            y: 0
+            width: Math.max(1, Math.round(parent.width / root.effectiveMobileViewScale))
+            height: Math.max(1, Math.round(parent.height / root.effectiveMobileViewScale))
+            scale: root.effectiveMobileViewScale
+            transformOrigin: Item.TopLeft
+        }
     }
 
     QtObject {
