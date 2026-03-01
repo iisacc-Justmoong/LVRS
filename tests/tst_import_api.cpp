@@ -32,6 +32,7 @@ private slots:
     void hierarchy_chevron_requires_children_loads();
     void hierarchy_item_hover_and_active_state_visual_contract_loads();
     void hierarchy_item_inputable_overlay_contract_loads();
+    void hierarchy_item_input_overlay_geometry_and_close_contract_loads();
     void button_padding_matches_figma_spec();
     void input_field_figma_contract_loads();
     void toggle_switch_figma_color_contract_loads();
@@ -1076,6 +1077,74 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("contractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_item_input_overlay_geometry_and_close_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    width: 360
+    height: 120
+
+    LV.HierarchyItem {
+        id: item
+        objectName: "item"
+        width: 320
+        label: "Node"
+        indentLevel: 2
+        showChevron: false
+        hasChildItems: false
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *itemObject = root->findChild<QObject *>(QStringLiteral("item"));
+    QVERIFY(itemObject);
+    auto *item = qobject_cast<QQuickItem *>(itemObject);
+    QVERIFY(item);
+
+    auto *labelObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemLabel"), Qt::FindChildrenRecursively);
+    auto *loaderObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemInputLoader"), Qt::FindChildrenRecursively);
+    QVERIFY(labelObject);
+    QVERIFY(loaderObject);
+    auto *labelItem = qobject_cast<QQuickItem *>(labelObject);
+    QVERIFY(labelItem);
+
+    itemObject->setProperty("inputable", true);
+
+    QTRY_VERIFY(loaderObject->property("active").toBool());
+    auto *overlayObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemInputOverlay"), Qt::FindChildrenRecursively);
+    QTRY_VERIFY(overlayObject != nullptr);
+    auto *overlayItem = qobject_cast<QQuickItem *>(overlayObject);
+    QVERIFY(overlayItem);
+
+    const QPointF labelPos = labelItem->mapToItem(item, QPointF(0, 0));
+    const QPointF overlayPos = overlayItem->mapToItem(item, QPointF(0, 0));
+
+    QVERIFY2(qAbs(labelPos.x() - overlayPos.x()) <= 0.5, "Overlay x must match label x.");
+    QVERIFY2(qAbs(labelPos.y() - overlayPos.y()) <= 0.5, "Overlay y must match label y.");
+    QVERIFY2(qAbs(labelItem->width() - overlayItem->width()) <= 0.5, "Overlay width must match label width.");
+    QVERIFY2(qAbs(labelItem->height() - overlayItem->height()) <= 0.5, "Overlay height must match label height.");
+
+    const bool acceptedInvoked = QMetaObject::invokeMethod(overlayObject,
+                                                            "accepted",
+                                                            Q_ARG(QString, QStringLiteral("Node Renamed")));
+    QVERIFY(acceptedInvoked);
+
+    QTRY_VERIFY(!itemObject->property("inputable").toBool());
+    QTRY_COMPARE(itemObject->property("inputResult").toString(), QStringLiteral("Node Renamed"));
+    QTRY_COMPARE(itemObject->property("label").toString(), QStringLiteral("Node Renamed"));
+    QTRY_VERIFY(labelObject->property("visible").toBool());
+    QTRY_VERIFY(!loaderObject->property("active").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()

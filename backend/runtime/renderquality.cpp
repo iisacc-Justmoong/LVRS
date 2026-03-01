@@ -559,19 +559,39 @@ qreal RenderQuality::effectiveSupersampleScale() const
     return qBound(1.0, effectiveScale, m_supersampleScale);
 }
 
-bool RenderQuality::shouldUseSceneSupersampling(int width, int height) const
+qreal RenderQuality::resolveSceneSupersampleScaleForSize(int width, int height) const
 {
     if (!m_enabled || !kSupersamplingEnabled || !m_sceneSupersampling)
-        return false;
-    if (width <= 0 || height <= 0)
-        return false;
+        return 1.0;
 
-    const qreal scale = effectiveSupersampleScale();
-    if (scale <= 1.0)
-        return false;
+    const int resolvedWidth = qMax(1, width);
+    const int resolvedHeight = qMax(1, height);
+    const qreal requestedScale = effectiveSupersampleScale();
+    if (requestedScale <= 1.0)
+        return 1.0;
 
-    const qreal pixelCost = static_cast<qreal>(width) * static_cast<qreal>(height) * scale * scale;
-    return pixelCost <= static_cast<qreal>(m_sceneSupersamplePixelBudget);
+    const qreal pixelArea = static_cast<qreal>(resolvedWidth) * static_cast<qreal>(resolvedHeight);
+    const qreal budget = static_cast<qreal>(m_sceneSupersamplePixelBudget);
+    if (pixelArea <= 0.0 || budget <= pixelArea)
+        return 1.0;
+
+    const qreal budgetScale = std::sqrt(budget / pixelArea);
+    if (!qIsFinite(budgetScale) || budgetScale <= 1.0)
+        return 1.0;
+
+    const qreal clampedScale = qBound(1.0, qMin(requestedScale, budgetScale), requestedScale);
+    if (clampedScale >= kTextCompensationMinScale)
+        return clampedScale;
+
+    if (budgetScale >= kTextCompensationMinScale)
+        return qMin(requestedScale, kTextCompensationMinScale);
+
+    return clampedScale;
+}
+
+bool RenderQuality::shouldUseSceneSupersampling(int width, int height) const
+{
+    return resolveSceneSupersampleScaleForSize(width, height) > 1.0;
 }
 
 QSize RenderQuality::resolveLayerTextureSize(int width, int height, bool sceneSupersamplingActive) const
@@ -581,7 +601,7 @@ QSize RenderQuality::resolveLayerTextureSize(int width, int height, bool sceneSu
     if (!sceneSupersamplingActive)
         return QSize(baseWidth, baseHeight);
 
-    const qreal scale = effectiveSupersampleScale();
+    const qreal scale = resolveSceneSupersampleScaleForSize(baseWidth, baseHeight);
     if (scale <= 1.0)
         return QSize(baseWidth, baseHeight);
 

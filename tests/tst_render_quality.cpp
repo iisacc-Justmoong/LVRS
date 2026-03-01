@@ -57,7 +57,8 @@ void RenderQualityTests::render_quality_bounds_and_window_apply()
     QVERIFY(quality.sceneSupersamplePixelBudget() > 0);
     QVERIFY(!quality.sceneSupersamplingActive());
     QVERIFY(quality.shouldUseSceneSupersampling(640, 360));
-    QVERIFY(!quality.shouldUseSceneSupersampling(1480, 980));
+    QVERIFY(quality.shouldUseSceneSupersampling(1480, 980));
+    QVERIFY(!quality.shouldUseSceneSupersampling(5000, 4000));
     QCOMPARE(quality.resolveLayerTextureSize(640, 360, true),
              QSize(1920, 1080));
     QCOMPARE(quality.resolveLayerTextureSize(640, 360, false),
@@ -71,6 +72,8 @@ void RenderQualityTests::render_quality_bounds_and_window_apply()
     quality.bindWindow(&boundWindow);
     QVERIFY(quality.sceneSupersamplingActive());
     boundWindow.resize(1480, 980);
+    QVERIFY(quality.sceneSupersamplingActive());
+    boundWindow.resize(5000, 4000);
     QVERIFY(!quality.sceneSupersamplingActive());
     quality.unbindWindow();
     QVERIFY(!quality.sceneSupersamplingActive());

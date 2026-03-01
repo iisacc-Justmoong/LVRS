@@ -9,6 +9,7 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 `RenderQuality` directly manages the following:
 
 - scene supersampling enable/disable decisions
+- scene supersampling scale clamping by window pixel budget (keep text compensation when possible)
 - baseline policy for MSAA, frames-in-flight, partial update, and batch renderer
 - render downgrade (power-save) policy when a window is inactive
 - PSO (pipeline state object) cache policy
@@ -59,7 +60,14 @@ When `applyWindow()` is called, the values above are immediately applied to `QQu
 
 `effectiveSupersampleScaleValue` changes dynamically when DRS is enabled and uses a `NOTIFY` signal to update QML bindings.
 
-### 3.4 Device presets
+### 3.4 Scene supersampling budget behavior
+
+- Requested supersample scale starts from `effectiveSupersampleScaleValue`.
+- Runtime computes a budget-fit scale per window size instead of binary full-on/full-off in normal ranges.
+- If the budget cannot keep at least `1.0x`, scene supersampling is disabled for that size.
+- Framework keeps a default text-compensation floor (`1.2x`) whenever the pixel budget allows it.
+
+### 3.5 Device presets
 
 - `detectedDeviceTier` (constant)
 - `activeDeviceTier`

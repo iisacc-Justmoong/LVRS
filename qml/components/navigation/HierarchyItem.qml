@@ -26,6 +26,7 @@ AbstractButton {
     property bool selected: false
     property bool inputable: false
     property string inputResult: control.text
+    property bool _inputOverlayReadyForFocusClose: false
 
     signal inputEdited(string text)
     signal inputSubmitted(string text)
@@ -94,6 +95,30 @@ AbstractButton {
         if (control.inputResult !== normalized)
             control.inputResult = normalized
         return normalized
+    }
+
+    function syncInputOverlayTextAndFocus(requestFocus) {
+        if (labelInputLoader.status !== Loader.Ready || !labelInputLoader.item)
+            return
+
+        if (!labelInputLoader.item.activeFocus && labelInputLoader.item.text !== control.inputResult)
+            labelInputLoader.item.text = control.inputResult
+
+        if (!requestFocus)
+            return
+
+        control._inputOverlayReadyForFocusClose = false
+        Qt.callLater(function() {
+            if (!control.inputable
+                || labelInputLoader.status !== Loader.Ready
+                || !labelInputLoader.item) {
+                return
+            }
+            labelInputLoader.item.forceInputFocus()
+            if (labelInputLoader.item.selectAll)
+                labelInputLoader.item.selectAll()
+            control._inputOverlayReadyForFocusClose = true
+        })
     }
 
     tone: AbstractButton.Borderless
@@ -181,6 +206,7 @@ AbstractButton {
 
                 Label {
                     id: labelNode
+                    objectName: "hierarchyItemLabel"
                     anchors.fill: parent
                     style: body
                     text: control.inputResult
@@ -197,11 +223,13 @@ AbstractButton {
 
                 Loader {
                     id: labelInputLoader
-                    anchors.fill: parent
+                    objectName: "hierarchyItemInputLoader"
+                    anchors.fill: labelNode
                     active: control.inputable
                     visible: control.inputable
                     sourceComponent: Component {
                         InputField {
+                            objectName: "hierarchyItemInputOverlay"
                             enabled: control.enabled
                             backgroundColor: "transparent"
                             backgroundColorHover: "transparent"
@@ -225,13 +253,28 @@ AbstractButton {
                                 const value = control.applyInputResult(text)
                                 control.inputEdited(value)
                             }
-                            onAccepted: control.inputSubmitted(control.applyInputResult(text))
+                            onAccepted: {
+                                const value = control.applyInputResult(text)
+                                control.inputSubmitted(value)
+                                control.inputable = false
+                            }
+                            onFocusedChanged: {
+                                if (!control.inputable
+                                    || focused
+                                    || !control._inputOverlayReadyForFocusClose) {
+                                    return
+                                }
+                                control.inputable = false
+                            }
                         }
                     }
 
                     onLoaded: {
-                        if (item)
-                            item.text = control.inputResult
+                        control.syncInputOverlayTextAndFocus(control.inputable)
+                    }
+                    onStatusChanged: {
+                        if (status !== Loader.Ready)
+                            control._inputOverlayReadyForFocusClose = false
                     }
                 }
             }
@@ -295,12 +338,11 @@ AbstractButton {
         }
     }
     onInputableChanged: {
-        if (control.inputable
-            && labelInputLoader.status === Loader.Ready
-            && labelInputLoader.item
-            && !labelInputLoader.item.activeFocus) {
-            labelInputLoader.item.text = control.inputResult
+        if (!control.inputable) {
+            control._inputOverlayReadyForFocusClose = false
+            return
         }
+        control.syncInputOverlayTextAndFocus(true)
     }
     onExpandedChanged: {
         if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)

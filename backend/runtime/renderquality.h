@@ -69,7 +69,8 @@ public:
     static constexpr qreal kForcedSupersampleScale = 3.0;
     static constexpr bool kSupersamplingEnabled = true;
     static constexpr bool kAntialiasingEnabled = true;
-    static constexpr int kSceneSupersamplePixelBudget = 6000000;
+    static constexpr int kSceneSupersamplePixelBudget = 14000000;
+    static constexpr qreal kTextCompensationMinScale = 1.2;
 
     explicit RenderQuality(QObject *parent = nullptr);
 
@@ -196,6 +197,7 @@ private:
     qreal clampedDynamicScale(qreal value) const;
     void setDynamicResolutionScaleInternal(qreal value);
     void resetDynamicResolutionController();
+    qreal resolveSceneSupersampleScaleForSize(int width, int height) const;
     QString resolvedPsoCacheFile() const;
     void updateWindowPowerMode();
     void updateSceneSupersamplingActive();
