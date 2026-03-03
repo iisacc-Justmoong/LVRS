@@ -21,7 +21,8 @@ AbstractButton {
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
-    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
+    readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
     horizontalPadding: Theme.gap8

@@ -67,6 +67,14 @@ On completion, main flow is:
 - `effectiveSupersampleScale`, `sceneSupersamplingActive`
 - internal supersample host uses backend-resolved texture sizing and mipmap policy
 
+Default quality-first profile in current implementation:
+
+- `mobileViewScale: 1.0` (avoid unnecessary scaled composition blur in default path)
+- `inactiveRenderDowngradeEnabled: false`
+- `inactiveRenderMsaaSamples: 8`
+- `autoApplyDeviceTierPreset: true`
+- `forcedDeviceTierPreset: 3` (`RenderQuality.UltraTier`)
+
 ### Adaptive scaffold and page-stack API
 
 Aliases to internal scaffold include:

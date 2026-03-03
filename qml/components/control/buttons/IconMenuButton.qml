@@ -36,8 +36,9 @@ AbstractButton {
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
-    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale))
-    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale))
+    readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property string indicatorNameDefault: "generalchevronDown"
     readonly property string indicatorNameBorderless: "generalchevronDownBorderless"
     readonly property string indicatorNameAccent: "generalchevronDownAccent"

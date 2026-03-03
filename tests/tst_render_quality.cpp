@@ -276,6 +276,15 @@ void RenderQualityTests::render_quality_gpu_policy_pso_texture_and_drs_contract(
     QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::HighTier));
     QCOMPARE(quality.framesInFlight(), 3);
     QVERIFY(!quality.dynamicResolutionEnabled());
+
+    quality.applyDeviceTierPreset(static_cast<int>(RenderQuality::UltraTier));
+    QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::UltraTier));
+    QCOMPARE(quality.msaaSamples(), 16);
+    QCOMPARE(quality.framesInFlight(), 3);
+    QVERIFY(!quality.dynamicResolutionEnabled());
+    QVERIFY(!quality.textureCompressionEnabled());
+    QVERIFY(quality.depthBufferFor2D());
+    QVERIFY(!quality.inactiveRenderDowngradeEnabled());
 }
 
 QTEST_MAIN(RenderQualityTests)

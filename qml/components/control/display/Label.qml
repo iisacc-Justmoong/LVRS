@@ -147,11 +147,7 @@ Item {
         lineHeight: control.styleLineHeight
         lineHeightMode: Text.FixedHeight
         elide: Text.ElideRight
-        renderType: Text.NativeRendering
-        onRenderTypeChanged: {
-            if (renderType !== Text.NativeRendering)
-                renderType = Text.NativeRendering
-        }
+        renderType: RenderQuality.nativeTextRendering ? Text.NativeRendering : Text.QtRendering
     }
 
     onStyleChanged: {

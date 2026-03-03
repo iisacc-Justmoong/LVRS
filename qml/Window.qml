@@ -24,7 +24,7 @@ QtQuickWindow.Window {
     property int mobileMinWidth: 320
     property int mobileMinHeight: 240
     property bool useBackendMobileScale: true
-    property real mobileViewScale: 1.5
+    property real mobileViewScale: 1.0
     readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
         ? Math.max(1.0, mobileViewScale)
         : 1.0
@@ -35,7 +35,7 @@ QtQuickWindow.Window {
     property bool solidChrome: true
     property bool autoApplyRenderQuality: true
     property bool autoApplyDeviceTierPreset: true
-    property int forcedDeviceTierPreset: -1
+    property int forcedDeviceTierPreset: 3
     property bool autoAttachRuntimeEvents: false
 
     readonly property real effectiveSupersampleScale: autoApplyRenderQuality && RenderQuality.enabled

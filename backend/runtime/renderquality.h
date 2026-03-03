@@ -59,7 +59,8 @@ public:
     enum DeviceTier {
         LowTier = 0,
         BalancedTier = 1,
-        HighTier = 2
+        HighTier = 2,
+        UltraTier = 3
     };
     Q_ENUM(DeviceTier)
 
@@ -154,9 +155,9 @@ public:
     Q_INVOKABLE void applyWindow(QObject *window);
     Q_INVOKABLE void applyGlobalDefaults();
 
-    static void configureGlobalDefaults(int msaaSamples = 4,
+    static void configureGlobalDefaults(int msaaSamples = 8,
                                         bool nativeTextRendering = true,
-                                        int framesInFlight = 2,
+                                        int framesInFlight = 3,
                                         bool partialUpdateEnabled = true,
                                         bool batchRenderingEnabled = true);
 
@@ -230,11 +231,11 @@ private:
                                                   QStringLiteral("dds") };
     bool m_dynamicResolutionEnabled = false;
     qreal m_dynamicResolutionScale = kForcedSupersampleScale;
-    qreal m_dynamicResolutionMinScale = 1.5;
+    qreal m_dynamicResolutionMinScale = 2.25;
     qreal m_dynamicResolutionMaxScale = kForcedSupersampleScale;
-    qreal m_dynamicResolutionStep = 0.25;
-    double m_dynamicResolutionTargetFrameMs = 16.6;
-    double m_dynamicResolutionHysteresisMs = 2.0;
+    qreal m_dynamicResolutionStep = 0.10;
+    double m_dynamicResolutionTargetFrameMs = 13.0;
+    double m_dynamicResolutionHysteresisMs = 1.0;
     int m_dynamicOverBudgetStreak = 0;
     int m_dynamicUnderBudgetStreak = 0;
     QElapsedTimer m_dynamicFrameTimer;

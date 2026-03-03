@@ -35,7 +35,7 @@ Controls.ApplicationWindow {
     property int mobileMinWidth: 360
     property int mobileMinHeight: 640
     property bool useBackendMobileScale: true
-    property real mobileViewScale: 1.5
+    property real mobileViewScale: 1.0
     readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
         ? Math.max(1.0, mobileViewScale)
         : 1.0
@@ -82,10 +82,10 @@ Controls.ApplicationWindow {
     property bool windowDragHandleEnabled: isDesktopPlatform
     property int windowDragHandleHeight: 28
     property int windowDragHandleTopMargin: 0
-    property bool inactiveRenderDowngradeEnabled: true
-    property int inactiveRenderMsaaSamples: 0
+    property bool inactiveRenderDowngradeEnabled: false
+    property int inactiveRenderMsaaSamples: 8
     property bool autoApplyDeviceTierPreset: true
-    property int forcedDeviceTierPreset: -1
+    property int forcedDeviceTierPreset: 3
     property int pageRouterRetainInactivePages: 0
     property int pageRouterCacheCapacity: 256
 

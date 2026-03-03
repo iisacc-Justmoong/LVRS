@@ -89,7 +89,8 @@ If `tier=-1`, the automatically detected device tier is applied.
 |---|---|---|
 | `LowTier` | prioritize low-end stability | `MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off` |
 | `BalancedTier` | default balanced mode | `MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on` |
-| `HighTier` | prioritize image quality | `MSAA=8`, `framesInFlight=3`, `DRS off`, `mipmap on` |
+| `HighTier` | prioritize image quality | `MSAA=12`, `framesInFlight=3`, `DRS off`, `mipmap on`, `textureCompression off` |
+| `UltraTier` | maximum visual fidelity baseline | `MSAA=16`, `framesInFlight=3`, `DRS off`, `mipmap on`, `depthBufferFor2D on`, `textureCompression off`, `inactive downgrade off` |
 
 ## 6. QML Integration Points
 
@@ -102,6 +103,7 @@ Applied behavior:
 - layer: `layer.mipmap: RenderQuality.mipmapEnabled`
 - image source: `source: RenderQuality.resolveTextureSource(...)`
 - startup preset apply: `RenderQuality.applyDeviceTierPreset(...)`
+- shell defaults now pin startup policy to `UltraTier` (`forcedDeviceTierPreset: 3`) in `ApplicationWindow` and `Window`
 
 ## 7. Verification Commands
 

@@ -697,7 +697,7 @@ void RenderQuality::sampleFrameTime(double frameMs)
 void RenderQuality::applyDeviceTierPreset(int tier)
 {
     int resolvedTier = tier;
-    if (resolvedTier < static_cast<int>(LowTier) || resolvedTier > static_cast<int>(HighTier))
+    if (resolvedTier < static_cast<int>(LowTier) || resolvedTier > static_cast<int>(UltraTier))
         resolvedTier = m_detectedDeviceTier;
 
     switch (static_cast<DeviceTier>(resolvedTier)) {
@@ -718,19 +718,37 @@ void RenderQuality::applyDeviceTierPreset(int tier)
         setDynamicResolutionEnabled(true);
         break;
     case HighTier:
-        setMsaaSamples(8);
+        setMsaaSamples(12);
         setFramesInFlight(3);
         setPartialUpdateEnabled(true);
         setBatchRenderingEnabled(true);
-        setInactiveMsaaSamples(2);
+        setInactiveRenderDowngradeEnabled(false);
+        setInactiveMsaaSamples(8);
         setMipmapEnabled(true);
-        setTextureCompressionEnabled(true);
-        setDepthBufferFor2D(false);
-        setDynamicResolutionMinScale(2.0);
+        setTextureCompressionEnabled(false);
+        setDepthBufferFor2D(true);
+        setDynamicResolutionMinScale(2.25);
         setDynamicResolutionMaxScale(3.0);
-        setDynamicResolutionStep(0.25);
-        setDynamicResolutionTargetFrameMs(16.6);
-        setDynamicResolutionHysteresisMs(2.0);
+        setDynamicResolutionStep(0.10);
+        setDynamicResolutionTargetFrameMs(13.0);
+        setDynamicResolutionHysteresisMs(1.0);
+        setDynamicResolutionEnabled(false);
+        break;
+    case UltraTier:
+        setMsaaSamples(16);
+        setFramesInFlight(3);
+        setPartialUpdateEnabled(true);
+        setBatchRenderingEnabled(true);
+        setInactiveRenderDowngradeEnabled(false);
+        setInactiveMsaaSamples(16);
+        setMipmapEnabled(true);
+        setTextureCompressionEnabled(false);
+        setDepthBufferFor2D(true);
+        setDynamicResolutionMinScale(2.5);
+        setDynamicResolutionMaxScale(3.0);
+        setDynamicResolutionStep(0.10);
+        setDynamicResolutionTargetFrameMs(11.1);
+        setDynamicResolutionHysteresisMs(1.0);
         setDynamicResolutionEnabled(false);
         break;
     case BalancedTier:
