@@ -204,7 +204,26 @@ Controls.Popup {
     function itemShortcut(entry) {
         if (!entry || typeof entry !== "object")
             return ""
-        return entry.key || entry.shortcut || ""
+        const rawShortcut = entry.key !== undefined
+            ? entry.key
+            : (entry.shortcut !== undefined
+                   ? entry.shortcut
+                   : entry.keyText)
+        if (rawShortcut === undefined || rawShortcut === null)
+            return ""
+        return String(rawShortcut)
+    }
+
+    function itemKeyVisible(entry) {
+        if (!entry || typeof entry !== "object")
+            return true
+        if (entry.keyVisible !== undefined)
+            return !!entry.keyVisible
+        if (entry.shortcutVisible !== undefined)
+            return !!entry.shortcutVisible
+        if (entry.showShortcut !== undefined)
+            return !!entry.showShortcut
+        return true
     }
 
     function itemIconName(entry) {
@@ -229,24 +248,56 @@ Controls.Popup {
 
     function itemShowChevron(entry) {
         if (!entry || typeof entry !== "object")
-            return true
+            return false
         if (entry.showChevron !== undefined)
             return !!entry.showChevron
+        return true
+    }
+
+    function itemHasChildItems(entry) {
+        if (!entry || typeof entry !== "object")
+            return false
+        if (entry.hasChildItems !== undefined)
+            return !!entry.hasChildItems
         if (entry.hasSubmenu !== undefined)
             return !!entry.hasSubmenu
-        return true
+
+        const children = entry.children !== undefined ? entry.children : entry.submenu
+        if (children === undefined || children === null)
+            return false
+        if (Array.isArray(children))
+            return children.length > 0
+        if (children.length !== undefined)
+            return Number(children.length) > 0
+        if (children.count !== undefined)
+            return Number(children.count) > 0
+        return false
+    }
+
+    function itemEffectiveChevron(entry) {
+        return itemShowChevron(entry) && itemHasChildItems(entry)
+    }
+
+    function itemExpanded(entry) {
+        if (!entry || typeof entry !== "object")
+            return false
+        if (entry.expanded !== undefined)
+            return !!entry.expanded
+        if (entry.opened !== undefined)
+            return !!entry.opened
+        return false
     }
 
     function itemSelectionDirection(entry) {
         if (!entry || typeof entry !== "object")
-            return "right"
+            return "auto"
         if (entry.selectionDirection !== undefined)
             return entry.selectionDirection
         if (entry.direction !== undefined)
             return entry.direction
         if (entry.chevronDirection !== undefined)
             return entry.chevronDirection
-        return "right"
+        return "auto"
     }
 
     function itemState(entry, index, menuItem) {
@@ -348,7 +399,7 @@ Controls.Popup {
 
     function shouldCloseOnTrigger(entry) {
         if (!entry || typeof entry !== "object")
-            return control.autoCloseOnTrigger && !itemShowChevron(entry)
+            return control.autoCloseOnTrigger
 
         if (entry.keepOpen === true || entry.preventClose === true)
             return false
@@ -356,7 +407,7 @@ Controls.Popup {
             return !!entry.closeOnTrigger
         if (entry.autoClose !== undefined)
             return !!entry.autoClose
-        return control.autoCloseOnTrigger && !itemShowChevron(entry)
+        return control.autoCloseOnTrigger && !itemEffectiveChevron(entry)
     }
 
     function emitItemEvents(index, entry) {
@@ -514,9 +565,12 @@ Controls.Popup {
                     state: control.itemState(delegateRoot.entry, delegateRoot.index, menuItem)
                     label: control.itemLabel(delegateRoot.entry)
                     key: control.itemShortcut(delegateRoot.entry)
+                    keyVisible: control.itemKeyVisible(delegateRoot.entry)
                     iconName: control.itemIconName(delegateRoot.entry)
                     iconSource: control.itemIconSource(delegateRoot.entry)
                     showChevron: control.itemShowChevron(delegateRoot.entry)
+                    hasChildItems: control.itemHasChildItems(delegateRoot.entry)
+                    expanded: control.itemExpanded(delegateRoot.entry)
                     selectionDirection: control.itemSelectionDirection(delegateRoot.entry)
                     enabled: control.itemEnabled(delegateRoot.entry)
                     onClicked: control.triggerEntry(delegateRoot.index)

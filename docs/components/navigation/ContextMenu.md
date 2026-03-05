@@ -52,13 +52,18 @@ Supported object fields include:
 
 - label/text: `label`, `text`, `title`
 - icon: `iconName`/`icon`, `iconSource`/`source`
-- state: `enabled`, `state`, `selected`, `showChevron`, `hasSubmenu`, `selectionDirection`
+- key text: `key`, `shortcut`, `keyText`
+- key visibility: `keyVisible`, `shortcutVisible`, `showShortcut`
+- state: `enabled`, `state`, `selected`
+- chevron/children: `showChevron`, `hasChildItems`, `hasSubmenu`, `expanded`, `selectionDirection`
 - event: `eventName`/`event`/`action`, `eventPayload`/`payload`, `events[]`
 - callback: `onTriggered`, `onClicked`, `handler`
 - close policy: `closeOnTrigger`, `autoClose`, `keepOpen`, `preventClose`
 - divider: `type: "divider"` or `divider: true`
 
 Callback receives context `{ index, item, menu, eventName, payload, emit(), close() }`.
+
+Chevron render condition is `showChevron && hasChildItems` (resolved from entry fields).
 
 ## Usage
 

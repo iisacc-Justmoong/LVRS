@@ -15,11 +15,21 @@ AbstractButton {
 
     property int state: defaultState
     property string label: "Label"
-    property alias key: shortcutLabel.text
-    property alias shortcut: shortcutLabel.text
+    QtObject {
+        id: shortcutStore
+        property string text: "key"
+    }
+
+    property alias key: shortcutStore.text
+    property alias shortcut: shortcutStore.text
+    property bool keyVisible: true
+    property string keyPlaceholder: "key"
     property bool showChevron: true
-    // Supports int enum or string: right|left|up|down
-    property var selectionDirection: directionRight
+    property bool hasChildItems: true
+    readonly property bool effectiveShowChevron: showChevron && hasChildItems
+    property bool expanded: false
+    // Supports int enum or string: auto|right|left|up|down
+    property var selectionDirection: "auto"
     property int itemWidth: 161
     property int itemHeight: 22
     property int iconSize: 16
@@ -48,21 +58,33 @@ AbstractButton {
         : resolvedIconName.length > 0
             ? Theme.iconPath(resolvedIconName)
             : ""
+    readonly property string resolvedShortcutText: {
+        if (!control.keyVisible)
+            return ""
+        const rawShortcut = shortcutStore.text === undefined || shortcutStore.text === null
+            ? ""
+            : String(shortcutStore.text).trim()
+        if (rawShortcut.length > 0)
+            return rawShortcut
+        return control.keyPlaceholder
+    }
     readonly property int resolvedSelectionDirection: {
         const raw = selectionDirection
+        if (raw === undefined || raw === null)
+            return control.expanded ? directionDown : directionRight
         if (typeof raw === "number")
             return Math.max(directionRight, Math.min(directionDown, Math.round(raw)))
 
-        const normalized = raw === undefined || raw === null
-            ? ""
-            : String(raw).trim().toLowerCase()
+        const normalized = String(raw).trim().toLowerCase()
+        if (normalized.length === 0 || normalized === "auto")
+            return control.expanded ? directionDown : directionRight
         if (normalized === "left")
             return directionLeft
         if (normalized === "up")
             return directionUp
         if (normalized === "down")
             return directionDown
-        return directionRight
+        return control.expanded ? directionDown : directionRight
     }
     readonly property color resolvedBackgroundColor: isSelected
         ? Theme.contextMenuItemSelectedBackground
@@ -166,8 +188,8 @@ AbstractButton {
             Label {
                 id: shortcutLabel
                 style: body
-                visible: text.length > 0
-                text: "key"
+                visible: control.keyVisible
+                text: control.resolvedShortcutText
                 color: control.isInactive ? Theme.descriptionColor
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)
                 Layout.alignment: Qt.AlignVCenter
@@ -178,7 +200,7 @@ AbstractButton {
 
             Image {
                 id: chevronIcon
-                visible: control.showChevron
+                visible: control.effectiveShowChevron
                 Layout.preferredWidth: control.chevronSize
                 Layout.preferredHeight: control.chevronSize
                 Layout.alignment: Qt.AlignVCenter
@@ -198,4 +220,14 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.MenuItem { iconName: "iconname"; state: selectedState; label: "Label"; key: "key"; selectionDirection: "right" }
+// LV.MenuItem {
+//     iconName: "iconname"
+//     state: selectedState
+//     label: "Label"
+//     keyVisible: true
+//     key: "Cmd+K"
+//     hasChildItems: true
+//     showChevron: true
+//     expanded: false
+//     selectionDirection: "auto"
+// }

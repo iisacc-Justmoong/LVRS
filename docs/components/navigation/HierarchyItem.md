@@ -25,7 +25,11 @@ Display:
 - `showChevron`
 - `hasChildItems`
 - `effectiveShowChevron` (readonly)
-- `expanded`, `selected`
+- `expanded`
+- direction constants: `directionRight`, `directionLeft`, `directionUp`, `directionDown`
+- `selectionDirection` (`int` or string: `auto|right|left|up|down`)
+- `resolvedSelectionDirection` (readonly)
+- `selected`
 - `inputable` (default `false`; enables inline input overlay at label bounds)
 - `inputResult` (latest editable label string)
 
@@ -53,6 +57,8 @@ Input events:
 - Row click calls `hierarchyList.requestActivate(control)` when available.
 - Chevron click toggles `expanded` and requests activation.
 - Chevron visibility is gated by `showChevron && hasChildItems`.
+- `selectionDirection: "auto"` maps `expanded=false` to right and `expanded=true` to down.
+- Explicit direction (`left|up|down|right`) overrides auto mode.
 - Property changes notify list helper hooks (`scheduleRefreshState`, `notifyExpansionChanged`, `scheduleNormalizeActiveItem`).
 - When `inputable` is `true`, the label region is overlaid by `InputField` in exactly the same geometry as the label bounds.
 - Enter submission (`accepted`) applies the value to `inputResult`/`label`, emits `inputSubmitted(text)`, and closes the input overlay (`inputable = false`).
@@ -68,5 +74,7 @@ LV.HierarchyItem {
     indentLevel: 2
     showChevron: true
     hasChildItems: true
+    expanded: false
+    selectionDirection: "auto"
 }
 ```

@@ -30,6 +30,7 @@ private slots:
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void hierarchy_chevron_requires_children_loads();
+    void hierarchy_item_chevron_direction_contract_loads();
     void hierarchy_item_hover_and_active_state_visual_contract_loads();
     void hierarchy_item_inputable_overlay_contract_loads();
     void hierarchy_item_input_overlay_geometry_and_close_contract_loads();
@@ -38,6 +39,7 @@ private slots:
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
     void radio_button_figma_contract_loads();
+    void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
     void table_cell_item_contract_loads();
     void list_item_and_footer_figma_contract_loads();
@@ -918,6 +920,69 @@ Item {
     QTRY_VERIFY(root->property("chevronRuleReady").toBool());
 }
 
+void ImportApiTests::hierarchy_item_chevron_direction_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.HierarchyItem {
+        id: autoCollapsed
+        visible: false
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+        selectionDirection: "auto"
+    }
+
+    LV.HierarchyItem {
+        id: autoExpanded
+        visible: false
+        showChevron: true
+        hasChildItems: true
+        expanded: true
+        selectionDirection: "auto"
+    }
+
+    LV.HierarchyItem {
+        id: forcedUp
+        visible: false
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+        selectionDirection: "up"
+    }
+
+    LV.HierarchyItem {
+        id: leafNode
+        visible: false
+        showChevron: true
+        hasChildItems: false
+        expanded: false
+        selectionDirection: "auto"
+    }
+
+    property bool chevronDirectionReady:
+        autoCollapsed.effectiveShowChevron
+        && autoCollapsed.resolvedSelectionDirection === autoCollapsed.directionRight
+        && autoCollapsed.resolvedChevronRotation === -90
+        && autoExpanded.resolvedSelectionDirection === autoExpanded.directionDown
+        && autoExpanded.resolvedChevronRotation === 0
+        && forcedUp.resolvedSelectionDirection === forcedUp.directionUp
+        && forcedUp.resolvedChevronRotation === 180
+        && !leafNode.effectiveShowChevron
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("chevronDirectionReady").toBool());
+}
+
 void ImportApiTests::hierarchy_item_hover_and_active_state_visual_contract_loads()
 {
     const QString requestedPlatform = qEnvironmentVariable("QT_QPA_PLATFORM").trimmed();
@@ -1499,6 +1564,82 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaRadioReady").toBool());
+}
+
+void ImportApiTests::menu_item_key_and_chevron_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.MenuItem {
+        id: collapsedSubmenu
+        visible: false
+        label: "Collapsed"
+        keyVisible: true
+        key: "Cmd+K"
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+        selectionDirection: "auto"
+    }
+
+    LV.MenuItem {
+        id: expandedSubmenu
+        visible: false
+        label: "Expanded"
+        keyVisible: true
+        key: "Alt+K"
+        showChevron: true
+        hasChildItems: true
+        expanded: true
+        selectionDirection: "auto"
+    }
+
+    LV.MenuItem {
+        id: noChild
+        visible: false
+        label: "Leaf"
+        keyVisible: true
+        key: ""
+        keyPlaceholder: "key"
+        showChevron: true
+        hasChildItems: false
+        expanded: false
+        selectionDirection: "auto"
+    }
+
+    LV.MenuItem {
+        id: hiddenKey
+        visible: false
+        label: "HiddenKey"
+        keyVisible: false
+        key: "Ctrl+H"
+        showChevron: false
+        hasChildItems: false
+        selectionDirection: "right"
+    }
+
+    property bool menuItemContract:
+        collapsedSubmenu.keyVisible
+        && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
+        && collapsedSubmenu.effectiveShowChevron
+        && collapsedSubmenu.resolvedSelectionDirection === collapsedSubmenu.directionRight
+        && expandedSubmenu.resolvedSelectionDirection === expandedSubmenu.directionDown
+        && noChild.resolvedShortcutText === "key"
+        && !noChild.effectiveShowChevron
+        && hiddenKey.resolvedShortcutText === ""
+        && hiddenKey.keyVisible === false
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("menuItemContract").toBool());
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()

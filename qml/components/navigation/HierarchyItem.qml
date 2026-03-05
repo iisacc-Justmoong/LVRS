@@ -6,6 +6,10 @@ AbstractButton {
     id: control
 
     readonly property bool __isHierarchyItem: true
+    readonly property int directionRight: 0
+    readonly property int directionLeft: 1
+    readonly property int directionUp: 2
+    readonly property int directionDown: 3
     property int itemId: -1
     property string itemKey: ""
     property string parentItemKey: ""
@@ -23,6 +27,8 @@ AbstractButton {
     property bool hasChildItems: true
     readonly property bool effectiveShowChevron: showChevron && hasChildItems
     property bool expanded: false
+    // Supports int enum or string: auto|right|left|up|down
+    property var selectionDirection: "auto"
     property bool selected: false
     property bool inputable: false
     property string inputResult: control.text
@@ -53,7 +59,33 @@ AbstractButton {
     readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property string chevronIconName: "generalchevronDown"
     readonly property url chevronIconSource: Theme.iconPath(control.chevronIconName)
-    readonly property real resolvedChevronRotation: control.expanded ? 0 : -90
+    readonly property int resolvedSelectionDirection: {
+        const raw = selectionDirection
+        if (raw === undefined || raw === null)
+            return control.expanded ? directionDown : directionRight
+        if (typeof raw === "number")
+            return Math.max(directionRight, Math.min(directionDown, Math.round(raw)))
+
+        const normalized = String(raw).trim().toLowerCase()
+        if (normalized.length === 0 || normalized === "auto")
+            return control.expanded ? directionDown : directionRight
+        if (normalized === "left")
+            return directionLeft
+        if (normalized === "up")
+            return directionUp
+        if (normalized === "down")
+            return directionDown
+        return control.expanded ? directionDown : directionRight
+    }
+    readonly property real resolvedChevronRotation: {
+        if (control.resolvedSelectionDirection === control.directionLeft)
+            return 90
+        if (control.resolvedSelectionDirection === control.directionUp)
+            return 180
+        if (control.resolvedSelectionDirection === control.directionDown)
+            return 0
+        return -90
+    }
     readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
     readonly property int stateIdle: 0
     readonly property int stateHover: 1
