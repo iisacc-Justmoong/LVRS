@@ -4,7 +4,7 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Primary
+    tone: AbstractButton.Borderless
     readonly property int figmaButtonHeight: Theme.gap20
     horizontalPadding: Theme.gap8
     verticalPadding: Theme.gap4
@@ -27,4 +27,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Primary }
+// LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }

@@ -33,6 +33,7 @@ Indicator icon mapping:
 
 Layout:
 
+- default tone fallback: `Borderless`
 - fixed `figmaButtonHeight` (`Theme.gap20`)
 - `horizontalPadding: Theme.gap2`
 - `verticalPadding: Theme.gap2`
@@ -51,7 +52,7 @@ Layout:
 import LVRS 1.0 as LV
 
 LV.IconMenuButton {
-    tone: LV.AbstractButton.Default
+    tone: LV.AbstractButton.Borderless
     iconName: "projectStructure"
 }
 ```

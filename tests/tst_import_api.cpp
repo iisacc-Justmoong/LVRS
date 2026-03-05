@@ -35,6 +35,9 @@ private slots:
     void hierarchy_item_inputable_overlay_contract_loads();
     void hierarchy_item_input_overlay_geometry_and_close_contract_loads();
     void button_padding_matches_figma_spec();
+    void button_default_tone_fallback_borderless_loads();
+    void stepper_figma_contract_loads();
+    void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
@@ -1325,6 +1328,143 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaPaddingReady").toBool());
+}
+
+void ImportApiTests::button_default_tone_fallback_borderless_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    property color transparentColor: "transparent"
+
+    LV.LabelButton { id: labelButton; text: "Button"; visible: false }
+    LV.IconButton { id: iconButton; visible: false }
+    LV.LabelMenuButton { id: labelMenuButton; text: "Open"; visible: false }
+    LV.IconMenuButton { id: iconMenuButton; visible: false }
+
+    property bool defaultFallbackReady:
+        labelButton.tone === LV.AbstractButton.Borderless
+        && iconButton.tone === LV.AbstractButton.Borderless
+        && labelMenuButton.tone === LV.AbstractButton.Borderless
+        && iconMenuButton.tone === LV.AbstractButton.Borderless
+        && labelButton.backgroundColor === transparentColor
+        && iconButton.backgroundColor === transparentColor
+        && labelMenuButton.backgroundColor === transparentColor
+        && iconMenuButton.backgroundColor === transparentColor
+        && labelMenuButton.resolvedIndicatorName === "generalchevronDownBorderless"
+        && iconMenuButton.resolvedIndicatorName === "generalchevronDownBorderless"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("defaultFallbackReady").toBool());
+}
+
+void ImportApiTests::stepper_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    property color transparentColor: "transparent"
+
+    LV.Stepper { id: defaultStepper; visible: false }
+    LV.Stepper { id: primaryUpDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
+    LV.Stepper { id: primaryUp; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Up }
+    LV.Stepper { id: primaryDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Down }
+    LV.Stepper { id: borderlessUpDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.UpDown }
+    LV.Stepper { id: borderlessUp; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Up }
+    LV.Stepper { id: borderlessDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Down }
+
+    property bool stepperContractReady:
+        defaultStepper.tone === LV.AbstractButton.Primary
+        && defaultStepper.arrow === LV.Stepper.UpDown
+        && Math.abs(defaultStepper.width - LV.Theme.iconSm) < 0.01
+        && Math.abs(defaultStepper.height - LV.Theme.iconSm) < 0.01
+        && Math.abs(defaultStepper.implicitWidth - LV.Theme.iconSm) < 0.01
+        && Math.abs(defaultStepper.implicitHeight - LV.Theme.iconSm) < 0.01
+        && Math.abs(defaultStepper.cornerRadius - LV.Theme.radiusSm) < 0.01
+        && Math.abs(primaryUp.iconWidth - 10.0) < 0.01
+        && Math.abs(primaryUp.iconHeight - 6.0) < 0.01
+        && Math.abs(primaryDown.iconWidth - 10.0) < 0.01
+        && Math.abs(primaryDown.iconHeight - 6.0) < 0.01
+        && Math.abs(primaryUpDown.iconWidth - 6.436) < 0.05
+        && Math.abs(primaryUpDown.iconHeight - 11.146) < 0.05
+        && Math.abs(borderlessUpDown.iconWidth - 6.436) < 0.05
+        && Math.abs(borderlessUpDown.iconHeight - 11.146) < 0.05
+        && primaryUp.backgroundColor === LV.Theme.primary
+        && borderlessUp.backgroundColor === transparentColor
+        && borderlessUp.backgroundColorHover === LV.Theme.surfaceAlt
+        && borderlessUp.backgroundColorPressed === LV.Theme.accentBlueMuted
+        && primaryUp.resolvedIconColor === LV.Theme.accentWhite
+        && primaryDown.resolvedIconColor === LV.Theme.accentWhite
+        && borderlessUp.resolvedIconColor === LV.Theme.primary
+        && borderlessDown.resolvedIconColor === LV.Theme.primary
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("stepperContractReady").toBool());
+}
+
+void ImportApiTests::combo_box_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.ComboBox { id: defaultCombo; visible: false }
+    LV.ComboBox { id: primaryUpDown; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.UpDown }
+    LV.ComboBox { id: primaryUp; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.Up }
+    LV.ComboBox { id: primaryDown; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.Down }
+    LV.ComboBox { id: borderlessUpDown; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.UpDown }
+    LV.ComboBox { id: borderlessUp; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Up }
+    LV.ComboBox { id: borderlessDown; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Down }
+
+    property bool comboBoxContractReady:
+        defaultCombo.tone === LV.ComboBox.Primary
+        && defaultCombo.arrow === LV.Stepper.UpDown
+        && Math.abs(defaultCombo.width - 97.0) < 0.01
+        && Math.abs(defaultCombo.height - 20.0) < 0.01
+        && Math.abs(defaultCombo.implicitWidth - 97.0) < 0.01
+        && Math.abs(defaultCombo.implicitHeight - 20.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboWidth - 97.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboHeight - 20.0) < 0.01
+        && defaultCombo.resolvedTone === LV.ComboBox.Primary
+        && primaryUp.resolvedTone === LV.ComboBox.Primary
+        && primaryDown.resolvedTone === LV.ComboBox.Primary
+        && borderlessUp.resolvedTone === LV.ComboBox.Borderless
+        && borderlessDown.resolvedTone === LV.ComboBox.Borderless
+        && defaultCombo.resolvedArrow === LV.Stepper.UpDown
+        && primaryUp.resolvedArrow === LV.Stepper.Up
+        && primaryDown.resolvedArrow === LV.Stepper.Down
+        && borderlessUpDown.resolvedArrow === LV.Stepper.UpDown
+        && borderlessUp.resolvedArrow === LV.Stepper.Up
+        && borderlessDown.resolvedArrow === LV.Stepper.Down
+        && defaultCombo.backgroundColor === LV.Theme.panelBackground10
+        && defaultCombo.backgroundColorHover === LV.Theme.panelBackground11
+        && defaultCombo.backgroundColorPressed === LV.Theme.panelBackground12
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("comboBoxContractReady").toBool());
 }
 
 void ImportApiTests::input_field_figma_contract_loads()

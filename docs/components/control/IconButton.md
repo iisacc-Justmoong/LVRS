@@ -26,6 +26,7 @@ Computed/icon resolution:
 
 Layout:
 
+- default tone fallback: `Borderless`
 - fixed height: `Theme.gap20`
 - compact paddings (`Theme.gap2`)
 

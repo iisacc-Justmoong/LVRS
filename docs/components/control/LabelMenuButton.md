@@ -14,7 +14,7 @@ Location: `qml/components/control/buttons/LabelMenuButton.qml`
 Text and tone:
 
 - `text` (inherited)
-- `tone` (inherited)
+- `tone` (inherited, default fallback: `Borderless`)
 
 Indicator:
 
@@ -43,6 +43,6 @@ import LVRS 1.0 as LV
 
 LV.LabelMenuButton {
     text: "Options"
-    tone: LV.AbstractButton.Default
+    tone: LV.AbstractButton.Borderless
 }
 ```

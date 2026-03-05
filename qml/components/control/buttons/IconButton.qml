@@ -5,7 +5,7 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Primary
+    tone: AbstractButton.Borderless
     readonly property int figmaButtonHeight: Theme.gap20
     readonly property string fallbackIconName: "projectStructure"
     readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)
@@ -94,4 +94,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.IconButton { tone: LV.AbstractButton.Primary; iconName: "add" }
+// LV.IconButton { tone: LV.AbstractButton.Borderless; iconName: "add" }

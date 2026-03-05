@@ -13,6 +13,7 @@ Location: `qml/components/control/buttons/LabelButton.qml`
 
 Inherited from `AbstractButton` plus fixed layout contract:
 
+- default tone fallback: `Borderless`
 - fixed height: `Theme.gap20`
 - `horizontalPadding: Theme.gap8`
 - `verticalPadding: Theme.gap4`
@@ -25,7 +26,7 @@ import LVRS 1.0 as LV
 
 LV.LabelButton {
     text: "Save"
-    tone: LV.AbstractButton.Primary
+    tone: LV.AbstractButton.Borderless
 }
 ```
 

@@ -79,6 +79,8 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/control/IconSegmentedControl.md`
 - `docs/components/control/LabelMenuButton.md`
 - `docs/components/control/IconMenuButton.md`
+- `docs/components/control/ComboBox.md`
+- `docs/components/control/Stepper.md`
 - `docs/components/control/Label.md`
 - `docs/components/control/CheckBox.md`
 - `docs/components/control/RadioButton.md`

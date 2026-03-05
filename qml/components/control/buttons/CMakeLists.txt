@@ -4,6 +4,8 @@ set(LVRS_CONTROL_BUTTON_QML_FILES
     qml/components/control/buttons/IconMenuButton.qml
     qml/components/control/buttons/LabelButton.qml
     qml/components/control/buttons/IconButton.qml
+    qml/components/control/buttons/ComboBox.qml
+    qml/components/control/buttons/Stepper.qml
     qml/components/control/buttons/LabelSegmentedControl.qml
     qml/components/control/buttons/IconSegmentedControl.qml
 )
