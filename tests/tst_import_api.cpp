@@ -39,6 +39,8 @@ private slots:
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
     void radio_button_figma_contract_loads();
+    void modal_empty_frame_contract_loads();
+    void modal_content_action_contract_loads();
     void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
     void table_cell_item_contract_loads();
@@ -1564,6 +1566,117 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaRadioReady").toBool());
+}
+
+void ImportApiTests::modal_empty_frame_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 420
+    height: 320
+    property int canceledCount: 0
+    property bool contractReady: false
+
+    LV.Modal {
+        id: modal
+        width: root.width
+        height: root.height
+        open: true
+        onCanceled: root.canceledCount += 1
+    }
+
+    Component.onCompleted: {
+        const insideX = modal.width * 0.5
+        const insideY = (modal.height * 0.5) + modal.verticalOffset
+        const insideIgnored = modal.handleBackdropClick(insideX, insideY)
+        const outsideCanceled = modal.handleBackdropClick(1, 1)
+        contractReady =
+            modal.verticalOffset < 0
+            && insideIgnored === false
+            && outsideCanceled === true
+            && !modal.open
+            && root.canceledCount === 1
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
+}
+
+void ImportApiTests::modal_content_action_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 960
+    height: 420
+    property int primaryCount: 0
+    property int secondaryCount: 0
+    property int tertiaryCount: 0
+    property bool contractReady: false
+
+    LV.Modal {
+        id: modal
+        width: root.width
+        height: root.height
+        open: true
+        title: "Unlock iPhone 15 Pro Max to Continue"
+        description: "Xcode cannot launch because the device is locked."
+        buttonCount: 4
+        primaryText: "Cancel Running"
+        secondaryText: "Later"
+        tertiaryText: "Help"
+        onPrimaryClicked: root.primaryCount += 1
+        onSecondaryClicked: root.secondaryCount += 1
+        onTertiaryClicked: root.tertiaryCount += 1
+    }
+
+    Component.onCompleted: {
+        const insideX = modal.width * 0.5
+        const insideY = (modal.height * 0.5) + modal.verticalOffset
+        const insideIgnored = modal.handleBackdropClick(insideX, insideY)
+        const primaryTriggered = modal.triggerAction(1)
+        const secondaryTriggered = modal.triggerAction(2)
+        const tertiaryTriggered = modal.triggerAction(3)
+        const invalidTriggered = modal.triggerAction(4)
+        contractReady =
+            modal.verticalOffset < 0
+            && modal.resolvedDescription.length > 0
+            && modal.resolvedButtonCount === 3
+            && modal.actionVisible(1)
+            && modal.actionVisible(2)
+            && modal.actionVisible(3)
+            && insideIgnored === false
+            && primaryTriggered
+            && secondaryTriggered
+            && tertiaryTriggered
+            && !invalidTriggered
+            && root.primaryCount === 1
+            && root.secondaryCount === 1
+            && root.tertiaryCount === 1
+            && modal.open
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::menu_item_key_and_chevron_contract_loads()
