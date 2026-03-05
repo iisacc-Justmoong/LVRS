@@ -28,6 +28,8 @@ private slots:
     void hierarchy_nested_children_indent_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
+    void hierarchy_toolbar_figma_layout_contract_loads();
+    void hierarchy_toolbar_manual_icon_button_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void hierarchy_chevron_requires_children_loads();
     void hierarchy_item_chevron_direction_contract_loads();
@@ -46,6 +48,7 @@ private slots:
     void modal_content_action_contract_loads();
     void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
+    void context_menu_auto_placement_contract_loads();
     void table_cell_item_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
@@ -810,6 +813,192 @@ Item {
     QTRY_VERIFY(root->property("toolbarContractReady").toBool());
 }
 
+void ImportApiTests::hierarchy_toolbar_figma_layout_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 220
+    height: 60
+
+    property int probeAttempts: 0
+    property bool layoutContractReady: false
+    property string layoutDiagnostics: ""
+
+    property var toolbarItems: [
+        { id: "slot0", iconName: "projectStructure", selected: true },
+        { id: "slot1", iconName: "projectStructure" },
+        { id: "slot2", iconName: "projectStructure" },
+        { id: "slot3", iconName: "projectStructure" },
+        { id: "slot4", iconName: "projectStructure" },
+        { id: "slot5", iconName: "projectStructure" },
+        { id: "slot6", iconName: "projectStructure" },
+        { id: "slot7", iconName: "projectStructure" }
+    ]
+
+    LV.HierarchyToolbar {
+        id: toolbar
+        width: 200
+        height: 20
+        buttonItems: root.toolbarItems
+    }
+
+    function approximatelyEqual(leftValue, rightValue, tolerance) {
+        return Math.abs(leftValue - rightValue) <= tolerance
+    }
+
+    function evaluateLayoutContract() {
+        const buttons = toolbar.collectButtons().slice().sort(function(leftButton, rightButton) {
+            return leftButton.x - rightButton.x
+        })
+        if (buttons.length !== 8) {
+            root.layoutDiagnostics = "buttonCount=" + buttons.length
+            return false
+        }
+
+        const expectedX = [
+            0.0,
+            25.7142857143,
+            51.4285714286,
+            77.1428571429,
+            102.8571428571,
+            128.5714285714,
+            154.2857142857,
+            180.0
+        ]
+
+        for (let index = 0; index < expectedX.length; index++) {
+            const button = buttons[index]
+            if (!button || !button.visible)
+                return false
+            if (!approximatelyEqual(button.x, expectedX[index], 0.8)) {
+                root.layoutDiagnostics = "xMismatch index=" + index
+                    + " actual=" + button.x
+                    + " expected=" + expectedX[index]
+                    + " spacing=" + toolbar.distributedSpacing
+                return false
+            }
+            if (!approximatelyEqual(button.width, 20.0, 0.2)) {
+                root.layoutDiagnostics = "widthMismatch index=" + index + " width=" + button.width
+                return false
+            }
+            if (!approximatelyEqual(button.height, 20.0, 0.2)) {
+                root.layoutDiagnostics = "heightMismatch index=" + index + " height=" + button.height
+                return false
+            }
+        }
+        const ready = toolbar.horizontalPadding === 0
+            && toolbar.verticalPadding === 0
+            && approximatelyEqual(toolbar.backgroundOpacity, 0.0, 0.001)
+            && toolbar.activeButtonId === "slot0"
+            && toolbar.activeIndex === 0
+        if (!ready) {
+            root.layoutDiagnostics = "stateMismatch hPad=" + toolbar.horizontalPadding
+                + " vPad=" + toolbar.verticalPadding
+                + " bgOpacity=" + toolbar.backgroundOpacity
+                + " activeId=" + toolbar.activeButtonId
+                + " activeIndex=" + toolbar.activeIndex
+        }
+        return ready
+    }
+
+    function probeLayoutContract() {
+        root.probeAttempts += 1
+        root.layoutContractReady = evaluateLayoutContract()
+        if (!root.layoutContractReady && root.probeAttempts < 10)
+            Qt.callLater(probeLayoutContract)
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(probeLayoutContract)
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("layoutContractReady").toBool(),
+                 qPrintable(root->property("layoutDiagnostics").toString()));
+}
+
+void ImportApiTests::hierarchy_toolbar_manual_icon_button_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 220
+    height: 80
+
+    property int probeAttempts: 0
+    property int activatedCount: 0
+    property bool contractReady: false
+
+    LV.HierarchyToolbar {
+        id: toolbar
+        width: 120
+        height: 20
+        buttonItems: []
+
+        LV.IconButton { iconName: "projectStructure" }
+        LV.IconButton { iconName: "projectStructure" }
+        LV.IconButton { iconName: "projectStructure" }
+
+        onActiveChanged: function(button, buttonId, index) {
+            root.activatedCount += 1
+        }
+    }
+
+    function evaluateContract() {
+        const buttons = toolbar.collectButtons()
+        if (buttons.length !== 3)
+            return false
+
+        const secondButton = buttons[1]
+        if (!secondButton)
+            return false
+
+        if (secondButton.click !== undefined)
+            secondButton.click()
+        else if (secondButton.clicked !== undefined)
+            secondButton.clicked()
+
+        return toolbar.buttonCount === 3
+            && toolbar.activeIndex === 1
+            && toolbar.activeButtonId === 1
+            && root.activatedCount === 1
+            && buttons[1].tone === LV.AbstractButton.Default
+            && buttons[0].tone === LV.AbstractButton.Borderless
+            && buttons[2].tone === LV.AbstractButton.Borderless
+    }
+
+    function probeContract() {
+        root.probeAttempts += 1
+        root.contractReady = evaluateContract()
+        if (!root.contractReady && root.probeAttempts < 10)
+            Qt.callLater(probeContract)
+    }
+
+    Component.onCompleted: Qt.callLater(probeContract)
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
+}
+
 void ImportApiTests::hierarchy_row_click_only_activates_not_toggles()
 {
     QQmlEngine engine;
@@ -835,26 +1024,45 @@ Item {
                 expanded: true,
                 selected: true,
                 children: [
-                    { key: "child", depth: 1, label: "Child" }
+                    {
+                        key: "branch",
+                        depth: 1,
+                        label: "Branch",
+                        expanded: false,
+                        children: [
+                            { key: "leaf", depth: 2, label: "Leaf" }
+                        ]
+                    }
                 ]
             }
         ]
     }
 
     property bool rowClickToggleBlocked: false
+    property bool collapsedBranchClickActivates: false
+    property bool rowClickContractReady: rowClickToggleBlocked && collapsedBranchClickActivates
 
     function evaluateRowClickToggle() {
         const row = hierarchy.activeListItem
-        if (!row || !row.clicked) {
+        const list = row && row.hierarchyList ? row.hierarchyList : null
+        const collapsedBranch = list && list.resolveByKey ? list.resolveByKey("branch") : null
+        if (!row || !row.clicked || !list || !collapsedBranch || !collapsedBranch.clicked) {
             if (rowProbeAttempts < 40) {
                 rowProbeAttempts += 1
                 Qt.callLater(evaluateRowClickToggle)
             }
             return
         }
-        const wasExpanded = !!row.expanded
+
+        const rootWasExpanded = !!row.expanded
         row.clicked()
-        rowClickToggleBlocked = (row.expanded === wasExpanded)
+        rowClickToggleBlocked = (row.expanded === rootWasExpanded)
+
+        const branchWasExpanded = !!collapsedBranch.expanded
+        collapsedBranch.clicked()
+        collapsedBranchClickActivates =
+            list.activeItem === collapsedBranch
+            && collapsedBranch.expanded === branchWasExpanded
     }
 
     Component.onCompleted: {
@@ -865,7 +1073,7 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QTRY_VERIFY(root->property("rowClickToggleBlocked").toBool());
+    QTRY_VERIFY(root->property("rowClickContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_chevron_requires_children_loads()
@@ -1989,6 +2197,60 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("actionContract").toBool());
+}
+
+void ImportApiTests::context_menu_auto_placement_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 400
+    height: 300
+
+    LV.ContextMenu {
+        id: menu
+        visible: false
+        edgeMargin: 4
+        itemWidth: 120
+    }
+
+    property var downRight: menu.resolveOpenPlacement(40, 40, 120, 80, root.width, root.height)
+    property var downLeft: menu.resolveOpenPlacement(390, 40, 120, 80, root.width, root.height)
+    property var upRight: menu.resolveOpenPlacement(40, 295, 120, 80, root.width, root.height)
+    property var upLeft: menu.resolveOpenPlacement(395, 295, 120, 80, root.width, root.height)
+    property var oversized: menu.resolveOpenPlacement(200, 150, 500, 380, root.width, root.height)
+
+    property bool placementContract:
+        downRight.horizontalDirection === menu.directionRight
+        && downRight.verticalDirection === menu.directionDown
+        && downRight.x === 40
+        && downRight.y === 40
+        && downLeft.horizontalDirection === menu.directionLeft
+        && downLeft.verticalDirection === menu.directionDown
+        && downLeft.x === 270
+        && downLeft.y === 40
+        && upRight.horizontalDirection === menu.directionRight
+        && upRight.verticalDirection === menu.directionUp
+        && upRight.x === 40
+        && upRight.y === 215
+        && upLeft.horizontalDirection === menu.directionLeft
+        && upLeft.verticalDirection === menu.directionUp
+        && upLeft.x === 275
+        && upLeft.y === 215
+        && oversized.x === 0
+        && oversized.y === 0
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("placementContract").toBool());
 }
 
 void ImportApiTests::table_cell_item_contract_loads()

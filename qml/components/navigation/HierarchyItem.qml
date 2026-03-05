@@ -130,6 +130,19 @@ AbstractButton {
         return normalized
     }
 
+    function requestActivationFromInteraction() {
+        if (!control.enabled)
+            return
+
+        if (control.hierarchyList && control.hierarchyList.requestActivate) {
+            control.hierarchyList.requestActivate(control)
+            return
+        }
+
+        if (!control.selected)
+            control.selected = true
+    }
+
     function syncInputOverlayTextAndFocus(requestFocus) {
         if (labelInputLoader.status !== Loader.Ready || !labelInputLoader.item)
             return
@@ -172,10 +185,8 @@ AbstractButton {
     backgroundColorPressed: rowBackgroundColorPressed
     backgroundColorDisabled: rowBackgroundColor
 
-    onClicked: {
-        if (hierarchyList && hierarchyList.requestActivate)
-            hierarchyList.requestActivate(control)
-    }
+    onPressed: control.requestActivationFromInteraction()
+    onClicked: control.requestActivationFromInteraction()
 
     onHierarchyListChanged: {
         if (hierarchyList && hierarchyList.registerItem)
@@ -340,8 +351,7 @@ AbstractButton {
                 onClicked: function(mouse) {
                     mouse.accepted = true
                     control.expanded = !control.expanded
-                    if (control.hierarchyList && control.hierarchyList.requestActivate)
-                        control.hierarchyList.requestActivate(control)
+                    control.requestActivationFromInteraction()
                 }
             }
         }

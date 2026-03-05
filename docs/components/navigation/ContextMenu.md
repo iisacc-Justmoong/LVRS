@@ -33,6 +33,8 @@ Visual/layout:
 - `itemWidth`, `itemSpacing`
 - `menuColor`, `menuOpacity`, `resolvedMenuColor`
 - `dividerColor`
+- `edgeMargin` (viewport inset used by auto placement; default `Theme.gap4`)
+- `openHorizontalDirection`, `openVerticalDirection` (last resolved placement direction)
 
 Animation tuning:
 
@@ -64,6 +66,14 @@ Supported object fields include:
 Callback receives context `{ index, item, menu, eventName, payload, emit(), close() }`.
 
 Chevron render condition is `showChevron && hasChildItems` (resolved from entry fields).
+
+## Placement Contract
+
+- `openAt(x, y)` performs built-in edge-aware placement against overlay bounds.
+- Default preference is right/down from anchor point.
+- If space is insufficient, placement flips to left and/or up.
+- Final position is clamped to viewport with `edgeMargin`.
+- `resolveOpenPlacement(...)` exposes the internal placement solver for deterministic testing and tooling.
 
 ## Usage
 

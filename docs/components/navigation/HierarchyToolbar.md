@@ -26,8 +26,12 @@ Layout and appearance:
 - `horizontalPadding`
 - `verticalPadding`
 - `spacing`
+- `slotSize`
+- `distributeSpacing`
 - `backgroundColor`
 - `backgroundOpacity`
+- `visibleButtonCount`
+- `distributedSpacing`
 
 Signals:
 
@@ -43,7 +47,21 @@ Methods:
 
 Compatibility:
 
-- `buttons` default property alias is kept for manual `ToolbarButton` children.
+- `buttons` default property alias is kept for manual children.
+- Manual `IconButton` declarations are treated as toolbar slots; declared count equals toolbar button count.
+- Manual `IconButton` clicks are auto-wired to toolbar activation and receive default/borderless active tone switching.
+
+## Figma Layout Baseline
+
+Default layout follows the hierarchy header toolbar spec from Figma (`Whatson`, node `134:4111`):
+
+- Toolbar content area is treated as a `200 x 20` reference strip.
+- Each toolbar slot uses `20 x 20` (`slotSize = Theme.gap20`).
+- Items are distributed left-to-right across available width (`justify-between` behavior).
+- Default padding is zero (`horizontalPadding = 0`, `verticalPadding = 0`).
+- Default background is transparent (`backgroundOpacity = 0`).
+
+If fixed-gap behavior is needed, set `distributeSpacing: false` and control spacing via `spacing`.
 
 ## Item Model Contract
 

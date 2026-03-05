@@ -16,6 +16,7 @@ Controls.Popup {
     property color menuColor: Theme.contextMenuSurface
     property color dividerColor: Theme.contextMenuDivider
     property real menuOpacity: 1.0
+    property int edgeMargin: Theme.gap4
     property bool enableOpenBounce: true
     property bool autoTuneByBackend: true
     property int openBounceDuration: 170
@@ -28,6 +29,12 @@ Controls.Popup {
     property real openStartY: 0
     property real openTargetX: 0
     property real openTargetY: 0
+    readonly property int directionRight: 0
+    readonly property int directionLeft: 1
+    readonly property int directionDown: 2
+    readonly property int directionUp: 3
+    property int openHorizontalDirection: directionRight
+    property int openVerticalDirection: directionDown
     readonly property var backendRuntimeProfile: Platform.runtimeProfile(Platform.canonicalOs)
     readonly property bool backendTransitionReady: backendRuntimeProfile.backendFeatureReady !== false
     readonly property real backendTransitionSpeedFactor: {
@@ -470,20 +477,33 @@ Controls.Popup {
     }
 
     function openAt(xPos, yPos) {
-        var px = xPos
-        var py = yPos
         var targetWidth = Math.max(implicitWidth, width)
         var targetHeight = Math.max(implicitHeight, height)
-        if (parent) {
-            px = Math.max(0, Math.min(px, parent.width - targetWidth))
-            py = Math.max(0, Math.min(py, parent.height - targetHeight))
+        if (!parent) {
+            openHorizontalDirection = directionRight
+            openVerticalDirection = directionDown
+            openTargetX = Math.round(xPos)
+            openTargetY = Math.round(yPos)
+            x = openTargetX
+            y = openTargetY
+            openAnchorX = Math.max(0, Math.min(targetWidth, xPos - openTargetX))
+            openAnchorY = Math.max(0, Math.min(targetHeight, yPos - openTargetY))
+        } else {
+            const placement = resolveOpenPlacement(xPos,
+                                                   yPos,
+                                                   targetWidth,
+                                                   targetHeight,
+                                                   parent.width,
+                                                   parent.height)
+            openHorizontalDirection = placement.horizontalDirection
+            openVerticalDirection = placement.verticalDirection
+            openTargetX = placement.x
+            openTargetY = placement.y
+            x = openTargetX
+            y = openTargetY
+            openAnchorX = placement.anchorX
+            openAnchorY = placement.anchorY
         }
-        openTargetX = Math.round(px)
-        openTargetY = Math.round(py)
-        x = openTargetX
-        y = openTargetY
-        openAnchorX = Math.max(0, Math.min(targetWidth, xPos - openTargetX))
-        openAnchorY = Math.max(0, Math.min(targetHeight, yPos - openTargetY))
         const startScale = resolvedOpenBounceEnabled ? resolvedOpenStartScale : 1.0
         openStartX = openTargetX + openAnchorX * (1.0 - startScale)
         openStartY = openTargetY + openAnchorY * (1.0 - startScale)
@@ -500,6 +520,80 @@ Controls.Popup {
         }
         const mapped = item.mapToItem(parent, xPos, yPos)
         openAt(mapped.x, mapped.y)
+    }
+
+    function clampValue(value, minimum, maximum) {
+        return Math.max(minimum, Math.min(value, maximum))
+    }
+
+    function resolvedEdgeMargin() {
+        const numericMargin = Number(edgeMargin)
+        if (!Number.isFinite(numericMargin))
+            return 0
+        return Math.max(0, Math.round(numericMargin))
+    }
+
+    function resolveOpenPlacement(anchorX, anchorY, targetWidth, targetHeight, viewportWidth, viewportHeight) {
+        const menuWidth = Math.max(0, Number(targetWidth) || 0)
+        const menuHeight = Math.max(0, Number(targetHeight) || 0)
+        const viewWidth = Math.max(0, Number(viewportWidth) || 0)
+        const viewHeight = Math.max(0, Number(viewportHeight) || 0)
+        const margin = resolvedEdgeMargin()
+
+        const spaceRight = viewWidth - margin - anchorX
+        const spaceLeft = anchorX - margin
+        const spaceDown = viewHeight - margin - anchorY
+        const spaceUp = anchorY - margin
+
+        var horizontalDirection = directionRight
+        if (spaceRight >= menuWidth) {
+            horizontalDirection = directionRight
+        } else if (spaceLeft >= menuWidth) {
+            horizontalDirection = directionLeft
+        } else {
+            horizontalDirection = spaceLeft > spaceRight ? directionLeft : directionRight
+        }
+
+        var verticalDirection = directionDown
+        if (spaceDown >= menuHeight) {
+            verticalDirection = directionDown
+        } else if (spaceUp >= menuHeight) {
+            verticalDirection = directionUp
+        } else {
+            verticalDirection = spaceUp > spaceDown ? directionUp : directionDown
+        }
+
+        var rawX = horizontalDirection === directionLeft ? anchorX - menuWidth : anchorX
+        var rawY = verticalDirection === directionUp ? anchorY - menuHeight : anchorY
+
+        const minX = margin
+        const maxX = viewWidth - margin - menuWidth
+        const minY = margin
+        const maxY = viewHeight - margin - menuHeight
+
+        if (maxX >= minX) {
+            rawX = clampValue(rawX, minX, maxX)
+        } else {
+            rawX = Math.max(0, Math.min(rawX, viewWidth - menuWidth))
+        }
+
+        if (maxY >= minY) {
+            rawY = clampValue(rawY, minY, maxY)
+        } else {
+            rawY = Math.max(0, Math.min(rawY, viewHeight - menuHeight))
+        }
+
+        const resolvedX = Math.round(rawX)
+        const resolvedY = Math.round(rawY)
+
+        return {
+            x: resolvedX,
+            y: resolvedY,
+            horizontalDirection: horizontalDirection,
+            verticalDirection: verticalDirection,
+            anchorX: Math.max(0, Math.min(menuWidth, anchorX - resolvedX)),
+            anchorY: Math.max(0, Math.min(menuHeight, anchorY - resolvedY))
+        }
     }
 
     Item {

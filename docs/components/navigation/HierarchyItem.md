@@ -54,7 +54,8 @@ Input events:
 
 ## Behavior Contract
 
-- Row click calls `hierarchyList.requestActivate(control)` when available.
+- Row press/click requests activation immediately; click activation does not depend on expansion.
+- When used outside `HierarchyList`, row interaction sets local `selected = true`.
 - Chevron click toggles `expanded` and requests activation.
 - Chevron visibility is gated by `showChevron && hasChildItems`.
 - `selectionDirection: "auto"` maps `expanded=false` to right and `expanded=true` to down.
