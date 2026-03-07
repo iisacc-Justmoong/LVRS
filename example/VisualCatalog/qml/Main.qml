@@ -8,31 +8,24 @@ LV.ApplicationWindow {
     id: root
 
     visible: true
-    width: 1480
+    width: 1540
     height: 980
-    desktopMinWidth: 360
-    desktopMinHeight: 520
+    desktopMinWidth: 960
+    desktopMinHeight: 680
     usePlatformSafeMargin: true
     autoAttachRuntimeEvents: true
     autoHookBackendUserEvents: false
     globalEventListenersEnabled: true
-    scaffoldLayoutMode: "auto"
-    scaffoldPreferBottomNavigation: true
-    scaffoldBottomNavigationMaxItems: 5
-    scaffoldCompactSpacingEnabled: true
-    scaffoldCompactSpacingBreakpoint: 1040
-    scaffoldNavRailMaxWidthRatio: 0.3
-    scaffoldDrawerMarginSafety: LV.Theme.gap24
+    navigationEnabled: false
     title: "LVRS Visual Catalog"
-    subtitle: "Developer-focused design system console"
-    navItems: LV.AppState.navItems
-    readonly property bool catalogCompactLayout: matchesMedia("mobile-layout") || isCompact
+    subtitle: activeEntry ? activeEntry.label : "Catalog Overview"
+
+    readonly property bool catalogCompactLayout: width < 1260
     readonly property int catalogOuterMargin: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap16
     readonly property int catalogSectionGap: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogCardInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
-
-    readonly property var accentPreviewTokens: LV.Theme.accentPaletteTokens
+    readonly property int sidebarWidth: catalogCompactLayout ? 264 : 320
 
     readonly property var runtimeSnapshot: LV.AppState.runtimeSnapshot
     readonly property var viewStateSnapshot: LV.AppState.viewStateSnapshot
@@ -73,347 +66,190 @@ LV.ApplicationWindow {
     readonly property bool metricsPass: metricsPassedChecks === metricsTotalChecks
     readonly property string metricsSummary: metricsPassedChecks + "/" + metricsTotalChecks
 
-    readonly property var pageMeta: [
-        {
-            tab: "Overview",
-            title: "Runtime + Metrics Overview",
-            doc: "Entry page for immediate validation of theme, runtime snapshot, and global overlays."
-        },
-        {
-            tab: "Typography",
-            title: "Label Typography",
-            doc: "Verification panel for all label styles and fallback policy."
-        },
-        {
-            tab: "Buttons",
-            title: "Button Families",
-            doc: "Primary/default/borderless/destructive/disabled combinations and icon variants."
-        },
-        {
-            tab: "Table",
-            title: "Table Components",
-            doc: "Figma-based table composition: Table + Header + Row + CellItem primitives."
-        },
-        {
-            tab: "Inputs",
-            title: "Input Components",
-            doc: "InputField/TextEditor/CodeEditor behavior with fixed editor heights."
-        },
-        {
-            tab: "Navigation",
-            title: "Hierarchy Navigation",
-            doc: "Tree-model rendering with chevron-only expand/collapse behavior."
-        },
-        {
-            tab: "Accent",
-            title: "Accent Token Audit",
-            doc: "Color token preview generated from icon-set driven accent palette."
-        },
-        {
-            tab: "Runtime",
-            title: "Event Monitor",
-            doc: "Global click/context traces and backend event tail monitor for developers."
-        }
-    ]
-
-    property int activeTabIndex: 0
-    property var runtimeRows: []
-    property int runtimeMaxRows: 160
-    property int lastRuntimeSequence: -1
-    property string runtimeFilter: "all"
-    property var runtimeHealth: ({})
-    property var lastGlobalPress: ({})
-    property var lastGlobalContext: ({})
-    property var activeContextMenuItems: LV.AppState.demoContextMenuItems
-
-    readonly property int runtimeVisibleCount: runtimeFilteredCount(runtimeFilter)
-
-    function runtimeFilteredCount(filterValue) {
-        if (filterValue === "all")
-            return runtimeRows.length
-        let count = 0
-        for (let i = 0; i < runtimeRows.length; i++) {
-            const row = runtimeRows[i]
-            if (row && String(row.category) === filterValue)
-                count += 1
-        }
-        return count
+    CatalogRegistry {
+        id: catalogRegistry
     }
 
-    function responsiveColumns(availableWidth, minimumCellWidth, minimumColumns, maximumColumns) {
-        const widthValue = Math.max(1, Number(availableWidth || 0))
-        const cellWidth = Math.max(1, Number(minimumCellWidth || 1))
-        const lowerBound = Math.max(1, Number(minimumColumns || 1))
-        let resolved = Math.max(lowerBound, Math.floor(widthValue / cellWidth))
-
-        if (maximumColumns !== undefined && maximumColumns !== null) {
-            const upperBound = Number(maximumColumns)
-            if (upperBound > 0)
-                resolved = Math.min(resolved, upperBound)
-        }
-        return resolved
-    }
-
-    function categoryForEvent(type) {
-        const normalized = String(type || "")
-        if (normalized.indexOf("mouse-") === 0
-                || normalized.indexOf("key-") === 0
-                || normalized.indexOf("touch-") === 0
-                || normalized.indexOf("context-") === 0
-                || normalized.indexOf("global-") === 0)
-            return "input"
-        if (normalized.indexOf("render-") === 0)
-            return "render"
-        if (normalized.indexOf("route-") === 0 || normalized.indexOf("viewstack-") === 0)
-            return "navigation"
-        if (normalized.indexOf("daemon-") === 0 || normalized.indexOf("window-") === 0)
-            return "runtime"
-        return "system"
-    }
-
-    function timestamp(epochMs) {
-        const ms = Number(epochMs || 0)
-        if (ms <= 0)
-            return "--:--:--.--"
-        const date = new Date(ms)
-        const hh = date.getHours() < 10 ? "0" + date.getHours() : String(date.getHours())
-        const mm = date.getMinutes() < 10 ? "0" + date.getMinutes() : String(date.getMinutes())
-        const ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : String(date.getSeconds())
-        const cs = Math.floor(date.getMilliseconds() / 10)
-        const cc = cs < 10 ? "0" + cs : String(cs)
-        return hh + ":" + mm + ":" + ss + "." + cc
-    }
-
-    function appendRuntimeRow(category, source, type, payload, sequence, epochMs) {
-        const rows = runtimeRows.slice()
-        rows.push({
-            category: category,
-            source: source,
-            type: type,
-            payload: payload || ({}),
-            sequence: sequence !== undefined ? sequence : -1,
-            epochMs: epochMs !== undefined ? epochMs : Date.now()
-        })
-        if (rows.length > runtimeMaxRows)
-            rows.splice(0, rows.length - runtimeMaxRows)
-        runtimeRows = rows
-    }
+    property string activeEntryKey: catalogRegistry.overview.key
+    readonly property var activeEntry: catalogRegistry.entryByKey(activeEntryKey)
+    readonly property var activeBreadcrumb: catalogRegistry.breadcrumb(activeEntryKey)
+    readonly property int catalogComponentCount: catalogRegistry.componentCount
+    readonly property int catalogDocumentCount: catalogRegistry.totalEntryCount
+    readonly property var activeChildren: catalogRegistry.directChildren(activeEntryKey)
+    readonly property var activeRelated: root.recordsForKeys(activeEntry ? activeEntry.related : [])
 
     function syncRuntimeState() {
         LV.AppState.syncRuntimeSnapshot(LV.RuntimeEvents.snapshot())
         LV.AppState.syncViewStateSnapshot(LV.ViewStateTracker.snapshot())
         LV.AppState.syncPageHistory(LV.PageMonitor.history)
-        runtimeHealth = LV.RuntimeEvents.daemonHealth()
     }
 
-    function ingestBackendTail(maxRows) {
-        if (!LV.Backend || !LV.Backend.hookedUserEvents)
-            return
-        const rows = LV.Backend.hookedUserEvents(maxRows)
-        if (!rows || rows.length === undefined)
-            return
-        for (let i = 0; i < rows.length; i++) {
-            const eventData = rows[i]
-            const sequence = eventData.sequence !== undefined ? Number(eventData.sequence) : -1
-            if (sequence >= 0 && sequence <= lastRuntimeSequence)
-                continue
-            if (sequence >= 0)
-                lastRuntimeSequence = sequence
+    function breadcrumbText(parts) {
+        if (!parts || parts.length === undefined || parts.length === 0)
+            return ""
+        return parts.join(" / ")
+    }
 
-            const type = String(eventData.type || "unknown")
-            if (type === "ui-event" || type === "mouse-move" || type === "hover-move")
-                continue
-
-            appendRuntimeRow(
-                        categoryForEvent(type),
-                        "Backend",
-                        type,
-                        eventData.payload || ({}),
-                        sequence,
-                        eventData.timestampEpochMs)
+    function recordsForKeys(keys) {
+        const result = []
+        if (!keys || keys.length === undefined)
+            return result
+        for (let i = 0; i < keys.length; i++) {
+            const record = catalogRegistry.entryByKey(keys[i])
+            if (record && result.indexOf(record) === -1)
+                result.push(record)
         }
+        return result
     }
 
-    function contextMenuItemsForEvent(eventData) {
-        const ui = eventData && eventData.ui ? eventData.ui : ({})
-        const className = ui.className ? String(ui.className) : ""
-        const objectName = ui.objectName ? String(ui.objectName) : ""
-        const text = ui.text ? String(ui.text) : ""
+    function activateCatalogEntry(key) {
+        const record = catalogRegistry.entryByKey(key)
+        if (!record)
+            return false
+        activeEntryKey = record.key
+        Qt.callLater(function() {
+            if (catalogHierarchy && catalogHierarchy.activeListItemKey !== record.key)
+                catalogHierarchy.activateListItemByKey(record.key)
+        })
+        return true
+    }
 
-        if (className.indexOf("TextEdit") !== -1 || objectName.toLowerCase().indexOf("editor") !== -1) {
-            return [
-                { id: "copy", label: "Copy", key: "Cmd+C", showChevron: false },
-                { id: "paste", label: "Paste", key: "Cmd+V", showChevron: false },
-                { type: "divider" },
-                { id: "select-all", label: "Select All", key: "Cmd+A", showChevron: false }
-            ]
+    function previewComponentFor(previewId) {
+        switch (String(previewId || "")) {
+        case "overview":
+            return overviewPreview
+        case "section":
+            return sectionPreview
+        case "application-shell":
+            return applicationShellPreview
+        case "window-shell":
+            return windowShellPreview
+        case "app-header":
+            return appHeaderPreview
+        case "stack-layout":
+            return stackLayoutPreview
+        case "abstract-button":
+            return abstractButtonPreview
+        case "button-family":
+            return buttonFamilyPreview
+        case "segmented-control":
+            return segmentedControlPreview
+        case "selector-control":
+            return selectorControlPreview
+        case "selection-control":
+            return selectionControlPreview
+        case "label-display":
+            return labelDisplayPreview
+        case "progress-display":
+            return progressDisplayPreview
+        case "table-display":
+            return tableDisplayPreview
+        case "input-field":
+            return inputFieldPreview
+        case "text-editor":
+            return textEditorPreview
+        case "code-editor":
+            return codeEditorPreview
+        case "event-listener":
+            return eventListenerPreview
+        case "guard-utility":
+            return guardUtilityPreview
+        case "router-navigation":
+            return routerNavigationPreview
+        case "hierarchy-navigation":
+            return hierarchyNavigationPreview
+        case "list-navigation":
+            return listNavigationPreview
+        case "menu-navigation":
+            return menuNavigationPreview
+        case "app-card-surface":
+            return appCardSurfacePreview
+        case "alert-surface":
+            return alertSurfacePreview
+        case "modal-surface":
+            return modalSurfacePreview
+        default:
+            return placeholderPreview
         }
-
-        return [
-            { id: "inspect", label: "Inspect", key: "", showChevron: false },
-            { id: "focus", label: "Focus " + (objectName.length > 0 ? objectName : className || "Target"), key: "", showChevron: false },
-            { type: "divider" },
-            { id: "copy", label: text.length > 0 ? ("Copy \"" + text + "\"") : "Copy Label", key: "", showChevron: false }
-        ]
-    }
-
-    function openContextMenuAtGlobal(globalX, globalY) {
-        const overlayParent = demoContextMenu ? demoContextMenu.parent : null
-        if (overlayParent && overlayParent.mapFromGlobal) {
-            const mapped = overlayParent.mapFromGlobal(globalX, globalY)
-            demoContextMenu.openAt(mapped.x, mapped.y)
-            return
-        }
-        demoContextMenu.openAt(globalX - root.x, globalY - root.y)
-    }
-
-    function dismissContextIfOutside(eventData) {
-        if (!demoContextMenu || !demoContextMenu.opened || !demoContextMenu.dismissIfOutsideGlobalEvent)
-            return
-        demoContextMenu.dismissIfOutsideGlobalEvent(eventData)
-    }
-
-    onGlobalPressedEvent: function(eventData) {
-        lastGlobalPress = eventData || ({})
-        dismissContextIfOutside(eventData)
-        appendRuntimeRow("input", "ApplicationWindow", "global-pressed", eventData || ({}), -1, Date.now())
-    }
-
-    onGlobalContextEvent: function(eventData) {
-        lastGlobalContext = eventData || ({})
-        dismissContextIfOutside(eventData)
-        appendRuntimeRow("input", "ApplicationWindow", "global-context", eventData || ({}), -1, Date.now())
-
-        if (!eventData)
-            return
-        const x = eventData.globalX !== undefined ? eventData.globalX : eventData.x
-        const y = eventData.globalY !== undefined ? eventData.globalY : eventData.y
-        if (x === undefined || y === undefined)
-            return
-
-        activeContextMenuItems = contextMenuItemsForEvent(eventData)
-        openContextMenuAtGlobal(x, y)
     }
 
     Component.onCompleted: {
         LV.AppState.bootstrap()
         LV.FontPolicy.enforceApplicationFallback()
-        LV.RuntimeEvents.captureProfile = LV.RuntimeEvents.LowLatencyCapture
         LV.RenderMonitor.attachWindow(root)
         LV.PageMonitor.record("/visual-catalog")
         syncRuntimeState()
+        Qt.callLater(function() {
+            root.activateCatalogEntry(root.activeEntryKey)
+        })
+    }
 
-        if (LV.Backend && LV.Backend.hookUserEvents)
-            LV.Backend.hookUserEvents()
-
-        LV.Debug.enabled = true
-        LV.Debug.runtimeCaptureEnabled = false
-        LV.Debug.runtimeEchoEnabled = false
-        LV.Debug.stdoutMinimumLevel = "WARN"
-        LV.Debug.stdoutNoiseReductionEnabled = true
-
-        appendRuntimeRow("runtime", "Main", "catalog-opened", { route: LV.AppState.currentRoute }, -1, Date.now())
+    onActiveEntryChanged: {
+        if (previewLoader.item && previewLoader.item.catalogEntry !== undefined)
+            previewLoader.item.catalogEntry = activeEntry
     }
 
     Timer {
         interval: 220
         running: true
         repeat: true
-        onTriggered: {
-            root.syncRuntimeState()
-            root.ingestBackendTail(12)
-        }
+        onTriggered: root.syncRuntimeState()
     }
 
-    LV.Alert {
-        id: sampleAlert
-        anchors.fill: parent
-        open: LV.AppState.alertOpen
-        buttonCount: 3
-        title: "Alert Dialog"
-        message: "This alert verifies frame, overlay, and action callback behavior."
-        primaryText: "Confirm"
-        secondaryText: "Cancel"
-        tertiaryText: "Ignore"
-        onPrimaryClicked: LV.AppState.alertOpen = false
-        onSecondaryClicked: LV.AppState.alertOpen = false
-        onTertiaryClicked: LV.AppState.alertOpen = false
-        onDismissed: LV.AppState.alertOpen = false
-    }
+    Component {
+        id: overviewPreview
 
-    LV.ContextMenu {
-        id: demoContextMenu
-        items: root.activeContextMenuItems
-    }
-
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: root.catalogOuterMargin
-        spacing: root.catalogSectionGap
-
-        TabBar {
-            id: tabBar
-            visible: !root.catalogCompactLayout
-            Layout.fillWidth: true
-            currentIndex: root.activeTabIndex
-            onCurrentIndexChanged: {
-                if (root.activeTabIndex !== currentIndex)
-                    root.activeTabIndex = currentIndex
-            }
-
-            Repeater {
-                model: root.pageMeta
-                TabButton {
-                    required property var modelData
-                    text: modelData.tab
-                }
-            }
-        }
-
-        Flickable {
-            id: compactTabStrip
-            visible: root.catalogCompactLayout
-            Layout.fillWidth: true
-            Layout.preferredHeight: compactTabRow.implicitHeight
-            Layout.maximumHeight: compactTabRow.implicitHeight
-            contentWidth: compactTabRow.implicitWidth
-            contentHeight: compactTabRow.implicitHeight
-            interactive: contentWidth > width
-            flickableDirection: Flickable.HorizontalFlick
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
-
-            Row {
-                id: compactTabRow
-                spacing: LV.Theme.gap6
-
-                Repeater {
-                    model: root.pageMeta
-
-                    delegate: LV.LabelButton {
-                        required property int index
-                        required property var modelData
-                        text: modelData.tab
-                        tone: root.activeTabIndex === index ? LV.AbstractButton.Primary : LV.AbstractButton.Default
-                        onClicked: root.activeTabIndex = index
-                    }
-                }
-            }
-        }
-
-        LV.AppCard {
-            Layout.fillWidth: true
-            implicitHeight: root.catalogCompactLayout ? 136 : 108
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
 
             Column {
-                anchors.fill: parent
-                anchors.margins: root.catalogContentInset
-                spacing: LV.Theme.gap6
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
 
-                LV.Label {
-                    style: header
-                    color: LV.Theme.textPrimary
-                    text: root.pageMeta[root.activeTabIndex].title
+                GridLayout {
+                    width: parent.width
+                    columns: root.catalogCompactLayout ? 1 : 3
+                    rowSpacing: LV.Theme.gap8
+                    columnSpacing: LV.Theme.gap8
+
+                    Repeater {
+                        model: [
+                            { title: "Public Types", value: String(root.catalogComponentCount) },
+                            { title: "Catalog Entries", value: String(root.catalogDocumentCount) },
+                            { title: "Health Checks", value: root.metricsSummary }
+                        ]
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            implicitHeight: 84
+                            radius: LV.Theme.radiusMd
+                            color: LV.Theme.surfaceAlt
+                            border.width: 1
+                            border.color: LV.Theme.contextMenuDivider
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: root.catalogContentInset
+                                spacing: LV.Theme.gap4
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: modelData.title
+                                }
+
+                                LV.Label {
+                                    style: title2
+                                    color: LV.Theme.textPrimary
+                                    text: modelData.value
+                                }
+                            }
+                        }
+                    }
                 }
 
                 LV.Label {
@@ -421,605 +257,1620 @@ LV.ApplicationWindow {
                     style: description
                     color: LV.Theme.textSecondary
                     wrapMode: Text.WordWrap
-                    text: root.pageMeta[root.activeTabIndex].doc
+                    text: "Start from a section in the sidebar, then drill down to a concrete type. Component pages stay consistent: summary, live preview, usage snippet, source location, and related links."
                 }
 
-                LV.Label {
-                    style: caption
-                    color: root.metricsPass ? LV.Theme.accentGreenBright : LV.Theme.accentRose
-                    text: "Design-health metrics: " + root.metricsSummary
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    Repeater {
+                        model: [
+                            { key: "application-window", label: "ApplicationWindow" },
+                            { key: "input-field", label: "InputField" },
+                            { key: "hierarchy", label: "Hierarchy" },
+                            { key: "context-menu", label: "ContextMenu" },
+                            { key: "modal", label: "Modal" }
+                        ]
+
+                        delegate: LV.LabelButton {
+                            required property var modelData
+                            text: modelData.label
+                            tone: LV.AbstractButton.Default
+                            onClicked: root.activateCatalogEntry(modelData.key)
+                        }
+                    }
                 }
             }
         }
+    }
 
-        StackLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            currentIndex: root.activeTabIndex
+    Component {
+        id: sectionPreview
 
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: LV.Theme.gap12
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
 
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        implicitHeight: root.catalogCompactLayout ? 216 : 132
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: "Section pages act as local indexes. Choose any child type below to open its dedicated visual reference page."
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    Repeater {
+                        model: catalogRegistry.directChildren(preview.catalogEntry ? preview.catalogEntry.key : "")
+
+                        delegate: LV.LabelButton {
+                            required property var modelData
+                            text: modelData.label
+                            tone: LV.AbstractButton.Default
+                            onClicked: root.activateCatalogEntry(modelData.key)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: applicationShellPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Rectangle {
+                    width: parent.width
+                    implicitHeight: shellColumn.implicitHeight + root.catalogContentInset * 2
+                    radius: LV.Theme.radiusMd
+                    color: LV.Theme.surfaceAlt
+                    border.width: 1
+                    border.color: LV.Theme.contextMenuDivider
+
+                    Column {
+                        id: shellColumn
+                        x: root.catalogContentInset
+                        y: root.catalogContentInset
+                        width: parent.width - root.catalogContentInset * 2
+                        spacing: LV.Theme.gap8
+
+                        LV.AppHeader {
+                            width: parent.width
+                            title: preview.catalogEntry && preview.catalogEntry.key === "app-shell" ? "Compatibility Shell" : "Adaptive Shell"
+                            subtitle: "Shell anatomy preview"
+                            menuVisible: true
+
+                            LV.IconButton {
+                                iconName: "add"
+                                tone: LV.AbstractButton.Borderless
+                            }
+
+                            LV.LabelButton {
+                                text: "Refresh"
+                                tone: LV.AbstractButton.Default
+                            }
+                        }
 
                         GridLayout {
-                            anchors.fill: parent
-                            anchors.margins: root.catalogContentInset
+                            width: parent.width
                             columns: root.catalogCompactLayout ? 1 : 3
                             rowSpacing: LV.Theme.gap8
-                            columnSpacing: LV.Theme.gap16
+                            columnSpacing: LV.Theme.gap8
 
-                            Column {
-                                Layout.fillWidth: true
-                                spacing: LV.Theme.gap4
-                                LV.Label { style: header2; color: LV.Theme.textPrimary; text: "Core Runtime" }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "pid=" + (root.runtimeSnapshot.pid !== undefined ? root.runtimeSnapshot.pid : "n/a") }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "uptimeMs=" + (root.runtimeSnapshot.uptimeMs !== undefined ? root.runtimeSnapshot.uptimeMs : "n/a") }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "rssBytes=" + (root.runtimeSnapshot.rssBytes !== undefined ? root.runtimeSnapshot.rssBytes : "n/a") }
-                            }
+                            Repeater {
+                                model: [
+                                    { title: "Current Route", value: LV.AppState.currentRoute.length > 0 ? LV.AppState.currentRoute : "/visual-catalog" },
+                                    { title: "Runtime Uptime", value: root.runtimeSnapshot.uptimeMs !== undefined ? String(root.runtimeSnapshot.uptimeMs) + " ms" : "n/a" },
+                                    { title: "Adaptive Mode", value: root.catalogCompactLayout ? "Compact" : "Wide" }
+                                ]
 
-                            Column {
-                                Layout.fillWidth: true
-                                spacing: LV.Theme.gap4
-                                LV.Label { style: header2; color: LV.Theme.textPrimary; text: "Compliance" }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "renderScale=" + root.metricsRenderScaleCompliant }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "fontFallback=" + root.metricsFontFallbackCompliant }
-                                LV.Label { style: description; color: LV.Theme.textSecondary; text: "themeText=" + root.metricsThemeTextCompliant }
-                            }
+                                delegate: Rectangle {
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    implicitHeight: 72
+                                    radius: LV.Theme.radiusSm
+                                    color: LV.Theme.surfaceGhost
 
-                            Column {
-                                Layout.fillWidth: true
-                                Layout.alignment: root.catalogCompactLayout ? Qt.AlignLeft : Qt.AlignRight
-                                spacing: LV.Theme.gap8
-                                LV.LabelButton {
-                                    text: "Open Alert"
-                                    tone: LV.AbstractButton.Primary
-                                    onClicked: LV.AppState.alertOpen = true
-                                }
-                                LV.LabelButton {
-                                    text: "Refresh Snapshot"
-                                    tone: LV.AbstractButton.Default
-                                    onClicked: {
-                                        root.syncRuntimeState()
-                                        root.appendRuntimeRow("system", "Main", "manual-refresh", {}, -1, Date.now())
+                                    Column {
+                                        anchors.fill: parent
+                                        anchors.margins: root.catalogContentInset
+                                        spacing: LV.Theme.gap2
+
+                                        LV.Label {
+                                            style: caption
+                                            color: LV.Theme.textTertiary
+                                            text: modelData.title
+                                        }
+
+                                        LV.Label {
+                                            style: body
+                                            color: LV.Theme.textPrimary
+                                            text: modelData.value
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+    }
 
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+    Component {
+        id: windowShellPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: frameRect.implicitHeight
+
+            Rectangle {
+                id: frameRect
+                width: parent.width
+                implicitHeight: windowColumn.implicitHeight + root.catalogContentInset * 2
+                radius: LV.Theme.radiusMd
+                color: LV.Theme.surfaceAlt
+                border.width: 1
+                border.color: LV.Theme.contextMenuDivider
+
+                Column {
+                    id: windowColumn
+                    x: root.catalogContentInset
+                    y: root.catalogContentInset
+                    width: parent.width - root.catalogContentInset * 2
+                    spacing: LV.Theme.gap8
+
+                    RowLayout {
+                        width: parent.width
+
+                        LV.Label {
+                            Layout.fillWidth: true
+                            style: header2
+                            color: LV.Theme.textPrimary
+                            text: "Window metrics"
+                        }
+
+                        LV.Label {
+                            style: caption
+                            color: LV.Theme.textSecondary
+                            text: root.width + " x " + root.height
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 160
+                        radius: LV.Theme.radiusMd
+                        color: LV.Theme.windowAlt
+                        border.width: 1
+                        border.color: LV.Theme.contextMenuDivider
 
                         Column {
                             anchors.fill: parent
-                            anchors.margins: root.catalogCardInset
-                            spacing: LV.Theme.gap8
+                            anchors.margins: root.catalogContentInset
+                            spacing: LV.Theme.gap6
 
                             LV.Label {
                                 style: body
                                 color: LV.Theme.textPrimary
-                                text: "Use right-click anywhere in this window to open the global context menu."
+                                text: "LV.Window is a lighter wrapper than LV.ApplicationWindow."
                             }
 
                             LV.Label {
                                 style: description
                                 color: LV.Theme.textSecondary
-                                text: "Outside-click dismissal and global context behavior are integrated at ApplicationWindow level."
+                                text: "Use it when the scaffold is unnecessary but render-quality and platform policies still matter."
                                 wrapMode: Text.WordWrap
                             }
 
                             LV.Label {
                                 style: caption
                                 color: LV.Theme.textTertiary
-                                text: "Last context target: " + (root.lastGlobalContext.ui && root.lastGlobalContext.ui.path ? root.lastGlobalContext.ui.path : "n/a")
+                                text: "safeMargin=" + root.safeMargin + " | supersample=" + root.effectiveSupersampleScale.toFixed(2)
                             }
                         }
                     }
                 }
             }
+        }
+    }
 
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
+    Component {
+        id: appHeaderPreview
 
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: root.catalogCardInset
-                        spacing: LV.Theme.gap8
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: headerColumn.implicitHeight
 
-                        LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Typography" }
-                        LV.Label { style: title; text: "Title" }
-                        LV.Label { style: title2; text: "Title2" }
-                        LV.Label { style: header; text: "Header" }
-                        LV.Label { style: header2; text: "Header2" }
-                        LV.Label { style: body; text: "Body" }
-                        LV.Label { style: description; text: "Description" }
-                        LV.Label { style: caption; text: "Caption" }
-                        LV.Label { style: disabled; text: "Disabled" }
+            Column {
+                id: headerColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.AppHeader {
+                    width: parent.width
+                    title: "Design System"
+                    subtitle: "Header actions and page chrome"
+                    menuVisible: true
+
+                    LV.LabelButton {
+                        text: "Share"
+                        tone: LV.AbstractButton.Default
+                    }
+
+                    LV.IconButton {
+                        iconName: "viewMoreSymbolicDefault"
+                        tone: LV.AbstractButton.Borderless
                     }
                 }
             }
+        }
+    }
 
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
+    Component {
+        id: stackLayoutPreview
 
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: root.catalogCardInset
-                        spacing: LV.Theme.gap10
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
 
-                        LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Button States" }
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
 
-                        Flow {
-                            width: parent.width
+                LV.Label {
+                    style: caption
+                    color: LV.Theme.textTertiary
+                    text: "Selected: " + (preview.catalogEntry ? preview.catalogEntry.label : "")
+                }
+
+                LV.VStack {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    Rectangle {
+                        width: parent.width
+                        height: 56
+                        radius: LV.Theme.radiusMd
+                        color: LV.Theme.surfaceAlt
+
+                        LV.HStack {
+                            anchors.fill: parent
+                            anchors.margins: root.catalogContentInset
                             spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
-                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Primary }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Primary }
-                            LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Primary }
-                        }
 
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Default }
-                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Default }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Default }
-                            LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Default }
-                        }
+                            Rectangle {
+                                width: 72
+                                height: 24
+                                radius: LV.Theme.radiusSm
+                                color: LV.Theme.accentOverlay
+                            }
 
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Borderless }
-                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Borderless }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Borderless }
-                            LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
-                        }
+                            LV.Spacer { }
 
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Destructive }
-                            LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Destructive }
-                            LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Destructive }
-                            LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Destructive }
-                        }
-
-                        Flow {
-                            width: parent.width
-                            spacing: LV.Theme.gap8
-                            LV.LabelButton { text: "Label"; enabled: false }
-                            LV.IconButton { iconName: "add"; enabled: false }
-                            LV.LabelMenuButton { text: "Menu"; enabled: false }
-                            LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; enabled: false }
+                            Rectangle {
+                                width: 120
+                                height: 24
+                                radius: LV.Theme.radiusSm
+                                color: LV.Theme.surfaceGhost
+                            }
                         }
                     }
-                }
-            }
 
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
+                    Rectangle {
+                        width: parent.width
+                        height: 120
+                        radius: LV.Theme.radiusMd
+                        color: LV.Theme.surfaceAlt
+                        border.width: 1
+                        border.color: LV.Theme.contextMenuDivider
 
-                    ScrollView {
-                        anchors.fill: parent
-                        clip: true
+                        LV.ZStack {
+                            anchors.fill: parent
+                            anchors.margins: root.catalogContentInset
 
-                        ColumnLayout {
-                            width: parent.width
-                            spacing: root.catalogSectionGap
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: LV.Theme.radiusSm
+                                color: LV.Theme.surfaceGhost
+                            }
 
                             LV.Label {
-                                style: title2
+                                anchors.centerIn: parent
+                                style: header2
                                 color: LV.Theme.textPrimary
-                                text: "Table Components"
-                                Layout.leftMargin: root.catalogContentInset
-                                Layout.rightMargin: root.catalogContentInset
-                                Layout.topMargin: root.catalogContentInset
+                                text: "Layered content"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: abstractButtonPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    LV.AbstractButton { text: "Primary"; tone: LV.AbstractButton.Primary }
+                    LV.AbstractButton { text: "Default"; tone: LV.AbstractButton.Default }
+                    LV.AbstractButton { text: "Borderless"; tone: LV.AbstractButton.Borderless }
+                    LV.AbstractButton { text: "Destructive"; tone: LV.AbstractButton.Destructive }
+                    LV.AbstractButton { text: "Disabled"; tone: LV.AbstractButton.Disabled }
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: "AbstractButton is the tone and spacing foundation for the rest of the button family."
+                }
+            }
+        }
+    }
+
+    Component {
+        id: buttonFamilyPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+            property string selectionLabel: preview.catalogEntry ? preview.catalogEntry.label : "Button"
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.Label {
+                    style: caption
+                    color: LV.Theme.textTertiary
+                    text: "Selected: " + preview.selectionLabel
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
+                    LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Primary }
+                    LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Default }
+                    LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    LV.LabelButton { text: "Default"; tone: LV.AbstractButton.Default }
+                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
+                    LV.LabelMenuButton { text: "Options"; tone: LV.AbstractButton.Borderless }
+                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Default }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: segmentedControlPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.LabelSegmentedControl {
+                    width: implicitWidth
+
+                    LV.LabelButton { text: "Day" }
+                    LV.LabelButton { text: "Week" }
+                    LV.LabelButton { text: "Month" }
+                }
+
+                LV.IconSegmentedControl {
+                    width: implicitWidth
+
+                    LV.IconButton { iconName: "projectStructure" }
+                    LV.IconButton { iconName: "add" }
+                    LV.IconButton { iconName: "viewMoreSymbolicDefault" }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: selectorControlPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap12
+
+                    LV.ComboBox {
+                        text: "Primary"
+                        tone: LV.ComboBox.Primary
+                        arrow: LV.Stepper.UpDown
+                    }
+
+                    LV.ComboBox {
+                        text: "Borderless"
+                        tone: LV.ComboBox.Borderless
+                        arrow: LV.Stepper.Down
+                    }
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap12
+
+                    LV.Stepper { tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Up }
+                    LV.Stepper { tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
+                    LV.Stepper { tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Down }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: selectionControlPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap16
+
+                    LV.CheckBox { text: "Remember"; checked: true }
+                    LV.RadioButton { text: "Choice A"; checked: true }
+                    LV.ToggleSwitch { text: "Enabled"; checked: true }
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap16
+
+                    LV.CheckBox { text: "Disabled"; enabled: false; checked: true }
+                    LV.RadioButton { text: "Choice B"; enabled: false }
+                    LV.ToggleSwitch { text: "Disabled"; enabled: false; checked: false }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: labelDisplayPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: labelColumn.implicitHeight
+
+            Column {
+                id: labelColumn
+                width: parent.width
+                spacing: LV.Theme.gap4
+
+                LV.Label { style: title; text: "Title" }
+                LV.Label { style: title2; text: "Title2" }
+                LV.Label { style: header; text: "Header" }
+                LV.Label { style: header2; text: "Header2" }
+                LV.Label { style: body; text: "Body" }
+                LV.Label { style: description; text: "Description" }
+                LV.Label { style: caption; text: "Caption" }
+                LV.Label { style: disabled; text: "Disabled" }
+            }
+        }
+    }
+
+    Component {
+        id: progressDisplayPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.ProgressBar {
+                    width: parent.width
+                    size: large
+                    currentValue: 72
+                    endValue: 100
+                }
+
+                LV.ProgressBar {
+                    width: parent.width
+                    size: regular
+                    currentValue: 36
+                    endValue: 100
+                }
+            }
+        }
+    }
+
+    Component {
+        id: tableDisplayPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Rectangle {
+                    width: parent.width
+                    implicitHeight: 168
+                    radius: LV.Theme.radiusMd
+                    color: LV.Theme.surfaceAlt
+                    border.width: 1
+                    border.color: LV.Theme.contextMenuDivider
+
+                    Flickable {
+                        anchors.fill: parent
+                        anchors.margins: root.catalogContentInset
+                        contentWidth: table.width
+                        contentHeight: table.implicitHeight
+                        interactive: contentWidth > width
+                        flickableDirection: Flickable.HorizontalFlick
+                        boundsBehavior: Flickable.StopAtBounds
+                        clip: true
+
+                        LV.Table {
+                            id: table
+                            width: 448
+                            headerColumns: ["Name", "State", "Owner"]
+                            rows: [
+                                ["Renderer", "Active", "Core"],
+                                ["Input", "Idle", "UX"],
+                                ["Metrics", "Ready", "Tools"]
+                            ]
+                        }
+                    }
+                }
+
+                LV.TableHeader {
+                    width: parent.width
+                    columns: ["Column", "Column", "Column"]
+                }
+
+                LV.TableRow {
+                    width: parent.width
+                    cells: ["Text", "Text", "Text"]
+                }
+            }
+        }
+    }
+
+    Component {
+        id: inputFieldPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: inputColumn.implicitHeight
+
+            Column {
+                id: inputColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.InputField {
+                    width: parent.width
+                    placeholderText: "Standard input"
+                    text: "LVRS"
+                }
+
+                LV.InputField {
+                    width: parent.width
+                    placeholderText: "Search"
+                    mode: searchMode
+                }
+            }
+        }
+    }
+
+    Component {
+        id: textEditorPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: editorColumn.implicitHeight
+
+            Column {
+                id: editorColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.TextEditor {
+                    width: parent.width
+                    editorHeight: 180
+                    text: "TextEditor keeps a fixed outer height while the internal editor scrolls.\n\nThis makes it suitable for forms, notes, and documentation panels."
+                }
+            }
+        }
+    }
+
+    Component {
+        id: codeEditorPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: codeColumn.implicitHeight
+
+            Column {
+                id: codeColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.CodeEditor {
+                    width: parent.width
+                    editorHeight: 200
+                    readOnly: true
+                    snippetTitle: "Example"
+                    snippetLanguage: "qml"
+                    text: "import QtQuick\nimport LVRS as LV\n\nLV.LabelButton {\n    text: \"Open\"\n    tone: LV.AbstractButton.Primary\n}"
+                }
+            }
+        }
+    }
+
+    Component {
+        id: eventListenerPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            property string lastEvent: "No event captured yet"
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Rectangle {
+                    id: targetArea
+                    width: parent.width
+                    height: 180
+                    radius: LV.Theme.radiusMd
+                    color: LV.Theme.surfaceAlt
+                    border.width: 1
+                    border.color: LV.Theme.contextMenuDivider
+
+                    LV.Label {
+                        anchors.centerIn: parent
+                        style: body
+                        color: LV.Theme.textPrimary
+                        text: "Click or press inside this area"
+                    }
+
+                    LV.EventListener {
+                        trigger: "pressed"
+                        action: function(eventData) {
+                            preview.lastEvent = "pressed at " + Math.round(eventData.x) + ", " + Math.round(eventData.y)
+                        }
+                    }
+
+                    LV.EventListener {
+                        trigger: "clicked"
+                        action: function(eventData) {
+                            preview.lastEvent = "clicked at " + Math.round(eventData.x) + ", " + Math.round(eventData.y)
+                        }
+                    }
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: preview.lastEvent
+                }
+            }
+        }
+    }
+
+    Component {
+        id: guardUtilityPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.InputField {
+                    id: guardedField
+                    width: parent.width
+                    placeholderText: "IME guard target"
+                    text: "Compose here"
+                }
+
+                LV.InputMethodGuard {
+                    target: guardedField.inputItem
+                    guardEnabled: true
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 152
+                    radius: LV.Theme.radiusMd
+                    color: LV.Theme.surfaceAlt
+                    border.width: 1
+                    border.color: LV.Theme.contextMenuDivider
+
+                    Flickable {
+                        id: guardFlickable
+                        anchors.fill: parent
+                        anchors.margins: root.catalogContentInset
+                        contentWidth: width
+                        contentHeight: guardColumn.implicitHeight
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        Column {
+                            id: guardColumn
+                            width: guardFlickable.width
+                            spacing: LV.Theme.gap6
+
+                            Repeater {
+                                model: 10
+
+                                delegate: LV.Label {
+                                    required property int index
+                                    width: parent.width
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    text: "Scrollable row " + (index + 1)
+                                }
+                            }
+                        }
+                    }
+
+                    LV.WheelScrollGuard {
+                        anchors.fill: parent
+                        targetFlickable: guardFlickable
+                        consumeInside: true
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: routerNavigationPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: routerColumn.implicitHeight
+
+            Column {
+                id: routerColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Row {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    LV.Link {
+                        router: previewRouter
+                        href: "/"
+                        text: "Home"
+                    }
+
+                    LV.Link {
+                        router: previewRouter
+                        href: "/reports"
+                        text: "Reports"
+                    }
+
+                    LV.LabelButton {
+                        text: "Navigator.go"
+                        tone: LV.AbstractButton.Default
+                        onClicked: LV.Navigator.go("/reports")
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 180
+                    radius: LV.Theme.radiusMd
+                    color: LV.Theme.surfaceAlt
+                    border.width: 1
+                    border.color: LV.Theme.contextMenuDivider
+
+                    LV.PageRouter {
+                        id: previewRouter
+                        anchors.fill: parent
+                        anchors.margins: root.catalogContentInset
+                        registerAsGlobalNavigator: true
+                        initialPath: "/"
+                        routes: [
+                            { path: "/", component: routerHomePage },
+                            { path: "/reports", component: routerReportsPage }
+                        ]
+                    }
+
+                    Component {
+                        id: routerHomePage
+
+                        Rectangle {
+                            color: LV.Theme.surfaceGhost
+                            radius: LV.Theme.radiusSm
+
+                            LV.Label {
+                                anchors.centerIn: parent
+                                style: header2
+                                color: LV.Theme.textPrimary
+                                text: "Home Route"
+                            }
+                        }
+                    }
+
+                    Component {
+                        id: routerReportsPage
+
+                        Rectangle {
+                            color: LV.Theme.accentOverlay
+                            radius: LV.Theme.radiusSm
+
+                            LV.Label {
+                                anchors.centerIn: parent
+                                style: header2
+                                color: LV.Theme.textPrimary
+                                text: "Reports Route"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: hierarchyNavigationPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.HierarchyToolbar {
+                    width: parent.width
+                    buttonItems: [
+                        { id: "overview", iconName: "projectStructure" },
+                        { id: "expand", iconName: "viewMoreSymbolicDefault" },
+                        { id: "collapse", iconName: "panDownSymbolicDefault" }
+                    ]
+                }
+
+                LV.HierarchyItem {
+                    width: parent.width
+                    label: "Standalone node"
+                    itemKey: "standalone"
+                    showChevron: true
+                    hasChildItems: true
+                    expanded: false
+                    iconGlyph: "N"
+                }
+
+                LV.Hierarchy {
+                    width: parent.width
+                    height: 232
+                    model: [
+                        {
+                            key: "scene",
+                            label: "Scene",
+                            expanded: true,
+                            iconGlyph: "S",
+                            children: [
+                                {
+                                    key: "camera",
+                                    label: "Camera",
+                                    iconGlyph: "C",
+                                    children: [
+                                        { key: "frustum", label: "Frustum", iconGlyph: "F" }
+                                    ]
+                                },
+                                {
+                                    key: "lights",
+                                    label: "Lights",
+                                    expanded: true,
+                                    iconGlyph: "L",
+                                    children: [
+                                        { key: "key", label: "Key Light", iconGlyph: "K" },
+                                        { key: "rim", label: "Rim Light", iconGlyph: "R" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+
+                    LV.ToolbarButton { buttonId: "overview"; iconGlyph: "O" }
+                    LV.ToolbarButton { buttonId: "expand"; iconGlyph: "+" }
+                    LV.ToolbarButton { buttonId: "collapse"; iconGlyph: "-" }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: listNavigationPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.ListToolbar {
+                    width: implicitWidth
+                    icon1: "projectStructure"
+                    icon2: "add"
+                    icon3: "viewMoreSymbolicDefault"
+                }
+
+                LV.ListItem {
+                    width: parent.width
+                    label: "Inspector row"
+                }
+
+                LV.List {
+                    width: 220
+                    height: 220
+                    items: [
+                        { label: "Overview" },
+                        { label: "Reports" },
+                        { label: "Settings" }
+                    ]
+                }
+
+                LV.ListFooter {
+                    button1: ({ type: "icon", iconName: "projectStructure" })
+                    button2: ({ type: "menu", iconName: "add" })
+                    button3: ({ type: "icon", iconName: "viewMoreSymbolicDefault" })
+                }
+            }
+        }
+    }
+
+    Component {
+        id: menuNavigationPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.MenuItem {
+                    width: 240
+                    label: "Open Recent"
+                    key: "Cmd+O"
+                    keyVisible: true
+                    showChevron: true
+                    hasChildItems: true
+                    expanded: false
+                    state: selectedState
+                }
+
+                LV.MenuDivider {
+                    width: parent.width
+                    axis: "horizontal"
+                }
+
+                LV.LabelButton {
+                    id: menuOpenButton
+                    text: "Open ContextMenu"
+                    tone: LV.AbstractButton.Default
+                    onClicked: previewMenu.openAt(menuOpenButton.x, menuOpenButton.y + menuOpenButton.height + LV.Theme.gap8)
+                }
+
+                LV.ContextMenu {
+                    id: previewMenu
+                    items: [
+                        { label: "Inspect", eventName: "inspect" },
+                        { type: "divider" },
+                        { label: "Copy Label", key: "Cmd+C", showChevron: false }
+                    ]
+                }
+            }
+        }
+    }
+
+    Component {
+        id: appCardSurfacePreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: card.implicitHeight
+
+            LV.AppCard {
+                id: card
+                width: parent.width
+                title: "System Health"
+                subtitle: "Reusable surface"
+
+                Column {
+                    width: parent.width
+                    spacing: LV.Theme.gap6
+
+                    LV.Label {
+                        width: parent.width
+                        style: body
+                        color: LV.Theme.textPrimary
+                        text: "AppCard keeps header, padding, and content spacing consistent."
+                        wrapMode: Text.WordWrap
+                    }
+
+                    LV.ProgressBar {
+                        width: parent.width
+                        currentValue: 84
+                        endValue: 100
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: alertSurfacePreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            property bool alertOpen: false
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    LV.AlertButton {
+                        text: "Primary"
+                        tone: LV.AbstractButton.Primary
+                    }
+
+                    LV.AlertButton {
+                        text: "Default"
+                        tone: LV.AbstractButton.Default
+                    }
+
+                    LV.LabelButton {
+                        text: "Open Alert"
+                        tone: LV.AbstractButton.Default
+                        onClicked: preview.alertOpen = true
+                    }
+                }
+
+                LV.Alert {
+                    open: preview.alertOpen
+                    buttonCount: 2
+                    title: "Alert Example"
+                    message: "This preview uses the real Alert surface and AlertButton styling."
+                    primaryText: "Confirm"
+                    secondaryText: "Cancel"
+                    onPrimaryClicked: preview.alertOpen = false
+                    onSecondaryClicked: preview.alertOpen = false
+                    onDismissed: preview.alertOpen = false
+                }
+            }
+        }
+    }
+
+    Component {
+        id: modalSurfacePreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            property bool modalOpen: false
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.LabelButton {
+                    text: "Open Modal"
+                    tone: LV.AbstractButton.Default
+                    onClicked: preview.modalOpen = true
+                }
+
+                LV.Modal {
+                    open: preview.modalOpen
+                    title: "Continue?"
+                    description: "The modal preview uses the live component so overlay and action layout behavior stay visible."
+                    iconName: "projectStructure"
+                    primaryText: "Continue"
+                    secondaryText: "Cancel"
+                    onPrimaryClicked: preview.modalOpen = false
+                    onSecondaryClicked: preview.modalOpen = false
+                    onCanceled: preview.modalOpen = false
+                }
+            }
+        }
+    }
+
+    Component {
+        id: placeholderPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: 96
+
+            LV.Label {
+                anchors.fill: parent
+                style: description
+                color: LV.Theme.textSecondary
+                wrapMode: Text.WordWrap
+                text: "No dedicated live preview is registered for this entry yet."
+            }
+        }
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: root.catalogOuterMargin
+        spacing: root.catalogSectionGap
+
+        LV.AppCard {
+            Layout.fillWidth: true
+            implicitHeight: root.catalogCompactLayout ? 158 : 126
+
+            Column {
+                anchors.fill: parent
+                anchors.margins: root.catalogContentInset
+                spacing: LV.Theme.gap6
+
+                LV.Label {
+                    style: title2
+                    color: LV.Theme.textPrimary
+                    text: "Visual Documentation Browser"
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: "The left hierarchy is the primary index. Section entries summarize domains, and component entries open dedicated reference pages with live LVRS previews."
+                }
+
+                Flow {
+                    width: parent.width
+                    spacing: LV.Theme.gap8
+
+                    Repeater {
+                        model: [
+                            { label: root.catalogComponentCount + " public types" },
+                            { label: root.catalogDocumentCount + " catalog entries" },
+                            { label: "health " + root.metricsSummary },
+                            { label: root.activeEntry ? root.activeEntry.roleLabel : "Overview" }
+                        ]
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            radius: LV.Theme.radiusSm
+                            color: LV.Theme.surfaceAlt
+                            border.width: 1
+                            border.color: LV.Theme.contextMenuDivider
+                            implicitWidth: chipLabel.implicitWidth + LV.Theme.gap12
+                            implicitHeight: chipLabel.implicitHeight + LV.Theme.gap6
+
+                            LV.Label {
+                                id: chipLabel
+                                anchors.centerIn: parent
+                                style: caption
+                                color: LV.Theme.textPrimary
+                                text: modelData.label
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: root.catalogSectionGap
+
+            ColumnLayout {
+                Layout.preferredWidth: root.sidebarWidth
+                Layout.minimumWidth: 240
+                Layout.maximumWidth: 360
+                Layout.fillHeight: true
+                spacing: root.catalogSectionGap
+
+                LV.AppCard {
+                    Layout.fillWidth: true
+                    implicitHeight: 124
+
+                    Column {
+                        anchors.fill: parent
+                        anchors.margins: root.catalogContentInset
+                        spacing: LV.Theme.gap4
+
+                        LV.Label {
+                            style: header2
+                            color: LV.Theme.textPrimary
+                            text: "Component Index"
+                        }
+
+                        LV.Label {
+                            width: parent.width
+                            style: description
+                            color: LV.Theme.textSecondary
+                            wrapMode: Text.WordWrap
+                            text: "Use O for overview, + to expand, and - to collapse the full tree."
+                        }
+                    }
+                }
+
+                LV.Hierarchy {
+                    id: catalogHierarchy
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    minimumPanelWidth: root.sidebarWidth
+                    model: catalogRegistry.hierarchyModel
+                    autoExpandDepth: 5
+                    footerVisible: false
+
+                    onListItemActivated: function(item) {
+                        if (item && item.itemKey)
+                            root.activeEntryKey = String(item.itemKey)
+                    }
+
+                    onToolbarButtonTriggered: function(button, buttonId) {
+                        if (buttonId === "overview")
+                            root.activateCatalogEntry(catalogRegistry.overview.key)
+                        else if (buttonId === "expand")
+                            catalogHierarchy.expandAll()
+                        else if (buttonId === "collapse")
+                            catalogHierarchy.collapseAll(true)
+                    }
+
+                    LV.ToolbarButton {
+                        buttonId: "overview"
+                        iconGlyph: "O"
+                    }
+
+                    LV.ToolbarButton {
+                        buttonId: "expand"
+                        iconGlyph: "+"
+                    }
+
+                    LV.ToolbarButton {
+                        buttonId: "collapse"
+                        iconGlyph: "-"
+                    }
+                }
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+
+                ColumnLayout {
+                    width: Math.max(parent.width, 720)
+                    spacing: root.catalogSectionGap
+
+                    LV.AppCard {
+                        Layout.fillWidth: true
+                        implicitHeight: heroColumn.implicitHeight + root.catalogContentInset * 2
+
+                        Column {
+                            id: heroColumn
+                            x: root.catalogContentInset
+                            y: root.catalogContentInset
+                            width: parent.width - root.catalogContentInset * 2
+                            spacing: LV.Theme.gap6
+
+                            LV.Label {
+                                style: caption
+                                color: LV.Theme.textTertiary
+                                text: root.breadcrumbText(root.activeBreadcrumb)
+                            }
+
+                            LV.Label {
+                                style: title
+                                color: LV.Theme.textPrimary
+                                text: root.activeEntry ? root.activeEntry.label : "Catalog Overview"
                             }
 
                             LV.Label {
                                 style: description
                                 color: LV.Theme.textSecondary
-                                text: "Table primitives are shown together for design-parity checks against Figma nodes."
-                                wrapMode: Text.WordWrap
-                                Layout.fillWidth: true
-                                Layout.leftMargin: root.catalogContentInset
-                                Layout.rightMargin: root.catalogContentInset
-                            }
-
-                            Rectangle {
-                                Layout.leftMargin: root.catalogContentInset
-                                Layout.rightMargin: root.catalogContentInset
-                                Layout.fillWidth: true
-                                implicitHeight: tablePreview.implicitHeight + (root.catalogContentInset * 2)
-                                radius: LV.Theme.radiusMd
-                                color: LV.Theme.surfaceAlt
-                                border.width: 1
-                                border.color: LV.Theme.contextMenuDivider
-                                clip: true
-
-                                Flickable {
-                                    id: tablePreviewFlick
-                                    anchors.fill: parent
-                                    anchors.margins: root.catalogContentInset
-                                    contentWidth: tablePreview.implicitWidth
-                                    contentHeight: tablePreview.implicitHeight
-                                    interactive: contentWidth > width
-                                    flickableDirection: Flickable.HorizontalFlick
-                                    boundsBehavior: Flickable.StopAtBounds
-                                    clip: true
-
-                                    LV.Table {
-                                        id: tablePreview
-                                        width: 405
-                                        headerColumns: ["Name", "State", "Owner"]
-                                        rows: [
-                                            ["Renderer", "Active", "Core"],
-                                            ["Input", "Idle", "UX"],
-                                            ["Pipeline", "Active", "Render"],
-                                            ["Metrics", "Paused", "Ops"]
-                                        ]
-                                    }
-                                }
+                                text: root.activeEntry ? root.activeEntry.roleLabel : "Overview"
                             }
 
                             LV.Label {
-                                style: header2
+                                width: parent.width
+                                style: body
                                 color: LV.Theme.textPrimary
-                                text: "Subcomponents"
-                                Layout.leftMargin: root.catalogContentInset
-                                Layout.rightMargin: root.catalogContentInset
-                                Layout.topMargin: LV.Theme.gap4
-                            }
-
-                            Rectangle {
-                                Layout.leftMargin: root.catalogContentInset
-                                Layout.rightMargin: root.catalogContentInset
-                                Layout.fillWidth: true
-                                implicitHeight: subcomponentColumn.implicitHeight + (root.catalogContentInset * 2)
-                                radius: LV.Theme.radiusMd
-                                color: LV.Theme.surfaceAlt
-                                border.width: 1
-                                border.color: LV.Theme.contextMenuDivider
-                                clip: true
-
-                                Flickable {
-                                    id: subcomponentFlick
-                                    anchors.fill: parent
-                                    anchors.margins: root.catalogContentInset
-                                    contentWidth: subcomponentColumn.width
-                                    contentHeight: subcomponentColumn.height
-                                    interactive: contentWidth > width
-                                    flickableDirection: Flickable.HorizontalFlick
-                                    boundsBehavior: Flickable.StopAtBounds
-                                    clip: true
-
-                                    Column {
-                                        id: subcomponentColumn
-                                        width: Math.max(subcomponentFlick.width, 717)
-                                        spacing: LV.Theme.gap8
-
-                                        LV.TableHeader {
-                                            width: parent.width
-                                            columns: ["Column", "Column", "Column"]
-                                        }
-
-                                        LV.TableRow {
-                                            width: parent.width
-                                            cells: ["Text", "Text", "Text"]
-                                        }
-
-                                        LV.TableCellItem {
-                                            text: "Text"
-                                        }
-                                    }
-                                }
-                            }
-
-                            Item {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: LV.Theme.gap12
+                                wrapMode: Text.WordWrap
+                                text: root.activeEntry ? root.activeEntry.summary : ""
                             }
                         }
                     }
-                }
-            }
 
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
+                    LV.AppCard {
+                        Layout.fillWidth: true
+                        title: "Live Preview"
+                        subtitle: root.activeEntry ? root.activeEntry.label : ""
+                        implicitHeight: Math.max(root.catalogCompactLayout ? 320 : 360, (previewLoader.item && previewLoader.item.implicitHeight ? previewLoader.item.implicitHeight : 0) + root.catalogCardInset * 2)
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: root.catalogCardInset
-                        spacing: LV.Theme.gap10
+                        Item {
+                            anchors.fill: parent
+                            anchors.margins: root.catalogCardInset
 
-                        LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Input Components" }
-
-                        LV.InputField {
-                            Layout.fillWidth: true
-                            placeholderText: "Standard input"
-                            text: "LVRS"
+                            Loader {
+                                id: previewLoader
+                                anchors.fill: parent
+                                sourceComponent: root.previewComponentFor(root.activeEntry ? root.activeEntry.previewId : "")
+                                onLoaded: {
+                                    if (item && item.catalogEntry !== undefined)
+                                        item.catalogEntry = root.activeEntry
+                                }
+                            }
                         }
+                    }
 
-                        LV.InputField {
-                            Layout.fillWidth: true
-                            placeholderText: "Search mode"
-                            mode: searchMode
-                        }
-
-                        LV.TextEditor {
-                            Layout.fillWidth: true
-                            editorHeight: 140
-                            text: "TextEditor uses fixed external height while keeping internal scroll responsive."
-                        }
+                    LV.AppCard {
+                        Layout.fillWidth: true
+                        visible: root.activeEntry && root.activeEntry.usage.length > 0
+                        title: "Usage"
+                        subtitle: "Canonical QML snippet"
+                        implicitHeight: codePreview.editorHeight + root.catalogCardInset * 2
 
                         LV.CodeEditor {
-                            Layout.fillWidth: true
-                            editorHeight: 160
-                            snippetTitle: "main.qml"
+                            id: codePreview
+                            x: root.catalogCardInset
+                            y: root.catalogCardInset
+                            width: parent.width - root.catalogCardInset * 2
+                            readOnly: true
+                            editorHeight: Math.max(160, Math.min(260, contentHeight + LV.Theme.gap20))
+                            snippetTitle: root.activeEntry ? root.activeEntry.label + ".qml" : "usage.qml"
                             snippetLanguage: "qml"
-                            text: "import QtQuick\\nRectangle { color: \"#1E1F22\" }"
+                            text: root.activeEntry ? root.activeEntry.usage : ""
                         }
                     }
-                }
-            }
-
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: root.catalogCardInset
-                        spacing: LV.Theme.gap10
-
-                        LV.Label {
-                            style: title2
-                            color: LV.Theme.textPrimary
-                            text: "Hierarchy"
-                        }
-
-                        LV.Label {
-                            Layout.fillWidth: true
-                            style: description
-                            color: LV.Theme.textSecondary
-                            wrapMode: Text.WordWrap
-                            text: "Expand/collapse is handled via chevron area. Row click selects item only."
-                        }
-
-                        LV.Hierarchy {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            model: [
-                                {
-                                    key: "scene",
-                                    label: "Scene",
-                                    expanded: true,
-                                    iconGlyph: "■",
-                                    children: [
-                                        {
-                                            key: "camera",
-                                            label: "Main Camera",
-                                            iconGlyph: "◎",
-                                            children: [
-                                                { key: "camera-frustum", label: "Frustum", iconGlyph: "△" }
-                                            ]
-                                        },
-                                        {
-                                            key: "lights",
-                                            label: "Lights",
-                                            expanded: true,
-                                            iconGlyph: "◉",
-                                            children: [
-                                                { key: "key-light", label: "Key Light", iconGlyph: "●" },
-                                                { key: "rim-light", label: "Rim Light", iconGlyph: "●" }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-
-            Item {
-                LV.AppCard {
-                    anchors.fill: parent
-
-                    ScrollView {
-                        anchors.fill: parent
-                        clip: true
-
-                        GridLayout {
-                            width: parent.width
-                            columns: root.catalogCompactLayout
-                                ? 1
-                                : root.responsiveColumns(width - (LV.Theme.gap10 * 2), 220, 2, 4)
-                            rowSpacing: LV.Theme.gap10
-                            columnSpacing: LV.Theme.gap10
-
-                            Repeater {
-                                model: root.accentPreviewTokens
-
-                                delegate: Rectangle {
-                                    id: accentCard
-                                    required property var modelData
-                                    Layout.fillWidth: true
-                                    implicitHeight: 84
-                                    radius: LV.Theme.radiusMd
-                                    color: LV.Theme.surfaceAlt
-                                    border.width: 1
-                                    border.color: LV.Theme.contextMenuDivider
-
-                                    Column {
-                                        anchors.fill: parent
-                                        anchors.margins: root.catalogCardInset
-                                        spacing: LV.Theme.gap6
-
-                                        Rectangle {
-                                            width: parent.width
-                                            height: 24
-                                            radius: LV.Theme.radiusSm
-                                            color: accentCard.modelData.color
-                                            border.width: accentCard.modelData.name === "accentTransparent" ? 1 : 0
-                                            border.color: LV.Theme.contextMenuDivider
-                                        }
-
-                                        LV.Label {
-                                            style: caption
-                                            color: LV.Theme.textPrimary
-                                            text: accentCard.modelData.name
-                                            elide: Text.ElideRight
-                                        }
-
-                                        LV.Label {
-                                            style: disabled
-                                            color: LV.Theme.textTertiary
-                                            text: accentCard.modelData.color
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: LV.Theme.gap12
 
                     LV.AppCard {
                         Layout.fillWidth: true
-                        implicitHeight: 130
+                        title: "Structure"
+                        subtitle: "Source, related types, and branch contents"
+                        implicitHeight: structureColumn.implicitHeight + root.catalogCardInset * 2
 
                         Column {
-                            anchors.fill: parent
-                            anchors.margins: root.catalogCardInset
-                            spacing: LV.Theme.gap6
-
-                            LV.Label { style: title2; color: LV.Theme.textPrimary; text: "Event Monitor" }
-                            LV.Label { style: description; color: LV.Theme.textSecondary; text: "rows=" + root.runtimeRows.length + " | visible=" + root.runtimeVisibleCount }
-                            LV.Label { style: description; color: LV.Theme.textSecondary; text: "lastPress=" + (root.lastGlobalPress.globalX !== undefined ? Math.round(root.lastGlobalPress.globalX) + "," + Math.round(root.lastGlobalPress.globalY) : "n/a") }
-                            LV.Label { style: description; color: LV.Theme.textSecondary; text: "lastContext=" + (root.lastGlobalContext.globalX !== undefined ? Math.round(root.lastGlobalContext.globalX) + "," + Math.round(root.lastGlobalContext.globalY) : "n/a") }
-                        }
-                    }
-
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        implicitHeight: root.catalogCompactLayout ? 96 : 52
-
-                        Flow {
-                            anchors.fill: parent
-                            anchors.margins: root.catalogCardInset
-                            spacing: LV.Theme.gap8
-
-                            LV.LabelButton { text: "All"; tone: root.runtimeFilter === "all" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "all" }
-                            LV.LabelButton { text: "Input"; tone: root.runtimeFilter === "input" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "input" }
-                            LV.LabelButton { text: "Runtime"; tone: root.runtimeFilter === "runtime" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "runtime" }
-                            LV.LabelButton { text: "Render"; tone: root.runtimeFilter === "render" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "render" }
-                            LV.LabelButton { text: "Navigation"; tone: root.runtimeFilter === "navigation" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "navigation" }
-                            LV.LabelButton { text: "System"; tone: root.runtimeFilter === "system" ? LV.AbstractButton.Primary : LV.AbstractButton.Default; onClicked: root.runtimeFilter = "system" }
-                            LV.LabelButton {
-                                text: "Clear"
-                                tone: LV.AbstractButton.Default
-                                onClicked: {
-                                    root.runtimeRows = []
-                                    root.lastRuntimeSequence = -1
-                                    if (LV.Backend && LV.Backend.clearHookedUserEvents)
-                                        LV.Backend.clearHookedUserEvents()
-                                }
-                            }
-                        }
-                    }
-
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
-                        Flickable {
-                            id: runtimeViewport
-                            anchors.fill: parent
-                            anchors.margins: root.catalogCardInset
-                            clip: true
-                            contentWidth: width
-                            contentHeight: runtimeColumn.implicitHeight
+                            id: structureColumn
+                            x: root.catalogCardInset
+                            y: root.catalogCardInset
+                            width: parent.width - root.catalogCardInset * 2
+                            spacing: root.catalogSectionGap
 
                             Column {
-                                id: runtimeColumn
-                                width: runtimeViewport.width
-                                spacing: LV.Theme.gap8
+                                width: parent.width
+                                spacing: LV.Theme.gap4
 
-                                Repeater {
-                                    model: root.runtimeRows
-
-                                    delegate: Rectangle {
-                                        id: runtimeRowCard
-                                        required property var modelData
-                                        width: parent.width
-                                        visible: root.runtimeFilter === "all"
-                                            || String(runtimeRowCard.modelData.category) === root.runtimeFilter
-                                        radius: LV.Theme.radiusSm
-                                        color: LV.Theme.surfaceGhost
-                                        border.width: 1
-                                        border.color: LV.Theme.contextMenuDivider
-                                        implicitHeight: rowCol.implicitHeight + LV.Theme.gap8 * 2
-
-                                        Column {
-                                            id: rowCol
-                                            anchors.fill: parent
-                                            anchors.margins: root.catalogCardInset
-                                            spacing: LV.Theme.gap4
-
-                                            LV.Label {
-                                                style: body
-                                                color: LV.Theme.textPrimary
-                                                text: "["
-                                                    + root.timestamp(runtimeRowCard.modelData.epochMs)
-                                                    + "] "
-                                                    + runtimeRowCard.modelData.source
-                                                    + " / "
-                                                    + runtimeRowCard.modelData.type
-                                            }
-
-                                            LV.Label {
-                                                style: caption
-                                                color: LV.Theme.textSecondary
-                                                text: "category="
-                                                    + runtimeRowCard.modelData.category
-                                                    + " | sequence="
-                                                    + runtimeRowCard.modelData.sequence
-                                            }
-                                        }
-                                    }
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: "Source Path"
                                 }
 
                                 LV.Label {
                                     width: parent.width
-                                    visible: root.runtimeRows.length === 0
-                                    style: description
-                                    color: LV.Theme.textSecondary
-                                    text: "No runtime rows collected yet. Click or right-click in the window to generate monitor events."
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    wrapMode: Text.WrapAnywhere
+                                    text: root.activeEntry && root.activeEntry.location.length > 0 ? root.activeEntry.location : "Catalog section"
+                                }
+                            }
+
+                            Column {
+                                width: parent.width
+                                spacing: LV.Theme.gap4
+                                visible: root.activeEntry && root.activeEntry.docPath.length > 0
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: "Documentation Path"
+                                }
+
+                                LV.Label {
+                                    width: parent.width
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    wrapMode: Text.WrapAnywhere
+                                    text: root.activeEntry ? root.activeEntry.docPath : ""
+                                }
+                            }
+
+                            Column {
+                                width: parent.width
+                                spacing: LV.Theme.gap6
+                                visible: root.activeRelated.length > 0
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: "Related Types"
+                                }
+
+                                Flow {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap8
+
+                                    Repeater {
+                                        model: root.activeRelated
+
+                                        delegate: LV.LabelButton {
+                                            required property var modelData
+                                            text: modelData.label
+                                            tone: LV.AbstractButton.Default
+                                            onClicked: root.activateCatalogEntry(modelData.key)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Column {
+                                width: parent.width
+                                spacing: LV.Theme.gap6
+                                visible: root.activeChildren.length > 0
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: "Branch Contents"
+                                }
+
+                                Flow {
+                                    width: parent.width
+                                    spacing: LV.Theme.gap8
+
+                                    Repeater {
+                                        model: root.activeChildren
+
+                                        delegate: LV.LabelButton {
+                                            required property var modelData
+                                            text: modelData.label
+                                            tone: LV.AbstractButton.Default
+                                            onClicked: root.activateCatalogEntry(modelData.key)
+                                        }
+                                    }
                                 }
                             }
                         }
+                    }
 
-                        LV.WheelScrollGuard {
-                            anchors.fill: parent
-                            targetFlickable: runtimeViewport
-                            consumeInside: true
+                    LV.AppCard {
+                        Layout.fillWidth: true
+                        visible: root.activeEntry && root.activeEntry.notes.length > 0
+                        title: "Notes"
+                        subtitle: "Behavior and positioning guidance"
+                        implicitHeight: notesColumn.implicitHeight + root.catalogCardInset * 2
+
+                        Column {
+                            id: notesColumn
+                            x: root.catalogCardInset
+                            y: root.catalogCardInset
+                            width: parent.width - root.catalogCardInset * 2
+                            spacing: LV.Theme.gap6
+
+                            Repeater {
+                                model: root.activeEntry ? root.activeEntry.notes : []
+
+                                delegate: LV.Label {
+                                    required property var modelData
+                                    width: parent.width
+                                    style: description
+                                    color: LV.Theme.textSecondary
+                                    wrapMode: Text.WordWrap
+                                    text: modelData
+                                }
+                            }
                         }
                     }
                 }

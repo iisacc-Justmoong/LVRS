@@ -23,6 +23,7 @@ qt_add_qml_module(LVRSExampleVisualCatalog
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
     QML_FILES
+        qml/CatalogRegistry.qml
         qml/Main.qml
 )
 

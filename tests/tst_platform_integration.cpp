@@ -171,6 +171,10 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("pid")));
         QVERIFY(snapshot.contains(QStringLiteral("uptimeMs")));
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
+        QCOMPARE(root->property("catalogComponentCount").toInt(), 52);
+        QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
+        QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("catalog-overview"));
+        QVERIFY(root->property("activeEntry").isValid());
     }
 }
 

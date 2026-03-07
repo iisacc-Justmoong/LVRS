@@ -1595,6 +1595,13 @@ Item {
     LV.Stepper { id: borderlessUpDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.UpDown }
     LV.Stepper { id: borderlessUp; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Up }
     LV.Stepper { id: borderlessDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Down }
+    property string stepperDebug:
+        "default="
+        + defaultStepper.width + "," + defaultStepper.height + "," + defaultStepper.implicitWidth + "," + defaultStepper.implicitHeight
+        + " upBounds=" + primaryUp.iconBounds.x + "," + primaryUp.iconBounds.y + "," + primaryUp.iconBounds.width + "," + primaryUp.iconBounds.height
+        + " downBounds=" + primaryDown.iconBounds.x + "," + primaryDown.iconBounds.y + "," + primaryDown.iconBounds.width + "," + primaryDown.iconBounds.height
+        + " upDownBounds=" + primaryUpDown.iconBounds.x + "," + primaryUpDown.iconBounds.y + "," + primaryUpDown.iconBounds.width + "," + primaryUpDown.iconBounds.height
+        + " colors=" + primaryUp.backgroundColor + "," + borderlessUp.backgroundColor + "," + borderlessUp.backgroundColorHover + "," + borderlessUp.backgroundColorPressed
 
     property bool stepperContractReady:
         defaultStepper.tone === LV.AbstractButton.Primary
@@ -1612,6 +1619,18 @@ Item {
         && Math.abs(primaryUpDown.iconHeight - 11.146) < 0.05
         && Math.abs(borderlessUpDown.iconWidth - 6.436) < 0.05
         && Math.abs(borderlessUpDown.iconHeight - 11.146) < 0.05
+        && Math.abs(primaryUp.iconBounds.x - 3.0) < 0.05
+        && Math.abs(primaryUp.iconBounds.y - 5.0) < 0.05
+        && Math.abs(primaryUp.iconBounds.width - 10.0) < 0.05
+        && Math.abs(primaryUp.iconBounds.height - 6.0) < 0.05
+        && Math.abs(primaryDown.iconBounds.x - 3.0) < 0.05
+        && Math.abs(primaryDown.iconBounds.y - 5.0) < 0.05
+        && Math.abs(primaryDown.iconBounds.width - 10.0) < 0.05
+        && Math.abs(primaryDown.iconBounds.height - 6.0) < 0.05
+        && Math.abs(primaryUpDown.iconBounds.x - 4.782) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.y - 2.427) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.width - 6.436) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.height - 11.146) < 0.06
         && primaryUp.backgroundColor === LV.Theme.primary
         && borderlessUp.backgroundColor === transparentColor
         && borderlessUp.backgroundColorHover === LV.Theme.surfaceAlt
@@ -1625,7 +1644,8 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("stepperContractReady").toBool());
+    const QString stepperDebug = root->property("stepperDebug").toString();
+    QVERIFY2(root->property("stepperContractReady").toBool(), qPrintable(stepperDebug));
 }
 
 void ImportApiTests::combo_box_figma_contract_loads()
@@ -1646,6 +1666,7 @@ Item {
     LV.ComboBox { id: borderlessUpDown; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.UpDown }
     LV.ComboBox { id: borderlessUp; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Up }
     LV.ComboBox { id: borderlessDown; visible: false; tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Down }
+    LV.ComboBox { id: scopedToneCombo; visible: false; tone: LV.ComboBox.Tone.Primary }
 
     property bool comboBoxContractReady:
         defaultCombo.tone === LV.ComboBox.Primary
@@ -1662,17 +1683,28 @@ Item {
         && Math.abs(defaultCombo.figmaComboRightPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboVerticalPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboCornerRadius - 5.0) < 0.01
+        && Math.abs(defaultCombo.figmaIndicatorSize - 16.0) < 0.01
+        && Math.abs(defaultCombo.figmaLabelLineHeight - 12.0) < 0.01
         && defaultCombo.resolvedTone === LV.ComboBox.Primary
         && primaryUp.resolvedTone === LV.ComboBox.Primary
         && primaryDown.resolvedTone === LV.ComboBox.Primary
         && borderlessUp.resolvedTone === LV.ComboBox.Borderless
         && borderlessDown.resolvedTone === LV.ComboBox.Borderless
+        && scopedToneCombo.resolvedTone === LV.ComboBox.Primary
         && defaultCombo.resolvedArrow === LV.Stepper.UpDown
         && primaryUp.resolvedArrow === LV.Stepper.Up
         && primaryDown.resolvedArrow === LV.Stepper.Down
         && borderlessUpDown.resolvedArrow === LV.Stepper.UpDown
         && borderlessUp.resolvedArrow === LV.Stepper.Up
         && borderlessDown.resolvedArrow === LV.Stepper.Down
+        && Math.abs(defaultCombo.labelBounds.x - 8.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.y - 3.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.width - 72.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.height - 12.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.x - 80.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.y - 1.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.width - 16.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.height - 16.0) < 0.01
         && defaultCombo.backgroundColor === LV.Theme.panelBackground10
         && defaultCombo.backgroundColorHover === LV.Theme.panelBackground11
         && defaultCombo.backgroundColorPressed === LV.Theme.panelBackground12

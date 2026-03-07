@@ -38,6 +38,9 @@ Signals:
   - `Theme.panelBackground12`
 - label text defaults to `"Label"`, is rendered with body typography in white, and elides within the combo frame
 - trailing indicator is always `Stepper`, with tone mapped from combo tone
+- label area and indicator slot are positioned explicitly:
+  - label frame: `x=8`, `y=3`, `width=72`, `height=12`
+  - stepper frame: `x=80`, `y=1`, `size=16`
 
 ## Usage
 
@@ -56,3 +59,4 @@ LV.ComboBox {
 
 - `tone` affects the `Stepper` appearance only (`Primary` blue / `Borderless` transparent).
 - `arrow` expresses open direction state (`Up`, `Down`, `UpDown`).
+- The component does not rely on `RowLayout` for the indicator slot, so the stepper cannot stretch or collapse when used inside other layout containers.

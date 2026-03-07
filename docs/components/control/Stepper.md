@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/Stepper.qml`
 
-`Stepper` is a compact directional button component that follows the Figma stepper contract (`16x16`, radius `4`) with `Up`, `Down`, and `UpDown` arrow modes.
+`Stepper` is a compact standalone directional control that follows the Figma stepper contract (`16x16`, radius `4`) with `Up`, `Down`, and `UpDown` arrow modes.
 
 ## Purpose
 
@@ -11,7 +11,6 @@ Location: `qml/components/control/buttons/Stepper.qml`
 
 ## Core API
 
-- Inherits from `AbstractButton`.
 - `tone` (default: `AbstractButton.Primary`)
 - `arrow` (default: `Stepper.UpDown`)
   - `Stepper.UpDown`
@@ -21,6 +20,7 @@ Location: `qml/components/control/buttons/Stepper.qml`
 Computed properties:
 
 - `iconWidth`, `iconHeight` (mode-dependent visual contract)
+- `iconBounds` (actual centered icon frame inside the `16 x 16` button)
 - `resolvedIconColor` (tone/enabled-aware arrow color)
 
 ## Visual Contract
@@ -50,7 +50,8 @@ LV.Stepper {
 ## How It Works
 
 - Renders the Figma chevron as filled `Canvas` paths to avoid external icon dependencies.
-- Uses `AbstractButton` interaction pipeline for hover/press/disabled behavior.
+- Keeps the vector in an exact centered icon frame (`10 x 6` or `6.436 x 11.146`) instead of stretching it to the whole button box.
+- Uses its own hover/press/disabled mouse pipeline so icon geometry stays isolated from external button templates.
 - Repaints icon canvas when `arrow` or resolved icon color changes.
 
 ## Practical Notes

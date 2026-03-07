@@ -16,6 +16,7 @@ class ExampleSmokeTests : public QObject
 private slots:
     void mvvm_example_loads();
     void event_listener_example_loads();
+    void visual_catalog_example_loads();
 };
 
 static QObject *loadFile(QQmlEngine &engine, const QString &path)
@@ -50,6 +51,18 @@ void ExampleSmokeTests::event_listener_example_loads()
     QVERIFY2(!path.isEmpty(), "Failed to locate ../example/EventListener/Main.qml");
     QScopedPointer<QObject> obj(loadFile(engine, path));
     QVERIFY(obj);
+}
+
+void ExampleSmokeTests::visual_catalog_example_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QString path = QFINDTESTDATA("../example/VisualCatalog/qml/Main.qml");
+    QVERIFY2(!path.isEmpty(), "Failed to locate ../example/VisualCatalog/qml/Main.qml");
+    QScopedPointer<QObject> obj(loadFile(engine, path));
+    QVERIFY(obj);
+    QCOMPARE(obj->property("catalogComponentCount").toInt(), 52);
 }
 
 QTEST_MAIN(ExampleSmokeTests)

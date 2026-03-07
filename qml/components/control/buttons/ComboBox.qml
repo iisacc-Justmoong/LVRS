@@ -1,11 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 Item {
     id: control
 
-    enum ComboTone {
+    enum Tone {
         Primary,
         Borderless
     }
@@ -25,6 +24,8 @@ Item {
     readonly property int figmaComboRightPadding: 1
     readonly property int figmaComboVerticalPadding: 1
     readonly property int figmaComboCornerRadius: Theme.radiusControl
+    readonly property int figmaIndicatorSize: Theme.iconSm
+    readonly property int figmaLabelLineHeight: Theme.textBodyLineHeight
     readonly property int resolvedTone: tone === ComboBox.Borderless
         ? ComboBox.Borderless
         : ComboBox.Primary
@@ -42,11 +43,19 @@ Item {
         : interactionArea.containsMouse
             ? backgroundColorHover
             : backgroundColor
+    readonly property real indicatorX: width - figmaComboRightPadding - figmaIndicatorSize
+    readonly property real indicatorY: Math.round((height - figmaIndicatorSize) * 0.5)
+    readonly property real labelX: figmaComboLeftPadding
+    readonly property real labelAvailableWidth: Math.max(0, indicatorX - figmaComboLeftPadding)
+    readonly property real labelY: Math.round((height - figmaLabelLineHeight) * 0.5)
+    readonly property rect indicatorBounds: Qt.rect(indicator.x, indicator.y, indicator.width, indicator.height)
+    readonly property rect labelBounds: Qt.rect(label.x, label.y, label.width, label.height)
 
     implicitWidth: figmaComboWidth
     implicitHeight: figmaComboHeight
     width: figmaComboWidth
     height: figmaComboHeight
+    clip: true
 
     Rectangle {
         anchors.fill: parent
@@ -55,35 +64,30 @@ Item {
         antialiasing: true
     }
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: control.figmaComboLeftPadding
-        anchors.rightMargin: control.figmaComboRightPadding
-        anchors.topMargin: control.figmaComboVerticalPadding
-        anchors.bottomMargin: control.figmaComboVerticalPadding
-        spacing: Theme.gapNone
+    Label {
+        id: label
+        x: control.labelX
+        y: control.labelY
+        width: control.labelAvailableWidth
+        height: control.figmaLabelLineHeight
+        style: body
+        text: "Label"
+        color: Theme.accentWhite
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        lineHeight: control.figmaLabelLineHeight
+        lineHeightMode: Text.FixedHeight
+    }
 
-        Label {
-            id: label
-            style: body
-            text: "Label"
-            color: Theme.accentWhite
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignLeft
-            lineHeight: 12
-            lineHeightMode: Text.FixedHeight
-            Layout.alignment: Qt.AlignVCenter
-            Layout.fillWidth: true
-        }
-
-        Stepper {
-            id: indicator
-            tone: control.resolvedTone === ComboBox.Borderless
-                ? AbstractButton.Borderless
-                : AbstractButton.Primary
-            arrow: control.resolvedArrow
-            Layout.alignment: Qt.AlignVCenter
-        }
+    Stepper {
+        id: indicator
+        x: control.indicatorX
+        y: control.indicatorY
+        tone: control.resolvedTone === ComboBox.Borderless
+            ? AbstractButton.Borderless
+            : AbstractButton.Primary
+        arrow: control.resolvedArrow
     }
 
     MouseArea {

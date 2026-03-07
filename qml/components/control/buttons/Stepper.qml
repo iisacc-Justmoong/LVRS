@@ -1,7 +1,7 @@
 import QtQuick
 import LVRS 1.0
 
-AbstractButton {
+Item {
     id: control
 
     enum StepperArrow {
@@ -10,9 +10,20 @@ AbstractButton {
         Down
     }
 
-    tone: AbstractButton.Primary
+    property int tone: AbstractButton.Primary
     property int arrow: Stepper.UpDown
+    property bool enabled: true
+    property int cornerRadius: Theme.radiusSm
+    property color textColorDisabled: Theme.textOctonary
 
+    signal clicked()
+    signal pressed()
+    signal released()
+    signal canceled()
+
+    readonly property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
+    readonly property bool hovered: interactionArea.containsMouse && effectiveEnabled
+    readonly property bool down: interactionArea.pressed && effectiveEnabled
     readonly property real figmaStepperSize: Theme.iconSm
     readonly property real figmaChevronWidth: 10
     readonly property real figmaChevronHeight: 6
@@ -20,6 +31,22 @@ AbstractButton {
     readonly property real figmaUpDownChevronHeight: 11.1455
     readonly property real iconWidth: control.arrow === Stepper.UpDown ? figmaUpDownChevronWidth : figmaChevronWidth
     readonly property real iconHeight: control.arrow === Stepper.UpDown ? figmaUpDownChevronHeight : figmaChevronHeight
+    readonly property rect iconBounds: Qt.rect(iconFrame.x, iconFrame.y, iconFrame.width, iconFrame.height)
+    readonly property color backgroundColor: control.tone === AbstractButton.Borderless ? "transparent" : Theme.primary
+    readonly property color backgroundColorHover: control.tone === AbstractButton.Borderless
+        ? Theme.surfaceAlt
+        : Qt.darker(Theme.primary, 1.12)
+    readonly property color backgroundColorPressed: control.tone === AbstractButton.Borderless
+        ? Theme.accentBlueMuted
+        : Qt.darker(Theme.primary, 1.2)
+    readonly property color backgroundColorDisabled: Theme.panelBackground04
+    readonly property color resolvedBackgroundColor: !control.effectiveEnabled
+        ? control.backgroundColorDisabled
+        : control.down
+            ? control.backgroundColorPressed
+            : control.hovered
+                ? control.backgroundColorHover
+                : control.backgroundColor
     readonly property color resolvedIconColor: !control.effectiveEnabled
         ? control.textColorDisabled
         : control.tone === AbstractButton.Borderless
@@ -101,29 +128,27 @@ AbstractButton {
         ctx.closePath()
     }
 
-    horizontalPadding: Theme.gapNone
-    verticalPadding: Theme.gapNone
-    spacing: Theme.gapNone
-    cornerRadius: Theme.radiusSm
-
-    width: figmaStepperSize
-    height: figmaStepperSize
     implicitWidth: figmaStepperSize
     implicitHeight: figmaStepperSize
+    width: figmaStepperSize
+    height: figmaStepperSize
+    clip: true
 
-    backgroundColor: control.tone === AbstractButton.Borderless ? "transparent" : Theme.primary
-    backgroundColorHover: control.tone === AbstractButton.Borderless
-        ? Theme.surfaceAlt
-        : Qt.darker(Theme.primary, 1.12)
-    backgroundColorPressed: control.tone === AbstractButton.Borderless
-        ? Theme.accentBlueMuted
-        : Qt.darker(Theme.primary, 1.2)
+    Rectangle {
+        anchors.fill: parent
+        radius: control.cornerRadius
+        antialiasing: true
+        color: control.resolvedBackgroundColor
+    }
 
-    contentItem: Item {
-        implicitWidth: control.iconWidth
-        implicitHeight: control.iconHeight
-        width: implicitWidth
-        height: implicitHeight
+    Item {
+        id: iconFrame
+        x: (control.width - width) * 0.5
+        y: (control.height - height) * 0.5
+        width: control.iconWidth
+        height: control.iconHeight
+        implicitWidth: width
+        implicitHeight: height
 
         Canvas {
             id: iconCanvas
@@ -158,6 +183,20 @@ AbstractButton {
                 ctx.restore()
             }
         }
+    }
+
+    MouseArea {
+        id: interactionArea
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        hoverEnabled: control.effectiveEnabled
+        preventStealing: true
+        enabled: control.effectiveEnabled
+
+        onPressed: control.pressed()
+        onReleased: control.released()
+        onCanceled: control.canceled()
+        onClicked: control.clicked()
     }
 
     onArrowChanged: iconCanvas.requestPaint()
