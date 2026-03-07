@@ -36,7 +36,7 @@ After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
-When host examples are built, the source snapshot keeps them under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) are staged with portable LVRS runtime lookup paths so those binaries can be launched directly from the snapshot after install.
+When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and the copied source snapshot receives a fresh launchable copy under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) are staged with portable LVRS runtime lookup paths so those binaries can be launched directly from the snapshot after install. If `./install.sh --without-examples` is used, those snapshot `bin/` directories are omitted. Example binaries are no longer staged back into the source tree during a normal build.
 
 ## Build (Framework-First Default)
 
@@ -63,11 +63,17 @@ cmake -S . -B build \
 cmake --build build -j
 ```
 
+Populate every example `bin/` directory in one pass:
+
+```bash
+cmake --build build --target lvrs_host_examples_all
+```
+
 Run visual-catalog demo:
 
 ```bash
 cmake --build build --target LVRSExampleVisualCatalog
-./build/bin/LVRSExampleVisualCatalog
+./build/example/VisualCatalog/bin/LVRSExampleVisualCatalog
 ```
 
 Run tests:

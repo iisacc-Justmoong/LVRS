@@ -45,6 +45,7 @@ State visuals:
 - `interactionStateName` (readonly: `Idle|Hover|Active`)
 - `rowBackgroundColor`, `rowBackgroundColorHover`, `rowBackgroundColorPressed`
 - `rowVisible` (readonly, from `_rowVisibleInternal`)
+- `dragPreviewActive`, `dragPreviewOpacity` (used by editable hierarchy drag preview)
 
 Input events:
 
@@ -64,6 +65,7 @@ Input events:
 - When `inputable` is `true`, the label region is overlaid by `InputField` in exactly the same geometry as the label bounds.
 - Enter submission (`accepted`) applies the value to `inputResult`/`label`, emits `inputSubmitted(text)`, and closes the input overlay (`inputable = false`).
 - Losing input focus while editing also closes the input overlay to restore label visibility.
+- When the owning list is in `editable` mode and the row is being dragged, `dragPreviewActive` lowers row opacity for the in-place preview.
 
 ## Usage
 

@@ -56,7 +56,7 @@ pub struct InstallArgs {
     #[arg(long)]
     pub clean: bool,
 
-    /// Disable host configure-time example targets
+    /// Disable host configure-time example targets and omit snapshot example binaries
     #[arg(long = "without-examples")]
     pub without_examples: bool,
 

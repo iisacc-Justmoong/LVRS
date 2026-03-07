@@ -26,6 +26,7 @@ private slots:
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
     void hierarchy_nested_children_indent_contract_loads();
+    void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -636,6 +637,115 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("nestedContractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_editable_drag_depth_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property int activationAttempts: 0
+    property bool activatedFolder2: false
+    property int moveCount: 0
+    property string movedKey: ""
+    property int movedFromIndex: -1
+    property int movedToIndex: -1
+    property int movedDepth: -1
+    property var dragItem: hierarchyList.activeItemKey === "folder2" ? hierarchyList.activeItem : null
+
+    property var treeModel: [
+        {
+            key: "folder1",
+            label: "Folder 1",
+            expanded: true,
+            children: [
+                { key: "folder2", label: "Folder 2" }
+            ]
+        },
+        { key: "folder3", label: "Folder 3" }
+    ]
+
+    function ensureFolder2Active() {
+        if (activatedFolder2 || activationAttempts >= 40)
+            return
+        activationAttempts += 1
+        activatedFolder2 = hierarchyList.activateByKey("folder2")
+        if (!activatedFolder2)
+            Qt.callLater(ensureFolder2Active)
+    }
+
+    function performEditableDrag() {
+        if (!dragItem)
+            return false
+
+        return hierarchyList._applyEditableMove(dragItem, 1, 0)
+    }
+
+    LV.Hierarchy {
+        id: hierarchyAliasProbe
+        visible: false
+        editable: true
+        model: []
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        width: parent.width
+        height: parent.height
+        editable: true
+        model: root.treeModel
+
+        onItemMoved: function(item, itemId, itemKey, fromIndex, toIndex, depth) {
+            root.moveCount += 1
+            root.movedKey = itemKey
+            root.movedFromIndex = fromIndex
+            root.movedToIndex = toIndex
+            root.movedDepth = depth
+        }
+    }
+
+    Component.onCompleted: Qt.callLater(root.ensureFolder2Active)
+
+    property bool dragContractReady:
+        hierarchyAliasProbe.editable
+        && hierarchyList.editable
+        && activatedFolder2
+        && moveCount === 1
+        && movedKey === "folder2"
+        && movedFromIndex === 1
+        && movedToIndex === 1
+        && movedDepth === 0
+        && hierarchyList.activeItemKey === "folder2"
+        && treeModel.length === 3
+        && treeModel[0].key === "folder1"
+        && treeModel[0].depth === 0
+        && treeModel[0].children.length === 0
+        && treeModel[1].key === "folder2"
+        && treeModel[1].depth === 0
+        && treeModel[1].parentKey === ""
+        && treeModel[2].key === "folder3"
+        && treeModel[2].depth === 0
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("activatedFolder2").toBool());
+    QVariant dragPerformed;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "performEditableDrag",
+                                      Q_RETURN_ARG(QVariant, dragPerformed)));
+    QVERIFY(dragPerformed.toBool());
+    QTRY_VERIFY(root->property("dragContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()
@@ -1756,6 +1866,22 @@ Item {
         text: "locked"
     }
 
+    LV.InputField {
+        id: inlineField
+        visible: false
+        style: inlineStyle
+        placeholderText: "Inline"
+        text: "value"
+    }
+
+    LV.InputField {
+        id: inlineDisabledField
+        visible: false
+        enabled: false
+        style: inlineStyle
+        placeholderText: "Inline disabled"
+    }
+
     property bool figmaInputFieldReady:
         defaultField.backgroundColor === LV.Theme.panelBackground10
         && defaultField.backgroundColorFocused === LV.Theme.panelBackground10
@@ -1769,6 +1895,15 @@ Item {
         && defaultField.clearIconBackgroundColor === LV.Theme.descriptionColor
         && defaultField.clearIconBackgroundColorDisabled === LV.Theme.disabledColor
         && defaultField.clearIconForegroundColor === LV.Theme.panelBackground10
+        && inlineField.style === inlineField.inlineStyle
+        && inlineField.backgroundColor === LV.Theme.accentTransparent
+        && inlineField.backgroundColorHover === LV.Theme.accentTransparent
+        && inlineField.backgroundColorPressed === LV.Theme.accentTransparent
+        && inlineField.backgroundColorFocused === LV.Theme.accentTransparent
+        && inlineField.backgroundColorDisabled === LV.Theme.accentTransparent
+        && inlineDisabledField.backgroundColor === LV.Theme.accentTransparent
+        && inlineDisabledField.backgroundColorDisabled === LV.Theme.accentTransparent
+        && inlineField.showClearButton
         && searchField.mode === searchField.searchMode
         && searchField.searchIconVisible
         && searchField.showClearButton

@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 include(CMakeParseArguments)
 
 function(_lvrs_internal_append_unique_qml_import_path target path_value)
@@ -59,6 +60,16 @@ function(_lvrs_internal_example_source_snapshot_runtime_rpath runtime_platform o
     set(${out_var} "${_lvrs_runtime_rpath}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_example_runtime_output_dir out_var)
+    if(NOT DEFINED LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR OR LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR STREQUAL "")
+        set(_lvrs_example_runtime_output_dir "${CMAKE_CURRENT_BINARY_DIR}/bin")
+    else()
+        set(_lvrs_example_runtime_output_dir "${LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR}")
+    endif()
+
+    set(${out_var} "${_lvrs_example_runtime_output_dir}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_configure_example_source_snapshot_runtime target runtime_platform)
     _lvrs_internal_example_source_snapshot_runtime_rpath(
         "${runtime_platform}"
@@ -73,46 +84,6 @@ function(_lvrs_internal_configure_example_source_snapshot_runtime target runtime
         BUILD_RPATH
         "${_lvrs_runtime_rpath}"
     )
-endfunction()
-
-function(_lvrs_internal_stage_example_binary_to_source_bin target runtime_platform)
-    if(NOT TARGET "${target}")
-        message(FATAL_ERROR "_lvrs_internal_stage_example_binary_to_source_bin() target not found: ${target}")
-    endif()
-
-    if(runtime_platform STREQUAL "ios"
-       OR runtime_platform STREQUAL "android"
-       OR runtime_platform STREQUAL "wasm")
-        return()
-    endif()
-
-    get_target_property(_lvrs_source_stage_configured "${target}" _LVRS_EXAMPLE_SOURCE_BIN_STAGE_CONFIGURED)
-    if(_lvrs_source_stage_configured)
-        return()
-    endif()
-
-    set(_lvrs_source_bin_dir "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-    add_custom_command(TARGET "${target}" POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E make_directory "${_lvrs_source_bin_dir}"
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "$<TARGET_FILE:${target}>"
-            "${_lvrs_source_bin_dir}/$<TARGET_FILE_NAME:${target}>"
-        COMMENT "Stage ${target} into ${_lvrs_source_bin_dir}"
-        VERBATIM
-    )
-
-    if(runtime_platform STREQUAL "windows")
-        add_custom_command(TARGET "${target}" POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-                $<TARGET_RUNTIME_DLLS:${target}>
-                "${_lvrs_source_bin_dir}"
-            COMMAND_EXPAND_LISTS
-            COMMENT "Stage runtime DLLs for ${target} into ${_lvrs_source_bin_dir}"
-            VERBATIM
-        )
-    endif()
-
-    set_property(TARGET "${target}" PROPERTY _LVRS_EXAMPLE_SOURCE_BIN_STAGE_CONFIGURED TRUE)
 endfunction()
 
 function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
@@ -253,11 +224,7 @@ function(lvrs_configure_example_target target)
         message(FATAL_ERROR "lvrs_configure_example_target() target not found: ${target}")
     endif()
 
-    if(NOT DEFINED LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR OR LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR STREQUAL "")
-        set(_lvrs_example_runtime_output_dir "${CMAKE_BINARY_DIR}/bin")
-    else()
-        set(_lvrs_example_runtime_output_dir "${LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR}")
-    endif()
+    _lvrs_internal_example_runtime_output_dir(_lvrs_example_runtime_output_dir)
 
     _lvrs_internal_detect_target_runtime_platform(_lvrs_example_target_platform)
 
@@ -295,7 +262,6 @@ function(lvrs_configure_example_target target)
         "${target}"
         "${_lvrs_example_target_platform}"
     )
-    _lvrs_internal_stage_example_binary_to_source_bin("${target}" "${_lvrs_example_target_platform}")
 
     lvrs_apply_platform_build_optimizations("${target}")
 
@@ -316,6 +282,92 @@ function(lvrs_configure_example_target target)
         endif()
     endif()
 endfunction()
+
+macro(lvrs_add_example_app)
+    set(_lvrs_example_options)
+    set(_lvrs_example_one_value_args TARGET URI VERSION)
+    set(_lvrs_example_multi_value_args SOURCES QML_FILES RESOURCES INCLUDE_DIRS LINK_LIBRARIES)
+    cmake_parse_arguments(LVRS_EXAMPLE
+        "${_lvrs_example_options}"
+        "${_lvrs_example_one_value_args}"
+        "${_lvrs_example_multi_value_args}"
+        ${ARGN}
+    )
+
+    if(NOT LVRS_EXAMPLE_TARGET)
+        message(FATAL_ERROR "lvrs_add_example_app() requires TARGET")
+    endif()
+    if(NOT LVRS_EXAMPLE_URI)
+        message(FATAL_ERROR "lvrs_add_example_app() requires URI")
+    endif()
+    if(NOT LVRS_EXAMPLE_SOURCES)
+        message(FATAL_ERROR "lvrs_add_example_app() requires SOURCES")
+    endif()
+    if(NOT LVRS_EXAMPLE_QML_FILES)
+        message(FATAL_ERROR "lvrs_add_example_app() requires QML_FILES")
+    endif()
+    if(NOT LVRS_EXAMPLE_VERSION)
+        set(LVRS_EXAMPLE_VERSION "1.0")
+    endif()
+
+    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        project("${LVRS_EXAMPLE_TARGET}" LANGUAGES CXX)
+        set(CMAKE_CXX_STANDARD 20)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Svg Network)
+        qt_standard_project_setup()
+    endif()
+
+    if(NOT TARGET LVRSCore)
+        add_subdirectory("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/.." backend_build)
+    endif()
+
+    qt_add_executable("${LVRS_EXAMPLE_TARGET}"
+        ${LVRS_EXAMPLE_SOURCES}
+    )
+
+    set(_lvrs_example_qml_module_args
+        URI "${LVRS_EXAMPLE_URI}"
+        VERSION "${LVRS_EXAMPLE_VERSION}"
+        RESOURCE_PREFIX "/qt/qml"
+        QML_FILES
+            ${LVRS_EXAMPLE_QML_FILES}
+    )
+    if(LVRS_EXAMPLE_RESOURCES)
+        list(APPEND _lvrs_example_qml_module_args
+            RESOURCES
+                ${LVRS_EXAMPLE_RESOURCES}
+        )
+    endif()
+
+    qt_add_qml_module("${LVRS_EXAMPLE_TARGET}"
+        ${_lvrs_example_qml_module_args}
+    )
+
+    target_link_libraries("${LVRS_EXAMPLE_TARGET}"
+        PRIVATE
+            Qt6::Quick
+            Qt6::QuickControls2
+            ${LVRS_EXAMPLE_LINK_LIBRARIES}
+    )
+
+    if(LVRS_EXAMPLE_INCLUDE_DIRS)
+        target_include_directories("${LVRS_EXAMPLE_TARGET}"
+            PRIVATE
+                ${LVRS_EXAMPLE_INCLUDE_DIRS}
+        )
+    endif()
+
+    lvrs_configure_qml_app("${LVRS_EXAMPLE_TARGET}")
+    lvrs_configure_example_target("${LVRS_EXAMPLE_TARGET}")
+
+    add_custom_target("run_${LVRS_EXAMPLE_TARGET}"
+        COMMAND $<TARGET_FILE:${LVRS_EXAMPLE_TARGET}>
+        DEPENDS "${LVRS_EXAMPLE_TARGET}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        USES_TERMINAL
+    )
+endmacro()
 
 function(_lvrs_internal_known_runtime_platforms out_var)
     if(DEFINED LVRS_RUNTIME_PLATFORMS)

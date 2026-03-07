@@ -1,43 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    project(LVRSExampleIOSHello LANGUAGES CXX)
+include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/LVRSHelpers.cmake")
 
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-    find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Svg Network)
-    qt_standard_project_setup()
-endif()
-
-if(NOT TARGET LVRSCore)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. backend_build)
-endif()
-
-qt_add_executable(LVRSExampleIOSHello
-    main.cpp
-)
-
-qt_add_qml_module(LVRSExampleIOSHello
+lvrs_add_example_app(
+    TARGET LVRSExampleIOSHello
     URI ExampleIOSHello
-    VERSION 1.0
-    RESOURCE_PREFIX "/qt/qml"
+    SOURCES
+        main.cpp
     QML_FILES
         qml/Main.qml
-)
-
-target_link_libraries(LVRSExampleIOSHello
-    PRIVATE
-        Qt6::Quick
-        Qt6::QuickControls2
-)
-
-lvrs_configure_qml_app(LVRSExampleIOSHello)
-lvrs_configure_example_target(LVRSExampleIOSHello)
-
-add_custom_target(run_LVRSExampleIOSHello
-    COMMAND $<TARGET_FILE:LVRSExampleIOSHello>
-    DEPENDS LVRSExampleIOSHello
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    USES_TERMINAL
 )

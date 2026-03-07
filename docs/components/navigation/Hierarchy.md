@@ -38,6 +38,7 @@ Behavior aliases:
 - `depthRole`
 - `inferDepthFromStructure`
 - `keyboardListNavigationEnabled`
+- `editable`
 
 Optional footer:
 
@@ -62,6 +63,7 @@ Signals:
 - `toolbarEventTriggered(eventName, payload, index, item, buttonId)`
 - `listItemActivated(item, itemId, index)`
 - `listItemExpanded(item, itemId, index, expanded)`
+- `listItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)`
 - `footerButtonTriggered(index, config)`
 
 ## Usage
@@ -96,6 +98,7 @@ LV.Hierarchy {
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.
+- `editable` forwards `HierarchyList` drag-depth editing; the underlying model must be an array-backed object tree.
 
 ## Advanced Usage: Programmatic Activation
 

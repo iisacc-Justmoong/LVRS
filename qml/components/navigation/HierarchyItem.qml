@@ -33,6 +33,8 @@ AbstractButton {
     property bool inputable: false
     property string inputResult: control.text
     property bool _inputOverlayReadyForFocusClose: false
+    property bool dragPreviewActive: false
+    property real dragPreviewOpacity: 0.45
 
     signal inputEdited(string text)
     signal inputSubmitted(string text)
@@ -179,6 +181,7 @@ AbstractButton {
     implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
     width: parent ? parent.width : implicitWidth
     visible: rowVisible
+    opacity: dragPreviewActive ? dragPreviewOpacity : 1.0
 
     backgroundColor: rowBackgroundColor
     backgroundColorHover: rowBackgroundColorHover

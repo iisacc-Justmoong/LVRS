@@ -11,7 +11,7 @@ From repository root:
 ```bash
 cmake -S . -B build -DLVRS_BUILD_EXAMPLES=ON
 cmake --build build --target LVRSExampleEventListener
-./build/example/EventListener/LVRSExampleEventListener
+./build/example/EventListener/bin/LVRSExampleEventListener
 ```
 
 On macOS Finder, you can also click `example/run-eventlistener.command`.

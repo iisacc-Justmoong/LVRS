@@ -16,7 +16,7 @@ From repository root:
 ```bash
 cmake -S . -B build -DLVRS_BUILD_EXAMPLES=ON
 cmake --build build --target LVRSExampleMVVM
-./build/example/mvvm/LVRSExampleMVVM
+./build/example/mvvm/bin/LVRSExampleMVVM
 ```
 
 On macOS Finder, you can also click `example/run-mvvm.command`.

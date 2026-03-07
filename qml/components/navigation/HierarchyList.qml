@@ -9,6 +9,7 @@ Item {
     property int activeItemId: -1
     property string activeItemKey: ""
     property bool keyboardNavigationEnabled: true
+    property bool editable: false
 
     // Main API: array/list-like model input.
     // Supports nested children arrays or list models via childrenRole.
@@ -36,6 +37,9 @@ Item {
     property int generatedIconSize: 16
     property int generatedChevronSize: 16
     property bool autoExpandAncestorsOnActivate: true
+    readonly property bool editableSupported: Array.isArray(model) && treeModelSupportsEditing(model)
+    readonly property bool editableEnabled: editable && editableSupported
+    readonly property bool effectiveInferDepthFromStructure: inferDepthFromStructure || editableEnabled
 
     readonly property bool usingTreeModel: modelCount(model) > 0
     property int _itemCountInternal: 0
@@ -46,6 +50,7 @@ Item {
     signal activeChanged(var item, int itemId, int index)
     signal expansionChanged(var item, bool expanded, int index)
     signal ensureVisibleRequested(real y, real height)
+    signal itemMoved(var item, int itemId, string itemKey, int fromIndex, int toIndex, int depth)
 
     default property alias items: manualColumn.data
 
@@ -72,6 +77,17 @@ Item {
     property int _rebuildDescriptorIndex: 0
     property int _rebuildChunkSize: 240
     property bool _isBuildingGeneratedItems: false
+    property bool _dragActiveInternal: false
+    property var _dragItem: null
+    property int _dragSourceIndex: -1
+    property int _dragSourceEndIndex: -1
+    property int _dragTargetIndex: -1
+    property int _dragTargetDepth: -1
+    property int _dragRawInsertionIndex: -1
+    property real _dragPointerX: 0
+    property real _dragPointerY: 0
+    property real _dragIndicatorY: 0
+    property real _dragIndicatorX: 0
 
     Component {
         id: generatedItemComponent
@@ -126,7 +142,7 @@ Item {
         if (explicitDepth !== undefined && explicitDepth !== null)
             return normalizedDepth(explicitDepth, fallbackDepth)
 
-        const structuralDepth = inferDepthFromStructure ? fallbackDepth : 0
+        const structuralDepth = effectiveInferDepthFromStructure ? fallbackDepth : 0
         return normalizedDepth(structuralDepth, 0)
     }
 
@@ -150,6 +166,40 @@ Item {
         if (modelData.get !== undefined)
             return modelData.get(index)
         return modelData[index]
+    }
+
+    function normalizedRoleName(roleName, fallbackValue) {
+        const rawRoleName = roleName === undefined || roleName === null ? "" : String(roleName).trim()
+        if (rawRoleName.length > 0)
+            return rawRoleName
+        return fallbackValue === undefined || fallbackValue === null ? "" : String(fallbackValue)
+    }
+
+    function editableChildNodes(node) {
+        return roleValue(node, childrenRole,
+                         roleValue(node, "items",
+                                   roleValue(node, "nodes", undefined)))
+    }
+
+    function treeModelSupportsEditing(nodes) {
+        if (!Array.isArray(nodes))
+            return false
+
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i]
+            if (!node || typeof node !== "object" || Array.isArray(node))
+                return false
+
+            const childNodes = editableChildNodes(node)
+            if (childNodes === undefined || childNodes === null)
+                continue
+            if (!Array.isArray(childNodes))
+                return false
+            if (!treeModelSupportsEditing(childNodes))
+                return false
+        }
+
+        return true
     }
 
     function isManagedItem(item) {
@@ -538,6 +588,425 @@ Item {
             descendantEnd = i
         }
         return descendantEnd
+    }
+
+    function itemAtPositionInList(currentItems, localX, localY) {
+        const visibleItems = collectVisibleItems(false)
+        for (let i = 0; i < visibleItems.length; i++) {
+            const candidate = visibleItems[i]
+            if (!candidate)
+                continue
+            if (localX < candidate.x || localX > candidate.x + candidate.width)
+                continue
+            if (localY < candidate.y || localY > candidate.y + candidate.height)
+                continue
+            const candidateIndex = indexOfItemInList(currentItems, candidate)
+            if (candidateIndex >= 0)
+                return candidate
+        }
+        return null
+    }
+
+    function insertionIndexForYInList(currentItems, localY) {
+        const visibleItems = collectVisibleItems(false)
+        if (visibleItems.length === 0)
+            return 0
+
+        for (let i = 0; i < visibleItems.length; i++) {
+            const candidate = visibleItems[i]
+            const candidateIndex = indexOfItemInList(currentItems, candidate)
+            if (candidateIndex < 0)
+                continue
+            const midpoint = candidate.y + candidate.height * 0.5
+            if (localY < midpoint)
+                return candidateIndex
+        }
+
+        const lastVisibleItem = visibleItems[visibleItems.length - 1]
+        const lastVisibleIndex = indexOfItemInList(currentItems, lastVisibleItem)
+        return lastVisibleIndex < 0 ? currentItems.length : lastVisibleIndex + 1
+    }
+
+    function adjustedInsertionIndexForDraggedBlock(rawInsertionIndex, sourceStart, sourceEnd) {
+        if (sourceStart < 0 || sourceEnd < sourceStart)
+            return -1
+
+        const blockSize = sourceEnd - sourceStart + 1
+        if (rawInsertionIndex <= sourceStart)
+            return rawInsertionIndex
+        if (rawInsertionIndex >= sourceEnd + 1)
+            return rawInsertionIndex - blockSize
+        return -1
+    }
+
+    function dragIndentStep() {
+        if (_dragItem) {
+            const draggedIndentStep = Number(_dragItem.indentStep)
+            if (Number.isFinite(draggedIndentStep) && draggedIndentStep > 0)
+                return Math.max(1, Math.round(draggedIndentStep))
+        }
+
+        const generatedStep = Number(generatedIndentStep)
+        if (Number.isFinite(generatedStep) && generatedStep > 0)
+            return Math.max(1, Math.round(generatedStep))
+        return 8
+    }
+
+    function dragBasePadding() {
+        if (_dragItem) {
+            const draggedPadding = Number(_dragItem.baseLeftPadding)
+            if (Number.isFinite(draggedPadding))
+                return draggedPadding
+        }
+        return 8
+    }
+
+    function desiredDepthForPointerX(localX) {
+        const indentStep = dragIndentStep()
+        const depthFromPosition = Math.floor((localX - dragBasePadding() + indentStep * 0.5) / indentStep)
+        return Math.max(0, depthFromPosition)
+    }
+
+    function remainingItemsWithoutDraggedBlock(currentItems) {
+        const remainingItems = []
+        for (let i = 0; i < currentItems.length; i++) {
+            if (i >= _dragSourceIndex && i <= _dragSourceEndIndex)
+                continue
+            remainingItems.push(currentItems[i])
+        }
+        return remainingItems
+    }
+
+    function resolvedEditableDepthForInsertionIndex(currentItems, insertionIndex, desiredDepth) {
+        if (insertionIndex < 0)
+            return null
+
+        const remainingItems = remainingItemsWithoutDraggedBlock(currentItems)
+        const previousItem = insertionIndex > 0 ? remainingItems[insertionIndex - 1] : null
+        const nextItem = insertionIndex < remainingItems.length ? remainingItems[insertionIndex] : null
+        const minDepth = nextItem ? itemIndentLevel(nextItem) : 0
+        const maxDepth = previousItem ? itemIndentLevel(previousItem) + 1 : 0
+        const boundedDepth = Math.max(minDepth, Math.min(maxDepth, normalizedDepth(desiredDepth, 0)))
+        return {
+            depth: boundedDepth,
+            minDepth: minDepth,
+            maxDepth: maxDepth
+        }
+    }
+
+    function resolvedDragTargetInList(currentItems, rawInsertionIndex, localX) {
+        const insertionIndex = adjustedInsertionIndexForDraggedBlock(rawInsertionIndex,
+                                                                     _dragSourceIndex,
+                                                                     _dragSourceEndIndex)
+        if (insertionIndex < 0)
+            return null
+
+        const resolvedDepth = resolvedEditableDepthForInsertionIndex(currentItems,
+                                                                     insertionIndex,
+                                                                     desiredDepthForPointerX(localX))
+        if (!resolvedDepth)
+            return null
+
+        return {
+            insertionIndex: insertionIndex,
+            depth: resolvedDepth.depth,
+            minDepth: resolvedDepth.minDepth,
+            maxDepth: resolvedDepth.maxDepth
+        }
+    }
+
+    function indicatorYForRawInsertionIndex(currentItems, rawInsertionIndex) {
+        if (currentItems.length === 0)
+            return 0
+        if (rawInsertionIndex <= 0)
+            return 0
+        if (rawInsertionIndex >= currentItems.length) {
+            const lastItem = currentItems[currentItems.length - 1]
+            return lastItem ? lastItem.y + lastItem.height : 0
+        }
+
+        const targetItem = currentItems[rawInsertionIndex]
+        return targetItem ? targetItem.y : 0
+    }
+
+    function editableDescriptorFromItem(item, index) {
+        if (!item || !item.nodeData || typeof item.nodeData !== "object" || Array.isArray(item.nodeData))
+            return null
+
+        return {
+            nodeData: item.nodeData,
+            itemId: effectiveItemId(item, index),
+            itemKey: effectiveItemKey(item, index),
+            indentLevel: itemIndentLevel(item),
+            label: item.label === undefined || item.label === null ? "" : String(item.label),
+            iconName: item.iconName === undefined || item.iconName === null ? "" : String(item.iconName),
+            iconSource: item.iconSource === undefined || item.iconSource === null ? "" : String(item.iconSource),
+            iconGlyph: item.iconGlyph === undefined || item.iconGlyph === null ? "" : String(item.iconGlyph),
+            enabled: !!item.enabled,
+            expanded: !!item.expanded,
+            showChevron: !!item.showChevron
+        }
+    }
+
+    function buildEditableDescriptors(currentItems) {
+        const descriptors = []
+        for (let i = 0; i < currentItems.length; i++) {
+            const descriptor = editableDescriptorFromItem(currentItems[i], i)
+            if (!descriptor)
+                return null
+            descriptors.push(descriptor)
+        }
+        return descriptors
+    }
+
+    function assignNodeDescriptorState(node, descriptor, parentItemKey, childrenBucket) {
+        const keyRoleName = normalizedRoleName(itemKeyRole, "key")
+        const idRoleName = normalizedRoleName(itemIdRole, "itemId")
+        const labelRoleName = normalizedRoleName(labelRole, "label")
+        const iconNameRoleName = normalizedRoleName(iconNameRole, "iconName")
+        const iconSourceRoleName = normalizedRoleName(iconSourceRole, "iconSource")
+        const iconGlyphRoleName = normalizedRoleName(iconGlyphRole, "iconGlyph")
+        const enabledRoleName = normalizedRoleName(enabledRole, "enabled")
+        const expandedRoleName = normalizedRoleName(expandedRole, "expanded")
+        const showChevronRoleName = normalizedRoleName(showChevronRole, "showChevron")
+        const depthRoleName = normalizedRoleName(depthRole, "depth")
+        const childrenRoleName = normalizedRoleName(childrenRole, "children")
+
+        if (keyRoleName.length > 0)
+            node[keyRoleName] = descriptor.itemKey
+        if (descriptor.itemId >= 0 && idRoleName.length > 0)
+            node[idRoleName] = descriptor.itemId
+        if (labelRoleName.length > 0)
+            node[labelRoleName] = descriptor.label
+        if (iconNameRoleName.length > 0 && (descriptor.iconName.length > 0 || node[iconNameRoleName] !== undefined))
+            node[iconNameRoleName] = descriptor.iconName
+        if (iconSourceRoleName.length > 0 && (descriptor.iconSource.length > 0 || node[iconSourceRoleName] !== undefined))
+            node[iconSourceRoleName] = descriptor.iconSource
+        if (iconGlyphRoleName.length > 0 && (descriptor.iconGlyph.length > 0 || node[iconGlyphRoleName] !== undefined))
+            node[iconGlyphRoleName] = descriptor.iconGlyph
+        if (enabledRoleName.length > 0)
+            node[enabledRoleName] = descriptor.enabled
+        if (expandedRoleName.length > 0)
+            node[expandedRoleName] = descriptor.expanded
+        if (showChevronRoleName.length > 0)
+            node[showChevronRoleName] = descriptor.showChevron
+
+        if (node.indentLevel !== undefined || depthRoleName === "indentLevel")
+            node.indentLevel = descriptor.indentLevel
+        if (depthRoleName.length > 0)
+            node[depthRoleName] = descriptor.indentLevel
+
+        node.parentKey = parentItemKey
+        if (childrenRoleName.length > 0)
+            node[childrenRoleName] = childrenBucket
+    }
+
+    function applyEditableTreeOrder(flatDescriptors) {
+        if (!Array.isArray(model) || !Array.isArray(flatDescriptors))
+            return false
+
+        const rootNodes = []
+        const stack = []
+
+        for (let i = 0; i < flatDescriptors.length; i++) {
+            const descriptor = flatDescriptors[i]
+            if (!descriptor || !descriptor.nodeData)
+                return false
+
+            while (stack.length > descriptor.indentLevel)
+                stack.pop()
+
+            const parentEntry = descriptor.indentLevel > 0 ? stack[descriptor.indentLevel - 1] : null
+            const childrenBucket = []
+            descriptor._childrenBucket = childrenBucket
+            descriptor._parentItemKey = parentEntry ? parentEntry.itemKey : ""
+
+            if (parentEntry)
+                parentEntry.children.push(descriptor.nodeData)
+            else
+                rootNodes.push(descriptor.nodeData)
+
+            stack[descriptor.indentLevel] = {
+                itemKey: descriptor.itemKey,
+                children: childrenBucket
+            }
+            if (stack.length > descriptor.indentLevel + 1)
+                stack.length = descriptor.indentLevel + 1
+        }
+
+        for (let i = 0; i < flatDescriptors.length; i++) {
+            const descriptor = flatDescriptors[i]
+            assignNodeDescriptorState(descriptor.nodeData,
+                                      descriptor,
+                                      descriptor._parentItemKey,
+                                      descriptor._childrenBucket || [])
+        }
+
+        while (model.length > 0)
+            model.pop()
+        for (let i = 0; i < rootNodes.length; i++)
+            model.push(rootNodes[i])
+
+        return true
+    }
+
+    function _applyEditableMove(item, targetIndex, targetDepth) {
+        if (!editableEnabled || !usingTreeModel || !item || !Array.isArray(model))
+            return false
+
+        const currentItems = collectItems()
+        const sourceIndex = indexOfItemInList(currentItems, item)
+        if (sourceIndex < 0)
+            return false
+
+        _dragSourceIndex = sourceIndex
+        _dragSourceEndIndex = descendantRangeEndInList(currentItems, sourceIndex)
+
+        const editableDescriptors = buildEditableDescriptors(currentItems)
+        if (!editableDescriptors)
+            return false
+
+        const blockDescriptors = editableDescriptors.slice(_dragSourceIndex, _dragSourceEndIndex + 1)
+        const remainingDescriptors = editableDescriptors.slice(0, _dragSourceIndex)
+            .concat(editableDescriptors.slice(_dragSourceEndIndex + 1))
+        if (blockDescriptors.length === 0)
+            return false
+
+        const clampedTargetIndex = Math.max(0,
+                                            Math.min(normalizeFromIndex(targetIndex),
+                                                     remainingDescriptors.length))
+        const resolvedDepth = resolvedEditableDepthForInsertionIndex(currentItems,
+                                                                     clampedTargetIndex,
+                                                                     targetDepth)
+        if (!resolvedDepth)
+            return false
+
+        const sourceDepth = blockDescriptors[0].indentLevel
+        const depthDelta = resolvedDepth.depth - sourceDepth
+        for (let i = 0; i < blockDescriptors.length; i++)
+            blockDescriptors[i].indentLevel = Math.max(0, blockDescriptors[i].indentLevel + depthDelta)
+
+        if (clampedTargetIndex === _dragSourceIndex && depthDelta === 0)
+            return false
+
+        const reorderedDescriptors = remainingDescriptors.slice(0, clampedTargetIndex)
+            .concat(blockDescriptors)
+            .concat(remainingDescriptors.slice(clampedTargetIndex))
+        if (!applyEditableTreeOrder(reorderedDescriptors))
+            return false
+
+        const movedDescriptor = blockDescriptors[0]
+        markItemsDirty(true)
+        scheduleRebuildTreeItems()
+        scheduleRefreshState()
+        scheduleNormalizeActiveItem()
+        itemMoved(item,
+                  movedDescriptor.itemId,
+                  movedDescriptor.itemKey,
+                  _dragSourceIndex,
+                  clampedTargetIndex,
+                  movedDescriptor.indentLevel)
+        return true
+    }
+
+    function resetEditableDragState() {
+        if (_dragItem && _dragItem.dragPreviewActive !== undefined)
+            _dragItem.dragPreviewActive = false
+
+        _dragActiveInternal = false
+        _dragItem = null
+        _dragSourceIndex = -1
+        _dragSourceEndIndex = -1
+        _dragTargetIndex = -1
+        _dragTargetDepth = -1
+        _dragRawInsertionIndex = -1
+        _dragPointerX = 0
+        _dragPointerY = 0
+        _dragIndicatorY = 0
+        _dragIndicatorX = 0
+    }
+
+    function _beginEditableDragForItem(draggedItem, localX, localY) {
+        if (!editableEnabled || !usingTreeModel)
+            return false
+
+        const currentItems = collectItems()
+        if (buildEditableDescriptors(currentItems) === null)
+            return false
+
+        if (!draggedItem || !draggedItem.enabled)
+            return false
+
+        const sourceIndex = indexOfItemInList(currentItems, draggedItem)
+        if (sourceIndex < 0)
+            return false
+
+        resetEditableDragState()
+
+        _dragActiveInternal = true
+        _dragItem = draggedItem
+        _dragSourceIndex = sourceIndex
+        _dragSourceEndIndex = descendantRangeEndInList(currentItems, sourceIndex)
+        _dragPointerX = localX
+        _dragPointerY = localY
+        if (_dragItem.dragPreviewActive !== undefined)
+            _dragItem.dragPreviewActive = true
+        updateEditableDrag(localX, localY)
+        return true
+    }
+
+    function beginEditableDrag(localX, localY) {
+        const currentItems = collectItems()
+        const draggedItem = itemAtPositionInList(currentItems, localX, localY)
+        return _beginEditableDragForItem(draggedItem, localX, localY)
+    }
+
+    function updateEditableDrag(localX, localY) {
+        if (!_dragActiveInternal || !_dragItem)
+            return false
+
+        _dragPointerX = localX
+        _dragPointerY = localY
+
+        const currentItems = collectItems()
+        const rawInsertionIndex = insertionIndexForYInList(currentItems, localY)
+        const resolvedTarget = resolvedDragTargetInList(currentItems, rawInsertionIndex, localX)
+        _dragRawInsertionIndex = rawInsertionIndex
+
+        if (!resolvedTarget) {
+            _dragTargetIndex = -1
+            _dragTargetDepth = -1
+            return false
+        }
+
+        _dragTargetIndex = resolvedTarget.insertionIndex
+        _dragTargetDepth = resolvedTarget.depth
+        _dragIndicatorY = indicatorYForRawInsertionIndex(currentItems, rawInsertionIndex)
+        _dragIndicatorX = dragBasePadding() + resolvedTarget.depth * dragIndentStep()
+        return true
+    }
+
+    function applyDraggedItemMove() {
+        if (!_dragActiveInternal
+                || !_dragItem
+                || _dragTargetIndex < 0
+                || _dragTargetDepth < 0
+                || !Array.isArray(model)) {
+            return false
+        }
+        return _applyEditableMove(_dragItem, _dragTargetIndex, _dragTargetDepth)
+    }
+
+    function endEditableDrag(commitMove) {
+        const shouldCommit = commitMove === undefined ? true : !!commitMove
+        if (!_dragActiveInternal) {
+            resetEditableDragState()
+            return false
+        }
+
+        const committed = shouldCommit ? applyDraggedItemMove() : false
+        resetEditableDragState()
+        return committed
     }
 
     function scheduleRefreshState(fromIndex, toIndex) {
@@ -952,7 +1421,7 @@ Item {
 
             const indentLevel = isObjectNode
                 ? resolvedIndentLevel(node, depth)
-                : normalizedDepth(inferDepthFromStructure ? depth : 0, 0)
+                : normalizedDepth(effectiveInferDepthFromStructure ? depth : 0, 0)
 
             const parentItemKeyRaw = isObjectNode ? roleValue(node, "parentKey", parentKey) : parentKey
             const parentItemKey = parentItemKeyRaw === undefined || parentItemKeyRaw === null
@@ -1213,11 +1682,18 @@ Item {
     }
 
     onUsingTreeModelChanged: {
+        if (_dragActiveInternal)
+            endEditableDrag(false)
         markItemsDirty(true)
         scheduleRebuildTreeItems()
         scheduleRefreshState()
     }
-    onModelChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onModelChanged: {
+        if (_dragActiveInternal)
+            endEditableDrag(false)
+        markItemsDirty(true)
+        scheduleRebuildTreeItems()
+    }
     onChildrenRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onItemIdRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onItemKeyRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
@@ -1235,6 +1711,10 @@ Item {
     onGeneratedItemWidthChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onGeneratedIconSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onGeneratedChevronSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onEditableChanged: {
+        if (!editable && _dragActiveInternal)
+            endEditableDrag(false)
+    }
 
     onActiveItemChanged: {
         if (!_applyingActiveState)
@@ -1274,6 +1754,51 @@ Item {
         if (!control.keyboardNavigationEnabled)
             return
         event.accepted = control.navigateRight()
+    }
+
+    DragHandler {
+        id: editDragHandler
+        enabled: control.editableEnabled && control.usingTreeModel
+        target: null
+        acceptedButtons: Qt.LeftButton
+
+        onActiveChanged: {
+            if (active) {
+                control.beginEditableDrag(centroid.pressPosition.x, centroid.pressPosition.y)
+                return
+            }
+            control.endEditableDrag(true)
+        }
+        onCentroidChanged: {
+            if (!active)
+                return
+            control.updateEditableDrag(centroid.position.x, centroid.position.y)
+        }
+        onCanceled: {
+            control.endEditableDrag(false)
+        }
+    }
+
+    Rectangle {
+        visible: control._dragActiveInternal && control._dragTargetIndex >= 0 && control._dragTargetDepth >= 0
+        x: Math.max(0, control._dragIndicatorX)
+        y: Math.max(0, control._dragIndicatorY - 1)
+        width: Math.max(24, control.width - x - Theme.gap8)
+        height: 2
+        radius: 1
+        color: Theme.primary
+        z: 50
+    }
+
+    Rectangle {
+        visible: control._dragActiveInternal && control._dragTargetIndex >= 0 && control._dragTargetDepth >= 0
+        width: 8
+        height: 8
+        radius: 4
+        x: Math.max(0, control._dragIndicatorX - width * 0.5)
+        y: Math.max(0, control._dragIndicatorY - height * 0.5)
+        color: Theme.primary
+        z: 51
     }
 
     Column {

@@ -18,7 +18,7 @@ Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to cons
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
-When host examples are enabled, the copied source snapshot keeps the staged binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot.
+When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, while the copied source snapshot receives fresh binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot. If `--without-examples` is used, those snapshot `bin/` directories are removed. Normal builds no longer stage example binaries back into the source tree.
 
 ## Rust CLI Entry Points
 
@@ -56,10 +56,16 @@ cmake -S . -B build \
   -DLVRS_BUILD_EXAMPLES=ON \
   -DLVRS_BUILD_TESTS=ON
 cmake --build build --target LVRSExampleVisualCatalog
-./build/bin/LVRSExampleVisualCatalog
+./build/example/VisualCatalog/bin/LVRSExampleVisualCatalog
 ```
 
-The visual-catalog example target (`LVRSExampleVisualCatalog`) emits the executable as `build/bin/LVRSExampleVisualCatalog`.
+Build every host example and populate all `build/example/*/bin` directories:
+
+```bash
+cmake --build build --target lvrs_host_examples_all
+```
+
+The visual-catalog example target (`LVRSExampleVisualCatalog`) emits the executable as `build/example/VisualCatalog/bin/LVRSExampleVisualCatalog`.
 The framework library target (`LVRSCore`) itself does not emit a runnable app.
 
 ## Test

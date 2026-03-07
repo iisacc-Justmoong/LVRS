@@ -32,6 +32,7 @@ State:
 - `itemCount`, `visibleItemCount` (readonly)
 - `keyboardNavigationEnabled`
 - `autoExpandAncestorsOnActivate`
+- `editable` (enables drag-based depth editing for array-backed object tree models)
 
 Composition:
 
@@ -42,6 +43,7 @@ Signals:
 - `activeChanged(item, itemId, index)`
 - `expansionChanged(item, expanded, index)`
 - `ensureVisibleRequested(y, height)`
+- `itemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)`
 
 Primary methods:
 
@@ -58,6 +60,8 @@ Primary methods:
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Visibility is computed from ancestor expansion state and cached incrementally.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
+- `editable` currently supports only array-backed object tree models; `ListModel` and primitive-only arrays are not editable.
+- While `editable` is enabled, nested `children` structure is also treated as depth input even when explicit depth fields are absent, so drag depth edits remain visually coherent.
 
 ## Usage
 

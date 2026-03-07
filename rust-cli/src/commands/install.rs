@@ -160,8 +160,17 @@ fn run_internal(
 
     println!("[LVRS] Multi-platform framework install completed.");
 
+    if build_examples && source_snapshot {
+        build_host_examples(&build_dir, &build_type)?;
+    }
+
     if source_snapshot {
-        install_source_snapshot(&project_root, &source_install_dir)?;
+        install_source_snapshot(
+            &project_root,
+            &source_install_dir,
+            &build_dir,
+            build_examples,
+        )?;
     }
 
     if register_cmake_registry {
@@ -455,7 +464,32 @@ fn remove_path(path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn install_source_snapshot(project_root: &Path, source_install_dir: &Path) -> Result<()> {
+fn build_host_examples(build_dir: &Path, build_type: &str) -> Result<()> {
+    println!("[LVRS] Building host examples for source snapshot...");
+    let build_status = run_command(
+        "cmake",
+        &[
+            "--build".to_string(),
+            build_dir.display().to_string(),
+            "--config".to_string(),
+            build_type.to_string(),
+            "--target".to_string(),
+            "lvrs_host_examples_all".to_string(),
+        ],
+    );
+    if build_status {
+        return Ok(());
+    }
+
+    bail!("host example build step failed")
+}
+
+fn install_source_snapshot(
+    project_root: &Path,
+    source_install_dir: &Path,
+    build_dir: &Path,
+    include_example_bins: bool,
+) -> Result<()> {
     println!("[LVRS] Installing source snapshot...");
     let _ = remove_path(source_install_dir);
     fs::create_dir_all(source_install_dir).with_context(|| {
@@ -482,6 +516,11 @@ fn install_source_snapshot(project_root: &Path, source_install_dir: &Path) -> Re
         }
     }
 
+    prune_source_snapshot_example_bin_dirs(source_install_dir)?;
+    if include_example_bins {
+        install_built_example_bins(build_dir, source_install_dir)?;
+    }
+
     let source_revision =
         detect_git_revision(project_root).unwrap_or_else(|| "unknown".to_string());
     let installed_at = detect_install_time();
@@ -494,6 +533,79 @@ fn install_source_snapshot(project_root: &Path, source_install_dir: &Path) -> Re
     fs::write(source_install_dir.join("INSTALL_SOURCE_INFO.txt"), info)
         .context("failed to write source snapshot metadata")?;
     Ok(())
+}
+
+fn prune_source_snapshot_example_bin_dirs(source_install_dir: &Path) -> Result<()> {
+    let snapshot_example_root = source_install_dir.join("example");
+    if !snapshot_example_root.is_dir() {
+        return Ok(());
+    }
+
+    for entry in fs::read_dir(&snapshot_example_root).with_context(|| {
+        format!(
+            "failed to read source snapshot example dir: {}",
+            snapshot_example_root.display()
+        )
+    })? {
+        let entry = entry?;
+        let example_dir = entry.path();
+        if !example_dir.is_dir() {
+            continue;
+        }
+        remove_path(&example_dir.join("bin"))?;
+    }
+
+    Ok(())
+}
+
+fn install_built_example_bins(build_dir: &Path, source_install_dir: &Path) -> Result<()> {
+    let built_examples_root = build_dir.join("example");
+    if !built_examples_root.is_dir() {
+        bail!(
+            "host example build output directory not found: {}",
+            built_examples_root.display()
+        );
+    }
+
+    let snapshot_examples_root = source_install_dir.join("example");
+    let mut copied_any = false;
+
+    for entry in fs::read_dir(&built_examples_root).with_context(|| {
+        format!(
+            "failed to read built example dir: {}",
+            built_examples_root.display()
+        )
+    })? {
+        let entry = entry?;
+        let example_build_dir = entry.path();
+        if !example_build_dir.is_dir() {
+            continue;
+        }
+
+        let built_bin_dir = example_build_dir.join("bin");
+        if !built_bin_dir.is_dir() {
+            continue;
+        }
+
+        let example_name = entry.file_name();
+        let snapshot_example_dir = snapshot_examples_root.join(&example_name);
+        if !snapshot_example_dir.is_dir() {
+            continue;
+        }
+
+        let snapshot_bin_dir = snapshot_example_dir.join("bin");
+        run_cmake_copy_directory(&built_bin_dir, &snapshot_bin_dir)?;
+        copied_any = true;
+    }
+
+    if copied_any {
+        return Ok(());
+    }
+
+    bail!(
+        "no host example binaries were produced under {}",
+        built_examples_root.display()
+    )
 }
 
 fn should_skip_snapshot_entry(name: &str) -> bool {
@@ -701,4 +813,66 @@ fn set_executable_bit(path: &Path) -> Result<()> {
 #[cfg(not(unix))]
 fn set_executable_bit(_path: &Path) -> Result<()> {
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_test_dir(label: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|value| value.as_nanos())
+            .unwrap_or(0);
+        env::temp_dir().join(format!(
+            "lvrs-install-tests-{label}-{}-{nanos}",
+            std::process::id()
+        ))
+    }
+
+    #[test]
+    fn prune_source_snapshot_example_bin_dirs_removes_stale_bins() -> Result<()> {
+        let root = temp_test_dir("prune");
+        let bin_dir = root.join("example").join("VisualCatalog").join("bin");
+        fs::create_dir_all(&bin_dir)?;
+        fs::write(bin_dir.join("stale-app"), "stale")?;
+
+        prune_source_snapshot_example_bin_dirs(&root)?;
+
+        assert!(!bin_dir.exists());
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn install_built_example_bins_copies_fresh_build_outputs() -> Result<()> {
+        let root = temp_test_dir("copy");
+        let build_bin_dir = root.join("build").join("example").join("VisualCatalog").join("bin");
+        let snapshot_example_dir = root.join("snapshot").join("example").join("VisualCatalog");
+        let stale_bin_dir = snapshot_example_dir.join("bin");
+
+        fs::create_dir_all(&build_bin_dir)?;
+        fs::create_dir_all(&stale_bin_dir)?;
+        fs::write(stale_bin_dir.join("old-app"), "stale")?;
+        fs::write(
+            build_bin_dir.join("LVRSExampleVisualCatalog"),
+            "fresh-build-output",
+        )?;
+
+        prune_source_snapshot_example_bin_dirs(&root.join("snapshot"))?;
+        install_built_example_bins(&root.join("build"), &root.join("snapshot"))?;
+
+        let copied_binary = snapshot_example_dir
+            .join("bin")
+            .join("LVRSExampleVisualCatalog");
+        assert!(copied_binary.exists());
+        assert_eq!(fs::read_to_string(copied_binary)?, "fresh-build-output");
+        assert!(!snapshot_example_dir.join("bin").join("old-app").exists());
+
+        remove_path(&root)?;
+        Ok(())
+    }
 }

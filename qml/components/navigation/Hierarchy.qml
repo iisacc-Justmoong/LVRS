@@ -24,6 +24,7 @@ Rectangle {
     property alias depthRole: hierarchyList.depthRole
     property alias inferDepthFromStructure: hierarchyList.inferDepthFromStructure
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
+    property alias editable: hierarchyList.editable
     default property alias listItems: hierarchyList.items
 
     // Optional bottom-left ListFooter API.
@@ -38,6 +39,7 @@ Rectangle {
     signal toolbarEventTriggered(string eventName, var payload, int index, var item, var buttonId)
     signal listItemActivated(var item, int itemId, int index)
     signal listItemExpanded(var item, int itemId, int index, bool expanded)
+    signal listItemMoved(var item, int itemId, string itemKey, int fromIndex, int toIndex, int depth)
     signal footerButtonTriggered(int index, var config)
 
     implicitWidth: minimumPanelWidth
@@ -158,6 +160,9 @@ Rectangle {
         }
         function onExpansionChanged(item, expanded, index) {
             control.listItemExpanded(item, hierarchyList.effectiveItemId(item, index), index, expanded)
+        }
+        function onItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth) {
+            control.listItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)
         }
     }
 }

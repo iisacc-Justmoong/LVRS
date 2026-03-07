@@ -7,8 +7,11 @@ AbstractInputBar {
 
     readonly property int defaultMode: 0
     readonly property int searchMode: 1
+    readonly property int filledStyle: 0
+    readonly property int inlineStyle: 1
 
     property int mode: defaultMode
+    property int style: filledStyle
     property alias placeholder: control.placeholderText
     property bool clearButtonVisible: true
     property bool searchIconVisible: mode === searchMode
@@ -20,6 +23,16 @@ AbstractInputBar {
     property color clearIconBackgroundColorDisabled: Theme.disabledColor
     property color clearIconForegroundColor: Theme.panelBackground10
 
+    readonly property int resolvedStyle: style === inlineStyle ? inlineStyle : filledStyle
+    readonly property color frameFillColor: resolvedStyle === inlineStyle
+        ? Theme.accentTransparent
+        : Theme.panelBackground10
+    readonly property color frameFillColorHover: resolvedStyle === inlineStyle
+        ? Theme.accentTransparent
+        : Theme.panelBackground11
+    readonly property color frameFillColorPressed: resolvedStyle === inlineStyle
+        ? Theme.accentTransparent
+        : Theme.panelBackground12
     readonly property bool showClearButton: clearButtonVisible
         && enabled
         && !readOnly
@@ -38,11 +51,11 @@ AbstractInputBar {
     placeholderColorDisabled: Theme.disabledColor
     placeholderOpacity: 1.0
 
-    backgroundColor: Theme.panelBackground10
-    backgroundColorHover: Theme.panelBackground11
-    backgroundColorPressed: Theme.panelBackground12
-    backgroundColorFocused: Theme.panelBackground10
-    backgroundColorDisabled: Theme.panelBackground10
+    backgroundColor: frameFillColor
+    backgroundColorHover: frameFillColorHover
+    backgroundColorPressed: frameFillColorPressed
+    backgroundColorFocused: frameFillColor
+    backgroundColorDisabled: frameFillColor
 
     selectionColor: Theme.accent
     selectedTextColor: Theme.textPrimary
@@ -147,4 +160,4 @@ AbstractInputBar {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.InputField { placeholderText: "Search"; mode: searchMode }
+// LV.InputField { placeholderText: "Search"; mode: searchMode; style: inlineStyle }
