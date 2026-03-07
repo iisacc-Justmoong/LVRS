@@ -14,6 +14,19 @@ Rectangle {
     property string subtitle: ""
     readonly property int cardPadding: Theme.gap18
     readonly property int sectionSpacing: Theme.gap10
+    readonly property real contentImplicitWidth: {
+        let maxWidth = 0
+        for (let i = 0; i < contentSlot.children.length; ++i) {
+            const child = contentSlot.children[i]
+            if (!child || child.implicitWidth === undefined)
+                continue
+            const candidateWidth = Number(child.implicitWidth)
+            if (!isFinite(candidateWidth) || candidateWidth <= maxWidth)
+                continue
+            maxWidth = candidateWidth
+        }
+        return maxWidth
+    }
     readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
         ? Math.max(0, Math.min(width, height) / 2)
         : cornerRadius
@@ -22,7 +35,7 @@ Rectangle {
 
     implicitWidth: Math.max(
                        Theme.dialogMinWidth,
-                       cardPadding * 2 + Math.max(headerBlock.implicitWidth, contentSlot.childrenRect.width)
+                       cardPadding * 2 + Math.max(headerBlock.implicitWidth, contentImplicitWidth)
                    )
     implicitHeight: cardPadding * 2
                     + headerBlock.implicitHeight

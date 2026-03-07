@@ -357,13 +357,14 @@ Item {
     id: root
 
     property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
-    property string expectedByName: iconRoot + "viewMoreSymbolicDefault.svg"
-    property string expectedByExt: iconRoot + "viewMoreSymbolicBorderless.svg"
-    property string expectedByGroup: iconRoot + "panDownSymbolicDefault.svg"
-    property string expectedByUrl: iconRoot + "panDownSymbolicAccent.svg"
-    property string expectedMenuByName: iconRoot + "panDownSymbolicBorderless.svg"
-    property bool themeAddsSvg: LV.Theme.iconPath("panDownSymbolicDisabled") === iconRoot + "panDownSymbolicDisabled.svg"
-    property bool themeKeepsSvg: LV.Theme.iconPath("panDownSymbolicDisabled.svg") === iconRoot + "panDownSymbolicDisabled.svg"
+    property string expectedByName: iconRoot + "generalmoreHorizontal.svg"
+    property string expectedByExt: iconRoot + "generalmoreHorizontal.svg"
+    property string expectedByGroup: iconRoot + "generalchevronDown.svg"
+    property string expectedByUrl: iconRoot + "generalchevronDownAccent.svg"
+    property string expectedMenuByName: iconRoot + "generalchevronDownBorderless.svg"
+    property bool themeAddsSvg: LV.Theme.iconPath("panDownSymbolicDisabled") === iconRoot + "generalchevronDownDisabled.svg"
+    property bool themeKeepsSvg: LV.Theme.iconPath("panDownSymbolicDisabled.svg") === iconRoot + "generalchevronDownDisabled.svg"
+    property bool themeFlattensGroupedName: LV.Theme.iconPath("general/projectStructure") === iconRoot + "generalprojectStructure.svg"
 
     LV.IconButton {
         id: byName
@@ -408,6 +409,7 @@ Item {
     QVERIFY(root);
     QVERIFY(root->property("themeAddsSvg").toBool());
     QVERIFY(root->property("themeKeepsSvg").toBool());
+    QVERIFY(root->property("themeFlattensGroupedName").toBool());
     QVERIFY(root->property("byNameOk").toBool());
     QVERIFY(root->property("byExtOk").toBool());
     QVERIFY(root->property("byGroupOk").toBool());
@@ -1436,7 +1438,7 @@ import LVRS as LV
 
 Item {
     property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
-    property string expectedFallbackIcon: iconRoot + "projectStructure.svg"
+    property string expectedFallbackIcon: iconRoot + "generalprojectStructure.svg"
     property color transparentColor: "transparent"
 
     LV.LabelButton { id: labelButton; text: "Button"; tone: LV.AbstractButton.Primary; visible: false }

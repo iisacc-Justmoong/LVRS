@@ -45,6 +45,21 @@ function(uifw_add_test test_name test_source)
     endif()
 endfunction()
 
+add_test(
+    NAME LVRSTests_cmake_bootstrap_lvrs_dir_resolution
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_bootstrap_lvrs_dir_resolution.cmake"
+)
+
+add_test(
+    NAME LVRSTests_cmake_example_source_snapshot_runtime_path
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_example_source_snapshot_runtime_path.cmake"
+)
+
 uifw_add_test(LVRSTests_layout tst_layout.cpp)
 uifw_add_test(LVRSTests_eventlistener tst_eventlistener.cpp)
 uifw_add_test(LVRSTests_examples tst_examples.cpp)

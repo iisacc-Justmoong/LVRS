@@ -36,6 +36,7 @@ After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
+When host examples are built, the source snapshot keeps them under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) are staged with portable LVRS runtime lookup paths so those binaries can be launched directly from the snapshot after install.
 
 ## Build (Framework-First Default)
 
@@ -154,7 +155,9 @@ Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_D
 Android SDK/NDK auto-detection can be overridden with `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` and `LVRS_BOOTSTRAP_ANDROID_NDK`.
 WASM launch behavior can be overridden with `LVRS_BOOTSTRAP_WASM_HOST`, `LVRS_BOOTSTRAP_WASM_PORT`, `LVRS_BOOTSTRAP_WASM_OPEN_BROWSER`.
 `LVRS_DIR` and package-registry policy cache values are forwarded automatically to bootstrap reconfigure.
+When LVRS is consumed from an installed multi-platform prefix, bootstrap resolves `LVRS_DIR` to the target platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so cross toolchains do not rely on root-prefix package discovery.
 LVRS package config exports toolchain hint variables for downstream scripts:
+- `LVRS_INSTALL_ROOT`
 - `LVRS_QT_HOST_PREFIX_HINT`
 - `LVRS_QT_IOS_PREFIX_HINT`
 - `LVRS_QT_ANDROID_PREFIX_HINT`
@@ -162,6 +165,7 @@ LVRS package config exports toolchain hint variables for downstream scripts:
 - `LVRS_ANDROID_SDK_HINT`
 - `LVRS_ANDROID_NDK_HINT`
 - `LVRS_EMSDK_HINT`
+If a manual cross-platform configure still bypasses the root dispatcher because the toolchain roots package search paths, set `LVRS_DIR` directly to `<prefix>/platforms/<platform>/lib/cmake/LVRS`.
 Example:
 ```bash
 cmake --build build --target bootstrap_MyApp_all

@@ -20,12 +20,59 @@ function(_lvrs_internal_append_unique_qml_import_path target path_value)
     set_property(TARGET "${target}" PROPERTY QT_QML_IMPORT_PATH "${_lvrs_paths}")
 endfunction()
 
+function(_lvrs_internal_append_unique_target_list_property target property_name value)
+    if(NOT TARGET "${target}")
+        message(FATAL_ERROR "_lvrs_internal_append_unique_target_list_property() target not found: ${target}")
+    endif()
+
+    if(value STREQUAL "")
+        return()
+    endif()
+
+    get_target_property(_lvrs_existing_values "${target}" "${property_name}")
+    if(NOT _lvrs_existing_values OR _lvrs_existing_values STREQUAL "${property_name}-NOTFOUND")
+        set(_lvrs_existing_values "")
+    endif()
+
+    set(_lvrs_values "${_lvrs_existing_values}")
+    list(APPEND _lvrs_values "${value}")
+    list(REMOVE_DUPLICATES _lvrs_values)
+    set_property(TARGET "${target}" PROPERTY "${property_name}" "${_lvrs_values}")
+endfunction()
+
 function(_lvrs_internal_apply_safe_default_output_dirs target)
     get_target_property(_lvrs_runtime_output_dir "${target}" RUNTIME_OUTPUT_DIRECTORY)
     if(NOT _lvrs_runtime_output_dir OR _lvrs_runtime_output_dir STREQUAL "RUNTIME_OUTPUT_DIRECTORY-NOTFOUND")
         # Prevent executable/output name collisions with qt_add_qml_module default OUTPUT_DIRECTORY.
         set_property(TARGET "${target}" PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
     endif()
+endfunction()
+
+function(_lvrs_internal_example_source_snapshot_runtime_rpath runtime_platform out_var)
+    set(_lvrs_runtime_rpath "")
+    if(runtime_platform STREQUAL "macos")
+        set(_lvrs_runtime_rpath "@loader_path/../../../../platforms/macos/lib")
+    elseif(runtime_platform STREQUAL "linux")
+        set(_lvrs_runtime_rpath "$ORIGIN/../../../../platforms/linux/lib")
+    endif()
+
+    set(${out_var} "${_lvrs_runtime_rpath}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_configure_example_source_snapshot_runtime target runtime_platform)
+    _lvrs_internal_example_source_snapshot_runtime_rpath(
+        "${runtime_platform}"
+        _lvrs_runtime_rpath
+    )
+    if(_lvrs_runtime_rpath STREQUAL "")
+        return()
+    endif()
+
+    _lvrs_internal_append_unique_target_list_property(
+        "${target}"
+        BUILD_RPATH
+        "${_lvrs_runtime_rpath}"
+    )
 endfunction()
 
 function(_lvrs_internal_stage_example_binary_to_source_bin target runtime_platform)
@@ -53,6 +100,17 @@ function(_lvrs_internal_stage_example_binary_to_source_bin target runtime_platfo
         COMMENT "Stage ${target} into ${_lvrs_source_bin_dir}"
         VERBATIM
     )
+
+    if(runtime_platform STREQUAL "windows")
+        add_custom_command(TARGET "${target}" POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                $<TARGET_RUNTIME_DLLS:${target}>
+                "${_lvrs_source_bin_dir}"
+            COMMAND_EXPAND_LISTS
+            COMMENT "Stage runtime DLLs for ${target} into ${_lvrs_source_bin_dir}"
+            VERBATIM
+        )
+    endif()
 
     set_property(TARGET "${target}" PROPERTY _LVRS_EXAMPLE_SOURCE_BIN_STAGE_CONFIGURED TRUE)
 endfunction()
@@ -233,6 +291,10 @@ function(lvrs_configure_example_target target)
         )
     endif()
 
+    _lvrs_internal_configure_example_source_snapshot_runtime(
+        "${target}"
+        "${_lvrs_example_target_platform}"
+    )
     _lvrs_internal_stage_example_binary_to_source_bin("${target}" "${_lvrs_example_target_platform}")
 
     lvrs_apply_platform_build_optimizations("${target}")
@@ -703,6 +765,56 @@ function(_lvrs_internal_detect_qt_host_prefix out_var)
     set(${out_var} "${_lvrs_qt_host_prefix}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_resolve_install_root_from_lvrs_hint hint out_var)
+    set(_lvrs_install_root "")
+    if(hint STREQUAL "")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    get_filename_component(_lvrs_hint_abs "${hint}" ABSOLUTE)
+    file(TO_CMAKE_PATH "${_lvrs_hint_abs}" _lvrs_hint_abs)
+
+    if(EXISTS "${_lvrs_hint_abs}/platforms" AND EXISTS "${_lvrs_hint_abs}/LVRSConfig.cmake")
+        set(_lvrs_install_root "${_lvrs_hint_abs}")
+    elseif(_lvrs_hint_abs MATCHES "^(.*)/platforms/[^/]+/lib/cmake/LVRS$")
+        set(_lvrs_install_root "${CMAKE_MATCH_1}")
+    elseif(_lvrs_hint_abs MATCHES "^(.*)/platforms/[^/]+$")
+        set(_lvrs_install_root "${CMAKE_MATCH_1}")
+    endif()
+
+    set(${out_var} "${_lvrs_install_root}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_resolve_platform_lvrs_dir install_root platform out_var)
+    set(_lvrs_platform_dir "")
+    if(NOT install_root STREQUAL "")
+        set(_lvrs_candidate "${install_root}/platforms/${platform}/lib/cmake/LVRS")
+        if(EXISTS "${_lvrs_candidate}/LVRSConfig.cmake")
+            set(_lvrs_platform_dir "${_lvrs_candidate}")
+        endif()
+    endif()
+
+    set(${out_var} "${_lvrs_platform_dir}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_resolve_bootstrap_lvrs_dir hint platform out_var)
+    _lvrs_internal_resolve_install_root_from_lvrs_hint("${hint}" _lvrs_install_root)
+    if(NOT _lvrs_install_root STREQUAL "")
+        _lvrs_internal_resolve_platform_lvrs_dir(
+            "${_lvrs_install_root}"
+            "${platform}"
+            _lvrs_platform_dir
+        )
+        if(NOT _lvrs_platform_dir STREQUAL "")
+            set(${out_var} "${_lvrs_platform_dir}" PARENT_SCOPE)
+            return()
+        endif()
+    endif()
+
+    set(${out_var} "${hint}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_framework_bootstrap_install_root out_var)
     set(_lvrs_install_root "")
     if(DEFINED LVRS_BOOTSTRAP_INSTALL_ROOT AND NOT LVRS_BOOTSTRAP_INSTALL_ROOT STREQUAL "")
@@ -1068,11 +1180,15 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
     _lvrs_internal_bootstrap_build_type(_lvrs_bootstrap_build_type)
     _lvrs_internal_detect_qt_host_prefix(_lvrs_qt_host_prefix)
 
-    set(_lvrs_bootstrap_lvrs_dir "")
+    set(_lvrs_bootstrap_lvrs_hint "")
     if(DEFINED LVRS_DIR AND NOT LVRS_DIR STREQUAL "")
-        set(_lvrs_bootstrap_lvrs_dir "${LVRS_DIR}")
+        set(_lvrs_bootstrap_lvrs_hint "${LVRS_DIR}")
     elseif(DEFINED ENV{LVRS_DIR} AND NOT "$ENV{LVRS_DIR}" STREQUAL "")
-        set(_lvrs_bootstrap_lvrs_dir "$ENV{LVRS_DIR}")
+        set(_lvrs_bootstrap_lvrs_hint "$ENV{LVRS_DIR}")
+    elseif(DEFINED LVRS_INSTALL_ROOT AND NOT LVRS_INSTALL_ROOT STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_hint "${LVRS_INSTALL_ROOT}")
+    elseif(DEFINED LVRS_ACTIVE_PREFIX AND NOT LVRS_ACTIVE_PREFIX STREQUAL "")
+        set(_lvrs_bootstrap_lvrs_hint "${LVRS_ACTIVE_PREFIX}")
     endif()
 
     set(_lvrs_bootstrap_find_no_pkg_registry "")
@@ -1143,6 +1259,11 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
         _lvrs_internal_escape_list_for_cache("${_lvrs_combined_prefix_path}" _lvrs_combined_prefix_path_escaped)
 
         set(_lvrs_platform_build_dir "${_lvrs_bootstrap_root}/${target}/${_lvrs_platform}")
+        _lvrs_internal_resolve_bootstrap_lvrs_dir(
+            "${_lvrs_bootstrap_lvrs_hint}"
+            "${_lvrs_platform}"
+            _lvrs_platform_lvrs_dir
+        )
 
         set(_lvrs_generate_ios_xcode_project OFF)
         if(_lvrs_platform STREQUAL "ios")
@@ -1293,7 +1414,7 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_androiddeployqt_path}"
                 "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_bootstrap_emsdk_root}"
                 "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_bootstrap_emscripten_toolchain_file}"
-                "-DLVRS_BOOTSTRAP_LVRS_DIR=${_lvrs_bootstrap_lvrs_dir}"
+                "-DLVRS_BOOTSTRAP_LVRS_DIR=${_lvrs_platform_lvrs_dir}"
                 "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"

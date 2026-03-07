@@ -52,6 +52,8 @@ Rules:
 - Empty input returns empty string.
 - Full resource path (`:/`) is returned as-is.
 - `.svg` is appended when omitted.
+- Legacy logical aliases are normalized to the shipped icon filenames (for example `projectStructure -> generalprojectStructure`, `add -> generaladd`, `viewMoreSymbolicDefault -> generalmoreHorizontal`, `panDownSymbolic* -> generalchevronDown*`).
+- Group-style names are flattened before lookup (for example `general/projectStructure -> generalprojectStructure.svg`).
 
 ## Accent Palette Tokens
 

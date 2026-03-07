@@ -8,6 +8,33 @@ QtObject {
     readonly property string fontBody: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
     readonly property string fontDisplay: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
     readonly property string iconSetBasePath: "qrc:/qt/qml/LVRS/resources/iconset/"
+    readonly property var iconNameAliases: ({
+        "add": "generaladd",
+        "projectstructure": "generalprojectStructure",
+        "viewmoresymbolicdefault": "generalmoreHorizontal",
+        "viewmoresymbolicborderless": "generalmoreHorizontal",
+        "pandownsymbolicdefault": "generalchevronDown",
+        "pandownsymbolicaccent": "generalchevronDownAccent",
+        "pandownsymbolicborderless": "generalchevronDownBorderless",
+        "pandownsymbolicdisabled": "generalchevronDownDisabled"
+    })
+
+    function normalizeIconLookupName(iconName) {
+        const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
+        let normalizedName = rawName.trim()
+        if (normalizedName.length === 0)
+            return ""
+        if (normalizedName.toLowerCase().endsWith(".svg"))
+            normalizedName = normalizedName.slice(0, -4)
+        if (normalizedName.indexOf("/") !== -1) {
+            const segments = normalizedName.split("/").filter(segment => segment.length > 0)
+            normalizedName = segments.join("")
+        }
+        const aliasKey = normalizedName.toLowerCase()
+        if (iconNameAliases[aliasKey] !== undefined)
+            return iconNameAliases[aliasKey]
+        return normalizedName
+    }
 
     function iconPath(iconName) {
         const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
@@ -16,10 +43,10 @@ QtObject {
             return ""
         if (trimmedName.indexOf(":/") !== -1)
             return trimmedName
-        const lowerName = trimmedName.toLowerCase()
-        if (lowerName.length >= 4 && lowerName.lastIndexOf(".svg") === lowerName.length - 4)
-            return iconSetBasePath + trimmedName
-        return iconSetBasePath + trimmedName + ".svg"
+        const resolvedName = normalizeIconLookupName(trimmedName)
+        if (resolvedName.length === 0)
+            return ""
+        return iconSetBasePath + resolvedName + ".svg"
     }
 
     //Window

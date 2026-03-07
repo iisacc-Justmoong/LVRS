@@ -893,7 +893,8 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
 {
     if (kHiDpiEnabled) {
         qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArrayLiteral("1"));
-        qputenv("QT_SCALE_FACTOR_ROUNDING_POLICY", QByteArrayLiteral("PassThrough"));
+        QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
+            Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
 
     if (kAntialiasingEnabled)

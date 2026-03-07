@@ -18,6 +18,7 @@ Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to cons
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
+When host examples are enabled, the copied source snapshot keeps the staged binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot.
 
 ## Rust CLI Entry Points
 
@@ -167,10 +168,12 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (propagate `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` into bootstrap reconfigure)
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_IPO` (propagate `LVRS_ENABLE_IPO` into bootstrap reconfigure)
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
+When the host build consumes LVRS from an installed multi-platform prefix, bootstrap rewrites `LVRS_DIR` to the requested platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so iOS/Android/WASM toolchains do not depend on root-prefix package discovery.
 LVRS package config exports platform/toolchain hint variables for scripts:
 - `LVRS_LAYOUT_VERSION`
 - `LVRS_ACTIVE_PLATFORM`
 - `LVRS_ACTIVE_PREFIX`
+- `LVRS_INSTALL_ROOT`
 - `LVRS_QT_HOST_PREFIX_HINT`
 - `LVRS_QT_IOS_PREFIX_HINT`
 - `LVRS_QT_ANDROID_PREFIX_HINT`
@@ -178,6 +181,7 @@ LVRS package config exports platform/toolchain hint variables for scripts:
 - `LVRS_ANDROID_SDK_HINT`
 - `LVRS_ANDROID_NDK_HINT`
 - `LVRS_EMSDK_HINT`
+For a manual cross-platform configure outside LVRS bootstrap, set `LVRS_DIR` directly to `<prefix>/platforms/<platform>/lib/cmake/LVRS` if the toolchain roots `find_package()` lookups away from the install root.
 Example one-shot bootstrap command:
 ```bash
 cmake --build build --target bootstrap_MyApp_all
