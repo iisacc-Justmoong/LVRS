@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/ComboBox.qml`
 
-`ComboBox` is a compact context-menu trigger row that follows the Figma contract (`97x20`) and uses `Stepper` as the trailing indicator.
+`ComboBox` is a compact context-menu trigger row that follows the Figma contract (`97x18`) and uses `Stepper` as the trailing indicator.
 
 ## Purpose
 
@@ -11,6 +11,7 @@ Location: `qml/components/control/buttons/ComboBox.qml`
 
 ## Core API
 
+- `text` (default: `"Label"`)
 - `tone` (default: `ComboBox.Primary`)
   - `ComboBox.Primary`
   - `ComboBox.Borderless`
@@ -28,14 +29,14 @@ Signals:
 
 ## Visual Contract
 
-- fixed frame: `97 x 20`
-- container paddings: left `8`, right `2`, top/bottom `2`
-- radius: `Theme.radiusBase` (`6`)
+- fixed frame: `97 x 18`
+- container paddings: left `8`, right `1`, top/bottom `1`
+- radius: `Theme.radiusControl` (`5`)
 - container base/hover/pressed colors:
   - `Theme.panelBackground10`
   - `Theme.panelBackground11`
   - `Theme.panelBackground12`
-- label text is fixed to `"Label"` and rendered with body typography in white
+- label text defaults to `"Label"`, is rendered with body typography in white, and elides within the combo frame
 - trailing indicator is always `Stepper`, with tone mapped from combo tone
 
 ## Usage
@@ -44,6 +45,7 @@ Signals:
 import LVRS 1.0 as LV
 
 LV.ComboBox {
+    text: "Control"
     tone: LV.ComboBox.Borderless
     arrow: LV.Stepper.Down
     onClicked: menu.open()

@@ -1637,6 +1637,7 @@ import LVRS as LV
 
 Item {
     LV.ComboBox { id: defaultCombo; visible: false }
+    LV.ComboBox { id: customTextCombo; visible: false; text: "Control" }
     LV.ComboBox { id: primaryUpDown; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.UpDown }
     LV.ComboBox { id: primaryUp; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.Up }
     LV.ComboBox { id: primaryDown; visible: false; tone: LV.ComboBox.Primary; arrow: LV.Stepper.Down }
@@ -1647,12 +1648,18 @@ Item {
     property bool comboBoxContractReady:
         defaultCombo.tone === LV.ComboBox.Primary
         && defaultCombo.arrow === LV.Stepper.UpDown
+        && defaultCombo.text === "Label"
+        && customTextCombo.text === "Control"
         && Math.abs(defaultCombo.width - 97.0) < 0.01
-        && Math.abs(defaultCombo.height - 20.0) < 0.01
+        && Math.abs(defaultCombo.height - 18.0) < 0.01
         && Math.abs(defaultCombo.implicitWidth - 97.0) < 0.01
-        && Math.abs(defaultCombo.implicitHeight - 20.0) < 0.01
+        && Math.abs(defaultCombo.implicitHeight - 18.0) < 0.01
         && Math.abs(defaultCombo.figmaComboWidth - 97.0) < 0.01
-        && Math.abs(defaultCombo.figmaComboHeight - 20.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboHeight - 18.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboLeftPadding - 8.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboRightPadding - 1.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboVerticalPadding - 1.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboCornerRadius - 5.0) < 0.01
         && defaultCombo.resolvedTone === LV.ComboBox.Primary
         && primaryUp.resolvedTone === LV.ComboBox.Primary
         && primaryDown.resolvedTone === LV.ComboBox.Primary

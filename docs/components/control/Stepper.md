@@ -49,9 +49,9 @@ LV.Stepper {
 
 ## How It Works
 
-- Renders arrow geometry with `Canvas` to avoid external icon dependencies.
+- Renders the Figma chevron as filled `Canvas` paths to avoid external icon dependencies.
 - Uses `AbstractButton` interaction pipeline for hover/press/disabled behavior.
-- Repaints icon canvas when `arrow`, stroke width, or resolved icon color changes.
+- Repaints icon canvas when `arrow` or resolved icon color changes.
 
 ## Practical Notes
 

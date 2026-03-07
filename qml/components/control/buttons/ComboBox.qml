@@ -12,6 +12,7 @@ Item {
 
     property int tone: ComboBox.Primary
     property int arrow: Stepper.UpDown
+    property alias text: label.text
 
     signal clicked()
     signal pressed()
@@ -19,7 +20,11 @@ Item {
     signal canceled()
 
     readonly property int figmaComboWidth: 97
-    readonly property int figmaComboHeight: 20
+    readonly property int figmaComboHeight: 18
+    readonly property int figmaComboLeftPadding: Theme.gap8
+    readonly property int figmaComboRightPadding: 1
+    readonly property int figmaComboVerticalPadding: 1
+    readonly property int figmaComboCornerRadius: Theme.radiusControl
     readonly property int resolvedTone: tone === ComboBox.Borderless
         ? ComboBox.Borderless
         : ComboBox.Primary
@@ -45,29 +50,29 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Theme.radiusBase
+        radius: control.figmaComboCornerRadius
         color: control.resolvedBackgroundColor
         antialiasing: true
     }
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: Theme.gap8
-        anchors.rightMargin: Theme.gap2
-        anchors.topMargin: Theme.gap2
-        anchors.bottomMargin: Theme.gap2
+        anchors.leftMargin: control.figmaComboLeftPadding
+        anchors.rightMargin: control.figmaComboRightPadding
+        anchors.topMargin: control.figmaComboVerticalPadding
+        anchors.bottomMargin: control.figmaComboVerticalPadding
         spacing: Theme.gapNone
 
         Label {
+            id: label
             style: body
             text: "Label"
             color: Theme.accentWhite
+            elide: Text.ElideRight
+            horizontalAlignment: Text.AlignLeft
             lineHeight: 12
             lineHeightMode: Text.FixedHeight
             Layout.alignment: Qt.AlignVCenter
-        }
-
-        Item {
             Layout.fillWidth: true
         }
 
