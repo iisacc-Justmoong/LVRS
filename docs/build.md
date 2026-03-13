@@ -12,7 +12,10 @@
 - If neither is available, install exits with guidance to build CLI first.
 
 The install flow builds `bootstrap_lvrs_all`.
-By default, framework bootstrap platform set is `macos;linux;windows;ios;android;wasm`.
+By default, the framework bootstrap platform set follows the current host:
+- Linux: `linux;android;wasm`
+- macOS: `macos;ios;android;wasm`
+- Windows: `windows;android;wasm`
 Platforms without a matching Qt kit are skipped during bootstrap target generation.
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to constrain/override the platform set.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.

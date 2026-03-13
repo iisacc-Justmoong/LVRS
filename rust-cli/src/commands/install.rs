@@ -8,7 +8,6 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-const DEFAULT_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "macos;linux;windows;ios;android;wasm";
 const ENV_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS";
 const ENV_LVRS_ROOT: &str = "LVRS_ROOT";
 const ENV_LVRS_PROJECT_ROOT: &str = "LVRS_PROJECT_ROOT";
@@ -43,7 +42,7 @@ fn run_internal(
     let host_platform = detect_host_platform();
     let host_install_prefix = platform_install_root.join(&host_platform);
     let bootstrap_framework_platforms =
-        resolve_bootstrap_framework_platforms(args.platforms.as_deref());
+        resolve_bootstrap_framework_platforms(args.platforms.as_deref(), host_platform);
 
     let build_type = args
         .build_type
@@ -153,7 +152,7 @@ fn run_internal(
     if !build_status {
         eprintln!("[LVRS] Build failed.");
         eprintln!(
-            "[LVRS] Apple targets never use x86. Check iOS/Qt kit architecture (arm64) and retry."
+            "[LVRS] Check requested platform prerequisites: Apple targets use arm64 Qt kits; WASM needs emsdk or LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE."
         );
         bail!("build step failed");
     }
@@ -232,7 +231,16 @@ fn normalize_platform_list(input: String) -> String {
     input.replace(',', ";")
 }
 
-fn resolve_bootstrap_framework_platforms(cli_platforms: Option<&str>) -> String {
+fn default_bootstrap_framework_platforms(host_platform: &str) -> &'static str {
+    match host_platform {
+        "linux" => "linux;android;wasm",
+        "macos" => "macos;ios;android;wasm",
+        "windows" => "windows;android;wasm",
+        _ => "android;wasm",
+    }
+}
+
+fn resolve_bootstrap_framework_platforms(cli_platforms: Option<&str>, host_platform: &str) -> String {
     if let Some(value) = cli_platforms {
         return normalize_platform_list(value.to_string());
     }
@@ -244,7 +252,7 @@ fn resolve_bootstrap_framework_platforms(cli_platforms: Option<&str>) -> String 
         }
     }
 
-    DEFAULT_BOOTSTRAP_FRAMEWORK_PLATFORMS.to_string()
+    default_bootstrap_framework_platforms(host_platform).to_string()
 }
 
 fn validate_deprecated_build_dir(build_dir: Option<&Path>, project_root: &Path) -> Result<()> {
@@ -874,5 +882,29 @@ mod tests {
 
         remove_path(&root)?;
         Ok(())
+    }
+
+    #[test]
+    fn default_bootstrap_framework_platforms_follow_host_policy() {
+        assert_eq!(
+            default_bootstrap_framework_platforms("linux"),
+            "linux;android;wasm"
+        );
+        assert_eq!(
+            default_bootstrap_framework_platforms("macos"),
+            "macos;ios;android;wasm"
+        );
+        assert_eq!(
+            default_bootstrap_framework_platforms("windows"),
+            "windows;android;wasm"
+        );
+    }
+
+    #[test]
+    fn resolve_bootstrap_framework_platforms_prefers_host_defaults() {
+        assert_eq!(
+            resolve_bootstrap_framework_platforms(None, "linux"),
+            "linux;android;wasm"
+        );
     }
 }

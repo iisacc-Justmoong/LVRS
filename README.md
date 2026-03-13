@@ -29,7 +29,11 @@ cd LVRS
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
 If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
 The install flow builds `bootstrap_lvrs_all`.
-By default, bootstrap targets include the full runtime platform set (`macos;linux;windows;ios;android;wasm`), and platforms without a discoverable Qt kit are skipped.
+By default, the bootstrap platform set follows the current host:
+- Linux: `linux;android;wasm`
+- macOS: `macos;ios;android;wasm`
+- Windows: `windows;android;wasm`
+Platforms without a discoverable Qt kit are skipped.
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to override bootstrap/install platforms explicitly.
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
