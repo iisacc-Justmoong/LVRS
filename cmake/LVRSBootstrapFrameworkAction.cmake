@@ -365,6 +365,14 @@ file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_BINARY_DIR}")
 file(MAKE_DIRECTORY "${LVRS_BOOTSTRAP_INSTALL_PREFIX}")
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "android")
+    if(NOT LVRS_BOOTSTRAP_ANDROID_SDK_ROOT STREQUAL ""
+       AND NOT IS_DIRECTORY "${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}")
+        _lvrs_bootstrap_fail("configured LVRS_BOOTSTRAP_ANDROID_SDK_ROOT does not exist: ${LVRS_BOOTSTRAP_ANDROID_SDK_ROOT}")
+    endif()
+    if(NOT LVRS_BOOTSTRAP_ANDROID_NDK STREQUAL ""
+       AND NOT IS_DIRECTORY "${LVRS_BOOTSTRAP_ANDROID_NDK}")
+        _lvrs_bootstrap_fail("configured LVRS_BOOTSTRAP_ANDROID_NDK does not exist: ${LVRS_BOOTSTRAP_ANDROID_NDK}")
+    endif()
     if(LVRS_BOOTSTRAP_ANDROID_SDK_ROOT STREQUAL "")
         _lvrs_bootstrap_detect_android_sdk_root(_lvrs_detected_android_sdk)
         set(LVRS_BOOTSTRAP_ANDROID_SDK_ROOT "${_lvrs_detected_android_sdk}")

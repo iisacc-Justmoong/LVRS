@@ -9,8 +9,47 @@ use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const ENV_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS";
+const ENV_CMAKE_PREFIX_PATH: &str = "CMAKE_PREFIX_PATH";
+const ENV_LVRS_INSTALL_PREFIX: &str = "LVRS_INSTALL_PREFIX";
 const ENV_LVRS_ROOT: &str = "LVRS_ROOT";
 const ENV_LVRS_PROJECT_ROOT: &str = "LVRS_PROJECT_ROOT";
+const ENV_QT6_DIR: &str = "Qt6_DIR";
+
+#[derive(Debug, Clone)]
+pub(crate) struct LinuxQtAutoConfig {
+    pub(crate) prefix: PathBuf,
+    pub(crate) qt6_dir: PathBuf,
+    pub(crate) source: String,
+    pub(crate) injected: Vec<String>,
+}
+
+#[derive(Debug)]
+struct CommandCapture {
+    success: bool,
+    output: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum LinuxPackageManager {
+    Apt,
+    Dnf,
+    Pacman,
+    Zypper,
+    Apk,
+}
+
+#[derive(Debug, Clone)]
+struct LinuxPackageInstallPlan {
+    manager: LinuxPackageManager,
+    display_commands: Vec<String>,
+    exec_commands: Vec<(String, Vec<String>)>,
+}
+
+#[derive(Debug, Clone)]
+struct LinuxOsRelease {
+    id: String,
+    id_like: Vec<String>,
+}
 
 pub fn run(args: InstallArgs, _verbose: u8) -> Result<()> {
     run_internal(args, _verbose, None)
@@ -35,9 +74,7 @@ fn run_internal(
     validate_deprecated_build_dir(args.build_dir.as_deref(), &project_root)?;
 
     let home_dir = resolve_home_dir()?;
-    let install_prefix = args
-        .prefix
-        .unwrap_or_else(|| home_dir.join(".local").join("LVRS"));
+    let install_prefix = resolve_install_prefix(args.prefix.clone(), &home_dir)?;
     let platform_install_root = install_prefix.join("platforms");
     let host_platform = detect_host_platform();
     let host_install_prefix = platform_install_root.join(&host_platform);
@@ -56,7 +93,39 @@ fn run_internal(
     let source_install_dir = install_prefix.join("src").join("LVRS");
     let package_config_dir = host_install_prefix.join("lib").join("cmake").join("LVRS");
 
+    let lvrs_build_examples_value = if build_examples { "ON" } else { "OFF" };
+    let lvrs_build_tests_value = if build_tests { "ON" } else { "OFF" };
+
+    let mut configure_args = vec![
+        "-S".to_string(),
+        project_root.display().to_string(),
+        "-B".to_string(),
+        build_dir.display().to_string(),
+        format!("-DCMAKE_INSTALL_PREFIX={}", install_prefix.display()),
+        format!("-DCMAKE_BUILD_TYPE={build_type}"),
+        "-DLVRS_BUILD_SHARED_LIBS=ON".to_string(),
+        format!("-DLVRS_BUILD_EXAMPLES={lvrs_build_examples_value}"),
+        format!("-DLVRS_BUILD_TESTS={lvrs_build_tests_value}"),
+        format!(
+            "-DLVRS_BOOTSTRAP_INSTALL_ROOT={}",
+            platform_install_root.display()
+        ),
+        format!("-DLVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS={bootstrap_framework_platforms}"),
+        "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=OFF".to_string(),
+        "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=OFF".to_string(),
+        "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=ON".to_string(),
+        "-DLVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE=ON".to_string(),
+    ];
+    configure_args.extend(args.cmake_args.clone());
+
     ensure_cmake_available()?;
+    let linux_qt_auto_config = ensure_linux_host_prerequisites(
+        host_platform,
+        &home_dir,
+        &mut configure_args,
+        &args.cmake_args,
+        args.install_linux_deps,
+    )?;
 
     println!("[LVRS] Project root : {}", project_root.display());
     println!("[LVRS] Build dir    : {}", build_dir.display());
@@ -73,6 +142,11 @@ fn run_internal(
     println!("[LVRS] Examples     : {}", flag_as_number(build_examples));
     println!("[LVRS] Tests        : {}", flag_as_number(build_tests));
     println!("[LVRS] Clean mode   : forced reinstall");
+    if let Some(config) = &linux_qt_auto_config {
+        println!("[LVRS] Linux Qt     : {}", config.prefix.display());
+        println!("[LVRS] Linux Qt6_DIR: {}", config.qt6_dir.display());
+        println!("[LVRS] Qt detect    : {}", config.source);
+    }
     if args.clean {
         println!("[LVRS] --clean is deprecated. Forced reinstall mode is always enabled.");
     }
@@ -105,36 +179,13 @@ fn run_internal(
         remove_path_with_stale_fallback(&binary_path, &binary_path.display().to_string())?;
     }
 
-    let lvrs_build_examples_value = if build_examples { "ON" } else { "OFF" };
-    let lvrs_build_tests_value = if build_tests { "ON" } else { "OFF" };
-
-    let mut configure_args = vec![
-        "-S".to_string(),
-        project_root.display().to_string(),
-        "-B".to_string(),
-        build_dir.display().to_string(),
-        format!("-DCMAKE_INSTALL_PREFIX={}", install_prefix.display()),
-        format!("-DCMAKE_BUILD_TYPE={build_type}"),
-        "-DLVRS_BUILD_SHARED_LIBS=ON".to_string(),
-        format!("-DLVRS_BUILD_EXAMPLES={lvrs_build_examples_value}"),
-        format!("-DLVRS_BUILD_TESTS={lvrs_build_tests_value}"),
-        format!(
-            "-DLVRS_BOOTSTRAP_INSTALL_ROOT={}",
-            platform_install_root.display()
-        ),
-        format!("-DLVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS={bootstrap_framework_platforms}"),
-        "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=OFF".to_string(),
-        "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=OFF".to_string(),
-        "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=ON".to_string(),
-        "-DLVRS_BOOTSTRAP_LVRS_INSTALL_QML_MODULE=ON".to_string(),
-    ];
-    configure_args.extend(args.cmake_args.clone());
-
     let configure_status = run_command("cmake", &configure_args);
     if !configure_status {
         eprintln!("[LVRS] Configure failed.");
-        eprintln!("[LVRS] If Qt is not auto-detected, pass your Qt prefix, e.g.:");
-        eprintln!("       CMAKE_PREFIX_PATH=/path/to/Qt lvrs install");
+        eprintln!(
+            "[LVRS] If Qt is not auto-detected, pass Qt6_DIR or LVRS_BOOTSTRAP_QT_PREFIX_LINUX, e.g.:"
+        );
+        eprintln!("       Qt6_DIR=/path/to/Qt/lib/cmake/Qt6 lvrs install");
         bail!("configure step failed");
     }
 
@@ -152,7 +203,7 @@ fn run_internal(
     if !build_status {
         eprintln!("[LVRS] Build failed.");
         eprintln!(
-            "[LVRS] Check requested platform prerequisites: Apple targets use arm64 Qt kits; WASM needs emsdk or LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE."
+            "[LVRS] Check requested platform prerequisites: Apple targets use arm64 Qt kits; Android needs a valid SDK+NDK; WASM needs emsdk or LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE."
         );
         bail!("build step failed");
     }
@@ -204,7 +255,7 @@ fn flag_as_number(value: bool) -> u8 {
     if value { 1 } else { 0 }
 }
 
-fn resolve_home_dir() -> Result<PathBuf> {
+pub(crate) fn resolve_home_dir() -> Result<PathBuf> {
     if let Ok(home) = env::var("HOME") {
         if !home.is_empty() {
             return Ok(PathBuf::from(home));
@@ -218,7 +269,1045 @@ fn resolve_home_dir() -> Result<PathBuf> {
     bail!("HOME/USERPROFILE environment variable is required.")
 }
 
-fn detect_host_platform() -> &'static str {
+pub(crate) fn resolve_install_prefix(
+    cli_prefix: Option<PathBuf>,
+    home_dir: &Path,
+) -> Result<PathBuf> {
+    if let Some(prefix) = cli_prefix {
+        return normalize_user_path(prefix, home_dir);
+    }
+
+    if let Ok(value) = env::var(ENV_LVRS_INSTALL_PREFIX) {
+        let trimmed = value.trim();
+        if !trimmed.is_empty() {
+            return normalize_user_path(PathBuf::from(trimmed), home_dir);
+        }
+    }
+
+    Ok(home_dir.join(".local").join("LVRS"))
+}
+
+fn normalize_user_path(path: PathBuf, home_dir: &Path) -> Result<PathBuf> {
+    let expanded = expand_tilde_path(&path, home_dir);
+    if expanded.is_absolute() {
+        Ok(expanded)
+    } else {
+        Ok(env::current_dir()
+            .context("failed to read current working directory")?
+            .join(expanded))
+    }
+}
+
+fn expand_tilde_path(path: &Path, home_dir: &Path) -> PathBuf {
+    let raw = path.to_string_lossy();
+    if raw == "~" {
+        return home_dir.to_path_buf();
+    }
+    if let Some(stripped) = raw.strip_prefix("~/") {
+        return home_dir.join(stripped);
+    }
+    path.to_path_buf()
+}
+
+pub(crate) fn ensure_linux_host_prerequisites(
+    host_platform: &str,
+    home_dir: &Path,
+    configure_args: &mut Vec<String>,
+    user_cmake_args: &[String],
+    install_linux_deps: bool,
+) -> Result<Option<LinuxQtAutoConfig>> {
+    if host_platform != "linux" {
+        ensure_cmake_available()?;
+        return Ok(None);
+    }
+
+    let explicit_qt_hint = has_explicit_linux_qt_hint(user_cmake_args);
+    let package_install_plan = detect_linux_package_install_plan();
+    let mut package_install_attempted = false;
+    let missing_tools = collect_missing_linux_host_tools();
+    if !missing_tools.is_empty() {
+        if install_linux_deps {
+            let Some(plan) = package_install_plan.as_ref() else {
+                eprintln!(
+                    "[LVRS] Missing Linux host tools: {}",
+                    missing_tools.join(", ")
+                );
+                bail!("linux host dependencies missing");
+            };
+            println!(
+                "[LVRS] Installing Linux host dependencies: {}",
+                missing_tools.join(", ")
+            );
+            run_linux_package_install(plan)?;
+            package_install_attempted = true;
+        } else {
+            eprintln!(
+                "[LVRS] Missing Linux host tools: {}",
+                missing_tools.join(", ")
+            );
+            print_linux_dependency_install_hint(package_install_plan.as_ref());
+            bail!("linux host dependencies missing");
+        }
+    }
+
+    ensure_cmake_available()?;
+
+    let preflight_args = collect_linux_preflight_cmake_args(user_cmake_args);
+    let mut initial_preflight = run_linux_dependency_preflight(&preflight_args)?;
+    if initial_preflight.success {
+        return Ok(None);
+    }
+
+    if explicit_qt_hint {
+        eprintln!("[LVRS] Linux dependency preflight failed.");
+        eprintln!(
+            "[LVRS] Explicit Qt hints are set. Fix Qt6_DIR/LVRS_BOOTSTRAP_QT_PREFIX_LINUX and retry."
+        );
+        eprintln!(
+            "[LVRS] Preflight tail:\n{}",
+            tail_lines(&initial_preflight.output, 12)
+        );
+        print_linux_dependency_install_hint(package_install_plan.as_ref());
+        bail!("linux dependency preflight failed");
+    }
+
+    let mut detected_qt_install = detect_linux_qt_install(home_dir);
+    if detected_qt_install.is_none() && install_linux_deps && !package_install_attempted {
+        if let Some(plan) = package_install_plan.as_ref() {
+            println!(
+                "[LVRS] Qt development packages were not detected. Installing Linux distro dependencies..."
+            );
+            run_linux_package_install(plan)?;
+            ensure_cmake_available()?;
+            initial_preflight = run_linux_dependency_preflight(&preflight_args)?;
+            if initial_preflight.success {
+                return Ok(None);
+            }
+            detected_qt_install = detect_linux_qt_install(home_dir);
+        }
+    }
+
+    let Some(mut qt_install) = detected_qt_install else {
+        eprintln!("[LVRS] Linux dependency preflight failed.");
+        eprintln!(
+            "[LVRS] Required dependency: Qt 6.5+ development package with Quick, QuickControls2, Qml, Svg, Network, and Qt host tools."
+        );
+        eprintln!(
+            "[LVRS] Searched Qt hints: Qt6_DIR, LVRS_BOOTSTRAP_QT_PREFIX_LINUX, LVRS_BOOTSTRAP_QT_PREFIX, QT_LINUX_PREFIX, QT_HOST_PREFIX, QTDIR, CMAKE_PREFIX_PATH, qtpaths6/qmake6, ~/Qt, /opt/Qt, distro Qt locations."
+        );
+        eprintln!(
+            "[LVRS] Preflight tail:\n{}",
+            tail_lines(&initial_preflight.output, 12)
+        );
+        print_linux_dependency_install_hint(package_install_plan.as_ref());
+        bail!("linux dependency preflight failed");
+    };
+
+    let mut retry_preflight_args = preflight_args;
+    let mut injected = Vec::new();
+    if inject_cmake_definition(configure_args, ENV_QT6_DIR, &qt_install.qt6_dir) {
+        injected.push(format!(
+            "-D{}={}",
+            ENV_QT6_DIR,
+            qt_install.qt6_dir.display()
+        ));
+    }
+    if inject_cmake_definition(
+        configure_args,
+        "LVRS_BOOTSTRAP_QT_PREFIX_LINUX",
+        &qt_install.prefix,
+    ) {
+        injected.push(format!(
+            "-DLVRS_BOOTSTRAP_QT_PREFIX_LINUX={}",
+            qt_install.prefix.display()
+        ));
+    }
+    inject_cmake_definition(&mut retry_preflight_args, ENV_QT6_DIR, &qt_install.qt6_dir);
+
+    let retry_preflight = run_linux_dependency_preflight(&retry_preflight_args)?;
+    if !retry_preflight.success {
+        eprintln!("[LVRS] Linux dependency preflight failed after Qt auto-detect.");
+        eprintln!("[LVRS] Auto-detected Qt source : {}", qt_install.source);
+        eprintln!(
+            "[LVRS] Auto-detected Qt prefix : {}",
+            qt_install.prefix.display()
+        );
+        eprintln!(
+            "[LVRS] Auto-detected Qt6_DIR : {}",
+            qt_install.qt6_dir.display()
+        );
+        eprintln!(
+            "[LVRS] Preflight tail:\n{}",
+            tail_lines(&retry_preflight.output, 12)
+        );
+        print_linux_dependency_install_hint(package_install_plan.as_ref());
+        bail!("linux dependency preflight failed");
+    }
+
+    qt_install.injected = injected;
+    Ok(Some(qt_install))
+}
+
+fn collect_missing_linux_host_tools() -> Vec<&'static str> {
+    let mut missing = Vec::new();
+    if !program_exists("cmake") {
+        missing.push("cmake");
+    }
+    if !(program_exists("c++") || program_exists("g++") || program_exists("clang++")) {
+        missing.push("C++ compiler");
+    }
+    if !(program_exists("make")
+        || program_exists("gmake")
+        || program_exists("ninja")
+        || program_exists("ninja-build"))
+    {
+        missing.push("build tool (make or ninja)");
+    }
+    missing
+}
+
+fn program_exists(program: &str) -> bool {
+    find_program_in_path(program).is_some()
+}
+
+fn find_program_in_path(program: &str) -> Option<PathBuf> {
+    let path_value = env::var_os("PATH")?;
+    for entry in env::split_paths(&path_value) {
+        let candidate = entry.join(program);
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+fn detect_linux_package_install_plan() -> Option<LinuxPackageInstallPlan> {
+    let os_release = read_linux_os_release().unwrap_or_else(|| LinuxOsRelease {
+        id: String::new(),
+        id_like: Vec::new(),
+    });
+    let manager = detect_linux_package_manager(&os_release)?;
+    Some(build_linux_package_install_plan(manager))
+}
+
+fn read_linux_os_release() -> Option<LinuxOsRelease> {
+    let content = fs::read_to_string("/etc/os-release").ok()?;
+    let mut id = String::new();
+    let mut id_like = Vec::new();
+
+    for line in content.lines() {
+        let Some((raw_key, raw_value)) = line.split_once('=') else {
+            continue;
+        };
+        let key = raw_key.trim();
+        let value = raw_value.trim().trim_matches('"');
+        match key {
+            "ID" => id = value.to_lowercase(),
+            "ID_LIKE" => {
+                id_like = value
+                    .split_whitespace()
+                    .map(|item| item.to_lowercase())
+                    .collect()
+            }
+            _ => {}
+        }
+    }
+
+    Some(LinuxOsRelease { id, id_like })
+}
+
+fn detect_linux_package_manager(os_release: &LinuxOsRelease) -> Option<LinuxPackageManager> {
+    let distro_tokens = {
+        let mut tokens = Vec::new();
+        if !os_release.id.is_empty() {
+            tokens.push(os_release.id.as_str());
+        }
+        for item in &os_release.id_like {
+            tokens.push(item.as_str());
+        }
+        tokens
+    };
+
+    if program_exists("apt-get")
+        && distro_tokens
+            .iter()
+            .any(|token| matches!(*token, "debian" | "ubuntu" | "linuxmint" | "pop"))
+    {
+        return Some(LinuxPackageManager::Apt);
+    }
+    if program_exists("dnf")
+        && distro_tokens
+            .iter()
+            .any(|token| matches!(*token, "fedora" | "rhel" | "centos"))
+    {
+        return Some(LinuxPackageManager::Dnf);
+    }
+    if program_exists("pacman")
+        && distro_tokens
+            .iter()
+            .any(|token| matches!(*token, "arch" | "manjaro"))
+    {
+        return Some(LinuxPackageManager::Pacman);
+    }
+    if program_exists("zypper")
+        && distro_tokens
+            .iter()
+            .any(|token| matches!(*token, "opensuse" | "suse" | "sles"))
+    {
+        return Some(LinuxPackageManager::Zypper);
+    }
+    if program_exists("apk") && distro_tokens.iter().any(|token| matches!(*token, "alpine")) {
+        return Some(LinuxPackageManager::Apk);
+    }
+
+    if program_exists("apt-get") {
+        Some(LinuxPackageManager::Apt)
+    } else if program_exists("dnf") {
+        Some(LinuxPackageManager::Dnf)
+    } else if program_exists("pacman") {
+        Some(LinuxPackageManager::Pacman)
+    } else if program_exists("zypper") {
+        Some(LinuxPackageManager::Zypper)
+    } else if program_exists("apk") {
+        Some(LinuxPackageManager::Apk)
+    } else {
+        None
+    }
+}
+
+fn build_linux_package_install_plan(manager: LinuxPackageManager) -> LinuxPackageInstallPlan {
+    let is_root = linux_user_is_root();
+    let sudo_available = program_exists("sudo");
+    let prefix = if is_root {
+        None
+    } else if sudo_available {
+        Some("sudo")
+    } else {
+        None
+    };
+
+    match manager {
+        LinuxPackageManager::Apt => LinuxPackageInstallPlan {
+            manager,
+            display_commands: vec![
+                render_prefixed_command(prefix, "apt-get", &["update"]),
+                render_prefixed_command(
+                    prefix,
+                    "apt-get",
+                    &[
+                        "install",
+                        "-y",
+                        "build-essential",
+                        "cmake",
+                        "ninja-build",
+                        "pkg-config",
+                        "qt6-base-dev",
+                        "qt6-base-dev-tools",
+                        "qt6-declarative-dev",
+                        "qt6-declarative-dev-tools",
+                        "qt6-svg-dev",
+                    ],
+                ),
+            ],
+            exec_commands: vec![
+                prefixed_command(prefix, "apt-get", &["update"]),
+                prefixed_command(
+                    prefix,
+                    "apt-get",
+                    &[
+                        "install",
+                        "-y",
+                        "build-essential",
+                        "cmake",
+                        "ninja-build",
+                        "pkg-config",
+                        "qt6-base-dev",
+                        "qt6-base-dev-tools",
+                        "qt6-declarative-dev",
+                        "qt6-declarative-dev-tools",
+                        "qt6-svg-dev",
+                    ],
+                ),
+            ],
+        },
+        LinuxPackageManager::Dnf => LinuxPackageInstallPlan {
+            manager,
+            display_commands: vec![render_prefixed_command(
+                prefix,
+                "dnf",
+                &[
+                    "install",
+                    "-y",
+                    "gcc-c++",
+                    "cmake",
+                    "ninja-build",
+                    "pkgconf-pkg-config",
+                    "qt6-qtbase-devel",
+                    "qt6-qtdeclarative-devel",
+                    "qt6-qtsvg-devel",
+                ],
+            )],
+            exec_commands: vec![prefixed_command(
+                prefix,
+                "dnf",
+                &[
+                    "install",
+                    "-y",
+                    "gcc-c++",
+                    "cmake",
+                    "ninja-build",
+                    "pkgconf-pkg-config",
+                    "qt6-qtbase-devel",
+                    "qt6-qtdeclarative-devel",
+                    "qt6-qtsvg-devel",
+                ],
+            )],
+        },
+        LinuxPackageManager::Pacman => LinuxPackageInstallPlan {
+            manager,
+            display_commands: vec![render_prefixed_command(
+                prefix,
+                "pacman",
+                &[
+                    "-S",
+                    "--needed",
+                    "base-devel",
+                    "cmake",
+                    "ninja",
+                    "pkgconf",
+                    "qt6-base",
+                    "qt6-declarative",
+                    "qt6-svg",
+                ],
+            )],
+            exec_commands: vec![prefixed_command(
+                prefix,
+                "pacman",
+                &[
+                    "-S",
+                    "--needed",
+                    "base-devel",
+                    "cmake",
+                    "ninja",
+                    "pkgconf",
+                    "qt6-base",
+                    "qt6-declarative",
+                    "qt6-svg",
+                ],
+            )],
+        },
+        LinuxPackageManager::Zypper => LinuxPackageInstallPlan {
+            manager,
+            display_commands: vec![render_prefixed_command(
+                prefix,
+                "zypper",
+                &[
+                    "install",
+                    "-y",
+                    "gcc-c++",
+                    "cmake",
+                    "ninja",
+                    "pkg-config",
+                    "qt6-base-devel",
+                    "qt6-declarative-devel",
+                    "qt6-svg-devel",
+                ],
+            )],
+            exec_commands: vec![prefixed_command(
+                prefix,
+                "zypper",
+                &[
+                    "install",
+                    "-y",
+                    "gcc-c++",
+                    "cmake",
+                    "ninja",
+                    "pkg-config",
+                    "qt6-base-devel",
+                    "qt6-declarative-devel",
+                    "qt6-svg-devel",
+                ],
+            )],
+        },
+        LinuxPackageManager::Apk => LinuxPackageInstallPlan {
+            manager,
+            display_commands: vec![render_prefixed_command(
+                prefix,
+                "apk",
+                &[
+                    "add",
+                    "build-base",
+                    "cmake",
+                    "ninja",
+                    "pkgconf",
+                    "qt6-qtbase-dev",
+                    "qt6-qtdeclarative-dev",
+                    "qt6-qtsvg-dev",
+                ],
+            )],
+            exec_commands: vec![prefixed_command(
+                prefix,
+                "apk",
+                &[
+                    "add",
+                    "build-base",
+                    "cmake",
+                    "ninja",
+                    "pkgconf",
+                    "qt6-qtbase-dev",
+                    "qt6-qtdeclarative-dev",
+                    "qt6-qtsvg-dev",
+                ],
+            )],
+        },
+    }
+}
+
+fn linux_user_is_root() -> bool {
+    let output = Command::new("id")
+        .arg("-u")
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output();
+    match output {
+        Ok(value) if value.status.success() => String::from_utf8_lossy(&value.stdout).trim() == "0",
+        _ => false,
+    }
+}
+
+fn render_prefixed_command(prefix: Option<&str>, program: &str, args: &[&str]) -> String {
+    let (exec_program, exec_args) = prefixed_command(prefix, program, args);
+    std::iter::once(exec_program)
+        .chain(exec_args)
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn prefixed_command(prefix: Option<&str>, program: &str, args: &[&str]) -> (String, Vec<String>) {
+    if let Some(prefix_program) = prefix {
+        let mut exec_args = vec![program.to_string()];
+        exec_args.extend(args.iter().map(|value| (*value).to_string()));
+        (prefix_program.to_string(), exec_args)
+    } else {
+        (
+            program.to_string(),
+            args.iter().map(|value| (*value).to_string()).collect(),
+        )
+    }
+}
+
+fn run_linux_package_install(plan: &LinuxPackageInstallPlan) -> Result<()> {
+    if !linux_user_is_root() && !program_exists("sudo") {
+        bail!(
+            "[LVRS] automatic Linux dependency install requires root or sudo. run the suggested package-manager command manually."
+        );
+    }
+
+    for (program, args) in &plan.exec_commands {
+        println!("[LVRS] Running: {}", render_command_line(program, args));
+        let status = Command::new(program)
+            .args(args)
+            .stdin(Stdio::inherit())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .with_context(|| {
+                format!("failed to run Linux dependency install command: {program}")
+            })?;
+        if !status.success() {
+            bail!(
+                "[LVRS] Linux dependency install command failed: {}",
+                render_command_line(program, args)
+            );
+        }
+    }
+
+    Ok(())
+}
+
+fn render_command_line(program: &str, args: &[String]) -> String {
+    std::iter::once(program.to_string())
+        .chain(args.iter().cloned())
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn print_linux_dependency_install_hint(plan: Option<&LinuxPackageInstallPlan>) {
+    let Some(plan) = plan else {
+        return;
+    };
+
+    eprintln!(
+        "[LVRS] Suggested Linux dependency install command(s) via {}:",
+        linux_package_manager_label(plan.manager)
+    );
+    for command in &plan.display_commands {
+        eprintln!("       {}", command);
+    }
+    if !linux_user_is_root() && !program_exists("sudo") {
+        eprintln!("       run the command(s) above as root.");
+    } else {
+        eprintln!("       or rerun with: lvrs install --install-linux-deps");
+    }
+}
+
+fn linux_package_manager_label(manager: LinuxPackageManager) -> &'static str {
+    match manager {
+        LinuxPackageManager::Apt => "apt",
+        LinuxPackageManager::Dnf => "dnf",
+        LinuxPackageManager::Pacman => "pacman",
+        LinuxPackageManager::Zypper => "zypper",
+        LinuxPackageManager::Apk => "apk",
+    }
+}
+
+fn collect_linux_preflight_cmake_args(cmake_args: &[String]) -> Vec<String> {
+    let mut collected = Vec::new();
+    let mut index = 0usize;
+    while index < cmake_args.len() {
+        let arg = &cmake_args[index];
+        match arg.as_str() {
+            "-G" | "-A" | "-T" => {
+                if let Some(value) = cmake_args.get(index + 1) {
+                    collected.push(arg.clone());
+                    collected.push(value.clone());
+                    index += 2;
+                    continue;
+                }
+            }
+            _ => {}
+        }
+
+        if matches_inline_generator_arg(arg) {
+            collected.push(arg.clone());
+            index += 1;
+            continue;
+        }
+
+        if let Some(key) = cmake_definition_key(arg) {
+            if matches!(
+                key,
+                ENV_QT6_DIR
+                    | ENV_CMAKE_PREFIX_PATH
+                    | "CMAKE_C_COMPILER"
+                    | "CMAKE_CXX_COMPILER"
+                    | "CMAKE_MAKE_PROGRAM"
+                    | "CMAKE_TOOLCHAIN_FILE"
+            ) {
+                collected.push(arg.clone());
+            }
+        }
+
+        index += 1;
+    }
+
+    collected
+}
+
+fn matches_inline_generator_arg(arg: &str) -> bool {
+    arg.starts_with("-G") || arg.starts_with("-A") || arg.starts_with("-T")
+}
+
+fn cmake_definition_key(arg: &str) -> Option<&str> {
+    if !arg.starts_with("-D") {
+        return None;
+    }
+
+    let definition = &arg[2..];
+    let key = definition.split_once('=').map(|(value, _)| value)?;
+    Some(key.split(':').next().unwrap_or(key))
+}
+
+fn has_explicit_linux_qt_hint(cmake_args: &[String]) -> bool {
+    if cmake_args.iter().any(|arg| {
+        matches!(
+            cmake_definition_key(arg),
+            Some(ENV_QT6_DIR | "LVRS_BOOTSTRAP_QT_PREFIX_LINUX" | "LVRS_BOOTSTRAP_QT_PREFIX")
+        )
+    }) {
+        return true;
+    }
+
+    for env_name in [
+        ENV_QT6_DIR,
+        "LVRS_BOOTSTRAP_QT_PREFIX_LINUX",
+        "LVRS_BOOTSTRAP_QT_PREFIX",
+        "QT_LINUX_PREFIX",
+        "QT_HOST_PREFIX",
+        "QTDIR",
+    ] {
+        if let Ok(value) = env::var(env_name) {
+            if !value.trim().is_empty() {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+fn inject_cmake_definition(args: &mut Vec<String>, key: &str, value: &Path) -> bool {
+    if args
+        .iter()
+        .any(|arg| cmake_definition_key(arg).is_some_and(|definition| definition == key))
+    {
+        return false;
+    }
+
+    args.push(format!("-D{}={}", key, value.display()));
+    true
+}
+
+fn detect_linux_qt_install(home_dir: &Path) -> Option<LinuxQtAutoConfig> {
+    for env_name in [
+        ENV_QT6_DIR,
+        "LVRS_BOOTSTRAP_QT_PREFIX_LINUX",
+        "LVRS_BOOTSTRAP_QT_PREFIX",
+        "QT_LINUX_PREFIX",
+        "QT_HOST_PREFIX",
+        "QTDIR",
+    ] {
+        if let Ok(value) = env::var(env_name) {
+            for candidate in split_search_paths(&value) {
+                if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
+                    return Some(LinuxQtAutoConfig {
+                        prefix,
+                        qt6_dir,
+                        source: format!("env:{env_name}"),
+                        injected: Vec::new(),
+                    });
+                }
+            }
+        }
+    }
+
+    if let Ok(value) = env::var(ENV_CMAKE_PREFIX_PATH) {
+        for candidate in split_search_paths(&value) {
+            if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
+                return Some(LinuxQtAutoConfig {
+                    prefix,
+                    qt6_dir,
+                    source: format!("env:{ENV_CMAKE_PREFIX_PATH}"),
+                    injected: Vec::new(),
+                });
+            }
+        }
+    }
+
+    for tool in ["qtpaths6", "qtpaths", "qmake6", "qmake"] {
+        for query_key in ["QT_INSTALL_LIBS", "QT_INSTALL_PREFIX"] {
+            if let Some(candidate) = query_qt_install_path(tool, query_key) {
+                if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
+                    return Some(LinuxQtAutoConfig {
+                        prefix,
+                        qt6_dir,
+                        source: format!("{tool} -query {query_key}"),
+                        injected: Vec::new(),
+                    });
+                }
+            }
+        }
+    }
+
+    for root in detect_qt_version_roots(Some(home_dir)) {
+        for candidate in linux_qt_prefix_candidates(&root) {
+            if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
+                return Some(LinuxQtAutoConfig {
+                    prefix,
+                    qt6_dir,
+                    source: format!("search:{}", candidate.display()),
+                    injected: Vec::new(),
+                });
+            }
+        }
+    }
+
+    for candidate in [
+        PathBuf::from("/usr/lib/x86_64-linux-gnu"),
+        PathBuf::from("/usr/lib64"),
+        PathBuf::from("/usr/lib"),
+        PathBuf::from("/usr/local/lib64"),
+        PathBuf::from("/usr/local/lib"),
+        PathBuf::from("/usr/lib/qt6"),
+        PathBuf::from("/usr/lib64/qt6"),
+        PathBuf::from("/usr/local/lib/qt6"),
+    ] {
+        if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
+            return Some(LinuxQtAutoConfig {
+                prefix,
+                qt6_dir,
+                source: format!("search:{}", candidate.display()),
+                injected: Vec::new(),
+            });
+        }
+    }
+
+    None
+}
+
+fn split_search_paths(raw: &str) -> Vec<PathBuf> {
+    raw.split([';', ':'])
+        .filter_map(|value| {
+            let trimmed = value.trim();
+            if trimmed.is_empty() {
+                None
+            } else {
+                Some(PathBuf::from(trimmed))
+            }
+        })
+        .collect()
+}
+
+fn query_qt_install_path(tool: &str, query_key: &str) -> Option<PathBuf> {
+    let output = Command::new(tool)
+        .args(["-query", query_key])
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let value = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if value.is_empty() {
+        None
+    } else {
+        Some(PathBuf::from(value))
+    }
+}
+
+fn resolve_qt_install_candidate(candidate: &Path) -> Option<(PathBuf, PathBuf)> {
+    if candidate.is_file()
+        && candidate
+            .file_name()
+            .is_some_and(|name| name == "Qt6Config.cmake")
+    {
+        let qt6_dir = candidate.parent()?.to_path_buf();
+        let prefix = qt_prefix_from_qt6_dir(&qt6_dir)?;
+        return Some((prefix, qt6_dir));
+    }
+
+    if !candidate.is_dir() {
+        return None;
+    }
+
+    for relative in ["lib/cmake/Qt6", "lib64/cmake/Qt6", "cmake/Qt6"] {
+        let qt6_dir = candidate.join(relative);
+        if qt6_dir.join("Qt6Config.cmake").is_file() {
+            let prefix = if relative == "cmake/Qt6" {
+                qt_prefix_from_qt6_dir(&qt6_dir)?
+            } else {
+                candidate.to_path_buf()
+            };
+            return Some((prefix, qt6_dir));
+        }
+    }
+
+    if candidate.join("Qt6Config.cmake").is_file() {
+        let qt6_dir = candidate.to_path_buf();
+        let prefix = qt_prefix_from_qt6_dir(&qt6_dir)?;
+        return Some((prefix, qt6_dir));
+    }
+
+    None
+}
+
+fn qt_prefix_from_qt6_dir(qt6_dir: &Path) -> Option<PathBuf> {
+    if !qt6_dir.join("Qt6Config.cmake").is_file() {
+        return None;
+    }
+
+    let qt6_name = qt6_dir.file_name()?.to_string_lossy();
+    if qt6_name != "Qt6" {
+        return None;
+    }
+
+    let cmake_dir = qt6_dir.parent()?;
+    if cmake_dir.file_name()?.to_string_lossy() != "cmake" {
+        return None;
+    }
+
+    let prefix_candidate = cmake_dir.parent()?.to_path_buf();
+    let prefix_name = prefix_candidate
+        .file_name()
+        .map(|value| value.to_string_lossy());
+    if matches!(prefix_name.as_deref(), Some("lib" | "lib64")) {
+        prefix_candidate.parent().map(Path::to_path_buf)
+    } else {
+        Some(prefix_candidate)
+    }
+}
+
+fn detect_qt_version_roots(home_dir: Option<&Path>) -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+    if let Ok(value) = env::var("QT_VERSION_ROOT") {
+        let candidate = PathBuf::from(value.trim());
+        if candidate.is_dir() {
+            roots.push(candidate);
+        }
+    }
+
+    if let Some(home) = home_dir {
+        push_latest_or_self(&mut roots, &home.join("Qt"));
+    }
+
+    push_latest_or_self(&mut roots, &PathBuf::from("/opt/Qt"));
+    push_latest_or_self(&mut roots, &PathBuf::from("/opt/qt"));
+
+    roots
+}
+
+fn push_latest_or_self(targets: &mut Vec<PathBuf>, base_dir: &Path) {
+    if !base_dir.is_dir() {
+        return;
+    }
+
+    if let Some(latest) = latest_version_dir(base_dir) {
+        if !targets.contains(&latest) {
+            targets.push(latest);
+        }
+        return;
+    }
+
+    let value = base_dir.to_path_buf();
+    if !targets.contains(&value) {
+        targets.push(value);
+    }
+}
+
+fn linux_qt_prefix_candidates(version_root: &Path) -> Vec<PathBuf> {
+    let mut candidates = vec![
+        version_root.join("gcc_64"),
+        version_root.join("linux"),
+        version_root.to_path_buf(),
+    ];
+    candidates.retain(|candidate| candidate.is_dir());
+    candidates
+}
+
+fn latest_version_dir(parent: &Path) -> Option<PathBuf> {
+    let mut candidates = Vec::new();
+    let read_dir = fs::read_dir(parent).ok()?;
+    for entry in read_dir.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        if is_version_text(&name) {
+            candidates.push(path);
+        }
+    }
+
+    candidates.sort_by(|left, right| compare_version_paths(left, right));
+    candidates.pop()
+}
+
+fn is_version_text(text: &str) -> bool {
+    !text.is_empty() && text.chars().all(|ch| ch.is_ascii_digit() || ch == '.')
+}
+
+fn compare_version_paths(left: &Path, right: &Path) -> std::cmp::Ordering {
+    let left_name = left
+        .file_name()
+        .map(|value| value.to_string_lossy().to_string())
+        .unwrap_or_default();
+    let right_name = right
+        .file_name()
+        .map(|value| value.to_string_lossy().to_string())
+        .unwrap_or_default();
+    compare_version_text(&left_name, &right_name)
+}
+
+fn compare_version_text(left: &str, right: &str) -> std::cmp::Ordering {
+    let left_parts = parse_version_parts(left);
+    let right_parts = parse_version_parts(right);
+    let max_len = left_parts.len().max(right_parts.len());
+    for index in 0..max_len {
+        let left_value = *left_parts.get(index).unwrap_or(&0);
+        let right_value = *right_parts.get(index).unwrap_or(&0);
+        if left_value != right_value {
+            return left_value.cmp(&right_value);
+        }
+    }
+    std::cmp::Ordering::Equal
+}
+
+fn parse_version_parts(text: &str) -> Vec<u32> {
+    text.split('.')
+        .map(|part| part.parse::<u32>().unwrap_or(0))
+        .collect()
+}
+
+fn run_linux_dependency_preflight(cmake_args: &[String]) -> Result<CommandCapture> {
+    let preflight_root = env::temp_dir().join(format!(
+        "lvrs-linux-preflight-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|value| value.as_nanos())
+            .unwrap_or(0)
+    ));
+    let preflight_build_dir = preflight_root.join("build");
+    fs::create_dir_all(&preflight_root).with_context(|| {
+        format!(
+            "failed to create Linux dependency preflight dir: {}",
+            preflight_root.display()
+        )
+    })?;
+    fs::write(
+        preflight_root.join("CMakeLists.txt"),
+        concat!(
+            "cmake_minimum_required(VERSION 3.21)\n",
+            "project(LVRSLinuxPreflight LANGUAGES CXX)\n",
+            "find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)\n",
+            "foreach(_lvrs_tool IN ITEMS moc rcc qmlimportscanner qmlcachegen qmltyperegistrar)\n",
+            "    if(NOT TARGET Qt6::${_lvrs_tool})\n",
+            "        message(FATAL_ERROR \"Qt host tool target missing: Qt6::${_lvrs_tool}\")\n",
+            "    endif()\n",
+            "endforeach()\n"
+        ),
+    )
+    .context("failed to write Linux dependency preflight CMakeLists.txt")?;
+
+    let mut args = vec![
+        "-S".to_string(),
+        preflight_root.display().to_string(),
+        "-B".to_string(),
+        preflight_build_dir.display().to_string(),
+    ];
+    args.extend(cmake_args.iter().cloned());
+
+    let output = Command::new("cmake")
+        .args(&args)
+        .stdin(Stdio::null())
+        .output()
+        .context("failed to run Linux dependency preflight")?;
+    let combined_output = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let _ = remove_path(&preflight_root);
+
+    Ok(CommandCapture {
+        success: output.status.success(),
+        output: combined_output,
+    })
+}
+
+fn tail_lines(text: &str, max_lines: usize) -> String {
+    let lines = text
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .collect::<Vec<_>>();
+    let start = lines.len().saturating_sub(max_lines);
+    lines[start..].join("\n")
+}
+
+pub(crate) fn detect_host_platform() -> &'static str {
     match env::consts::OS {
         "macos" => "macos",
         "linux" => "linux",
@@ -233,14 +1322,17 @@ fn normalize_platform_list(input: String) -> String {
 
 fn default_bootstrap_framework_platforms(host_platform: &str) -> &'static str {
     match host_platform {
-        "linux" => "linux;android;wasm",
+        "linux" => "linux",
         "macos" => "macos;ios;android;wasm",
         "windows" => "windows;android;wasm",
         _ => "android;wasm",
     }
 }
 
-fn resolve_bootstrap_framework_platforms(cli_platforms: Option<&str>, host_platform: &str) -> String {
+pub(crate) fn resolve_bootstrap_framework_platforms(
+    cli_platforms: Option<&str>,
+    host_platform: &str,
+) -> String {
     if let Some(value) = cli_platforms {
         return normalize_platform_list(value.to_string());
     }
@@ -292,7 +1384,7 @@ fn has_sentinels(path: &Path) -> bool {
         && path.join("backend").is_dir()
 }
 
-fn resolve_project_root(project_root_override: Option<PathBuf>) -> Result<PathBuf> {
+pub(crate) fn resolve_project_root(project_root_override: Option<PathBuf>) -> Result<PathBuf> {
     if let Some(path) = project_root_override {
         return validate_project_root_candidate(path, "bootstrap override");
     }
@@ -791,19 +1883,52 @@ fn write_env_helper(
         fs::create_dir_all(parent)
             .with_context(|| format!("failed to create env helper dir: {}", parent.display()))?;
     }
-    let content = format!(
-        "#!/usr/bin/env sh\n# LVRS environment helper\nexport LVRS_PLATFORMS_ROOT=\"{}\"\nexport LVRS_HOST_PLATFORM=\"{}\"\nexport LVRS_HOST_PREFIX=\"{}\"\nexport CMAKE_PREFIX_PATH=\"{}:${{CMAKE_PREFIX_PATH:-}}\"\nexport QML2_IMPORT_PATH=\"{}/lib/qt6/qml:${{QML2_IMPORT_PATH:-}}\"\n",
+    let content = render_env_helper_script(
         platform_install_root.display(),
         host_platform,
         host_install_prefix.display(),
         install_prefix.display(),
-        host_install_prefix.display()
+        host_install_prefix.display(),
     );
     fs::write(env_file, content)
         .with_context(|| format!("failed to write env helper: {}", env_file.display()))?;
 
     set_executable_bit(env_file)?;
     Ok(())
+}
+
+fn render_env_helper_script(
+    platform_install_root: impl std::fmt::Display,
+    host_platform: &str,
+    host_install_prefix: impl std::fmt::Display,
+    install_prefix: impl std::fmt::Display,
+    qml_import_root: impl std::fmt::Display,
+) -> String {
+    let mut content = format!(
+        "#!/usr/bin/env sh\n# LVRS environment helper\nexport LVRS_PLATFORMS_ROOT=\"{}\"\nexport LVRS_HOST_PLATFORM=\"{}\"\nexport LVRS_HOST_PREFIX=\"{}\"\n",
+        platform_install_root, host_platform, host_install_prefix
+    );
+    content.push_str(
+        r#"_lvrs_prepend_path() {
+    _lvrs_var_name="$1"
+    _lvrs_path_value="$2"
+    eval "_lvrs_current_value=\${${_lvrs_var_name}:-}"
+    case ":${_lvrs_current_value}:" in
+        *:"${_lvrs_path_value}":*) return ;;
+    esac
+    if [ -n "${_lvrs_current_value}" ]; then
+        eval "export ${_lvrs_var_name}=\"${_lvrs_path_value}:${_lvrs_current_value}\""
+    else
+        eval "export ${_lvrs_var_name}=\"${_lvrs_path_value}\""
+    fi
+}
+"#,
+    );
+    content.push_str(&format!(
+        "_lvrs_prepend_path CMAKE_PREFIX_PATH \"{}\"\n_lvrs_prepend_path QML2_IMPORT_PATH \"{}/lib/qt6/qml\"\nunset -f _lvrs_prepend_path\n",
+        install_prefix, qml_import_root
+    ));
+    content
 }
 
 #[cfg(unix)]
@@ -858,7 +1983,11 @@ mod tests {
     #[test]
     fn install_built_example_bins_copies_fresh_build_outputs() -> Result<()> {
         let root = temp_test_dir("copy");
-        let build_bin_dir = root.join("build").join("example").join("VisualCatalog").join("bin");
+        let build_bin_dir = root
+            .join("build")
+            .join("example")
+            .join("VisualCatalog")
+            .join("bin");
         let snapshot_example_dir = root.join("snapshot").join("example").join("VisualCatalog");
         let stale_bin_dir = snapshot_example_dir.join("bin");
 
@@ -886,10 +2015,7 @@ mod tests {
 
     #[test]
     fn default_bootstrap_framework_platforms_follow_host_policy() {
-        assert_eq!(
-            default_bootstrap_framework_platforms("linux"),
-            "linux;android;wasm"
-        );
+        assert_eq!(default_bootstrap_framework_platforms("linux"), "linux");
         assert_eq!(
             default_bootstrap_framework_platforms("macos"),
             "macos;ios;android;wasm"
@@ -904,7 +2030,83 @@ mod tests {
     fn resolve_bootstrap_framework_platforms_prefers_host_defaults() {
         assert_eq!(
             resolve_bootstrap_framework_platforms(None, "linux"),
-            "linux;android;wasm"
+            "linux"
         );
+    }
+
+    #[test]
+    fn resolve_qt_install_candidate_accepts_standard_prefix_layout() -> Result<()> {
+        let root = temp_test_dir("qt-standard");
+        let qt_prefix = root.join("Qt").join("6.8.3").join("gcc_64");
+        let qt6_dir = qt_prefix.join("lib").join("cmake").join("Qt6");
+        fs::create_dir_all(&qt6_dir)?;
+        fs::write(qt6_dir.join("Qt6Config.cmake"), "")?;
+
+        let resolved = resolve_qt_install_candidate(&qt_prefix);
+        assert!(resolved.is_some());
+        let (resolved_prefix, resolved_qt6_dir) = resolved.unwrap();
+        assert_eq!(resolved_prefix, qt_prefix);
+        assert_eq!(resolved_qt6_dir, qt6_dir);
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn resolve_qt_install_candidate_accepts_multiarch_layout() -> Result<()> {
+        let root = temp_test_dir("qt-multiarch");
+        let qt_prefix = root.join("usr").join("lib").join("x86_64-linux-gnu");
+        let qt6_dir = qt_prefix.join("cmake").join("Qt6");
+        fs::create_dir_all(&qt6_dir)?;
+        fs::write(qt6_dir.join("Qt6Config.cmake"), "")?;
+
+        let resolved = resolve_qt_install_candidate(&qt_prefix);
+        assert!(resolved.is_some());
+        let (resolved_prefix, resolved_qt6_dir) = resolved.unwrap();
+        assert_eq!(resolved_prefix, qt_prefix);
+        assert_eq!(resolved_qt6_dir, qt6_dir);
+
+        let resolved_from_qt6_dir = resolve_qt_install_candidate(&qt6_dir).unwrap();
+        assert_eq!(resolved_from_qt6_dir.0, qt_prefix);
+        assert_eq!(resolved_from_qt6_dir.1, qt6_dir);
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn render_env_helper_script_uses_idempotent_path_prepend() {
+        let script = render_env_helper_script(
+            "/tmp/lvrs/platforms",
+            "linux",
+            "/tmp/lvrs/platforms/linux",
+            "/tmp/lvrs",
+            "/tmp/lvrs/platforms/linux",
+        );
+        assert!(script.contains("export LVRS_PLATFORMS_ROOT=\"/tmp/lvrs/platforms\""));
+        assert!(script.contains("_lvrs_prepend_path CMAKE_PREFIX_PATH \"/tmp/lvrs\""));
+        assert!(script.contains(
+            "_lvrs_prepend_path QML2_IMPORT_PATH \"/tmp/lvrs/platforms/linux/lib/qt6/qml\""
+        ));
+    }
+
+    #[test]
+    fn linux_package_manager_label_matches_command_family() {
+        assert_eq!(linux_package_manager_label(LinuxPackageManager::Apt), "apt");
+        assert_eq!(linux_package_manager_label(LinuxPackageManager::Dnf), "dnf");
+        assert_eq!(
+            linux_package_manager_label(LinuxPackageManager::Pacman),
+            "pacman"
+        );
+    }
+
+    #[test]
+    fn build_linux_package_install_plan_for_apt_contains_qt_packages() {
+        let plan = build_linux_package_install_plan(LinuxPackageManager::Apt);
+        let joined = plan.display_commands.join("\n");
+        assert!(joined.contains("apt-get install -y"));
+        assert!(joined.contains("qt6-base-dev"));
+        assert!(joined.contains("qt6-declarative-dev"));
+        assert!(joined.contains("qt6-svg-dev"));
     }
 }

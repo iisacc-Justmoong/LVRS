@@ -16,9 +16,9 @@ const MAIN_CPP_RELATIVE_PATH: &str = "main.cpp";
 const MAIN_ROOT_OBJECT_MARKER: &str = "rootObject = QStringLiteral(\"Main\")";
 const MAIN_BOOTSTRAP_CALL_MARKER: &str = "runBootstrappedQmlApp";
 
-struct AutoBootstrapHints {
-    injected: Vec<String>,
-    warnings: Vec<String>,
+pub(crate) struct AutoBootstrapHints {
+    pub(crate) injected: Vec<String>,
+    pub(crate) warnings: Vec<String>,
 }
 
 pub fn run(mut args: BootstrapArgs, verbose: u8) -> Result<()> {
@@ -67,7 +67,7 @@ pub fn run(mut args: BootstrapArgs, verbose: u8) -> Result<()> {
     install::run_with_project_root(args.install, verbose, project_root)
 }
 
-fn resolve_bootstrap_platforms(
+pub(crate) fn resolve_bootstrap_platforms(
     cli_platforms: Option<String>,
     with_wasm: bool,
 ) -> (String, &'static str) {
@@ -106,7 +106,7 @@ fn normalize_platform_list(input: &str) -> String {
     input.replace(',', ";")
 }
 
-fn parse_platform_list(input: &str) -> Vec<String> {
+pub(crate) fn parse_platform_list(input: &str) -> Vec<String> {
     let mut platforms = Vec::new();
     for item in input.split(';') {
         let token = item.trim().to_lowercase();
@@ -120,7 +120,7 @@ fn parse_platform_list(input: &str) -> Vec<String> {
     platforms
 }
 
-fn ensure_main_entrypoints_ready(project_root: &Path) -> Result<()> {
+pub(crate) fn ensure_main_entrypoints_ready(project_root: &Path) -> Result<()> {
     let main_cpp = project_root.join(MAIN_CPP_RELATIVE_PATH);
     if !main_cpp.is_file() {
         bail!(
@@ -232,7 +232,7 @@ fn has_sentinels(path: &Path) -> bool {
         && path.join("backend").is_dir()
 }
 
-fn apply_auto_bootstrap_hints(
+pub(crate) fn apply_auto_bootstrap_hints(
     cmake_args: &mut Vec<String>,
     selected_platforms: &[String],
 ) -> Result<AutoBootstrapHints> {

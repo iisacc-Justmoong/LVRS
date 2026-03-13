@@ -24,8 +24,8 @@ pub enum Command {
     /// Bootstrap desktop/mobile multi-platform setup from Main entrypoint defaults.
     Bootstrap(BootstrapArgs),
 
-    /// Run baseline workspace checks for CLI development.
-    Doctor,
+    /// Run host/bootstrap dependency checks and optional fixups.
+    Doctor(DoctorArgs),
 
     /// Print platform information.
     Platform,
@@ -64,6 +64,10 @@ pub struct InstallArgs {
     #[arg(long = "without-tests")]
     pub without_tests: bool,
 
+    /// Linux only: install missing distro packages for host build dependencies before configure
+    #[arg(long = "install-linux-deps")]
+    pub install_linux_deps: bool,
+
     /// Deprecated/unsupported
     #[arg(long = "force-x86-qt-tools")]
     pub force_x86_qt_tools: bool,
@@ -89,4 +93,71 @@ pub struct BootstrapArgs {
 
     #[command(flatten)]
     pub install: InstallArgs,
+}
+
+#[derive(Debug, Args)]
+pub struct DoctorArgs {
+    /// Install prefix to inspect (default: ~/.local/LVRS)
+    #[arg(long, value_name = "path")]
+    pub prefix: Option<PathBuf>,
+
+    /// Linux only: install missing distro packages for host build dependencies
+    #[arg(long = "fix", alias = "install-linux-deps")]
+    pub fix: bool,
+
+    /// Validate Main-entry bootstrap readiness and cross-platform auto-detect hints
+    #[arg(long = "bootstrap")]
+    pub bootstrap: bool,
+
+    /// Bootstrap platforms to evaluate with --bootstrap (comma/semicolon list)
+    #[arg(long, value_name = "list")]
+    pub platforms: Option<String>,
+
+    /// Include wasm in the default bootstrap platform set for --bootstrap
+    #[arg(long = "with-wasm")]
+    pub with_wasm: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn doctor_fix_flags_parse() {
+        let cli = Cli::try_parse_from(["lvrs", "doctor", "--fix"]).expect("doctor --fix");
+        match cli.command {
+            Command::Doctor(args) => assert!(args.fix),
+            other => panic!("unexpected command: {other:?}"),
+        }
+
+        let cli = Cli::try_parse_from(["lvrs", "doctor", "--install-linux-deps"])
+            .expect("doctor --install-linux-deps");
+        match cli.command {
+            Command::Doctor(args) => assert!(args.fix),
+            other => panic!("unexpected command: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn doctor_bootstrap_flags_parse() {
+        let cli = Cli::try_parse_from([
+            "lvrs",
+            "doctor",
+            "--bootstrap",
+            "--with-wasm",
+            "--platforms",
+            "linux,android,wasm",
+        ])
+        .expect("doctor bootstrap flags");
+
+        match cli.command {
+            Command::Doctor(args) => {
+                assert!(args.bootstrap);
+                assert!(args.with_wasm);
+                assert_eq!(args.platforms.as_deref(), Some("linux,android,wasm"));
+            }
+            other => panic!("unexpected command: {other:?}"),
+        }
+    }
 }
