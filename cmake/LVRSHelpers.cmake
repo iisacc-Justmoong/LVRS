@@ -521,11 +521,27 @@ function(_lvrs_internal_resolve_qt_prefix_candidate candidate out_var)
 
     if(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/lib/cmake/Qt6/Qt6Config.cmake")
         set(_lvrs_resolved_prefix "${candidate}")
+    elseif(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/lib64/cmake/Qt6/Qt6Config.cmake")
+        set(_lvrs_resolved_prefix "${candidate}")
+    elseif(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/cmake/Qt6/Qt6Config.cmake")
+        set(_lvrs_resolved_prefix "${candidate}")
     elseif(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/Qt6Config.cmake")
-        get_filename_component(_lvrs_resolved_prefix "${candidate}/../../.." ABSOLUTE)
+        get_filename_component(_lvrs_qt6_cmake_dir "${candidate}" ABSOLUTE)
+        get_filename_component(_lvrs_qt6_cmake_parent "${_lvrs_qt6_cmake_dir}" DIRECTORY)
+        get_filename_component(_lvrs_qt6_prefix_candidate "${_lvrs_qt6_cmake_parent}" DIRECTORY)
+        get_filename_component(_lvrs_qt6_prefix_name "${_lvrs_qt6_prefix_candidate}" NAME)
+        if(_lvrs_qt6_prefix_name STREQUAL "lib" OR _lvrs_qt6_prefix_name STREQUAL "lib64")
+            get_filename_component(_lvrs_resolved_prefix "${_lvrs_qt6_prefix_candidate}" DIRECTORY)
+        else()
+            set(_lvrs_resolved_prefix "${_lvrs_qt6_prefix_candidate}")
+        endif()
+        unset(_lvrs_qt6_cmake_dir)
+        unset(_lvrs_qt6_cmake_parent)
+        unset(_lvrs_qt6_prefix_candidate)
+        unset(_lvrs_qt6_prefix_name)
     elseif(candidate MATCHES "Qt6Config\\.cmake$" AND EXISTS "${candidate}")
         get_filename_component(_lvrs_qt6_cmake_dir "${candidate}" DIRECTORY)
-        get_filename_component(_lvrs_resolved_prefix "${_lvrs_qt6_cmake_dir}/../../.." ABSOLUTE)
+        _lvrs_internal_resolve_qt_prefix_candidate("${_lvrs_qt6_cmake_dir}" _lvrs_resolved_prefix)
         unset(_lvrs_qt6_cmake_dir)
     elseif(IS_DIRECTORY "${candidate}" AND EXISTS "${candidate}/bin/qtpaths")
         set(_lvrs_resolved_prefix "${candidate}")
@@ -587,7 +603,11 @@ function(_lvrs_internal_detect_qt_prefix_for_platform platform out_var)
         return()
     endif()
 
-    get_filename_component(_lvrs_current_qt_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+    _lvrs_internal_resolve_qt_prefix_candidate("${Qt6_DIR}" _lvrs_current_qt_prefix)
+    if(_lvrs_current_qt_prefix STREQUAL "")
+        set(${out_var} "" PARENT_SCOPE)
+        return()
+    endif()
     get_filename_component(_lvrs_qt_version_root "${_lvrs_current_qt_prefix}" DIRECTORY)
 
     _lvrs_internal_platform_qt_dir_candidates("${platform}" _lvrs_qt_candidates)
@@ -820,7 +840,7 @@ function(_lvrs_internal_detect_qt_host_prefix out_var)
     elseif(DEFINED ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX} AND NOT "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}" STREQUAL "")
         set(_lvrs_qt_host_prefix "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
     elseif(DEFINED Qt6_DIR)
-        get_filename_component(_lvrs_qt_host_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+        _lvrs_internal_resolve_qt_prefix_candidate("${Qt6_DIR}" _lvrs_qt_host_prefix)
     endif()
 
     set(${out_var} "${_lvrs_qt_host_prefix}" PARENT_SCOPE)
@@ -1144,6 +1164,22 @@ function(lvrs_create_framework_bootstrap_targets)
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
 
+        set(_lvrs_platform_android_abi "")
+        set(_lvrs_platform_android_sdk_root "")
+        set(_lvrs_platform_android_ndk "")
+        if(_lvrs_platform STREQUAL "android")
+            set(_lvrs_platform_android_abi "${_lvrs_android_abi}")
+            set(_lvrs_platform_android_sdk_root "${_lvrs_bootstrap_android_sdk_root}")
+            set(_lvrs_platform_android_ndk "${_lvrs_bootstrap_android_ndk}")
+        endif()
+
+        set(_lvrs_platform_emsdk_root "")
+        set(_lvrs_platform_emscripten_toolchain_file "")
+        if(_lvrs_platform STREQUAL "wasm")
+            set(_lvrs_platform_emsdk_root "${_lvrs_bootstrap_emsdk_root}")
+            set(_lvrs_platform_emscripten_toolchain_file "${_lvrs_bootstrap_emscripten_toolchain_file}")
+        endif()
+
         set(_lvrs_combined_prefix_path "")
         if(NOT _lvrs_qt_prefix STREQUAL "")
             set(_lvrs_combined_prefix_path "${_lvrs_qt_prefix}")
@@ -1175,11 +1211,11 @@ function(lvrs_create_framework_bootstrap_targets)
                 "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
                 "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
-                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
-                "-DLVRS_BOOTSTRAP_ANDROID_SDK_ROOT=${_lvrs_bootstrap_android_sdk_root}"
-                "-DLVRS_BOOTSTRAP_ANDROID_NDK=${_lvrs_bootstrap_android_ndk}"
-                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_bootstrap_emsdk_root}"
-                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_bootstrap_emscripten_toolchain_file}"
+                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_platform_android_abi}"
+                "-DLVRS_BOOTSTRAP_ANDROID_SDK_ROOT=${_lvrs_platform_android_sdk_root}"
+                "-DLVRS_BOOTSTRAP_ANDROID_NDK=${_lvrs_platform_android_ndk}"
+                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_platform_emsdk_root}"
+                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_platform_emscripten_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_INSTALL_PREFIX=${_lvrs_platform_install_prefix}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
@@ -1302,6 +1338,33 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
         endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
+
+        set(_lvrs_platform_generate_ios_xcode_project "OFF")
+        set(_lvrs_platform_ios_simulator_name "")
+        if(_lvrs_platform STREQUAL "ios")
+            set(_lvrs_platform_generate_ios_xcode_project "${_lvrs_generate_ios_xcode_project}")
+            set(_lvrs_platform_ios_simulator_name "${_lvrs_ios_simulator_name}")
+        endif()
+
+        set(_lvrs_platform_generate_android_studio_project "OFF")
+        set(_lvrs_platform_android_abi "")
+        set(_lvrs_platform_android_studio_project_dir "")
+        set(_lvrs_platform_androiddeployqt_path "")
+        set(_lvrs_platform_android_serial "")
+        if(_lvrs_platform STREQUAL "android")
+            set(_lvrs_platform_generate_android_studio_project "${_lvrs_generate_android_studio_project}")
+            set(_lvrs_platform_android_abi "${_lvrs_android_abi}")
+            set(_lvrs_platform_android_studio_project_dir "${_lvrs_android_studio_project_dir}")
+            set(_lvrs_platform_androiddeployqt_path "${_lvrs_androiddeployqt_path}")
+            set(_lvrs_platform_android_serial "${_lvrs_android_serial}")
+        endif()
+
+        set(_lvrs_platform_emsdk_root "")
+        set(_lvrs_platform_emscripten_toolchain_file "")
+        if(_lvrs_platform STREQUAL "wasm")
+            set(_lvrs_platform_emsdk_root "${_lvrs_bootstrap_emsdk_root}")
+            set(_lvrs_platform_emscripten_toolchain_file "${_lvrs_bootstrap_emscripten_toolchain_file}")
+        endif()
 
         set(_lvrs_combined_prefix_path "")
         if(NOT _lvrs_qt_prefix STREQUAL "")
@@ -1466,18 +1529,18 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
                 "-DLVRS_BOOTSTRAP_QT_HOST_PREFIX=${_lvrs_qt_host_prefix}"
                 "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
-                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_android_abi}"
-                "-DLVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT=${_lvrs_generate_ios_xcode_project}"
-                "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_generate_android_studio_project}"
-                "-DLVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR=${_lvrs_android_studio_project_dir}"
-                "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_androiddeployqt_path}"
-                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_bootstrap_emsdk_root}"
-                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_bootstrap_emscripten_toolchain_file}"
+                "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_platform_android_abi}"
+                "-DLVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT=${_lvrs_platform_generate_ios_xcode_project}"
+                "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_platform_generate_android_studio_project}"
+                "-DLVRS_BOOTSTRAP_ANDROID_STUDIO_PROJECT_DIR=${_lvrs_platform_android_studio_project_dir}"
+                "-DLVRS_BOOTSTRAP_ANDROIDDEPLOYQT=${_lvrs_platform_androiddeployqt_path}"
+                "-DLVRS_BOOTSTRAP_EMSDK_ROOT=${_lvrs_platform_emsdk_root}"
+                "-DLVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE=${_lvrs_platform_emscripten_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_LVRS_DIR=${_lvrs_platform_lvrs_dir}"
                 "-DLVRS_BOOTSTRAP_FIND_PACKAGE_NO_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_no_pkg_registry}"
                 "-DLVRS_BOOTSTRAP_FIND_USE_PACKAGE_REGISTRY=${_lvrs_bootstrap_find_use_pkg_registry}"
-                "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_ios_simulator_name}"
-                "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_android_serial}"
+                "-DLVRS_BOOTSTRAP_IOS_SIMULATOR_NAME=${_lvrs_platform_ios_simulator_name}"
+                "-DLVRS_BOOTSTRAP_ANDROID_SERIAL=${_lvrs_platform_android_serial}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_EXAMPLES=${_lvrs_bootstrap_lvrs_build_examples}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_TESTS=${_lvrs_bootstrap_lvrs_build_tests}"
                 "-DLVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS=${_lvrs_bootstrap_lvrs_build_shared_libs}"

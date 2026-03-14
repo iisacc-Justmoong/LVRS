@@ -1,60 +1,91 @@
-use anyhow::{Context, Result};
+use super::{bootstrap, install};
+use crate::cli::DoctorArgs;
+use anyhow::{Result, bail};
 use std::env;
-use std::path::Path;
+use std::io::{self, Write};
 
-const SENTINELS: [&str; 3] = ["CMakeLists.txt", "qml", "backend"];
+pub fn run(args: DoctorArgs, verbose: u8) -> Result<()> {
+    let cwd = env::current_dir()?;
+    let project_root = install::resolve_project_root(None)?;
+    let home_dir = install::resolve_home_dir()?;
+    let install_prefix = install::resolve_install_prefix(args.prefix.clone(), &home_dir)?;
+    let host_platform = install::detect_host_platform();
 
-pub fn run(verbose: u8) -> Result<()> {
-    let cwd = env::current_dir().context("failed to read current working directory")?;
-    println!("doctor: workspace check");
-    println!("cwd: {}", cwd.display());
+    println!("[LVRS] Doctor cwd        : {}", cwd.display());
+    println!("[LVRS] Doctor root       : {}", project_root.display());
+    println!("[LVRS] Doctor host       : {host_platform}");
+    println!("[LVRS] Install prefix    : {}", install_prefix.display());
 
-    if let Some(root) = find_repo_root(&cwd) {
-        println!("repo_root: {}", root.display());
-        println!("status: ready");
-
-        if verbose > 0 {
-            for sentinel in SENTINELS {
-                println!("ok: {}", root.join(sentinel).display());
+    let mut host_configure_args = Vec::new();
+    let host_qt = install::ensure_linux_host_prerequisites(
+        host_platform,
+        &home_dir,
+        &mut host_configure_args,
+        &[],
+        args.fix,
+    )?;
+    println!("[LVRS] Host prerequisites: ready");
+    if let Some(config) = &host_qt {
+        println!("[LVRS] Linux Qt         : {}", config.prefix.display());
+        println!("[LVRS] Linux Qt6_DIR    : {}", config.qt6_dir.display());
+        println!("[LVRS] Qt detect        : {}", config.source);
+        if verbose > 0 && !config.injected.is_empty() {
+            println!("[LVRS] Host injects:");
+            for item in &config.injected {
+                println!("  - {item}");
             }
         }
-    } else {
-        let mut missing = Vec::new();
-        for sentinel in SENTINELS {
-            let candidate = cwd.join(sentinel);
-            if !candidate.exists() {
-                missing.push(sentinel);
+    }
+
+    if args.bootstrap {
+        let (platforms, source) =
+            bootstrap::resolve_bootstrap_platforms(args.platforms.clone(), args.with_wasm);
+        let selected_platforms = bootstrap::parse_platform_list(&platforms);
+        if selected_platforms.is_empty() {
+            bail!(
+                "[LVRS] bootstrap platform list is empty. set --platforms with at least one target."
+            );
+        }
+
+        bootstrap::ensure_main_entrypoints_ready(&project_root)?;
+        let mut bootstrap_cmake_args = Vec::new();
+        let hints =
+            bootstrap::apply_auto_bootstrap_hints(&mut bootstrap_cmake_args, &selected_platforms)?;
+
+        println!("[LVRS] Bootstrap source : {source}");
+        println!("[LVRS] Bootstrap targets: {}", selected_platforms.join(";"));
+        println!("[LVRS] Bootstrap entry : ready");
+
+        if hints.injected.is_empty() {
+            println!("[LVRS] Bootstrap hints  : none");
+        } else {
+            println!("[LVRS] Bootstrap hints  :");
+            for item in &hints.injected {
+                println!("  - {item}");
             }
         }
 
-        println!("status: partial");
-        println!("missing: {}", missing.join(", "));
-        println!("hint: expected LVRS sentinels were not found in current or parent paths.");
+        if hints.warnings.is_empty() {
+            println!("[LVRS] Bootstrap detect : ready");
+        } else {
+            println!("[LVRS] Bootstrap warnings:");
+            for item in &hints.warnings {
+                println!("  - {item}");
+            }
+            let _ = io::stdout().flush();
+            bail!(
+                "[LVRS] bootstrap readiness is incomplete. install the missing toolchains or rerun doctor with --platforms limited to the targets you intend to build."
+            );
+        }
+
+        if verbose > 0 && !bootstrap_cmake_args.is_empty() {
+            println!("[LVRS] Bootstrap injects:");
+            for item in &bootstrap_cmake_args {
+                println!("  - {item}");
+            }
+        }
     }
 
-    if verbose > 0 {
-        println!("cargo.toml: {}", exists_local("Cargo.toml"));
-        println!("src/main.rs: {}", exists_local("src/main.rs"));
-    }
-
+    println!("[LVRS] Doctor status     : ready");
     Ok(())
-}
-
-fn exists_local(path: &str) -> bool {
-    Path::new(path).exists()
-}
-
-fn find_repo_root(start: &Path) -> Option<&Path> {
-    let mut cursor = Some(start);
-    while let Some(path) = cursor {
-        if has_sentinels(path) {
-            return Some(path);
-        }
-        cursor = path.parent();
-    }
-    None
-}
-
-fn has_sentinels(path: &Path) -> bool {
-    SENTINELS.iter().all(|name| path.join(name).exists())
 }

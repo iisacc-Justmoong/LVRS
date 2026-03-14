@@ -12,10 +12,17 @@
 - If neither is available, install exits with guidance to build CLI first.
 
 The install flow builds `bootstrap_lvrs_all`.
-By default, framework bootstrap platform set is `macos;linux;windows;ios;android;wasm`.
+By default, the framework bootstrap platform set follows the current host:
+- Linux: `linux`
+- macOS: `macos;ios;android;wasm`
+- Windows: `windows;android;wasm`
 Platforms without a matching Qt kit are skipped during bootstrap target generation.
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to constrain/override the platform set.
+On Linux hosts, the installer runs a dependency preflight before cleaning/building. It validates the host C++ toolchain, required Qt 6.5+ modules, and Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts when available.
+If those Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
+`lvrs doctor --fix` runs the same host-side dependency check/fix flow without starting an install. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` additionally validates the `main.cpp` bootstrap entry markers and reports any missing cross-platform Qt/Android/WASM auto-detect hints; it exits non-zero when the requested bootstrap target set is not ready.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
+Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to change the install root.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, while the copied source snapshot receives fresh binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot. If `--without-examples` is used, those snapshot `bin/` directories are removed. Normal builds no longer stage example binaries back into the source tree.

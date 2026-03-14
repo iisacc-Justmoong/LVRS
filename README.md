@@ -29,9 +29,17 @@ cd LVRS
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
 If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
 The install flow builds `bootstrap_lvrs_all`.
-By default, bootstrap targets include the full runtime platform set (`macos;linux;windows;ios;android;wasm`), and platforms without a discoverable Qt kit are skipped.
+By default, the bootstrap platform set follows the current host:
+- Linux: `linux`
+- macOS: `macos;ios;android;wasm`
+- Windows: `windows;android;wasm`
+Platforms without a discoverable Qt kit are skipped.
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to override bootstrap/install platforms explicitly.
+On Linux hosts, `lvrs install` now runs a CMake preflight first: it verifies the host C++ toolchain, Qt 6.5+ modules (`Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`), and required Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts (Qt online installer, `qtpaths`/`qmake`, distro multiarch installs) when possible.
+If Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
+Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
+Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to move the install root.
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
