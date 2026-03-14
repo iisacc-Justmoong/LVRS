@@ -158,6 +158,7 @@ Android bootstrap generates an Android Studio (Gradle) project by default and in
 WASM bootstrap emits browser artifacts and writes `LVRSWasmArtifact.cmake` entry metadata in the wasm bootstrap build tree.
 `launch_<target>_wasm` serves the wasm build tree via a local static HTTP server and can auto-open a browser.
 `export_<target>_wasm_site` recursively collects wasm web assets (nested layout-safe) and generates an `index.html` redirect to the detected entry.
+Any platform without a discoverable Qt kit is skipped with a configure-time status message, and its related `bootstrap_`, `launch_`, and `export_` targets are not generated.
 Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>`
 - `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for Android deploy tooling lookup)

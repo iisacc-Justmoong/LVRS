@@ -74,6 +74,14 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_example_host_aggregate_target.cmake"
 )
 
+add_test(
+    NAME LVRSTests_cmake_app_bootstrap_skip_missing_qt_kit
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_app_bootstrap_skip_missing_qt_kit.cmake"
+)
+
 uifw_add_test(LVRSTests_layout tst_layout.cpp)
 uifw_add_test(LVRSTests_eventlistener tst_eventlistener.cpp)
 uifw_add_test(LVRSTests_examples tst_examples.cpp)

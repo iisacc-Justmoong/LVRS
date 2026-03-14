@@ -154,6 +154,7 @@ LVRS also generates launch/export convenience targets:
 - `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree and writes `LVRSWasmArtifact.cmake` entry metadata
 - `launch_<YourTarget>_wasm` serves the wasm build tree with a local static HTTP server and optionally opens the browser
 - `export_<YourTarget>_wasm_site` collects wasm web assets recursively (including nested output layouts) and writes an `index.html` redirect to the detected app entry
+Any platform without a discoverable Qt kit is skipped with a configure-time status message, and its matching `bootstrap_`, `launch_`, and `export_` targets are omitted from the generated target graph.
 Override paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`, `WASM`).
 Project-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.
 Android Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.

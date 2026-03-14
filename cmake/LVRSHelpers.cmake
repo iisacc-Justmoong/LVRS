@@ -622,6 +622,15 @@ function(_lvrs_internal_detect_qt_prefix_for_platform platform out_var)
     set(${out_var} "" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_report_missing_bootstrap_qt_kit bootstrap_kind platform)
+    string(TOUPPER "${platform}" _lvrs_platform_upper)
+    message(STATUS
+        "LVRS ${bootstrap_kind} bootstrap targets: skipping '${platform}' "
+        "(Qt kit not found). Set LVRS_BOOTSTRAP_QT_PREFIX_${_lvrs_platform_upper} "
+        "or install the matching Qt platform kit."
+    )
+endfunction()
+
 function(_lvrs_internal_default_toolchain_for_qt_prefix qt_prefix out_var)
     if(qt_prefix STREQUAL "")
         set(${out_var} "" PARENT_SCOPE)
@@ -1129,13 +1138,7 @@ function(lvrs_create_framework_bootstrap_targets)
         _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
         _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
         if(_lvrs_qt_prefix STREQUAL "")
-            string(TOUPPER "${_lvrs_platform}" _lvrs_platform_upper)
-            message(STATUS
-                "LVRS framework bootstrap targets: skipping '${_lvrs_platform}' "
-                "(Qt kit not found). Set LVRS_BOOTSTRAP_QT_PREFIX_${_lvrs_platform_upper} "
-                "or install the matching Qt platform kit."
-            )
-            unset(_lvrs_platform_upper)
+            _lvrs_internal_report_missing_bootstrap_qt_kit("framework" "${_lvrs_platform}")
             continue()
         endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
@@ -1293,6 +1296,10 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
         _lvrs_internal_bootstrap_osx_sysroot_for_platform("${_lvrs_platform}" _lvrs_osx_sysroot)
         _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
         _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
+        if(_lvrs_qt_prefix STREQUAL "")
+            _lvrs_internal_report_missing_bootstrap_qt_kit("app" "${_lvrs_platform}")
+            continue()
+        endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
 
