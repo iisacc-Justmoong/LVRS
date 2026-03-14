@@ -13,9 +13,9 @@ if(NOT _lvrs_macos_rpath STREQUAL "@loader_path/../../../../platforms/macos/lib"
 endif()
 
 _lvrs_internal_example_source_snapshot_runtime_rpath("linux" _lvrs_linux_rpath)
-if(NOT _lvrs_linux_rpath STREQUAL "$ORIGIN/../../../../platforms/linux/lib")
+if(NOT _lvrs_linux_rpath STREQUAL "$ORIGIN/../../../../../platforms/linux/lib")
     message(FATAL_ERROR
-        "Expected Linux example rpath '$ORIGIN/../../../../platforms/linux/lib', got '${_lvrs_linux_rpath}'.")
+        "Expected Linux example rpath '$ORIGIN/../../../../../platforms/linux/lib', got '${_lvrs_linux_rpath}'.")
 endif()
 
 _lvrs_internal_example_source_snapshot_runtime_rpath("ios" _lvrs_ios_rpath)

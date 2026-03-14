@@ -54,7 +54,7 @@ function(_lvrs_internal_example_source_snapshot_runtime_rpath runtime_platform o
     if(runtime_platform STREQUAL "macos")
         set(_lvrs_runtime_rpath "@loader_path/../../../../platforms/macos/lib")
     elseif(runtime_platform STREQUAL "linux")
-        set(_lvrs_runtime_rpath "$ORIGIN/../../../../platforms/linux/lib")
+        set(_lvrs_runtime_rpath "$ORIGIN/../../../../../platforms/linux/lib")
     endif()
 
     set(${out_var} "${_lvrs_runtime_rpath}" PARENT_SCOPE)
@@ -134,6 +134,150 @@ function(_lvrs_internal_target_supports_link_options target out_var)
     else()
         set(${out_var} FALSE PARENT_SCOPE)
     endif()
+endfunction()
+
+function(_lvrs_internal_target_has_runtime_binary target out_var)
+    if(NOT TARGET "${target}")
+        set(${out_var} FALSE PARENT_SCOPE)
+        return()
+    endif()
+
+    get_target_property(_lvrs_target_type "${target}" TYPE)
+    if(_lvrs_target_type STREQUAL "SHARED_LIBRARY"
+       OR _lvrs_target_type STREQUAL "MODULE_LIBRARY")
+        set(${out_var} TRUE PARENT_SCOPE)
+        return()
+    endif()
+
+    if(NOT _lvrs_target_type STREQUAL "UNKNOWN_LIBRARY")
+        set(${out_var} FALSE PARENT_SCOPE)
+        return()
+    endif()
+
+    get_target_property(_lvrs_imported_configs "${target}" IMPORTED_CONFIGURATIONS)
+    set(_lvrs_location_props IMPORTED_LOCATION)
+    if(_lvrs_imported_configs)
+        foreach(_lvrs_config IN LISTS _lvrs_imported_configs)
+            string(TOUPPER "${_lvrs_config}" _lvrs_config_upper)
+            list(APPEND _lvrs_location_props "IMPORTED_LOCATION_${_lvrs_config_upper}")
+        endforeach()
+    endif()
+
+    foreach(_lvrs_location_prop IN LISTS _lvrs_location_props)
+        get_target_property(_lvrs_target_location "${target}" "${_lvrs_location_prop}")
+        if(NOT _lvrs_target_location)
+            continue()
+        endif()
+        if(_lvrs_target_location MATCHES "\\.(so(\\.[0-9]+)*)$"
+           OR _lvrs_target_location MATCHES "\\.dylib$"
+           OR _lvrs_target_location MATCHES "\\.dll$")
+            set(${out_var} TRUE PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+
+    set(${out_var} FALSE PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_resolve_lvrs_shared_runtime_target out_var)
+    set(_lvrs_runtime_target "")
+    foreach(_lvrs_candidate IN ITEMS LVRS::LVRS LVRSCore)
+        if(NOT TARGET "${_lvrs_candidate}")
+            continue()
+        endif()
+        _lvrs_internal_target_has_runtime_binary("${_lvrs_candidate}" _lvrs_candidate_has_runtime_binary)
+        if(_lvrs_candidate_has_runtime_binary)
+            set(_lvrs_runtime_target "${_lvrs_candidate}")
+            break()
+        endif()
+    endforeach()
+
+    set(${out_var} "${_lvrs_runtime_target}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_resolve_lvrs_qml_module_source out_var)
+    set(_lvrs_qml_module_source "")
+    if(DEFINED LVRS_QML_MODULE_PATH AND NOT LVRS_QML_MODULE_PATH STREQUAL "")
+        set(_lvrs_qml_module_source "${LVRS_QML_MODULE_PATH}")
+    elseif(DEFINED LVRS_QML_IMPORT_PATH AND NOT LVRS_QML_IMPORT_PATH STREQUAL "")
+        set(_lvrs_qml_module_source "${LVRS_QML_IMPORT_PATH}/LVRS")
+    endif()
+
+    set(${out_var} "${_lvrs_qml_module_source}" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_linux_runtime_bundle_dir_expression target out_var)
+    set(${out_var} "$<TARGET_FILE_DIR:${target}>/lvrs-runtime" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_linux_runtime_bundle_rpath out_var)
+    set(${out_var} "$ORIGIN/lvrs-runtime" PARENT_SCOPE)
+endfunction()
+
+function(_lvrs_internal_apply_linux_runtime_bundle target)
+    if(NOT TARGET "${target}")
+        message(FATAL_ERROR "_lvrs_internal_apply_linux_runtime_bundle() target not found: ${target}")
+    endif()
+
+    get_target_property(_lvrs_runtime_bundle_applied "${target}" _LVRS_LINUX_RUNTIME_BUNDLE_APPLIED)
+    if(_lvrs_runtime_bundle_applied)
+        return()
+    endif()
+
+    _lvrs_internal_resolve_lvrs_shared_runtime_target(_lvrs_runtime_target)
+    _lvrs_internal_resolve_lvrs_qml_module_source(_lvrs_qml_module_source)
+    if(_lvrs_runtime_target STREQUAL "" AND _lvrs_qml_module_source STREQUAL "")
+        return()
+    endif()
+
+    _lvrs_internal_linux_runtime_bundle_dir_expression("${target}" _lvrs_runtime_bundle_dir)
+    _lvrs_internal_linux_runtime_bundle_rpath(_lvrs_runtime_bundle_rpath)
+
+    _lvrs_internal_append_unique_target_list_property(
+        "${target}"
+        BUILD_RPATH
+        "${_lvrs_runtime_bundle_rpath}"
+    )
+    _lvrs_internal_append_unique_target_list_property(
+        "${target}"
+        INSTALL_RPATH
+        "${_lvrs_runtime_bundle_rpath}"
+    )
+
+    set_property(TARGET "${target}" PROPERTY _LVRS_LINUX_RUNTIME_BUNDLE_APPLIED TRUE)
+    set_property(TARGET "${target}" PROPERTY _LVRS_LINUX_RUNTIME_BUNDLE_DIR "${_lvrs_runtime_bundle_dir}")
+    set_property(TARGET "${target}" PROPERTY _LVRS_LINUX_RUNTIME_BUNDLE_RPATH "${_lvrs_runtime_bundle_rpath}")
+    set_property(TARGET "${target}" PROPERTY _LVRS_LINUX_RUNTIME_BUNDLE_LIBRARY_TARGET "${_lvrs_runtime_target}")
+    set_property(TARGET "${target}" PROPERTY _LVRS_LINUX_RUNTIME_BUNDLE_QML_SOURCE "${_lvrs_qml_module_source}")
+
+    set(_lvrs_runtime_commands
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${_lvrs_runtime_bundle_dir}"
+    )
+
+    if(NOT _lvrs_runtime_target STREQUAL "")
+        list(APPEND _lvrs_runtime_commands
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "$<TARGET_FILE:${_lvrs_runtime_target}>"
+                "${_lvrs_runtime_bundle_dir}/$<TARGET_FILE_NAME:${_lvrs_runtime_target}>"
+        )
+    endif()
+
+    if(NOT _lvrs_qml_module_source STREQUAL "")
+        list(APPEND _lvrs_runtime_commands
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${_lvrs_runtime_bundle_dir}/qml"
+            COMMAND "${CMAKE_COMMAND}" -E copy_directory
+                "${_lvrs_qml_module_source}"
+                "${_lvrs_runtime_bundle_dir}/qml/LVRS"
+        )
+    endif()
+
+    add_custom_command(
+        TARGET "${target}"
+        POST_BUILD
+        ${_lvrs_runtime_commands}
+        COMMAND_EXPAND_LISTS
+        VERBATIM
+    )
 endfunction()
 
 function(lvrs_apply_platform_build_optimizations target)
@@ -1821,6 +1965,10 @@ function(lvrs_configure_qml_app target)
     _lvrs_internal_apply_safe_default_output_dirs("${target}")
     _lvrs_internal_maybe_link_static_lvrs_plugin("${target}")
     lvrs_apply_platform_build_optimizations("${target}")
+    _lvrs_internal_detect_target_runtime_platform(_lvrs_target_runtime_platform)
+    if(_lvrs_target_runtime_platform STREQUAL "linux")
+        _lvrs_internal_apply_linux_runtime_bundle("${target}")
+    endif()
 
     # Allow qmlimportscanner/qmllint and IDE tooling to discover LVRS module
     # metadata while avoiding duplicate LVRS roots (root + module directory).

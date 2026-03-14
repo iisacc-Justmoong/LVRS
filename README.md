@@ -44,7 +44,7 @@ After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
-When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and the copied source snapshot receives a fresh launchable copy under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) are staged with portable LVRS runtime lookup paths so those binaries can be launched directly from the snapshot after install. If `./install.sh --without-examples` is used, those snapshot `bin/` directories are omitted. Example binaries are no longer staged back into the source tree during a normal build.
+When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The copied source snapshot receives the same launchable layout under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) retain portable runtime lookup paths so those binaries can be launched directly from the snapshot after install. If `./install.sh --without-examples` is used, those snapshot `bin/` directories are omitted. Example binaries are no longer staged back into the source tree during a normal build.
 
 ## Build (Framework-First Default)
 
@@ -125,7 +125,7 @@ import LVRS 1.0 as LV
 ```
 
 Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.
-`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, and auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build.
+`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically adds Linux runtime QML import candidates such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. Qt runtime deployment itself remains a target-environment concern.
 `lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
 `LV.ApplicationWindow` now includes adaptive layout policy properties:
@@ -156,7 +156,7 @@ LVRS also generates launch/export convenience targets:
 - `export_<YourTarget>_android_studio`
 - `export_<YourTarget>_wasm_site`
 `bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:
-- desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`)
+- desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`). Linux app targets built through `lvrs_add_qml_app()` also stage `lvrs-runtime/` next to the executable so the LVRS shared library is resolved through a relative `RPATH`.
 - `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`
 - `android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`
 - `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree and writes `LVRSWasmArtifact.cmake` entry metadata

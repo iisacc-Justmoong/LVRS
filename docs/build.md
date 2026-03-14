@@ -25,7 +25,7 @@ Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `lin
 Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to change the install root.
 The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
-When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, while the copied source snapshot receives fresh binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot. If `--without-examples` is used, those snapshot `bin/` directories are removed. Normal builds no longer stage example binaries back into the source tree.
+When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`; Linux builds additionally stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The copied source snapshot receives fresh binaries under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) embed a portable LVRS runtime lookup path so those binaries can be launched directly from the installed snapshot. If `--without-examples` is used, those snapshot `bin/` directories are removed. Normal builds no longer stage example binaries back into the source tree.
 
 ## Rust CLI Entry Points
 
@@ -41,7 +41,11 @@ Main-entrypoint bootstrap profile:
 cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- bootstrap
 ```
 
-`lvrs bootstrap` defaults to desktop+mobile (`macos;linux;windows;ios;android`) and adds wasm only with `--with-wasm` (unless `--platforms` is explicitly set).
+`lvrs bootstrap` defaults to a host-matched target set unless `--platforms` is provided:
+- Linux host: `linux`
+- macOS host: `macos;ios;android`
+- Windows host: `windows;android`
+`--with-wasm` appends `wasm` to that host default set.
 Before running, it validates `main.cpp` contains the expected LVRS bootstrap entry markers (`runBootstrappedQmlApp`, `rootObject = QStringLiteral("Main")`).
 
 ## Configure
@@ -122,7 +126,7 @@ lvrs_add_qml_app(
 ```
 
 Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when configuring the downstream project.
-`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, and auto-links/imports LVRS static QML plugin artifacts for static package builds.
+`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, auto-links/imports LVRS static QML plugin artifacts for static package builds, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically probes Linux runtime QML import locations such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. Qt runtime deployment itself remains target-environment specific.
 `LV.ApplicationWindow` provides adaptive layout policy APIs for mobile/desktop reordering:
 - `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
 - `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
@@ -159,7 +163,7 @@ It also creates launch/export convenience targets:
 - `export_<target>_android_studio`
 - `export_<target>_wasm_site`
 `bootstrap_<target>_all` triggers all platform bootstrap actions in one build invocation.
-Desktop bootstrap targets produce executable artifacts.
+Desktop bootstrap targets produce executable artifacts. Linux app targets built through `lvrs_add_qml_app()` stage `lvrs-runtime/` beside the executable so the LVRS shared library resolves through a relative `RPATH`.
 iOS bootstrap generates an Xcode project by default and installs a simulator app via `xcrun simctl`.
 Android bootstrap generates an Android Studio (Gradle) project by default and installs an APK via `adb`.
 WASM bootstrap emits browser artifacts and writes `LVRSWasmArtifact.cmake` entry metadata in the wasm bootstrap build tree.

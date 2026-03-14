@@ -82,7 +82,16 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_app_bootstrap_skip_missing_qt_kit.cmake"
 )
 
+add_test(
+    NAME LVRSTests_cmake_linux_runtime_bundle_helper
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_linux_runtime_bundle_helper.cmake"
+)
+
 uifw_add_test(LVRSTests_layout tst_layout.cpp)
+uifw_add_test(LVRSTests_app_entry tst_app_entry.cpp)
 uifw_add_test(LVRSTests_eventlistener tst_eventlistener.cpp)
 uifw_add_test(LVRSTests_examples tst_examples.cpp)
 uifw_add_test(LVRSTests_debug tst_debug.cpp)

@@ -95,10 +95,39 @@ pub(crate) fn resolve_bootstrap_platforms(
 }
 
 fn default_bootstrap_platforms(with_wasm: bool) -> &'static str {
-    if with_wasm {
-        DESKTOP_MOBILE_WASM_PLATFORMS
-    } else {
-        DESKTOP_MOBILE_PLATFORMS
+    default_bootstrap_platforms_for_host(install::detect_host_platform(), with_wasm)
+}
+
+fn default_bootstrap_platforms_for_host(host_platform: &str, with_wasm: bool) -> &'static str {
+    match host_platform {
+        "linux" => {
+            if with_wasm {
+                "linux;wasm"
+            } else {
+                "linux"
+            }
+        }
+        "macos" => {
+            if with_wasm {
+                "macos;ios;android;wasm"
+            } else {
+                "macos;ios;android"
+            }
+        }
+        "windows" => {
+            if with_wasm {
+                "windows;android;wasm"
+            } else {
+                "windows;android"
+            }
+        }
+        _ => {
+            if with_wasm {
+                DESKTOP_MOBILE_WASM_PLATFORMS
+            } else {
+                DESKTOP_MOBILE_PLATFORMS
+            }
+        }
     }
 }
 
@@ -620,4 +649,19 @@ fn resolve_home_dir() -> Result<PathBuf> {
         }
     }
     bail!("HOME/USERPROFILE environment variable is required.")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn host_aware_bootstrap_defaults_include_linux_only_on_linux_hosts() {
+        assert_eq!(default_bootstrap_platforms_for_host("linux", false), "linux");
+        assert_eq!(default_bootstrap_platforms_for_host("linux", true), "linux;wasm");
+        assert_eq!(default_bootstrap_platforms_for_host("macos", false), "macos;ios;android");
+        assert_eq!(default_bootstrap_platforms_for_host("macos", true), "macos;ios;android;wasm");
+        assert_eq!(default_bootstrap_platforms_for_host("windows", false), "windows;android");
+        assert_eq!(default_bootstrap_platforms_for_host("windows", true), "windows;android;wasm");
+    }
 }
