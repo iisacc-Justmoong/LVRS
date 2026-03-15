@@ -17,6 +17,11 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycodec.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchyops.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycontroller.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchyvisibility.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycommandstack.cpp
 )
 
 set(LVRS_BACKEND_HEADERS
@@ -39,6 +44,14 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchynode.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchymoveintent.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchyselectionstate.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycodec.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchyops.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycontroller.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchyvisibility.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycommandstack.h
 )
 
 if(APPLE AND NOT IOS)

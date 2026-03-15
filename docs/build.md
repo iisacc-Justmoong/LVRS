@@ -10,6 +10,7 @@
 - If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
+- Direct `lvrs install` can recover the repository root from `<prefix>/src/LVRS/INSTALL_SOURCE_INFO.txt` when launched outside the checkout. If the stored absolute path went stale after an upper-directory rename, the CLI re-locates the root by matching trailing path segments and otherwise falls back to the installed source snapshot in place.
 
 The install flow builds `bootstrap_lvrs_all`.
 By default, the framework bootstrap platform set follows the current host:

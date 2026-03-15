@@ -6,9 +6,9 @@ use std::io::{self, Write};
 
 pub fn run(args: DoctorArgs, verbose: u8) -> Result<()> {
     let cwd = env::current_dir()?;
-    let project_root = install::resolve_project_root(None)?;
     let home_dir = install::resolve_home_dir()?;
     let install_prefix = install::resolve_install_prefix(args.prefix.clone(), &home_dir)?;
+    let project_root = install::resolve_project_root(None, Some(&install_prefix))?;
     let host_platform = install::detect_host_platform();
 
     println!("[LVRS] Doctor cwd        : {}", cwd.display());

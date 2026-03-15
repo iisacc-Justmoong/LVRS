@@ -9,8 +9,6 @@ use std::path::{Path, PathBuf};
 const DESKTOP_MOBILE_PLATFORMS: &str = "macos;linux;windows;ios;android";
 const DESKTOP_MOBILE_WASM_PLATFORMS: &str = "macos;linux;windows;ios;android;wasm";
 const ENV_BOOTSTRAP_FRAMEWORK_PLATFORMS: &str = "LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS";
-const ENV_LVRS_ROOT: &str = "LVRS_ROOT";
-const ENV_LVRS_PROJECT_ROOT: &str = "LVRS_PROJECT_ROOT";
 
 const MAIN_CPP_RELATIVE_PATH: &str = "main.cpp";
 const MAIN_ROOT_OBJECT_MARKER: &str = "rootObject = QStringLiteral(\"Main\")";
@@ -22,7 +20,9 @@ pub(crate) struct AutoBootstrapHints {
 }
 
 pub fn run(mut args: BootstrapArgs, verbose: u8) -> Result<()> {
-    let project_root = resolve_project_root()?;
+    let home_dir = install::resolve_home_dir()?;
+    let install_prefix = install::resolve_install_prefix(args.install.prefix.clone(), &home_dir)?;
+    let project_root = install::resolve_project_root(None, Some(&install_prefix))?;
     ensure_main_entrypoints_ready(&project_root)?;
 
     let (platforms, source) =
@@ -176,89 +176,6 @@ pub(crate) fn ensure_main_entrypoints_ready(project_root: &Path) -> Result<()> {
         main_cpp.display(),
         missing_settings.join(", ")
     )
-}
-
-fn resolve_project_root() -> Result<PathBuf> {
-    if let Some(root) = resolve_root_from_env() {
-        return validate_project_root_candidate(root, "environment");
-    }
-
-    let cwd = env::current_dir().context("failed to read current working directory")?;
-    if let Some(root) = find_project_root(&cwd) {
-        return Ok(root);
-    }
-
-    if let Ok(executable) = env::current_exe() {
-        if let Some(start) = executable.parent() {
-            if let Some(root) = find_project_root(start) {
-                return Ok(root);
-            }
-        }
-    }
-
-    let manifest_hint = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
-    if let Some(root) = find_project_root(&manifest_hint) {
-        return Ok(root);
-    }
-
-    bail!(
-        "failed to locate LVRS repository root from {} (expected CMakeLists.txt, qml, backend). Set {} when launching outside the repository tree.",
-        cwd.display(),
-        ENV_LVRS_ROOT
-    )
-}
-
-fn resolve_root_from_env() -> Option<PathBuf> {
-    for env_name in [ENV_LVRS_ROOT, ENV_LVRS_PROJECT_ROOT] {
-        if let Ok(value) = env::var(env_name) {
-            let trimmed = value.trim();
-            if !trimmed.is_empty() {
-                return Some(PathBuf::from(trimmed));
-            }
-        }
-    }
-    None
-}
-
-fn validate_project_root_candidate(candidate: PathBuf, source: &str) -> Result<PathBuf> {
-    let normalized = if candidate.is_absolute() {
-        candidate
-    } else {
-        env::current_dir()
-            .context("failed to read current working directory")?
-            .join(candidate)
-    };
-
-    if has_sentinels(&normalized) {
-        return Ok(normalized);
-    }
-
-    if let Some(root) = find_project_root(&normalized) {
-        return Ok(root);
-    }
-
-    bail!(
-        "invalid LVRS project root from {}: {} (expected CMakeLists.txt, qml, backend)",
-        source,
-        normalized.display()
-    )
-}
-
-fn find_project_root(start: &Path) -> Option<PathBuf> {
-    let mut current = Some(start);
-    while let Some(path) = current {
-        if has_sentinels(path) {
-            return Some(path.to_path_buf());
-        }
-        current = path.parent();
-    }
-    None
-}
-
-fn has_sentinels(path: &Path) -> bool {
-    path.join("CMakeLists.txt").exists()
-        && path.join("qml").is_dir()
-        && path.join("backend").is_dir()
 }
 
 pub(crate) fn apply_auto_bootstrap_hints(
@@ -657,11 +574,29 @@ mod tests {
 
     #[test]
     fn host_aware_bootstrap_defaults_include_linux_only_on_linux_hosts() {
-        assert_eq!(default_bootstrap_platforms_for_host("linux", false), "linux");
-        assert_eq!(default_bootstrap_platforms_for_host("linux", true), "linux;wasm");
-        assert_eq!(default_bootstrap_platforms_for_host("macos", false), "macos;ios;android");
-        assert_eq!(default_bootstrap_platforms_for_host("macos", true), "macos;ios;android;wasm");
-        assert_eq!(default_bootstrap_platforms_for_host("windows", false), "windows;android");
-        assert_eq!(default_bootstrap_platforms_for_host("windows", true), "windows;android;wasm");
+        assert_eq!(
+            default_bootstrap_platforms_for_host("linux", false),
+            "linux"
+        );
+        assert_eq!(
+            default_bootstrap_platforms_for_host("linux", true),
+            "linux;wasm"
+        );
+        assert_eq!(
+            default_bootstrap_platforms_for_host("macos", false),
+            "macos;ios;android"
+        );
+        assert_eq!(
+            default_bootstrap_platforms_for_host("macos", true),
+            "macos;ios;android;wasm"
+        );
+        assert_eq!(
+            default_bootstrap_platforms_for_host("windows", false),
+            "windows;android"
+        );
+        assert_eq!(
+            default_bootstrap_platforms_for_host("windows", true),
+            "windows;android;wasm"
+        );
     }
 }

@@ -28,6 +28,7 @@ cd LVRS
 
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
 If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
+Direct `lvrs install` now also reuses the installed source metadata under `<prefix>/src/LVRS` when launched outside the repository tree. If the recorded checkout path became stale because an upper directory was renamed, the CLI relocates the project root by matching the preserved trailing path segments before falling back to the installed source snapshot itself.
 The install flow builds `bootstrap_lvrs_all`.
 By default, the bootstrap platform set follows the current host:
 - Linux: `linux`

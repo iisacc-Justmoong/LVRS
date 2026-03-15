@@ -355,6 +355,7 @@ target_include_directories(LVRSCore
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/hierarchy>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/LVRS>
 )
 

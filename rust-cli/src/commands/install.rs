@@ -1,10 +1,10 @@
 use crate::cli::InstallArgs;
 use anyhow::{Context, Result, bail};
 use std::env;
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -14,6 +14,7 @@ const ENV_LVRS_INSTALL_PREFIX: &str = "LVRS_INSTALL_PREFIX";
 const ENV_LVRS_ROOT: &str = "LVRS_ROOT";
 const ENV_LVRS_PROJECT_ROOT: &str = "LVRS_PROJECT_ROOT";
 const ENV_QT6_DIR: &str = "Qt6_DIR";
+const INSTALL_SOURCE_INFO_FILE: &str = "INSTALL_SOURCE_INFO.txt";
 
 #[derive(Debug, Clone)]
 pub(crate) struct LinuxQtAutoConfig {
@@ -68,13 +69,13 @@ fn run_internal(
         bail!("[LVRS] --force-x86-qt-tools is unsupported. Apple x86 paths are disabled.");
     }
 
-    let project_root = resolve_project_root(project_root_override)?;
+    let home_dir = resolve_home_dir()?;
+    let install_prefix = resolve_install_prefix(args.prefix.clone(), &home_dir)?;
+    let project_root = resolve_project_root(project_root_override, Some(&install_prefix))?;
 
     let build_dir = project_root.join("build");
     validate_deprecated_build_dir(args.build_dir.as_deref(), &project_root)?;
 
-    let home_dir = resolve_home_dir()?;
-    let install_prefix = resolve_install_prefix(args.prefix.clone(), &home_dir)?;
     let platform_install_root = install_prefix.join("platforms");
     let host_platform = detect_host_platform();
     let host_install_prefix = platform_install_root.join(&host_platform);
@@ -91,6 +92,8 @@ fn run_internal(
     let build_tests = !args.without_tests;
 
     let source_install_dir = install_prefix.join("src").join("LVRS");
+    let project_root_is_installed_snapshot =
+        paths_refer_to_same_location(&project_root, &source_install_dir);
     let package_config_dir = host_install_prefix.join("lib").join("cmake").join("LVRS");
 
     let lvrs_build_examples_value = if build_examples { "ON" } else { "OFF" };
@@ -166,6 +169,9 @@ fn run_internal(
             .join("LVRS"),
         source_install_dir.clone(),
     ] {
+        if project_root_is_installed_snapshot && path == source_install_dir {
+            continue;
+        }
         remove_path_with_stale_fallback(&path, &path.display().to_string())?;
     }
 
@@ -1384,7 +1390,10 @@ fn has_sentinels(path: &Path) -> bool {
         && path.join("backend").is_dir()
 }
 
-pub(crate) fn resolve_project_root(project_root_override: Option<PathBuf>) -> Result<PathBuf> {
+pub(crate) fn resolve_project_root(
+    project_root_override: Option<PathBuf>,
+    install_prefix_hint: Option<&Path>,
+) -> Result<PathBuf> {
     if let Some(path) = project_root_override {
         return validate_project_root_candidate(path, "bootstrap override");
     }
@@ -1411,11 +1420,70 @@ pub(crate) fn resolve_project_root(project_root_override: Option<PathBuf>) -> Re
         return Ok(path);
     }
 
+    if let Some(path) = resolve_project_root_from_installed_source(install_prefix_hint)? {
+        return Ok(path);
+    }
+
     bail!(
         "failed to locate LVRS repository root from {} (expected CMakeLists.txt, qml, backend). Set {} to repository root when launching outside the tree.",
         cwd.display(),
         ENV_LVRS_ROOT
     )
+}
+
+fn resolve_project_root_from_installed_source(
+    install_prefix_hint: Option<&Path>,
+) -> Result<Option<PathBuf>> {
+    if let Some(prefix) = install_prefix_hint {
+        if let Some(path) = resolve_project_root_from_install_prefix(prefix)? {
+            return Ok(Some(path));
+        }
+    }
+
+    let home_dir = match resolve_home_dir() {
+        Ok(home_dir) => home_dir,
+        Err(_) => return Ok(None),
+    };
+    let install_prefix = resolve_install_prefix(None, &home_dir)?;
+
+    resolve_project_root_from_install_prefix(&install_prefix)
+}
+
+fn resolve_project_root_from_install_prefix(install_prefix: &Path) -> Result<Option<PathBuf>> {
+    let source_install_dir = install_prefix.join("src").join("LVRS");
+    let metadata_path = source_install_dir.join(INSTALL_SOURCE_INFO_FILE);
+
+    if let Some(path) = parse_installed_source_project_root(&metadata_path)? {
+        if let Ok(resolved) = validate_project_root_candidate(path, "installed source metadata") {
+            return Ok(Some(resolved));
+        }
+    }
+
+    if has_sentinels(&source_install_dir) {
+        return Ok(Some(source_install_dir));
+    }
+
+    Ok(None)
+}
+
+fn parse_installed_source_project_root(metadata_path: &Path) -> Result<Option<PathBuf>> {
+    if !metadata_path.is_file() {
+        return Ok(None);
+    }
+
+    let metadata = fs::read_to_string(metadata_path)
+        .with_context(|| format!("failed to read {}", metadata_path.display()))?;
+
+    for line in metadata.lines() {
+        if let Some(value) = line.strip_prefix("project_root=") {
+            let trimmed = value.trim();
+            if !trimmed.is_empty() {
+                return Ok(Some(PathBuf::from(trimmed)));
+            }
+        }
+    }
+
+    Ok(None)
 }
 
 fn resolve_root_from_env() -> Option<PathBuf> {
@@ -1447,11 +1515,138 @@ fn validate_project_root_candidate(candidate: PathBuf, source: &str) -> Result<P
         return Ok(path);
     }
 
+    if let Some(path) = relocate_project_root_candidate(&normalized) {
+        return Ok(path);
+    }
+
     bail!(
         "invalid LVRS project root from {}: {} (expected CMakeLists.txt, qml, backend)",
         source,
         normalized.display()
     )
+}
+
+fn relocate_project_root_candidate(stale_path: &Path) -> Option<PathBuf> {
+    let anchor = deepest_existing_ancestor(stale_path)?;
+    if !anchor.is_dir() || anchor == Path::new("/") {
+        return None;
+    }
+
+    let stale_components = normal_path_components(stale_path);
+    if stale_components.is_empty() {
+        return None;
+    }
+
+    let anchor_depth = normal_path_components(&anchor).len();
+    let remaining_depth = stale_components.len().saturating_sub(anchor_depth);
+    let max_depth = remaining_depth.saturating_add(2).min(6);
+    let mut best_match: Option<(usize, usize, PathBuf)> = None;
+
+    walk_project_root_candidates(&anchor, 0, max_depth, &mut |candidate| {
+        if !has_sentinels(candidate) {
+            return;
+        }
+
+        let shared_tail = shared_tail_component_count(candidate, stale_path);
+        if shared_tail == 0 {
+            return;
+        }
+
+        let depth_gap = normal_path_components(candidate)
+            .len()
+            .abs_diff(stale_components.len());
+        let should_replace = match &best_match {
+            Some((best_tail, best_gap, best_path)) => {
+                shared_tail > *best_tail
+                    || (shared_tail == *best_tail
+                        && (depth_gap < *best_gap
+                            || (depth_gap == *best_gap && candidate < best_path.as_path())))
+            }
+            None => true,
+        };
+
+        if should_replace {
+            best_match = Some((shared_tail, depth_gap, candidate.to_path_buf()));
+        }
+    });
+
+    match best_match {
+        Some((shared_tail, _, path)) if shared_tail >= 2 => Some(path),
+        _ => None,
+    }
+}
+
+fn deepest_existing_ancestor(path: &Path) -> Option<PathBuf> {
+    let mut current = Some(path);
+    while let Some(candidate) = current {
+        if candidate.exists() {
+            return Some(candidate.to_path_buf());
+        }
+        current = candidate.parent();
+    }
+    None
+}
+
+fn walk_project_root_candidates(
+    root: &Path,
+    depth: usize,
+    max_depth: usize,
+    visit: &mut impl FnMut(&Path),
+) {
+    visit(root);
+
+    if depth >= max_depth {
+        return;
+    }
+
+    let entries = match fs::read_dir(root) {
+        Ok(entries) => entries,
+        Err(_) => return,
+    };
+    let mut directories = Vec::new();
+
+    for entry in entries.flatten() {
+        let Ok(file_type) = entry.file_type() else {
+            continue;
+        };
+        if !file_type.is_dir() || file_type.is_symlink() {
+            continue;
+        }
+        directories.push(entry.path());
+    }
+
+    directories.sort();
+    for path in directories {
+        walk_project_root_candidates(&path, depth + 1, max_depth, visit);
+    }
+}
+
+fn normal_path_components(path: &Path) -> Vec<OsString> {
+    path.components()
+        .filter_map(|component| match component {
+            Component::Normal(value) => Some(value.to_os_string()),
+            _ => None,
+        })
+        .collect()
+}
+
+fn shared_tail_component_count(lhs: &Path, rhs: &Path) -> usize {
+    let lhs_components = normal_path_components(lhs);
+    let rhs_components = normal_path_components(rhs);
+
+    lhs_components
+        .iter()
+        .rev()
+        .zip(rhs_components.iter().rev())
+        .take_while(|(lhs, rhs)| lhs == rhs)
+        .count()
+}
+
+fn paths_refer_to_same_location(lhs: &Path, rhs: &Path) -> bool {
+    match (fs::canonicalize(lhs), fs::canonicalize(rhs)) {
+        (Ok(left), Ok(right)) => left == right,
+        _ => lhs == rhs,
+    }
 }
 
 fn ensure_cmake_available() -> Result<()> {
@@ -1590,6 +1785,16 @@ fn install_source_snapshot(
     build_dir: &Path,
     include_example_bins: bool,
 ) -> Result<()> {
+    if paths_refer_to_same_location(project_root, source_install_dir) {
+        println!("[LVRS] Reusing installed source snapshot in place...");
+        prune_source_snapshot_example_bin_dirs(source_install_dir)?;
+        if include_example_bins {
+            install_built_example_bins(build_dir, source_install_dir)?;
+        }
+        write_source_snapshot_metadata(project_root, source_install_dir)?;
+        return Ok(());
+    }
+
     println!("[LVRS] Installing source snapshot...");
     let _ = remove_path(source_install_dir);
     fs::create_dir_all(source_install_dir).with_context(|| {
@@ -1621,6 +1826,11 @@ fn install_source_snapshot(
         install_built_example_bins(build_dir, source_install_dir)?;
     }
 
+    write_source_snapshot_metadata(project_root, source_install_dir)?;
+    Ok(())
+}
+
+fn write_source_snapshot_metadata(project_root: &Path, source_install_dir: &Path) -> Result<()> {
     let source_revision =
         detect_git_revision(project_root).unwrap_or_else(|| "unknown".to_string());
     let installed_at = detect_install_time();
@@ -1630,7 +1840,7 @@ fn install_source_snapshot(
         source_revision,
         installed_at
     );
-    fs::write(source_install_dir.join("INSTALL_SOURCE_INFO.txt"), info)
+    fs::write(source_install_dir.join(INSTALL_SOURCE_INFO_FILE), info)
         .context("failed to write source snapshot metadata")?;
     Ok(())
 }
@@ -1952,7 +2162,7 @@ fn set_executable_bit(_path: &Path) -> Result<()> {
 mod tests {
     use super::*;
     use std::env;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_test_dir(label: &str) -> PathBuf {
@@ -1964,6 +2174,16 @@ mod tests {
             "lvrs-install-tests-{label}-{}-{nanos}",
             std::process::id()
         ))
+    }
+
+    fn create_project_root(path: &Path) -> Result<()> {
+        fs::create_dir_all(path.join("qml"))?;
+        fs::create_dir_all(path.join("backend"))?;
+        fs::write(
+            path.join("CMakeLists.txt"),
+            "cmake_minimum_required(VERSION 3.21)\n",
+        )?;
+        Ok(())
     }
 
     #[test]
@@ -2008,6 +2228,53 @@ mod tests {
         assert!(copied_binary.exists());
         assert_eq!(fs::read_to_string(copied_binary)?, "fresh-build-output");
         assert!(!snapshot_example_dir.join("bin").join("old-app").exists());
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn validate_project_root_candidate_recovers_after_parent_directory_rename() -> Result<()> {
+        let root = temp_test_dir("relocate");
+        let storage_root = root.join("Storage");
+        let relocated_root = storage_root
+            .join("Workspace")
+            .join("InfraSystem")
+            .join("LVRS");
+        let stale_root = storage_root.join("static").join("InfraSystem").join("LVRS");
+
+        create_project_root(&relocated_root)?;
+
+        let resolved = validate_project_root_candidate(stale_root, "test")?;
+        assert_eq!(resolved, relocated_root);
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn install_source_snapshot_keeps_in_place_snapshot_contents() -> Result<()> {
+        let root = temp_test_dir("in-place-snapshot");
+        create_project_root(&root)?;
+        fs::write(root.join("README.md"), "keep")?;
+
+        let stale_bin = root.join("example").join("VisualCatalog").join("bin");
+        let build_bin = root
+            .join("build")
+            .join("example")
+            .join("VisualCatalog")
+            .join("bin");
+        fs::create_dir_all(&stale_bin)?;
+        fs::create_dir_all(&build_bin)?;
+        fs::write(stale_bin.join("stale-app"), "stale")?;
+        fs::write(build_bin.join("fresh-app"), "fresh")?;
+
+        install_source_snapshot(&root, &root, &root.join("build"), true)?;
+
+        assert_eq!(fs::read_to_string(root.join("README.md"))?, "keep");
+        assert!(!stale_bin.join("stale-app").exists());
+        assert_eq!(fs::read_to_string(stale_bin.join("fresh-app"))?, "fresh");
+        assert!(root.join(INSTALL_SOURCE_INFO_FILE).is_file());
 
         remove_path(&root)?;
         Ok(())
