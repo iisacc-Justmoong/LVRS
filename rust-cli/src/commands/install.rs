@@ -1862,7 +1862,22 @@ fn prune_source_snapshot_example_bin_dirs(source_install_dir: &Path) -> Result<(
         if !example_dir.is_dir() {
             continue;
         }
-        remove_path(&example_dir.join("bin"))?;
+
+        let bin_dir = example_dir.join("bin");
+        if !bin_dir.is_dir() {
+            continue;
+        }
+
+        for bin_entry in fs::read_dir(&bin_dir)
+            .with_context(|| format!("failed to read snapshot bin dir: {}", bin_dir.display()))?
+        {
+            let bin_entry = bin_entry?;
+            let bin_path = bin_entry.path();
+            if is_example_launcher_script(&bin_path)? {
+                continue;
+            }
+            remove_path(&bin_path)?;
+        }
     }
 
     Ok(())
@@ -1904,8 +1919,41 @@ fn install_built_example_bins(build_dir: &Path, source_install_dir: &Path) -> Re
         }
 
         let snapshot_bin_dir = snapshot_example_dir.join("bin");
-        run_cmake_copy_directory(&built_bin_dir, &snapshot_bin_dir)?;
-        copied_any = true;
+        fs::create_dir_all(&snapshot_bin_dir).with_context(|| {
+            format!(
+                "failed to create snapshot example bin dir: {}",
+                snapshot_bin_dir.display()
+            )
+        })?;
+
+        for built_entry in fs::read_dir(&built_bin_dir).with_context(|| {
+            format!(
+                "failed to read built example bin dir: {}",
+                built_bin_dir.display()
+            )
+        })? {
+            let built_entry = built_entry?;
+            let built_path = built_entry.path();
+            let built_name = built_entry.file_name();
+            let default_snapshot_path = snapshot_bin_dir.join(&built_name);
+
+            if built_path.is_dir() {
+                remove_path(&default_snapshot_path)?;
+                run_cmake_copy_directory(&built_path, &default_snapshot_path)?;
+                copied_any = true;
+                continue;
+            }
+
+            let snapshot_path = if is_example_launcher_script(&default_snapshot_path)? {
+                let renamed = format!("{}.real", built_name.to_string_lossy());
+                snapshot_bin_dir.join(renamed)
+            } else {
+                default_snapshot_path
+            };
+
+            copy_file_preserving_permissions(&built_path, &snapshot_path)?;
+            copied_any = true;
+        }
     }
 
     if copied_any {
@@ -1961,6 +2009,50 @@ fn run_cmake_copy_file(source: &Path, destination_dir: &Path) -> Result<()> {
             destination_dir.display()
         )
     }
+}
+
+fn is_example_launcher_script(path: &Path) -> Result<bool> {
+    if !path.is_file() {
+        return Ok(false);
+    }
+
+    let content = fs::read(path)
+        .with_context(|| format!("failed to read launcher candidate: {}", path.display()))?;
+    Ok(content.starts_with(b"#!/bin/sh\n"))
+}
+
+fn copy_file_preserving_permissions(source: &Path, destination: &Path) -> Result<()> {
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent).with_context(|| {
+            format!(
+                "failed to create destination parent directory: {}",
+                parent.display()
+            )
+        })?;
+    }
+
+    if destination.exists() {
+        remove_path(destination)?;
+    }
+
+    fs::copy(source, destination).with_context(|| {
+        format!(
+            "failed to copy file: {} -> {}",
+            source.display(),
+            destination.display()
+        )
+    })?;
+
+    let permissions = fs::metadata(source)
+        .with_context(|| format!("failed to read source metadata: {}", source.display()))?
+        .permissions();
+    fs::set_permissions(destination, permissions).with_context(|| {
+        format!(
+            "failed to apply source permissions: {}",
+            destination.display()
+        )
+    })?;
+    Ok(())
 }
 
 fn detect_git_revision(project_root: &Path) -> Option<String> {
@@ -2186,16 +2278,31 @@ mod tests {
         Ok(())
     }
 
+    fn write_launcher_script(path: &Path) -> Result<()> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, "#!/bin/sh\nexit 0\n")?;
+        Ok(())
+    }
+
     #[test]
-    fn prune_source_snapshot_example_bin_dirs_removes_stale_bins() -> Result<()> {
+    fn prune_source_snapshot_example_bin_dirs_preserves_launchers() -> Result<()> {
         let root = temp_test_dir("prune");
         let bin_dir = root.join("example").join("VisualCatalog").join("bin");
         fs::create_dir_all(&bin_dir)?;
+        write_launcher_script(&bin_dir.join("LVRSExampleVisualCatalog"))?;
         fs::write(bin_dir.join("stale-app"), "stale")?;
+        fs::write(
+            bin_dir.join("LVRSExampleVisualCatalog.real"),
+            "stale-runtime",
+        )?;
 
         prune_source_snapshot_example_bin_dirs(&root)?;
 
-        assert!(!bin_dir.exists());
+        assert!(bin_dir.join("LVRSExampleVisualCatalog").exists());
+        assert!(!bin_dir.join("stale-app").exists());
+        assert!(!bin_dir.join("LVRSExampleVisualCatalog.real").exists());
         remove_path(&root)?;
         Ok(())
     }
@@ -2213,6 +2320,7 @@ mod tests {
 
         fs::create_dir_all(&build_bin_dir)?;
         fs::create_dir_all(&stale_bin_dir)?;
+        write_launcher_script(&stale_bin_dir.join("LVRSExampleVisualCatalog"))?;
         fs::write(stale_bin_dir.join("old-app"), "stale")?;
         fs::write(
             build_bin_dir.join("LVRSExampleVisualCatalog"),
@@ -2224,9 +2332,17 @@ mod tests {
 
         let copied_binary = snapshot_example_dir
             .join("bin")
-            .join("LVRSExampleVisualCatalog");
+            .join("LVRSExampleVisualCatalog.real");
         assert!(copied_binary.exists());
         assert_eq!(fs::read_to_string(copied_binary)?, "fresh-build-output");
+        assert_eq!(
+            fs::read_to_string(
+                snapshot_example_dir
+                    .join("bin")
+                    .join("LVRSExampleVisualCatalog")
+            )?,
+            "#!/bin/sh\nexit 0\n"
+        );
         assert!(!snapshot_example_dir.join("bin").join("old-app").exists());
 
         remove_path(&root)?;
@@ -2266,14 +2382,22 @@ mod tests {
             .join("bin");
         fs::create_dir_all(&stale_bin)?;
         fs::create_dir_all(&build_bin)?;
+        write_launcher_script(&stale_bin.join("LVRSExampleVisualCatalog"))?;
         fs::write(stale_bin.join("stale-app"), "stale")?;
-        fs::write(build_bin.join("fresh-app"), "fresh")?;
+        fs::write(build_bin.join("LVRSExampleVisualCatalog"), "fresh")?;
 
         install_source_snapshot(&root, &root, &root.join("build"), true)?;
 
         assert_eq!(fs::read_to_string(root.join("README.md"))?, "keep");
         assert!(!stale_bin.join("stale-app").exists());
-        assert_eq!(fs::read_to_string(stale_bin.join("fresh-app"))?, "fresh");
+        assert_eq!(
+            fs::read_to_string(stale_bin.join("LVRSExampleVisualCatalog"))?,
+            "#!/bin/sh\nexit 0\n"
+        );
+        assert_eq!(
+            fs::read_to_string(stale_bin.join("LVRSExampleVisualCatalog.real"))?,
+            "fresh"
+        );
         assert!(root.join(INSTALL_SOURCE_INFO_FILE).is_file());
 
         remove_path(&root)?;

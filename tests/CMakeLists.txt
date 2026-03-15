@@ -61,6 +61,20 @@ add_test(
 )
 
 add_test(
+    NAME LVRSTests_cmake_example_build_tree_runtime_path
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_example_build_tree_runtime_path.cmake"
+)
+
+add_test(
+    NAME LVRSTests_cmake_build_script_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_build_script_contract.cmake"
+)
+
+add_test(
     NAME LVRSTests_cmake_example_runtime_output_dir
     COMMAND "${CMAKE_COMMAND}"
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"

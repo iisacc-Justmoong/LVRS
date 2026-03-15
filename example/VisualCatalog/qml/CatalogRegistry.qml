@@ -565,7 +565,7 @@ QtObject {
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree panel",
                             summary: "Composite hierarchy panel that combines toolbar, scrollable tree list, and optional footer buttons.",
-                            usage: "LV.Hierarchy {\n    model: [{ key: \"root\", label: \"Root\", children: [{ key: \"child\", label: \"Child\" }] }]\n}",
+                            usage: "LV.Hierarchy {\n    model: [{ key: \"root\", depth: 0, label: \"Root\", expanded: true }, { key: \"child\", depth: 1, label: \"Child\" }]\n}",
                             related: ["hierarchy-list", "hierarchy-item", "hierarchy-toolbar"]
                         }),
                         component({
@@ -575,8 +575,8 @@ QtObject {
                             docPath: "docs/components/navigation/HierarchyList.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree list manager",
-                            summary: "Flattening and state-management layer that generates HierarchyItem rows from model data.",
-                            usage: "LV.HierarchyList {\n    model: [{ key: \"root\", label: \"Root\", children: [{ key: \"child\", label: \"Child\" }] }]\n}",
+                            summary: "Depth-aware state-management layer that generates HierarchyItem rows from model data.",
+                            usage: "LV.HierarchyList {\n    model: [{ key: \"root\", depth: 0, label: \"Root\", expanded: true }, { key: \"child\", depth: 1, label: \"Child\" }]\n}",
                             related: ["hierarchy", "hierarchy-item"]
                         }),
                         component({
@@ -754,25 +754,30 @@ QtObject {
     function buildHierarchy(records) {
         const nodes = []
         for (let i = 0; i < records.length; i++)
-            nodes.push(buildHierarchyNode(records[i]))
+            appendHierarchyRows(records[i], 0, nodes)
         return nodes
     }
 
-    function buildHierarchyNode(record) {
+    function buildHierarchyNode(record, depth) {
         const children = childRecords(record)
         const icon = record.iconGlyph && String(record.iconGlyph).length > 0
             ? String(record.iconGlyph)
             : String(record.label || "?").charAt(0).toUpperCase()
-        const node = {
+        return {
             key: record.key,
+            depth: depth,
             label: record.label,
             iconGlyph: icon,
             expanded: true,
             showChevron: children.length > 0
         }
-        if (children.length > 0)
-            node.children = buildHierarchy(children)
-        return node
+    }
+
+    function appendHierarchyRows(record, depth, sink) {
+        const children = childRecords(record)
+        sink.push(buildHierarchyNode(record, depth))
+        for (let i = 0; i < children.length; i++)
+            appendHierarchyRows(children[i], depth + 1, sink)
     }
 
     function countEntries(records) {

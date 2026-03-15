@@ -35,8 +35,10 @@ private slots:
     void hierarchy_chevron_requires_children_loads();
     void hierarchy_item_chevron_direction_contract_loads();
     void hierarchy_item_hover_and_active_state_visual_contract_loads();
-    void hierarchy_item_inputable_overlay_contract_loads();
-    void hierarchy_item_input_overlay_geometry_and_close_contract_loads();
+    void hierarchy_item_figma_defaults_contract_loads();
+    void hierarchy_item_layout_geometry_contract_loads();
+    void hierarchy_item_structure_api_contract_loads();
+    void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
     void button_default_tone_fallback_borderless_loads();
     void stepper_figma_contract_loads();
@@ -357,6 +359,13 @@ import LVRS as LV
 Item {
     id: root
 
+    function sameColor(left, right) {
+        return Math.abs(left.r - right.r) < 0.001
+            && Math.abs(left.g - right.g) < 0.001
+            && Math.abs(left.b - right.b) < 0.001
+            && Math.abs(left.a - right.a) < 0.001
+    }
+
     property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
     property string expectedByName: iconRoot + "generalmoreHorizontal.svg"
     property string expectedByExt: iconRoot + "generalmoreHorizontal.svg"
@@ -449,34 +458,10 @@ Item {
         width: 280
         height: 300
         model: [
-            {
-                key: "root",
-                depth: 0,
-                itemId: 10,
-                text: "Root",
-                icon: "viewMoreSymbolicDefault",
-                expanded: true,
-                children: [
-                    {
-                        key: "child-a",
-                        depth: 1,
-                        itemId: 11,
-                        text: "Child A",
-                        icon: "viewMoreSymbolicDefault",
-                        expanded: false,
-                        children: [
-                            { key: "leaf-a1", depth: 2, itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" }
-                        ]
-                    },
-                    {
-                        key: "child-b",
-                        depth: 1,
-                        itemId: 20,
-                        text: "Child B",
-                        icon: "viewMoreSymbolicDisabled"
-                    }
-                ]
-            }
+            { key: "root", depth: 0, itemId: 10, text: "Root", icon: "viewMoreSymbolicDefault", expanded: true },
+            { key: "child-a", depth: 1, itemId: 11, text: "Child A", icon: "viewMoreSymbolicDefault", expanded: false },
+            { key: "leaf-a1", depth: 2, itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" },
+            { key: "child-b", depth: 1, itemId: 20, text: "Child B", icon: "viewMoreSymbolicDisabled" }
         ]
     }
 
@@ -557,37 +542,10 @@ Item {
         visible: false
         width: 200
         model: [
-            {
-                key: "root",
-                depth: 0,
-                label: "Root",
-                iconName: "projectStructure",
-                expanded: true,
-                children: [
-                    {
-                        key: "child",
-                        depth: 1,
-                        label: "Child",
-                        iconName: "viewMoreSymbolicDefault",
-                        children: [
-                            {
-                                key: "grand",
-                                depth: 2,
-                                label: "Grand",
-                                iconName: "viewMoreSymbolicBorderless",
-                                children: [
-                                    {
-                                        key: "great",
-                                        depth: 3,
-                                        label: "Great",
-                                        iconName: "viewMoreSymbolicDisabled"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
+            { key: "root", depth: 0, label: "Root", iconName: "projectStructure", expanded: true },
+            { key: "child", depth: 1, label: "Child", iconName: "viewMoreSymbolicDefault", expanded: false },
+            { key: "grand", depth: 2, label: "Grand", iconName: "viewMoreSymbolicBorderless", expanded: false },
+            { key: "great", depth: 3, label: "Great", iconName: "viewMoreSymbolicDisabled" }
         ]
     }
 
@@ -653,41 +611,81 @@ Item {
     width: 320
     height: 240
 
-    property int activationAttempts: 0
-    property bool activatedFolder2: false
-    property int moveCount: 0
+    property int lookupAttempts: 0
+    property bool dragItemReady: false
+    property int startedCount: 0
+    property int updatedCount: 0
+    property int endedCount: 0
+    property int movedItemId: -1
     property string movedKey: ""
     property int movedFromIndex: -1
     property int movedToIndex: -1
     property int movedDepth: -1
-    property var dragItem: hierarchyList.activeItemKey === "folder2" ? hierarchyList.activeItem : null
+    property string movedModeName: ""
+    property string movedParentKey: ""
+    property string movedAnchorKey: ""
+    property int startedIndex: -1
+    property int startedEndIndex: -1
+    property int startedDepth: -1
+    property int updatedIndex: -1
+    property int updatedDepth: -1
+    property string updatedModeName: ""
+    property string updatedParentKey: ""
+    property string updatedAnchorKey: ""
+    property bool lastCommitted: false
+    property bool previewValid: false
+    property int previewIndex: -1
+    property int previewDepth: -1
+    property string previewModeName: ""
+    property string previewParentKey: ""
+    property string previewAnchorKey: ""
+    property var dragItem: null
 
     property var treeModel: [
-        {
-            key: "folder1",
-            label: "Folder 1",
-            expanded: true,
-            children: [
-                { key: "folder2", label: "Folder 2" }
-            ]
-        },
-        { key: "folder3", label: "Folder 3" }
+        { key: "root", depth: 0, label: "Root", expanded: true },
+        { key: "branch", depth: 1, label: "Branch", expanded: true },
+        { key: "leaf", depth: 2, label: "Leaf" },
+        { key: "sibling", depth: 0, label: "Sibling", expanded: true }
     ]
 
-    function ensureFolder2Active() {
-        if (activatedFolder2 || activationAttempts >= 40)
+    function ensureDragItem() {
+        if (dragItemReady || lookupAttempts >= 40)
             return
-        activationAttempts += 1
-        activatedFolder2 = hierarchyList.activateByKey("folder2")
-        if (!activatedFolder2)
-            Qt.callLater(ensureFolder2Active)
+        lookupAttempts += 1
+        const candidate = hierarchyList.resolveByKey("branch")
+        if (!candidate) {
+            Qt.callLater(ensureDragItem)
+            return
+        }
+        dragItem = candidate
+        dragItemReady = true
     }
 
     function performEditableDrag() {
         if (!dragItem)
             return false
 
-        return hierarchyList._applyEditableMove(dragItem, 1, 0)
+        const siblingItem = hierarchyList.resolveByKey("sibling")
+        if (!siblingItem)
+            return false
+
+        if (!dragItem.beginDrag(dragItem.width * 0.5, dragItem.height * 0.5))
+            return false
+
+        const desiredListPoint = Qt.point(siblingItem.baseLeftPadding + siblingItem.indentStep + 1,
+                                          siblingItem.y + siblingItem.height + 1)
+        const localUpdatePoint = dragItem.mapFromItem(hierarchyList, desiredListPoint.x, desiredListPoint.y)
+        const updated = dragItem.updateDrag(localUpdatePoint.x, localUpdatePoint.y)
+        previewValid = dragItem.dragTargetValid
+        previewIndex = dragItem.dragTargetIndex
+        previewDepth = dragItem.dragTargetDepth
+        previewModeName = dragItem.dragTargetModeName
+        previewParentKey = dragItem.dragTargetParentItemKey
+        previewAnchorKey = dragItem.dragTargetAnchorItemKey
+        if (!updated)
+            return false
+
+        return dragItem.commitDrag()
     }
 
     LV.Hierarchy {
@@ -705,7 +703,7 @@ Item {
         model: root.treeModel
 
         onItemMoved: function(item, itemId, itemKey, fromIndex, toIndex, depth) {
-            root.moveCount += 1
+            root.movedItemId = itemId
             root.movedKey = itemKey
             root.movedFromIndex = fromIndex
             root.movedToIndex = toIndex
@@ -713,33 +711,89 @@ Item {
         }
     }
 
-    Component.onCompleted: Qt.callLater(root.ensureFolder2Active)
+    Connections {
+        target: root.dragItem
+        function onDragStarted(sourceIndex, sourceEndIndex, sourceDepth) {
+            root.startedCount += 1
+            root.startedIndex = sourceIndex
+            root.startedEndIndex = sourceEndIndex
+            root.startedDepth = sourceDepth
+        }
+        function onDragUpdated(targetIndex, targetDepth, modeName, parentItemKey, anchorItemKey) {
+            root.updatedCount += 1
+            root.updatedIndex = targetIndex
+            root.updatedDepth = targetDepth
+            root.updatedModeName = modeName
+            root.updatedParentKey = parentItemKey
+            root.updatedAnchorKey = anchorItemKey
+        }
+        function onDragEnded(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey, anchorItemKey) {
+            root.endedCount += 1
+            root.lastCommitted = committed
+            root.movedFromIndex = fromIndex
+            root.movedToIndex = toIndex
+            root.movedDepth = targetDepth
+            root.movedModeName = modeName
+            root.movedParentKey = parentItemKey
+            root.movedAnchorKey = anchorItemKey
+        }
+    }
+
+    Component.onCompleted: Qt.callLater(root.ensureDragItem)
 
     property bool dragContractReady:
         hierarchyAliasProbe.editable
         && hierarchyList.editable
-        && activatedFolder2
-        && moveCount === 1
-        && movedKey === "folder2"
+        && dragItemReady
+        && startedCount === 1
+        && updatedCount >= 1
+        && endedCount === 1
+        && startedIndex === 1
+        && startedEndIndex === 2
+        && startedDepth === 1
+        && previewValid
+        && previewIndex === 2
+        && previewDepth === 1
+        && previewModeName === "child"
+        && previewParentKey === "sibling"
+        && previewAnchorKey === "sibling"
+        && updatedIndex === 2
+        && updatedDepth === 1
+        && updatedModeName === "child"
+        && updatedParentKey === "sibling"
+        && updatedAnchorKey === "sibling"
+        && lastCommitted
+        && movedItemId === 1
+        && movedKey === "branch"
         && movedFromIndex === 1
-        && movedToIndex === 1
-        && movedDepth === 0
-        && hierarchyList.activeItemKey === "folder2"
-        && treeModel.length === 3
-        && treeModel[0].key === "folder1"
+        && movedToIndex === 2
+        && movedDepth === 1
+        && movedModeName === "child"
+        && movedParentKey === "sibling"
+        && movedAnchorKey === "sibling"
+        && treeModel.length === 4
+        && treeModel[0].key === "root"
         && treeModel[0].depth === 0
-        && treeModel[0].children.length === 0
-        && treeModel[1].key === "folder2"
+        && treeModel[0].parentKey === ""
+        && treeModel[0].parentItemKey === ""
+        && treeModel[1].key === "sibling"
         && treeModel[1].depth === 0
         && treeModel[1].parentKey === ""
-        && treeModel[2].key === "folder3"
-        && treeModel[2].depth === 0
+        && treeModel[1].parentItemKey === ""
+        && treeModel[2].key === "branch"
+        && treeModel[2].depth === 1
+        && treeModel[2].parentKey === "sibling"
+        && treeModel[2].parentItemKey === "sibling"
+        && treeModel[3].key === "leaf"
+        && treeModel[3].depth === 2
+        && treeModel[3].parentKey === "branch"
+        && treeModel[3].parentItemKey === "branch"
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QTRY_VERIFY(root->property("activatedFolder2").toBool());
+    QTRY_VERIFY(root->property("dragItemReady").toBool());
     QVariant dragPerformed;
     QVERIFY(QMetaObject::invokeMethod(root.data(),
                                       "performEditableDrag",
@@ -776,16 +830,8 @@ Item {
             { id: "layers", iconName: "projectStructure" }
         ]
         model: [
-            {
-                key: "root",
-                depth: 0,
-                label: "Root",
-                iconName: "projectStructure",
-                expanded: true,
-                children: [
-                    { key: "child", depth: 1, label: "Child", iconName: "viewMoreSymbolicDefault" }
-                ]
-            }
+            { key: "root", depth: 0, label: "Root", iconName: "projectStructure", expanded: true },
+            { key: "child", depth: 1, label: "Child", iconName: "viewMoreSymbolicDefault" }
         ]
         footerVisible: true
         footerButton1: ({
@@ -812,7 +858,7 @@ Item {
     property bool footerContractReady:
         hierarchy.footerVisible
         && hierarchy.toolbarItems.length === 2
-        && hierarchy.model.length === 1
+        && hierarchy.model.length === 2
         && footerTriggerResult
         && footerSignalCount === 1
         && footerCallbackCount === 1
@@ -1129,24 +1175,9 @@ Item {
         width: 260
         height: 220
         model: [
-            {
-                key: "root",
-                depth: 0,
-                label: "Root",
-                expanded: true,
-                selected: true,
-                children: [
-                    {
-                        key: "branch",
-                        depth: 1,
-                        label: "Branch",
-                        expanded: false,
-                        children: [
-                            { key: "leaf", depth: 2, label: "Leaf" }
-                        ]
-                    }
-                ]
-            }
+            { key: "root", depth: 0, label: "Root", expanded: true, selected: true },
+            { key: "branch", depth: 1, label: "Branch", expanded: false },
+            { key: "leaf", depth: 2, label: "Leaf" }
         ]
     }
 
@@ -1378,8 +1409,11 @@ Window {
     QVERIFY(itemB);
 
     QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemAObject);
+    QTRY_VERIFY(itemAObject->property("active").toBool());
     QTRY_COMPARE(itemAObject->property("state").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(itemAObject->property("uxState").toInt(), itemAObject->property("uxStateActive").toInt());
     QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Idle"));
+    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateIdle").toInt());
     QVERIFY(!itemBObject->property("isHoverState").toBool());
     QVERIFY(!itemBObject->property("isActiveState").toBool());
 
@@ -1389,6 +1423,7 @@ Window {
 
     QTRY_VERIFY(itemBObject->property("isHoverState").toBool());
     QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Hover"));
+    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateHover").toInt());
 
     QObject *hoverBackground = itemBObject->property("background").value<QObject *>();
     QVERIFY(hoverBackground);
@@ -1399,8 +1434,10 @@ Window {
     QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, hoverPointInt, 10);
 
     QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemBObject);
+    QTRY_VERIFY(itemBObject->property("active").toBool());
     QTRY_VERIFY(itemBObject->property("isActiveState").toBool());
     QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Active"));
+    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateActive").toInt());
     QTRY_VERIFY(!itemAObject->property("isActiveState").toBool());
 
     QObject *activeBackground = itemBObject->property("background").value<QObject *>();
@@ -1410,7 +1447,7 @@ Window {
     QCOMPARE(activeRenderedColor, expectedActiveColor);
 }
 
-void ImportApiTests::hierarchy_item_inputable_overlay_contract_loads()
+void ImportApiTests::hierarchy_item_figma_defaults_contract_loads()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -1422,45 +1459,39 @@ import LVRS as LV
 Item {
     id: root
 
-    property int editedCount: 0
-    property int submittedCount: 0
-    property string editedValue: ""
-    property string submittedValue: ""
-    property string applyResult: ""
-
     LV.HierarchyItem {
         id: item
         visible: false
-        label: "Node"
-        onInputEdited: function(text) {
-            root.editedCount += 1
-            root.editedValue = text
-        }
-        onInputSubmitted: function(text) {
-            root.submittedCount += 1
-            root.submittedValue = text
-        }
-    }
-
-    Component.onCompleted: {
-        item.inputable = true
-        item.applyInputResult("Node 2")
-        applyResult = item.applyInputResult("Node 3")
-        item.inputEdited("Node 4")
-        item.inputSubmitted("Node 5")
     }
 
     property bool contractReady:
-        item.inputable === true
+        item.label === "Label"
         && item.rowHeight === 20
+        && item.itemWidth === 200
         && item.indentStep === 8
-        && applyResult === "Node 3"
-        && item.inputResult === "Node 3"
-        && item.label === "Node 3"
-        && editedCount === 1
-        && submittedCount === 1
-        && editedValue === "Node 4"
-        && submittedValue === "Node 5"
+        && item.iconSize === 16
+        && item.chevronSize === 16
+        && item.baseLeftPadding === 8
+        && item.rowRightPadding === 8
+        && item.leadingSpacing === 2
+        && item.implicitWidth === 200
+        && item.implicitHeight === 20
+        && item.cornerRadius === LV.Theme.radiusControl
+        && item.computedLeftPadding === 8
+        && item.effectiveShowChevron
+        && item.resolvedSelectionDirection === item.directionRight
+        && item.resolvedChevronIconName === "generalchevronRight"
+        && item.activatable
+        && item.selectable
+        && item.childCount == 0
+        && item.visibleChildCount == 0
+        && item.descendantCount == 0
+        && item.flatIndex == -1
+        && item.visibleIndex == -1
+        && item.textColorNormal === LV.Theme.bodyColor
+        && item.rowBackgroundColorActive === LV.Theme.accentBlueMuted
+        && item.rowBackgroundColorInactive === LV.Theme.panelBackground12
+        && item.iconPlaceholderColor === LV.Theme.darkGrey10
 }
 )";
 
@@ -1469,7 +1500,7 @@ Item {
     QTRY_VERIFY(root->property("contractReady").toBool());
 }
 
-void ImportApiTests::hierarchy_item_input_overlay_geometry_and_close_contract_loads()
+void ImportApiTests::hierarchy_item_layout_geometry_contract_loads()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -1485,11 +1516,7 @@ Item {
     LV.HierarchyItem {
         id: item
         objectName: "item"
-        width: 320
-        label: "Node"
-        indentLevel: 2
-        showChevron: false
-        hasChildItems: false
+        width: 200
     }
 }
 )";
@@ -1502,39 +1529,346 @@ Item {
     auto *item = qobject_cast<QQuickItem *>(itemObject);
     QVERIFY(item);
 
+    auto *iconObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemIcon"), Qt::FindChildrenRecursively);
     auto *labelObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemLabel"), Qt::FindChildrenRecursively);
-    auto *loaderObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemInputLoader"), Qt::FindChildrenRecursively);
+    auto *chevronObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemChevron"), Qt::FindChildrenRecursively);
+    QVERIFY(iconObject);
     QVERIFY(labelObject);
-    QVERIFY(loaderObject);
+    QVERIFY(chevronObject);
+    auto *iconItem = qobject_cast<QQuickItem *>(iconObject);
     auto *labelItem = qobject_cast<QQuickItem *>(labelObject);
+    auto *chevronItem = qobject_cast<QQuickItem *>(chevronObject);
+    QVERIFY(iconItem);
     QVERIFY(labelItem);
+    QVERIFY(chevronItem);
 
-    itemObject->setProperty("inputable", true);
-
-    QTRY_VERIFY(loaderObject->property("active").toBool());
-    auto *overlayObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemInputOverlay"), Qt::FindChildrenRecursively);
-    QTRY_VERIFY(overlayObject != nullptr);
-    auto *overlayItem = qobject_cast<QQuickItem *>(overlayObject);
-    QVERIFY(overlayItem);
-
+    const QPointF iconPos = iconItem->mapToItem(item, QPointF(0, 0));
     const QPointF labelPos = labelItem->mapToItem(item, QPointF(0, 0));
-    const QPointF overlayPos = overlayItem->mapToItem(item, QPointF(0, 0));
+    const QPointF chevronPos = chevronItem->mapToItem(item, QPointF(0, 0));
 
-    QVERIFY2(qAbs(labelPos.x() - overlayPos.x()) <= 0.5, "Overlay x must match label x.");
-    QVERIFY2(qAbs(labelPos.y() - overlayPos.y()) <= 0.5, "Overlay y must match label y.");
-    QVERIFY2(qAbs(labelItem->width() - overlayItem->width()) <= 0.5, "Overlay width must match label width.");
-    QVERIFY2(qAbs(labelItem->height() - overlayItem->height()) <= 0.5, "Overlay height must match label height.");
+    QVERIFY2(qAbs(iconPos.x() - 8.0) <= 0.5, "Icon x must match the 8px Figma inset.");
+    QVERIFY2(qAbs(labelPos.x() - 26.0) <= 0.5, "Label x must follow icon width + 2px gap.");
+    QVERIFY2(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
+    QVERIFY2(qAbs(labelItem->width() - 148.0) <= 0.5, "Label width must match the Figma baseline layout.");
+    QVERIFY2(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
+}
 
-    const bool acceptedInvoked = QMetaObject::invokeMethod(overlayObject,
-                                                            "accepted",
-                                                            Q_ARG(QString, QStringLiteral("Node Renamed")));
-    QVERIFY(acceptedInvoked);
+void ImportApiTests::hierarchy_item_structure_api_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
 
-    QTRY_VERIFY(!itemObject->property("inputable").toBool());
-    QTRY_COMPARE(itemObject->property("inputResult").toString(), QStringLiteral("Node Renamed"));
-    QTRY_COMPARE(itemObject->property("label").toString(), QStringLiteral("Node Renamed"));
-    QTRY_VERIFY(labelObject->property("visible").toBool());
-    QTRY_VERIFY(!loaderObject->property("active").toBool());
+Item {
+    id: root
+    property int probeAttempts: 0
+    property bool contractReady: false
+
+    LV.HierarchyList {
+        id: list
+        visible: false
+        model: [
+            { key: "root", depth: 0, label: "Root", expanded: true, selected: true },
+            { key: "branch", depth: 1, label: "Branch", expanded: false },
+            { key: "leaf", depth: 2, label: "Leaf", activatable: false },
+            { key: "sibling", depth: 1, label: "Sibling" }
+        ]
+    }
+
+    function evaluateContract() {
+        const rootItem = list.resolveByKey("root")
+        const branchItem = list.resolveByKey("branch")
+        const leafItem = list.resolveByKey("leaf")
+        const siblingItem = list.resolveByKey("sibling")
+
+        if ((!rootItem || !branchItem || !leafItem || !siblingItem) && probeAttempts < 40) {
+            probeAttempts += 1
+            Qt.callLater(evaluateContract)
+            return
+        }
+
+        contractReady = rootItem && branchItem && leafItem && siblingItem
+            && list.itemCount === 4
+            && list.visibleItemCount === 3
+            && rootItem.active
+            && rootItem.uxState === rootItem.uxStateActive
+            && rootItem.parentPathLabel === ""
+            && rootItem.childCount === 2
+            && rootItem.visibleChildCount === 2
+            && rootItem.descendantCount === 3
+            && rootItem.visibleDescendantCount === 2
+            && rootItem.hiddenDescendantCount === 1
+            && rootItem.childItemKeysText === "branch, sibling"
+            && rootItem.childItemLabelsText === "Branch, Sibling"
+            && rootItem.pathItemKeysText === "root"
+            && rootItem.pathItemLabelsText === "Root"
+            && rootItem.firstChildItemKey === "branch"
+            && rootItem.firstChildItemLabel === "Branch"
+            && rootItem.lastChildItemKey === "sibling"
+            && rootItem.lastChildItemLabel === "Sibling"
+            && rootItem.flatIndex === 0
+            && rootItem.visibleIndex === 0
+            && rootItem.siblingIndex === 0
+            && rootItem.visibleSiblingIndex === 0
+            && rootItem.siblingCount === 1
+            && rootItem.visibleSiblingCount === 1
+            && rootItem.isRootItem
+            && rootItem.isBranchItem
+            && !rootItem.isLeafItem
+            && rootItem.isOnlySibling
+            && !rootItem.hasParentItem
+            && rootItem.chevronExpandable
+            && rootItem.canToggleExpanded
+            && rootItem.canCollapse
+            && !rootItem.canExpand
+            && !rootItem.collapsed
+            && branchItem.parentItemKey === "root"
+            && branchItem.parentLabel === "Root"
+            && branchItem.parentPathLabel === "Root"
+            && branchItem.childCount === 1
+            && branchItem.visibleChildCount === 0
+            && branchItem.descendantCount === 1
+            && branchItem.visibleDescendantCount === 0
+            && branchItem.hiddenDescendantCount === 1
+            && branchItem.childItemKeysText === "leaf"
+            && branchItem.childItemLabelsText === "Leaf"
+            && branchItem.ancestorItemKeysText === "root"
+            && branchItem.ancestorLabelsText === "Root"
+            && branchItem.pathItemKeysText === "root, branch"
+            && branchItem.pathItemLabelsText === "Root, Branch"
+            && branchItem.flatIndex === 1
+            && branchItem.visibleIndex === 1
+            && branchItem.siblingIndex === 0
+            && branchItem.visibleSiblingIndex === 0
+            && branchItem.siblingCount === 2
+            && branchItem.visibleSiblingCount === 2
+            && branchItem.hasParentItem
+            && !branchItem.isRootItem
+            && branchItem.isBranchItem
+            && !branchItem.isLeafItem
+            && branchItem.isFirstSibling
+            && !branchItem.isLastSibling
+            && branchItem.chevronExpandable
+            && branchItem.canExpand
+            && !branchItem.canCollapse
+            && branchItem.collapsed
+            && branchItem.canBecomeActive
+            && !branchItem.active
+            && leafItem.parentItemKey === "branch"
+            && leafItem.parentLabel === "Branch"
+            && leafItem.parentPathLabel === "Root / Branch"
+            && leafItem.childCount === 0
+            && leafItem.visibleChildCount === 0
+            && leafItem.descendantCount === 0
+            && leafItem.visibleDescendantCount === 0
+            && leafItem.hiddenDescendantCount === 0
+            && leafItem.ancestorItemKeysText === "root, branch"
+            && leafItem.ancestorLabelsText === "Root, Branch"
+            && leafItem.pathItemKeysText === "root, branch, leaf"
+            && leafItem.pathItemLabelsText === "Root, Branch, Leaf"
+            && leafItem.flatIndex === 2
+            && leafItem.visibleIndex === -1
+            && leafItem.siblingIndex === 0
+            && leafItem.visibleSiblingIndex === -1
+            && leafItem.siblingCount === 1
+            && leafItem.visibleSiblingCount === 0
+            && !leafItem.isRootItem
+            && !leafItem.isBranchItem
+            && leafItem.isLeafItem
+            && leafItem.isOnlySibling
+            && !leafItem.chevronExpandable
+            && !leafItem.canToggleExpanded
+            && !leafItem.activatable
+            && !leafItem.selectable
+            && !leafItem.canBecomeActive
+            && leafItem.uxState === leafItem.uxStateInactive
+            && !leafItem.rowVisible
+            && siblingItem.parentItemKey === "root"
+            && siblingItem.parentLabel === "Root"
+            && siblingItem.parentPathLabel === "Root"
+            && siblingItem.siblingIndex === 1
+            && siblingItem.visibleSiblingIndex === 1
+            && siblingItem.siblingCount === 2
+            && siblingItem.visibleSiblingCount === 2
+            && siblingItem.visibleIndex === 2
+            && siblingItem.isLastSibling
+            && siblingItem.pathItemLabelsText === "Root, Sibling"
+            && siblingItem.isLeafItem
+
+        if (!contractReady) {
+            console.log("hierarchy-structure-debug", JSON.stringify({
+                itemCount: list.itemCount,
+                visibleItemCount: list.visibleItemCount,
+                root: rootItem ? {
+                    active: rootItem.active,
+                    uxState: rootItem.uxState,
+                    parentPathLabel: rootItem.parentPathLabel,
+                    childCount: rootItem.childCount,
+                    visibleChildCount: rootItem.visibleChildCount,
+                    descendantCount: rootItem.descendantCount,
+                    visibleDescendantCount: rootItem.visibleDescendantCount,
+                    childItemKeysText: rootItem.childItemKeysText,
+                    childItemLabelsText: rootItem.childItemLabelsText,
+                    pathItemKeysText: rootItem.pathItemKeysText,
+                    pathItemLabelsText: rootItem.pathItemLabelsText,
+                    flatIndex: rootItem.flatIndex,
+                    visibleIndex: rootItem.visibleIndex,
+                    siblingIndex: rootItem.siblingIndex,
+                    visibleSiblingIndex: rootItem.visibleSiblingIndex,
+                    siblingCount: rootItem.siblingCount,
+                    visibleSiblingCount: rootItem.visibleSiblingCount,
+                    canCollapse: rootItem.canCollapse
+                } : null,
+                branch: branchItem ? {
+                    parentItemKey: branchItem.parentItemKey,
+                    parentLabel: branchItem.parentLabel,
+                    parentPathLabel: branchItem.parentPathLabel,
+                    childCount: branchItem.childCount,
+                    visibleChildCount: branchItem.visibleChildCount,
+                    descendantCount: branchItem.descendantCount,
+                    visibleDescendantCount: branchItem.visibleDescendantCount,
+                    childItemKeysText: branchItem.childItemKeysText,
+                    childItemLabelsText: branchItem.childItemLabelsText,
+                    ancestorItemKeysText: branchItem.ancestorItemKeysText,
+                    pathItemLabelsText: branchItem.pathItemLabelsText,
+                    flatIndex: branchItem.flatIndex,
+                    visibleIndex: branchItem.visibleIndex,
+                    siblingIndex: branchItem.siblingIndex,
+                    visibleSiblingIndex: branchItem.visibleSiblingIndex,
+                    siblingCount: branchItem.siblingCount,
+                    visibleSiblingCount: branchItem.visibleSiblingCount,
+                    canExpand: branchItem.canExpand,
+                    canCollapse: branchItem.canCollapse
+                } : null,
+                leaf: leafItem ? {
+                    parentItemKey: leafItem.parentItemKey,
+                    parentLabel: leafItem.parentLabel,
+                    parentPathLabel: leafItem.parentPathLabel,
+                    activatable: leafItem.activatable,
+                    uxState: leafItem.uxState,
+                    rowVisible: leafItem.rowVisible,
+                    ancestorItemKeysText: leafItem.ancestorItemKeysText,
+                    pathItemLabelsText: leafItem.pathItemLabelsText,
+                    flatIndex: leafItem.flatIndex,
+                    visibleIndex: leafItem.visibleIndex,
+                    siblingCount: leafItem.siblingCount,
+                    visibleSiblingCount: leafItem.visibleSiblingCount
+                } : null,
+                sibling: siblingItem ? {
+                    parentItemKey: siblingItem.parentItemKey,
+                    parentLabel: siblingItem.parentLabel,
+                    parentPathLabel: siblingItem.parentPathLabel,
+                    siblingIndex: siblingItem.siblingIndex,
+                    visibleSiblingIndex: siblingItem.visibleSiblingIndex,
+                    siblingCount: siblingItem.siblingCount,
+                    visibleSiblingCount: siblingItem.visibleSiblingCount,
+                    visibleIndex: siblingItem.visibleIndex,
+                    pathItemLabelsText: siblingItem.pathItemLabelsText
+                } : null
+            }))
+        }
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(evaluateContract)
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_item_ux_state_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    function sameColor(left, right) {
+        return Math.abs(left.r - right.r) < 0.001
+            && Math.abs(left.g - right.g) < 0.001
+            && Math.abs(left.b - right.b) < 0.001
+            && Math.abs(left.a - right.a) < 0.001
+    }
+
+    LV.HierarchyItem {
+        id: idleItem
+        visible: false
+    }
+
+    LV.HierarchyItem {
+        id: inactiveItem
+        visible: false
+        selectable: false
+    }
+
+    LV.HierarchyItem {
+        id: activeItem
+        visible: false
+        selected: true
+    }
+
+    LV.HierarchyItem {
+        id: dragItem
+        visible: false
+        dragPreviewActive: true
+    }
+
+    LV.HierarchyItem {
+        id: collapsedItem
+        visible: false
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+    }
+
+    property bool contractReady: false
+
+    Component.onCompleted: {
+        contractReady =
+        idleItem.uxState === idleItem.uxStateIdle
+        && idleItem.uxStateName === "Idle"
+        && idleItem.canBecomeActive
+        && !idleItem.active
+        && idleItem.rowBackgroundColor.a === 0
+        && inactiveItem.uxState === inactiveItem.uxStateInactive
+        && inactiveItem.uxStateName === "Inactive"
+        && inactiveItem.inactive
+        && !inactiveItem.activatable
+        && !inactiveItem.selectable
+        && !inactiveItem.canBecomeActive
+        && sameColor(inactiveItem.rowBackgroundColor, LV.Theme.panelBackground12)
+        && activeItem.uxState === activeItem.uxStateActive
+        && activeItem.uxStateName === "Active"
+        && activeItem.active
+        && sameColor(activeItem.rowBackgroundColor, LV.Theme.accentBlueMuted)
+        && dragItem.uxState === dragItem.uxStateDrag
+        && dragItem.uxStateName === "Drag"
+        && dragItem.isDragState
+        && sameColor(dragItem.rowBackgroundColor, LV.Theme.accentBlueMuted)
+        && Math.abs(dragItem.opacity - dragItem.dragPreviewOpacity) < 0.01
+        && collapsedItem.chevronExpandable
+        && collapsedItem.canExpand
+        && !collapsedItem.canCollapse
+        && collapsedItem.collapsed
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()

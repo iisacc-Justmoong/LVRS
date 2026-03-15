@@ -45,7 +45,7 @@ After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
-When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The copied source snapshot receives the same launchable layout under `<prefix>/src/LVRS/example/*/bin`; desktop-host snapshots (`macOS`, `Linux`) retain portable runtime lookup paths so those binaries can be launched directly from the snapshot after install. If `./install.sh --without-examples` is used, those snapshot `bin/` directories are omitted. Example binaries are no longer staged back into the source tree during a normal build.
+When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.
 
 ## Build (Framework-First Default)
 
@@ -63,27 +63,33 @@ cmake --build build -j
 
 By default, LVRS builds as an installable framework package (no example app, no tests).
 
+For repository-local development, prefer the root build helper:
+
+```bash
+./build.sh
+```
+
+`build.sh` configures `build/` with `LVRS_BUILD_EXAMPLES=ON` and `LVRS_BUILD_TESTS=ON`, builds the host outputs, and fails if any checked-in example launcher no longer matches its build-tree runtime.
+
 ## Build and Run Examples
 
 ```bash
-cmake -S . -B build \
-  -DLVRS_BUILD_EXAMPLES=ON \
-  -DLVRS_BUILD_TESTS=ON
-cmake --build build -j
+./build.sh
 ```
 
 Populate every example `bin/` directory in one pass:
 
 ```bash
-cmake --build build --target lvrs_host_examples_all
+./build.sh --without-tests
 ```
 
 Run visual-catalog demo:
 
 ```bash
-cmake --build build --target LVRSExampleVisualCatalog
-./build/example/VisualCatalog/bin/LVRSExampleVisualCatalog
+./example/VisualCatalog/bin/LVRSExampleVisualCatalog
 ```
+
+The checked-in launcher resolves the build-tree executable from `build/example/VisualCatalog/bin/LVRSExampleVisualCatalog`. You can still run that build-tree executable directly if needed.
 
 Run tests:
 

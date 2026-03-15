@@ -2,11 +2,11 @@
 
 Location: `qml/components/navigation/HierarchyList.qml`
 
-`HierarchyList` is a tree/list manager that renders `HierarchyItem` rows from either manual children or model-driven flattened tree data.
+`HierarchyList` is a depth-aware view list that renders `HierarchyItem` rows from either manual children or a flat model array with explicit depth values.
 
 ## Purpose
 
-- Flatten nested tree model into visible hierarchy rows.
+- Render a depth-array model into visible hierarchy rows.
 - Maintain activation, visibility, and expansion state efficiently.
 - Provide keyboard navigation and ancestor auto-expansion behavior.
 
@@ -15,11 +15,9 @@ Location: `qml/components/navigation/HierarchyList.qml`
 Model and roles:
 
 - `model` (main tree input), `treeModel` (compat alias)
-- `childrenRole`, `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
-- `enabledRole`, `expandedRole`, `selectedRole`, `showChevronRole`
+- `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
+- `enabledRole`, `expandedRole`, `selectedRole`, `activatableRole`, `showChevronRole`
 - `depthRole` (default `depth`)
-- `inferDepthFromStructure` (default `false`)
-- `autoExpandDepth`
 
 Generated row defaults:
 
@@ -32,7 +30,7 @@ State:
 - `itemCount`, `visibleItemCount` (readonly)
 - `keyboardNavigationEnabled`
 - `autoExpandAncestorsOnActivate`
-- `editable` (enables drag-based depth editing for array-backed object tree models)
+- `editable` (enables drag-based depth editing for array-backed object depth models)
 
 Composition:
 
@@ -51,17 +49,21 @@ Primary methods:
 - expansion: `expandAll()`, `collapseAll(keepRootExpanded)`
 - navigation: `navigateLeft()`, `navigateRight()`, `activateRelativeVisible(step)`
 - lookup helpers: `resolveById(...)`, `resolveByKey(...)`, `indexOfItem(...)`, `isItemVisible(...)`
+- tree relations: `parentItem(item)`, `firstChildItem(item)`
 
 ## Behavior Contract
 
 - `model` is present: list generates managed `HierarchyItem` instances.
 - `model` is empty: uses manually slotted `items` as managed rows.
-- Indentation uses explicit model depth (`indentLevel` first, then `depthRole`); structural inference is optional via `inferDepthFromStructure`.
+- Model input is expected to be a flat array/list of rows with explicit depth data (`indentLevel` first, then `depthRole`).
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
+- Managed rows are enriched with item metadata on every refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
 - Visibility is computed from ancestor expansion state and cached incrementally.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
-- `editable` currently supports only array-backed object tree models; `ListModel` and primitive-only arrays are not editable.
-- While `editable` is enabled, nested `children` structure is also treated as depth input even when explicit depth fields are absent, so drag depth edits remain visually coherent.
+- Generated rows can consume per-node activation affordance through `activatableRole` (default `activatable`, with `selectable` fallback), and non-activatable rows are excluded from activation normalization and keyboard activation targets.
+- `editable` currently supports only array-backed object depth models; `ListModel` and primitive-only arrays are not editable.
+- `editable` does not expose the drag API on the list itself; it only enables the item-level drag/drop contract on generated `HierarchyItem` rows.
+- Depth reorder operations update the flat backing array and rewrite each moved row's depth plus `parentKey` / `parentItemKey` fields.
 
 ## Usage
 
@@ -70,14 +72,8 @@ import LVRS 1.0 as LV
 
 LV.HierarchyList {
     model: [
-        {
-            key: "root",
-            depth: 0,
-            label: "Root",
-            children: [
-                { key: "child", depth: 1, label: "Child" }
-            ]
-        }
+        { key: "root", depth: 0, label: "Root", expanded: true },
+        { key: "child", depth: 1, label: "Child" }
     ]
 }
 ```

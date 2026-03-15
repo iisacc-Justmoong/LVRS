@@ -2,11 +2,11 @@
 
 Location: `qml/components/navigation/Hierarchy.qml`
 
-`Hierarchy` is a tree-panel surface composed of toolbar + scrollable hierarchy list.
+`Hierarchy` is a hierarchy-panel surface composed of toolbar + scrollable depth-aware hierarchy list.
 
 ## Purpose
 
-- Render nested model data with explicit expand/collapse controls.
+- Render depth-array hierarchy data with explicit expand/collapse controls.
 - Provide activation and expansion callbacks for host features.
 - Keep tree navigation usable inside nested scroll containers.
 
@@ -34,9 +34,7 @@ Toolbar aliases:
 
 Behavior aliases:
 
-- `autoExpandDepth`
 - `depthRole`
-- `inferDepthFromStructure`
 - `keyboardListNavigationEnabled`
 - `editable`
 
@@ -77,13 +75,8 @@ LV.Hierarchy {
         { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
     ]
     model: [
-        {
-            key: "root",
-            depth: 0,
-            label: "Root",
-            expanded: true,
-            children: [{ key: "child", depth: 1, label: "Child" }]
-        }
+        { key: "root", depth: 0, label: "Root", expanded: true },
+        { key: "child", depth: 1, label: "Child" }
     ]
     footerVisible: true
     footerButton1: ({ type: "icon", iconName: "projectStructure" })
@@ -98,7 +91,7 @@ LV.Hierarchy {
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.
-- `editable` forwards `HierarchyList` drag-depth editing; the underlying model must be an array-backed object tree.
+- `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must be an array-backed object depth list.
 
 ## Advanced Usage: Programmatic Activation
 

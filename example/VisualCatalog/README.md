@@ -8,12 +8,11 @@ The left sidebar is a `Hierarchy` index of the public QML surface, and the right
 From repository root:
 
 ```bash
-cmake -S . -B build -DLVRS_BUILD_EXAMPLES=ON
-cmake --build build --target LVRSExampleVisualCatalog
-./build/example/VisualCatalog/bin/LVRSExampleVisualCatalog
+./build.sh
+./example/VisualCatalog/bin/LVRSExampleVisualCatalog
 ```
 
-On macOS Finder, you can also click `example/run-visual-catalog.command`.
+The checked-in launcher resolves the build-tree executable from `build/example/VisualCatalog/bin/LVRSExampleVisualCatalog` during in-repository development and a sibling snapshot runtime after install.
 
 ## Structure
 

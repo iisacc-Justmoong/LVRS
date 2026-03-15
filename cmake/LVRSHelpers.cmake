@@ -60,6 +60,15 @@ function(_lvrs_internal_example_source_snapshot_runtime_rpath runtime_platform o
     set(${out_var} "${_lvrs_runtime_rpath}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_example_build_tree_runtime_rpath runtime_platform out_var)
+    set(_lvrs_runtime_rpath "")
+    if(runtime_platform STREQUAL "macos")
+        set(_lvrs_runtime_rpath "@loader_path/../../../")
+    endif()
+
+    set(${out_var} "${_lvrs_runtime_rpath}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_example_runtime_output_dir out_var)
     if(NOT DEFINED LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR OR LVRS_EXAMPLE_RUNTIME_OUTPUT_DIR STREQUAL "")
         set(_lvrs_example_runtime_output_dir "${CMAKE_CURRENT_BINARY_DIR}/bin")
@@ -72,6 +81,22 @@ endfunction()
 
 function(_lvrs_internal_configure_example_source_snapshot_runtime target runtime_platform)
     _lvrs_internal_example_source_snapshot_runtime_rpath(
+        "${runtime_platform}"
+        _lvrs_runtime_rpath
+    )
+    if(_lvrs_runtime_rpath STREQUAL "")
+        return()
+    endif()
+
+    _lvrs_internal_append_unique_target_list_property(
+        "${target}"
+        BUILD_RPATH
+        "${_lvrs_runtime_rpath}"
+    )
+endfunction()
+
+function(_lvrs_internal_configure_example_build_tree_runtime target runtime_platform)
+    _lvrs_internal_example_build_tree_runtime_rpath(
         "${runtime_platform}"
         _lvrs_runtime_rpath
     )
@@ -401,6 +426,11 @@ function(lvrs_configure_example_target target)
             RUNTIME_OUTPUT_DIRECTORY "${_lvrs_example_runtime_output_dir}"
         )
     endif()
+
+    _lvrs_internal_configure_example_build_tree_runtime(
+        "${target}"
+        "${_lvrs_example_target_platform}"
+    )
 
     _lvrs_internal_configure_example_source_snapshot_runtime(
         "${target}"

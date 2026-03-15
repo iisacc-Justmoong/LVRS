@@ -1239,32 +1239,12 @@ LV.ApplicationWindow {
                     width: parent.width
                     height: 232
                     model: [
-                        {
-                            key: "scene",
-                            label: "Scene",
-                            expanded: true,
-                            iconGlyph: "S",
-                            children: [
-                                {
-                                    key: "camera",
-                                    label: "Camera",
-                                    iconGlyph: "C",
-                                    children: [
-                                        { key: "frustum", label: "Frustum", iconGlyph: "F" }
-                                    ]
-                                },
-                                {
-                                    key: "lights",
-                                    label: "Lights",
-                                    expanded: true,
-                                    iconGlyph: "L",
-                                    children: [
-                                        { key: "key", label: "Key Light", iconGlyph: "K" },
-                                        { key: "rim", label: "Rim Light", iconGlyph: "R" }
-                                    ]
-                                }
-                            ]
-                        }
+                        { key: "scene", depth: 0, label: "Scene", expanded: true, iconGlyph: "S" },
+                        { key: "camera", depth: 1, label: "Camera", expanded: false, iconGlyph: "C" },
+                        { key: "frustum", depth: 2, label: "Frustum", iconGlyph: "F" },
+                        { key: "lights", depth: 1, label: "Lights", expanded: true, iconGlyph: "L" },
+                        { key: "key", depth: 2, label: "Key Light", iconGlyph: "K" },
+                        { key: "rim", depth: 2, label: "Rim Light", iconGlyph: "R" }
                     ]
 
                     LV.ToolbarButton { buttonId: "overview"; iconGlyph: "O" }
@@ -1611,7 +1591,6 @@ LV.ApplicationWindow {
                     Layout.fillHeight: true
                     minimumPanelWidth: root.sidebarWidth
                     model: catalogRegistry.hierarchyModel
-                    autoExpandDepth: 5
                     footerVisible: false
 
                     onListItemActivated: function(item) {
