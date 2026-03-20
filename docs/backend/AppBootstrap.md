@@ -1,6 +1,6 @@
 # AppBootstrap
 
-Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp`
+Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp` / `backend/runtime/appentry.h`
 
 `AppBootstrap` provides pre/post application initialization routines for graphics backend policy, style setup, and font fallback setup.
 
@@ -8,6 +8,9 @@ Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp`
 
 - `lvrs::preApplicationBootstrap(options) -> AppBootstrapState`
 - `lvrs::postApplicationBootstrap(app, options) -> void`
+- `lvrs::runBootstrappedQmlApp(argc, argv, launchSpec) -> int`
+
+For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchSpec` as the standard wrapper around the pre/post bootstrap sequence. It keeps the required bootstrap order intact and can seed root QML properties through `initialProperties` before `QQmlApplicationEngine::loadFromModule(...)`.
 
 ## `AppBootstrapOptions`
 

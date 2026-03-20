@@ -2,37 +2,51 @@ import QtQuick
 import QtQuick.Layouts
 import LVRS 1.0 as LV
 
-LV.ApplicationWindow {
+LV.AppBootstrapWindow {
     id: root
 
-    visible: true
+    property string bootstrapTitle: "Android Hello"
+    property string bootstrapSubtitle: "LVRS Example"
+    property string bootstrapMessage: "This app verifies LVRS Android bootstrap."
+    property string platformLabel: "Android"
+
     width: 780
     height: 540
-    title: "Android Hello"
-    subtitle: "LVRS Example"
-    navigationEnabled: false
+    title: bootstrapTitle
+    subtitle: bootstrapSubtitle
+    pageRoutes: [
+        { path: "/", component: helloRoute }
+    ]
 
-    LV.AppCard {
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.82, 560)
-        title: "Android Demo"
-        subtitle: "Hello World!"
+    Component {
+        id: helloRoute
 
-        ColumnLayout {
-            width: parent.width - (LV.Theme.gap24 * 2)
-            spacing: LV.Theme.gap8
+        Item {
+            anchors.fill: parent
 
-            LV.Label {
-                Layout.fillWidth: true
-                style: header
-                text: "Hello World!"
-            }
+            LV.AppCard {
+                anchors.centerIn: parent
+                width: Math.min(parent.width * 0.82, 560)
+                title: platformLabel + " Demo"
+                subtitle: "Single route host"
 
-            LV.Label {
-                Layout.fillWidth: true
-                style: body
-                wrapMode: Text.WordWrap
-                text: "This app verifies LVRS Android bootstrap and emulator deploy flow."
+                ColumnLayout {
+                    width: parent.width - (LV.Theme.gap24 * 2)
+                    spacing: LV.Theme.gap8
+
+                    LV.Label {
+                        Layout.fillWidth: true
+                        style: header
+                        text: "Hello World!"
+                    }
+
+                    LV.Label {
+                        Layout.fillWidth: true
+                        style: body
+                        wrapMode: Text.WordWrap
+                        text: bootstrapMessage
+                    }
+                }
             }
         }
     }

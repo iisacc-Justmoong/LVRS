@@ -132,7 +132,7 @@ lvrs_add_qml_app(
 ```
 
 Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when configuring the downstream project.
-`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, auto-links/imports LVRS static QML plugin artifacts for static package builds, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically probes Linux runtime QML import locations such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. Qt runtime deployment itself remains target-environment specific.
+`lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, auto-links/imports LVRS static QML plugin artifacts for static package builds, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically probes Linux runtime QML import locations such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. `QmlAppLaunchSpec::initialProperties` is applied through `QQmlApplicationEngine::setInitialProperties(...)` immediately before `loadFromModule(...)`, so route or window startup state can be decided in C++ before the first frame. Qt runtime deployment itself remains target-environment specific.
 `LV.ApplicationWindow` provides adaptive layout policy APIs for mobile/desktop reordering:
 - `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
 - `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
@@ -145,6 +145,36 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 `LV.ApplicationWindow` page-stack API: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
+Recommended app-root bootstrap profile for mobile/desktop single-project apps:
+
+```cpp
+lvrs::QmlAppLaunchSpec launchSpec;
+launchSpec.bootstrap.applicationName = QStringLiteral("MyApp");
+launchSpec.bootstrap.quickStyleName = QStringLiteral("Basic");
+launchSpec.moduleUri = QStringLiteral("MyApp");
+launchSpec.rootObject = QStringLiteral("Main");
+launchSpec.initialProperties = QVariantMap{
+    {QStringLiteral("initialRoutePath"), QStringLiteral("/")},
+    {QStringLiteral("bootstrapTitle"), QStringLiteral("MyApp")}
+};
+```
+
+```qml
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.AppBootstrapWindow {
+    pageRoutes: [
+        { path: "/", component: homePage }
+    ]
+
+    Component {
+        id: homePage
+        Item {}
+    }
+}
+```
+`LV.AppBootstrapWindow` is the reusable downstream root for the imported bootstrap profile. It extends `LV.ApplicationWindow` and preconfigures visible root hosting, mobile-safe viewport defaults, runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath`.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`

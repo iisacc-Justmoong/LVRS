@@ -67,6 +67,7 @@ This structure is intentional so the same question can be answered consistently 
 
 ## App Layer
 
+- `docs/components/app/AppBootstrapWindow.md`
 - `docs/components/app/ApplicationWindow.md`
 - `docs/components/app/AppShell.md`
 

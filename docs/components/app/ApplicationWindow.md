@@ -4,6 +4,8 @@ Location: `qml/ApplicationWindow.qml`
 
 `ApplicationWindow` is the LVRS root shell that combines adaptive navigation layout, render/runtime wiring, and global event bridging.
 
+For downstream apps that want the standard single-project bootstrap profile, prefer `LV.AppBootstrapWindow`. `ApplicationWindow` remains the lower-level shell when projects need to control those defaults directly.
+
 ## Purpose
 
 - Own platform/size-class and adaptive scaffold state.
@@ -43,7 +45,7 @@ On completion, main flow is:
   - `mobileDisplayCoverageOverrideEnabled`
   - `mobileFullscreenVisibilityOverride`
   - `mobileFullscreenGeometryHintOverride`
-  - `mobileOversizedHeightEnabled`
+  - `mobileOversizedHeightEnabled` (default `false`; opt in only for explicit oversized-surface workarounds)
   - `mobileOversizedHeight`
   - `mobileLayoutHeightHint`
   - `mobileOversizedHeightActive`
@@ -125,24 +127,34 @@ Signals:
 - Adaptive layout transitions are guarded to avoid invalid one-step transitions and resize oscillation.
 - `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling one does not force the other.
 - Runtime attach and backend hook are feature-flagged; both can be fully disabled for constrained hosts.
-- Mobile safe-area fill strategy can force an intentionally oversized window height while keeping layout computation bounded to `mobileLayoutViewportHeight`.
+- Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
 
 ## Usage
 
 ```qml
+import QtQuick
 import LVRS 1.0 as LV
 
 LV.ApplicationWindow {
     visible: true
-    width: 1280
-    height: 800
+    width: 430
+    height: 932
 
-    globalEventListenersEnabled: true
+    autoAttachRuntimeEvents: true
+    mobileOversizedHeightEnabled: false
     useInternalPageStack: true
+
+    property string initialRoutePath: "/"
+
+    pageInitialPath: initialRoutePath
     pageRoutes: [
-        { path: "/", component: homePage },
-        { path: "/reports", component: reportsPage }
+        { path: "/", component: homePage }
     ]
+
+    Component {
+        id: homePage
+        Item {}
+    }
 }
 ```

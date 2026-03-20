@@ -35,6 +35,7 @@ Toolbar aliases:
 Behavior aliases:
 
 - `depthRole`
+- `draggableRole`
 - `keyboardListNavigationEnabled`
 - `editable`
 

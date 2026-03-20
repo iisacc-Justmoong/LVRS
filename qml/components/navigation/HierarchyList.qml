@@ -26,11 +26,12 @@ Item {
     property string expandedRole: "expanded"
     property string selectedRole: "selected"
     property string activatableRole: "activatable"
+    property string draggableRole: "draggable"
     property string showChevronRole: "showChevron"
     property string depthRole: "depth"
 
     property int generatedIndentStep: 8
-    property int generatedRowHeight: 28
+    property int generatedRowHeight: 20
     property int generatedItemWidth: 200
     property int generatedIconSize: 16
     property int generatedChevronSize: 16
@@ -1049,6 +1050,7 @@ Item {
             iconGlyph: item.iconGlyph === undefined || item.iconGlyph === null ? "" : String(item.iconGlyph),
             enabled: !!item.enabled,
             activatable: item.activatable === undefined ? true : !!item.activatable,
+            draggable: item.dragAllowed === undefined ? true : !!item.dragAllowed,
             expanded: !!item.expanded,
             showChevron: !!item.showChevron
         }
@@ -1074,6 +1076,7 @@ Item {
         const iconGlyphRoleName = normalizedRoleName(iconGlyphRole, "iconGlyph")
         const enabledRoleName = normalizedRoleName(enabledRole, "enabled")
         const activatableRoleName = normalizedRoleName(activatableRole, "activatable")
+        const draggableRoleName = normalizedRoleName(draggableRole, "draggable")
         const expandedRoleName = normalizedRoleName(expandedRole, "expanded")
         const showChevronRoleName = normalizedRoleName(showChevronRole, "showChevron")
         const depthRoleName = normalizedRoleName(depthRole, "depth")
@@ -1101,6 +1104,12 @@ Item {
             node.activatable = descriptor.activatable
         if (node.selectable !== undefined || activatableRoleName === "selectable")
             node.selectable = descriptor.activatable
+        if (draggableRoleName.length > 0)
+            node[draggableRoleName] = descriptor.draggable
+        if (node.dragAllowed !== undefined || draggableRoleName === "dragAllowed")
+            node.dragAllowed = descriptor.draggable
+        if (node.draggable !== undefined || draggableRoleName === "draggable")
+            node.draggable = descriptor.draggable
         if (expandedRoleName.length > 0)
             node[expandedRoleName] = descriptor.expanded
         if (showChevronRoleName.length > 0)
@@ -1874,6 +1883,10 @@ Item {
                                          activatableRole,
                                          roleValue(node, "selectable",
                                                    roleValue(node, "activatable", true)))
+            const draggable = boolRole(node,
+                                       draggableRole,
+                                       roleValue(node, "dragAllowed",
+                                                 roleValue(node, "draggable", true)))
 
             sink.push({
                           itemId: itemId,
@@ -1889,6 +1902,7 @@ Item {
                           selected: selected,
                           enabled: enabled,
                           activatable: activatable,
+                          draggable: draggable,
                           indentLevel: indentLevel,
                           pathLabel: pathLabel,
                           nodeData: node
@@ -1950,6 +1964,7 @@ Item {
                                                                  selected: descriptor.selected,
                                                                  enabled: descriptor.enabled,
                                                                  activatable: descriptor.activatable,
+                                                                 dragAllowed: descriptor.draggable,
                                                                  indentLevel: descriptor.indentLevel,
                                                                  indentStep: control.generatedIndentStep,
                                                                  rowHeight: control.generatedRowHeight,

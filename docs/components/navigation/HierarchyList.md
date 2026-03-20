@@ -16,13 +16,13 @@ Model and roles:
 
 - `model` (main tree input), `treeModel` (compat alias)
 - `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
-- `enabledRole`, `expandedRole`, `selectedRole`, `activatableRole`, `showChevronRole`
+- `enabledRole`, `expandedRole`, `selectedRole`, `activatableRole`, `draggableRole`, `showChevronRole`
 - `depthRole` (default `depth`)
 
 Generated row defaults:
 
-- `generatedIndentStep` (default `8`), `generatedRowHeight`, `generatedItemWidth`
-- `generatedIconSize`, `generatedChevronSize`
+- `generatedIndentStep` (default `8`), `generatedRowHeight` (default `20`), `generatedItemWidth` (default `200`)
+- `generatedIconSize` (default `16`), `generatedChevronSize` (default `16`)
 
 State:
 
@@ -57,10 +57,12 @@ Primary methods:
 - `model` is empty: uses manually slotted `items` as managed rows.
 - Model input is expected to be a flat array/list of rows with explicit depth data (`indentLevel` first, then `depthRole`).
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
+- Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
 - Managed rows are enriched with item metadata on every refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
 - Visibility is computed from ancestor expansion state and cached incrementally.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
 - Generated rows can consume per-node activation affordance through `activatableRole` (default `activatable`, with `selectable` fallback), and non-activatable rows are excluded from activation normalization and keyboard activation targets.
+- Generated rows can consume per-node drag affordance through `draggableRole` (default `draggable`, with `dragAllowed` fallback), so editable lists can keep selected rows interactive while locking specific nodes against drag startup.
 - `editable` currently supports only array-backed object depth models; `ListModel` and primitive-only arrays are not editable.
 - `editable` does not expose the drag API on the list itself; it only enables the item-level drag/drop contract on generated `HierarchyItem` rows.
 - Depth reorder operations update the flat backing array and rewrite each moved row's depth plus `parentKey` / `parentItemKey` fields.

@@ -17,8 +17,10 @@ class ImportApiTests : public QObject
     Q_OBJECT
 
 private slots:
+    void app_bootstrap_window_loads();
     void versionless_import_application_window_loads();
     void application_window_page_stack_state_loads();
+    void application_window_initial_properties_seed_page_stack();
     void versionless_import_window_loads();
     void appshell_compat_loads();
     void application_window_platform_adaptive_layout_loads();
@@ -27,6 +29,7 @@ private slots:
     void hierarchy_string_array_model_loads();
     void hierarchy_nested_children_indent_contract_loads();
     void hierarchy_editable_drag_depth_contract_loads();
+    void hierarchy_editable_drag_per_item_lock_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -67,6 +70,47 @@ static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
             qWarning() << err;
     }
     return obj;
+}
+
+void ImportApiTests::app_bootstrap_window_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    QQmlComponent component(&engine);
+    component.setData(R"(
+import QtQuick
+import LVRS as LV
+
+LV.AppBootstrapWindow {
+    width: 430
+    height: 932
+    visible: false
+    pageRoutes: [
+        { path: "/", component: homePage }
+    ]
+
+    property bool bootstrapContractReady:
+        !navigationEnabled
+        && autoAttachRuntimeEvents
+        && internalRouterRegisterAsGlobalNavigator
+        && !mobileOversizedHeightEnabled
+        && useInternalPageStack
+        && pageInitialPath === initialRoutePath
+
+    Component {
+        id: homePage
+        Item {}
+    }
+}
+)",
+                      QUrl());
+
+    QScopedPointer<QObject> root(component.create());
+    QVERIFY2(root, "Expected AppBootstrapWindow to load");
+    QVERIFY2(!component.isError(), "Unexpected QML errors while creating AppBootstrapWindow");
+    QVERIFY(root->property("bootstrapContractReady").toBool());
 }
 
 void ImportApiTests::versionless_import_application_window_loads()
@@ -256,6 +300,54 @@ LV.ApplicationWindow {
     QVERIFY(root);
     QTRY_VERIFY(root->property("stackInitialReady").toBool());
     QTRY_VERIFY(root->property("stackNavigationWorked").toBool());
+}
+
+void ImportApiTests::application_window_initial_properties_seed_page_stack()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    QQmlComponent component(&engine);
+    component.setData(R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 430
+    height: 932
+    visible: false
+    autoAttachRuntimeEvents: true
+    mobileOversizedHeightEnabled: false
+    useInternalPageStack: true
+    pageInitialPath: initialRoutePath
+    pageRoutes: [
+        { path: "/", component: homePage }
+    ]
+
+    property string initialRoutePath: "/"
+    property bool stackReady: internalPageStackEnabled
+        && activePageRouter !== null
+        && activePageRouter.currentPath === initialRoutePath
+        && autoAttachRuntimeEvents
+        && !mobileOversizedHeightEnabled
+
+    Component {
+        id: homePage
+        Item { objectName: "home-page" }
+    }
+}
+)",
+                      QUrl());
+
+    QObject *created = component.createWithInitialProperties({
+        {QStringLiteral("initialRoutePath"), QStringLiteral("/")}
+    });
+    QScopedPointer<QObject> root(created);
+    QVERIFY2(root, "Expected ApplicationWindow to load with initial properties");
+    QVERIFY2(!component.isError(), "Unexpected QML errors while creating ApplicationWindow with initial properties");
+    QTRY_VERIFY(root->property("stackReady").toBool());
 }
 
 void ImportApiTests::appshell_compat_loads()
@@ -576,6 +668,10 @@ Item {
             && grandItem.iconName === "viewMoreSymbolicBorderless"
             && greatItem.label === "Great"
             && greatItem.iconName === "viewMoreSymbolicDisabled"
+            && rootItem.rowHeight === 20
+            && childItem.rowHeight === 20
+            && grandItem.rowHeight === 20
+            && greatItem.rowHeight === 20
             && rootItem.indentLevel === 0
             && childItem.indentLevel === 1
             && grandItem.indentLevel === 2
@@ -800,6 +896,114 @@ Item {
                                       Q_RETURN_ARG(QVariant, dragPerformed)));
     QVERIFY(dragPerformed.toBool());
     QTRY_VERIFY(root->property("dragContractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_editable_drag_per_item_lock_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property int lookupAttempts: 0
+    property bool itemsReady: false
+    property var lockedItem: null
+    property var freeItem: null
+    property var fallbackItem: null
+
+    property var customModel: [
+        { key: "root", depth: 0, label: "Root", expanded: true, movable: true },
+        { key: "locked", depth: 1, label: "Locked", movable: false },
+        { key: "free", depth: 1, label: "Free", movable: true }
+    ]
+    property var fallbackModel: [
+        { key: "fallback", depth: 0, label: "Fallback", dragAllowed: false }
+    ]
+
+    function ensureItems() {
+        if (itemsReady || lookupAttempts >= 40)
+            return
+
+        lookupAttempts += 1
+        const locked = hierarchyList.resolveByKey("locked")
+        const free = hierarchyList.resolveByKey("free")
+        const fallback = fallbackList.resolveByKey("fallback")
+        if (!locked || !free || !fallback) {
+            Qt.callLater(ensureItems)
+            return
+        }
+
+        lockedItem = locked
+        freeItem = free
+        fallbackItem = fallback
+        itemsReady = true
+    }
+
+    function evaluateDragLockContract() {
+        if (!lockedItem || !freeItem || !fallbackItem)
+            return false
+
+        const lockedStarted = lockedItem.beginDrag(lockedItem.width * 0.5, lockedItem.height * 0.5)
+        const freeStarted = freeItem.beginDrag(freeItem.width * 0.5, freeItem.height * 0.5)
+        const fallbackStarted = fallbackItem.beginDrag(fallbackItem.width * 0.5, fallbackItem.height * 0.5)
+        if (freeStarted)
+            freeItem.cancelDrag()
+
+        return hierarchyAliasProbe.draggableRole === "movable"
+            && hierarchyList.draggableRole === "movable"
+            && !lockedItem.dragEnabled
+            && !lockedStarted
+            && freeItem.dragEnabled
+            && freeStarted
+            && !fallbackItem.dragEnabled
+            && !fallbackStarted
+    }
+
+    LV.Hierarchy {
+        id: hierarchyAliasProbe
+        visible: false
+        editable: true
+        draggableRole: "movable"
+        model: root.customModel
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        width: parent.width
+        height: parent.height
+        editable: true
+        draggableRole: hierarchyAliasProbe.draggableRole
+        model: root.customModel
+    }
+
+    LV.HierarchyList {
+        id: fallbackList
+        visible: false
+        width: 1
+        height: 1
+        editable: true
+        model: root.fallbackModel
+    }
+
+    Component.onCompleted: Qt.callLater(root.ensureItems)
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("itemsReady").toBool());
+    QVariant dragLockContractReady;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "evaluateDragLockContract",
+                                      Q_RETURN_ARG(QVariant, dragLockContractReady)));
+    QVERIFY(dragLockContractReady.toBool());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()

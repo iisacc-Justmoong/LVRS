@@ -24,3 +24,4 @@ The checked-in launcher resolves the build-tree executable from `build/example/V
 - Browse the library by domain instead of memorizing file paths.
 - Use section nodes for category overviews.
 - Use component nodes for concrete visual documentation and usage examples.
+- Use the hierarchy preview to validate flat depth-array reordering and parent reassignment by drag and drop.

@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <QStringList>
+#include <QVariantMap>
 
 class QQmlApplicationEngine;
 
@@ -13,6 +14,7 @@ struct QmlAppLaunchSpec {
     AppBootstrapOptions bootstrap;
     QString moduleUri;
     QString rootObject = QStringLiteral("Main");
+    QVariantMap initialProperties;
     QStringList qmlImportPaths;
     bool includeDefaultRuntimeQmlImportPaths = true;
     std::function<void(QQmlApplicationEngine &engine)> configureEngine;

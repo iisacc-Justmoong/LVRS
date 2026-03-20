@@ -62,7 +62,7 @@ void ExampleSmokeTests::visual_catalog_example_loads()
     QVERIFY2(!path.isEmpty(), "Failed to locate ../example/VisualCatalog/qml/Main.qml");
     QScopedPointer<QObject> obj(loadFile(engine, path));
     QVERIFY(obj);
-    QCOMPARE(obj->property("catalogComponentCount").toInt(), 52);
+    QCOMPARE(obj->property("catalogComponentCount").toInt(), 53);
 }
 
 QTEST_MAIN(ExampleSmokeTests)

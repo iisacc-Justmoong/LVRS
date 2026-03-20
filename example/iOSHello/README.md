@@ -1,6 +1,10 @@
 # iOS Hello Example
 
-Minimal LVRS Hello World example intended for iOS bootstrap verification.
+Minimal LVRS iOS bootstrap example with:
+
+- standard `QmlAppLaunchSpec` initial property seeding
+- a single-route `LV.AppBootstrapWindow` host
+- mobile-safe defaults (`mobileOversizedHeightEnabled: false`) plus runtime attach
 
 ## Build iOS bootstrap target
 

@@ -78,7 +78,9 @@ int runBootstrappedQmlApp(int argc, char *argv[], const QmlAppLaunchSpec &spec)
     if (spec.configureEngine)
         spec.configureEngine(engine);
 
+    engine.setInitialProperties(spec.initialProperties);
     engine.loadFromModule(spec.moduleUri, spec.rootObject);
+    engine.setInitialProperties({});
 
     return app.exec();
 }

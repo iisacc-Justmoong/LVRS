@@ -1209,7 +1209,83 @@ LV.ApplicationWindow {
         Item {
             id: preview
             property var catalogEntry: ({})
+            property var editableHierarchyModel: createEditableHierarchyModel()
+            property string dragEventSummary: "Drag rows vertically to reorder them, then move right in 8 px steps to redefine parent and depth."
+            property string hierarchyArraySummary: ""
+            property string activeItemSummary: "Select or drag a generated row to inspect the item-owned hierarchy API."
             implicitHeight: contentColumn.implicitHeight
+
+            function createEditableHierarchyModel() {
+                return [
+                    { key: "scene", depth: 0, label: "Scene", expanded: true, iconGlyph: "S", parentKey: "", parentItemKey: "" },
+                    { key: "camera", depth: 1, label: "Camera", expanded: true, iconGlyph: "C", parentKey: "scene", parentItemKey: "scene" },
+                    { key: "frustum", depth: 2, label: "Frustum", iconGlyph: "F", parentKey: "camera", parentItemKey: "camera" },
+                    { key: "lights", depth: 1, label: "Lights", expanded: true, iconGlyph: "L", parentKey: "scene", parentItemKey: "scene" },
+                    { key: "key", depth: 2, label: "Key Light", iconGlyph: "K", parentKey: "lights", parentItemKey: "lights" },
+                    { key: "rim", depth: 2, label: "Rim Light", iconGlyph: "R", parentKey: "lights", parentItemKey: "lights" }
+                ]
+            }
+
+            function resolvedNodeParentKey(node) {
+                if (!node)
+                    return "root"
+
+                const parentItemKey = node.parentItemKey === undefined || node.parentItemKey === null
+                    ? ""
+                    : String(node.parentItemKey)
+                if (parentItemKey.length > 0)
+                    return parentItemKey
+
+                const parentKey = node.parentKey === undefined || node.parentKey === null ? "" : String(node.parentKey)
+                return parentKey.length > 0 ? parentKey : "root"
+            }
+
+            function syncHierarchyArraySummary() {
+                const fragments = []
+                for (let i = 0; i < editableHierarchyModel.length; i++) {
+                    const node = editableHierarchyModel[i]
+                    if (!node)
+                        continue
+                    const key = node.key === undefined || node.key === null ? "node-" + i : String(node.key)
+                    const depth = Number(node.depth)
+                    const normalizedDepth = Number.isFinite(depth) ? Math.max(0, Math.trunc(depth)) : 0
+                    fragments.push(key + " d" + normalizedDepth + " <- " + resolvedNodeParentKey(node))
+                }
+                hierarchyArraySummary = fragments.join(" | ")
+            }
+
+            function syncActiveItemSummary() {
+                const item = hierarchyPreview.activeListItem
+                if (!item) {
+                    activeItemSummary = "Select or drag a generated row to inspect the item-owned hierarchy API."
+                    return
+                }
+
+                const itemKey = item.resolvedItemKey === undefined || item.resolvedItemKey === null
+                    ? ""
+                    : String(item.resolvedItemKey)
+                const parentKey = item.parentItemKey === undefined || item.parentItemKey === null || String(item.parentItemKey).length === 0
+                    ? "root"
+                    : String(item.parentItemKey)
+                const dragMode = item.dragTargetModeName === undefined || item.dragTargetModeName === null || String(item.dragTargetModeName).length === 0
+                    ? "none"
+                    : String(item.dragTargetModeName)
+                activeItemSummary = itemKey
+                    + " depth " + item.indentLevel
+                    + ", parent " + parentKey
+                    + ", dragEnabled " + item.dragEnabled
+                    + ", canToggleExpanded " + item.canToggleExpanded
+                    + ", dragTarget " + dragMode
+            }
+
+            function resetEditableHierarchyModel() {
+                editableHierarchyModel = createEditableHierarchyModel()
+                dragEventSummary = "Drag rows vertically to reorder them, then move right in 8 px steps to redefine parent and depth."
+                syncHierarchyArraySummary()
+                Qt.callLater(preview.syncActiveItemSummary)
+            }
+
+            Component.onCompleted: syncHierarchyArraySummary()
 
             Column {
                 id: contentColumn
@@ -1227,29 +1303,128 @@ LV.ApplicationWindow {
 
                 LV.HierarchyItem {
                     width: parent.width
-                    label: "Standalone node"
-                    itemKey: "standalone"
+                    label: "Generated rows emit drag signals from the item itself"
+                    itemKey: "delegate-contract"
                     showChevron: true
                     hasChildItems: true
                     expanded: false
-                    iconGlyph: "N"
+                    iconGlyph: "I"
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: "Editable hierarchy is now a flat depth-array demo. Drag a row up or down to move it, then push right by one indent step to reparent it as a child."
                 }
 
                 LV.Hierarchy {
+                    id: hierarchyPreview
                     width: parent.width
-                    height: 232
-                    model: [
-                        { key: "scene", depth: 0, label: "Scene", expanded: true, iconGlyph: "S" },
-                        { key: "camera", depth: 1, label: "Camera", expanded: false, iconGlyph: "C" },
-                        { key: "frustum", depth: 2, label: "Frustum", iconGlyph: "F" },
-                        { key: "lights", depth: 1, label: "Lights", expanded: true, iconGlyph: "L" },
-                        { key: "key", depth: 2, label: "Key Light", iconGlyph: "K" },
-                        { key: "rim", depth: 2, label: "Rim Light", iconGlyph: "R" }
-                    ]
+                    height: 240
+                    editable: true
+                    model: preview.editableHierarchyModel
+
+                    onListItemActivated: function(item) {
+                        preview.syncActiveItemSummary()
+                    }
+                    onListItemMoved: function(item, itemId, itemKey, fromIndex, toIndex, depth) {
+                        preview.dragEventSummary = String(itemKey) + " moved from " + fromIndex + " to " + toIndex + " at depth " + depth + "."
+                        preview.syncHierarchyArraySummary()
+                        Qt.callLater(preview.syncActiveItemSummary)
+                    }
+                    onToolbarButtonTriggered: function(button, buttonId) {
+                        if (buttonId === "overview")
+                            hierarchyPreview.activateListItemByKey("scene")
+                        else if (buttonId === "expand")
+                            hierarchyPreview.expandAll()
+                        else if (buttonId === "collapse")
+                            hierarchyPreview.collapseAll(true)
+                        else if (buttonId === "reset")
+                            preview.resetEditableHierarchyModel()
+                    }
 
                     LV.ToolbarButton { buttonId: "overview"; iconGlyph: "O" }
                     LV.ToolbarButton { buttonId: "expand"; iconGlyph: "+" }
                     LV.ToolbarButton { buttonId: "collapse"; iconGlyph: "-" }
+                    LV.ToolbarButton { buttonId: "reset"; iconGlyph: "R" }
+                }
+
+                Connections {
+                    target: hierarchyPreview.activeListItem
+                    ignoreUnknownSignals: true
+
+                    function onDragStarted(sourceIndex, sourceEndIndex, sourceDepth) {
+                        const item = hierarchyPreview.activeListItem
+                        const label = item && item.resolvedLabel !== undefined && item.resolvedLabel !== null
+                            ? String(item.resolvedLabel)
+                            : "Row"
+                        preview.dragEventSummary = label + " drag start [" + sourceIndex + "-" + sourceEndIndex + "] depth " + sourceDepth + "."
+                        preview.syncActiveItemSummary()
+                    }
+
+                    function onDragUpdated(targetIndex, targetDepth, modeName, parentItemKey, anchorItemKey) {
+                        const parentKey = parentItemKey && String(parentItemKey).length > 0 ? String(parentItemKey) : "root"
+                        const anchorKey = anchorItemKey && String(anchorItemKey).length > 0 ? String(anchorItemKey) : "none"
+                        preview.dragEventSummary = "Preview " + String(modeName) + " -> index " + targetIndex + ", depth " + targetDepth + ", parent " + parentKey + ", anchor " + anchorKey + "."
+                        preview.syncActiveItemSummary()
+                    }
+
+                    function onDragEnded(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey, anchorItemKey) {
+                        const parentKey = parentItemKey && String(parentItemKey).length > 0 ? String(parentItemKey) : "root"
+                        const anchorKey = anchorItemKey && String(anchorItemKey).length > 0 ? String(anchorItemKey) : "none"
+                        preview.dragEventSummary = committed
+                            ? "Committed " + String(modeName) + " move from " + fromIndex + " to " + toIndex + " at depth " + targetDepth + " under " + parentKey + " with anchor " + anchorKey + "."
+                            : "Canceled drag from " + fromIndex + "."
+                        preview.syncHierarchyArraySummary()
+                        Qt.callLater(preview.syncActiveItemSummary)
+                    }
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: caption
+                    color: LV.Theme.textTertiary
+                    text: "Active Item API"
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: body
+                    color: LV.Theme.textPrimary
+                    wrapMode: Text.WordWrap
+                    text: preview.activeItemSummary
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: caption
+                    color: LV.Theme.textTertiary
+                    text: "Last Drag Event"
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: body
+                    color: LV.Theme.textPrimary
+                    wrapMode: Text.WordWrap
+                    text: preview.dragEventSummary
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: caption
+                    color: LV.Theme.textTertiary
+                    text: "Bound Depth Array"
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: preview.hierarchyArraySummary
                 }
             }
         }

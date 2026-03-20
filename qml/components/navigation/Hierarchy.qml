@@ -21,6 +21,7 @@ Rectangle {
     property alias model: hierarchyList.model
     property alias treeModel: hierarchyList.model
     property alias depthRole: hierarchyList.depthRole
+    property alias draggableRole: hierarchyList.draggableRole
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     property alias editable: hierarchyList.editable
     default property alias listItems: hierarchyList.items

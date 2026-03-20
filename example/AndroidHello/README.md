@@ -1,6 +1,10 @@
 # Android Hello Example
 
-Minimal LVRS Hello World example intended for Android bootstrap verification.
+Minimal LVRS Android bootstrap example with:
+
+- standard `QmlAppLaunchSpec` initial property seeding
+- a single-route `LV.AppBootstrapWindow` host
+- mobile-safe defaults (`mobileOversizedHeightEnabled: false`) plus runtime attach
 
 ## Build Android bootstrap target
 

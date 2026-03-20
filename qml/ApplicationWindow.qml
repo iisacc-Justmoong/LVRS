@@ -44,7 +44,9 @@ Controls.ApplicationWindow {
     property bool mobileDisplayCoverageOverrideEnabled: true
     property bool mobileFullscreenVisibilityOverride: true
     property bool mobileFullscreenGeometryHintOverride: true
-    property bool mobileOversizedHeightEnabled: true
+    // Oversized mobile root surfaces stay opt-in because they can push routed content
+    // outside the visible first-frame viewport on iOS and Android.
+    property bool mobileOversizedHeightEnabled: false
     property int mobileOversizedHeight: 16384
     property int mobileLayoutHeightHint: 0
     readonly property bool mobileOversizedHeightActive: mobileOversizedHeightEnabled && fullWindowAreaOnMobileEnabled

@@ -61,9 +61,20 @@ QtObject {
             summary: "Root window and shell types that define platform behavior, adaptive layout, and compatibility wrappers.",
             notes: [
                 "Application types own the outer shell and should be the first stop for app-level composition.",
-                "AppShell remains a compatibility alias while ApplicationWindow is the canonical shell."
+                "AppBootstrapWindow is the standard downstream bootstrap shell, while AppShell remains a compatibility alias."
             ],
             items: [
+                component({
+                    key: "app-bootstrap-window",
+                    label: "AppBootstrapWindow",
+                    location: "qml/AppBootstrapWindow.qml",
+                    docPath: "docs/components/app/AppBootstrapWindow.md",
+                    previewId: "application-shell",
+                    roleLabel: "Bootstrap root",
+                    summary: "Reusable downstream app root that preconfigures mobile-safe defaults, runtime attach, and internal page-stack startup.",
+                    usage: "LV.AppBootstrapWindow {\n    title: \"Workspace\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
+                    related: ["application-window", "page-router", "navigator"]
+                }),
                 component({
                     key: "application-window",
                     label: "ApplicationWindow",
@@ -564,8 +575,8 @@ QtObject {
                             docPath: "docs/components/navigation/Hierarchy.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree panel",
-                            summary: "Composite hierarchy panel that combines toolbar, scrollable tree list, and optional footer buttons.",
-                            usage: "LV.Hierarchy {\n    model: [{ key: \"root\", depth: 0, label: \"Root\", expanded: true }, { key: \"child\", depth: 1, label: \"Child\" }]\n}",
+                            summary: "Composite tree panel that renders a flat depth array and forwards item-driven drag/drop moves through the bound model.",
+                            usage: "LV.Hierarchy {\n    editable: true\n    model: [\n        { key: \"root\", depth: 0, label: \"Root\", expanded: true },\n        { key: \"camera\", depth: 1, label: \"Camera\" }\n    ]\n    onListItemMoved: function(item, itemId, itemKey, fromIndex, toIndex, depth) {\n        console.log(itemKey, fromIndex, toIndex, depth)\n    }\n}",
                             related: ["hierarchy-list", "hierarchy-item", "hierarchy-toolbar"]
                         }),
                         component({
@@ -575,8 +586,8 @@ QtObject {
                             docPath: "docs/components/navigation/HierarchyList.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree list manager",
-                            summary: "Depth-aware state-management layer that generates HierarchyItem rows from model data.",
-                            usage: "LV.HierarchyList {\n    model: [{ key: \"root\", depth: 0, label: \"Root\", expanded: true }, { key: \"child\", depth: 1, label: \"Child\" }]\n}",
+                            summary: "Depth-aware view manager for flat hierarchy arrays; editable moves are initiated from generated HierarchyItem rows.",
+                            usage: "LV.HierarchyList {\n    editable: true\n    model: [\n        { key: \"root\", depth: 0, label: \"Root\", expanded: true },\n        { key: \"camera\", depth: 1, label: \"Camera\" }\n    ]\n}",
                             related: ["hierarchy", "hierarchy-item"]
                         }),
                         component({
@@ -586,8 +597,8 @@ QtObject {
                             docPath: "docs/components/navigation/HierarchyItem.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree row",
-                            summary: "Row delegate for indentation, icon rendering, chevrons, selection, and inline label editing.",
-                            usage: "LV.HierarchyItem {\n    label: \"Camera\"\n    showChevron: true\n    hasChildItems: true\n}",
+                            summary: "Tree row delegate that owns the drag/drop lifecycle API, exposes drop-preview metadata, and renders chevrons, icons, and selection state.",
+                            usage: "LV.HierarchyItem {\n    label: \"Camera\"\n    itemKey: \"camera\"\n    showChevron: true\n    hasChildItems: true\n    onDragEnded: function(committed, fromIndex, toIndex, targetDepth) {\n        if (committed)\n            console.log(itemKey, fromIndex, toIndex, targetDepth)\n    }\n}",
                             related: ["hierarchy-list", "hierarchy"]
                         })
                     ]

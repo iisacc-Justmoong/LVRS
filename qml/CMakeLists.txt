@@ -1,4 +1,5 @@
 set(LVRS_QML_FILES
+    qml/AppBootstrapWindow.qml
     qml/AppShell.qml
     qml/ApplicationWindow.qml
     qml/Window.qml

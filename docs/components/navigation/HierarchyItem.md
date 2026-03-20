@@ -110,6 +110,7 @@ UX state:
 
 Drag affordance:
 
+- `dragAllowed`
 - `dragPreviewActive`
 - `dragPreviewOpacity`
 - `draggable` (readonly; reflects list editability)
@@ -179,6 +180,7 @@ Visual tokens:
 - `childItemKeysText` and `childItemLabelsText` provide the string-form child summary requested by consumers that do not want to inspect arrays directly.
 - `ancestor*`, `pathItem*`, and sibling-count fields expose lineage and local ordering directly on the row without an additional lookup back into `HierarchyList`.
 - Dragging a generated row rewrites the connected flat depth-array model in place: row order changes, moved subtree depth changes, and `parentKey` / `parentItemKey` are recomputed on the backing objects.
+- `dragAllowed` lets hosts keep a row selectable and visible while preventing drag startup for protected nodes inside an otherwise editable hierarchy.
 - `dragTargetModeName` resolves the current drop intent as `before`, `after`, `child`, or `root`.
 - `activatable`/`selectable` control whether row click can make the item active without preventing chevron-driven expansion.
 - `uxState` is the primary enum for UX handling. Priority is: `Drag` -> `Inactive` -> `Active` -> `Pressed` -> `Hover` -> `Idle`.

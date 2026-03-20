@@ -38,6 +38,7 @@ AbstractButton {
     property var hierarchyList: null
     property var nodeData: null
     property bool generatedByTreeModel: false
+    property bool dragAllowed: true
 
     property int childCount: 0
     property int visibleChildCount: 0
@@ -151,6 +152,7 @@ AbstractButton {
     readonly property bool inactive: !enabled || !activatable
     readonly property bool draggable: hierarchyList
         ? !!(hierarchyList.editableEnabled !== undefined ? hierarchyList.editableEnabled : hierarchyList.editable)
+            && dragAllowed
         : false
     readonly property bool dragEnabled: draggable && enabled && generatedByTreeModel
     readonly property bool dragging: dragPreviewActive

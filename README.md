@@ -132,7 +132,7 @@ import LVRS 1.0 as LV
 ```
 
 Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.
-`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically adds Linux runtime QML import candidates such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. Qt runtime deployment itself remains a target-environment concern.
+`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically adds Linux runtime QML import candidates such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. `QmlAppLaunchSpec::initialProperties` is forwarded through `QQmlApplicationEngine::setInitialProperties(...)` immediately before `loadFromModule(...)`, which allows downstream apps to seed root route state before the first frame. Qt runtime deployment itself remains a target-environment concern.
 `lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.
 On the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.
 `LV.ApplicationWindow` now includes adaptive layout policy properties:
@@ -147,6 +147,7 @@ On the configured host desktop platform, the matching runtime target directly la
 State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 Page-stack API on `LV.ApplicationWindow`: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
+For mobile-first app roots, prefer `LV.AppBootstrapWindow`. It wraps `LV.ApplicationWindow` with a standard downstream bootstrap profile: visible root window, `autoAttachRuntimeEvents: true`, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath: initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
 - `bootstrap_<YourTarget>_linux`
