@@ -16,10 +16,10 @@ Location: `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`
 ## Platform Backend Matrix
 
 - macOS / iOS: Metal required.
-- Windows: Vulkan required.
+- Windows: D3D11 preferred. Bootstrap probes the DirectX runtime first and falls back to OpenGL when D3D11 cannot be initialized.
 - Android: Vulkan preferred. Bootstrap probes the runtime loader first and falls back to OpenGL when Vulkan is unavailable at startup.
 - Linux: Qt default backend selection.
-- Other targets: no hard override; Qt default backend selection is used.
+- WASM / other targets: no hard override; Qt default backend selection is used.
 
 If a required backend is unavailable and no platform fallback exists, bootstrap returns `ok == false` with error message.
 
@@ -37,13 +37,16 @@ When backend bootstrap succeeds, startup logs include backend identity and loade
 Examples:
 
 - `LVRS graphics backend: metal`
+- `LVRS graphics backend: d3d11, loader = d3d11`
+- `LVRS graphics backend: opengl, loader = windows-fallback`
 - `LVRS graphics backend: vulkan, loader = ...`
 
 ## Interaction with RenderQuality
 
 If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
-This keeps text/MSAA defaults aligned with backend policy while using a lighter mobile bootstrap profile before per-window device-tier presets are applied.
-Global defaults also seed GPU pipeline-cache env hints (`QSG_RHI_PIPELINE_CACHE_LOAD/SAVE`).
+This keeps text/MSAA defaults aligned with backend policy while using a platform-tuned bootstrap profile before per-window device-tier presets are applied.
+The bootstrap profile also seeds scenegraph env hints such as pipeline-cache enablement and atlas sizing before global defaults are applied.
+Android/iOS use reduced MSAA and atlas sizing, while WASM uses a lighter single-frame bootstrap profile and explicitly disables batch/pipeline-cache hints by default.
 Per-window PSO cache file binding and device-tier presets are then applied at `RenderQuality.applyWindow(...)` / `RenderQuality.applyDeviceTierPreset(...)`.
 
 ## Failure Handling Guidance
@@ -68,9 +71,10 @@ Before shipping, validate one real device/simulator per target family:
 
 - macOS: confirm Metal backend selection and stable startup.
 - iOS: confirm Metal path and text rendering quality.
-- Windows: confirm Vulkan loader discovery and startup.
+- Windows: confirm both the D3D11 path and the OpenGL fallback path can reach first frame.
 - Linux: confirm stable startup with Qt default backend selection.
 - Android: confirm both Vulkan-capable device behavior and OpenGL fallback policy.
+- WASM: confirm browser startup with the lighter bootstrap profile.
 
 ## Deployment Troubleshooting
 
@@ -78,8 +82,9 @@ If startup fails at bootstrap stage:
 
 - inspect bootstrap error string first,
 - verify Qt build includes required rendering backend feature,
-- verify runtime loader/driver presence for Vulkan targets (Windows/Android),
+- verify runtime loader/driver presence for fallback-capable targets (Windows D3D11, Android Vulkan),
 - verify Android fallback logs when Vulkan probing fails,
+- verify Windows fallback logs when D3D11 probing fails,
 - confirm no environment override is forcing incompatible graphics API.
 
 ## Operational Recommendation

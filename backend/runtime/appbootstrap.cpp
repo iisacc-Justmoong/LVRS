@@ -4,7 +4,6 @@
 #include "backend/runtime/renderquality.h"
 
 #include <QDebug>
-#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQuickStyle>
 
@@ -16,7 +15,20 @@ struct RenderQualityBootstrapProfile {
     int framesInFlight = 2;
     bool partialUpdateEnabled = true;
     bool batchRenderingEnabled = true;
+    bool pipelineCacheEnabled = true;
+    int textureAtlasEdge = 2048;
 };
+
+void seedBootstrapBooleanEnvironment(const char *name, bool enabled)
+{
+    if (enabled) {
+        if (qEnvironmentVariableIsEmpty(name))
+            qputenv(name, QByteArrayLiteral("1"));
+        return;
+    }
+
+    qputenv(name, QByteArrayLiteral("0"));
+}
 
 RenderQualityBootstrapProfile resolveRenderQualityBootstrapProfile()
 {
@@ -25,6 +37,14 @@ RenderQualityBootstrapProfile resolveRenderQualityBootstrapProfile()
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     profile.msaaSamples = 2;
     profile.framesInFlight = 2;
+    profile.textureAtlasEdge = 1024;
+#elif defined(Q_OS_WASM)
+    profile.msaaSamples = 2;
+    profile.framesInFlight = 1;
+    profile.partialUpdateEnabled = false;
+    profile.batchRenderingEnabled = false;
+    profile.pipelineCacheEnabled = false;
+    profile.textureAtlasEdge = 1024;
 #elif defined(Q_OS_MACOS)
     profile.msaaSamples = 4;
     profile.framesInFlight = 3;
@@ -39,23 +59,17 @@ RenderQualityBootstrapProfile resolveRenderQualityBootstrapProfile()
     return profile;
 }
 
-void loadBundledFonts()
+void applyRenderQualityBootstrapEnvironment(const RenderQualityBootstrapProfile &profile)
 {
-    static const char *kFontResources[] = {
-        ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
-    };
+    seedBootstrapBooleanEnvironment("QSG_RHI_PIPELINE_CACHE_LOAD", profile.pipelineCacheEnabled);
+    seedBootstrapBooleanEnvironment("QSG_RHI_PIPELINE_CACHE_SAVE", profile.pipelineCacheEnabled);
 
-    for (const char *fontResource : kFontResources) {
-        if (QFontDatabase::addApplicationFont(QString::fromLatin1(fontResource)) < 0)
-            qWarning() << "Failed to load bundled font:" << fontResource;
+    if (profile.batchRenderingEnabled && profile.textureAtlasEdge > 0) {
+        const QByteArray atlasEdge = QByteArray::number(profile.textureAtlasEdge);
+        if (qEnvironmentVariableIsEmpty("QSG_ATLAS_WIDTH"))
+            qputenv("QSG_ATLAS_WIDTH", atlasEdge);
+        if (qEnvironmentVariableIsEmpty("QSG_ATLAS_HEIGHT"))
+            qputenv("QSG_ATLAS_HEIGHT", atlasEdge);
     }
 }
 
@@ -79,6 +93,7 @@ AppBootstrapState preApplicationBootstrap(const AppBootstrapOptions &options)
 
     if (options.configureRenderQualityDefaults) {
         const RenderQualityBootstrapProfile profile = resolveRenderQualityBootstrapProfile();
+        applyRenderQualityBootstrapEnvironment(profile);
         RenderQuality::configureGlobalDefaults(profile.msaaSamples,
                                               profile.nativeTextRendering,
                                               profile.framesInFlight,
@@ -111,7 +126,7 @@ void postApplicationBootstrap(QGuiApplication &app, const AppBootstrapOptions &o
         app.setApplicationName(appName);
 
     if (options.installBundledFonts)
-        loadBundledFonts();
+        FontPolicy::loadBundledFonts();
 
     if (options.installPretendardFallbacks)
         FontPolicy::installPretendardFallbacks();

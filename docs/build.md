@@ -96,7 +96,7 @@ ctest --test-dir build --output-on-failure
 - `LVRS_BUILD_EXAMPLES` (`OFF`): build runnable examples.
 - `LVRS_BUILD_TESTS` (`OFF`): build and register tests.
 - `LVRS_INSTALL_QML_MODULE` (`ON`): install QML module artifacts (`qmldir`, qmltypes, plugin, QML files) under `<prefix>/lib/qt6/qml/LVRS`.
-- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when fixed graphics backend Qt feature requirements are missing.
+- `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when fixed graphics backend Qt feature requirements are missing for platforms that require feature-gated backends.
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (`ON`): apply platform-specific release/relwithdebinfo/minsizerel compile+link optimization flags.
 - `LVRS_ENABLE_IPO` (`ON`): enable interprocedural optimization (LTO) for release-like configs when toolchain support is available.
 - `LVRS_SANITIZER` (`none`): sanitizer instrumentation (`none`, `address`, `thread`, `undefined`).
@@ -143,7 +143,7 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 - runtime state flags: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`
 - `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
 State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
-`LV.ApplicationWindow` page-stack API: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
+`LV.ApplicationWindow` page-stack API: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
 Recommended app-root bootstrap profile for mobile/desktop single-project apps:
 
@@ -163,7 +163,8 @@ launchSpec.initialProperties = QVariantMap{
 import QtQuick
 import LVRS 1.0 as LV
 
-LV.AppBootstrapWindow {
+LV.ApplicationWindow {
+    visible: true
     pageRoutes: [
         { path: "/", component: homePage }
     ]
@@ -174,7 +175,7 @@ LV.AppBootstrapWindow {
     }
 }
 ```
-`LV.AppBootstrapWindow` is the reusable downstream root for the imported bootstrap profile. It extends `LV.ApplicationWindow` and preconfigures visible root hosting, mobile-safe viewport defaults, runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath`. `LV.ApplicationWindow` and `LV.Window` now default `forcedDeviceTierPreset` to `-1`, which keeps automatic device-tier detection enabled unless a downstream app explicitly pins a preset.
+`LV.ApplicationWindow` is the reusable downstream root for the imported bootstrap profile. It now owns platform-profile-driven runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath` directly. `LV.ApplicationWindow` and `LV.Window` default `forcedDeviceTierPreset` to `-1`, which keeps automatic device-tier detection enabled unless a downstream app explicitly pins a preset. On iOS and Android, `LV.ApplicationWindow` also defaults to OS-managed mobile windowing/insets, so fullscreen transitions and content-root stretching are no longer forced unless a downstream app explicitly opts back into the legacy coverage overrides. `LV.AppBootstrapWindow` remains available as a compatibility wrapper when an existing codebase still wants the old type name plus `visible: true`.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`
@@ -263,16 +264,16 @@ For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOT
 At configure time, when `LVRS_ENFORCE_VULKAN=ON`:
 
 - macOS/iOS must provide Qt Metal support (`QT_FEATURE_metal >= 0`).
-- Windows/Android must provide Qt Vulkan support (`QT_FEATURE_vulkan >= 0`).
+- Android must provide Qt Vulkan support (`QT_FEATURE_vulkan >= 0`).
 - `Vulkan::Vulkan` is used when discoverable for Vulkan-fixed targets, but absence at configure time is treated as warning and runtime loader discovery is used instead.
 
 At runtime:
 
 - macOS/iOS are fixed to Metal.
-- Windows is fixed to Vulkan.
+- Windows prefers D3D11, probes the DirectX runtime during bootstrap, and falls back to OpenGL when DirectX cannot be initialized.
 - Android prefers Vulkan, probes runtime loader availability during bootstrap, and falls back to OpenGL when Vulkan cannot be initialized.
 - Linux uses Qt default backend selection.
-- Other platforms use Qt default backend selection as fallback.
+- WASM/other platforms use Qt default backend selection as fallback.
 - Startup fails fast if a required fixed backend cannot be initialized and no platform fallback is available.
 
 Bootstrap render defaults are selected conservatively before app construction. Mobile targets use a lighter MSAA / frames-in-flight profile than desktop targets so the first window starts with lower memory pressure before per-window `RenderQuality` presets are applied.

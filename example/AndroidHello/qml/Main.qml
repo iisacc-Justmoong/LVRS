@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import LVRS 1.0 as LV
 
-LV.AppBootstrapWindow {
+LV.ApplicationWindow {
     id: root
 
     property string bootstrapTitle: "Android Hello"
@@ -12,6 +12,7 @@ LV.AppBootstrapWindow {
 
     width: 780
     height: 540
+    visible: true
     title: bootstrapTitle
     subtitle: bootstrapSubtitle
     pageRoutes: [

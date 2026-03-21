@@ -2,35 +2,21 @@
 
 Location: `qml/AppBootstrapWindow.qml`
 
-`AppBootstrapWindow` is the reusable downstream app-root shell for the LVRS mobile/desktop bootstrap profile.
+`AppBootstrapWindow` is a compatibility wrapper around `ApplicationWindow`.
 
 ## Purpose
 
-- Provide a standard visible root window for consumer projects.
-- Keep mobile-safe viewport defaults without the oversized-height workaround.
-- Auto-attach runtime monitoring at startup.
-- Initialize the internal page stack from a seedable `initialRoutePath`.
-- Register the internal router as the global navigator by default.
+- Preserve the older bootstrap-root import path for downstream apps.
+- Provide a visible-root convenience default on top of the inherited `ApplicationWindow` bootstrap contract.
 
 ## Inherited Base
 
 - Inherits `ApplicationWindow`.
-- All `ApplicationWindow` properties, aliases, methods, and signals remain available.
+- All `ApplicationWindow` properties, aliases, methods, and signals remain available, including `initialRoutePath`, page-stack hosting, and runtime-profile-driven defaults.
 
-## Added Defaults
+## Added Default
 
 - `visible: true`
-- `navigationEnabled: false`
-- `autoAttachRuntimeEvents: true`
-- `internalRouterRegisterAsGlobalNavigator: true`
-- `mobileOversizedHeightEnabled: false`
-- `useInternalPageStack: true`
-
-## Added Property
-
-- `initialRoutePath: string` (default `"/"`)
-
-`pageInitialPath` is bound to `initialRoutePath`, so downstream C++ can seed the first route through `QmlAppLaunchSpec::initialProperties`.
 
 ## Usage
 
@@ -39,8 +25,8 @@ import QtQuick
 import LVRS 1.0 as LV
 
 LV.AppBootstrapWindow {
-    width: 430
-    height: 932
+    width: 900
+    height: 620
     title: "MyApp"
 
     pageRoutes: [
@@ -56,5 +42,6 @@ LV.AppBootstrapWindow {
 
 ## Recommendation
 
-- Use `AppBootstrapWindow` for new consumer app roots that want the standard LVRS bootstrap path.
-- Use `ApplicationWindow` directly when a project needs to opt out of the bootstrap defaults or manage route/runtime policy manually.
+- Use `ApplicationWindow` directly for new consumer app roots.
+- Keep `AppBootstrapWindow` only when an existing codebase benefits from the legacy type name or wants `visible: true` preconfigured in the QML root.
+- On desktop targets the inherited default profile still auto-attaches `RuntimeEvents`; on iOS/Android it stays off unless the app opts in.

@@ -83,17 +83,17 @@ void ImportApiTests::app_bootstrap_window_loads()
 import QtQuick
 import LVRS as LV
 
-LV.AppBootstrapWindow {
-    width: 430
-    height: 932
-    visible: false
-    pageRoutes: [
+    LV.AppBootstrapWindow {
+        width: 430
+        height: 932
+        visible: false
+        pageRoutes: [
         { path: "/", component: homePage }
     ]
 
     property bool bootstrapContractReady:
         !navigationEnabled
-        && autoAttachRuntimeEvents
+        && autoAttachRuntimeEvents === (backendRuntimeProfile.runtimeEventsAutoAttachRecommended === true)
         && internalRouterRegisterAsGlobalNavigator
         && !mobileOversizedHeightEnabled
         && useInternalPageStack
@@ -145,10 +145,23 @@ LV.ApplicationWindow {
         && matchesMedia("bottom-nav")
         && !matchesMedia("rail-nav")
     property bool qualityReady: LV.RenderQuality.enabled && LV.RenderQuality.supersampleScale >= 3.0
-    property bool backendOptimizationDefaultsReady: !autoAttachRuntimeEvents
-        && autoAttachRuntimeEvents === globalEventListenersEnabled
+    property bool backendOptimizationDefaultsReady: autoAttachRuntimeEvents
+            === (backendRuntimeProfile.runtimeEventsAutoAttachRecommended === true)
         && !autoHookBackendUserEvents
         && !globalEventListenersEnabled
+    property bool bootstrapContractReady: internalRouterRegisterAsGlobalNavigator
+        && !mobileOversizedHeightEnabled
+        && useInternalPageStack
+    property bool platformPolicyDefaultsReady:
+        delegateMobileWindowingToSystem === (backendRuntimeProfile.mobileSystemWindowDelegationRecommended === true)
+        && delegateMobileInsetsToSystem === (backendRuntimeProfile.mobileSystemInsetsDelegationRecommended === true)
+        && forceFullWindowAreaOnMobile === (backendMobilePlatform && !delegateMobileInsetsToSystem)
+        && mobileDisplayCoverageOverrideEnabled === ((backendRuntimeProfile.mobileDisplayCoverageOverrideRecommended === true)
+            && !delegateMobileWindowingToSystem)
+        && mobileFullscreenVisibilityOverride === ((backendRuntimeProfile.mobileFullscreenVisibilityRecommended === true)
+            && !delegateMobileWindowingToSystem)
+        && mobileFullscreenGeometryHintOverride === ((backendRuntimeProfile.mobileFullscreenGeometryHintRecommended === true)
+            && !delegateMobileWindowingToSystem)
     property bool deviceTierPolicyReady: autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
@@ -205,6 +218,8 @@ LV.ApplicationWindow {
     QVERIFY(root->property("adaptiveApiReady").toBool());
     QVERIFY(root->property("qualityReady").toBool());
     QVERIFY(root->property("backendOptimizationDefaultsReady").toBool());
+    QVERIFY(root->property("bootstrapContractReady").toBool());
+    QVERIFY(root->property("platformPolicyDefaultsReady").toBool());
     QVERIFY(root->property("deviceTierPolicyReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
@@ -325,19 +340,16 @@ LV.ApplicationWindow {
     width: 430
     height: 932
     visible: false
-    autoAttachRuntimeEvents: true
-    mobileOversizedHeightEnabled: false
-    useInternalPageStack: true
-    pageInitialPath: initialRoutePath
     pageRoutes: [
         { path: "/", component: homePage }
     ]
 
-    property string initialRoutePath: "/"
     property bool stackReady: internalPageStackEnabled
         && activePageRouter !== null
         && activePageRouter.currentPath === initialRoutePath
-        && autoAttachRuntimeEvents
+        && autoAttachRuntimeEvents === (backendRuntimeProfile.runtimeEventsAutoAttachRecommended === true)
+        && !navigationEnabled
+        && internalRouterRegisterAsGlobalNavigator
         && !mobileOversizedHeightEnabled
 
     Component {

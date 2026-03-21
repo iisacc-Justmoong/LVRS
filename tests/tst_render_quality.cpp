@@ -208,8 +208,9 @@ void RenderQualityTests::render_quality_signal_and_global_defaults()
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_FRAMES_IN_FLIGHT"), 3);
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_PIPELINE_CACHE_LOAD"), 1);
     QCOMPARE(qEnvironmentVariableIntValue("QSG_RHI_PIPELINE_CACHE_SAVE"), 1);
-    QVERIFY(!qEnvironmentVariableIsSet("QSG_PARTIAL_UPDATE"));
-    QVERIFY(!qEnvironmentVariableIsSet("QSG_BATCH_RENDERER"));
+    QCOMPARE(qEnvironmentVariableIntValue("QSG_PARTIAL_UPDATE"), 0);
+    QCOMPARE(qEnvironmentVariableIntValue("QSG_NO_FULL_REDRAW"), 0);
+    QCOMPARE(qEnvironmentVariableIntValue("QSG_BATCH_RENDERER"), 0);
 
     QSurfaceFormat::setDefaultFormat(previousFormat);
     QQuickWindow::setTextRenderType(previousTextType);

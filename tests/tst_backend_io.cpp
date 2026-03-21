@@ -24,6 +24,7 @@ class BackendIoTests : public QObject
 
 private slots:
     void backend_file_roundtrip_and_errors();
+    void backend_writable_location_contract_respects_platform_defaults();
     void backend_error_signal_and_directory_idempotence();
     void backend_event_hook_receives_runtime_events();
     void backend_async_concurrency_and_io_contract();
@@ -54,6 +55,26 @@ void BackendIoTests::backend_file_roundtrip_and_errors()
 
     const QString tempLocation = backend.writableLocation(static_cast<int>(QStandardPaths::TempLocation));
     QVERIFY(!tempLocation.isEmpty());
+}
+
+void BackendIoTests::backend_writable_location_contract_respects_platform_defaults()
+{
+    Backend backend;
+
+    const QString tempLocation = backend.writableLocation(static_cast<int>(QStandardPaths::TempLocation));
+    QVERIFY(!tempLocation.isEmpty());
+    QCOMPARE(tempLocation, QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    const QList<QStandardPaths::StandardLocation> mobileFallbackLocations = {
+        QStandardPaths::DesktopLocation,
+        QStandardPaths::ApplicationsLocation,
+        QStandardPaths::DownloadLocation
+    };
+
+    for (QStandardPaths::StandardLocation location : mobileFallbackLocations)
+        QVERIFY(!backend.writableLocation(static_cast<int>(location)).isEmpty());
+#endif
 }
 
 void BackendIoTests::backend_error_signal_and_directory_idempotence()

@@ -93,7 +93,9 @@ Major `type` values and key `payload` fields:
 - `mouse-move`, `hover-move`: `x`, `y`, `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`, `pointerUi`, `pointerObjectName`, `pointerClassName`, `pointerPath`
 - `mouse-press`, `mouse-release`, `mouse-double-click`: keys above + `button`, `lastMousePressEpochMs`/`lastMouseReleaseEpochMs`, elapsed fields
 - `mouse-wheel`: keys above + `angleDeltaX/Y`, `pixelDeltaX/Y`, `phase`, `inverted`
-- `touch-event`: `phase`, `pointCount`, `points[]`, `pointerUi`
+- `touch-event`: `phase`, `pointCount`, `x`, `y`, `buttons`, `pressedMouseButtons`, `mouseButtonPressed`,
+  `lastMousePressEpochMs`, `lastMouseReleaseEpochMs`, elapsed timing fields, `points[]`, `pointerUi`,
+  `pointerObjectName`, `pointerClassName`, `pointerPath`
 - `tablet-event`: `phase`, `pressure`, `rotation`, `xTilt`, `yTilt`, `pointerType`, etc.
 - `tablet-proximity`: `phase`
 - `native-gesture`: `gestureType`, `value`, pointer information

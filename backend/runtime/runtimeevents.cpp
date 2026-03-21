@@ -29,6 +29,26 @@
 #include <unistd.h>
 #endif
 
+namespace {
+
+constexpr int kPrimaryTouchButtonMask = static_cast<int>(Qt::LeftButton);
+
+QString touchPhaseLabel(QEvent::Type type)
+{
+    switch (type) {
+    case QEvent::TouchBegin:
+        return QStringLiteral("begin");
+    case QEvent::TouchEnd:
+        return QStringLiteral("end");
+    case QEvent::TouchCancel:
+        return QStringLiteral("cancel");
+    default:
+        return QStringLiteral("update");
+    }
+}
+
+} // namespace
+
 RuntimeEvents *RuntimeEvents::s_instance = nullptr;
 
 RuntimeEvents::RuntimeEvents(QObject *parent)
@@ -959,6 +979,7 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     case QEvent::TouchEnd:
     case QEvent::TouchCancel: {
         auto *touchEvent = static_cast<QTouchEvent *>(event);
+        const QEvent::Type touchType = event->type();
         QVariantList points;
         points.reserve(touchEvent->points().size());
         for (const QEventPoint &point : touchEvent->points()) {
@@ -972,35 +993,84 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             pointMap.insert(QStringLiteral("pressure"), point.pressure());
             points.append(pointMap);
         }
-        if (!touchEvent->points().isEmpty()) {
-            const QEventPoint &latest = touchEvent->points().constFirst();
-            updateMouseFromEvent(latest.globalPosition().x(),
-                                 latest.globalPosition().y(),
-                                 m_lastMouseButtons,
-                                 static_cast<int>(touchEvent->modifiers()));
-            emit mouseChanged();
-        }
-        {
-            QString phase = QStringLiteral("update");
-            switch (event->type()) {
-            case QEvent::TouchBegin:
-                phase = QStringLiteral("begin");
-                break;
-            case QEvent::TouchEnd:
-                phase = QStringLiteral("end");
-                break;
-            case QEvent::TouchCancel:
-                phase = QStringLiteral("cancel");
-                break;
-            default:
+
+        const bool hadActivePress = m_mouseButtonPressed
+                                    || m_lastMouseButtons != static_cast<int>(Qt::NoButton);
+        const QEventPoint *trackedPoint = nullptr;
+        for (const QEventPoint &point : touchEvent->points()) {
+            if (point.state() != QEventPoint::Released) {
+                trackedPoint = &point;
                 break;
             }
+        }
+        if (!trackedPoint && !touchEvent->points().isEmpty())
+            trackedPoint = &touchEvent->points().constFirst();
+
+        const bool hasActiveTouchPoint = trackedPoint
+                                         && touchType != QEvent::TouchEnd
+                                         && touchType != QEvent::TouchCancel
+                                         && trackedPoint->state() != QEventPoint::Released;
+        const bool pressedTransition = hasActiveTouchPoint && !hadActivePress;
+        const bool releasedTransition = !hasActiveTouchPoint && hadActivePress;
+        const int normalizedButtons = hasActiveTouchPoint
+                                      ? kPrimaryTouchButtonMask
+                                      : static_cast<int>(Qt::NoButton);
+
+        if (pressedTransition) {
+            m_lastMousePressEpochMs = nowEpochMs();
+            m_mousePressCount += 1;
+            m_mouseButtonPressed = true;
+        } else if (releasedTransition) {
+            m_lastMouseReleaseEpochMs = nowEpochMs();
+            m_mouseReleaseCount += 1;
+            m_mouseButtonPressed = false;
+        } else if (hasActiveTouchPoint) {
+            m_mouseMoveCount += 1;
+            m_mouseButtonPressed = true;
+        } else {
+            m_mouseButtonPressed = false;
+        }
+
+        if (trackedPoint) {
+            updateMouseFromEvent(trackedPoint->globalPosition().x(),
+                                 trackedPoint->globalPosition().y(),
+                                 normalizedButtons,
+                                 static_cast<int>(touchEvent->modifiers()));
+        } else {
+            updateMouseFromEvent(m_lastMouseX,
+                                 m_lastMouseY,
+                                 normalizedButtons,
+                                 static_cast<int>(touchEvent->modifiers()));
+        }
+        emit mouseChanged();
+        if (pressedTransition)
+            emit mousePressed(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        else if (releasedTransition)
+            emit mouseReleased(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+        else if (hasActiveTouchPoint)
+            emit mouseMoved(m_lastMouseX, m_lastMouseY, m_lastMouseButtons, m_lastMouseModifiers);
+
+        {
             QVariantMap payload;
-            payload.insert(QStringLiteral("phase"), phase);
+            payload.insert(QStringLiteral("phase"), touchPhaseLabel(touchType));
             payload.insert(QStringLiteral("pointCount"), touchEvent->points().size());
-            payload.insert(QStringLiteral("modifiers"), static_cast<int>(touchEvent->modifiers()));
+            payload.insert(QStringLiteral("x"), m_lastMouseX);
+            payload.insert(QStringLiteral("y"), m_lastMouseY);
+            payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
+            payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
+            payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
+            payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
+            payload.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
+            payload.insert(QStringLiteral("lastMouseReleaseEpochMs"), QVariant::fromValue(m_lastMouseReleaseEpochMs));
+            payload.insert(QStringLiteral("mousePressElapsedMs"), QVariant::fromValue(mousePressElapsedMs()));
+            payload.insert(QStringLiteral("mouseReleaseElapsedMs"), QVariant::fromValue(mouseReleaseElapsedMs()));
+            payload.insert(QStringLiteral("activePressDurationMs"), QVariant::fromValue(activePressDurationMs()));
             payload.insert(QStringLiteral("points"), points);
-            payload.insert(QStringLiteral("pointerUi"), pointerUi());
+            const QVariantMap pointer = pointerUi();
+            payload.insert(QStringLiteral("pointerUi"), pointer);
+            payload.insert(QStringLiteral("pointerObjectName"), pointer.value(QStringLiteral("objectName")));
+            payload.insert(QStringLiteral("pointerClassName"), pointer.value(QStringLiteral("className")));
+            payload.insert(QStringLiteral("pointerPath"), pointer.value(QStringLiteral("path")));
             recordRuntimeEvent(QStringLiteral("touch-event"), payload);
         }
         markActivity();

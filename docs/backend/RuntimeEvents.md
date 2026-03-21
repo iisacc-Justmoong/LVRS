@@ -164,6 +164,9 @@ Health-focused summary:
 Input-centric state payload:
 
 - pointer global coordinates, mouse button flags, key states, modifier union, pointerUi, press/release timing.
+- Touch input is normalized onto the same primary-pointer contract as desktop mouse input:
+  the active touch contact is reported as `Qt::LeftButton`, updates contribute to mouse counters/signals,
+  and release/cancel clears the button state.
 
 #### `recentEvents(): list` / `clearRecentEvents()`
 

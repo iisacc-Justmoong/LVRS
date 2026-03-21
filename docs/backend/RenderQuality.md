@@ -103,7 +103,7 @@ Applied behavior:
 - layer: `layer.mipmap: RenderQuality.mipmapEnabled`
 - image source: `source: RenderQuality.resolveTextureSource(...)`
 - startup preset apply: `RenderQuality.applyDeviceTierPreset(...)`
-- shell defaults now pin startup policy to `UltraTier` (`forcedDeviceTierPreset: 3`) in `ApplicationWindow` and `Window`
+- shell defaults keep startup policy in auto-detect mode (`forcedDeviceTierPreset: -1`) in `ApplicationWindow` and `Window`
 
 ## 7. Verification Commands
 

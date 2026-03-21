@@ -6,9 +6,18 @@ QtQuickWindow.Window {
     id: root
 
     readonly property string platform: Qt.platform.os
-    readonly property bool isMobilePlatform: platform === "android" || platform === "ios"
-    readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
-    readonly property bool backendMobilePlatform: Platform.mobile
+    readonly property var backendRuntimeProfile: Platform.runtimeProfile(platform)
+    readonly property string canonicalPlatform: {
+        const target = backendRuntimeProfile && backendRuntimeProfile.target !== undefined
+            ? String(backendRuntimeProfile.target)
+            : ""
+        if (target.length > 0 && target !== "unknown")
+            return target
+        return Platform.canonicalOs
+    }
+    readonly property bool isMobilePlatform: backendRuntimeProfile.mobile === true
+    readonly property bool isDesktopPlatform: backendRuntimeProfile.desktop === true
+    readonly property bool backendMobilePlatform: isMobilePlatform
 
     readonly property int compact: 0
     readonly property int medium: 1

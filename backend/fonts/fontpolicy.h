@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE QString styleNameForTextSize(int pixelSize, const QString &fallbackStyleName) const;
     Q_INVOKABLE bool isThemeTextStyleCompliant(int pixelSize, int weight, const QString &styleName) const;
 
+    static void loadBundledFonts();
     static void installPretendardFallbacks();
     static bool enforcePretendardFallback();
 

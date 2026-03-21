@@ -41,6 +41,32 @@ struct ThreadLocalIoBufferPool {
 
 thread_local ThreadLocalIoBufferPool g_threadLocalIoBufferPool;
 
+QString writableLocationWithMobileFallback(QStandardPaths::StandardLocation location)
+{
+    const QString primary = QStandardPaths::writableLocation(location);
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    if (!primary.isEmpty())
+        return primary;
+
+    static constexpr std::array<QStandardPaths::StandardLocation, 5> kMobileFallbackLocations = {
+        QStandardPaths::DocumentsLocation,
+        QStandardPaths::AppDataLocation,
+        QStandardPaths::AppLocalDataLocation,
+        QStandardPaths::CacheLocation,
+        QStandardPaths::TempLocation
+    };
+
+    for (QStandardPaths::StandardLocation fallbackLocation : kMobileFallbackLocations) {
+        if (fallbackLocation == location)
+            continue;
+        const QString candidate = QStandardPaths::writableLocation(fallbackLocation);
+        if (!candidate.isEmpty())
+            return candidate;
+    }
+#endif
+    return primary;
+}
+
 QByteArray acquireThreadLocalIoBuffer(qsizetype minCapacity)
 {
     ThreadLocalIoBufferPool &pool = g_threadLocalIoBufferPool;
@@ -749,7 +775,7 @@ qulonglong Backend::dispatchAsyncTask(const QString &taskName, const QVariantMap
 
 QString Backend::writableLocation(int location) const
 {
-    return QStandardPaths::writableLocation(
+    return writableLocationWithMobileFallback(
         static_cast<QStandardPaths::StandardLocation>(location));
 }
 

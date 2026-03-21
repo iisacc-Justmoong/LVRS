@@ -181,7 +181,10 @@ QString graphicsBackendForPlatformToken(const QString &platform)
     if (platform == kPlatformMacos() || platform == kPlatformIos())
         return QStringLiteral("metal");
 
-    if (platform == kPlatformWindows() || platform == kPlatformAndroid())
+    if (platform == kPlatformWindows())
+        return QStringLiteral("d3d11");
+
+    if (platform == kPlatformAndroid())
         return QStringLiteral("vulkan");
 
     return QStringLiteral("default");
@@ -212,6 +215,106 @@ bool backendFeatureReady(const QString &backendName)
     if (backendName == QStringLiteral("vulkan"))
         return isVulkanFeatureReady();
     return true;
+}
+
+struct AdaptiveViewProfile {
+    int wideBreakpoint = 980;
+    int navWidth = 220;
+    int navDrawerWidth = 240;
+    int mobileDesktopMinWidth = 1200;
+    int bottomNavigationMaxItems = 5;
+    int compactSpacingBreakpoint = 900;
+    double navRailMaxWidthRatio = 0.32;
+    int drawerMarginSafety = 16;
+    int drawerEnterDuration = 160;
+    int drawerExitDuration = 120;
+    bool enableAnimatedTransitions = true;
+};
+
+AdaptiveViewProfile adaptiveViewProfileForPlatform(const QString &platform, bool backendReady)
+{
+    AdaptiveViewProfile profile;
+    profile.enableAnimatedTransitions = backendReady;
+
+    if (platform == kPlatformIos()) {
+        profile.wideBreakpoint = 948;
+        profile.navWidth = 216;
+        profile.navDrawerWidth = 264;
+        profile.mobileDesktopMinWidth = 1180;
+        profile.bottomNavigationMaxItems = 5;
+        profile.compactSpacingBreakpoint = 860;
+        profile.navRailMaxWidthRatio = 0.33;
+        profile.drawerMarginSafety = 24;
+        profile.drawerEnterDuration = 185;
+        profile.drawerExitDuration = 145;
+        return profile;
+    }
+
+    if (platform == kPlatformAndroid()) {
+        profile.wideBreakpoint = 940;
+        profile.navWidth = 208;
+        profile.navDrawerWidth = 252;
+        profile.mobileDesktopMinWidth = 1080;
+        profile.bottomNavigationMaxItems = 4;
+        profile.compactSpacingBreakpoint = 840;
+        profile.navRailMaxWidthRatio = 0.34;
+        profile.drawerMarginSafety = 20;
+        profile.drawerEnterDuration = 170;
+        profile.drawerExitDuration = 130;
+        return profile;
+    }
+
+    if (platform == kPlatformMacos()) {
+        profile.wideBreakpoint = 1040;
+        profile.navWidth = 232;
+        profile.navDrawerWidth = 256;
+        profile.mobileDesktopMinWidth = 1320;
+        profile.compactSpacingBreakpoint = 960;
+        profile.navRailMaxWidthRatio = 0.30;
+        profile.drawerEnterDuration = 180;
+        profile.drawerExitDuration = 136;
+        return profile;
+    }
+
+    if (platform == kPlatformWindows()) {
+        profile.wideBreakpoint = 1000;
+        profile.navWidth = 224;
+        profile.navDrawerWidth = 248;
+        profile.mobileDesktopMinWidth = 1240;
+        profile.compactSpacingBreakpoint = 920;
+        profile.navRailMaxWidthRatio = 0.31;
+        profile.drawerEnterDuration = 155;
+        profile.drawerExitDuration = 115;
+        return profile;
+    }
+
+    if (platform == kPlatformLinux()) {
+        profile.wideBreakpoint = 980;
+        profile.navWidth = 220;
+        profile.navDrawerWidth = 240;
+        profile.mobileDesktopMinWidth = 1200;
+        profile.compactSpacingBreakpoint = 900;
+        profile.navRailMaxWidthRatio = 0.32;
+        profile.drawerEnterDuration = 160;
+        profile.drawerExitDuration = 120;
+        return profile;
+    }
+
+    if (platform == kPlatformWasm()) {
+        profile.wideBreakpoint = 960;
+        profile.navWidth = 216;
+        profile.navDrawerWidth = 236;
+        profile.mobileDesktopMinWidth = 1120;
+        profile.bottomNavigationMaxItems = 4;
+        profile.compactSpacingBreakpoint = 880;
+        profile.navRailMaxWidthRatio = 0.34;
+        profile.enableAnimatedTransitions = false;
+        profile.drawerEnterDuration = 140;
+        profile.drawerExitDuration = 100;
+        return profile;
+    }
+
+    return profile;
 }
 
 QString cmakeSystemNameForPlatformToken(const QString &platform)
@@ -256,8 +359,38 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     const QString normalized = normalizePlatformToken(requested.isEmpty() ? hostCanonical : requested);
     const bool known = isKnownPlatformToken(normalized);
     const QString backend = known ? graphicsBackendForPlatformToken(normalized) : QStringLiteral("default");
+    const bool backendReady = known ? backendFeatureReady(backend) : false;
     const bool desktop = known && isDesktopPlatformToken(normalized);
     const bool mobile = known && isMobilePlatformToken(normalized);
+    const bool android = known && normalized == kPlatformAndroid();
+    const bool ios = known && normalized == kPlatformIos();
+    const bool runtimeEventsAutoAttachRecommended = desktop && normalized != kPlatformWasm();
+    const bool mobileSystemWindowDelegationRecommended = mobile;
+    const bool mobileSystemInsetsDelegationRecommended = mobile;
+    const bool mobileDisplayCoverageOverrideRecommended = android;
+    const bool mobileFullscreenVisibilityRecommended = android;
+    const bool mobileFullscreenGeometryHintRecommended = android;
+    int bootstrapMsaaSamples = 4;
+    int bootstrapFramesInFlight = 2;
+    bool bootstrapPartialUpdateRecommended = true;
+    bool bootstrapBatchRenderingRecommended = true;
+    bool bootstrapPipelineCacheRecommended = true;
+    int bootstrapTextureAtlasEdge = 2048;
+    const AdaptiveViewProfile adaptiveView = adaptiveViewProfileForPlatform(normalized, backendReady);
+
+    if (android || ios) {
+        bootstrapMsaaSamples = 2;
+        bootstrapTextureAtlasEdge = 1024;
+    } else if (normalized == kPlatformMacos()) {
+        bootstrapFramesInFlight = 3;
+    } else if (normalized == kPlatformWasm()) {
+        bootstrapMsaaSamples = 2;
+        bootstrapFramesInFlight = 1;
+        bootstrapPartialUpdateRecommended = false;
+        bootstrapBatchRenderingRecommended = false;
+        bootstrapPipelineCacheRecommended = false;
+        bootstrapTextureAtlasEdge = 1024;
+    }
 
     QVariantMap profile;
     profile.insert(QStringLiteral("requested"), requested);
@@ -269,9 +402,34 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     profile.insert(QStringLiteral("mobile"), mobile);
     profile.insert(QStringLiteral("backend"), backend);
     profile.insert(QStringLiteral("generationSupported"), known);
-    profile.insert(QStringLiteral("backendFeatureReady"), known ? backendFeatureReady(backend) : false);
+    profile.insert(QStringLiteral("backendFeatureReady"), backendReady);
     profile.insert(QStringLiteral("metalRequired"), known && backend == QStringLiteral("metal"));
     profile.insert(QStringLiteral("vulkanRequired"), known && backend == QStringLiteral("vulkan"));
+    profile.insert(QStringLiteral("runtimeEventsAutoAttachRecommended"), runtimeEventsAutoAttachRecommended);
+    profile.insert(QStringLiteral("mobileSystemWindowDelegationRecommended"), mobileSystemWindowDelegationRecommended);
+    profile.insert(QStringLiteral("mobileSystemInsetsDelegationRecommended"), mobileSystemInsetsDelegationRecommended);
+    profile.insert(QStringLiteral("mobileDisplayCoverageOverrideRecommended"), mobileDisplayCoverageOverrideRecommended);
+    profile.insert(QStringLiteral("mobileFullscreenVisibilityRecommended"), mobileFullscreenVisibilityRecommended);
+    profile.insert(QStringLiteral("mobileFullscreenGeometryHintRecommended"), mobileFullscreenGeometryHintRecommended);
+    profile.insert(QStringLiteral("bootstrapMsaaSamples"), bootstrapMsaaSamples);
+    profile.insert(QStringLiteral("bootstrapFramesInFlight"), bootstrapFramesInFlight);
+    profile.insert(QStringLiteral("bootstrapPartialUpdateRecommended"), bootstrapPartialUpdateRecommended);
+    profile.insert(QStringLiteral("bootstrapBatchRenderingRecommended"), bootstrapBatchRenderingRecommended);
+    profile.insert(QStringLiteral("bootstrapPipelineCacheRecommended"), bootstrapPipelineCacheRecommended);
+    profile.insert(QStringLiteral("bootstrapTextureAtlasEdge"), bootstrapTextureAtlasEdge);
+    profile.insert(QStringLiteral("adaptiveWideBreakpoint"), adaptiveView.wideBreakpoint);
+    profile.insert(QStringLiteral("adaptiveNavWidth"), adaptiveView.navWidth);
+    profile.insert(QStringLiteral("adaptiveNavDrawerWidth"), adaptiveView.navDrawerWidth);
+    profile.insert(QStringLiteral("adaptiveMobileDesktopMinWidth"), adaptiveView.mobileDesktopMinWidth);
+    profile.insert(QStringLiteral("adaptiveBottomNavigationMaxItems"), adaptiveView.bottomNavigationMaxItems);
+    profile.insert(QStringLiteral("adaptiveCompactSpacingBreakpoint"), adaptiveView.compactSpacingBreakpoint);
+    profile.insert(QStringLiteral("adaptiveNavRailMaxWidthRatio"), adaptiveView.navRailMaxWidthRatio);
+    profile.insert(QStringLiteral("adaptiveDrawerMarginSafety"), adaptiveView.drawerMarginSafety);
+    profile.insert(QStringLiteral("adaptiveDrawerEnterDuration"), adaptiveView.drawerEnterDuration);
+    profile.insert(QStringLiteral("adaptiveDrawerExitDuration"), adaptiveView.drawerExitDuration);
+    profile.insert(QStringLiteral("adaptiveAnimatedTransitions"), adaptiveView.enableAnimatedTransitions);
+    profile.insert(QStringLiteral("android"), android);
+    profile.insert(QStringLiteral("ios"), ios);
     profile.insert(QStringLiteral("cmakeSystemName"), known ? cmakeSystemNameForPlatformToken(normalized) : QStringLiteral("Unknown"));
     profile.insert(QStringLiteral("executableSuffix"), known ? executableSuffixForPlatformToken(normalized) : QString());
     profile.insert(QStringLiteral("sharedLibrarySuffix"), known ? sharedLibrarySuffixForPlatformToken(normalized) : QString());

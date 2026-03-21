@@ -3,8 +3,8 @@
 Minimal LVRS Android bootstrap example with:
 
 - standard `QmlAppLaunchSpec` initial property seeding
-- a single-route `LV.AppBootstrapWindow` host
-- mobile-safe defaults (`mobileOversizedHeightEnabled: false`) plus runtime attach
+- a single-route `LV.ApplicationWindow` host
+- mobile-safe defaults (`mobileOversizedHeightEnabled: false`) plus platform-profile runtime policy
 
 ## Build Android bootstrap target
 

@@ -29,6 +29,17 @@ constexpr double kDynamicFrameHysteresisMaxMs = 10.0;
 constexpr int kDynamicDownshiftTriggerFrames = 3;
 constexpr int kDynamicUpshiftTriggerFrames = 30;
 
+void seedSceneGraphBooleanEnvironment(const char *name, bool enabled)
+{
+    if (enabled) {
+        if (qEnvironmentVariableIsEmpty(name))
+            qputenv(name, QByteArrayLiteral("1"));
+        return;
+    }
+
+    qputenv(name, QByteArrayLiteral("0"));
+}
+
 QString normalizeTextureExtension(const QString &value)
 {
     QString normalized = value.trimmed().toLower();
@@ -910,16 +921,11 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
     if (qEnvironmentVariableIsEmpty("QSG_RHI_PIPELINE_CACHE_SAVE"))
         qputenv("QSG_RHI_PIPELINE_CACHE_SAVE", QByteArrayLiteral("1"));
 
-    if (partialUpdateEnabled) {
-        if (qEnvironmentVariableIsEmpty("QSG_PARTIAL_UPDATE"))
-            qputenv("QSG_PARTIAL_UPDATE", QByteArrayLiteral("1"));
-        if (qEnvironmentVariableIsEmpty("QSG_NO_FULL_REDRAW"))
-            qputenv("QSG_NO_FULL_REDRAW", QByteArrayLiteral("1"));
-    }
+    seedSceneGraphBooleanEnvironment("QSG_PARTIAL_UPDATE", partialUpdateEnabled);
+    seedSceneGraphBooleanEnvironment("QSG_NO_FULL_REDRAW", partialUpdateEnabled);
+    seedSceneGraphBooleanEnvironment("QSG_BATCH_RENDERER", batchRenderingEnabled);
 
     if (batchRenderingEnabled) {
-        if (qEnvironmentVariableIsEmpty("QSG_BATCH_RENDERER"))
-            qputenv("QSG_BATCH_RENDERER", QByteArrayLiteral("1"));
         if (qEnvironmentVariableIsEmpty("QSG_ATLAS_WIDTH"))
             qputenv("QSG_ATLAS_WIDTH", QByteArrayLiteral("2048"));
         if (qEnvironmentVariableIsEmpty("QSG_ATLAS_HEIGHT"))

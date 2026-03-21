@@ -134,6 +134,53 @@ bool tryLoadVulkanRuntime(QString *resolvedLoaderName, QString *lastErrorMessage
     return false;
 }
 
+QStringList buildD3D11LoaderCandidates()
+{
+    QStringList candidates;
+    candidates.append(QStringLiteral("d3d11"));
+    candidates.append(QStringLiteral("d3d11.dll"));
+
+    QStringList unique;
+    QSet<QString> seen;
+    for (const QString &candidate : candidates) {
+        if (candidate.isEmpty())
+            continue;
+        if (seen.contains(candidate))
+            continue;
+        seen.insert(candidate);
+        unique.append(candidate);
+    }
+    return unique;
+}
+
+bool tryLoadD3D11Runtime(QString *resolvedLoaderName, QString *lastErrorMessage)
+{
+    const QStringList candidates = buildD3D11LoaderCandidates();
+    QString lastError;
+    for (const QString &candidate : candidates) {
+        QLibrary loader(candidate);
+        if (!loader.load()) {
+            if (!loader.errorString().isEmpty())
+                lastError = loader.errorString();
+            continue;
+        }
+
+        if (loader.resolve("D3D11CreateDevice")) {
+            loader.unload();
+            if (resolvedLoaderName)
+                *resolvedLoaderName = candidate;
+            return true;
+        }
+
+        lastError = QStringLiteral("D3D11CreateDevice symbol is unavailable in %1").arg(candidate);
+        loader.unload();
+    }
+
+    if (lastErrorMessage)
+        *lastErrorMessage = lastError;
+    return false;
+}
+
 lvrs::GraphicsBackendBootstrapResult bootstrapMetalBackend()
 {
 #if defined(QT_FEATURE_metal) && QT_FEATURE_metal > 0
@@ -145,24 +192,27 @@ lvrs::GraphicsBackendBootstrapResult bootstrapMetalBackend()
 #endif
 }
 
-lvrs::GraphicsBackendBootstrapResult bootstrapDesktopVulkanBackend()
+lvrs::GraphicsBackendBootstrapResult bootstrapWindowsGraphicsBackend()
 {
-#if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
+#if defined(Q_OS_WIN)
     QString lastError;
     QString loaderName;
-    if (tryLoadVulkanRuntime(&loaderName, &lastError)) {
-        configureGraphicsBackend(QByteArrayLiteral("vulkan"), QSGRendererInterface::Vulkan);
-        return makeGraphicsBackendResult(QStringLiteral("vulkan"), loaderName);
+    if (tryLoadD3D11Runtime(&loaderName, &lastError)) {
+        configureGraphicsBackend(QByteArrayLiteral("d3d11"), QSGRendererInterface::Direct3D11);
+        if (loaderName.isEmpty())
+            loaderName = QStringLiteral("system");
+        return makeGraphicsBackendResult(QStringLiteral("d3d11"), loaderName);
     }
 
-    QString errorMessage =
-        QStringLiteral("Vulkan backend is required on this platform. Install Vulkan runtime and set QT_VULKAN_LIB appropriately.");
-    if (!lastError.isEmpty())
-        errorMessage += QStringLiteral(" Last loader error: %1").arg(lastError);
-    return makeGraphicsBackendFailure(errorMessage);
+    qWarning().noquote()
+        << "LVRS Windows graphics bootstrap: D3D11 probe failed; falling back to OpenGL."
+        << (lastError.isEmpty() ? QString() : QStringLiteral("Reason: %1").arg(lastError));
+
+    configureGraphicsBackend(QByteArrayLiteral("opengl"), QSGRendererInterface::OpenGL);
+    return makeGraphicsBackendResult(QStringLiteral("opengl"), QStringLiteral("windows-fallback"));
 #else
     return makeGraphicsBackendFailure(
-        QStringLiteral("Vulkan backend is required on this platform, but this Qt build has no Vulkan support."));
+        QStringLiteral("Direct3D11 bootstrap is only supported on Windows targets."));
 #endif
 }
 
@@ -201,7 +251,7 @@ GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
     return bootstrapAndroidGraphicsBackend();
 
 #elif defined(Q_OS_WIN)
-    return bootstrapDesktopVulkanBackend();
+    return bootstrapWindowsGraphicsBackend();
 
 #else
     configureGraphicsBackend(QByteArray(), QSGRendererInterface::Unknown);

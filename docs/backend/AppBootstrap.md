@@ -41,12 +41,20 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 - Optional `RenderQuality::configureGlobalDefaults()`.
 - Optional `QQuickStyle::setStyle(quickStyleName)`.
 - Optional graphics backend bootstrap and diagnostics logging.
-- Initializes default GPU cache hints (`QSG_RHI_PIPELINE_CACHE_LOAD/SAVE`) through `RenderQuality` global defaults path.
+- Seeds scenegraph environment hints (for example pipeline-cache and atlas sizing) through the platform bootstrap profile before `RenderQuality` global defaults are applied.
+
+### Platform bootstrap policy
+
+- macOS / iOS: fixed Metal backend; `4x/3` (macOS) or `2x/2` (iOS) MSAA/frames-in-flight bootstrap profile.
+- Windows: D3D11-first bootstrap with runtime probing and OpenGL fallback; `4x/2` bootstrap render profile.
+- Android: Vulkan-first bootstrap with OpenGL fallback; `2x/2` bootstrap render profile and reduced texture-atlas edge.
+- Linux: Qt default backend selection; `4x/2` bootstrap render profile.
+- WASM: Qt default backend selection; lighter `2x/1` bootstrap render profile with partial-update, batch-renderer, and pipeline-cache hints explicitly forced off.
 
 ## What `postApplicationBootstrap` Does
 
 - Applies application name (if provided).
-- Loads bundled fonts from resource set.
+- Loads bundled fonts from the shared `FontPolicy` bootstrap path.
 - Installs Pretendard fallbacks.
 - Optionally enforces Pretendard fallback and warns if enforcement fails.
 

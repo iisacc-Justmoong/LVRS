@@ -10,9 +10,24 @@ Controls.ApplicationWindow {
 
     // Platform + size-class signals to mimic media-query style rules.
     readonly property string platform: Qt.platform.os
-    readonly property bool isMobilePlatform: platform === "android" || platform === "ios"
-    readonly property bool isDesktopPlatform: platform === "osx" || platform === "windows" || platform === "linux"
-    readonly property bool backendMobilePlatform: Platform.mobile
+    readonly property var backendRuntimeProfile: Platform.runtimeProfile(platform)
+    readonly property string canonicalPlatform: {
+        const target = backendRuntimeProfile && backendRuntimeProfile.target !== undefined
+            ? String(backendRuntimeProfile.target)
+            : ""
+        if (target.length > 0 && target !== "unknown")
+            return target
+        return Platform.canonicalOs
+    }
+    readonly property bool isMobilePlatform: backendRuntimeProfile.mobile === true
+    readonly property bool isDesktopPlatform: backendRuntimeProfile.desktop === true
+    readonly property bool backendMobilePlatform: isMobilePlatform
+    readonly property bool runtimeEventsAutoAttachRecommended: backendRuntimeProfile.runtimeEventsAutoAttachRecommended === true
+    readonly property bool mobileSystemWindowDelegationRecommended: backendRuntimeProfile.mobileSystemWindowDelegationRecommended === true
+    readonly property bool mobileSystemInsetsDelegationRecommended: backendRuntimeProfile.mobileSystemInsetsDelegationRecommended === true
+    readonly property bool mobileDisplayCoverageOverrideRecommended: backendRuntimeProfile.mobileDisplayCoverageOverrideRecommended === true
+    readonly property bool mobileFullscreenVisibilityRecommended: backendRuntimeProfile.mobileFullscreenVisibilityRecommended === true
+    readonly property bool mobileFullscreenGeometryHintRecommended: backendRuntimeProfile.mobileFullscreenGeometryHintRecommended === true
     readonly property Item overlayLayer: Controls.Overlay.overlay
     readonly property Item nativeWindowContentRoot: windowRoot.contentItem ? windowRoot.contentItem.parent : null
 
@@ -39,11 +54,15 @@ Controls.ApplicationWindow {
     readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
         ? Math.max(1.0, mobileViewScale)
         : 1.0
-    property bool forceFullWindowAreaOnMobile: true
+    // Let the OS own critical mobile window transitions/insets by default.
+    property bool delegateMobileWindowingToSystem: backendMobilePlatform && mobileSystemWindowDelegationRecommended
+    property bool delegateMobileInsetsToSystem: backendMobilePlatform && mobileSystemInsetsDelegationRecommended
+    property bool forceFullWindowAreaOnMobile: backendMobilePlatform && !delegateMobileInsetsToSystem
     readonly property bool fullWindowAreaOnMobileEnabled: forceFullWindowAreaOnMobile && backendMobilePlatform
-    property bool mobileDisplayCoverageOverrideEnabled: true
-    property bool mobileFullscreenVisibilityOverride: true
-    property bool mobileFullscreenGeometryHintOverride: true
+    property bool mobileDisplayCoverageOverrideEnabled: mobileDisplayCoverageOverrideRecommended && !delegateMobileWindowingToSystem
+    property bool mobileFullscreenVisibilityOverride: mobileFullscreenVisibilityRecommended && !delegateMobileWindowingToSystem
+    property bool mobileFullscreenGeometryHintOverride: mobileFullscreenGeometryHintRecommended && !delegateMobileWindowingToSystem
+    property bool mobileFullscreenForcedByFramework: false
     // Oversized mobile root surfaces stay opt-in because they can push routed content
     // outside the visible first-frame viewport on iOS and Android.
     property bool mobileOversizedHeightEnabled: false
@@ -75,10 +94,10 @@ Controls.ApplicationWindow {
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
-    // Keep release defaults conservative: opt in when global listeners are required.
+    // Global listeners remain opt-in. RuntimeEvents bootstrap follows the platform profile
+    // unless a consumer explicitly overrides `autoAttachRuntimeEvents`.
     property bool globalEventListenersEnabled: false
-    // Runtime daemon attach remains opt-in via this property or global listener enablement.
-    property bool autoAttachRuntimeEvents: globalEventListenersEnabled
+    property bool autoAttachRuntimeEvents: runtimeEventsAutoAttachRecommended || globalEventListenersEnabled
     // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
     property bool autoHookBackendUserEvents: false
     property bool windowDragHandleEnabled: isDesktopPlatform
@@ -90,6 +109,7 @@ Controls.ApplicationWindow {
     property int forcedDeviceTierPreset: -1
     property int pageRouterRetainInactivePages: 0
     property int pageRouterCacheCapacity: 256
+    property string initialRoutePath: "/"
 
     property string subtitle: ""
     property var navItems: []
@@ -133,7 +153,6 @@ Controls.ApplicationWindow {
     property var lastGlobalContextEventData: ({})
     property bool useBackendAdaptivePolicy: true
     property var backendAdaptivePolicyOverrides: ({})
-    readonly property var backendRuntimeProfile: Platform.runtimeProfile(platform)
     readonly property var backendAdaptivePolicyDefaults: resolveBackendAdaptivePolicy(backendRuntimeProfile)
     readonly property var backendAdaptivePolicy: useBackendAdaptivePolicy
         ? mergePolicyMaps(backendAdaptivePolicyDefaults, backendAdaptivePolicyOverrides)
@@ -330,27 +349,19 @@ Controls.ApplicationWindow {
 
     function resolveBackendAdaptivePolicy(profile) {
         const safeProfile = profile && typeof profile === "object" ? profile : ({})
-        const mobile = safeProfile.mobile === true
-        const backendReady = safeProfile.backendFeatureReady !== false
-        const knownTarget = safeProfile.known === true
-        const backendName = safeProfile.backend !== undefined && safeProfile.backend !== null
-            ? String(safeProfile.backend).toLowerCase()
-            : "default"
-        const gpuAccelerated = backendName === "metal" || backendName === "vulkan"
-        const transitionScale = backendReady && gpuAccelerated ? 1.0 : 0.85
 
         return {
-            wideBreakpoint: mobile ? 940 : 980,
-            navWidth: mobile ? 208 : 220,
-            navDrawerWidth: mobile ? 252 : 240,
-            mobileDesktopMinWidth: mobile ? 1080 : 1200,
-            bottomNavigationMaxItems: mobile ? 4 : 5,
-            compactSpacingBreakpoint: mobile ? 840 : 900,
-            navRailMaxWidthRatio: mobile ? 0.34 : 0.32,
-            drawerMarginSafety: mobile ? Theme.gap20 : Theme.gap16,
-            drawerEnterDuration: Math.round(170 * transitionScale),
-            drawerExitDuration: Math.round(130 * transitionScale),
-            enableAnimatedTransitions: backendReady && knownTarget
+            wideBreakpoint: safeProfile.adaptiveWideBreakpoint,
+            navWidth: safeProfile.adaptiveNavWidth,
+            navDrawerWidth: safeProfile.adaptiveNavDrawerWidth,
+            mobileDesktopMinWidth: safeProfile.adaptiveMobileDesktopMinWidth,
+            bottomNavigationMaxItems: safeProfile.adaptiveBottomNavigationMaxItems,
+            compactSpacingBreakpoint: safeProfile.adaptiveCompactSpacingBreakpoint,
+            navRailMaxWidthRatio: safeProfile.adaptiveNavRailMaxWidthRatio,
+            drawerMarginSafety: safeProfile.adaptiveDrawerMarginSafety,
+            drawerEnterDuration: safeProfile.adaptiveDrawerEnterDuration,
+            drawerExitDuration: safeProfile.adaptiveDrawerExitDuration,
+            enableAnimatedTransitions: safeProfile.adaptiveAnimatedTransitions
         }
     }
 
@@ -392,14 +403,30 @@ Controls.ApplicationWindow {
     }
 
     function applyMobileDisplayCoverageOverride() {
-        if (!windowRoot.mobileDisplayCoverageOverrideEnabled || !windowRoot.fullWindowAreaOnMobileEnabled)
+        const geometryHintEnabled = windowRoot.mobileDisplayCoverageOverrideEnabled
+            && windowRoot.fullWindowAreaOnMobileEnabled
+            && windowRoot.mobileFullscreenGeometryHintOverride
+
+        if (typeof windowRoot.setFlag === "function")
+            windowRoot.setFlag(Qt.MaximizeUsingFullscreenGeometryHint, geometryHintEnabled)
+
+        const fullscreenEnabled = windowRoot.mobileDisplayCoverageOverrideEnabled
+            && windowRoot.fullWindowAreaOnMobileEnabled
+            && windowRoot.mobileFullscreenVisibilityOverride
+
+        if (!windowRoot.visible)
             return
 
-        if (windowRoot.mobileFullscreenGeometryHintOverride)
-            windowRoot.setFlag(Qt.MaximizeUsingFullscreenGeometryHint, true)
-
-        if (!windowRoot.mobileFullscreenVisibilityOverride || !windowRoot.visible)
+        if (!fullscreenEnabled) {
+            if (windowRoot.mobileFullscreenForcedByFramework && windowRoot.visibility === Window.FullScreen) {
+                if (typeof windowRoot.showNormal === "function")
+                    windowRoot.showNormal()
+                else
+                    windowRoot.visibility = Window.Windowed
+            }
+            windowRoot.mobileFullscreenForcedByFramework = false
             return
+        }
 
         if (windowRoot.visibility !== Window.FullScreen) {
             if (typeof windowRoot.showFullScreen === "function")
@@ -407,6 +434,8 @@ Controls.ApplicationWindow {
             else
                 windowRoot.visibility = Window.FullScreen
         }
+
+        windowRoot.mobileFullscreenForcedByFramework = true
     }
 
     function requestWindowMove() {
@@ -475,7 +504,7 @@ Controls.ApplicationWindow {
         
             property var navModel: ["Overview", "Suites", "Runs", "Devices", "Reports", "Settings"]
             property int navIndex: 0
-            property bool navigationEnabled: true
+            property bool navigationEnabled: false
             property string navTitle: "Navigation"
             property bool navTitleVisible: true
             property int navWidth: windowRoot.backendNavWidth
@@ -499,9 +528,9 @@ Controls.ApplicationWindow {
             property Component navFooter: null
             property var pageRouter: null
             property var routes: []
-            property string initialPath: "/"
+            property string initialPath: windowRoot.initialRoutePath
             property bool useInternalPageStack: true
-            property bool internalRouterRegisterAsGlobalNavigator: false
+            property bool internalRouterRegisterAsGlobalNavigator: true
         
             signal navActivated(int index, var item)
             signal layoutStateChanged(string profile, string navigationMode)
@@ -1384,7 +1413,6 @@ Controls.ApplicationWindow {
                     Debug.log("ApplicationWindow", "io-event-hooked", Backend.hookedEventCount)
             }
             Debug.log("ApplicationWindow", "supersample-scale", windowRoot.effectiveSupersampleScale)
-            windowRoot.applyMobileDisplayCoverageOverride()
             windowRoot.applyNativeWindowStyle()
             Qt.callLater(windowRoot.applyMobileDisplayCoverageOverride)
             Qt.callLater(windowRoot.applyNativeWindowStyle)

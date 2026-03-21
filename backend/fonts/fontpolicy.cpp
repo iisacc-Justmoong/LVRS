@@ -36,36 +36,37 @@ const QStringList kSubstitutionTargets = {
     QStringLiteral("sans-serif")
 };
 
-void ensureBundledPretendardFontsLoaded()
+const char *const kBundledPretendardFontResources[] = {
+    ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
+    ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
+};
+
+bool familyLooksLikePretendard(const QString &family)
 {
-    static bool loaded = false;
-    if (loaded)
-        return;
-    loaded = true;
+    return QString::compare(family, QStringLiteral("Pretendard"), Qt::CaseInsensitive) == 0
+        || family.contains(QStringLiteral("Pretendard"), Qt::CaseInsensitive);
+}
 
-    static const char *kFontResources[] = {
-        ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Bold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Light.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraLight.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Thin.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-ExtraBold.ttf",
-        ":/qt/qml/LVRS/resources/font/Pretendard-Black.ttf"
-    };
-
-    for (const char *fontResource : kFontResources)
-        QFontDatabase::addApplicationFont(QString::fromLatin1(fontResource));
+bool currentApplicationFontLooksLikePretendard()
+{
+    return qGuiApp && familyLooksLikePretendard(qGuiApp->font().family());
 }
 }
 
 FontPolicy::FontPolicy(QObject *parent)
     : QObject(parent)
 {
-    ensureBundledPretendardFontsLoaded();
+    loadBundledFonts();
     installPretendardFallbacks();
-    enforcePretendardFallback();
+    if (!currentApplicationFontLooksLikePretendard())
+        enforcePretendardFallback();
     refresh();
 }
 
@@ -91,12 +92,31 @@ QString FontPolicy::lastWarning() const
 
 bool FontPolicy::enforceApplicationFallback()
 {
+    if (currentApplicationFontLooksLikePretendard()) {
+        refresh();
+        setLastWarning(QString());
+        return true;
+    }
+
     const bool applied = enforcePretendardFallback();
     refresh();
     if (!applied && !m_pretendardAvailable) {
         setLastWarning(QStringLiteral("Pretendard is unavailable. Falling back to application font."));
+    } else {
+        setLastWarning(QString());
     }
     return applied;
+}
+
+void FontPolicy::loadBundledFonts()
+{
+    static bool loaded = false;
+    if (loaded)
+        return;
+    loaded = true;
+
+    for (const char *fontResource : kBundledPretendardFontResources)
+        QFontDatabase::addApplicationFont(QString::fromLatin1(fontResource));
 }
 
 void FontPolicy::refresh()
@@ -163,24 +183,29 @@ bool FontPolicy::isThemeTextStyleCompliant(int pixelSize, int weight, const QStr
 
 void FontPolicy::installPretendardFallbacks()
 {
+    static bool installed = false;
+    if (installed)
+        return;
+    installed = true;
+
+    loadBundledFonts();
     for (const QString &target : kSubstitutionTargets)
         QFont::insertSubstitution(target, QStringLiteral("Pretendard"));
 }
 
 bool FontPolicy::enforcePretendardFallback()
 {
+    loadBundledFonts();
     if (!qGuiApp)
         return false;
 
     QString pretendardFamily;
     const QStringList families = QFontDatabase::families();
     for (const QString &family : families) {
-        if (QString::compare(family, QStringLiteral("Pretendard"), Qt::CaseInsensitive) == 0) {
+        if (familyLooksLikePretendard(family)) {
             pretendardFamily = family;
             break;
         }
-        if (family.contains(QStringLiteral("Pretendard"), Qt::CaseInsensitive) && pretendardFamily.isEmpty())
-            pretendardFamily = family;
     }
 
     if (pretendardFamily.isEmpty())

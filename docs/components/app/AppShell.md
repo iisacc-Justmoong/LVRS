@@ -30,7 +30,7 @@ LV.AppShell {
 
 ## Recommendation
 
-Use `LV.AppBootstrapWindow` for standard consumer app roots, `LV.ApplicationWindow` for lower-level shell control, and keep `AppShell` only for compatibility.
+Use `LV.ApplicationWindow` for standard consumer app roots, keep `LV.AppBootstrapWindow` only as a compatibility visible-root wrapper, and keep `AppShell` only for compatibility.
 
 ## Migration Note
 
@@ -48,7 +48,7 @@ Q. Does `AppShell` expose a different navigation lifecycle?
 A. No. Navigation behavior is exactly the same as `ApplicationWindow`.
 
 Q. Should new modules import only `AppShell` for stability?  
-A. No. Use `AppBootstrapWindow` for the standard app-root bootstrap path or `ApplicationWindow` for direct shell control.
+A. No. Use `ApplicationWindow` for the standard app-root bootstrap path or `AppBootstrapWindow` only when legacy type compatibility is required.
 
 ## Deprecation Strategy
 

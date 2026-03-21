@@ -3,12 +3,16 @@
 #include <QCoreApplication>
 #include <QContextMenuEvent>
 #include <QEvent>
+#include <QEventPoint>
+#include <QInputDevice>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QPointingDevice>
 #include <QPointer>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QSignalSpy>
+#include <QTouchEvent>
 #include <QtPlugin>
 
 #include "backend/runtime/debuglogger.h"
@@ -18,6 +22,25 @@
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
+
+namespace {
+
+const QPointingDevice *testTouchDevice()
+{
+    static const QPointingDevice *device = new QPointingDevice(
+        QStringLiteral("LVRS Test Touchscreen"),
+        1,
+        QInputDevice::DeviceType::TouchScreen,
+        QPointingDevice::PointerType::Finger,
+        QInputDevice::Capability::Position
+            | QInputDevice::Capability::Area
+            | QInputDevice::Capability::Pressure,
+        10,
+        1);
+    return device;
+}
+
+} // namespace
 
 class RuntimeServicesTests : public QObject
 {
@@ -29,6 +52,7 @@ private slots:
     void runtime_events_idle_and_reset_signal_contract();
     void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
+    void runtime_events_touch_input_normalizes_to_pointer_contract();
     void runtime_events_window_replacement_survives_old_window_destruction();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
@@ -274,6 +298,86 @@ void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
     QCOMPARE(events.mouseReleaseCount(), 1u);
     QCOMPARE(events.lastMouseX(), 30.0);
     QCOMPARE(events.lastMouseY(), 22.0);
+}
+
+void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_contract()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    window.setWidth(480);
+    window.setHeight(320);
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    QSignalSpy mousePressedSpy(&events, &RuntimeEvents::mousePressed);
+    QSignalSpy mouseMovedSpy(&events, &RuntimeEvents::mouseMoved);
+    QSignalSpy mouseReleasedSpy(&events, &RuntimeEvents::mouseReleased);
+    QVERIFY(mousePressedSpy.isValid());
+    QVERIFY(mouseMovedSpy.isValid());
+    QVERIFY(mouseReleasedSpy.isValid());
+
+    events.resetCounters();
+
+    const QPointF beginPoint(40.0, 28.0);
+    const QPointF updatePoint(52.0, 36.0);
+
+    QTouchEvent touchBegin(QEvent::TouchBegin,
+                           testTouchDevice(),
+                           Qt::NoModifier,
+                           {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
+    QCoreApplication::sendEvent(&window, &touchBegin);
+
+    QCOMPARE(events.mousePressCount(), 1u);
+    QCOMPARE(events.mouseMoveCount(), 0u);
+    QCOMPARE(events.mouseReleaseCount(), 0u);
+    QVERIFY(events.mouseButtonPressed());
+    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
+    QCOMPARE(events.lastMouseX(), beginPoint.x());
+    QCOMPARE(events.lastMouseY(), beginPoint.y());
+    QVERIFY(events.lastMousePressEpochMs() > 0);
+    QCOMPARE(mousePressedSpy.count(), 1);
+
+    const QVariantMap beginState = events.inputState();
+    QCOMPARE(beginState.value(QStringLiteral("mouseButtons")).toInt(), static_cast<int>(Qt::LeftButton));
+    QVERIFY(beginState.value(QStringLiteral("mouseButtonPressed")).toBool());
+
+    QTouchEvent touchUpdate(QEvent::TouchUpdate,
+                            testTouchDevice(),
+                            Qt::NoModifier,
+                            {QEventPoint(0, QEventPoint::State::Updated, updatePoint, updatePoint)});
+    QCoreApplication::sendEvent(&window, &touchUpdate);
+
+    QCOMPARE(events.mousePressCount(), 1u);
+    QCOMPARE(events.mouseMoveCount(), 1u);
+    QCOMPARE(events.mouseReleaseCount(), 0u);
+    QVERIFY(events.mouseButtonPressed());
+    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
+    QCOMPARE(events.lastMouseX(), updatePoint.x());
+    QCOMPARE(events.lastMouseY(), updatePoint.y());
+    QCOMPARE(mouseMovedSpy.count(), 1);
+
+    QTouchEvent touchEnd(QEvent::TouchEnd,
+                         testTouchDevice(),
+                         Qt::NoModifier,
+                         {QEventPoint(0, QEventPoint::State::Released, updatePoint, updatePoint)});
+    QCoreApplication::sendEvent(&window, &touchEnd);
+
+    QCOMPARE(events.mousePressCount(), 1u);
+    QCOMPARE(events.mouseMoveCount(), 1u);
+    QCOMPARE(events.mouseReleaseCount(), 1u);
+    QVERIFY(!events.mouseButtonPressed());
+    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::NoButton));
+    QCOMPARE(events.lastMouseX(), updatePoint.x());
+    QCOMPARE(events.lastMouseY(), updatePoint.y());
+    QVERIFY(events.lastMouseReleaseEpochMs() > 0);
+    QCOMPARE(mouseReleasedSpy.count(), 1);
+
+    const QVariantMap lastEvent = events.lastEvent();
+    QCOMPARE(lastEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    const QVariantMap payload = lastEvent.value(QStringLiteral("payload")).toMap();
+    QCOMPARE(payload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
+    QCOMPARE(payload.value(QStringLiteral("buttons")).toInt(), static_cast<int>(Qt::NoButton));
+    QVERIFY(!payload.value(QStringLiteral("mouseButtonPressed")).toBool());
 }
 
 void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window_destruction()

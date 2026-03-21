@@ -81,8 +81,10 @@ Failure cases:
 
 #### `writableLocation(location): string`
 
-- Direct bridge to `QStandardPaths::writableLocation`.
-- Caller is responsible for validating non-empty path and creating directories.
+- Returns `QStandardPaths::writableLocation(location)` by default.
+- On Android/iOS, if the requested location resolves to an empty string, LVRS falls back to the first non-empty app-scoped location in this order:
+  `DocumentsLocation` -> `AppDataLocation` -> `AppLocalDataLocation` -> `CacheLocation` -> `TempLocation`.
+- Caller is still responsible for creating directories when needed.
 
 ### 3.2 Async APIs (multi-thread, UI non-blocking)
 

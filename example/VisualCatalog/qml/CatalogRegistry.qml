@@ -61,7 +61,7 @@ QtObject {
             summary: "Root window and shell types that define platform behavior, adaptive layout, and compatibility wrappers.",
             notes: [
                 "Application types own the outer shell and should be the first stop for app-level composition.",
-                "AppBootstrapWindow is the standard downstream bootstrap shell, while AppShell remains a compatibility alias."
+                "ApplicationWindow is the standard downstream bootstrap shell, while AppBootstrapWindow and AppShell remain compatibility wrappers."
             ],
             items: [
                 component({
@@ -70,9 +70,9 @@ QtObject {
                     location: "qml/AppBootstrapWindow.qml",
                     docPath: "docs/components/app/AppBootstrapWindow.md",
                     previewId: "application-shell",
-                    roleLabel: "Bootstrap root",
-                    summary: "Reusable downstream app root that preconfigures mobile-safe defaults, runtime attach, and internal page-stack startup.",
-                    usage: "LV.AppBootstrapWindow {\n    title: \"Workspace\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
+                    roleLabel: "Compatibility root",
+                    summary: "Compatibility wrapper around ApplicationWindow that only preconfigures a visible root window.",
+                    usage: "LV.AppBootstrapWindow {\n    title: \"Workspace\"\n}",
                     related: ["application-window", "page-router", "navigator"]
                 }),
                 component({
@@ -81,9 +81,9 @@ QtObject {
                     location: "qml/ApplicationWindow.qml",
                     docPath: "docs/components/app/ApplicationWindow.md",
                     previewId: "application-shell",
-                    roleLabel: "Root shell",
-                    summary: "Adaptive LVRS root shell that combines window policy, navigation scaffold, runtime wiring, and page-stack hosting.",
-                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n}",
+                    roleLabel: "Bootstrap root",
+                    summary: "Adaptive LVRS root shell that combines window policy, bootstrap defaults, navigation scaffold, runtime wiring, and page-stack hosting.",
+                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
                     related: ["app-shell", "page-router", "navigator"]
                 }),
                 component({
