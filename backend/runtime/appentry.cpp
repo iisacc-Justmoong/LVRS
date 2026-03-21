@@ -5,7 +5,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QGuiApplication>
+#include <QJsonDocument>
 #include <QQmlApplicationEngine>
+#include <QVariantMap>
 
 namespace lvrs {
 
@@ -24,6 +26,19 @@ void appendExistingPath(QStringList *paths, const QString &path)
         return;
 
     paths->append(cleanedPath);
+}
+
+QString compactJson(const QVariant &value)
+{
+    const QByteArray json = QJsonDocument::fromVariant(value).toJson(QJsonDocument::Compact);
+    if (!json.isEmpty())
+        return QString::fromUtf8(json);
+    return value.toString();
+}
+
+void logBootstrapEvent(const QString &event, const QVariantMap &payload)
+{
+    qInfo().noquote() << QStringLiteral("LVRS bootstrap.%1 %2").arg(event, compactJson(payload));
 }
 
 } // namespace
@@ -75,8 +90,28 @@ int runBootstrappedQmlApp(int argc, char *argv[], const QmlAppLaunchSpec &spec)
     for (const QString &path : runtimeImportPaths)
         engine.addImportPath(path);
 
+    if (spec.bootstrap.logBootstrapDiagnostics) {
+        QVariantMap payload;
+        payload.insert(QStringLiteral("applicationDirPath"), QCoreApplication::applicationDirPath());
+        payload.insert(QStringLiteral("includeDefaultRuntimeQmlImportPaths"),
+                       spec.includeDefaultRuntimeQmlImportPaths);
+        payload.insert(QStringLiteral("importPathCount"), runtimeImportPaths.size());
+        payload.insert(QStringLiteral("importPaths"), runtimeImportPaths);
+        logBootstrapEvent(QStringLiteral("entry.import-paths"), payload);
+    }
+
     if (spec.configureEngine)
         spec.configureEngine(engine);
+
+    if (spec.bootstrap.logBootstrapDiagnostics) {
+        QVariantMap payload;
+        payload.insert(QStringLiteral("moduleUri"), spec.moduleUri);
+        payload.insert(QStringLiteral("rootObject"), spec.rootObject);
+        payload.insert(QStringLiteral("configureEngine"), spec.configureEngine != nullptr);
+        payload.insert(QStringLiteral("initialPropertyCount"), spec.initialProperties.size());
+        payload.insert(QStringLiteral("initialPropertyKeys"), spec.initialProperties.keys());
+        logBootstrapEvent(QStringLiteral("entry.load-request"), payload);
+    }
 
     engine.setInitialProperties(spec.initialProperties);
     engine.loadFromModule(spec.moduleUri, spec.rootObject);

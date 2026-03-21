@@ -65,7 +65,7 @@ On completion, main flow is:
 ### Runtime and event bridge
 
 - `globalEventListenersEnabled` (default `false`)
-- `autoAttachRuntimeEvents` (default follows `runtimeEventsAutoAttachRecommended || globalEventListenersEnabled`)
+- `autoAttachRuntimeEvents` (default follows `globalEventListenersEnabled`; stock runtime profiles keep `runtimeEventsAutoAttachRecommended=false`)
 - `autoHookBackendUserEvents` (default `false`)
 - `lastGlobalPressedEventData`, `lastGlobalContextEventData`
 - signals: `globalPressedEvent(...)`, `globalContextEvent(...)`
@@ -150,8 +150,9 @@ Signals:
 
 - Adaptive layout transitions are guarded to avoid invalid one-step transitions and resize oscillation.
 - Adaptive scaffold metrics now come from `Platform.runtimeProfile()` on a per-OS basis rather than being inferred from a coarse mobile/desktop family split.
-- `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling one does not force the other.
+- `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling backend user-event mirroring does not force global listeners.
 - Runtime attach and backend hook are feature-flagged; both can be fully disabled for constrained hosts.
+- `scaffoldLayoutPlatform` is normalized through `Platform.normalizeTarget()` before adaptive mobile/desktop policy is resolved, so aliases such as `osx`, `ios-simulator`, and `android-arm64` are safe.
 - The standard bootstrap route contract now lives in `ApplicationWindow` itself, so downstream projects can seed `initialRoutePath` through `QmlAppLaunchSpec::initialProperties` without wrapping the root type.
 - Mobile system delegation defaults are platform-aware: on iOS and Android the root now prefers OS-managed windowing and insets, so `ApplicationWindow` no longer force-enters fullscreen or rebinds the content root unless a project explicitly opts back into those overrides.
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.

@@ -18,6 +18,7 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 - `quickStyleName: QString`
 - `configureRenderQualityDefaults: bool` (default `true`)
 - `bootstrapGraphicsBackend: bool` (default `true`)
+- `logBootstrapDiagnostics: bool` (default `true`)
 - `logGraphicsBackend: bool` (default `true`)
 - `installBundledFonts: bool` (default `true`)
 - `installPretendardFallbacks: bool` (default `true`)
@@ -40,6 +41,7 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 
 - Optional `RenderQuality::configureGlobalDefaults()`.
 - Optional `QQuickStyle::setStyle(quickStyleName)`.
+- Stage-by-stage bootstrap diagnostics logging with compact JSON payloads.
 - Optional graphics backend bootstrap and diagnostics logging.
 - Seeds scenegraph environment hints (for example pipeline-cache and atlas sizing) through the platform bootstrap profile before `RenderQuality` global defaults are applied.
 
@@ -49,7 +51,25 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 - Windows: D3D11-first bootstrap with runtime probing and OpenGL fallback; `4x/2` bootstrap render profile.
 - Android: Vulkan-first bootstrap with OpenGL fallback; `2x/2` bootstrap render profile and reduced texture-atlas edge.
 - Linux: Qt default backend selection; `4x/2` bootstrap render profile.
-- WASM: Qt default backend selection; lighter `2x/1` bootstrap render profile with partial-update, batch-renderer, and pipeline-cache hints explicitly forced off.
+- WASM: Qt default backend selection; lighter `2x/1` bootstrap render profile with partial-update, batch-renderer, and pipeline-cache hints explicitly forced off, and without forcing desktop-grade depth/stencil defaults at bootstrap.
+
+### Diagnostics output
+
+When `logBootstrapDiagnostics == true`, bootstrap writes compact structured lines to stdout. Major events include:
+
+- `LVRS bootstrap.pre.options`
+- `LVRS bootstrap.pre.render-quality`
+- `LVRS bootstrap.pre.quick-style`
+- `LVRS bootstrap.graphics.probe`
+- `LVRS bootstrap.graphics.selected`
+- `LVRS bootstrap.graphics.fallback`
+- `LVRS bootstrap.pre.complete`
+- `LVRS bootstrap.post.application`
+- `LVRS bootstrap.post.font-policy`
+- `LVRS bootstrap.entry.import-paths`
+- `LVRS bootstrap.entry.load-request`
+
+The payload includes platform tag, requested bootstrap options, effective render-profile defaults, scenegraph environment values, backend probe candidates, fallback reasons, and font-policy decisions.
 
 ## What `postApplicationBootstrap` Does
 
@@ -96,6 +116,7 @@ options.installPretendardFallbacks = true;
 ## Troubleshooting
 
 - `state.ok == false`: use `state.errorMessage` as primary root-cause string.
+- Bootstrap stdout lines already include structured payloads for render defaults, backend probing, and fallback reasons; capture them in CI and crash reports when possible.
 - Missing style changes: verify `quickStyleName` is set before app construction.
 - Unexpected font fallback: verify bundled font resources and fallback enforcement results.
 

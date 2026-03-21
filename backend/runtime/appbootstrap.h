@@ -13,6 +13,7 @@ struct AppBootstrapOptions {
     QString quickStyleName;
     bool configureRenderQualityDefaults = true;
     bool bootstrapGraphicsBackend = true;
+    bool logBootstrapDiagnostics = true;
     bool logGraphicsBackend = true;
     bool installBundledFonts = true;
     bool installPretendardFallbacks = true;
@@ -29,4 +30,3 @@ AppBootstrapState preApplicationBootstrap(const AppBootstrapOptions &options = {
 void postApplicationBootstrap(QGuiApplication &app, const AppBootstrapOptions &options = {});
 
 } // namespace lvrs
-

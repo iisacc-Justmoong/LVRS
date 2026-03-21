@@ -411,7 +411,7 @@ LV.ApplicationWindow {
     height: 900
     visible: false
     scaffoldLayoutMode: "auto"
-    scaffoldLayoutPlatform: "android"
+    scaffoldLayoutPlatform: "android-arm64"
     navItems: ["Home", "Runs", "Settings"]
     navigationEnabled: true
 

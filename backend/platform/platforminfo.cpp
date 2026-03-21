@@ -364,7 +364,7 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     const bool mobile = known && isMobilePlatformToken(normalized);
     const bool android = known && normalized == kPlatformAndroid();
     const bool ios = known && normalized == kPlatformIos();
-    const bool runtimeEventsAutoAttachRecommended = desktop && normalized != kPlatformWasm();
+    const bool runtimeEventsAutoAttachRecommended = false;
     const bool mobileSystemWindowDelegationRecommended = mobile;
     const bool mobileSystemInsetsDelegationRecommended = mobile;
     const bool mobileDisplayCoverageOverrideRecommended = android;

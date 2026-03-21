@@ -937,7 +937,7 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
     const int samples = qBound(minimumSamples, msaaSamples, 16);
     if (format.samples() < samples)
         format.setSamples(samples);
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WASM)
     if (format.depthBufferSize() < 24)
         format.setDepthBufferSize(24);
     if (format.stencilBufferSize() < 8)

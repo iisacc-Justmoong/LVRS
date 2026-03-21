@@ -94,8 +94,8 @@ Controls.ApplicationWindow {
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
-    // Global listeners remain opt-in. RuntimeEvents bootstrap follows the platform profile
-    // unless a consumer explicitly overrides `autoAttachRuntimeEvents`.
+    // Global listeners remain opt-in. Stock platform profiles keep the runtime daemon
+    // disabled unless a consumer explicitly enables global listeners or overrides it.
     property bool globalEventListenersEnabled: false
     property bool autoAttachRuntimeEvents: runtimeEventsAutoAttachRecommended || globalEventListenersEnabled
     // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
@@ -511,7 +511,7 @@ Controls.ApplicationWindow {
             property int navDrawerWidth: windowRoot.backendNavDrawerWidth
             property int wideBreakpoint: windowRoot.backendWideBreakpoint
             property string layoutMode: "auto" // auto, mobile, desktop
-            property string layoutPlatform: Qt.platform.os
+            property string layoutPlatform: windowRoot.canonicalPlatform
             property bool forceDesktopOnLargeMobile: false
             property int mobileDesktopMinWidth: windowRoot.backendMobileDesktopMinWidth
             property bool preferBottomNavigation: true
@@ -640,6 +640,18 @@ Controls.ApplicationWindow {
                 return 0
             }
         
+            function normalizePlatformToken(value) {
+                var token = String(value || "").trim()
+                if (token.length === 0)
+                    return ""
+                if (Platform && typeof Platform.normalizeTarget === "function") {
+                    var normalized = String(Platform.normalizeTarget(token) || "").trim().toLowerCase()
+                    if (normalized.length > 0)
+                        return normalized
+                }
+                return token.toLowerCase()
+            }
+
             function normalizeLayoutMode(value) {
                 var token = String(value || "").trim().toLowerCase()
                 if (token === "mobile" || token === "desktop" || token === "auto")
@@ -648,7 +660,9 @@ Controls.ApplicationWindow {
             }
         
             function isMobilePlatform(value) {
-                var token = String(value || "").trim().toLowerCase()
+                var token = root.normalizePlatformToken(value)
+                if (Platform && typeof Platform.targetIsMobile === "function")
+                    return Platform.targetIsMobile(token)
                 return token === "android" || token === "ios"
             }
         

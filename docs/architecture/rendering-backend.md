@@ -32,21 +32,22 @@ This moves failures from runtime to configure/build phase.
 
 ## Runtime Diagnostics
 
-When backend bootstrap succeeds, startup logs include backend identity and loader details when available.
+When bootstrap diagnostics are enabled, startup logs include stage-by-stage compact JSON payloads for render defaults, environment seeding, backend probe candidates, selected loader, and fallback reasons.
 
 Examples:
 
-- `LVRS graphics backend: metal`
-- `LVRS graphics backend: d3d11, loader = d3d11`
+- `LVRS bootstrap.pre.render-quality {"platform":"android", ...}`
+- `LVRS bootstrap.graphics.probe {"requestedBackend":"vulkan","candidates":[...], ...}`
+- `LVRS bootstrap.graphics.selected {"requestedBackend":"d3d11","selectedBackend":"d3d11","loader":"d3d11", ...}`
+- `LVRS bootstrap.graphics.fallback {"requestedBackend":"vulkan","selectedBackend":"opengl","reason":"...", ...}`
 - `LVRS graphics backend: opengl, loader = windows-fallback`
-- `LVRS graphics backend: vulkan, loader = ...`
 
 ## Interaction with RenderQuality
 
 If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
 This keeps text/MSAA defaults aligned with backend policy while using a platform-tuned bootstrap profile before per-window device-tier presets are applied.
 The bootstrap profile also seeds scenegraph env hints such as pipeline-cache enablement and atlas sizing before global defaults are applied.
-Android/iOS use reduced MSAA and atlas sizing, while WASM uses a lighter single-frame bootstrap profile and explicitly disables batch/pipeline-cache hints by default.
+Android/iOS use reduced MSAA and atlas sizing, while WASM uses a lighter single-frame bootstrap profile, explicitly disables batch/pipeline-cache hints by default, and does not force desktop depth/stencil defaults during bootstrap.
 Per-window PSO cache file binding and device-tier presets are then applied at `RenderQuality.applyWindow(...)` / `RenderQuality.applyDeviceTierPreset(...)`.
 
 ## Failure Handling Guidance
@@ -80,7 +81,7 @@ Before shipping, validate one real device/simulator per target family:
 
 If startup fails at bootstrap stage:
 
-- inspect bootstrap error string first,
+- inspect `LVRS bootstrap.pre.*` / `LVRS bootstrap.graphics.*` lines first,
 - verify Qt build includes required rendering backend feature,
 - verify runtime loader/driver presence for fallback-capable targets (Windows D3D11, Android Vulkan),
 - verify Android fallback logs when Vulkan probing fails,

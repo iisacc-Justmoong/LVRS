@@ -193,7 +193,7 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
 
     const QVariantMap desktopProfile = platform.runtimeProfile(QStringLiteral("linux"));
     QVERIFY(desktopProfile.value(QStringLiteral("desktop")).toBool());
-    QVERIFY(desktopProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
+    QVERIFY(!desktopProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
     QVERIFY(!desktopProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
     QVERIFY(!desktopProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
     QVERIFY(!desktopProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());

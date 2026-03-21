@@ -6,6 +6,7 @@ This document defines the schema used by debug and runtime-event data that is em
 
 ## 1. Output Channels
 
+- Bootstrap stdout diagnostics: emitted by `preApplicationBootstrap`, `postApplicationBootstrap`, and `runBootstrappedQmlApp` before `LV.Debug` is necessarily available.
 - Stdout text log: emitted by `LV.Debug` through `printEntryToStdout()`.
 - Stdout JSON log: when `LV.Debug.jsonOutput == true`, an additional line is emitted as `[DEBUG-ENTRY] { ... }`.
 - Debug memory buffer: available via `LV.Debug.entries()/filteredEntries()/summary()`.
@@ -27,6 +28,28 @@ The default values configured by `Component.onCompleted` and `debuggerBootstrap(
 - `LV.Debug.runtimeCaptureEnabled = true`
 
 The effective behavior is warning-centric (`WARN/ERROR`) output with high-frequency input/lifecycle noise suppression.
+
+Bootstrap diagnostics are separate from `LV.Debug`. They are always plain stdout lines prefixed with `LVRS bootstrap.` and carry compact JSON payloads describing bootstrap options, render defaults, backend probing, import-path resolution, and font-policy decisions.
+
+### Bootstrap stdout line format
+
+- Prefix: `LVRS bootstrap.<stage>`
+- Payload: compact JSON map
+- Level: `INFO` for normal progress, `WARN` for fallback/soft degradation, `CRITICAL` for fatal bootstrap failure
+
+Common bootstrap stages:
+
+- `pre.options`
+- `pre.render-quality`
+- `pre.quick-style`
+- `graphics.probe`
+- `graphics.selected`
+- `graphics.fallback`
+- `pre.complete`
+- `post.application`
+- `post.font-policy`
+- `entry.import-paths`
+- `entry.load-request`
 
 ## 3. LV.Debug Entry Schema
 

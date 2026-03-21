@@ -135,7 +135,7 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 `lvrs_configure_qml_app()` sets `QT_QML_IMPORT_PATH` for installed-package consumption, applies a default executable output directory (`<build>/bin`) when unset, auto-links/imports LVRS static QML plugin artifacts for static package builds, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically probes Linux runtime QML import locations such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading the root object. `QmlAppLaunchSpec::initialProperties` is applied through `QQmlApplicationEngine::setInitialProperties(...)` immediately before `loadFromModule(...)`, so route or window startup state can be decided in C++ before the first frame. Qt runtime deployment itself remains target-environment specific.
 `LV.ApplicationWindow` provides adaptive layout policy APIs for mobile/desktop reordering:
 - `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)
-- `scaffoldLayoutPlatform` override (default `Qt.platform.os`)
+- `scaffoldLayoutPlatform` override (default canonical platform token; aliases are normalized through `Platform.normalizeTarget()`)
 - `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`
 - `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`
 - `scaffoldCompactSpacingEnabled` + `scaffoldCompactSpacingBreakpoint`
@@ -144,7 +144,7 @@ Set `CMAKE_PREFIX_PATH` to the install root (`/path/to/lvrs-prefix`) when config
 - `matchesMedia()` tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`
 State uses page-stack routing (`LV.PageRouter`), and placement uses flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 `LV.ApplicationWindow` page-stack API: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
-Default `auto` mode is mobile-first for `android`/`ios` and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
+Default `auto` mode is mobile-first for canonical mobile targets and their normalized aliases (`android`, `android-arm64`, `ios`, `ios-simulator`, ...), and prevents wide-screen mobile windows from being forced into desktop rail layout unless explicitly configured. `desktop-compact` profile also selects bottom navigation when item count fits the configured limit.
 Recommended app-root bootstrap profile for mobile/desktop single-project apps:
 
 ```cpp
@@ -275,6 +275,7 @@ At runtime:
 - Linux uses Qt default backend selection.
 - WASM/other platforms use Qt default backend selection as fallback.
 - Startup fails fast if a required fixed backend cannot be initialized and no platform fallback is available.
+- Bootstrap stdout now emits structured `LVRS bootstrap.*` lines with render-profile, scenegraph environment, probe candidate, fallback-reason, import-path, and font-policy details so downstream apps can capture first-frame diagnostics without enabling `LV.Debug`.
 
 Bootstrap render defaults are selected conservatively before app construction. Mobile targets use a lighter MSAA / frames-in-flight profile than desktop targets so the first window starts with lower memory pressure before per-window `RenderQuality` presets are applied.
 

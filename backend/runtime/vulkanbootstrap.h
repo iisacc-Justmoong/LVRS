@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 
 namespace lvrs {
 struct GraphicsBackendBootstrapResult {
@@ -8,7 +9,11 @@ struct GraphicsBackendBootstrapResult {
     QString backendName;
     QString loaderName;
     QString errorMessage;
+    QString requestedBackendName;
+    bool fallbackUsed = false;
+    QString fallbackReason;
+    QStringList probeCandidates;
 };
 
-GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend();
+GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend(bool logDiagnostics = true);
 }
