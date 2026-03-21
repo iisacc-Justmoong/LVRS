@@ -57,7 +57,7 @@ Controls.ApplicationWindow {
     // Let the OS own critical mobile window transitions/insets by default.
     property bool delegateMobileWindowingToSystem: backendMobilePlatform && mobileSystemWindowDelegationRecommended
     property bool delegateMobileInsetsToSystem: backendMobilePlatform && mobileSystemInsetsDelegationRecommended
-    property bool forceFullWindowAreaOnMobile: backendMobilePlatform && !delegateMobileInsetsToSystem
+    property bool forceFullWindowAreaOnMobile: backendMobilePlatform
     readonly property bool fullWindowAreaOnMobileEnabled: forceFullWindowAreaOnMobile && backendMobilePlatform
     property bool mobileDisplayCoverageOverrideEnabled: mobileDisplayCoverageOverrideRecommended && !delegateMobileWindowingToSystem
     property bool mobileFullscreenVisibilityOverride: mobileFullscreenVisibilityRecommended && !delegateMobileWindowingToSystem
@@ -88,9 +88,25 @@ Controls.ApplicationWindow {
     readonly property int mobileBottomMarginFill: mobileOversizedHeightActive
         ? Math.max(0, mobileOversizedWindowHeight - mobileLayoutViewportHeight - mobileTopMarginFill)
         : 0
-    // Keep view composition identical across platforms; only apply when explicitly enabled.
-    property bool usePlatformSafeMargin: false
-    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? Theme.gap12 : 0
+    // Mobile roots keep a fixed layout inset while the render surface stays full-bleed.
+    property bool usePlatformSafeMargin: backendMobilePlatform
+    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 16 : 0
+    readonly property real mobileSystemSafeLeftInset: fullWindowAreaOnMobileEnabled ? Math.max(0, leftPadding) : 0
+    readonly property real mobileSystemSafeTopInset: fullWindowAreaOnMobileEnabled ? Math.max(0, topPadding) : 0
+    readonly property real mobileSystemSafeRightInset: fullWindowAreaOnMobileEnabled ? Math.max(0, rightPadding) : 0
+    readonly property real mobileSystemSafeBottomInset: fullWindowAreaOnMobileEnabled ? Math.max(0, bottomPadding) : 0
+    readonly property real layoutSafeLeftInset: safeMargin
+    readonly property real layoutSafeTopInset: safeMargin
+    readonly property real layoutSafeRightInset: safeMargin
+    readonly property real layoutSafeBottomInset: safeMargin
+    readonly property rect renderSurfaceBounds: Qt.rect(supersampleHost.x,
+                                                        supersampleHost.y,
+                                                        supersampleHost.width,
+                                                        supersampleHost.height)
+    readonly property rect layoutSafeAreaBounds: Qt.rect(supersampleHost.x + layoutSafeAreaHost.x,
+                                                         supersampleHost.y + layoutSafeAreaHost.y,
+                                                         layoutSafeAreaHost.width,
+                                                         layoutSafeAreaHost.height)
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
@@ -203,6 +219,7 @@ Controls.ApplicationWindow {
         property: "topPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     Binding {
@@ -210,6 +227,7 @@ Controls.ApplicationWindow {
         property: "rightPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     Binding {
@@ -217,6 +235,7 @@ Controls.ApplicationWindow {
         property: "bottomPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     Binding {
@@ -224,6 +243,7 @@ Controls.ApplicationWindow {
         property: "leftPadding"
         value: 0
         when: windowRoot.fullWindowAreaOnMobileEnabled
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     Binding {
@@ -252,63 +272,6 @@ Controls.ApplicationWindow {
         property: "height"
         value: windowRoot.height
         when: windowRoot.fullWindowAreaOnMobileEnabled && windowRoot.contentItem !== null
-    }
-
-    Item {
-        id: mobileSafeAreaBackdrop
-        parent: windowRoot.nativeWindowContentRoot
-        visible: parent !== null && windowRoot.fullWindowAreaOnMobileEnabled
-        z: 9000
-        anchors.fill: parent
-
-        readonly property real resolvedContentX: windowRoot.contentItem ? windowRoot.contentItem.x : 0
-        readonly property real resolvedContentY: windowRoot.contentItem ? windowRoot.contentItem.y : 0
-        readonly property real resolvedContentRight: windowRoot.contentItem
-            ? windowRoot.contentItem.x + windowRoot.contentItem.width
-            : width
-        readonly property real resolvedContentBottom: windowRoot.contentItem
-            ? windowRoot.contentItem.y + windowRoot.contentItem.height
-            : height
-        readonly property real leftInset: Math.max(0, Math.ceil(resolvedContentX))
-        readonly property real topInset: Math.max(0, Math.ceil(resolvedContentY))
-        readonly property real rightInset: Math.max(0, Math.ceil(width - resolvedContentRight))
-        readonly property real bottomInset: Math.max(0, Math.ceil(height - resolvedContentBottom))
-
-        Rectangle {
-            x: 0
-            y: 0
-            width: parent.width
-            height: mobileSafeAreaBackdrop.topInset
-            visible: height > 0
-            color: windowRoot.windowColor
-        }
-
-        Rectangle {
-            x: 0
-            y: mobileSafeAreaBackdrop.topInset
-            width: mobileSafeAreaBackdrop.leftInset
-            height: Math.max(0, parent.height - mobileSafeAreaBackdrop.topInset - mobileSafeAreaBackdrop.bottomInset)
-            visible: width > 0 && height > 0
-            color: windowRoot.windowColor
-        }
-
-        Rectangle {
-            x: parent.width - mobileSafeAreaBackdrop.rightInset
-            y: mobileSafeAreaBackdrop.topInset
-            width: mobileSafeAreaBackdrop.rightInset
-            height: Math.max(0, parent.height - mobileSafeAreaBackdrop.topInset - mobileSafeAreaBackdrop.bottomInset)
-            visible: width > 0 && height > 0
-            color: windowRoot.windowColor
-        }
-
-        Rectangle {
-            x: 0
-            y: parent.height - mobileSafeAreaBackdrop.bottomInset
-            width: parent.width
-            height: mobileSafeAreaBackdrop.bottomInset
-            visible: height > 0
-            color: windowRoot.windowColor
-        }
     }
 
     function mergePolicyMaps(basePolicy, overridePolicy) {
@@ -1298,33 +1261,42 @@ Controls.ApplicationWindow {
     Item {
         id: supersampleHost
         z: 2
-        x: windowRoot.safeMargin
-        y: windowRoot.safeMargin + windowRoot.mobileTopMarginFill
-        width: Math.max(1, windowRoot.width - windowRoot.safeMargin * 2)
-        height: Math.max(1, windowRoot.height - windowRoot.safeMargin * 2 - windowRoot.mobileTopMarginFill - windowRoot.mobileBottomMarginFill)
+        x: 0
+        y: windowRoot.mobileTopMarginFill
+        width: Math.max(1, windowRoot.width)
+        height: Math.max(1, windowRoot.height - windowRoot.mobileTopMarginFill - windowRoot.mobileBottomMarginFill)
         layer.enabled: windowRoot.sceneSupersamplingActive
         layer.smooth: layer.enabled
         layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
 
         Item {
-            id: scaledContentHost
-            x: 0
-            y: 0
-            width: Math.max(1, Math.round(parent.width / windowRoot.effectiveMobileViewScale))
-            height: Math.max(1, Math.round(parent.height / windowRoot.effectiveMobileViewScale))
-            scale: windowRoot.effectiveMobileViewScale
-            transformOrigin: Item.TopLeft
+            id: layoutSafeAreaHost
+            objectName: "applicationWindowLayoutSafeAreaHost"
+            x: windowRoot.layoutSafeLeftInset
+            y: windowRoot.layoutSafeTopInset
+            width: Math.max(1, parent.width - windowRoot.layoutSafeLeftInset - windowRoot.layoutSafeRightInset)
+            height: Math.max(1, parent.height - windowRoot.layoutSafeTopInset - windowRoot.layoutSafeBottomInset)
 
-            AdaptiveLayoutHost {
-                id: scaffold
-                anchors.fill: parent
-                navModel: windowRoot.navItems
-                layoutPlatform: windowRoot.platform
-                onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
-                onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
-                onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
-                onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
+            Item {
+                id: scaledContentHost
+                x: 0
+                y: 0
+                width: Math.max(1, Math.round(parent.width / windowRoot.effectiveMobileViewScale))
+                height: Math.max(1, Math.round(parent.height / windowRoot.effectiveMobileViewScale))
+                scale: windowRoot.effectiveMobileViewScale
+                transformOrigin: Item.TopLeft
+
+                AdaptiveLayoutHost {
+                    id: scaffold
+                    anchors.fill: parent
+                    navModel: windowRoot.navItems
+                    layoutPlatform: windowRoot.platform
+                    onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
+                    onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
+                    onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
+                    onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
+                }
             }
         }
     }

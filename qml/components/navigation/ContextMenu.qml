@@ -66,6 +66,24 @@ Controls.Popup {
     readonly property real resolvedOpenBackOvershoot: Math.max(0.15, Math.min(0.95, (resolvedOpenOvershootScale - 1.0) * 8.0))
     readonly property color resolvedMenuColor:
         Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
+    property real requestedPopupWidth: 0
+    property bool synchronizingResolvedWidth: false
+    readonly property int minimumItemWidth: Math.max(0, Math.round(Number(itemWidth) || 0))
+    readonly property int implicitItemContentWidth: Math.max(minimumItemWidth, Math.round(Number(contentWidthProbe.implicitWidth) || 0))
+    readonly property int requestedPopupWidthValue: {
+        const popupWidth = Number(requestedPopupWidth)
+        if (!Number.isFinite(popupWidth) || popupWidth <= 0)
+            return 0
+        return Math.max(0, Math.round(popupWidth))
+    }
+    readonly property int resolvedPopupWidth: Math.max(implicitWidth, requestedPopupWidthValue)
+    readonly property int explicitContentWidth: {
+        const popupWidth = Number(control.resolvedPopupWidth)
+        if (!Number.isFinite(popupWidth) || popupWidth <= 0)
+            return 0
+        return Math.max(0, Math.round(popupWidth - control.leftPadding - control.rightPadding))
+    }
+    readonly property int resolvedItemWidth: Math.max(implicitItemContentWidth, explicitContentWidth)
 
     signal itemTriggered(int index, var item)
     signal itemEventTriggered(string eventName, var payload, int index, var item)
@@ -152,8 +170,37 @@ Controls.Popup {
         return 0
     }
 
-    implicitWidth: itemWidth + leftPadding + rightPadding
+    implicitWidth: implicitItemContentWidth + leftPadding + rightPadding
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+
+    function syncResolvedWidth() {
+        if (synchronizingResolvedWidth)
+            return
+
+        const targetWidth = Number(resolvedPopupWidth)
+        if (!Number.isFinite(targetWidth) || targetWidth <= 0)
+            return
+        if (Math.abs(Number(width) - targetWidth) < 0.01)
+            return
+
+        synchronizingResolvedWidth = true
+        width = targetWidth
+        synchronizingResolvedWidth = false
+    }
+
+    onWidthChanged: {
+        if (synchronizingResolvedWidth)
+            return
+        requestedPopupWidth = width
+        Qt.callLater(syncResolvedWidth)
+    }
+
+    onImplicitWidthChanged: Qt.callLater(syncResolvedWidth)
+
+    Component.onCompleted: {
+        requestedPopupWidth = width
+        Qt.callLater(syncResolvedWidth)
+    }
 
     function pointInsidePopupAtLocal(localX, localY) {
         return localX >= control.x
@@ -627,10 +674,54 @@ Controls.Popup {
         antialiasing: true
     }
 
+    Item {
+        id: widthProbeHost
+        visible: false
+        width: 0
+        height: 0
+
+        Column {
+            id: contentWidthProbe
+            visible: false
+            spacing: control.itemSpacing
+
+            Repeater {
+                model: control.entryCount
+
+                delegate: Item {
+                    id: probeDelegate
+                    required property int index
+                    readonly property var entry: control.entryAt(index)
+                    readonly property bool divider: control.isDivider(entry)
+
+                    implicitWidth: divider ? control.minimumItemWidth : probeMenuItem.implicitWidth
+                    implicitHeight: divider ? 0 : probeMenuItem.implicitHeight
+
+                    MenuItem {
+                        id: probeMenuItem
+                        visible: !probeDelegate.divider
+                        itemWidth: control.minimumItemWidth
+                        state: control.itemState(probeDelegate.entry, probeDelegate.index, probeMenuItem)
+                        label: control.itemLabel(probeDelegate.entry)
+                        key: control.itemShortcut(probeDelegate.entry)
+                        keyVisible: control.itemKeyVisible(probeDelegate.entry)
+                        iconName: control.itemIconName(probeDelegate.entry)
+                        iconSource: control.itemIconSource(probeDelegate.entry)
+                        showChevron: control.itemShowChevron(probeDelegate.entry)
+                        hasChildItems: control.itemHasChildItems(probeDelegate.entry)
+                        expanded: control.itemExpanded(probeDelegate.entry)
+                        selectionDirection: control.itemSelectionDirection(probeDelegate.entry)
+                        enabled: control.itemEnabled(probeDelegate.entry)
+                    }
+                }
+            }
+        }
+    }
+
     contentItem: Column {
         id: menuColumn
         spacing: control.itemSpacing
-        width: control.itemWidth
+        width: control.resolvedItemWidth
 
         Repeater {
             model: control.entryCount
@@ -641,21 +732,22 @@ Controls.Popup {
                 readonly property var entry: control.entryAt(index)
                 readonly property bool divider: control.isDivider(entry)
 
-                width: control.itemWidth
+                width: control.resolvedItemWidth
+                implicitWidth: divider ? control.minimumItemWidth : menuItem.implicitWidth
                 implicitHeight: divider ? dividerItem.implicitHeight : menuItem.implicitHeight
 
                 MenuDivider {
                     id: dividerItem
                     visible: delegateRoot.divider
-                    width: control.itemWidth
+                    width: control.resolvedItemWidth
                     dividerColor: control.dividerColor
                 }
 
                 MenuItem {
                     id: menuItem
                     visible: !delegateRoot.divider
-                    width: control.itemWidth
-                    itemWidth: control.itemWidth
+                    width: control.resolvedItemWidth
+                    itemWidth: control.minimumItemWidth
                     state: control.itemState(delegateRoot.entry, delegateRoot.index, menuItem)
                     label: control.itemLabel(delegateRoot.entry)
                     key: control.itemShortcut(delegateRoot.entry)

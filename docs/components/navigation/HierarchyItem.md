@@ -115,6 +115,9 @@ Drag affordance:
 - `dragPreviewOpacity`
 - `draggable` (readonly; reflects list editability)
 - `dragEnabled` (readonly; item-level drag API availability)
+- `pointerDragRequiresLongPress` (readonly)
+- `immediatePointerDragEnabled` (readonly)
+- `mobileDragHoldInterval` (default `1000`)
 - `dragging` (readonly)
 - `dragActive`, `dragTargetValid`, `dragSourceItem`, `dragAnchorItem`, `dragParentTargetItem` (readonly)
 - `dragSourceIndex`, `dragSourceEndIndex` (readonly)
@@ -181,6 +184,7 @@ Visual tokens:
 - `ancestor*`, `pathItem*`, and sibling-count fields expose lineage and local ordering directly on the row without an additional lookup back into `HierarchyList`.
 - Dragging a generated row rewrites the connected flat depth-array model in place: row order changes, moved subtree depth changes, and `parentKey` / `parentItemKey` are recomputed on the backing objects.
 - `dragAllowed` lets hosts keep a row selectable and visible while preventing drag startup for protected nodes inside an otherwise editable hierarchy.
+- On mobile targets (`Theme.mobileTarget == true`), pointer drag startup is delayed until the row is held for `1000ms`; desktop targets keep immediate drag pickup.
 - `dragTargetModeName` resolves the current drop intent as `before`, `after`, `child`, or `root`.
 - `activatable`/`selectable` control whether row click can make the item active without preventing chevron-driven expansion.
 - `uxState` is the primary enum for UX handling. Priority is: `Drag` -> `Inactive` -> `Active` -> `Pressed` -> `Hover` -> `Idle`.

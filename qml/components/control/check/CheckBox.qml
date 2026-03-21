@@ -30,6 +30,11 @@ AbstractButton {
     property color boxBorderColorUncheckedDisabled: "transparent"
     property color innerShadowSoftColor: "#14000000"
     property color innerShadowStrongColor: "#1A000000"
+    readonly property real checkmarkSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property real checkmarkHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property real checkmarkRasterScale: Math.max(1.0, checkmarkSupersampleScale * checkmarkHiDpiScale)
 
     readonly property bool showInnerShadow: !(control.checked && control.enabled)
     readonly property color resolvedCheckedFillColor: !control.enabled
@@ -111,14 +116,21 @@ AbstractButton {
                 id: checkmarkCanvas
                 anchors.fill: parent
                 visible: control.checked
+                objectName: control.objectName.length > 0 ? control.objectName + "_checkmarkCanvas" : ""
                 antialiasing: true
+                canvasSize: Qt.size(Math.max(1, Math.ceil(width * control.checkmarkRasterScale)),
+                                    Math.max(1, Math.ceil(height * control.checkmarkRasterScale)))
+                readonly property real rasterScaleX: width > 0 ? canvasSize.width / width : 1.0
+                readonly property real rasterScaleY: height > 0 ? canvasSize.height / height : 1.0
 
                 onPaint: {
                     const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
+                    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
                     if (!control.checked)
                         return
 
+                    ctx.save()
+                    ctx.scale(checkmarkCanvas.rasterScaleX, checkmarkCanvas.rasterScaleY)
                     ctx.beginPath()
                     ctx.moveTo(width * 0.25, height * 0.52)
                     ctx.lineTo(width * 0.43, height * 0.70)
@@ -128,7 +140,12 @@ AbstractButton {
                     ctx.lineJoin = "round"
                     ctx.strokeStyle = control.enabled ? control.checkColor : control.checkMarkColorDisabled
                     ctx.stroke()
+                    ctx.restore()
                 }
+
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+                onCanvasSizeChanged: requestPaint()
             }
         }
 
@@ -146,6 +163,9 @@ AbstractButton {
     onCheckColorChanged: checkmarkCanvas.requestPaint()
     onCheckMarkColorDisabledChanged: checkmarkCanvas.requestPaint()
     onCheckMarkStrokeWidthChanged: checkmarkCanvas.requestPaint()
+    onCheckmarkRasterScaleChanged: checkmarkCanvas.requestPaint()
+
+    Component.onCompleted: checkmarkCanvas.requestPaint()
 
 }
 

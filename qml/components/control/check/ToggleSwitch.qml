@@ -26,6 +26,11 @@ Controls.Switch {
     property color disabledTrackColor: Theme.surfaceAlt
     property color trackShadowColor: Theme.shadowStrong
     property color knobFillColor: Theme.textPrimary
+    readonly property real knobSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property real knobHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property real knobRasterScale: Math.max(1.0, knobSupersampleScale * knobHiDpiScale)
     readonly property int knobXOff: trackPadding
     readonly property int knobXOn: Math.max(trackPadding, trackWidth - knobSize - trackPadding)
     readonly property color resolvedTrackColor: !control.enabled
@@ -90,23 +95,38 @@ Controls.Switch {
                 id: knobCanvas
                 anchors.fill: parent
                 opacity: control.enabled ? 1.0 : 0.55
+                objectName: control.objectName.length > 0 ? control.objectName + "_knobCanvas" : ""
                 antialiasing: true
+                canvasSize: Qt.size(Math.max(1, Math.ceil(width * control.knobRasterScale)),
+                                    Math.max(1, Math.ceil(height * control.knobRasterScale)))
+                readonly property real rasterScaleX: width > 0 ? canvasSize.width / width : 1.0
+                readonly property real rasterScaleY: height > 0 ? canvasSize.height / height : 1.0
 
                 onPaint: {
                     const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
+                    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
 
+                    ctx.save()
+                    ctx.scale(knobCanvas.rasterScaleX, knobCanvas.rasterScaleY)
                     const radius = Math.max(0, Math.min(width, height) * 0.5 - 0.75)
                     ctx.beginPath()
                     ctx.arc(width * 0.5, height * 0.5, radius, 0, Math.PI * 2, false)
                     ctx.fillStyle = control.knobFillColor
                     ctx.fill()
+                    ctx.restore()
                 }
+
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+                onCanvasSizeChanged: requestPaint()
             }
         }
     }
 
     onKnobFillColorChanged: knobCanvas.requestPaint()
+    onKnobRasterScaleChanged: knobCanvas.requestPaint()
+
+    Component.onCompleted: knobCanvas.requestPaint()
 
     contentItem: Label {
         style: body

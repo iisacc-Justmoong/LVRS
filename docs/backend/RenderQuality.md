@@ -96,7 +96,9 @@ If `tier=-1`, the automatically detected device tier is applied.
 
 - `qml/ApplicationWindow.qml`
 - `qml/Window.qml`
-- major icon components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
+- major icon/image components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
+- snapshot-driven control icons (`Stepper`, `InputField` search icon) via supersampled `Image.sourceSize`
+- `Canvas`-based control icons (`CheckBox`, `ToggleSwitch`) via supersampled `canvasSize` with per-axis ceil rounding
 
 Applied behavior:
 

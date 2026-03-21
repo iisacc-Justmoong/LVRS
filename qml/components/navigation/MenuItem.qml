@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 AbstractButton {
@@ -107,7 +106,7 @@ AbstractButton {
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
 
-    implicitWidth: itemWidth
+    implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
     implicitHeight: itemHeight
 
     textColor: Theme.titleHeaderColor
@@ -119,80 +118,130 @@ AbstractButton {
 
     contentItem: Item {
         id: contentRoot
+        objectName: "menuItem_contentRow"
+        readonly property real layoutWidth: width > 0 ? width : implicitWidth
+        readonly property int shortcutNaturalWidth: control.keyVisible ? shortcutLabel.implicitWidth : 0
+        readonly property int chevronLayoutWidth: control.effectiveShowChevron ? control.chevronSize : 0
+        readonly property int shortcutBudgetWidth: control.keyVisible
+            ? Math.max(0,
+                       Math.round((layoutWidth - control.iconSize - chevronLayoutWidth - (Theme.gap8 * 3)) * 0.45))
+            : 0
+        readonly property int resolvedShortcutWidth: control.keyVisible
+            ? Math.max(0, Math.min(shortcutNaturalWidth, shortcutBudgetWidth))
+            : 0
+        readonly property int trailingInnerGap: resolvedShortcutWidth > 0 && chevronLayoutWidth > 0 ? Theme.gap8 : 0
+        readonly property int resolvedTrailingWidth: resolvedShortcutWidth + trailingInnerGap + chevronLayoutWidth
+        readonly property int resolvedLabelWidth: Math.max(
+                                                      0,
+                                                      Math.min(labelNode.implicitWidth,
+                                                               Math.round(layoutWidth)
+                                                               - control.iconSize
+                                                               - Theme.gap8
+                                                               - (resolvedTrailingWidth > 0
+                                                                      ? Theme.gap8 + resolvedTrailingWidth
+                                                                      : 0)))
+        readonly property real labelX: control.iconSize + Theme.gap8
+        readonly property real labelRight: labelX + resolvedLabelWidth
+        readonly property real trailingX: layoutWidth - resolvedTrailingWidth
+        readonly property real spacerX: labelRight
+        readonly property real spacerWidth: Math.max(0, trailingX - labelRight)
+
         implicitWidth: Math.max(
                            control.itemWidth - control.leftPadding - control.rightPadding,
-                           leftGroup.implicitWidth + Theme.gap8 + rightGroup.implicitWidth)
-        implicitHeight: Math.max(leftGroup.implicitHeight, rightGroup.implicitHeight)
+                           control.iconSize
+                           + Theme.gap8
+                           + labelNode.implicitWidth
+                           + (shortcutNaturalWidth > 0 || chevronLayoutWidth > 0
+                                  ? Theme.gap8 + shortcutNaturalWidth + (shortcutNaturalWidth > 0 && chevronLayoutWidth > 0 ? Theme.gap8 : 0) + chevronLayoutWidth
+                                  : 0))
+        implicitHeight: Math.max(
+                            control.iconSize,
+                            labelNode.implicitHeight,
+                            shortcutLabel.implicitHeight,
+                            chevronLayoutWidth)
 
-        RowLayout {
-            id: leftGroup
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.gap8
+        Item {
+            objectName: "menuItem_iconSlot"
+            x: 0
+            y: Math.round((contentRoot.height - height) * 0.5)
+            width: control.iconSize
+            height: control.iconSize
 
-            Item {
-                Layout.preferredWidth: control.iconSize
-                Layout.preferredHeight: control.iconSize
-                Layout.alignment: Qt.AlignVCenter
-                implicitWidth: control.iconSize
-                implicitHeight: control.iconSize
-
-                Image {
-                    id: iconImage
-                    visible: control.resolvedIconSource.toString().length > 0
-                    anchors.centerIn: parent
-                    width: control.iconSize
-                    height: control.iconSize
-                    source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
-                    sourceSize.width: control.iconSourceSize
-                    sourceSize.height: control.iconSourceSize
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    mipmap: RenderQuality.mipmapEnabled
-                }
-
-                Item {
-                    anchors.fill: parent
-                    visible: !iconImage.visible
-
-                    Rectangle {
-                        width: Theme.scaleMetric(12)
-                        height: Theme.scaleMetric(12)
-                        radius: Theme.gap3
-                        color: control.iconPlaceholderColor
-                        anchors.centerIn: parent
-                        antialiasing: true
-                    }
-                }
+            Image {
+                id: iconImage
+                visible: control.resolvedIconSource.toString().length > 0
+                anchors.centerIn: parent
+                width: control.iconSize
+                height: control.iconSize
+                source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
+                sourceSize.width: control.iconSourceSize
+                sourceSize.height: control.iconSourceSize
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: RenderQuality.mipmapEnabled
             }
 
-            Label {
-                id: labelNode
-                style: body
-                text: control.label
-                color: control.isInactive ? Theme.titleHeaderColor
-                                          : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
-                Layout.alignment: Qt.AlignVCenter
-                elide: Text.ElideRight
-                lineHeight: Theme.textBodyLineHeight
-                lineHeightMode: Text.FixedHeight
+            Item {
+                anchors.fill: parent
+                visible: !iconImage.visible
+
+                Rectangle {
+                    width: Theme.scaleMetric(12)
+                    height: Theme.scaleMetric(12)
+                    radius: Theme.gap3
+                    color: control.iconPlaceholderColor
+                    anchors.centerIn: parent
+                    antialiasing: true
+                }
             }
         }
 
-        RowLayout {
-            id: rightGroup
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.gap8
+        Label {
+            id: labelNode
+            objectName: "menuItem_labelNode"
+            x: contentRoot.labelX
+            y: Math.round((contentRoot.height - height) * 0.5)
+            width: contentRoot.resolvedLabelWidth
+            height: implicitHeight
+            style: body
+            text: control.label
+            color: control.isInactive ? Theme.titleHeaderColor
+                                      : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
+            elide: Text.ElideRight
+            lineHeight: Theme.textBodyLineHeight
+            lineHeightMode: Text.FixedHeight
+        }
+
+        Item {
+            id: flexibleSpacer
+            objectName: "menuItem_flexibleSpacer"
+            x: contentRoot.spacerX
+            y: 0
+            width: contentRoot.spacerWidth
+            height: contentRoot.height
+        }
+
+        Item {
+            id: trailingGroup
+            objectName: "menuItem_trailingGroup"
+            visible: contentRoot.resolvedTrailingWidth > 0
+            x: contentRoot.trailingX
+            y: Math.round((contentRoot.height - height) * 0.5)
+            width: contentRoot.resolvedTrailingWidth
+            height: Math.max(shortcutLabel.implicitHeight, control.chevronSize)
 
             Label {
                 id: shortcutLabel
+                objectName: "menuItem_shortcutLabel"
                 style: body
-                visible: control.keyVisible
+                visible: control.keyVisible && contentRoot.resolvedShortcutWidth > 0
+                x: 0
+                y: Math.round((parent.height - height) * 0.5)
+                width: contentRoot.resolvedShortcutWidth
+                height: implicitHeight
                 text: control.resolvedShortcutText
                 color: control.isInactive ? Theme.descriptionColor
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)
-                Layout.alignment: Qt.AlignVCenter
                 elide: Text.ElideRight
                 lineHeight: Theme.textBodyLineHeight
                 lineHeightMode: Text.FixedHeight
@@ -200,10 +249,12 @@ AbstractButton {
 
             Image {
                 id: chevronIcon
+                objectName: "menuItem_chevronIcon"
                 visible: control.effectiveShowChevron
-                Layout.preferredWidth: control.chevronSize
-                Layout.preferredHeight: control.chevronSize
-                Layout.alignment: Qt.AlignVCenter
+                x: parent.width - width
+                y: Math.round((parent.height - height) * 0.5)
+                width: control.chevronSize
+                height: control.chevronSize
                 source: RenderQuality.resolveTextureSource(control.chevronIconSource)
                 sourceSize.width: control.chevronSourceSize
                 sourceSize.height: control.chevronSourceSize

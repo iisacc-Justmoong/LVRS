@@ -365,11 +365,11 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     const bool android = known && normalized == kPlatformAndroid();
     const bool ios = known && normalized == kPlatformIos();
     const bool runtimeEventsAutoAttachRecommended = false;
-    const bool mobileSystemWindowDelegationRecommended = mobile;
-    const bool mobileSystemInsetsDelegationRecommended = mobile;
-    const bool mobileDisplayCoverageOverrideRecommended = android;
-    const bool mobileFullscreenVisibilityRecommended = android;
-    const bool mobileFullscreenGeometryHintRecommended = android;
+    const bool mobileSystemWindowDelegationRecommended = android;
+    const bool mobileSystemInsetsDelegationRecommended = android;
+    const bool mobileDisplayCoverageOverrideRecommended = android || ios;
+    const bool mobileFullscreenVisibilityRecommended = android || ios;
+    const bool mobileFullscreenGeometryHintRecommended = android || ios;
     int bootstrapMsaaSamples = 4;
     int bootstrapFramesInFlight = 2;
     bool bootstrapPartialUpdateRecommended = true;

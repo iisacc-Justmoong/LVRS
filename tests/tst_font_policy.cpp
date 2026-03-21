@@ -31,15 +31,17 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         const char *style;
         int fallbackWeight;
         const char *fallbackStyle;
+        int mobilePixelSize;
+        int doubledPixelSize;
     };
     const QList<Token> expected = {
-        {26, QFont::Bold, "Bold", QFont::Bold, "Bold"},
-        {22, QFont::Bold, "Bold", QFont::Bold, "Bold"},
-        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
-        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
-        {12, QFont::Medium, "Medium", QFont::Medium, "Medium"},
-        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
-        {11, QFont::Normal, "Regular", QFont::Normal, "Regular"}
+        {26, QFont::Bold, "Bold", QFont::Bold, "Bold", 39, 52},
+        {22, QFont::Bold, "Bold", QFont::Bold, "Bold", 33, 44},
+        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 26, 34},
+        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 23, 30},
+        {12, QFont::Medium, "Medium", QFont::Medium, "Medium", 18, 24},
+        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 18, 24},
+        {11, QFont::Normal, "Regular", QFont::Normal, "Regular", 17, 22}
     };
 
     for (const Token &token : expected) {
@@ -47,6 +49,16 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         QCOMPARE(policy.styleNameForTextSize(token.pixelSize, QString::fromLatin1(token.fallbackStyle)),
                  QString::fromLatin1(token.style));
         QVERIFY(policy.isThemeTextStyleCompliant(token.pixelSize, token.weight, QString::fromLatin1(token.style)));
+
+        QCOMPARE(policy.weightForTextSize(token.mobilePixelSize, token.fallbackWeight), token.weight);
+        QCOMPARE(policy.styleNameForTextSize(token.mobilePixelSize, QString::fromLatin1(token.fallbackStyle)),
+                 QString::fromLatin1(token.style));
+        QVERIFY(policy.isThemeTextStyleCompliant(token.mobilePixelSize, token.weight, QString::fromLatin1(token.style)));
+
+        QCOMPARE(policy.weightForTextSize(token.doubledPixelSize, token.fallbackWeight), token.weight);
+        QCOMPARE(policy.styleNameForTextSize(token.doubledPixelSize, QString::fromLatin1(token.fallbackStyle)),
+                 QString::fromLatin1(token.style));
+        QVERIFY(policy.isThemeTextStyleCompliant(token.doubledPixelSize, token.weight, QString::fromLatin1(token.style)));
     }
 
     QCOMPARE(policy.weightForTextSize(99, QFont::Light), QFont::Light);

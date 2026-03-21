@@ -5,6 +5,7 @@
 #include <QFontInfo>
 #include <QGuiApplication>
 #include <QStringList>
+#include <QtMath>
 
 #include <array>
 
@@ -23,6 +24,12 @@ constexpr std::array<TextStyleToken, 7> kThemeTextTokens = {{
     {12, QFont::Medium, "Medium"},
     {12, QFont::DemiBold, "SemiBold"},
     {11, QFont::Normal, "Regular"}
+}};
+
+constexpr std::array<qreal, 3> kThemeTokenScaleFactors = {{
+    1.0,
+    1.5,
+    2.0
 }};
 
 const QStringList kSubstitutionTargets = {
@@ -61,7 +68,11 @@ bool currentApplicationFontLooksLikePretendard()
 
 bool tokenMatchesPixelSize(const TextStyleToken &token, int pixelSize)
 {
-    return token.pixelSize == pixelSize || token.pixelSize * 2 == pixelSize;
+    for (qreal scaleFactor : kThemeTokenScaleFactors) {
+        if (qRound(token.pixelSize * scaleFactor) == pixelSize)
+            return true;
+    }
+    return false;
 }
 }
 

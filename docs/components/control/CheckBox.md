@@ -41,7 +41,7 @@ Resolved values:
 ## Behavior Contract
 
 - `checkable: true`, `tone: Borderless`, transparent background layers.
-- Checkmark is drawn by `Canvas` and repainted on state/color/stroke changes.
+- Checkmark is drawn by `Canvas`, uses a supersampled backing store (`RenderQuality` + HiDPI), rounds each raster axis up independently, and repaints on state/color/stroke changes.
 - `showInnerShadow` is disabled only when checked+enabled.
 
 ## Usage

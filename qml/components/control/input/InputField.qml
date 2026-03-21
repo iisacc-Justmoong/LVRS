@@ -22,6 +22,17 @@ AbstractInputBar {
     property color clearIconBackgroundColorPressed: Qt.darker(clearIconBackgroundColor, 1.14)
     property color clearIconBackgroundColorDisabled: Theme.disabledColor
     property color clearIconForegroundColor: Theme.panelBackground10
+    readonly property real searchIconSupersampleScale: RenderQuality.enabled
+        ? RenderQuality.effectiveSupersampleScaleValue
+        : 1.0
+    readonly property real searchIconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property real searchIconRasterScale: Math.max(1.0, searchIconSupersampleScale * searchIconHiDpiScale)
+    readonly property real searchIconLensRadius: Theme.scaleRealMetric(4)
+    readonly property int searchIconSourceSize: Math.max(1, Math.ceil(Theme.iconSm * searchIconRasterScale))
+    readonly property string searchIconSnapshotProfile: Theme.mobileTarget ? "mobile" : "desktop"
+    readonly property bool searchIconUsesPlatformSnapshot: true
+    readonly property url searchIconSnapshotSource: "data:image/svg+xml;utf8," + encodeURIComponent(searchIconSnapshotSvgMarkup)
+    readonly property string searchIconSnapshotSvgMarkup: control.buildSearchSnapshotSvg()
 
     readonly property int resolvedStyle: style === inlineStyle ? inlineStyle : filledStyle
     readonly property color frameFillColor: resolvedStyle === inlineStyle
@@ -37,6 +48,29 @@ AbstractInputBar {
         && enabled
         && !readOnly
         && text.length > 0
+
+    function svgColor(value) {
+        return "rgba(" + Math.round(value.r * 255)
+            + "," + Math.round(value.g * 255)
+            + "," + Math.round(value.b * 255)
+            + "," + value.a.toFixed(3) + ")"
+    }
+
+    function buildSearchSnapshotSvg() {
+        const size = Theme.iconSm
+        const lensCenter = size * 0.42
+        const stroke = Math.max(1.0, searchIconStrokeWidth)
+        const handleStart = size * 0.63
+        const handleEnd = size * 0.84
+        return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + size + "\" height=\"" + size
+            + "\" viewBox=\"0 0 " + size + " " + size + "\" fill=\"none\">"
+            + "<circle cx=\"" + lensCenter + "\" cy=\"" + lensCenter + "\" r=\"" + searchIconLensRadius
+            + "\" stroke=\"" + svgColor(searchIconColor) + "\" stroke-width=\"" + stroke + "\"/>"
+            + "<path d=\"M " + handleStart + " " + handleStart + " L " + handleEnd + " " + handleEnd
+            + "\" stroke=\"" + svgColor(searchIconColor)
+            + "\" stroke-width=\"" + stroke + "\" stroke-linecap=\"round\"/>"
+            + "</svg>"
+    }
 
     implicitWidth: Theme.inputWidthMd
     fieldMinHeight: Theme.controlHeightSm
@@ -66,31 +100,17 @@ AbstractInputBar {
         height: Theme.iconSm
         visible: width > 0
 
-        Canvas {
+        Image {
             id: searchIcon
             anchors.fill: parent
-            antialiasing: true
-
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                if (!control.searchIconVisible)
-                    return
-
-                ctx.beginPath()
-                ctx.arc(width * 0.42, height * 0.42, 4.0, 0, Math.PI * 2, false)
-                ctx.lineWidth = control.searchIconStrokeWidth
-                ctx.strokeStyle = control.searchIconColor
-                ctx.stroke()
-
-                ctx.beginPath()
-                ctx.moveTo(width * 0.63, height * 0.63)
-                ctx.lineTo(width * 0.84, height * 0.84)
-                ctx.lineWidth = control.searchIconStrokeWidth
-                ctx.lineCap = "round"
-                ctx.strokeStyle = control.searchIconColor
-                ctx.stroke()
-            }
+            objectName: control.objectName.length > 0 ? control.objectName + "_searchIconSnapshot" : ""
+            source: control.searchIconSnapshotSource
+            sourceSize.width: control.searchIconSourceSize
+            sourceSize.height: control.searchIconSourceSize
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            mipmap: RenderQuality.mipmapEnabled
+            cache: true
         }
     }
 
@@ -152,10 +172,6 @@ AbstractInputBar {
         }
     }
 
-    onModeChanged: searchIcon.requestPaint()
-    onSearchIconVisibleChanged: searchIcon.requestPaint()
-    onSearchIconColorChanged: searchIcon.requestPaint()
-    onSearchIconStrokeWidthChanged: searchIcon.requestPaint()
 }
 
 // API usage (external):

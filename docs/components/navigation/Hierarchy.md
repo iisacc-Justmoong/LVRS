@@ -93,6 +93,7 @@ LV.Hierarchy {
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.
 - `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must be an array-backed object depth list.
+- In mobile-target runs, editable row drag requires a `1000ms` long press before `HierarchyItem` enters drag/drop mode, which preserves touch scrolling priority inside the panel `Flickable`.
 
 ## Advanced Usage: Programmatic Activation
 

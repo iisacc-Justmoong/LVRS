@@ -36,7 +36,7 @@ State (inherited):
 ## Behavior Contract
 
 - Knob x-position animates between `knobXOff` and `knobXOn`.
-- Knob fill is drawn by `Canvas` and repainted on `knobFillColor` change.
+- Knob fill is drawn by `Canvas`, uses a supersampled backing store (`RenderQuality` + HiDPI), rounds each raster axis up independently, and repaints on `knobFillColor` change.
 - Track color resolves from `checked + hovered + down + enabled`.
 
 ## Usage

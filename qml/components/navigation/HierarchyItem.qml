@@ -39,6 +39,7 @@ AbstractButton {
     property var nodeData: null
     property bool generatedByTreeModel: false
     property bool dragAllowed: true
+    property int mobileDragHoldInterval: 1000
 
     property int childCount: 0
     property int visibleChildCount: 0
@@ -155,6 +156,8 @@ AbstractButton {
             && dragAllowed
         : false
     readonly property bool dragEnabled: draggable && enabled && generatedByTreeModel
+    readonly property bool pointerDragRequiresLongPress: dragEnabled && Theme.mobileTarget
+    readonly property bool immediatePointerDragEnabled: dragEnabled && !pointerDragRequiresLongPress
     readonly property bool dragging: dragPreviewActive
     readonly property bool dragActive: hierarchyList
         ? !!hierarchyList._dragActiveInternal && hierarchyList._dragItem === control
@@ -305,9 +308,9 @@ AbstractButton {
             return control.uxStateInactive
         if (control.resolvedSelected)
             return control.uxStateActive
-        if (control.down)
+        if (control.effectivePressedState)
             return control.uxStatePressed
-        if (control.hovered)
+        if (control.effectiveHoverState)
             return control.uxStateHover
         return control.uxStateIdle
     }
@@ -330,6 +333,8 @@ AbstractButton {
     readonly property string interactionStateName: interactionState === stateActive
         ? "Active"
         : (interactionState === stateHover ? "Hover" : "Idle")
+    property bool _mobilePointerPressed: false
+    property bool _mobilePointerDragging: false
     readonly property bool isHoverState: uxState === uxStateHover
     readonly property bool isActiveState: uxState === uxStateActive
     readonly property bool isInactiveState: uxState === uxStateInactive
@@ -369,6 +374,8 @@ AbstractButton {
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale * control.iconHiDpiScale))
+    readonly property bool effectivePressedState: pointerDragRequiresLongPress ? _mobilePointerPressed : control.down
+    readonly property bool effectiveHoverState: pointerDragRequiresLongPress ? false : control.hovered
 
     function normalizedText(value) {
         if (value === undefined || value === null)
@@ -495,12 +502,24 @@ AbstractButton {
     backgroundColorPressed: resolvedRowBackgroundColorPressed
     backgroundColorDisabled: resolvedRowBackgroundColor
 
+    background: Rectangle {
+        radius: control.resolvedCornerRadius
+        antialiasing: true
+        color: !control.effectiveEnabled
+            ? control.backgroundColorDisabled
+            : control.effectivePressedState
+                ? control.backgroundColorPressed
+                : control.effectiveHoverState
+                    ? control.backgroundColorHover
+                    : control.backgroundColor
+    }
+
     onPressed: control.requestActivationFromInteraction()
     onClicked: control.requestActivationFromInteraction()
 
     DragHandler {
         id: itemDragHandler
-        enabled: control.dragEnabled
+        enabled: control.immediatePointerDragEnabled
         target: null
         acceptedButtons: Qt.LeftButton
 
@@ -645,6 +664,59 @@ AbstractButton {
                 }
             }
         }
+
+        MouseArea {
+            id: mobileLongPressDragArea
+            anchors.fill: parent
+            anchors.rightMargin: control.effectiveShowChevron ? control.chevronSize : 0
+            enabled: control.pointerDragRequiresLongPress
+            acceptedButtons: Qt.LeftButton
+            hoverEnabled: false
+            preventStealing: control._mobilePointerDragging
+            pressAndHoldInterval: control.mobileDragHoldInterval
+
+            onPressed: function(mouse) {
+                control._mobilePointerPressed = true
+                control._mobilePointerDragging = false
+                control.requestActivationFromInteraction()
+                control.pressed()
+            }
+
+            onClicked: function(mouse) {
+                if (control._mobilePointerDragging)
+                    return
+                control.requestActivationFromInteraction()
+                control.clicked()
+            }
+
+            onPressAndHold: function(mouse) {
+                control._mobilePointerDragging = control.beginDrag(mouse.x, mouse.y)
+            }
+
+            onPositionChanged: function(mouse) {
+                if (!control._mobilePointerDragging)
+                    return
+                control.updateDrag(mouse.x, mouse.y)
+            }
+
+            onReleased: function(mouse) {
+                const dragging = control._mobilePointerDragging
+                control._mobilePointerPressed = false
+                control._mobilePointerDragging = false
+                control.released()
+                if (dragging)
+                    control.commitDrag()
+            }
+
+            onCanceled: {
+                const dragging = control._mobilePointerDragging
+                control._mobilePointerPressed = false
+                control._mobilePointerDragging = false
+                if (dragging)
+                    control.cancelDrag()
+                control.canceled()
+            }
+        }
     }
 
     onIndentLevelChanged: {
@@ -690,6 +762,10 @@ AbstractButton {
     onDragPreviewActiveChanged: {
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
+    }
+    onPointerDragRequiresLongPressChanged: {
+        control._mobilePointerPressed = false
+        control._mobilePointerDragging = false
     }
 
     QtObject {

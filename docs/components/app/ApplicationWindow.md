@@ -34,6 +34,9 @@ On completion, main flow is:
 - `desktopMinWidth/Height`, `mobileMinWidth/Height`
 - `useBackendMobileScale`, `mobileViewScale`, `effectiveMobileViewScale`
 - `usePlatformSafeMargin`, `safeMargin`
+- `mobileSystemSafeLeftInset/TopInset/RightInset/BottomInset`
+- `layoutSafeLeftInset/TopInset/RightInset/BottomInset`
+- `renderSurfaceBounds`, `layoutSafeAreaBounds`
 
 ### Window and platform overrides
 
@@ -51,7 +54,7 @@ On completion, main flow is:
   - `delegateMobileWindowingToSystem`
   - `delegateMobileInsetsToSystem`
 - mobile coverage overrides:
-  - `forceFullWindowAreaOnMobile` (defaults to `false` on mobile while `delegateMobileInsetsToSystem=true`)
+  - `forceFullWindowAreaOnMobile` (defaults to `true` on mobile so the render surface stays full-bleed)
   - `mobileDisplayCoverageOverrideEnabled` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
   - `mobileFullscreenVisibilityOverride` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
   - `mobileFullscreenGeometryHintOverride` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
@@ -89,9 +92,12 @@ Default quality-first profile in current implementation:
 
 Default mobile sizing contract in current implementation:
 
-- `Theme` applies built-in `@2x` metric and typography tokens on iOS and Android.
-- `safeMargin` follows `Theme.gap12`, so the stock mobile root margin doubles alongside the rest of the token set.
-- `mobileViewScale` remains `1.0`; the framework prefers token-level `2x` sizing over full-scene composition scaling in the default path.
+- `Theme` applies built-in `1.5x` metric and typography tokens on iOS and Android.
+- `usePlatformSafeMargin` defaults to `true` on iOS and Android, and `safeMargin` defaults to a fixed `16` logical pixels on each side.
+- The render surface remains full-bleed on mobile; `ApplicationWindow` forces its automatic `contentItem` safe-area paddings back to `0` in the default mobile path.
+- Only the fixed `safeMargin` inset is applied to the internal layout viewport, so the app can render into the notch/status-bar and home-indicator regions while layout stays `16px` from each edge.
+- `renderSurfaceBounds` exposes the full composited host, while `layoutSafeAreaBounds` exposes the absolute window-space layout viewport after the fixed layout inset.
+- `mobileViewScale` remains `1.0`; the framework prefers token-level `1.5x` sizing over full-scene composition scaling in the default path.
 
 Default app-root bootstrap profile in current implementation:
 
@@ -160,11 +166,11 @@ Signals:
 - Runtime attach and backend hook are feature-flagged; both can be fully disabled for constrained hosts.
 - `scaffoldLayoutPlatform` is normalized through `Platform.normalizeTarget()` before adaptive mobile/desktop policy is resolved, so aliases such as `osx`, `ios-simulator`, and `android-arm64` are safe.
 - The standard bootstrap route contract now lives in `ApplicationWindow` itself, so downstream projects can seed `initialRoutePath` through `QmlAppLaunchSpec::initialProperties` without wrapping the root type.
-- Mobile system delegation defaults are platform-aware: on iOS and Android the root now prefers OS-managed windowing and insets, so `ApplicationWindow` no longer force-enters fullscreen or rebinds the content root unless a project explicitly opts back into those overrides.
+- Mobile system delegation defaults are platform-aware: Android still prefers OS-managed windowing/insets, while iOS now defaults to the framework-managed full-window coverage path so the render surface can extend into the status-bar, notch, and home-indicator regions.
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.
 - Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
-- Default mobile sizing now comes from `Theme` token doubling, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
+- Default mobile sizing now comes from the `Theme` mobile token profile, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
 
 ## Usage
 

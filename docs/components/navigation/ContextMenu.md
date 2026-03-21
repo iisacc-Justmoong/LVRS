@@ -31,6 +31,7 @@ Open/close behavior:
 Visual/layout:
 
 - `itemWidth`, `itemSpacing`
+- `resolvedItemWidth` (readonly)
 - `menuColor`, `menuOpacity`, `resolvedMenuColor`
 - `dividerColor`
 - `edgeMargin` (viewport inset used by auto placement; default `Theme.gap4`)
@@ -74,6 +75,14 @@ Chevron render condition is `showChevron && hasChildItems` (resolved from entry 
 - If space is insufficient, placement flips to left and/or up.
 - Final position is clamped to viewport with `edgeMargin`.
 - `resolveOpenPlacement(...)` exposes the internal placement solver for deterministic testing and tooling.
+
+## Width Contract
+
+- `itemWidth` is the baseline minimum row width.
+- `resolvedItemWidth` expands to the larger of baseline `itemWidth`, the widest delegate implicit width, and any explicit popup width supplied by the caller.
+- The popup frame itself is promoted to at least `implicitWidth`, so a narrow explicit `width` cannot clamp the menu below its content-driven size.
+- Delegate rows and dividers consume `resolvedItemWidth`, so a combo-triggered menu can grow wider than the trigger itself when content or caller sizing requires it.
+- Delegate `MenuItem` rows remain responsive inside `resolvedItemWidth`, so constrained menus do not push label/shortcut/chevron content outside the popup bounds or collapse the internal spacer into negative geometry.
 
 ## Usage
 

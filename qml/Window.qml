@@ -37,8 +37,17 @@ QtQuickWindow.Window {
     readonly property real effectiveMobileViewScale: useBackendMobileScale && backendMobilePlatform
         ? Math.max(1.0, mobileViewScale)
         : 1.0
-    property bool usePlatformSafeMargin: false
-    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? Theme.gap12 : 0
+    property bool usePlatformSafeMargin: backendMobilePlatform
+    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 16 : 0
+    readonly property real layoutSafeLeftInset: safeMargin
+    readonly property real layoutSafeTopInset: safeMargin
+    readonly property real layoutSafeRightInset: safeMargin
+    readonly property real layoutSafeBottomInset: safeMargin
+    readonly property rect renderSurfaceBounds: Qt.rect(contentHost.x, contentHost.y, contentHost.width, contentHost.height)
+    readonly property rect layoutSafeAreaBounds: Qt.rect(contentHost.x + layoutSafeAreaHost.x,
+                                                         contentHost.y + layoutSafeAreaHost.y,
+                                                         layoutSafeAreaHost.width,
+                                                         layoutSafeAreaHost.height)
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
@@ -120,20 +129,28 @@ QtQuickWindow.Window {
     Item {
         id: contentHost
         anchors.fill: parent
-        anchors.margins: root.safeMargin
         layer.enabled: root.sceneSupersamplingActive
         layer.smooth: layer.enabled
         layer.mipmap: RenderQuality.mipmapEnabled
         layer.textureSize: RenderQuality.resolveLayerTextureSize(width, height, layer.enabled)
 
         Item {
-            id: scaledContentHost
-            x: 0
-            y: 0
-            width: Math.max(1, Math.round(parent.width / root.effectiveMobileViewScale))
-            height: Math.max(1, Math.round(parent.height / root.effectiveMobileViewScale))
-            scale: root.effectiveMobileViewScale
-            transformOrigin: Item.TopLeft
+            id: layoutSafeAreaHost
+            objectName: "windowLayoutSafeAreaHost"
+            x: root.layoutSafeLeftInset
+            y: root.layoutSafeTopInset
+            width: Math.max(1, parent.width - root.layoutSafeLeftInset - root.layoutSafeRightInset)
+            height: Math.max(1, parent.height - root.layoutSafeTopInset - root.layoutSafeBottomInset)
+
+            Item {
+                id: scaledContentHost
+                x: 0
+                y: 0
+                width: Math.max(1, Math.round(parent.width / root.effectiveMobileViewScale))
+                height: Math.max(1, Math.round(parent.height / root.effectiveMobileViewScale))
+                scale: root.effectiveMobileViewScale
+                transformOrigin: Item.TopLeft
+            }
         }
     }
 

@@ -49,10 +49,11 @@ LV.Stepper {
 
 ## How It Works
 
-- Renders the Figma chevron as filled `Canvas` paths to avoid external icon dependencies.
-- Keeps the vector in an exact centered icon frame (`10 x 6` or `6.436 x 11.146`) instead of stretching it to the whole button box.
+- Builds the chevron as an inline SVG snapshot image instead of painting it through `Canvas`.
+- Chooses the snapshot profile per target (`desktop` / `mobile`) and requests a supersampled `sourceSize` from `RenderQuality.effectiveSupersampleScaleValue` and `Screen.devicePixelRatio`, so the combo indicator no longer shares a single raster path across platforms.
+- Keeps the icon in a device-pixel-snapped centered frame (`10 x 6` or `6.436 x 11.146`) instead of stretching it to the whole button box.
 - Uses its own hover/press/disabled mouse pipeline so icon geometry stays isolated from external button templates.
-- Repaints icon canvas when `arrow` or resolved icon color changes.
+- Rebuilds the inline SVG snapshot automatically when `arrow`, target profile, or resolved icon color changes.
 
 ## Practical Notes
 

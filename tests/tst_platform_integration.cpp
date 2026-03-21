@@ -118,11 +118,11 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
     QVERIFY(iosProfile.value(QStringLiteral("ios")).toBool());
     QVERIFY(!iosProfile.value(QStringLiteral("android")).toBool());
     QVERIFY(!iosProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
+    QVERIFY(!iosProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
+    QVERIFY(!iosProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
+    QVERIFY(iosProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
+    QVERIFY(iosProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
+    QVERIFY(iosProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
     QCOMPARE(iosProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
     QCOMPARE(iosProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
     QVERIFY(iosProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
@@ -357,15 +357,17 @@ Item {
     property bool tokenContract:
         LV.Theme.effectiveTarget === "android"
         && LV.Theme.mobileTarget
-        && LV.Theme.metricScaleFactor === 2.0
-        && LV.Theme.typographyScaleFactor === 2.0
-        && LV.Theme.gap8 === 16
-        && LV.Theme.dialogMinWidth === 560
-        && LV.Theme.textTitle === 52
-        && LV.Theme.textBody === 24
-        && LV.Theme.textCaption === 22
-        && LV.Theme.scaleMetric(17) === 34
-        && LV.Theme.scaleTextMetric(13) === 26
+        && LV.Theme.metricScaleFactor === 1.5
+        && LV.Theme.typographyScaleFactor === 1.5
+        && LV.Theme.gap8 === 12
+        && LV.Theme.dialogMinWidth === 420
+        && LV.Theme.textTitle === 39
+        && LV.Theme.textBody === 18
+        && LV.Theme.textCaption === 17
+        && LV.Theme.scaleMetric(17) === 26
+        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 2.25) < 0.01
+        && Math.abs(LV.Theme.scaleRealMetric(4) - 6.0) < 0.01
+        && LV.Theme.scaleTextMetric(13) === 20
         && LV.Theme.isThemeTextStyleCompliant(LV.Theme.textBody, LV.Theme.textBodyWeight, LV.Theme.textBodyStyleName)
 
     LV.List {
@@ -384,12 +386,12 @@ Item {
     }
 
     property bool componentContract:
-        listControl.listWidth === 340
-        && listControl.minimumListHeight === 446
-        && menuItem.itemWidth === 322
-        && menuItem.itemHeight === 44
-        && menuItem.iconSize === 32
-        && checkBox.boxSize === 34
+        listControl.listWidth === 255
+        && listControl.minimumListHeight === 335
+        && menuItem.itemWidth === 242
+        && menuItem.itemHeight === 33
+        && menuItem.iconSize === 24
+        && checkBox.boxSize === 26
 }
 )";
 

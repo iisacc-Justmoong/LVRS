@@ -37,7 +37,9 @@ Inherited text/input API (from `AbstractInputBar`):
 
 ## Behavior Contract
 
-- Search icon is drawn by `Canvas` and shown when `searchIconVisible == true`.
+- Search icon is generated as an inline SVG snapshot image, uses a supersampled `sourceSize` (`RenderQuality` + HiDPI), and is shown when `searchIconVisible == true`.
+- Search lens radius follows `Theme.scaleRealMetric(4)`, so the icon geometry tracks the mobile token profile while desktop and mobile keep separate snapshot payloads.
+- Search stroke color and width are baked into the current snapshot source, so the default magnifier and customized variants both avoid the shared `Canvas` raster path.
 - Clear button appears only when `clearButtonVisible && enabled && !readOnly && text.length > 0`.
 - Clear click sets `text = ""` and calls `forceInputFocus()`.
 - `style == inlineStyle` keeps spacing and affordances intact, but forces the field background fill to stay transparent across default, hover, pressed, focused, and disabled states.

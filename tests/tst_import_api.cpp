@@ -21,7 +21,9 @@ private slots:
     void versionless_import_application_window_loads();
     void application_window_page_stack_state_loads();
     void application_window_initial_properties_seed_page_stack();
+    void application_window_safe_margin_scopes_to_layout_not_render_surface();
     void versionless_import_window_loads();
+    void window_safe_margin_scopes_to_layout_not_render_surface();
     void appshell_compat_loads();
     void application_window_platform_adaptive_layout_loads();
     void icon_name_mapping_loads();
@@ -30,6 +32,7 @@ private slots:
     void hierarchy_nested_children_indent_contract_loads();
     void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_editable_drag_per_item_lock_contract_loads();
+    void hierarchy_mobile_drag_hold_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -47,6 +50,8 @@ private slots:
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
+    void canvas_icons_use_supersampled_backing_store();
+    void input_field_search_icon_mobile_scaling_contract_loads();
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
     void radio_button_figma_contract_loads();
@@ -54,6 +59,7 @@ private slots:
     void modal_content_action_contract_loads();
     void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
+    void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
     void table_cell_item_contract_loads();
     void list_item_and_footer_figma_contract_loads();
@@ -155,7 +161,9 @@ LV.ApplicationWindow {
     property bool platformPolicyDefaultsReady:
         delegateMobileWindowingToSystem === (backendRuntimeProfile.mobileSystemWindowDelegationRecommended === true)
         && delegateMobileInsetsToSystem === (backendRuntimeProfile.mobileSystemInsetsDelegationRecommended === true)
-        && forceFullWindowAreaOnMobile === (backendMobilePlatform && !delegateMobileInsetsToSystem)
+        && forceFullWindowAreaOnMobile === backendMobilePlatform
+        && usePlatformSafeMargin === backendMobilePlatform
+        && safeMargin === (backendMobilePlatform ? 16 : 0)
         && mobileDisplayCoverageOverrideEnabled === ((backendRuntimeProfile.mobileDisplayCoverageOverrideRecommended === true)
             && !delegateMobileWindowingToSystem)
         && mobileFullscreenVisibilityOverride === ((backendRuntimeProfile.mobileFullscreenVisibilityRecommended === true)
@@ -240,7 +248,6 @@ LV.Window {
     height: 360
     visible: false
     title: "Settings"
-    usePlatformSafeMargin: true
 
     property bool windowApiReady: platform.length > 0
         && (widthClass >= compact && widthClass <= expanded)
@@ -248,6 +255,8 @@ LV.Window {
         && typeof matchesMedia === "function"
         && autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
+        && usePlatformSafeMargin === backendMobilePlatform
+        && safeMargin === (backendMobilePlatform ? 16 : 0)
     property bool contentApiReady: contentLabel.text === "Window Content"
 
     LV.Label {
@@ -264,6 +273,88 @@ LV.Window {
     QVERIFY(root->property("solidChrome").toBool());
     QVERIFY(root->property("windowApiReady").toBool());
     QVERIFY(root->property("contentApiReady").toBool());
+}
+
+void ImportApiTests::window_safe_margin_scopes_to_layout_not_render_surface()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.Window {
+    id: root
+    width: 520
+    height: 360
+    visible: false
+    usePlatformSafeMargin: false
+    safeMargin: 24
+
+    LV.Label {
+        id: contentLabel
+        text: "Window Content"
+        style: body
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    const qreal rootWidth = root->property("width").toReal();
+    const qreal rootHeight = root->property("height").toReal();
+    root->setProperty("visible", true);
+    QTRY_COMPARE(root->property("renderSurfaceBounds").toRectF(), QRectF(0.0, 0.0, rootWidth, rootHeight));
+    QTRY_COMPARE(root->property("layoutSafeAreaBounds").toRectF(), QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
+    auto *layoutHost = root->findChild<QQuickItem *>(QStringLiteral("windowLayoutSafeAreaHost"));
+    QVERIFY(layoutHost);
+    QTRY_COMPARE(layoutHost->width(), rootWidth - 48.0);
+    QTRY_COMPARE(layoutHost->height(), rootHeight - 48.0);
+    const QPointF layoutOrigin = layoutHost->mapToScene(QPointF(0.0, 0.0));
+    QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
+}
+
+void ImportApiTests::application_window_safe_margin_scopes_to_layout_not_render_surface()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 520
+    height: 360
+    visible: false
+    navigationEnabled: false
+    usePlatformSafeMargin: false
+    safeMargin: 24
+
+    LV.Label {
+        id: contentLabel
+        text: "Application Content"
+        style: body
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    const qreal rootWidth = root->property("width").toReal();
+    const qreal rootHeight = root->property("height").toReal();
+    const QRectF renderSurfaceBounds = root->property("renderSurfaceBounds").toRectF();
+    const QRectF layoutSafeAreaBounds = root->property("layoutSafeAreaBounds").toRectF();
+    QCOMPARE(renderSurfaceBounds, QRectF(0.0, 0.0, rootWidth, rootHeight));
+    QCOMPARE(layoutSafeAreaBounds, QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
+    auto *layoutHost = root->findChild<QQuickItem *>(QStringLiteral("applicationWindowLayoutSafeAreaHost"));
+    QVERIFY(layoutHost);
+    const QPointF layoutOrigin = layoutHost->mapToScene(QPointF(0.0, 0.0));
+    QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
+    QCOMPARE(layoutHost->width(), rootWidth - 48.0);
+    QCOMPARE(layoutHost->height(), rootHeight - 48.0);
 }
 
 void ImportApiTests::application_window_page_stack_state_loads()
@@ -1023,6 +1114,102 @@ Item {
                                       "evaluateDragLockContract",
                                       Q_RETURN_ARG(QVariant, dragLockContractReady)));
     QVERIFY(dragLockContractReady.toBool());
+}
+
+void ImportApiTests::hierarchy_mobile_drag_hold_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    Component.onCompleted: {
+        LV.Theme.targetOverride = "ios"
+        Qt.callLater(root.ensureDragItem)
+    }
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    property int lookupAttempts: 0
+    property bool itemsReady: false
+    property var mobileItem: null
+
+    property var treeModel: [
+        { key: "root", depth: 0, label: "Root", expanded: true },
+        { key: "branch", depth: 1, label: "Branch", expanded: true },
+        { key: "leaf", depth: 2, label: "Leaf" },
+        { key: "sibling", depth: 0, label: "Sibling", expanded: true }
+    ]
+
+    function ensureDragItem() {
+        if (itemsReady || lookupAttempts >= 40)
+            return
+
+        lookupAttempts += 1
+        const candidate = hierarchyList.resolveByKey("branch")
+        if (!candidate) {
+            Qt.callLater(ensureDragItem)
+            return
+        }
+
+        mobileItem = candidate
+        itemsReady = true
+    }
+
+    function performProgrammaticDrag() {
+        if (!mobileItem)
+            return false
+
+        const siblingItem = hierarchyList.resolveByKey("sibling")
+        if (!siblingItem)
+            return false
+
+        if (!mobileItem.beginDrag(mobileItem.width * 0.5, mobileItem.height * 0.5))
+            return false
+
+        const desiredListPoint = Qt.point(siblingItem.baseLeftPadding + siblingItem.indentStep + 1,
+                                          siblingItem.y + siblingItem.height + 1)
+        const localUpdatePoint = mobileItem.mapFromItem(hierarchyList, desiredListPoint.x, desiredListPoint.y)
+        const updated = mobileItem.updateDrag(localUpdatePoint.x, localUpdatePoint.y)
+        if (!updated)
+            return false
+
+        return mobileItem.commitDrag()
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        width: parent.width
+        height: parent.height
+        editable: true
+        model: root.treeModel
+    }
+
+    property bool mobileHoldContractReady:
+        LV.Theme.mobileTarget
+        && itemsReady
+        && mobileItem !== null
+        && mobileItem.dragEnabled
+        && mobileItem.pointerDragRequiresLongPress
+        && !mobileItem.immediatePointerDragEnabled
+        && mobileItem.mobileDragHoldInterval === 1000
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("mobileHoldContractReady").toBool());
+    QVariant dragPerformed;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "performProgrammaticDrag",
+                                      Q_RETURN_ARG(QVariant, dragPerformed)));
+    QVERIFY(dragPerformed.toBool());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()
@@ -2254,6 +2441,12 @@ import LVRS as LV
 
 Item {
     property color transparentColor: "transparent"
+    readonly property real expectedUpDownX:
+        Math.round(((primaryUpDown.width - primaryUpDown.iconWidth) * 0.5) * primaryUpDown.devicePixelRatio)
+        / primaryUpDown.devicePixelRatio
+    readonly property real expectedUpDownY:
+        Math.round(((primaryUpDown.height - primaryUpDown.iconHeight) * 0.5) * primaryUpDown.devicePixelRatio)
+        / primaryUpDown.devicePixelRatio
 
     LV.Stepper { id: defaultStepper; visible: false }
     LV.Stepper { id: primaryUpDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
@@ -2294,8 +2487,8 @@ Item {
         && Math.abs(primaryDown.iconBounds.y - 5.0) < 0.05
         && Math.abs(primaryDown.iconBounds.width - 10.0) < 0.05
         && Math.abs(primaryDown.iconBounds.height - 6.0) < 0.05
-        && Math.abs(primaryUpDown.iconBounds.x - 4.782) < 0.06
-        && Math.abs(primaryUpDown.iconBounds.y - 2.427) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.x - expectedUpDownX) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.y - expectedUpDownY) < 0.06
         && Math.abs(primaryUpDown.iconBounds.width - 6.436) < 0.06
         && Math.abs(primaryUpDown.iconBounds.height - 11.146) < 0.06
         && primaryUp.backgroundColor === LV.Theme.primary
@@ -2473,6 +2666,150 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("figmaInputFieldReady").toBool());
+}
+
+void ImportApiTests::canvas_icons_use_supersampled_backing_store()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.Stepper {
+        objectName: "stepper"
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+    }
+
+    LV.InputField {
+        objectName: "searchField"
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+        mode: searchMode
+        placeholderText: "Search"
+    }
+
+    LV.CheckBox {
+        objectName: "checkBox"
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+        checked: true
+    }
+
+    LV.ToggleSwitch {
+        objectName: "toggleSwitch"
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+        checked: true
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    const auto assertSnapshotImage = [&](const QString &controlObjectName,
+                                         const QString &objectName,
+                                         const char *widthPropertyName,
+                                         const char *heightPropertyName) {
+        QObject *controlObject = root->findChild<QObject *>(controlObjectName, Qt::FindChildrenRecursively);
+        QObject *imageObject = root->findChild<QObject *>(objectName, Qt::FindChildrenRecursively);
+        QVERIFY2(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
+        QVERIFY2(imageObject, qPrintable(QStringLiteral("Expected image object %1").arg(objectName)));
+
+        const QSize sourceSize = imageObject->property("sourceSize").toSize();
+        const QUrl source = imageObject->property("source").toUrl();
+        const qreal expectedWidth = controlObject->property(widthPropertyName).toReal();
+        const qreal expectedHeight = controlObject->property(heightPropertyName).toReal();
+
+        QVERIFY2(source.toString().startsWith(QStringLiteral("data:image/svg+xml")),
+                 qPrintable(QStringLiteral("%1 should use an inline SVG snapshot source").arg(objectName)));
+        QCOMPARE(sourceSize.width(), qRound(expectedWidth));
+        QCOMPARE(sourceSize.height(), qRound(expectedHeight));
+    };
+
+    const auto assertSupersampledCanvas = [&](const QString &controlObjectName,
+                                              const QString &objectName,
+                                              const char *scalePropertyName) {
+        QObject *controlObject = root->findChild<QObject *>(controlObjectName, Qt::FindChildrenRecursively);
+        QObject *canvasObject = root->findChild<QObject *>(objectName, Qt::FindChildrenRecursively);
+        QVERIFY2(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
+        QVERIFY2(canvasObject, qPrintable(QStringLiteral("Expected canvas object %1").arg(objectName)));
+
+        const QSize canvasSize = canvasObject->property("canvasSize").toSize();
+        const qreal logicalWidth = canvasObject->property("width").toReal();
+        const qreal logicalHeight = canvasObject->property("height").toReal();
+        const qreal rasterScale = controlObject->property(scalePropertyName).toReal();
+
+        QVERIFY2(logicalWidth > 0.0, qPrintable(QStringLiteral("%1 width must be positive").arg(objectName)));
+        QVERIFY2(logicalHeight > 0.0, qPrintable(QStringLiteral("%1 height must be positive").arg(objectName)));
+        QVERIFY2(canvasSize.width() > qRound(logicalWidth),
+                 qPrintable(QStringLiteral("%1 canvas width should exceed logical width").arg(objectName)));
+        QVERIFY2(canvasSize.height() > qRound(logicalHeight),
+                 qPrintable(QStringLiteral("%1 canvas height should exceed logical height").arg(objectName)));
+        QCOMPARE(canvasSize.width(), qCeil(logicalWidth * rasterScale));
+        QCOMPARE(canvasSize.height(), qCeil(logicalHeight * rasterScale));
+    };
+
+    assertSnapshotImage(QStringLiteral("stepper"),
+                        QStringLiteral("stepper_iconSnapshot"),
+                        "iconSourceWidth",
+                        "iconSourceHeight");
+    assertSnapshotImage(QStringLiteral("searchField"),
+                        QStringLiteral("searchField_searchIconSnapshot"),
+                        "searchIconSourceSize",
+                        "searchIconSourceSize");
+    assertSupersampledCanvas(QStringLiteral("checkBox"),
+                             QStringLiteral("checkBox_checkmarkCanvas"),
+                             "checkmarkRasterScale");
+    assertSupersampledCanvas(QStringLiteral("toggleSwitch"),
+                             QStringLiteral("toggleSwitch_knobCanvas"),
+                             "knobRasterScale");
+}
+
+void ImportApiTests::input_field_search_icon_mobile_scaling_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.InputField {
+        id: searchField
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+        mode: searchMode
+        placeholderText: "Search"
+    }
+
+    property bool mobileSearchContractReady:
+        LV.Theme.mobileTarget
+        && searchField.searchIconUsesPlatformSnapshot
+        && searchField.searchIconSnapshotProfile === "mobile"
+        && Math.abs(searchField.searchIconLensRadius - LV.Theme.scaleRealMetric(4)) < 0.01
+        && Math.abs(searchField.searchIconLensRadius - 6.0) < 0.01
+        && Math.abs(searchField.searchIconStrokeWidth - 2.25) < 0.01
+        && LV.Theme.iconSm === 24
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("mobileSearchContractReady").toBool());
 }
 
 void ImportApiTests::toggle_switch_figma_color_contract_loads()
@@ -2818,6 +3155,34 @@ Item {
         selectionDirection: "right"
     }
 
+    LV.MenuItem {
+        id: wideItem
+        visible: false
+        itemWidth: 120
+        label: "A Very Wide Menu Entry"
+        keyVisible: true
+        key: "Cmd+Shift+P"
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+        selectionDirection: "auto"
+    }
+
+    LV.MenuItem {
+        id: constrainedItem
+        objectName: "constrainedItem"
+        visible: false
+        itemWidth: 120
+        width: 120
+        label: "A Very Wide Menu Entry"
+        keyVisible: true
+        key: "Cmd+Shift+P"
+        showChevron: true
+        hasChildItems: true
+        expanded: false
+        selectionDirection: "auto"
+    }
+
     property bool menuItemContract:
         collapsedSubmenu.keyVisible
         && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
@@ -2828,12 +3193,50 @@ Item {
         && !noChild.effectiveShowChevron
         && hiddenKey.resolvedShortcutText === ""
         && hiddenKey.keyVisible === false
+        && wideItem.implicitWidth > wideItem.itemWidth
+        && constrainedItem.width === 120
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("menuItemContract").toBool());
+
+    QObject *constrainedItem = root->findChild<QObject *>(QStringLiteral("constrainedItem"));
+    QVERIFY(constrainedItem);
+
+    auto *contentRow = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
+    auto *labelNode = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
+    auto *spacer = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_flexibleSpacer")));
+    auto *trailingGroup = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_trailingGroup")));
+    auto *shortcutLabel = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_shortcutLabel")));
+    auto *chevronIcon = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_chevronIcon")));
+
+    QVERIFY(contentRow);
+    QVERIFY(labelNode);
+    QVERIFY(spacer);
+    QVERIFY(trailingGroup);
+    QVERIFY(shortcutLabel);
+    QVERIFY(chevronIcon);
+
+    const qreal contentWidth = contentRow->width();
+    const qreal labelRight = labelNode->x() + labelNode->width();
+    const qreal trailingRight = trailingGroup->x() + trailingGroup->width();
+    const qreal shortcutRight = shortcutLabel->x() + shortcutLabel->width();
+    const qreal chevronRight = chevronIcon->x() + chevronIcon->width();
+
+    QVERIFY2(labelRight <= contentWidth + 0.01, "Menu label must stay within the content row.");
+    QVERIFY2(trailingGroup->x() >= labelRight - 0.01, "Trailing group must not overlap the label block.");
+    QVERIFY2(spacer->width() >= -0.01, "Responsive spacer must not resolve to a negative width.");
+    QVERIFY2(trailingRight <= contentWidth + 0.01, "Trailing group must stay within the content row.");
+    QVERIFY2(shortcutRight <= trailingGroup->width() + 0.01,
+             qPrintable(QStringLiteral("Shortcut label must stay within the trailing group (%1 <= %2).")
+                            .arg(shortcutRight)
+                            .arg(trailingGroup->width())));
+    QVERIFY2(chevronRight <= trailingGroup->width() + 0.01,
+             qPrintable(QStringLiteral("Chevron must stay within the trailing group (%1 <= %2).")
+                            .arg(chevronRight)
+                            .arg(trailingGroup->width())));
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()
@@ -2930,6 +3333,107 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("actionContract").toBool());
+}
+
+void ImportApiTests::context_menu_width_expansion_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    LV.ContextMenu {
+        id: contentDrivenMenu
+        visible: false
+        itemWidth: 120
+        items: [
+            {
+                label: "A Very Wide Menu Entry",
+                key: "Cmd+Shift+P",
+                keyVisible: true,
+                showChevron: true,
+                hasChildItems: true
+            }
+        ]
+    }
+
+    LV.ContextMenu {
+        id: widthDrivenMenu
+        visible: false
+        itemWidth: 120
+        width: 280
+        items: [
+            {
+                label: "Short",
+                showChevron: false,
+                hasChildItems: false
+            }
+        ]
+    }
+
+    LV.ContextMenu {
+        id: narrowWidthMenu
+        visible: false
+        itemWidth: 120
+        width: 100
+        items: [
+            {
+                label: "A Very Wide Menu Entry",
+                key: "Cmd+Shift+P",
+                keyVisible: true,
+                showChevron: true,
+                hasChildItems: true
+            }
+        ]
+    }
+
+    readonly property real contentDrivenBaseWidth:
+        contentDrivenMenu.itemWidth + contentDrivenMenu.leftPadding + contentDrivenMenu.rightPadding
+    readonly property real widthDrivenContentWidth:
+        widthDrivenMenu.width - widthDrivenMenu.leftPadding - widthDrivenMenu.rightPadding
+    readonly property real narrowWidthContentWidth:
+        narrowWidthMenu.width - narrowWidthMenu.leftPadding - narrowWidthMenu.rightPadding
+    readonly property string widthDebug:
+        contentDrivenMenu.implicitWidth + ","
+        + contentDrivenBaseWidth + ","
+        + contentDrivenMenu.resolvedItemWidth + ","
+        + contentDrivenMenu.contentItem.width + ","
+        + contentDrivenMenu.itemWidth + ","
+        + widthDrivenMenu.resolvedItemWidth + ","
+        + widthDrivenContentWidth + ","
+        + widthDrivenMenu.contentItem.width + ","
+        + widthDrivenMenu.itemWidth + ","
+        + narrowWidthMenu.width + ","
+        + narrowWidthMenu.implicitWidth + ","
+        + narrowWidthMenu.resolvedPopupWidth + ","
+        + narrowWidthContentWidth + ","
+        + narrowWidthMenu.resolvedItemWidth + ","
+        + narrowWidthMenu.contentItem.width
+
+    property bool widthExpansionContract:
+        contentDrivenMenu.implicitWidth > contentDrivenBaseWidth
+        && contentDrivenMenu.resolvedItemWidth === contentDrivenMenu.contentItem.width
+        && contentDrivenMenu.resolvedItemWidth > contentDrivenMenu.itemWidth
+        && Math.abs(widthDrivenMenu.resolvedItemWidth - widthDrivenContentWidth) < 0.01
+        && Math.abs(widthDrivenMenu.contentItem.width - widthDrivenContentWidth) < 0.01
+        && widthDrivenMenu.resolvedItemWidth > widthDrivenMenu.itemWidth
+        && Math.abs(narrowWidthMenu.width - narrowWidthMenu.resolvedPopupWidth) < 0.01
+        && Math.abs(narrowWidthMenu.width - narrowWidthMenu.implicitWidth) < 0.01
+        && Math.abs(narrowWidthMenu.resolvedItemWidth - narrowWidthContentWidth) < 0.01
+        && Math.abs(narrowWidthMenu.contentItem.width - narrowWidthContentWidth) < 0.01
+        && narrowWidthMenu.width > 100
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    const QString widthDebug = root->property("widthDebug").toString();
+    QTRY_VERIFY2(root->property("widthExpansionContract").toBool(), qPrintable(widthDebug));
 }
 
 void ImportApiTests::context_menu_auto_placement_contract_loads()
