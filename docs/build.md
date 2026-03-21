@@ -174,7 +174,7 @@ LV.AppBootstrapWindow {
     }
 }
 ```
-`LV.AppBootstrapWindow` is the reusable downstream root for the imported bootstrap profile. It extends `LV.ApplicationWindow` and preconfigures visible root hosting, mobile-safe viewport defaults, runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath`.
+`LV.AppBootstrapWindow` is the reusable downstream root for the imported bootstrap profile. It extends `LV.ApplicationWindow` and preconfigures visible root hosting, mobile-safe viewport defaults, runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath`. `LV.ApplicationWindow` and `LV.Window` now default `forcedDeviceTierPreset` to `-1`, which keeps automatic device-tier detection enabled unless a downstream app explicitly pins a preset.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`
@@ -269,10 +269,13 @@ At configure time, when `LVRS_ENFORCE_VULKAN=ON`:
 At runtime:
 
 - macOS/iOS are fixed to Metal.
-- Windows/Android are fixed to Vulkan.
+- Windows is fixed to Vulkan.
+- Android prefers Vulkan, probes runtime loader availability during bootstrap, and falls back to OpenGL when Vulkan cannot be initialized.
 - Linux uses Qt default backend selection.
 - Other platforms use Qt default backend selection as fallback.
-- Startup fails fast if a fixed backend cannot be initialized.
+- Startup fails fast if a required fixed backend cannot be initialized and no platform fallback is available.
+
+Bootstrap render defaults are selected conservatively before app construction. Mobile targets use a lighter MSAA / frames-in-flight profile than desktop targets so the first window starts with lower memory pressure before per-window `RenderQuality` presets are applied.
 
 ## Notes
 

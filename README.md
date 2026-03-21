@@ -147,7 +147,7 @@ On the configured host desktop platform, the matching runtime target directly la
 State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.
 Page-stack API on `LV.ApplicationWindow`: `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
-For mobile-first app roots, prefer `LV.AppBootstrapWindow`. It wraps `LV.ApplicationWindow` with a standard downstream bootstrap profile: visible root window, `autoAttachRuntimeEvents: true`, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath: initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`.
+For mobile-first app roots, prefer `LV.AppBootstrapWindow`. It wraps `LV.ApplicationWindow` with a standard downstream bootstrap profile: visible root window, `autoAttachRuntimeEvents: true`, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath: initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`. `LV.ApplicationWindow` and `LV.Window` now default `forcedDeviceTierPreset` to auto-detect mode (`-1`) so mobile roots do not force the Ultra tier on first launch.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
 - `bootstrap_<YourTarget>_linux`
@@ -226,10 +226,13 @@ Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matchi
 At runtime, graphics backend selection is bootstrapped through `backend/runtime/appbootstrap.*` from each app entrypoint.
 
 - macOS/iOS: Metal is fixed.
-- Windows/Android: Vulkan is fixed and runtime loader availability is validated.
+- Windows: Vulkan is fixed and runtime loader availability is validated.
+- Android: Vulkan is preferred, runtime loader availability is probed first, and startup falls back to OpenGL when Vulkan cannot be initialized during bootstrap.
 - Linux: Qt default backend selection is used.
 - Other platforms: Qt default backend selection is used as fallback.
 - If a fixed backend cannot be initialized, app startup fails fast with a clear error message.
+
+Bootstrap render defaults are also applied conservatively before the first window is created. Mobile targets use a lower MSAA / frames-in-flight profile than desktop targets so downstream apps start with lighter surface requirements before `RenderQuality.applyDeviceTierPreset(...)` refines per-window settings.
 
 Build-time backend enforcement is controlled by:
 - `LVRS_ENFORCE_VULKAN` (default `ON`)

@@ -16,11 +16,12 @@ Location: `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`
 ## Platform Backend Matrix
 
 - macOS / iOS: Metal required.
-- Windows / Android: Vulkan required.
+- Windows: Vulkan required.
+- Android: Vulkan preferred. Bootstrap probes the runtime loader first and falls back to OpenGL when Vulkan is unavailable at startup.
 - Linux: Qt default backend selection.
 - Other targets: no hard override; Qt default backend selection is used.
 
-If a required backend is unavailable, bootstrap returns `ok == false` with error message.
+If a required backend is unavailable and no platform fallback exists, bootstrap returns `ok == false` with error message.
 
 ## Build-Time Enforcement
 
@@ -41,7 +42,7 @@ Examples:
 ## Interaction with RenderQuality
 
 If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
-This keeps text/MSAA defaults aligned with backend policy.
+This keeps text/MSAA defaults aligned with backend policy while using a lighter mobile bootstrap profile before per-window device-tier presets are applied.
 Global defaults also seed GPU pipeline-cache env hints (`QSG_RHI_PIPELINE_CACHE_LOAD/SAVE`).
 Per-window PSO cache file binding and device-tier presets are then applied at `RenderQuality.applyWindow(...)` / `RenderQuality.applyDeviceTierPreset(...)`.
 
@@ -69,7 +70,7 @@ Before shipping, validate one real device/simulator per target family:
 - iOS: confirm Metal path and text rendering quality.
 - Windows: confirm Vulkan loader discovery and startup.
 - Linux: confirm stable startup with Qt default backend selection.
-- Android: confirm Vulkan-capable device behavior and fallback policy.
+- Android: confirm both Vulkan-capable device behavior and OpenGL fallback policy.
 
 ## Deployment Troubleshooting
 
@@ -78,6 +79,7 @@ If startup fails at bootstrap stage:
 - inspect bootstrap error string first,
 - verify Qt build includes required rendering backend feature,
 - verify runtime loader/driver presence for Vulkan targets (Windows/Android),
+- verify Android fallback logs when Vulkan probing fails,
 - confirm no environment override is forcing incompatible graphics API.
 
 ## Operational Recommendation

@@ -10,6 +10,35 @@
 
 namespace {
 
+struct RenderQualityBootstrapProfile {
+    int msaaSamples = 4;
+    bool nativeTextRendering = true;
+    int framesInFlight = 2;
+    bool partialUpdateEnabled = true;
+    bool batchRenderingEnabled = true;
+};
+
+RenderQualityBootstrapProfile resolveRenderQualityBootstrapProfile()
+{
+    RenderQualityBootstrapProfile profile;
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    profile.msaaSamples = 2;
+    profile.framesInFlight = 2;
+#elif defined(Q_OS_MACOS)
+    profile.msaaSamples = 4;
+    profile.framesInFlight = 3;
+#elif defined(Q_OS_WIN)
+    profile.msaaSamples = 4;
+    profile.framesInFlight = 2;
+#else
+    profile.msaaSamples = 4;
+    profile.framesInFlight = 2;
+#endif
+
+    return profile;
+}
+
 void loadBundledFonts()
 {
     static const char *kFontResources[] = {
@@ -48,8 +77,14 @@ AppBootstrapState preApplicationBootstrap(const AppBootstrapOptions &options)
 {
     AppBootstrapState state;
 
-    if (options.configureRenderQualityDefaults)
-        RenderQuality::configureGlobalDefaults();
+    if (options.configureRenderQualityDefaults) {
+        const RenderQualityBootstrapProfile profile = resolveRenderQualityBootstrapProfile();
+        RenderQuality::configureGlobalDefaults(profile.msaaSamples,
+                                              profile.nativeTextRendering,
+                                              profile.framesInFlight,
+                                              profile.partialUpdateEnabled,
+                                              profile.batchRenderingEnabled);
+    }
 
     const QString quickStyleName = options.quickStyleName.trimmed();
     if (!quickStyleName.isEmpty())
@@ -86,4 +121,3 @@ void postApplicationBootstrap(QGuiApplication &app, const AppBootstrapOptions &o
 }
 
 } // namespace lvrs
-

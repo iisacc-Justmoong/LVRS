@@ -900,11 +900,6 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
     if (kAntialiasingEnabled)
         qputenv("QSG_ANTIALIASING_METHOD", QByteArrayLiteral("msaa"));
 
-    if (qEnvironmentVariableIsEmpty("QSG_RHI_PREFER_SOFTWARE_RENDERER"))
-        qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", QByteArrayLiteral("0"));
-    if (qEnvironmentVariableIsEmpty("QSG_RENDER_LOOP"))
-        qputenv("QSG_RENDER_LOOP", QByteArrayLiteral("threaded"));
-
     if (qEnvironmentVariableIsEmpty("QSG_RHI_FRAMES_IN_FLIGHT")) {
         const int clampedFrames = qBound(kFramesInFlightMin, framesInFlight, kFramesInFlightMax);
         qputenv("QSG_RHI_FRAMES_IN_FLIGHT", QByteArray::number(clampedFrames));
@@ -936,10 +931,12 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
     const int samples = qBound(minimumSamples, msaaSamples, 16);
     if (format.samples() < samples)
         format.setSamples(samples);
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (format.depthBufferSize() < 24)
         format.setDepthBufferSize(24);
     if (format.stencilBufferSize() < 8)
         format.setStencilBufferSize(8);
+#endif
     QSurfaceFormat::setDefaultFormat(format);
 
     QQuickWindow::setTextRenderType(nativeTextRendering

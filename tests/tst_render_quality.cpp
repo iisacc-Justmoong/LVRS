@@ -272,6 +272,9 @@ void RenderQualityTests::render_quality_gpu_policy_pso_texture_and_drs_contract(
     QVERIFY(quality.dynamicResolutionScale() >= downgradedScale);
     QVERIFY(quality.dynamicResolutionScale() <= quality.dynamicResolutionMaxScale());
 
+    quality.applyDeviceTierPreset(-1);
+    QCOMPARE(quality.activeDeviceTier(), quality.detectedDeviceTier());
+
     quality.applyDeviceTierPreset(static_cast<int>(RenderQuality::HighTier));
     QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::HighTier));
     QCOMPARE(quality.framesInFlight(), 3);

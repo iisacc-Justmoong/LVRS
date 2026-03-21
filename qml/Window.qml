@@ -35,7 +35,7 @@ QtQuickWindow.Window {
     property bool solidChrome: true
     property bool autoApplyRenderQuality: true
     property bool autoApplyDeviceTierPreset: true
-    property int forcedDeviceTierPreset: 3
+    property int forcedDeviceTierPreset: -1
     property bool autoAttachRuntimeEvents: false
 
     readonly property real effectiveSupersampleScale: autoApplyRenderQuality && RenderQuality.enabled

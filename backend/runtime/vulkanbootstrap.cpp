@@ -1,5 +1,6 @@
 #include "backend/runtime/vulkanbootstrap.h"
 
+#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
 #include <QLibrary>
@@ -11,6 +12,33 @@
 #include <QtGui/qtgui-config.h>
 
 namespace {
+
+void configureGraphicsBackend(const QByteArray &backendName, QSGRendererInterface::GraphicsApi graphicsApi)
+{
+    if (backendName.isEmpty())
+        qunsetenv("QSG_RHI_BACKEND");
+    else
+        qputenv("QSG_RHI_BACKEND", backendName);
+    QQuickWindow::setGraphicsApi(graphicsApi);
+}
+
+lvrs::GraphicsBackendBootstrapResult makeGraphicsBackendResult(const QString &backendName,
+                                                              const QString &loaderName = QString())
+{
+    lvrs::GraphicsBackendBootstrapResult result;
+    result.available = true;
+    result.backendName = backendName;
+    result.loaderName = loaderName;
+    return result;
+}
+
+lvrs::GraphicsBackendBootstrapResult makeGraphicsBackendFailure(const QString &errorMessage)
+{
+    lvrs::GraphicsBackendBootstrapResult result;
+    result.errorMessage = errorMessage;
+    return result;
+}
+
 void appendIfExists(QStringList &candidates, const QString &path)
 {
     if (path.isEmpty())
@@ -105,75 +133,79 @@ bool tryLoadVulkanRuntime(QString *resolvedLoaderName, QString *lastErrorMessage
         *lastErrorMessage = lastError;
     return false;
 }
+
+lvrs::GraphicsBackendBootstrapResult bootstrapMetalBackend()
+{
+#if defined(QT_FEATURE_metal) && QT_FEATURE_metal > 0
+    configureGraphicsBackend(QByteArrayLiteral("metal"), QSGRendererInterface::Metal);
+    return makeGraphicsBackendResult(QStringLiteral("metal"));
+#else
+    return makeGraphicsBackendFailure(
+        QStringLiteral("Metal backend is required on macOS/iOS, but this Qt build has no Metal support."));
+#endif
+}
+
+lvrs::GraphicsBackendBootstrapResult bootstrapDesktopVulkanBackend()
+{
+#if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
+    QString lastError;
+    QString loaderName;
+    if (tryLoadVulkanRuntime(&loaderName, &lastError)) {
+        configureGraphicsBackend(QByteArrayLiteral("vulkan"), QSGRendererInterface::Vulkan);
+        return makeGraphicsBackendResult(QStringLiteral("vulkan"), loaderName);
+    }
+
+    QString errorMessage =
+        QStringLiteral("Vulkan backend is required on this platform. Install Vulkan runtime and set QT_VULKAN_LIB appropriately.");
+    if (!lastError.isEmpty())
+        errorMessage += QStringLiteral(" Last loader error: %1").arg(lastError);
+    return makeGraphicsBackendFailure(errorMessage);
+#else
+    return makeGraphicsBackendFailure(
+        QStringLiteral("Vulkan backend is required on this platform, but this Qt build has no Vulkan support."));
+#endif
+}
+
+lvrs::GraphicsBackendBootstrapResult bootstrapAndroidGraphicsBackend()
+{
+#if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
+    QString lastError;
+    QString loaderName;
+    if (tryLoadVulkanRuntime(&loaderName, &lastError)) {
+        configureGraphicsBackend(QByteArrayLiteral("vulkan"), QSGRendererInterface::Vulkan);
+        if (loaderName.isEmpty())
+            loaderName = QStringLiteral("system");
+        return makeGraphicsBackendResult(QStringLiteral("vulkan"), loaderName);
+    }
+
+    qWarning().noquote()
+        << "LVRS Android graphics bootstrap: Vulkan probe failed; falling back to OpenGL."
+        << (lastError.isEmpty() ? QString() : QStringLiteral("Reason: %1").arg(lastError));
+#else
+    qWarning().noquote()
+        << "LVRS Android graphics bootstrap: Qt Vulkan support is unavailable; falling back to OpenGL.";
+#endif
+
+    configureGraphicsBackend(QByteArrayLiteral("opengl"), QSGRendererInterface::OpenGL);
+    return makeGraphicsBackendResult(QStringLiteral("opengl"), QStringLiteral("android-fallback"));
+}
 }
 
 namespace lvrs {
 GraphicsBackendBootstrapResult bootstrapPreferredGraphicsBackend()
 {
-    GraphicsBackendBootstrapResult result;
-
-    qputenv("QSG_RHI_PREFER_SOFTWARE_RENDERER", QByteArrayLiteral("0"));
-
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-#if defined(QT_FEATURE_metal) && QT_FEATURE_metal > 0
-    qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("metal"));
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Metal);
-    result.available = true;
-    result.backendName = QStringLiteral("metal");
-    return result;
-#endif
+    return bootstrapMetalBackend();
 
-    result.errorMessage =
-        QStringLiteral("Metal backend is required on macOS/iOS, but this Qt build has no Metal support.");
-    return result;
+#elif defined(Q_OS_ANDROID)
+    return bootstrapAndroidGraphicsBackend();
 
-#elif defined(Q_OS_WIN) || defined(Q_OS_ANDROID)
-#if defined(QT_FEATURE_vulkan) && QT_FEATURE_vulkan > 0
-    qputenv("QSG_RHI_BACKEND", QByteArrayLiteral("vulkan"));
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
-
-#if defined(Q_OS_ANDROID)
-    result.available = true;
-    result.backendName = QStringLiteral("vulkan");
-    result.loaderName = QStringLiteral("system");
-    return result;
-#else
-    if (qEnvironmentVariableIsEmpty("VK_ICD_FILENAMES")) {
-#if defined(Q_OS_MACOS)
-        if (QFileInfo::exists("/opt/homebrew/etc/vulkan/icd.d/MoltenVK_icd.json"))
-            qputenv("VK_ICD_FILENAMES", QByteArrayLiteral("/opt/homebrew/etc/vulkan/icd.d/MoltenVK_icd.json"));
-        else if (QFileInfo::exists("/usr/local/etc/vulkan/icd.d/MoltenVK_icd.json"))
-            qputenv("VK_ICD_FILENAMES", QByteArrayLiteral("/usr/local/etc/vulkan/icd.d/MoltenVK_icd.json"));
-#endif
-    }
-
-    QString lastError;
-    QString loaderName;
-    if (tryLoadVulkanRuntime(&loaderName, &lastError)) {
-        result.available = true;
-        result.backendName = QStringLiteral("vulkan");
-        result.loaderName = loaderName;
-        return result;
-    }
-
-    result.errorMessage =
-        QStringLiteral("Vulkan backend is required on this platform. Install Vulkan runtime and set QT_VULKAN_LIB appropriately.");
-    if (!lastError.isEmpty())
-        result.errorMessage += QStringLiteral(" Last loader error: %1").arg(lastError);
-    return result;
-#endif
-#else
-    result.errorMessage =
-        QStringLiteral("Vulkan backend is required on this platform, but this Qt build has no Vulkan support.");
-    return result;
-#endif
+#elif defined(Q_OS_WIN)
+    return bootstrapDesktopVulkanBackend();
 
 #else
-    qunsetenv("QSG_RHI_BACKEND");
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Unknown);
-    result.available = true;
-    result.backendName = QStringLiteral("default");
-    return result;
+    configureGraphicsBackend(QByteArray(), QSGRendererInterface::Unknown);
+    return makeGraphicsBackendResult(QStringLiteral("default"));
 #endif
 }
 }

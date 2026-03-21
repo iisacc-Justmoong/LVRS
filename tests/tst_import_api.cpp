@@ -97,6 +97,8 @@ LV.AppBootstrapWindow {
         && internalRouterRegisterAsGlobalNavigator
         && !mobileOversizedHeightEnabled
         && useInternalPageStack
+        && autoApplyDeviceTierPreset
+        && forcedDeviceTierPreset < 0
         && pageInitialPath === initialRoutePath
 
     Component {
@@ -147,6 +149,8 @@ LV.ApplicationWindow {
         && autoAttachRuntimeEvents === globalEventListenersEnabled
         && !autoHookBackendUserEvents
         && !globalEventListenersEnabled
+    property bool deviceTierPolicyReady: autoApplyDeviceTierPreset
+        && forcedDeviceTierPreset < 0
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
@@ -201,6 +205,7 @@ LV.ApplicationWindow {
     QVERIFY(root->property("adaptiveApiReady").toBool());
     QVERIFY(root->property("qualityReady").toBool());
     QVERIFY(root->property("backendOptimizationDefaultsReady").toBool());
+    QVERIFY(root->property("deviceTierPolicyReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
@@ -226,6 +231,8 @@ LV.Window {
         && (widthClass >= compact && widthClass <= expanded)
         && (heightClass >= compact && heightClass <= expanded)
         && typeof matchesMedia === "function"
+        && autoApplyDeviceTierPreset
+        && forcedDeviceTierPreset < 0
     property bool contentApiReady: contentLabel.text === "Window Content"
 
     LV.Label {

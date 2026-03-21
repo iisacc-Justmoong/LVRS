@@ -87,7 +87,7 @@ Controls.ApplicationWindow {
     property bool inactiveRenderDowngradeEnabled: false
     property int inactiveRenderMsaaSamples: 8
     property bool autoApplyDeviceTierPreset: true
-    property int forcedDeviceTierPreset: 3
+    property int forcedDeviceTierPreset: -1
     property int pageRouterRetainInactivePages: 0
     property int pageRouterCacheCapacity: 256
 
