@@ -33,6 +33,7 @@ private slots:
     void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_editable_drag_per_item_lock_contract_loads();
     void hierarchy_mobile_drag_hold_contract_loads();
+    void hierarchy_mobile_activation_commits_on_release_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -50,7 +51,7 @@ private slots:
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
-    void canvas_icons_use_supersampled_backing_store();
+    void control_icons_use_supersampled_raster_contract();
     void input_field_search_icon_mobile_scaling_contract_loads();
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
@@ -1210,6 +1211,110 @@ Item {
                                       "performProgrammaticDrag",
                                       Q_RETURN_ARG(QVariant, dragPerformed)));
     QVERIFY(dragPerformed.toBool());
+}
+
+void ImportApiTests::hierarchy_mobile_activation_commits_on_release_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Window
+import LVRS as LV
+
+Window {
+    id: root
+    width: 320
+    height: 240
+    visible: true
+
+    Component.onCompleted: {
+        LV.Theme.targetOverride = "ios"
+        Qt.callLater(root.ensureItems)
+    }
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    property int lookupAttempts: 0
+    property bool itemsReady: false
+    property var rootItemRef: null
+    property var branchItemRef: null
+
+    property var treeModel: [
+        { key: "root", depth: 0, label: "Root", expanded: true, selected: true },
+        { key: "branch", depth: 1, label: "Branch" },
+        { key: "sibling", depth: 0, label: "Sibling" }
+    ]
+
+    function ensureItems() {
+        if (itemsReady || lookupAttempts >= 40)
+            return
+
+        lookupAttempts += 1
+        const rootCandidate = hierarchyList.resolveByKey("root")
+        const branchCandidate = hierarchyList.resolveByKey("branch")
+        if (!rootCandidate || !branchCandidate) {
+            Qt.callLater(ensureItems)
+            return
+        }
+
+        rootItemRef = rootCandidate
+        branchItemRef = branchCandidate
+        itemsReady = true
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        objectName: "hierarchyList"
+        anchors.fill: parent
+        editable: true
+        model: root.treeModel
+    }
+
+    property bool mobileReleaseActivationContractReady:
+        LV.Theme.mobileTarget
+        && itemsReady
+        && hierarchyList.activeItem === rootItemRef
+        && branchItemRef !== null
+        && branchItemRef.pointerDragRequiresLongPress
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+    QTRY_VERIFY(root->property("mobileReleaseActivationContractReady").toBool());
+
+    auto *list = root->findChild<QObject *>(QStringLiteral("hierarchyList"));
+    QVERIFY(list);
+    QObject *rootItemObject = root->property("rootItemRef").value<QObject *>();
+    QObject *branchItemObject = root->property("branchItemRef").value<QObject *>();
+    QVERIFY(rootItemObject);
+    QVERIFY(branchItemObject);
+    auto *branchItem = qobject_cast<QQuickItem *>(branchItemObject);
+    QVERIFY(branchItem);
+
+    const QPointF branchPoint = branchItem->mapToScene(QPointF(branchItem->width() * 0.5,
+                                                               branchItem->height() * 0.5));
+    const QPoint branchPointInt(qRound(branchPoint.x()), qRound(branchPoint.y()));
+
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
+    QCoreApplication::processEvents();
+    QTest::qWait(50);
+
+    QCOMPARE(list->property("activeItem").value<QObject *>(), rootItemObject);
+    QCOMPARE(list->property("activeItemKey").toString(), QStringLiteral("root"));
+    QVERIFY(!branchItemObject->property("active").toBool());
+
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
+
+    QTRY_COMPARE(list->property("activeItem").value<QObject *>(), branchItemObject);
+    QTRY_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("branch"));
+    QTRY_VERIFY(branchItemObject->property("active").toBool());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()
@@ -2495,10 +2600,14 @@ Item {
         && borderlessUp.backgroundColor === transparentColor
         && borderlessUp.backgroundColorHover === LV.Theme.surfaceAlt
         && borderlessUp.backgroundColorPressed === LV.Theme.accentBlueMuted
+        && primaryUp.resolvedIconName === "StepperUpPrimary"
+        && primaryDown.resolvedIconName === "StepperDownPrimary"
+        && borderlessUp.resolvedIconName === "StepperUpBorderless"
+        && borderlessDown.resolvedIconName === "StepperDownBorderless"
         && primaryUp.resolvedIconColor === LV.Theme.accentWhite
         && primaryDown.resolvedIconColor === LV.Theme.accentWhite
-        && borderlessUp.resolvedIconColor === LV.Theme.primary
-        && borderlessDown.resolvedIconColor === LV.Theme.primary
+        && borderlessUp.resolvedIconColor === LV.Theme.accentWhite
+        && borderlessDown.resolvedIconColor === LV.Theme.accentWhite
 }
 )";
 
@@ -2595,9 +2704,16 @@ Item {
     LV.InputField {
         id: searchField
         visible: false
-        mode: searchMode
+        search: true
         placeholderText: "Search"
         text: "abc"
+    }
+
+    LV.InputField {
+        id: legacySearchField
+        visible: false
+        mode: searchMode
+        placeholderText: "Legacy search"
     }
 
     LV.InputField {
@@ -2641,7 +2757,7 @@ Item {
         && defaultField.placeholderColor === LV.Theme.titleHeaderColor
         && defaultField.placeholderColorDisabled === LV.Theme.disabledColor
         && Math.abs(defaultField.placeholderOpacity - 1.0) < 0.001
-        && defaultField.searchIconColor === LV.Theme.descriptionColor
+        && defaultField.searchIconColor === LV.Theme.accentGrayLight
         && defaultField.clearIconBackgroundColor === LV.Theme.descriptionColor
         && defaultField.clearIconBackgroundColorDisabled === LV.Theme.disabledColor
         && defaultField.clearIconForegroundColor === LV.Theme.panelBackground10
@@ -2654,9 +2770,13 @@ Item {
         && inlineDisabledField.backgroundColor === LV.Theme.accentTransparent
         && inlineDisabledField.backgroundColorDisabled === LV.Theme.accentTransparent
         && inlineField.showClearButton
-        && searchField.mode === searchField.searchMode
+        && searchField.search
         && searchField.searchIconVisible
+        && Math.abs(searchField.searchIconSize - LV.Theme.scaleMetric(12)) < 0.01
         && searchField.showClearButton
+        && legacySearchField.mode === legacySearchField.searchMode
+        && legacySearchField.search
+        && legacySearchField.searchIconVisible
         && passwordField.echoMode === TextInput.Password
         && readOnlyField.readOnly
         && !readOnlyField.showClearButton
@@ -2668,7 +2788,7 @@ Item {
     QVERIFY(root->property("figmaInputFieldReady").toBool());
 }
 
-void ImportApiTests::canvas_icons_use_supersampled_backing_store()
+void ImportApiTests::control_icons_use_supersampled_raster_contract()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -2690,7 +2810,7 @@ Item {
         width: implicitWidth
         height: implicitHeight
         visible: false
-        mode: searchMode
+        search: true
         placeholderText: "Search"
     }
 
@@ -2717,6 +2837,7 @@ Item {
 
     const auto assertSnapshotImage = [&](const QString &controlObjectName,
                                          const QString &objectName,
+                                         const char *sourcePropertyName,
                                          const char *widthPropertyName,
                                          const char *heightPropertyName) {
         QObject *controlObject = root->findChild<QObject *>(controlObjectName, Qt::FindChildrenRecursively);
@@ -2726,11 +2847,11 @@ Item {
 
         const QSize sourceSize = imageObject->property("sourceSize").toSize();
         const QUrl source = imageObject->property("source").toUrl();
+        const QUrl expectedSource = controlObject->property(sourcePropertyName).toUrl();
         const qreal expectedWidth = controlObject->property(widthPropertyName).toReal();
         const qreal expectedHeight = controlObject->property(heightPropertyName).toReal();
 
-        QVERIFY2(source.toString().startsWith(QStringLiteral("data:image/svg+xml")),
-                 qPrintable(QStringLiteral("%1 should use an inline SVG snapshot source").arg(objectName)));
+        QCOMPARE(source, expectedSource);
         QCOMPARE(sourceSize.width(), qRound(expectedWidth));
         QCOMPARE(sourceSize.height(), qRound(expectedHeight));
     };
@@ -2760,10 +2881,12 @@ Item {
 
     assertSnapshotImage(QStringLiteral("stepper"),
                         QStringLiteral("stepper_iconSnapshot"),
+                        "renderedIconSource",
                         "iconSourceWidth",
                         "iconSourceHeight");
     assertSnapshotImage(QStringLiteral("searchField"),
-                        QStringLiteral("searchField_searchIconSnapshot"),
+                        QStringLiteral("searchField_searchIconImage"),
+                        "renderedSearchIconSource",
                         "searchIconSourceSize",
                         "searchIconSourceSize");
     assertSupersampledCanvas(QStringLiteral("checkBox"),
@@ -2792,17 +2915,18 @@ Item {
         width: implicitWidth
         height: implicitHeight
         visible: false
-        mode: searchMode
+        search: true
         placeholderText: "Search"
     }
 
     property bool mobileSearchContractReady:
         LV.Theme.mobileTarget
-        && searchField.searchIconUsesPlatformSnapshot
-        && searchField.searchIconSnapshotProfile === "mobile"
-        && Math.abs(searchField.searchIconLensRadius - LV.Theme.scaleRealMetric(4)) < 0.01
-        && Math.abs(searchField.searchIconLensRadius - 6.0) < 0.01
-        && Math.abs(searchField.searchIconStrokeWidth - 2.25) < 0.01
+        && searchField.search
+        && searchField.searchIconVisible
+        && Math.abs(searchField.searchIconSize - LV.Theme.scaleMetric(12)) < 0.01
+        && Math.abs(searchField.searchIconSize - 18.0) < 0.01
+        && searchField.searchIconSource == LV.Theme.iconPath("generalsearch")
+        && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
         && LV.Theme.iconSm === 24
 }
 )";

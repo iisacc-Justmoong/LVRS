@@ -931,7 +931,7 @@ LV.ApplicationWindow {
                 LV.InputField {
                     width: parent.width
                     placeholderText: "Search"
-                    mode: searchMode
+                    search: true
                 }
             }
         }

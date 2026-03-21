@@ -335,6 +335,7 @@ AbstractButton {
         : (interactionState === stateHover ? "Hover" : "Idle")
     property bool _mobilePointerPressed: false
     property bool _mobilePointerDragging: false
+    readonly property bool releaseActivationOnMobile: Theme.mobileTarget
     readonly property bool isHoverState: uxState === uxStateHover
     readonly property bool isActiveState: uxState === uxStateActive
     readonly property bool isInactiveState: uxState === uxStateInactive
@@ -399,7 +400,13 @@ AbstractButton {
         return normalizedStringArray(value).join(", ")
     }
 
-    function requestActivationFromInteraction() {
+    function requestActivationFromInteraction(interactionPhase) {
+        const phase = interactionPhase === undefined || interactionPhase === null
+            ? "click"
+            : String(interactionPhase).trim().toLowerCase()
+        if (control.releaseActivationOnMobile && phase === "press")
+            return
+
         if (!control.canBecomeActive)
             return
 
@@ -514,8 +521,8 @@ AbstractButton {
                     : control.backgroundColor
     }
 
-    onPressed: control.requestActivationFromInteraction()
-    onClicked: control.requestActivationFromInteraction()
+    onPressed: control.requestActivationFromInteraction("press")
+    onClicked: control.requestActivationFromInteraction("click")
 
     DragHandler {
         id: itemDragHandler
@@ -659,7 +666,7 @@ AbstractButton {
                     onClicked: function(mouse) {
                         mouse.accepted = true
                         control.expanded = !control.expanded
-                        control.requestActivationFromInteraction()
+                        control.requestActivationFromInteraction("click")
                     }
                 }
             }
@@ -678,14 +685,14 @@ AbstractButton {
             onPressed: function(mouse) {
                 control._mobilePointerPressed = true
                 control._mobilePointerDragging = false
-                control.requestActivationFromInteraction()
+                control.requestActivationFromInteraction("press")
                 control.pressed()
             }
 
             onClicked: function(mouse) {
                 if (control._mobilePointerDragging)
                     return
-                control.requestActivationFromInteraction()
+                control.requestActivationFromInteraction("click")
                 control.clicked()
             }
 

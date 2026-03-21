@@ -14,8 +14,8 @@ Location: `qml/components/control/input/InputField.qml`
 
 Mode:
 
-- `defaultMode`, `searchMode`
-- `mode`
+- `search`
+- `defaultMode`, `searchMode`, `mode` (legacy compatibility path)
 - `searchIconVisible`
 - `clearButtonVisible`
 - `showClearButton` (readonly)
@@ -27,7 +27,7 @@ Style:
 
 Search/clear visuals:
 
-- `searchIconColor`, `searchIconStrokeWidth`
+- `searchIconSize`, `searchIconSource`
 - `clearIconBackgroundColor`, `clearIconBackgroundColorHover`, `clearIconBackgroundColorPressed`, `clearIconBackgroundColorDisabled`
 - `clearIconForegroundColor`
 
@@ -37,9 +37,10 @@ Inherited text/input API (from `AbstractInputBar`):
 
 ## Behavior Contract
 
-- Search icon is generated as an inline SVG snapshot image, uses a supersampled `sourceSize` (`RenderQuality` + HiDPI), and is shown when `searchIconVisible == true`.
-- Search lens radius follows `Theme.scaleRealMetric(4)`, so the icon geometry tracks the mobile token profile while desktop and mobile keep separate snapshot payloads.
-- Search stroke color and width are baked into the current snapshot source, so the default magnifier and customized variants both avoid the shared `Canvas` raster path.
+- `search: true` enables the leading search affordance; legacy `mode: searchMode` still resolves to the same visual state.
+- Search icon uses the shipped `generalsearch.svg` asset and is shown when `searchIconVisible == true`.
+- Search icon frame follows a `12 x 12` contract on desktop and scales through `Theme.scaleMetric(12)` on mobile targets.
+- Search icon rendering uses a supersampled `Image.sourceSize` from `RenderQuality` and the active device pixel ratio instead of custom canvas painting.
 - Clear button appears only when `clearButtonVisible && enabled && !readOnly && text.length > 0`.
 - Clear click sets `text = ""` and calls `forceInputFocus()`.
 - `style == inlineStyle` keeps spacing and affordances intact, but forces the field background fill to stay transparent across default, hover, pressed, focused, and disabled states.
@@ -51,7 +52,7 @@ import LVRS 1.0 as LV
 
 LV.InputField {
     style: inlineStyle
-    mode: searchMode
+    search: true
     placeholderText: "Filter"
 }
 ```

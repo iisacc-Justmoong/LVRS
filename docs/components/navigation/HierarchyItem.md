@@ -185,6 +185,7 @@ Visual tokens:
 - Dragging a generated row rewrites the connected flat depth-array model in place: row order changes, moved subtree depth changes, and `parentKey` / `parentItemKey` are recomputed on the backing objects.
 - `dragAllowed` lets hosts keep a row selectable and visible while preventing drag startup for protected nodes inside an otherwise editable hierarchy.
 - On mobile targets (`Theme.mobileTarget == true`), pointer drag startup is delayed until the row is held for `1000ms`; desktop targets keep immediate drag pickup.
+- On mobile targets, touch activation is committed on release/click instead of press, so surrounding `Flickable` surfaces can steal the gesture for scrolling before the row becomes active.
 - `dragTargetModeName` resolves the current drop intent as `before`, `after`, `child`, or `root`.
 - `activatable`/`selectable` control whether row click can make the item active without preventing chevron-driven expansion.
 - `uxState` is the primary enum for UX handling. Priority is: `Drag` -> `Inactive` -> `Active` -> `Pressed` -> `Hover` -> `Idle`.

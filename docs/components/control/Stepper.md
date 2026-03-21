@@ -21,7 +21,8 @@ Computed properties:
 
 - `iconWidth`, `iconHeight` (mode-dependent visual contract)
 - `iconBounds` (actual centered icon frame inside the `16 x 16` button)
-- `resolvedIconColor` (tone/enabled-aware arrow color)
+- `resolvedIconColor` (enabled-aware arrow color)
+- `resolvedIconName` (maps `tone` + `arrow` to the shipped static SVG asset)
 
 ## Visual Contract
 
@@ -32,7 +33,7 @@ Computed properties:
   - icon: `Theme.accentWhite`
 - Borderless tone:
   - background: transparent
-  - icon: `Theme.primary`
+  - icon: `Theme.accentWhite`
   - hover/pressed background follow borderless button policy
 
 ## Usage
@@ -49,11 +50,10 @@ LV.Stepper {
 
 ## How It Works
 
-- Builds the chevron as an inline SVG snapshot image instead of painting it through `Canvas`.
-- Chooses the snapshot profile per target (`desktop` / `mobile`) and requests a supersampled `sourceSize` from `RenderQuality.effectiveSupersampleScaleValue` and `Screen.devicePixelRatio`, so the combo indicator no longer shares a single raster path across platforms.
-- Keeps the icon in a device-pixel-snapped centered frame (`10 x 6` or `6.436 x 11.146`) instead of stretching it to the whole button box.
-- Uses its own hover/press/disabled mouse pipeline so icon geometry stays isolated from external button templates.
-- Rebuilds the inline SVG snapshot automatically when `arrow`, target profile, or resolved icon color changes.
+- Resolves the exact shipped Figma export from `resources/iconset/Stepper*.svg` instead of rebuilding the chevrons procedurally at runtime.
+- Requests a supersampled `Image.sourceSize` from `RenderQuality.effectiveSupersampleScaleValue` and `Screen.devicePixelRatio`, so the static SVG stays crisp on HiDPI targets.
+- Preserves the public chevron geometry contract (`10 x 6` or `6.436 x 11.146`) through `iconWidth`, `iconHeight`, and `iconBounds`.
+- Keeps the hover/press/disabled mouse pipeline local to the component, while the rendered artwork comes from the pre-extracted SVG resources.
 
 ## Practical Notes
 

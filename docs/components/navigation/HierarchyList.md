@@ -66,6 +66,7 @@ Primary methods:
 - `editable` currently supports only array-backed object depth models; `ListModel` and primitive-only arrays are not editable.
 - `editable` does not expose the drag API on the list itself; it only enables the item-level drag/drop contract on generated `HierarchyItem` rows.
 - Generated editable rows keep desktop drag immediate, but mobile-target pointer drag starts only after a `1000ms` long press so touch scrolling stays with the surrounding `Flickable` until the hold gate is met.
+- Mobile-target row activation is committed on release/click rather than press, so list scrolling can claim the gesture before `activeItem` changes.
 - Depth reorder operations update the flat backing array and rewrite each moved row's depth plus `parentKey` / `parentItemKey` fields.
 
 ## Usage

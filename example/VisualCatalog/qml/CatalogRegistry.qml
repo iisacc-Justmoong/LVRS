@@ -424,7 +424,7 @@ QtObject {
                             previewId: "input-field",
                             roleLabel: "Single-line input",
                             summary: "One-line input control with optional search affordance and integrated clear action.",
-                            usage: "LV.InputField {\n    mode: searchMode\n    placeholderText: \"Search\"\n}",
+                            usage: "LV.InputField {\n    search: true\n    placeholderText: \"Search\"\n}",
                             related: ["abstract-input-bar", "text-editor"]
                         }),
                         component({
