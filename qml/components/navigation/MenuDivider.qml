@@ -7,9 +7,9 @@ Item {
     // axis: "horizontal" | "vertical"
     property string axis: "horizontal"
     property color dividerColor: Theme.contextMenuDivider
-    property int thickness: 1
-    property int crossPadding: 1
-    property int lineLength: 220
+    property int thickness: Theme.scaleMetric(1)
+    property int crossPadding: Theme.scaleMetric(1)
+    property int lineLength: Theme.scaleMetric(220)
 
     readonly property bool verticalAxis: {
         const normalized = axis === undefined || axis === null

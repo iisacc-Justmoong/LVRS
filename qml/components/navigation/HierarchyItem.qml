@@ -80,11 +80,11 @@ AbstractButton {
     property real dragPreviewOpacity: 0.45
 
     property int indentLevel: 0
-    property int indentStep: 8
-    property int rowHeight: 20
-    property int itemWidth: 200
-    property int iconSize: 16
-    property int chevronSize: 16
+    property int indentStep: Theme.scaleMetric(8)
+    property int rowHeight: Theme.scaleMetric(20)
+    property int itemWidth: Theme.scaleMetric(200)
+    property int iconSize: Theme.scaleMetric(16)
+    property int chevronSize: Theme.scaleMetric(16)
     property int baseLeftPadding: Theme.gap8
     property int rowRightPadding: Theme.gap8
     property int leadingSpacing: Theme.gap2
@@ -571,22 +571,22 @@ AbstractButton {
                 Item {
                     anchors.centerIn: parent
                     visible: !iconImage.visible && control.iconGlyph.length === 0
-                    width: 12
-                    height: 12
+                    width: Theme.scaleMetric(12)
+                    height: Theme.scaleMetric(12)
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 3
+                        radius: Theme.scaleMetric(3)
                         color: "transparent"
-                        border.width: 1
+                        border.width: Theme.scaleRealMetric(1)
                         border.color: control.iconPlaceholderColor
                         antialiasing: true
                     }
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 2
-                        radius: 2
+                        anchors.margins: Theme.scaleMetric(2)
+                        radius: Theme.scaleMetric(2)
                         color: control.iconPlaceholderColor
                         opacity: 0.16
                         antialiasing: true
@@ -609,7 +609,7 @@ AbstractButton {
                     color: control.enabled ? control.textColorNormal : control.textColorDisabled
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
-                    lineHeight: 16
+                    lineHeight: Theme.scaleTextMetric(16)
                     lineHeightMode: Text.FixedHeight
                 }
             }

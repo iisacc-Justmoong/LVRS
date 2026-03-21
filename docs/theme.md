@@ -3,6 +3,7 @@
 Location: `qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
+It now applies a built-in mobile `@2x` token profile, so spacing, radius, control sizes, and typography values resolve to doubled numbers on iOS and Android without relying on root-layer composition scaling.
 
 ## Token Groups
 
@@ -11,6 +12,24 @@ Location: `qml/Theme.qml`
 - Semantic color: `primary`/`accent`, `success`, `warning`, `danger`.
 - Accent palette: iconset-derived color token set (`accentPaletteTokens`).
 - Metrics: spacing, radius, control size, dialog size, and interaction timings.
+
+## Mobile `@2x` Scaling
+
+- `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.
+- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `2x`.
+- This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and text pixel sizes / line heights.
+- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level doubling over scaled composition for the stock mobile path.
+
+Preview/test helpers:
+
+- `targetOverride: string`
+- `effectiveTarget: string`
+- `mobileTarget: bool`
+- `metricScaleFactor: real`
+- `typographyScaleFactor: real`
+- `scaleMetric(value)`
+- `scaleRealMetric(value)`
+- `scaleTextMetric(value)`
 
 ## Window and Panel Surfaces
 
@@ -78,11 +97,11 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
   - `contextMenuItemSelectedBackground`
   - `contextMenuItemInactiveBackground`
 - Dialog sizing:
-  - `dialogMinWidth: 280`
-  - `dialogMaxWidth: 360`
+  - desktop: `dialogMinWidth: 280`, `dialogMaxWidth: 360`
+  - mobile: `dialogMinWidth: 560`, `dialogMaxWidth: 720`
 - Common radii:
-  - `radiusSm: 4`
-  - `radiusLg: 12`
+  - desktop: `radiusSm: 4`, `radiusLg: 12`
+  - mobile: `radiusSm: 8`, `radiusLg: 24`
 
 ## Usage
 

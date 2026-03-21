@@ -87,6 +87,12 @@ Default quality-first profile in current implementation:
 - `autoApplyDeviceTierPreset: true`
 - `forcedDeviceTierPreset: -1` (auto-detect tier)
 
+Default mobile sizing contract in current implementation:
+
+- `Theme` applies built-in `@2x` metric and typography tokens on iOS and Android.
+- `safeMargin` follows `Theme.gap12`, so the stock mobile root margin doubles alongside the rest of the token set.
+- `mobileViewScale` remains `1.0`; the framework prefers token-level `2x` sizing over full-scene composition scaling in the default path.
+
 Default app-root bootstrap profile in current implementation:
 
 - `navigationEnabled: false`
@@ -158,6 +164,7 @@ Signals:
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.
 - Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
+- Default mobile sizing now comes from `Theme` token doubling, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
 
 ## Usage
 

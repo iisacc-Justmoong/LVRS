@@ -58,6 +58,11 @@ bool currentApplicationFontLooksLikePretendard()
 {
     return qGuiApp && familyLooksLikePretendard(qGuiApp->font().family());
 }
+
+bool tokenMatchesPixelSize(const TextStyleToken &token, int pixelSize)
+{
+    return token.pixelSize == pixelSize || token.pixelSize * 2 == pixelSize;
+}
 }
 
 FontPolicy::FontPolicy(QObject *parent)
@@ -168,7 +173,7 @@ bool FontPolicy::isThemeTextStyleCompliant(int pixelSize, int weight, const QStr
 {
     const QString normalizedStyleName = styleName.trimmed();
     for (const TextStyleToken &token : kThemeTextTokens) {
-        if (token.pixelSize != pixelSize)
+        if (!tokenMatchesPixelSize(token, pixelSize))
             continue;
         if (token.weight != weight)
             continue;
@@ -233,7 +238,7 @@ bool FontPolicy::tokenForPixelSize(int pixelSize, int *weight, QString *styleNam
     const TextStyleToken *preferredByBoth = nullptr;
 
     for (const TextStyleToken &token : kThemeTextTokens) {
-        if (token.pixelSize != pixelSize)
+        if (!tokenMatchesPixelSize(token, pixelSize))
             continue;
 
         if (!firstMatch)

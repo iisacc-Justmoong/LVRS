@@ -16,7 +16,7 @@ AbstractInputBar {
     property bool clearButtonVisible: true
     property bool searchIconVisible: mode === searchMode
     property color searchIconColor: Theme.descriptionColor
-    property real searchIconStrokeWidth: 1.5
+    property real searchIconStrokeWidth: Theme.scaleRealMetric(1.5)
     property color clearIconBackgroundColor: Theme.descriptionColor
     property color clearIconBackgroundColorHover: Qt.lighter(clearIconBackgroundColor, 1.08)
     property color clearIconBackgroundColorPressed: Qt.darker(clearIconBackgroundColor, 1.14)
@@ -112,16 +112,16 @@ AbstractInputBar {
         Rectangle {
             id: clearIconBubble
             anchors.centerIn: parent
-            width: 14
-            height: 14
-            radius: 7
+            width: Theme.scaleMetric(14)
+            height: Theme.scaleMetric(14)
+            radius: Theme.scaleMetric(7)
             color: clearButton.backgroundColor
             antialiasing: true
 
             Rectangle {
-                width: 8
-                height: 1.4
-                radius: 0.7
+                width: Theme.scaleMetric(8)
+                height: Theme.scaleRealMetric(1.4)
+                radius: Theme.scaleRealMetric(0.7)
                 color: control.clearIconForegroundColor
                 anchors.centerIn: parent
                 rotation: 45
@@ -129,9 +129,9 @@ AbstractInputBar {
             }
 
             Rectangle {
-                width: 8
-                height: 1.4
-                radius: 0.7
+                width: Theme.scaleMetric(8)
+                height: Theme.scaleRealMetric(1.4)
+                radius: Theme.scaleRealMetric(0.7)
                 color: control.clearIconForegroundColor
                 anchors.centerIn: parent
                 rotation: -45

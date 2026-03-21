@@ -8,7 +8,7 @@ Item {
 
     property var cellItems: undefined
     property var columns: ["Column", "Column", "Column"]
-    property int rowHeight: 24
+    property int rowHeight: Theme.scaleMetric(24)
     property int cellHorizontalPadding: Theme.gap8
     property color textColor: Theme.descriptionColor
     property real separatorHeight: Theme.strokeThin
@@ -70,7 +70,7 @@ Item {
         return cellHorizontalPadding
     }
 
-    implicitWidth: 717
+    implicitWidth: Theme.scaleMetric(717)
     implicitHeight: rowHeight + separatorHeight
 
     Column {

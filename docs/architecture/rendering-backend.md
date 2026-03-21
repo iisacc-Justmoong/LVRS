@@ -47,7 +47,7 @@ Examples:
 If `configureRenderQualityDefaults` is enabled, `RenderQuality::configureGlobalDefaults()` is applied before app construction.
 This keeps text/MSAA defaults aligned with backend policy while using a platform-tuned bootstrap profile before per-window device-tier presets are applied.
 The bootstrap profile also seeds scenegraph env hints such as pipeline-cache enablement and atlas sizing before global defaults are applied.
-Android/iOS use reduced MSAA and atlas sizing, while WASM uses a lighter single-frame bootstrap profile, explicitly disables batch/pipeline-cache hints by default, and does not force desktop depth/stencil defaults during bootstrap.
+Android/iOS keep reduced atlas sizing but no longer lower the visible MSAA floor during bootstrap, while WASM uses a lighter single-frame bootstrap profile, explicitly disables batch/pipeline-cache hints by default, and does not force desktop depth/stencil defaults during bootstrap.
 Per-window PSO cache file binding and device-tier presets are then applied at `RenderQuality.applyWindow(...)` / `RenderQuality.applyDeviceTierPreset(...)`.
 
 ## Failure Handling Guidance

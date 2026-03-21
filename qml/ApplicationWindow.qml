@@ -90,7 +90,7 @@ Controls.ApplicationWindow {
         : 0
     // Keep view composition identical across platforms; only apply when explicitly enabled.
     property bool usePlatformSafeMargin: false
-    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
+    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? Theme.gap12 : 0
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
@@ -101,7 +101,7 @@ Controls.ApplicationWindow {
     // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
     property bool autoHookBackendUserEvents: false
     property bool windowDragHandleEnabled: isDesktopPlatform
-    property int windowDragHandleHeight: 28
+    property int windowDragHandleHeight: Theme.scaleMetric(28)
     property int windowDragHandleTopMargin: 0
     property bool inactiveRenderDowngradeEnabled: false
     property int inactiveRenderMsaaSamples: 8

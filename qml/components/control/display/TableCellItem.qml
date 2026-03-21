@@ -6,7 +6,7 @@ Item {
 
     property var itemData: null
     property string text: "Text"
-    property int cellHeight: 24
+    property int cellHeight: Theme.scaleMetric(24)
     property int contentSpacing: Theme.gap8
     property color dividerColor: Theme.panelBackground03
     property color textColor: Theme.bodyColor
@@ -92,7 +92,7 @@ Item {
         return normalized
     }
 
-    implicitWidth: 234
+    implicitWidth: Theme.scaleMetric(234)
     implicitHeight: resolvedCellHeight
     clip: resolvedClipContent
 
@@ -139,8 +139,8 @@ Item {
                     backgroundColorDisabled: "transparent"
                     placeholderText: ""
                     clearButtonVisible: false
-                    fieldMinHeight: 16
-                    centeredTextHeight: 16
+                    fieldMinHeight: Theme.scaleMetric(16)
+                    centeredTextHeight: Theme.scaleTextMetric(16)
                     insetHorizontal: 0
                     insetVertical: 0
                     sideSpacing: 0

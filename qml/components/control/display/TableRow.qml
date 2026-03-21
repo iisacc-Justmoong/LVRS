@@ -7,8 +7,8 @@ Item {
 
     property var cellItems: undefined
     property var cells: ["Text", "Text", "Text"] // legacy fallback
-    property int cellWidth: 234
-    property int cellHeight: 24
+    property int cellWidth: Theme.scaleMetric(234)
+    property int cellHeight: Theme.scaleMetric(24)
     property int contentSpacing: Theme.gap8
     property color dividerColor: Theme.panelBackground03
     property color textColor: Theme.bodyColor
@@ -71,7 +71,7 @@ Item {
         return control.inputable
     }
 
-    implicitWidth: 717
+    implicitWidth: Theme.scaleMetric(717)
     implicitHeight: cellHeight
 
     Row {

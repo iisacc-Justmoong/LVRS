@@ -38,7 +38,7 @@ QtQuickWindow.Window {
         ? Math.max(1.0, mobileViewScale)
         : 1.0
     property bool usePlatformSafeMargin: false
-    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 12 : 0
+    property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? Theme.gap12 : 0
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true

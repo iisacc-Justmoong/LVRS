@@ -19,6 +19,7 @@ private slots:
     void platform_flags_consistency();
     void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
+    void mobile_theme_scale_contract();
 };
 
 void PlatformIntegrationTests::platform_flags_consistency()
@@ -122,7 +123,7 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
     QVERIFY(!iosProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
     QVERIFY(!iosProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
     QVERIFY(!iosProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
-    QCOMPARE(iosProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 2);
+    QCOMPARE(iosProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
     QCOMPARE(iosProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
     QVERIFY(iosProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
     QVERIFY(iosProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
@@ -151,7 +152,7 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
     QVERIFY(androidProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
     QVERIFY(androidProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
     QVERIFY(androidProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
-    QCOMPARE(androidProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 2);
+    QCOMPARE(androidProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
     QCOMPARE(androidProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
     QVERIFY(androidProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
     QVERIFY(androidProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
@@ -336,6 +337,93 @@ LV.ApplicationWindow {
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
         QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("catalog-overview"));
         QVERIFY(root->property("activeEntry").isValid());
+    }
+}
+
+void PlatformIntegrationTests::mobile_theme_scale_contract()
+{
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+
+        const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    Component.onCompleted: LV.Theme.targetOverride = "android-arm64"
+
+    property bool tokenContract:
+        LV.Theme.effectiveTarget === "android"
+        && LV.Theme.mobileTarget
+        && LV.Theme.metricScaleFactor === 2.0
+        && LV.Theme.typographyScaleFactor === 2.0
+        && LV.Theme.gap8 === 16
+        && LV.Theme.dialogMinWidth === 560
+        && LV.Theme.textTitle === 52
+        && LV.Theme.textBody === 24
+        && LV.Theme.textCaption === 22
+        && LV.Theme.scaleMetric(17) === 34
+        && LV.Theme.scaleTextMetric(13) === 26
+        && LV.Theme.isThemeTextStyleCompliant(LV.Theme.textBody, LV.Theme.textBodyWeight, LV.Theme.textBodyStyleName)
+
+    LV.List {
+        id: listControl
+        visible: false
+    }
+
+    LV.MenuItem {
+        id: menuItem
+        visible: false
+    }
+
+    LV.CheckBox {
+        id: checkBox
+        visible: false
+    }
+
+    property bool componentContract:
+        listControl.listWidth === 340
+        && listControl.minimumListHeight === 446
+        && menuItem.itemWidth === 322
+        && menuItem.itemHeight === 44
+        && menuItem.iconSize === 32
+        && checkBox.boxSize === 34
+}
+)";
+
+        QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+        QVERIFY(root);
+        QTRY_VERIFY(root->property("tokenContract").toBool());
+        QVERIFY(root->property("componentContract").toBool());
+    }
+
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+
+        const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+QtObject {
+    Component.onCompleted: LV.Theme.targetOverride = "windows"
+
+    property bool desktopContract:
+        LV.Theme.effectiveTarget === "windows"
+        && !LV.Theme.mobileTarget
+        && LV.Theme.metricScaleFactor === 1.0
+        && LV.Theme.typographyScaleFactor === 1.0
+        && LV.Theme.gap8 === 8
+        && LV.Theme.textBody === 12
+        && LV.Theme.textCaption === 11
+}
+)";
+
+        QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+        QVERIFY(root);
+        QTRY_VERIFY(root->property("desktopContract").toBool());
     }
 }
 

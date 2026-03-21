@@ -14,7 +14,7 @@ Item {
         ["Text", "Text", "Text"]
     ]
 
-    property int rowHeight: 24
+    property int rowHeight: Theme.scaleMetric(24)
     property int cellWidth: 0
     property color backgroundColor: "#282828"
     property color borderColor: Theme.surface
@@ -86,7 +86,7 @@ Item {
         return control.inputable
     }
 
-    implicitWidth: 405
+    implicitWidth: Theme.scaleMetric(405)
     implicitHeight: tableHeader.implicitHeight + (resolvedRowCount * rowHeight)
 
     Rectangle {

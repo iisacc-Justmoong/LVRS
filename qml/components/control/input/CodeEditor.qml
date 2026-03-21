@@ -76,7 +76,7 @@ FocusScope {
     property string fontStyleName: Theme.textBodyStyleName
     property real fontLetterSpacing: Theme.textBodyLetterSpacing
     property real textLineHeight: Theme.textBodyLineHeight
-    property int centeredTextHeight: 16
+    property int centeredTextHeight: Theme.scaleTextMetric(16)
 
     readonly property bool focused: activeFocus || editor.activeFocus
     readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse

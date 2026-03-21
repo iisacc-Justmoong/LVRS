@@ -17,8 +17,8 @@ Item {
     property string iconName: ""
     property url iconSource: ""
     property bool showIcon: true
-    property int iconSize: 72
-    property int iconCornerRadius: 16
+    property int iconSize: Theme.scaleMetric(72)
+    property int iconCornerRadius: Theme.scaleMetric(16)
     property color iconBackgroundColor: Theme.panelBackground07
     property color iconBorderColor: Qt.rgba(Theme.strokeSoft.r, Theme.strokeSoft.g, Theme.strokeSoft.b, 0.18)
 
@@ -31,11 +31,11 @@ Item {
     property bool secondaryEnabled: true
     property bool tertiaryEnabled: true
 
-    property int maxWidth: 980
-    property int minWidth: 520
-    readonly property int preferredWidth: 760
+    property int maxWidth: Theme.scaleMetric(980)
+    property int minWidth: Theme.scaleMetric(520)
+    readonly property int preferredWidth: Theme.scaleMetric(760)
     property int sidePadding: Theme.gap24
-    property int frameMinHeight: 210
+    property int frameMinHeight: Theme.scaleMetric(210)
     property int verticalOffset: -Theme.gap16
 
     readonly property int shapeRoundRect: 0
@@ -215,14 +215,14 @@ Item {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     color: root.iconBackgroundColor
-                    border.width: 1
+                        border.width: Theme.scaleRealMetric(1)
                     border.color: root.iconBorderColor
                     antialiasing: true
 
                     Image {
                         id: iconImage
                         anchors.fill: parent
-                        anchors.margins: 8
+                        anchors.margins: Theme.scaleMetric(8)
                         source: RenderQuality.resolveTextureSource(root.resolvedIconSource)
                         visible: root.resolvedIconSource.toString().length > 0
                         fillMode: Image.PreserveAspectFit
@@ -233,8 +233,8 @@ Item {
                     Rectangle {
                         anchors.centerIn: parent
                         visible: !iconImage.visible
-                        width: 20
-                        height: 20
+                        width: Theme.scaleMetric(20)
+                        height: Theme.scaleMetric(20)
                         radius: Theme.radiusSm
                         color: Theme.darkGrey10
                         opacity: 0.72
@@ -269,7 +269,7 @@ Item {
                         color: Theme.textSecondary
                         wrapMode: Text.WordWrap
                         width: parent.width
-                        lineHeight: 18
+                        lineHeight: Theme.scaleTextMetric(18)
                         lineHeightMode: Text.FixedHeight
                     }
                 }

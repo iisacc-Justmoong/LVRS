@@ -51,7 +51,7 @@ FocusScope {
     property int insetHorizontal: Theme.gap12
     property int insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
-    property int centeredTextHeight: 16
+    property int centeredTextHeight: Theme.scaleTextMetric(16)
     property bool preferNativeGestures: Platform.mobile
 
     readonly property int shapeRoundRect: 0

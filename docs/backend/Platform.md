@@ -84,6 +84,7 @@ Component.onCompleted: {
 - The runtime-profile map is intended to drive view/runtime defaults without re-encoding platform policy in individual QML files.
 - Stock profiles keep `runtimeEventsAutoAttachRecommended=false`; downstream views should opt into `RuntimeEvents` deliberately instead of assuming desktop targets auto-start it.
 - `backend` maps to the bootstrap-preferred renderer for the target family: Apple targets use `metal`, Android uses `vulkan`, Windows prefers `d3d11` with OpenGL fallback, and Linux/WASM keep Qt default backend selection.
+- Stock mobile bootstrap profiles now preserve a `4x` MSAA quality floor while still reducing atlas size to `1024`, so startup remains conservative on memory pressure without intentionally softening first-frame edge quality.
 - `mobileSystemWindowDelegationRecommended` and `mobileSystemInsetsDelegationRecommended` are the preferred switches when a view wants mobile-safe defaults that let the OS own fullscreen transitions, cutout areas, and other critical insets.
 - The `adaptive*` keys are the canonical source for OS-specific scaffold metrics. `ApplicationWindow` consumes them directly instead of deriving layout policy from a coarse `mobile/desktop` split.
 

@@ -18,11 +18,11 @@ Item {
     signal released()
     signal canceled()
 
-    readonly property int figmaComboWidth: 97
-    readonly property int figmaComboHeight: 18
+    readonly property int figmaComboWidth: Theme.scaleMetric(97)
+    readonly property int figmaComboHeight: Theme.scaleMetric(18)
     readonly property int figmaComboLeftPadding: Theme.gap8
-    readonly property int figmaComboRightPadding: 1
-    readonly property int figmaComboVerticalPadding: 1
+    readonly property int figmaComboRightPadding: Theme.scaleMetric(1)
+    readonly property int figmaComboVerticalPadding: Theme.scaleMetric(1)
     readonly property int figmaComboCornerRadius: Theme.radiusControl
     readonly property int figmaIndicatorSize: Theme.iconSm
     readonly property int figmaLabelLineHeight: Theme.textBodyLineHeight

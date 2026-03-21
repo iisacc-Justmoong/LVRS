@@ -47,9 +47,9 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 
 ### Platform bootstrap policy
 
-- macOS / iOS: fixed Metal backend; `4x/3` (macOS) or `2x/2` (iOS) MSAA/frames-in-flight bootstrap profile.
+- macOS / iOS: fixed Metal backend; `4x/3` (macOS) or `4x/2` (iOS) MSAA/frames-in-flight bootstrap profile.
 - Windows: D3D11-first bootstrap with runtime probing and OpenGL fallback; `4x/2` bootstrap render profile.
-- Android: Vulkan-first bootstrap with OpenGL fallback; `2x/2` bootstrap render profile and reduced texture-atlas edge.
+- Android: Vulkan-first bootstrap with OpenGL fallback; `4x/2` bootstrap render profile and reduced texture-atlas edge.
 - Linux: Qt default backend selection; `4x/2` bootstrap render profile.
 - WASM: Qt default backend selection; lighter `2x/1` bootstrap render profile with partial-update, batch-renderer, and pipeline-cache hints explicitly forced off, and without forcing desktop-grade depth/stencil defaults at bootstrap.
 

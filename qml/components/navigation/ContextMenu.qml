@@ -7,7 +7,7 @@ Controls.Popup {
     id: control
 
     property var items: []
-    property int itemWidth: 161
+    property int itemWidth: Theme.scaleMetric(161)
     property int itemSpacing: 0
     property int selectedIndex: -1
     property bool autoCloseOnTrigger: true

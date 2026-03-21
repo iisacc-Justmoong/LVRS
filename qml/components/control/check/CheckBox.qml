@@ -11,8 +11,8 @@ AbstractButton {
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
     property int shapeStyle: shapeRoundRect
-    property int boxSize: 17
-    property real boxRadius: 3.5
+    property int boxSize: Theme.scaleMetric(17)
+    property real boxRadius: Theme.scaleRealMetric(3.5)
     property color checkColor: Theme.bodyColor
     property color checkedColor: Theme.accent
     property color uncheckedColor: Theme.bodyColor
@@ -21,8 +21,8 @@ AbstractButton {
     property color checkMarkColorDisabled: Theme.disabledColor
     property int checkMarkStrokeWidth: Theme.gap2
     property real boxBorderWidthCheckedEnabled: 0
-    property real boxBorderWidthCheckedDisabled: 0.5
-    property real boxBorderWidthUncheckedEnabled: 0.5
+    property real boxBorderWidthCheckedDisabled: Theme.scaleRealMetric(0.5)
+    property real boxBorderWidthUncheckedEnabled: Theme.scaleRealMetric(0.5)
     property real boxBorderWidthUncheckedDisabled: 0
     property color boxBorderColorCheckedEnabled: "transparent"
     property color boxBorderColorCheckedDisabled: Theme.panelBackground12
@@ -89,7 +89,7 @@ AbstractButton {
                 anchors.fill: parent
                 radius: parent.radius
                 color: "transparent"
-                border.width: 1
+                border.width: Theme.scaleRealMetric(1)
                 border.color: control.innerShadowSoftColor
                 visible: control.showInnerShadow
                 antialiasing: true

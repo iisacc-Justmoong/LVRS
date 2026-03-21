@@ -17,9 +17,9 @@ Item {
 
     property color trackColor: "#0D000000"
     property color fillColor: "#007AFF"
-    property real cornerRadius: 100
-    property real largeHeight: 6
-    property real regularHeight: 3
+    property real cornerRadius: Theme.scaleRealMetric(100)
+    property real largeHeight: Theme.scaleRealMetric(6)
+    property real regularHeight: Theme.scaleRealMetric(3)
 
     readonly property real barHeight: size === regular ? regularHeight : largeHeight
     readonly property real valueRange: endValue - startValue
@@ -35,7 +35,7 @@ Item {
         return cornerRadius
     }
 
-    implicitWidth: 100
+    implicitWidth: Theme.scaleMetric(100)
     implicitHeight: barHeight
 
     Rectangle {
@@ -62,7 +62,7 @@ Item {
         anchors.fill: parent
         radius: control.resolvedRadius(width, height)
         color: "transparent"
-        border.width: 1
+        border.width: Theme.scaleRealMetric(1)
         border.color: "#14000000"
         antialiasing: true
     }

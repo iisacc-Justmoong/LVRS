@@ -30,7 +30,7 @@ Item {
     property color appIconFrameColor: "#E8F0F5"
     property color appIconInnerColor: "#D8E0E6"
 
-    readonly property int preferredWidth: 328
+    readonly property int preferredWidth: Theme.scaleMetric(328)
     readonly property int sidePadding: Theme.gap24
     readonly property int resolvedButtonCount: {
         if (root.buttonCount === 2 || root.buttonCount === 3)
@@ -111,25 +111,25 @@ Item {
             id: contentColumn
             anchors.fill: parent
             spacing: Theme.gap8
-            topPadding: 32
+            topPadding: Theme.scaleMetric(32)
 
             Item {
                 width: parent.width
-                height: 64
+                height: Theme.scaleMetric(64)
 
                 Rectangle {
-                    width: 48
-                    height: 48
-                    radius: 10
+                    width: Theme.scaleMetric(48)
+                    height: Theme.scaleMetric(48)
+                    radius: Theme.scaleMetric(10)
                     anchors.centerIn: parent
                     color: root.appIconBackgroundColor
-                    border.width: 4
+                    border.width: Theme.scaleRealMetric(4)
                     border.color: root.appIconFrameColor
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 2
-                        radius: 8
+                        anchors.margins: Theme.scaleMetric(2)
+                        radius: Theme.scaleMetric(8)
                         color: root.appIconInnerColor
                         opacity: 0.42
                     }

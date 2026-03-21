@@ -15,9 +15,9 @@ AbstractButton {
 
     property int rowHorizontalPadding: Theme.gap4
     property int rowVerticalPadding: Theme.gap2
-    property int separatorHeight: 1
-    property int separatorTopSpacing: 1
-    property int minItemWidth: 170
+    property int separatorHeight: Theme.scaleMetric(1)
+    property int separatorTopSpacing: Theme.scaleMetric(1)
+    property int minItemWidth: Theme.scaleMetric(170)
     property color listBackgroundColor: "transparent"
     property color separatorColor: "#1A000000"
     property real separatorOpacity: 0.5
@@ -91,8 +91,8 @@ AbstractButton {
                         backgroundColorDisabled: "transparent"
                         placeholderText: ""
                         clearButtonVisible: false
-                        fieldMinHeight: 16
-                        centeredTextHeight: 16
+                        fieldMinHeight: Theme.scaleMetric(16)
+                        centeredTextHeight: Theme.scaleTextMetric(16)
                         insetHorizontal: 0
                         insetVertical: 0
                         sideSpacing: 0

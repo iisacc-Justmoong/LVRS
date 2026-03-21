@@ -68,7 +68,7 @@ FocusScope {
     property string fontStyleName: Theme.textBodyStyleName
     property real fontLetterSpacing: Theme.textBodyLetterSpacing
     property real textLineHeight: Theme.textBodyLineHeight
-    property int centeredTextHeight: 16
+    property int centeredTextHeight: Theme.scaleTextMetric(16)
 
     property color textColor: Theme.textPrimary
     property color textColorDisabled: Theme.textOctonary

@@ -30,11 +30,11 @@ Item {
     property string showChevronRole: "showChevron"
     property string depthRole: "depth"
 
-    property int generatedIndentStep: 8
-    property int generatedRowHeight: 20
-    property int generatedItemWidth: 200
-    property int generatedIconSize: 16
-    property int generatedChevronSize: 16
+    property int generatedIndentStep: Theme.scaleMetric(8)
+    property int generatedRowHeight: Theme.scaleMetric(20)
+    property int generatedItemWidth: Theme.scaleMetric(200)
+    property int generatedIconSize: Theme.scaleMetric(16)
+    property int generatedChevronSize: Theme.scaleMetric(16)
     property bool autoExpandAncestorsOnActivate: true
     readonly property bool editableSupported: Array.isArray(model) && depthArraySupportsEditing(model)
     readonly property bool editableEnabled: editable && editableSupported
@@ -2215,19 +2215,19 @@ Item {
     Rectangle {
         visible: control._dragActiveInternal && control._dragTargetIndex >= 0 && control._dragTargetDepth >= 0
         x: Math.max(0, control._dragIndicatorX)
-        y: Math.max(0, control._dragIndicatorY - 1)
-        width: Math.max(24, control.width - x - Theme.gap8)
-        height: 2
-        radius: 1
+        y: Math.max(0, control._dragIndicatorY - Theme.scaleMetric(1))
+        width: Math.max(Theme.scaleMetric(24), control.width - x - Theme.gap8)
+        height: Theme.scaleMetric(2)
+        radius: Theme.scaleMetric(1)
         color: Theme.primary
         z: 50
     }
 
     Rectangle {
         visible: control._dragActiveInternal && control._dragTargetIndex >= 0 && control._dragTargetDepth >= 0
-        width: 8
-        height: 8
-        radius: 4
+        width: Theme.scaleMetric(8)
+        height: Theme.scaleMetric(8)
+        radius: Theme.scaleMetric(4)
         x: Math.max(0, control._dragIndicatorX - width * 0.5)
         y: Math.max(0, control._dragIndicatorY - height * 0.5)
         color: Theme.primary

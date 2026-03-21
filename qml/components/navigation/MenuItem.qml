@@ -30,10 +30,10 @@ AbstractButton {
     property bool expanded: false
     // Supports int enum or string: auto|right|left|up|down
     property var selectionDirection: "auto"
-    property int itemWidth: 161
-    property int itemHeight: 22
-    property int iconSize: 16
-    property int chevronSize: 16
+    property int itemWidth: Theme.scaleMetric(161)
+    property int itemHeight: Theme.scaleMetric(22)
+    property int iconSize: Theme.scaleMetric(16)
+    property int chevronSize: Theme.scaleMetric(16)
     property string iconName: ""
     property url iconSource: ""
     property color iconPlaceholderColor: Theme.darkGrey10
@@ -156,8 +156,8 @@ AbstractButton {
                     visible: !iconImage.visible
 
                     Rectangle {
-                        width: 12
-                        height: 12
+                        width: Theme.scaleMetric(12)
+                        height: Theme.scaleMetric(12)
                         radius: Theme.gap3
                         color: control.iconPlaceholderColor
                         anchors.centerIn: parent
@@ -174,7 +174,7 @@ AbstractButton {
                                           : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
                 Layout.alignment: Qt.AlignVCenter
                 elide: Text.ElideRight
-                lineHeight: 12
+                lineHeight: Theme.textBodyLineHeight
                 lineHeightMode: Text.FixedHeight
             }
         }
@@ -194,7 +194,7 @@ AbstractButton {
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)
                 Layout.alignment: Qt.AlignVCenter
                 elide: Text.ElideRight
-                lineHeight: 12
+                lineHeight: Theme.textBodyLineHeight
                 lineHeightMode: Text.FixedHeight
             }
 

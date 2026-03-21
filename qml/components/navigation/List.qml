@@ -21,8 +21,8 @@ Item {
     property var footerButton2: ({ type: "icon", iconName: "delete" })
     property var footerButton3: ({ type: "icon", iconName: "cwmPermissionView" })
 
-    property int listWidth: 170
-    property int minimumListHeight: 223
+    property int listWidth: Theme.scaleMetric(170)
+    property int minimumListHeight: Theme.scaleMetric(223)
     property int itemHeight: Theme.gap24
     property int itemLabelLeftPadding: Theme.gap8
     property color backgroundColor: Theme.panelBackground03
@@ -153,10 +153,10 @@ Item {
                                 style: body
                                 text: control.itemLabel(rowButton.entry)
                                 color: rowButton.rowEnabled ? Theme.bodyColor : Theme.disabledColor
-                                font.pixelSize: 13
+                                font.pixelSize: Theme.scaleTextMetric(13)
                                 font.weight: Font.Normal
                                 font.styleName: "Regular"
-                                lineHeight: 16
+                                lineHeight: Theme.scaleTextMetric(16)
                                 lineHeightMode: Text.FixedHeight
                                 horizontalAlignment: Text.AlignLeft
                                 verticalAlignment: Text.AlignVCenter
@@ -167,7 +167,7 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.bottom: parent.bottom
-                                height: 1
+                                height: Theme.scaleMetric(1)
                                 color: control.separatorColor
                                 opacity: control.separatorOpacity
                                 visible: !rowButton.rowSelected

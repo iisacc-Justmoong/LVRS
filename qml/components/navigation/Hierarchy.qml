@@ -5,8 +5,8 @@ import LVRS 1.0
 Rectangle {
     id: control
 
-    property int minimumPanelWidth: 200
-    property int minimumPanelHeight: 530
+    property int minimumPanelWidth: Theme.scaleMetric(200)
+    property int minimumPanelHeight: Theme.scaleMetric(530)
     property color panelColor: Theme.panelBackground05
     property bool clipList: true
 
