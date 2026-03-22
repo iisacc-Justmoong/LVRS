@@ -17,6 +17,7 @@ It is designed to provide observability while giving explicit controls for laten
 
 `RuntimeEvents` does **not** own:
 
+- high-level gesture classification (`GestureEvents` owns hold/drag/swipe/native-gesture normalization),
 - persistence/export policy (`Backend` owns mirrored cache/export),
 - rendering-quality policy (`RenderQuality` owns this),
 - UI layout semantics (`ApplicationWindow`/QML owns this).
@@ -167,6 +168,8 @@ Input-centric state payload:
 - Touch input is normalized onto the same primary-pointer contract as desktop mouse input:
   the active touch contact is reported as `Qt::LeftButton`, updates contribute to mouse counters/signals,
   and release/cancel clears the button state.
+- High-level gesture semantics are intentionally not added here; consumers should use `GestureEvents`
+  when they need hold/drag/swipe/native-gesture classification.
 
 #### `recentEvents(): list` / `clearRecentEvents()`
 
@@ -175,6 +178,9 @@ Input-centric state payload:
 #### `hitTestUiAt(globalX, globalY): map`
 
 - On success returns detailed hit info.
+- Top-level fields describe the nearest logical component target, not only the deepest primitive leaf.
+- Raw deepest-leaf details are preserved in `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`, `hitLocalX`, `hitLocalY`, `hitDepth`.
+- Hierarchy and layer metadata are included through `hierarchy`, `depth`, `layerKind`, `componentName`, `qmlId`, `qmlBaseUrl`, and window/root fields.
 - If hit-test fails or unavailable, returns fallback map with `"unknown"` metadata.
 
 ## 5. High-Frequency Event Behavior
@@ -213,6 +219,8 @@ When hit-test is disabled/unavailable, fallback contains:
 - `globalX`, `globalY`
 - `insideWindow=false`
 - `objectName="unknown"`, `className="unknown"`, `path="unknown"`
+- `componentName="unknown"`, `layerKind="outsideWindow"| "unboundWindow"`
+- empty `hierarchy`, `qmlId`, `qmlBaseUrl`
 
 This guarantees schema stability for consumers that require fields to exist.
 
@@ -331,5 +339,6 @@ After runtime-event edits, validate:
 ## 13. Related APIs
 
 - `Backend`: mirrors runtime events into backend-owned cache.
+- `GestureEvents`: derives high-level gesture semantics from `eventRecorded`.
 - `EventListener` (QML): consumes runtime/global events for interaction handling.
 - `ApplicationWindow`: typical host that wires runtime monitoring on startup.

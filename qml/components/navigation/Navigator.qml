@@ -12,6 +12,14 @@ QtObject {
         hasRouter && router.currentPath !== undefined ? router.currentPath : ""
     readonly property int depth:
         hasRouter && router.depth !== undefined ? router.depth : 0
+    readonly property bool interactiveTransitionActive:
+        hasRouter && router.interactiveTransitionActive !== undefined ? router.interactiveTransitionActive : false
+    readonly property real interactiveTransitionProgress:
+        hasRouter && router.interactiveTransitionProgress !== undefined ? router.interactiveTransitionProgress : 0.0
+    readonly property string interactiveTransitionDirection:
+        hasRouter && router.interactiveTransitionDirection !== undefined ? router.interactiveTransitionDirection : "none"
+    readonly property string interactiveTransitionOperation:
+        hasRouter && router.interactiveTransitionOperation !== undefined ? router.interactiveTransitionOperation : "none"
 
     function childIndexInParent(targetRouter) {
         if (!targetRouter || !targetRouter.parent || targetRouter.parent.children === undefined)
@@ -147,6 +155,60 @@ QtObject {
             return false
         router.popToRoot()
         return true
+    }
+
+    function beginInteractiveTransition(spec) {
+        if (!hasRouter || router.beginInteractiveTransition === undefined)
+            return false
+        return router.beginInteractiveTransition(spec || ({}))
+    }
+
+    function beginInteractiveBack(meta) {
+        if (!hasRouter || router.beginInteractiveBack === undefined)
+            return false
+        return router.beginInteractiveBack(meta || ({}))
+    }
+
+    function beginInteractivePush(path, params, meta) {
+        if (!hasRouter || !path || router.beginInteractivePush === undefined)
+            return false
+        return router.beginInteractivePush(path, params || ({}), meta || ({}))
+    }
+
+    function beginInteractiveReplace(path, params, meta) {
+        if (!hasRouter || !path || router.beginInteractiveReplace === undefined)
+            return false
+        return router.beginInteractiveReplace(path, params || ({}), meta || ({}))
+    }
+
+    function beginInteractiveSetRoot(path, params, meta) {
+        if (!hasRouter || !path || router.beginInteractiveSetRoot === undefined)
+            return false
+        return router.beginInteractiveSetRoot(path, params || ({}), meta || ({}))
+    }
+
+    function updateInteractiveTransition(progress, details) {
+        if (!hasRouter || router.updateInteractiveTransition === undefined)
+            return false
+        return router.updateInteractiveTransition(progress, details || ({}))
+    }
+
+    function finishInteractiveTransition(commit) {
+        if (!hasRouter || router.finishInteractiveTransition === undefined)
+            return false
+        return router.finishInteractiveTransition(commit)
+    }
+
+    function cancelInteractiveTransition() {
+        if (!hasRouter || router.cancelInteractiveTransition === undefined)
+            return false
+        return router.cancelInteractiveTransition()
+    }
+
+    function shouldCommitInteractiveTransition(progress, velocityX, velocityY) {
+        if (!hasRouter || router.shouldCommitInteractiveTransition === undefined)
+            return false
+        return router.shouldCommitInteractiveTransition(progress, velocityX, velocityY)
     }
 }
 

@@ -5,7 +5,10 @@
 #include <QContextMenuEvent>
 #include <QDir>
 #include <QMouseEvent>
+#include <QInputDevice>
+#include <QPointingDevice>
 #include <QQuickWindow>
+#include <QTouchEvent>
 #include <QtPlugin>
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -21,7 +24,27 @@ private slots:
     void global_context_requested_trigger();
     void application_window_global_context_signal();
     void context_menu_dismisses_on_global_press_outside();
+    void gesture_triggers_receive_touch_and_swipe();
 };
+
+namespace {
+
+const QPointingDevice *eventListenerTouchDevice()
+{
+    static const QPointingDevice *device = new QPointingDevice(
+        QStringLiteral("LVRS EventListener Touchscreen"),
+        2,
+        QInputDevice::DeviceType::TouchScreen,
+        QPointingDevice::PointerType::Finger,
+        QInputDevice::Capability::Position
+            | QInputDevice::Capability::Area
+            | QInputDevice::Capability::Pressure,
+        10,
+        1);
+    return device;
+}
+
+} // namespace
 
 void EventListenerTests::click_trigger()
 {
@@ -254,6 +277,117 @@ LV.ApplicationWindow {
 
     QTRY_VERIFY(!object->property("menuOpened").toBool());
     QVERIFY(object->property("closeCount").toInt() >= 1);
+}
+
+void EventListenerTests::gesture_triggers_receive_touch_and_swipe()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 260
+    height: 180
+    autoAttachRuntimeEvents: true
+    visible: false
+    title: "EventListenerGestureTest"
+
+    property int touchStartCount: 0
+    property int swipeCount: 0
+    property real lastStartX: -1
+    property real lastStartY: -1
+    property string lastSwipeDirection: ""
+    property real lastSwipeDx: 0
+    property real lastSwipeDy: 0
+    property string lastUiObjectName: ""
+    property string lastUiLayerKind: ""
+    property string lastUiComponentName: ""
+    property int lastUiHierarchyDepth: -1
+    property string lastUiHitPath: ""
+
+    Rectangle {
+        id: gestureSurface
+        objectName: "gestureSurfaceObject"
+        anchors.fill: parent
+        color: "transparent"
+        z: 1
+    }
+
+    LV.EventListener {
+        trigger: "touchStarted"
+        action: function(eventData) {
+            root.touchStartCount += 1
+            root.lastStartX = eventData.globalX
+            root.lastStartY = eventData.globalY
+            const ui = eventData.ui || ({})
+            root.lastUiObjectName = ui.objectName || ""
+            root.lastUiLayerKind = ui.layerKind || ""
+            root.lastUiComponentName = ui.componentName || ""
+            root.lastUiHierarchyDepth = ui.depth === undefined ? -1 : ui.depth
+            root.lastUiHitPath = ui.hitPath || ""
+        }
+    }
+
+    LV.EventListener {
+        trigger: "swipeDetected"
+        action: function(eventData) {
+            root.swipeCount += 1
+            root.lastSwipeDirection = eventData.swipeDirection || ""
+            root.lastSwipeDx = eventData.totalDeltaX || 0
+            root.lastSwipeDy = eventData.totalDeltaY || 0
+        }
+    }
+}
+)";
+
+    QQmlComponent component(&engine);
+    component.setData(qml, QUrl());
+    QScopedPointer<QObject> object(component.create());
+    QVERIFY(object);
+
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    QVERIFY(window);
+
+    const QPointF beginPoint(42.0, 30.0);
+    const QPointF updatePoint(88.0, 34.0);
+    const QPointF endPoint(112.0, 36.0);
+
+    QTouchEvent touchBegin(QEvent::TouchBegin,
+                           eventListenerTouchDevice(),
+                           Qt::NoModifier,
+                           {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
+    QCoreApplication::sendEvent(window, &touchBegin);
+
+    QTRY_COMPARE(object->property("touchStartCount").toInt(), 1);
+    QCOMPARE(object->property("lastStartX").toReal(), beginPoint.x());
+    QCOMPARE(object->property("lastStartY").toReal(), beginPoint.y());
+    QVERIFY(!object->property("lastUiObjectName").toString().isEmpty());
+    QVERIFY(object->property("lastUiObjectName").toString() != QStringLiteral("unknown"));
+    QCOMPARE(object->property("lastUiLayerKind").toString(), QStringLiteral("content"));
+    QVERIFY(!object->property("lastUiComponentName").toString().isEmpty());
+    QVERIFY(object->property("lastUiHierarchyDepth").toInt() >= 1);
+    QVERIFY(!object->property("lastUiHitPath").toString().isEmpty());
+
+    QTouchEvent touchUpdate(QEvent::TouchUpdate,
+                            eventListenerTouchDevice(),
+                            Qt::NoModifier,
+                            {QEventPoint(0, QEventPoint::State::Updated, updatePoint, updatePoint)});
+    QCoreApplication::sendEvent(window, &touchUpdate);
+
+    QTouchEvent touchEnd(QEvent::TouchEnd,
+                         eventListenerTouchDevice(),
+                         Qt::NoModifier,
+                         {QEventPoint(0, QEventPoint::State::Released, endPoint, endPoint)});
+    QCoreApplication::sendEvent(window, &touchEnd);
+
+    QTRY_COMPARE(object->property("swipeCount").toInt(), 1);
+    QCOMPARE(object->property("lastSwipeDirection").toString(), QStringLiteral("leftToRight"));
+    QVERIFY(object->property("lastSwipeDx").toReal() > 0.0);
+    QVERIFY(qAbs(object->property("lastSwipeDy").toReal()) < 12.0);
 }
 
 QTEST_MAIN(EventListenerTests)

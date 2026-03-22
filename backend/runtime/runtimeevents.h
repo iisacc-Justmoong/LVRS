@@ -237,11 +237,25 @@ private:
     void pushRecentEvent(const QVariantMap &eventData);
     QVariantMap describeQuickItemAtGlobal(qreal globalX, qreal globalY) const;
     QVariantMap fallbackUiAt(qreal globalX, qreal globalY) const;
+    QVariantMap describeQuickItemIdentity(const QQuickItem *item,
+                                          const QQuickItem *rootItem,
+                                          const QQuickWindow *window,
+                                          int depth,
+                                          bool isHit) const;
+    QVariantList quickItemHierarchy(const QQuickItem *item,
+                                    const QQuickItem *rootItem,
+                                    const QQuickWindow *window) const;
     QString keyLabelForCode(int key) const;
     QStringList mouseButtonNames(int buttons) const;
     QStringList modifierNames(int modifiers) const;
     QQuickItem *deepestVisibleChildAt(QQuickItem *item, const QPointF &scenePos) const;
+    const QQuickItem *logicalEventTargetItem(const QQuickItem *item, const QQuickItem *rootItem) const;
+    bool quickItemHasStableIdentity(const QQuickItem *item) const;
     QString quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const;
+    QString quickItemLayerKind(const QQuickItem *item, const QQuickItem *rootItem) const;
+    QString qmlObjectName(const QObject *object) const;
+    QString qmlBaseUrlString(const QObject *object) const;
+    QString componentNameForObject(const QObject *object) const;
 
     QPointer<QQuickWindow> m_window;
     QMetaObject::Connection m_windowDestroyedConnection;

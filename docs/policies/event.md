@@ -11,14 +11,16 @@ Reason:
 - consistent backend/runtime fallback,
 - shared dedup behavior.
 
-## Rule 2: Use global triggers for cross-surface behavior
+## Rule 2: Use runtime/gesture triggers for cross-surface behavior
 
-For overlay dismissal, global context menu control, and app-level interaction hooks, use:
+For overlay dismissal, global context menu control, app-level interaction hooks, and mobile touch semantics that must survive nested view boundaries, use:
 
 - `globalPressed`
 - `globalContextRequested`
+- `touchStarted`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`
+- `swipeDetected`, `nativeGestureDetected`
 
-These triggers are resilient to nested local event boundaries.
+These triggers are resilient to nested local event boundaries and share the framework-managed payload contract.
 
 ## Rule 3: Incident payload is default; backend/input enrichment is opt-in
 

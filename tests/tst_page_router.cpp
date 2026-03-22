@@ -22,6 +22,8 @@ private slots:
     void page_router_updates_view_state_tracker_from_stack();
     void global_navigator_allows_one_line_navigation();
     void global_navigator_falls_back_to_previous_router();
+    void interactive_navigation_transitions_hold_route_commit_until_finish();
+    void page_transition_controller_proxies_application_window_router();
     void route_mvvm_binding_and_write_ownership_are_applied();
     void route_mvvm_ownership_is_released_when_view_is_popped();
 };
@@ -547,6 +549,251 @@ Item {
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "fallbackToFirstAndGoPrimary"));
     QTRY_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/primary"));
+}
+
+void PageRouterTests::interactive_navigation_transitions_hold_route_commit_until_finish()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 360
+    height: 240
+
+    property int depth: router.depth
+    property string currentPath: router.currentPath
+    property var currentParams: router.currentParams
+    property bool interactiveActive: router.interactiveTransitionActive
+    property real interactiveProgress: router.interactiveTransitionProgress
+    property string interactiveToPath: router.interactiveTransitionToPath
+    property real currentPageX: router.currentPageItem ? router.currentPageItem.x : 0
+    property bool currentPageEnabled: router.currentPageItem ? router.currentPageItem.enabled : false
+    property bool previewVisible: router.interactiveTransitionPreviewItem
+        ? router.interactiveTransitionPreviewItem.visible
+        : false
+    property var homePageItem: null
+    property real homePageX: homePageItem ? homePageItem.x : 0
+    property bool homeVisible: homePageItem ? homePageItem.visible : false
+    property bool homeEnabled: homePageItem ? homePageItem.enabled : false
+
+    Component {
+        id: homePage
+        Item {
+            Component.onCompleted: root.homePageItem = this
+        }
+    }
+
+    Component {
+        id: detailPage
+        Item {
+            property string token: ""
+        }
+    }
+
+    LV.PageRouter {
+        id: router
+        anchors.fill: parent
+        initialPath: "/"
+        interactiveTransitionSettleDuration: 0
+        routes: [
+            { path: "/", component: homePage },
+            { path: "/detail", component: detailPage }
+        ]
+    }
+
+    function openDetail() {
+        router.go("/detail", { token: "committed" })
+    }
+
+    function beginBack() {
+        return router.beginInteractiveBack({ source: "test" })
+    }
+
+    function updateTransition(progress, velocityX) {
+        return router.updateInteractiveTransition(progress, { velocityX: velocityX })
+    }
+
+    function finishTransition(commit) {
+        return router.finishInteractiveTransition(commit)
+    }
+
+    function cancelTransition() {
+        return router.cancelInteractiveTransition()
+    }
+
+    function beginForward() {
+        return router.beginInteractivePush("/detail", { token: "preview" }, { source: "test" })
+    }
+
+    function forcePresentationSync() {
+        router.scheduleActivePagePresentationSync()
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("depth").toInt(), 1);
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "openDetail"));
+    QTRY_COMPARE(root->property("depth").toInt(), 2);
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginBack"));
+    QTRY_VERIFY(root->property("interactiveActive").toBool());
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.5)),
+                                      Q_ARG(QVariant, QVariant(0.0))));
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    QCOMPARE(root->property("depth").toInt(), 2);
+    QVERIFY(root->property("homeVisible").toBool());
+    QVERIFY(root->property("currentPageX").toReal() > 100.0);
+    QVERIFY(root->property("homePageX").toReal() < -40.0);
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "forcePresentationSync"));
+    QTRY_VERIFY(root->property("homeVisible").toBool());
+    QTRY_VERIFY(!root->property("homeEnabled").toBool());
+    QTRY_VERIFY(!root->property("currentPageEnabled").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    QCOMPARE(root->property("depth").toInt(), 2);
+    QVERIFY(qAbs(root->property("currentPageX").toReal()) < 0.5);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginBack"));
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.65)),
+                                      Q_ARG(QVariant, QVariant(0.0))));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
+    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    QTRY_VERIFY(root->property("interactiveActive").toBool());
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+    QCOMPARE(root->property("interactiveToPath").toString(), QStringLiteral("/detail"));
+    QVERIFY(root->property("previewVisible").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.4)),
+                                      Q_ARG(QVariant, QVariant(-200.0))));
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.7)),
+                                      Q_ARG(QVariant, QVariant(-200.0))));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
+    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    QCOMPARE(root->property("depth").toInt(), 2);
+    const QVariantMap currentParams = root->property("currentParams").toMap();
+    QCOMPARE(currentParams.value(QStringLiteral("token")).toString(), QStringLiteral("preview"));
+}
+
+void PageRouterTests::page_transition_controller_proxies_application_window_router()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 360
+    height: 240
+    visible: true
+    initialRoutePath: "/"
+
+    property bool controllerAvailable: pageTransitionController !== null
+    property bool transitionActive: pageTransitionController ? pageTransitionController.active : false
+    property bool transitionCanCommit: pageTransitionController ? pageTransitionController.canCommit : false
+    property string currentPath: activePageRouter ? activePageRouter.currentPath : ""
+    property string pendingPath: pageTransitionController ? pageTransitionController.toPath : ""
+
+    pageRoutes: [
+        { path: "/", component: homePage },
+        { path: "/detail", component: detailPage }
+    ]
+
+    Component { id: homePage; Item { } }
+    Component {
+        id: detailPage
+        Item {
+            property string token: ""
+        }
+    }
+
+    Component.onCompleted: {
+        if (activePageRouter)
+            activePageRouter.interactiveTransitionSettleDuration = 0
+    }
+
+    function beginForward() {
+        return pageTransitionController.beginPush("/detail", { token: "controller" }, { source: "controller" })
+    }
+
+    function updateTransition(progress, velocityX) {
+        return pageTransitionController.update(progress, { velocityX: velocityX })
+    }
+
+    function finishAuto() {
+        return pageTransitionController.finish()
+    }
+
+    function cancelTransition() {
+        return pageTransitionController.cancel()
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("controllerAvailable").toBool());
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    QTRY_VERIFY(root->property("transitionActive").toBool());
+    QCOMPARE(root->property("pendingPath").toString(), QStringLiteral("/detail"));
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.15)),
+                                      Q_ARG(QVariant, QVariant(-1400.0))));
+    QTRY_VERIFY(root->property("transitionCanCommit").toBool());
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    QTRY_VERIFY(!root->property("transitionActive").toBool());
+    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "updateTransition",
+                                      Q_ARG(QVariant, QVariant(0.15)),
+                                      Q_ARG(QVariant, QVariant(-1400.0))));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishAuto"));
+    QTRY_VERIFY(!root->property("transitionActive").toBool());
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
 }
 
 void PageRouterTests::route_mvvm_binding_and_write_ownership_are_applied()

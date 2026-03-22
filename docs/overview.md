@@ -11,14 +11,16 @@ LVRS is a Qt 6.5+ QML framework centered on deterministic UI behavior, explicit 
 
 ## Runtime Architecture
 
-LVRS runtime is split into two cooperating layers.
+LVRS runtime is split into three cooperating layers.
 
 1. Event capture daemon (`RuntimeEvents`)  
-   Captures keyboard, pointer, context, touch/tablet/gesture, UI lifecycle, and process telemetry.
-2. Backend cache/bridge (`Backend`)  
-   Mirrors runtime event stream into a bounded cache and provides stable snapshots for QML consumers.
+   Captures keyboard, pointer, context, touch/tablet/native-gesture, UI lifecycle, and process telemetry.
+2. High-level gesture recognizer (`GestureEvents`)
+   Classifies the raw touch/native stream into `hold`, `drag`, `swipe`, and normalized touch-session payloads.
+3. Backend cache/bridge (`Backend`)
+   Mirrors the raw runtime event stream into a bounded cache and provides stable snapshots for QML consumers.
 
-This architecture exists so UI-layer logic can consume coherent snapshots under event bursts instead of racing mutable real-time streams.
+This architecture exists so UI-layer logic can consume either low-level runtime telemetry or high-level gesture semantics without collapsing both responsibilities into one mutable stream.
 
 ## UI Architecture
 
@@ -45,14 +47,17 @@ A production startup path should follow this order.
 ## Key Runtime Guarantees
 
 - Route transitions update `PageRouter.path`, current route state, and optional `ViewStateTracker` sync.
+- Interactive page transitions can preview forward/backward movement while deferring route commit until finish/cancel.
 - Global context/click signals can be consumed at app root through `ApplicationWindow` event bridge.
 - Nested wheel behavior can be isolated by `WheelScrollGuard`.
 - IME composition integrity can be enforced by `InputMethodGuard`.
+- High-level touch/gesture semantics can be consumed through `GestureEvents` or `EventListener` gesture triggers.
 
 ## Recommended Entry Documents by Use Case
 
-- Runtime event integration: `docs/backend/RuntimeEvents.md`, `docs/components/control/EventListener.md`.
+- Runtime event integration: `docs/backend/RuntimeEvents.md`, `docs/backend/GestureEvents.md`, `docs/components/control/EventListener.md`.
 - Navigation and route model binding: `docs/components/navigation/PageRouter.md`, `docs/mvvm.md`.
+- Interactive navigation driving: `docs/components/navigation/PageRouter.md`, `docs/components/navigation/PageTransitionController.md`.
 - Platform/backend behavior: `docs/architecture/rendering-backend.md`, `docs/backend/Platform.md`.
 - Logging and diagnostics: `docs/backend/Debug.md`, `docs/backend/DebugOutput.md`.
 
@@ -62,16 +67,18 @@ A typical production flow uses all runtime layers in sequence:
 
 1. Bootstrap app and rendering policy (`AppBootstrap`).
 2. Start and attach runtime daemon (`RuntimeEvents`).
-3. Hook backend event mirror (`Backend.hookUserEvents()`).
-4. Mount `ApplicationWindow` with `PageRouter` routes.
-5. Bind route metadata to `ViewModels` ownership.
-6. Handle global context/pressed events via `EventListener`.
+3. Attach `GestureEvents` when the feature requires high-level touch semantics.
+4. Hook backend event mirror (`Backend.hookUserEvents()`).
+5. Mount `ApplicationWindow` with `PageRouter` routes.
+6. Bind route metadata to `ViewModels` ownership.
+7. Handle global context/pressed/gesture events via `EventListener`.
 
 This chain provides deterministic behavior from startup through UI interaction.
 
 ## Common Integration Mistakes
 
 - Starting `RuntimeEvents` without attaching a window, then expecting UI hit-test data.
+- Expecting raw `RuntimeEvents` touch records to already distinguish hold/drag/swipe semantics.
 - Writing model properties from views that never claimed ownership in `ViewModels`.
 - Using nested `Flickable` surfaces without `WheelScrollGuard`.
 - Building context-menu close logic only from local click handlers instead of global coordinates.
@@ -81,6 +88,7 @@ This chain provides deterministic behavior from startup through UI interaction.
 After integrating LVRS in a new app, validate:
 
 - `RuntimeEvents.running == true`
+- `GestureEvents.runtimeAttached == true` when gesture triggers are used outside `EventListener`
 - `Backend.userEventHooked == true` when backend-first listeners are used
 - route transitions update `PageRouter.currentPath` and `ViewStateTracker.snapshot()` as expected
 - debug output includes expected event domains without uncontrolled flood

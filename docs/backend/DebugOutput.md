@@ -1,6 +1,6 @@
 # Debug Output Schema
 
-Location: `backend/runtime/debuglogger.h`, `backend/runtime/debuglogger.cpp`, `backend/runtime/runtimeevents.h`, `backend/runtime/runtimeevents.cpp`, `backend/io/backend.h`, `backend/io/backend.cpp`, `example/VisualCatalog/qml/Main.qml`, `qml/components/control/util/EventListener.qml`
+Location: `backend/runtime/debuglogger.h`, `backend/runtime/debuglogger.cpp`, `backend/runtime/runtimeevents.h`, `backend/runtime/runtimeevents.cpp`, `backend/runtime/gestureevents.h`, `backend/runtime/gestureevents.cpp`, `backend/io/backend.h`, `backend/io/backend.cpp`, `example/VisualCatalog/qml/Main.qml`, `qml/components/control/util/EventListener.qml`
 
 This document defines the schema used by debug and runtime-event data that is emitted and displayed in the LVRS demo app. It is intended to let developers trace relationships between stdout logs, runtime events, and QML monitor views without ambiguity.
 
@@ -11,6 +11,7 @@ This document defines the schema used by debug and runtime-event data that is em
 - Stdout JSON log: when `LV.Debug.jsonOutput == true`, an additional line is emitted as `[DEBUG-ENTRY] { ... }`.
 - Debug memory buffer: available via `LV.Debug.entries()/filteredEntries()/summary()`.
 - RuntimeEvents buffer: available via `LV.RuntimeEvents.recentEvents()`.
+- GestureEvents live surface: available through `LV.GestureEvents.gestureSequence`, `LV.GestureEvents.lastGesture`, and gesture signals.
 - Backend hook buffer: available via `LV.Backend.hookedUserEvents()`.
 - Demo Event Listener Monitor: displayed by `runtimeConsoleRows` and `eventMonitorSamplesModel` in `example/VisualCatalog/qml/Main.qml`.
 
@@ -225,6 +226,13 @@ Based on `qml/components/control/util/EventListener.qml`:
   - `input` (optional, `includeInputState=true`)
   - `backend` (optional)
   - for context events, `reason` and `source(mouse|context)` are added
+- Gesture triggers (`touchStarted|touchUpdated|touchEnded|touchCancelled|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):
+  - common: `sequence`, `gestureType`, `interactionKind`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`
+  - touch-derived: `sessionId`, `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`, `durationMs`, `directionX`, `directionY`, `dominantAxis`, `holdActive`, `dragActive`, `phase`, `pointCount`, `points`, pointer/button state, `ui`, `originUi`
+  - `ui` / `originUi` carry logical-target metadata (`objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`, `layerKind`, `hierarchy`) and raw leaf metadata (`hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`)
+  - swipe-specific: `swipeDirection`, `velocityX`, `velocityY`, `speed`
+  - native-gesture-specific: `nativeGestureType`, `value`
+  - optional `input` / `backend` enrichments follow the same opt-in switches as other triggers
 - Key/wheel triggers pass Qt event objects directly.
 
 Deduplication:

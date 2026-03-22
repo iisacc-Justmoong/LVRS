@@ -157,6 +157,7 @@ Controls.ApplicationWindow {
     property alias internalRouterRegisterAsGlobalNavigator: scaffold.internalRouterRegisterAsGlobalNavigator
     readonly property bool internalPageStackEnabled: scaffold.internalPageStackEnabled
     readonly property var activePageRouter: scaffold.activePageRouter
+    property alias pageTransitionController: scaffold.pageTransitionController
     readonly property string adaptiveLayoutProfile: scaffold.layoutProfile
     readonly property string adaptiveNavigationMode: scaffold.navigationMode
     default property alias content: scaffold.content
@@ -494,7 +495,8 @@ Controls.ApplicationWindow {
             property string initialPath: windowRoot.initialRoutePath
             property bool useInternalPageStack: true
             property bool internalRouterRegisterAsGlobalNavigator: true
-        
+            property alias pageTransitionController: pageTransitionController
+
             signal navActivated(int index, var item)
             signal layoutStateChanged(string profile, string navigationMode)
             signal stackNavigated(string path, var params)
@@ -853,7 +855,12 @@ Controls.ApplicationWindow {
                     root.syncNavIndexToCurrentPath()
                 }
             }
-        
+
+            PageTransitionController {
+                id: pageTransitionController
+                router: root.resolveRouter()
+            }
+
             Component {
                 id: defaultNavDelegate
         

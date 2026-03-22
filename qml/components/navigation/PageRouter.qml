@@ -21,6 +21,12 @@ Item {
     property bool isolateInactivePages: true
     property int retainInactivePageCount: 0
     property int routeResolveCacheCapacity: 256
+    property bool interactiveTransitionsEnabled: true
+    property int interactiveTransitionSettleDuration: 220
+    property real interactiveTransitionCommitProgress: 0.42
+    property real interactiveTransitionVelocityThreshold: 960
+    property real interactiveTransitionOutgoingParallaxFactor: 0.25
+    property real interactiveTransitionIncomingPreviewFactor: 0.35
     property var _trackedViewIds: []
     property bool _presentationSyncScheduled: false
     property bool _routeResolverDirty: true
@@ -29,10 +35,28 @@ Item {
     readonly property bool canGoBack: stackView.depth > 1
     readonly property int depth: stackView.depth
     readonly property var currentPageItem: stackView.currentItem
+    readonly property bool interactiveTransitionActive: interactiveTransitionDriver.active
+    readonly property real interactiveTransitionProgress: interactiveTransitionDriver.progress
+    readonly property string interactiveTransitionDirection: interactiveTransitionDriver.direction
+    readonly property string interactiveTransitionOperation: interactiveTransitionDriver.operation
+    readonly property string interactiveTransitionFromPath: interactiveTransitionDriver.fromPath
+    readonly property string interactiveTransitionToPath: interactiveTransitionDriver.toPath
+    readonly property var interactiveTransitionFromParams: interactiveTransitionDriver.fromParams
+    readonly property var interactiveTransitionToParams: interactiveTransitionDriver.toParams
+    readonly property real interactiveTransitionVelocityX: interactiveTransitionDriver.velocityX
+    readonly property real interactiveTransitionVelocityY: interactiveTransitionDriver.velocityY
+    readonly property var interactiveTransitionMeta: interactiveTransitionDriver.meta
+    readonly property var interactiveTransitionPreviewItem: interactiveTransitionDriver.previewItem
+    readonly property bool interactiveTransitionCanCommit: interactiveTransitionDriver.canCommit
 
     signal navigated(string path, var params)
     signal navigationFailed(string path)
     signal componentNavigated(var component)
+    signal interactiveTransitionStarted(var state)
+    signal interactiveTransitionUpdated(var state)
+    signal interactiveTransitionCommitted(var state)
+    signal interactiveTransitionCancelled(var state)
+    signal interactiveTransitionRejected(string reason, var state)
 
     function hasAnyAnchors(item) {
         if (!item || item.anchors === undefined)
@@ -41,6 +65,7 @@ Item {
             || item.anchors.top || item.anchors.bottom
             || item.anchors.horizontalCenter || item.anchors.verticalCenter
     }
+
 
     function applyPageViewportContract(item) {
         if (!item || !enforcePageViewport)
@@ -91,6 +116,62 @@ Item {
             child.clip = true
     }
 
+    function interactiveTransitionState() {
+        return interactiveTransitionDriver.currentState()
+    }
+
+    function abortInteractiveTransition() {
+        return interactiveTransitionDriver.abortTransition()
+    }
+
+    function beginInteractiveTransition(spec) {
+        return interactiveTransitionDriver.beginTransition(spec)
+    }
+
+    function beginInteractiveBack(meta) {
+        return interactiveTransitionDriver.beginBack(meta)
+    }
+
+    function beginInteractivePush(pathValue, params, meta) {
+        return interactiveTransitionDriver.beginPush(pathValue, params, meta)
+    }
+
+    function beginInteractiveReplace(pathValue, params, meta) {
+        return interactiveTransitionDriver.beginReplace(pathValue, params, meta)
+    }
+
+    function beginInteractiveSetRoot(pathValue, params, meta) {
+        return interactiveTransitionDriver.beginSetRoot(pathValue, params, meta)
+    }
+
+    function beginInteractivePushComponent(component, params, meta) {
+        return interactiveTransitionDriver.beginPushComponent(component, params, meta)
+    }
+
+    function beginInteractiveReplaceComponent(component, params, meta) {
+        return interactiveTransitionDriver.beginReplaceComponent(component, params, meta)
+    }
+
+    function beginInteractiveSetRootComponent(component, params, meta) {
+        return interactiveTransitionDriver.beginSetRootComponent(component, params, meta)
+    }
+
+    function updateInteractiveTransition(progress, details) {
+        return interactiveTransitionDriver.updateTransition(progress, details)
+    }
+
+    function shouldCommitInteractiveTransition(progress, velocityX, velocityY) {
+        return interactiveTransitionDriver.shouldCommitTransition(progress, velocityX, velocityY)
+    }
+
+    function finishInteractiveTransition(commit) {
+        return interactiveTransitionDriver.finishTransition(commit)
+    }
+
+    function cancelInteractiveTransition() {
+        return interactiveTransitionDriver.cancelTransition()
+    }
+
     function syncActivePagePresentation() {
         if (!isolateInactivePages)
             return
@@ -98,19 +179,31 @@ Item {
         var topIndex = stackView.depth - 1
         var retainDepth = Math.max(0, retainInactivePageCount)
         var keepFromIndex = Math.max(0, topIndex - retainDepth)
+        var transitionLocked = interactiveTransitionDriver.transitionLocked
+        var previewIndex = -1
+
+        if (transitionLocked
+                && interactiveTransitionDriver.secondaryItem
+                && interactiveTransitionDriver.operation === "pop"
+                && topIndex > 0) {
+            previewIndex = topIndex - 1
+            keepFromIndex = Math.min(keepFromIndex, previewIndex)
+        }
+
         for (var i = 0; i < stackView.depth; i++) {
             var page = stackView.get(i)
             if (!page)
                 continue
 
-            var active = i >= keepFromIndex
+            var active = i >= keepFromIndex || i === previewIndex
+            var transitionParticipant = transitionLocked && (i === topIndex || i === previewIndex)
             if (page.visible !== undefined)
                 page.visible = active
             if (page.enabled !== undefined)
-                page.enabled = active
+                page.enabled = transitionParticipant ? false : active
             if (page.opacity !== undefined)
                 page.opacity = active ? 1.0 : 0.0
-            if (!active && page.focus !== undefined)
+            if ((!active || transitionParticipant) && page.focus !== undefined)
                 page.focus = false
         }
     }
@@ -176,6 +269,8 @@ Item {
     }
 
     function pop() {
+        if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
+            abortInteractiveTransition()
         if (stackView.depth > 1) {
             stackView.pop()
             applyPageViewportContract(stackView.currentItem)
@@ -193,6 +288,8 @@ Item {
     }
 
     function popToRoot() {
+        if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
+            abortInteractiveTransition()
         if (stackView.depth > 1) {
             stackView.pop(stackView.get(0))
             applyPageViewportContract(stackView.currentItem)
@@ -306,6 +403,8 @@ Item {
     }
 
     function navigate(path, params, mode) {
+        if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
+            abortInteractiveTransition()
         var resolved = resolveRoute(path)
         var targetParams = ({})
         if (resolved && resolved.params) {
@@ -346,6 +445,8 @@ Item {
     }
 
     function navigateComponent(component, params, mode) {
+        if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
+            abortInteractiveTransition()
         if (!component)
             return
         var targetParams = params || {}
@@ -390,6 +491,22 @@ Item {
         onDepthChanged: root.scheduleActivePagePresentationSync()
     }
 
+    Item {
+        id: interactivePreviewHost
+        anchors.fill: parent
+        z: 1
+        visible: root.interactiveTransitionActive && root.interactiveTransitionDirection === "forward"
+        enabled: false
+        clip: true
+    }
+
+    PageRouterTransitionDriver {
+        id: interactiveTransitionDriver
+        router: root
+        stackView: stackView
+        previewHost: interactivePreviewHost
+    }
+
     property bool _syncingPath: false
 
     onRoutesChanged: {
@@ -421,6 +538,8 @@ Item {
     onPathChanged: {
         if (_syncingPath)
             return
+        if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
+            abortInteractiveTransition()
         rebuildFromPath()
     }
 

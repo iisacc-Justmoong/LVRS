@@ -17,6 +17,7 @@ Current policy is incident-centric: it avoids continuous state harvesting unless
 - Wheel: `wheel`
 - Keyboard: `keyPressed`, `keyReleased`
 - Global runtime: `globalPressed`, `globalContextRequested`
+- Gesture runtime: `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`, `holdStarted`, `longPressed`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`, `nativeGestureDetected`, `gestureRecognized`
 
 ## 3. Core API
 
@@ -97,6 +98,49 @@ Optional enrichments follow same toggles as local pointer payloads.
 
 - payload: `{ containsMouse: bool }`
 
+### Gesture triggers
+
+Gesture triggers receive the normalized payload published by `GestureEvents`.
+
+Always:
+
+- `sequence`, `gestureType`, `interactionKind`, `source`
+- `timestampEpochMs`
+- `x`, `y`, `globalX`, `globalY`
+
+Touch-derived gesture triggers additionally receive:
+
+- `sessionId`
+- `previousX`, `previousY`
+- `startX`, `startY`, `startGlobalX`, `startGlobalY`
+- `deltaX`, `deltaY`
+- `totalDeltaX`, `totalDeltaY`
+- `absoluteDeltaX`, `absoluteDeltaY`
+- `distance`, `durationMs`
+- `directionX`, `directionY`, `dominantAxis`
+- `holdActive`, `dragActive`
+- `phase`, `pointCount`, `points`
+- `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`
+- `ui`, `originUi`
+
+`ui` / `originUi` include component-identification metadata:
+
+- logical target: `objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`
+- hierarchy: `layerKind`, `depth`, `hierarchy`
+- raw deepest item: `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`
+
+Swipe-specific additions:
+
+- `swipeDirection`
+- `velocityX`
+- `velocityY`
+- `speed`
+
+Native-gesture additions:
+
+- `nativeGestureType`
+- `value`
+
 ## 6. Dedup Behavior
 
 - Global press dedup suppresses duplicate press incidents in a short time-distance window.
@@ -148,12 +192,27 @@ LV.EventListener {
 }
 ```
 
+### 7.4 Gesture listener
+
+```qml
+import LVRS 1.0 as LV
+
+LV.EventListener {
+    trigger: "swipeDetected"
+    action: function(eventData) {
+        console.log(eventData.swipeDirection, eventData.totalDeltaX, eventData.totalDeltaY)
+    }
+}
+```
+
 ## 8. Common Pitfalls
 
 - Enabling `includeInputState` everywhere by habit.
 - Enabling both `includeUiHit` and `includeBackendSummary` for high-frequency interaction paths.
 - Using `hoverChanged` for business logic that should be press/release driven.
 - Treating global triggers as local geometry-only events without global coordinate checks.
+- Expecting `longPressed` to be a separate payload type; it is an alias of `holdStarted`.
+- Expecting multi-touch semantic classification from `EventListener`; only the primary contact is classified today.
 
 ## 9. Troubleshooting Matrix
 
@@ -163,6 +222,7 @@ LV.EventListener {
 | missing `ui` payload | `includeUiHit=false` | inspect listener props | enable only where needed |
 | missing `input` payload | `includeInputState=false` | inspect listener props | enable explicitly for that listener |
 | duplicate context callbacks | dedup window too loose for source | inspect dedup config | tune `contextDedup*` values |
+| swipe/drag not firing | runtime not attached or thresholds too strict | inspect trigger type and movement payload | use gesture trigger path and tune thresholds through `GestureEvents` |
 | heavy callback chain | unnecessary enrichment enabled globally | inspect props in hot path | reduce to minimal incident payload |
 
 ## 10. Codex-Oriented Playbook
@@ -186,10 +246,12 @@ After edits:
 
 1. global press/context listeners still fire exactly once per incident,
 2. outside-dismiss flows still work with minimal payload,
-3. enriched listeners still receive requested optional fields when enabled.
+3. gesture triggers auto-attach runtime and deliver recognized payloads,
+4. enriched listeners still receive requested optional fields when enabled.
 
 ## 11. Related APIs
 
 - `RuntimeEvents`: runtime daemon source for global triggers.
+- `GestureEvents`: high-level gesture source used by gesture triggers.
 - `Backend`: optional backend-first input state source.
 - `ApplicationWindow`: installs root-level global listeners for app-wide behavior.

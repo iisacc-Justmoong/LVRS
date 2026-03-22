@@ -9,22 +9,27 @@ This document describes the end-to-end event path from OS/Qt events to high-leve
 - Maintains counters, recent-event ring buffer, and input snapshot (`inputState()`).
 - Emits `eventRecorded(eventData)` as canonical runtime stream.
 
-2. Hook Stage: `Backend`
+2. Recognition Stage: `GestureEvents`
+- Subscribes to `RuntimeEvents::eventRecorded`.
+- Interprets raw `touch-event` and `native-gesture` entries.
+- Emits normalized high-level gesture payloads (`touch*`, `holdStarted`, `drag*`, `swipeDetected`, `nativeGestureDetected`).
+
+3. Hook Stage: `Backend`
 - `hookUserEvents()` subscribes to `RuntimeEvents::eventRecorded`.
 - Mirrors events into bounded backend cache (`hookedUserEvents`).
 - Maintains per-type counters and last input snapshot for backend-first reads.
 
-3. Consumption Stage: `EventListener`
-- Converts trigger names to concrete source subscriptions.
+4. Consumption Stage: `EventListener`
+- Converts trigger names to concrete source subscriptions across both `RuntimeEvents` and `GestureEvents`.
 - Builds incident-first payloads (coordinates/button/modifier core).
 - Adds `input`/`ui` enrichment only when explicitly enabled.
 - Supports dedup windows for global press/context sequences.
 
-4. Dispatch Stage: `ApplicationWindow`
+5. Dispatch Stage: `ApplicationWindow`
 - Hosts always-on global listeners for app-level pressed/context signals.
 - Re-emits normalized payloads as `globalPressedEvent` and `globalContextEvent`.
 
-5. Feature Stage
+6. Feature Stage
 - `ContextMenu`: outside-dismiss and action dispatch.
 - Editors/hierarchy: nested wheel isolation via `WheelScrollGuard`.
 - Runtime console/debug tools: event stream visualization.
@@ -44,10 +49,20 @@ Optional enrichments:
 
 This shape is intentionally shared so feature components can consume one schema.
 
+Touch/gesture flows additionally carry:
+
+- gesture identity: `gestureType`, `interactionKind`, `sequence`, `sessionId`
+- geometry: `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`
+- timing: `timestampEpochMs`, `durationMs`
+- direction: `directionX`, `directionY`, `dominantAxis`
+- optional semantic extensions such as `swipeDirection`, `velocityX`, `velocityY`
+
 ## Why Backend-First Exists (Opt-In)
 
 Directly reading runtime singleton state from many QML handlers can cause temporal skew under bursty input.
 Backend-first mode reduces skew by reading from a stable mirrored cache, but it is intentionally opt-in to avoid hot-path overhead.
+
+Gesture listeners are intentionally not mirrored through `Backend`; they consume the recognized stream directly from `GestureEvents`.
 
 ## Context Dismiss Flow (Reference)
 
@@ -61,6 +76,7 @@ Backend-first mode reduces skew by reading from a stable mirrored cache, but it 
 When validating event behavior, verify:
 
 - `RuntimeEvents.running == true`
+- `GestureEvents.runtimeAttached == true` for direct singleton consumers
 - `Backend.userEventHooked == true` only for listeners that opt into backend/input enrichment
 - expected trigger fires exactly once within dedup window
 - payload carries expected optional `ui`/`input` fields only when enabled
@@ -81,6 +97,7 @@ This flow avoids dependency on local event boundaries.
 During troubleshooting, log at least these probes:
 
 - runtime sequence (`RuntimeEvents.eventSequence`)
+- gesture sequence (`GestureEvents.gestureSequence`)
 - backend mirror count (`Backend.hookedEventCount`)
 - dedup timestamps in listener payload handling
 - menu/dialog outside-dismiss geometry checks

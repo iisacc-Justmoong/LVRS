@@ -55,6 +55,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/AppBootstrap.md`
 - `docs/backend/Backend.md`
 - `docs/backend/RuntimeEvents.md`
+- `docs/backend/GestureEvents.md`
 - `docs/backend/RenderQuality.md`
 - `docs/backend/RenderMonitor.md`
 - `docs/backend/RouteMatcher.md`
@@ -102,6 +103,7 @@ This structure is intentional so the same question can be answered consistently 
 
 - `docs/components/navigation/Navigator.md`
 - `docs/components/navigation/PageRouter.md`
+- `docs/components/navigation/PageTransitionController.md`
 - `docs/components/navigation/Link.md`
 - `docs/components/navigation/Hierarchy.md`
 - `docs/components/navigation/HierarchyList.md`
@@ -125,7 +127,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Fast Lookup: Typical Questions
 
 - How to wire global input event handling?  
-  Start with `docs/architecture/event-pipeline.md`, then `docs/components/control/EventListener.md`.
+  Start with `docs/architecture/event-pipeline.md`, then `docs/backend/GestureEvents.md`, then `docs/components/control/EventListener.md`.
 
 - How to route pages with stack semantics and route params?  
   Start with `docs/components/navigation/PageRouter.md`, then `docs/policies/routing.md`.

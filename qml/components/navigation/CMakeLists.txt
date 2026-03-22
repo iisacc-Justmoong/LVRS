@@ -1,6 +1,8 @@
 set(LVRS_NAVIGATION_QML_FILES
     qml/components/navigation/Navigator.qml
     qml/components/navigation/PageRouter.qml
+    qml/components/navigation/PageRouterTransitionDriver.qml
+    qml/components/navigation/PageTransitionController.qml
     qml/components/navigation/Link.qml
     qml/components/navigation/ToolbarButton.qml
     qml/components/navigation/HierarchyToolbar.qml

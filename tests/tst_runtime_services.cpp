@@ -16,6 +16,7 @@
 #include <QtPlugin>
 
 #include "backend/runtime/debuglogger.h"
+#include "backend/runtime/gestureevents.h"
 #include "backend/runtime/renderingmonitor.h"
 #include "backend/runtime/runtimeevents.h"
 
@@ -53,6 +54,8 @@ private slots:
     void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
     void runtime_events_touch_input_normalizes_to_pointer_contract();
+    void runtime_events_hit_test_exposes_ui_hierarchy_metadata();
+    void gesture_events_recognize_hold_drag_and_swipe();
     void runtime_events_window_replacement_survives_old_window_destruction();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
@@ -378,6 +381,176 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
     QCOMPARE(payload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
     QCOMPARE(payload.value(QStringLiteral("buttons")).toInt(), static_cast<int>(Qt::NoButton));
     QVERIFY(!payload.value(QStringLiteral("mouseButtonPressed")).toBool());
+}
+
+void RuntimeServicesTests::runtime_events_hit_test_exposes_ui_hierarchy_metadata()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    window.setObjectName(QStringLiteral("runtimeWindow"));
+    window.setWidth(240);
+    window.setHeight(160);
+
+    QQuickItem *content = window.contentItem();
+    QVERIFY(content);
+    content->setObjectName(QStringLiteral("contentRoot"));
+
+    auto *panel = new QQuickItem(content);
+    panel->setObjectName(QStringLiteral("panel"));
+    panel->setX(10.0);
+    panel->setY(10.0);
+    panel->setWidth(140.0);
+    panel->setHeight(100.0);
+    panel->setZ(1.0);
+
+    auto *button = new QQuickItem(panel);
+    button->setObjectName(QStringLiteral("button"));
+    button->setX(8.0);
+    button->setY(6.0);
+    button->setWidth(56.0);
+    button->setHeight(32.0);
+    button->setZ(3.0);
+
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    const QVariantMap hit = events.hitTestUiAt(20.0, 20.0);
+    QCOMPARE(hit.value(QStringLiteral("objectName")).toString(), QStringLiteral("button"));
+    QCOMPARE(hit.value(QStringLiteral("componentName")).toString(), QStringLiteral("button"));
+    QCOMPARE(hit.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
+    QCOMPARE(hit.value(QStringLiteral("windowObjectName")).toString(), QStringLiteral("runtimeWindow"));
+    QCOMPARE(hit.value(QStringLiteral("rootObjectName")).toString(), QStringLiteral("contentRoot"));
+    QCOMPARE(hit.value(QStringLiteral("z")).toReal(), 3.0);
+    QVERIFY(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("contentRoot")));
+    QVERIFY(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("button")));
+
+    const QVariantList hierarchy = hit.value(QStringLiteral("hierarchy")).toList();
+    QCOMPARE(hierarchy.size(), 3);
+    QCOMPARE(hierarchy.constFirst().toMap().value(QStringLiteral("objectName")).toString(),
+             QStringLiteral("contentRoot"));
+    QCOMPARE(hierarchy.constLast().toMap().value(QStringLiteral("objectName")).toString(),
+             QStringLiteral("button"));
+    QCOMPARE(hit.value(QStringLiteral("depth")).toInt(), hierarchy.size() - 1);
+}
+
+void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
+{
+    RuntimeEvents events;
+    GestureEvents gestures;
+    QQuickWindow window;
+    window.setWidth(480);
+    window.setHeight(320);
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+    QVERIFY(gestures.attachRuntime(&events));
+    QVERIFY(gestures.runtimeAttached());
+
+    gestures.setHoldThresholdMs(60);
+    gestures.setDragThresholdPx(10.0);
+    gestures.setSwipeThresholdPx(30.0);
+    gestures.setSwipeMaxDurationMs(500);
+    gestures.resetState();
+
+    QSignalSpy touchStartedSpy(&gestures, &GestureEvents::touchStarted);
+    QSignalSpy holdStartedSpy(&gestures, &GestureEvents::holdStarted);
+    QSignalSpy touchEndedSpy(&gestures, &GestureEvents::touchEnded);
+    QSignalSpy dragStartedSpy(&gestures, &GestureEvents::dragStarted);
+    QSignalSpy dragUpdatedSpy(&gestures, &GestureEvents::dragUpdated);
+    QSignalSpy dragEndedSpy(&gestures, &GestureEvents::dragEnded);
+    QSignalSpy swipeDetectedSpy(&gestures, &GestureEvents::swipeDetected);
+    QVERIFY(touchStartedSpy.isValid());
+    QVERIFY(holdStartedSpy.isValid());
+    QVERIFY(touchEndedSpy.isValid());
+    QVERIFY(dragStartedSpy.isValid());
+    QVERIFY(dragUpdatedSpy.isValid());
+    QVERIFY(dragEndedSpy.isValid());
+    QVERIFY(swipeDetectedSpy.isValid());
+
+    const QPointF holdPoint(40.0, 28.0);
+    QTouchEvent holdBegin(QEvent::TouchBegin,
+                          testTouchDevice(),
+                          Qt::NoModifier,
+                          {QEventPoint(0, QEventPoint::State::Pressed, holdPoint, holdPoint)});
+    QCoreApplication::sendEvent(&window, &holdBegin);
+
+    QTRY_COMPARE(touchStartedSpy.count(), 1);
+    const QVariantMap holdStartTouchPayload = touchStartedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchStarted"));
+    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(1));
+    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("globalX")).toReal(), holdPoint.x());
+    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("globalY")).toReal(), holdPoint.y());
+    QVERIFY(holdStartTouchPayload.contains(QStringLiteral("ui")));
+    const QVariantMap holdStartUi = holdStartTouchPayload.value(QStringLiteral("ui")).toMap();
+    QCOMPARE(holdStartUi.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
+    QVERIFY(holdStartUi.value(QStringLiteral("hierarchy")).toList().size() >= 1);
+    QVERIFY(!holdStartUi.value(QStringLiteral("componentName")).toString().isEmpty());
+
+    QTRY_COMPARE_WITH_TIMEOUT(holdStartedSpy.count(), 1, 400);
+    const QVariantMap holdPayload = holdStartedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(holdPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("holdStarted"));
+    QCOMPARE(holdPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
+    QVERIFY(holdPayload.value(QStringLiteral("durationMs")).toLongLong() >= 60);
+    QVERIFY(holdPayload.value(QStringLiteral("holdActive")).toBool());
+
+    QTouchEvent holdEnd(QEvent::TouchEnd,
+                        testTouchDevice(),
+                        Qt::NoModifier,
+                        {QEventPoint(0, QEventPoint::State::Released, holdPoint, holdPoint)});
+    QCoreApplication::sendEvent(&window, &holdEnd);
+
+    QTRY_COMPARE(touchEndedSpy.count(), 1);
+    const QVariantMap holdEndPayload = touchEndedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(holdEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
+    QCOMPARE(holdEndPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchEnded"));
+
+    const QPointF swipeBeginPoint(52.0, 36.0);
+    const QPointF swipeUpdatePoint(94.0, 40.0);
+    const QPointF swipeEndPoint(116.0, 42.0);
+
+    QTouchEvent swipeBegin(QEvent::TouchBegin,
+                           testTouchDevice(),
+                           Qt::NoModifier,
+                           {QEventPoint(0, QEventPoint::State::Pressed, swipeBeginPoint, swipeBeginPoint)});
+    QCoreApplication::sendEvent(&window, &swipeBegin);
+    QTRY_COMPARE(touchStartedSpy.count(), 2);
+
+    QTouchEvent swipeUpdate(QEvent::TouchUpdate,
+                            testTouchDevice(),
+                            Qt::NoModifier,
+                            {QEventPoint(0, QEventPoint::State::Updated, swipeUpdatePoint, swipeUpdatePoint)});
+    QCoreApplication::sendEvent(&window, &swipeUpdate);
+
+    QTRY_COMPARE(dragStartedSpy.count(), 1);
+    QTRY_VERIFY(dragUpdatedSpy.count() >= 1);
+    const QVariantMap dragStartPayload = dragStartedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(dragStartPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("dragStarted"));
+    QCOMPARE(dragStartPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(2));
+    QCOMPARE(dragStartPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
+    QVERIFY(dragStartPayload.value(QStringLiteral("totalDeltaX")).toReal() > 0.0);
+    QVERIFY(qAbs(dragStartPayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
+
+    QTouchEvent swipeEnd(QEvent::TouchEnd,
+                         testTouchDevice(),
+                         Qt::NoModifier,
+                         {QEventPoint(0, QEventPoint::State::Released, swipeEndPoint, swipeEndPoint)});
+    QCoreApplication::sendEvent(&window, &swipeEnd);
+
+    QTRY_COMPARE(dragEndedSpy.count(), 1);
+    QTRY_COMPARE(swipeDetectedSpy.count(), 1);
+    QTRY_COMPARE(touchEndedSpy.count(), 2);
+
+    const QVariantMap swipePayload = swipeDetectedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(swipePayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("swipeDetected"));
+    QCOMPARE(swipePayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
+    QCOMPARE(swipePayload.value(QStringLiteral("swipeDirection")).toString(), QStringLiteral("leftToRight"));
+    QVERIFY(swipePayload.value(QStringLiteral("totalDeltaX")).toReal() >= 60.0);
+    QVERIFY(qAbs(swipePayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
+    QVERIFY(swipePayload.value(QStringLiteral("velocityX")).toReal() > 0.0);
+
+    const QVariantMap swipeEndPayload = touchEndedSpy.at(1).at(0).toMap();
+    QCOMPARE(swipeEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
+    QCOMPARE(swipeEndPayload.value(QStringLiteral("directionX")).toString(), QStringLiteral("positive"));
+    QCOMPARE(swipeEndPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
 }
 
 void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window_destruction()

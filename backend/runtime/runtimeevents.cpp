@@ -13,6 +13,8 @@
 #include <QKeySequence>
 #include <QMouseEvent>
 #include <QNativeGestureEvent>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QTabletEvent>
@@ -1542,17 +1544,31 @@ QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal global
         return map;
 
     const QPoint windowPoint = window->mapFromGlobal(QPoint(qRound(globalX), qRound(globalY)));
-    const QPointF scenePos(windowPoint.x(), windowPoint.y());
-    const bool insideWindow = scenePos.x() >= 0.0
+    QPointF scenePos(windowPoint.x(), windowPoint.y());
+    bool insideWindow = scenePos.x() >= 0.0
         && scenePos.y() >= 0.0
         && scenePos.x() <= static_cast<qreal>(window->width())
         && scenePos.y() <= static_cast<qreal>(window->height());
+    QString coordinateMode = QStringLiteral("globalMapped");
+    if (!insideWindow && !window->isVisible()) {
+        const QPointF localFallback(globalX, globalY);
+        const bool fallbackInside = localFallback.x() >= 0.0
+            && localFallback.y() >= 0.0
+            && localFallback.x() <= static_cast<qreal>(window->width())
+            && localFallback.y() <= static_cast<qreal>(window->height());
+        if (fallbackInside) {
+            scenePos = localFallback;
+            insideWindow = true;
+            coordinateMode = QStringLiteral("hiddenWindowLocalFallback");
+        }
+    }
 
     map.insert(QStringLiteral("globalX"), globalX);
     map.insert(QStringLiteral("globalY"), globalY);
     map.insert(QStringLiteral("windowX"), scenePos.x());
     map.insert(QStringLiteral("windowY"), scenePos.y());
     map.insert(QStringLiteral("insideWindow"), insideWindow);
+    map.insert(QStringLiteral("coordinateMode"), coordinateMode);
 
     if (!insideWindow)
         return map;
@@ -1560,19 +1576,57 @@ QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal global
     QQuickItem *hitItem = deepestVisibleChildAt(content, scenePos);
     if (!hitItem)
         hitItem = content;
+    const QQuickItem *logicalItem = logicalEventTargetItem(hitItem, content);
+    if (!logicalItem)
+        logicalItem = hitItem;
 
-    const QPointF localPos = hitItem->mapFromScene(scenePos);
+    const QPointF localPos = logicalItem->mapFromScene(scenePos);
     map.insert(QStringLiteral("localX"), localPos.x());
     map.insert(QStringLiteral("localY"), localPos.y());
+    const QPointF hitLocalPos = hitItem->mapFromScene(scenePos);
+    map.insert(QStringLiteral("hitLocalX"), hitLocalPos.x());
+    map.insert(QStringLiteral("hitLocalY"), hitLocalPos.y());
 
-    QString objectName = hitItem->objectName().trimmed();
+    QString objectName = logicalItem->objectName().trimmed();
     if (objectName.isEmpty())
         objectName = QStringLiteral("unnamed");
     map.insert(QStringLiteral("objectName"), objectName);
-    map.insert(QStringLiteral("className"), QString::fromLatin1(hitItem->metaObject()->className()));
-    map.insert(QStringLiteral("path"), quickItemPath(hitItem, content));
-    map.insert(QStringLiteral("enabled"), hitItem->isEnabled());
-    map.insert(QStringLiteral("visible"), hitItem->isVisible());
+    map.insert(QStringLiteral("className"), QString::fromLatin1(logicalItem->metaObject()->className()));
+    map.insert(QStringLiteral("path"), quickItemPath(logicalItem, content));
+    map.insert(QStringLiteral("componentName"), componentNameForObject(logicalItem));
+    map.insert(QStringLiteral("qmlId"), qmlObjectName(logicalItem));
+    map.insert(QStringLiteral("qmlBaseUrl"), qmlBaseUrlString(logicalItem));
+    map.insert(QStringLiteral("enabled"), logicalItem->isEnabled());
+    map.insert(QStringLiteral("visible"), logicalItem->isVisible());
+    map.insert(QStringLiteral("x"), logicalItem->x());
+    map.insert(QStringLiteral("y"), logicalItem->y());
+    map.insert(QStringLiteral("width"), logicalItem->width());
+    map.insert(QStringLiteral("height"), logicalItem->height());
+    map.insert(QStringLiteral("z"), logicalItem->z());
+    map.insert(QStringLiteral("opacity"), logicalItem->opacity());
+    map.insert(QStringLiteral("clip"), logicalItem->clip());
+    const QVariantList hierarchy = quickItemHierarchy(logicalItem, content, window);
+    map.insert(QStringLiteral("hierarchy"), hierarchy);
+    map.insert(QStringLiteral("depth"), qMax(0, hierarchy.size() - 1));
+    map.insert(QStringLiteral("layerKind"), quickItemLayerKind(logicalItem, content));
+    map.insert(QStringLiteral("windowObjectName"), window->objectName().trimmed());
+    map.insert(QStringLiteral("windowClassName"), QString::fromLatin1(window->metaObject()->className()));
+    map.insert(QStringLiteral("windowTitle"), window->title());
+    QString hitObjectName = hitItem->objectName().trimmed();
+    if (hitObjectName.isEmpty())
+        hitObjectName = QStringLiteral("unnamed");
+    map.insert(QStringLiteral("hitObjectName"), hitObjectName);
+    map.insert(QStringLiteral("hitClassName"), QString::fromLatin1(hitItem->metaObject()->className()));
+    map.insert(QStringLiteral("hitPath"), quickItemPath(hitItem, content));
+    map.insert(QStringLiteral("hitComponentName"), componentNameForObject(hitItem));
+    map.insert(QStringLiteral("hitQmlId"), qmlObjectName(hitItem));
+    map.insert(QStringLiteral("hitDepth"), qMax(0, quickItemHierarchy(hitItem, content, window).size() - 1));
+    if (!hierarchy.isEmpty()) {
+        const QVariantMap root = hierarchy.constFirst().toMap();
+        map.insert(QStringLiteral("rootObjectName"), root.value(QStringLiteral("objectName")));
+        map.insert(QStringLiteral("rootClassName"), root.value(QStringLiteral("className")));
+        map.insert(QStringLiteral("rootComponentName"), root.value(QStringLiteral("componentName")));
+    }
 
     const QVariant textProp = hitItem->property("text");
     if (textProp.isValid())
@@ -1590,13 +1644,102 @@ QVariantMap RuntimeEvents::describeQuickItemAtGlobal(qreal globalX, qreal global
 QVariantMap RuntimeEvents::fallbackUiAt(qreal globalX, qreal globalY) const
 {
     QVariantMap fallback;
+    QQuickWindow *window = m_window.data();
     fallback.insert(QStringLiteral("globalX"), globalX);
     fallback.insert(QStringLiteral("globalY"), globalY);
     fallback.insert(QStringLiteral("insideWindow"), false);
     fallback.insert(QStringLiteral("objectName"), QStringLiteral("unknown"));
     fallback.insert(QStringLiteral("className"), QStringLiteral("unknown"));
     fallback.insert(QStringLiteral("path"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("componentName"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("qmlId"), QString());
+    fallback.insert(QStringLiteral("qmlBaseUrl"), QString());
+    fallback.insert(QStringLiteral("x"), 0.0);
+    fallback.insert(QStringLiteral("y"), 0.0);
+    fallback.insert(QStringLiteral("width"), 0.0);
+    fallback.insert(QStringLiteral("height"), 0.0);
+    fallback.insert(QStringLiteral("z"), 0.0);
+    fallback.insert(QStringLiteral("opacity"), 0.0);
+    fallback.insert(QStringLiteral("clip"), false);
+    fallback.insert(QStringLiteral("hierarchy"), QVariantList());
+    fallback.insert(QStringLiteral("depth"), -1);
+    fallback.insert(QStringLiteral("layerKind"), window ? QStringLiteral("outsideWindow") : QStringLiteral("unboundWindow"));
+    fallback.insert(QStringLiteral("windowObjectName"), window ? window->objectName().trimmed() : QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("windowClassName"),
+                    window ? QString::fromLatin1(window->metaObject()->className()) : QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("windowTitle"), window ? window->title() : QString());
+    fallback.insert(QStringLiteral("rootObjectName"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("rootClassName"), QStringLiteral("unknown"));
+    fallback.insert(QStringLiteral("rootComponentName"), QStringLiteral("unknown"));
     return fallback;
+}
+
+QVariantMap RuntimeEvents::describeQuickItemIdentity(const QQuickItem *item,
+                                                     const QQuickItem *rootItem,
+                                                     const QQuickWindow *window,
+                                                     int depth,
+                                                     bool isHit) const
+{
+    QVariantMap map;
+    if (!item)
+        return map;
+
+    QString objectName = item->objectName().trimmed();
+    if (objectName.isEmpty())
+        objectName = QStringLiteral("unnamed");
+
+    map.insert(QStringLiteral("objectName"), objectName);
+    map.insert(QStringLiteral("className"), QString::fromLatin1(item->metaObject()->className()));
+    map.insert(QStringLiteral("componentName"), componentNameForObject(item));
+    map.insert(QStringLiteral("qmlId"), qmlObjectName(item));
+    map.insert(QStringLiteral("qmlBaseUrl"), qmlBaseUrlString(item));
+    map.insert(QStringLiteral("path"), quickItemPath(item, rootItem));
+    map.insert(QStringLiteral("enabled"), item->isEnabled());
+    map.insert(QStringLiteral("visible"), item->isVisible());
+    map.insert(QStringLiteral("x"), item->x());
+    map.insert(QStringLiteral("y"), item->y());
+    map.insert(QStringLiteral("width"), item->width());
+    map.insert(QStringLiteral("height"), item->height());
+    map.insert(QStringLiteral("z"), item->z());
+    map.insert(QStringLiteral("opacity"), item->opacity());
+    map.insert(QStringLiteral("clip"), item->clip());
+    map.insert(QStringLiteral("depth"), depth);
+    map.insert(QStringLiteral("isHit"), isHit);
+    map.insert(QStringLiteral("isRoot"), item == rootItem);
+    map.insert(QStringLiteral("layerKind"), quickItemLayerKind(item, rootItem));
+    if (window) {
+        map.insert(QStringLiteral("windowObjectName"), window->objectName().trimmed());
+        map.insert(QStringLiteral("windowClassName"), QString::fromLatin1(window->metaObject()->className()));
+    }
+    return map;
+}
+
+QVariantList RuntimeEvents::quickItemHierarchy(const QQuickItem *item,
+                                               const QQuickItem *rootItem,
+                                               const QQuickWindow *window) const
+{
+    QVariantList hierarchy;
+    if (!item)
+        return hierarchy;
+
+    QList<const QQuickItem *> chain;
+    const QQuickItem *cursor = item;
+    while (cursor) {
+        chain.prepend(cursor);
+        if (cursor == rootItem)
+            break;
+        cursor = cursor->parentItem();
+    }
+
+    hierarchy.reserve(chain.size());
+    for (qsizetype index = 0; index < chain.size(); ++index) {
+        hierarchy.append(describeQuickItemIdentity(chain.at(index),
+                                                   rootItem,
+                                                   window,
+                                                   static_cast<int>(index),
+                                                   chain.at(index) == item));
+    }
+    return hierarchy;
 }
 
 QString RuntimeEvents::keyLabelForCode(int key) const
@@ -1648,13 +1791,60 @@ QQuickItem *RuntimeEvents::deepestVisibleChildAt(QQuickItem *item, const QPointF
     if (!item || !item->isVisible())
         return nullptr;
 
-    const QPointF itemPos = item->mapFromScene(scenePos);
-    QQuickItem *child = item->childAt(itemPos.x(), itemPos.y());
-    if (!child)
-        return item;
+    QList<QQuickItem *> children = item->childItems();
+    std::stable_sort(children.begin(),
+                     children.end(),
+                     [](QQuickItem *lhs, QQuickItem *rhs) {
+                         if (!lhs || !rhs)
+                             return lhs < rhs;
+                         if (!qFuzzyCompare(lhs->z(), rhs->z()))
+                             return lhs->z() < rhs->z();
+                         return false;
+                     });
+    for (auto it = children.crbegin(); it != children.crend(); ++it) {
+        QQuickItem *child = *it;
+        if (!child || !child->isVisible())
+            continue;
 
-    QQuickItem *deepest = deepestVisibleChildAt(child, scenePos);
-    return deepest ? deepest : child;
+        const QPointF childPos = child->mapFromScene(scenePos);
+        if (!child->contains(childPos))
+            continue;
+
+        if (QQuickItem *deepest = deepestVisibleChildAt(child, scenePos))
+            return deepest;
+    }
+
+    const QPointF itemPos = item->mapFromScene(scenePos);
+    if (!item->contains(itemPos))
+        return nullptr;
+    if (item->property("runtimeHitTransparent").toBool())
+        return nullptr;
+    return item;
+}
+
+const QQuickItem *RuntimeEvents::logicalEventTargetItem(const QQuickItem *item, const QQuickItem *rootItem) const
+{
+    if (!item)
+        return nullptr;
+
+    const QQuickItem *cursor = item;
+    while (cursor) {
+        if (quickItemHasStableIdentity(cursor))
+            return cursor;
+        if (cursor == rootItem)
+            break;
+        cursor = cursor->parentItem();
+    }
+    return item;
+}
+
+bool RuntimeEvents::quickItemHasStableIdentity(const QQuickItem *item) const
+{
+    if (!item)
+        return false;
+    if (!qmlObjectName(item).isEmpty())
+        return true;
+    return !item->objectName().trimmed().isEmpty();
 }
 
 QString RuntimeEvents::quickItemPath(const QQuickItem *item, const QQuickItem *rootItem) const
@@ -1674,4 +1864,74 @@ QString RuntimeEvents::quickItemPath(const QQuickItem *item, const QQuickItem *r
     }
 
     return parts.join(QStringLiteral(" > "));
+}
+
+QString RuntimeEvents::quickItemLayerKind(const QQuickItem *item, const QQuickItem *rootItem) const
+{
+    if (!item)
+        return QStringLiteral("unknown");
+
+    const QQuickItem *cursor = item;
+    bool reachedRoot = false;
+    while (cursor) {
+        const QString objectName = cursor->objectName().trimmed().toLower();
+        const QString className = QString::fromLatin1(cursor->metaObject()->className());
+        if (className.contains(QStringLiteral("Overlay"), Qt::CaseInsensitive)
+            || objectName.contains(QStringLiteral("overlay"))) {
+            return QStringLiteral("overlay");
+        }
+        if (objectName.contains(QStringLiteral("safearea")))
+            return QStringLiteral("safeArea");
+        if (cursor == rootItem)
+            reachedRoot = true;
+        cursor = cursor->parentItem();
+    }
+
+    return reachedRoot ? QStringLiteral("content") : QStringLiteral("window");
+}
+
+QString RuntimeEvents::qmlObjectName(const QObject *object) const
+{
+    if (!object)
+        return QString();
+
+    if (QQmlContext *context = QQmlEngine::contextForObject(object)) {
+        const QString name = context->nameForObject(object).trimmed();
+        if (!name.isEmpty())
+            return name;
+    }
+    if (QQmlContext *context = qmlContext(object)) {
+        const QString name = context->nameForObject(object).trimmed();
+        if (!name.isEmpty())
+            return name;
+    }
+    return QString();
+}
+
+QString RuntimeEvents::qmlBaseUrlString(const QObject *object) const
+{
+    if (!object)
+        return QString();
+
+    if (QQmlContext *context = QQmlEngine::contextForObject(object))
+        return context->baseUrl().toString();
+    if (QQmlContext *context = qmlContext(object))
+        return context->baseUrl().toString();
+    return QString();
+}
+
+QString RuntimeEvents::componentNameForObject(const QObject *object) const
+{
+    if (!object)
+        return QStringLiteral("unknown");
+
+    const QString qmlName = qmlObjectName(object);
+    if (!qmlName.isEmpty())
+        return qmlName;
+
+    const QString objectName = object->objectName().trimmed();
+    if (!objectName.isEmpty())
+        return objectName;
+
+    return QString::fromLatin1(object->metaObject()->className());
 }

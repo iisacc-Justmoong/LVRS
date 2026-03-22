@@ -5,7 +5,9 @@ import LVRS 1.0
 Item {
     id: root
 
-    // Supported triggers: clicked, pressed, released, entered, exited, hoverChanged, wheel, keyPressed, keyReleased, globalPressed, globalContextRequested
+    // Supported triggers: clicked, pressed, released, entered, exited, hoverChanged, wheel, keyPressed, keyReleased,
+    // globalPressed, globalContextRequested, touchStarted, touchUpdated, touchEnded, touchCancelled,
+    // holdStarted/longPressed, dragStarted, dragUpdated, dragEnded, swipeDetected, nativeGestureDetected, gestureRecognized
     property string trigger: "clicked"
     property var action: null
     property var payload: ({})
@@ -20,6 +22,7 @@ Item {
     property bool includeInputState: false
     property bool preferBackendState: false
     property bool includeBackendSummary: false
+    property bool runtimeHitTransparent: true
     property double lastContextTimestamp: -1
     property real lastContextX: -1
     property real lastContextY: -1
@@ -50,6 +53,27 @@ Item {
 
     function isGlobalPointerTrigger(name) {
         return name === "globalPressed" || name === "globalContextRequested"
+    }
+
+    function normalizedGestureTrigger(name) {
+        if (name === "longPressed")
+            return "holdStarted"
+        return name
+    }
+
+    function isGestureTrigger(name) {
+        const normalized = normalizedGestureTrigger(name)
+        return normalized === "touchStarted"
+            || normalized === "touchUpdated"
+            || normalized === "touchEnded"
+            || normalized === "touchCancelled"
+            || normalized === "holdStarted"
+            || normalized === "dragStarted"
+            || normalized === "dragUpdated"
+            || normalized === "dragEnded"
+            || normalized === "swipeDetected"
+            || normalized === "nativeGestureDetected"
+            || normalized === "gestureRecognized"
     }
 
     function isContextGesture(buttons, modifiers) {
@@ -171,6 +195,24 @@ Item {
         return data
     }
 
+    function gesturePayload(eventData) {
+        const data = eventData ? Object.assign({}, eventData) : ({})
+        let inputState = undefined
+        if (root.includeInputState)
+            inputState = root.resolveInputState()
+        if (root.includeUiHit && (!data.ui || !root.mapHasEntries(data.ui))) {
+            const globalX = data.globalX !== undefined ? Number(data.globalX) : Number(data.x)
+            const globalY = data.globalY !== undefined ? Number(data.globalY) : Number(data.y)
+            if (!isNaN(globalX) && !isNaN(globalY))
+                data.ui = root.resolveUiAt(globalX, globalY, inputState)
+        }
+        if (root.includeInputState)
+            data.input = inputState
+        if (root.includeBackendSummary)
+            data.backend = root.resolveBackendSummary()
+        return data
+    }
+
     function isDuplicateContextEvent(x, y, nowMs) {
         if (lastContextTimestamp < 0)
             return false
@@ -219,12 +261,15 @@ Item {
     }
 
     function ensureGlobalRuntimeEventsAttached() {
-        if (!root.enabled || !root.isGlobalPointerTrigger(root.trigger) || !RuntimeEvents)
+        const needsRuntime = root.isGlobalPointerTrigger(root.trigger) || root.isGestureTrigger(root.trigger)
+        if (!root.enabled || !needsRuntime || !RuntimeEvents)
             return
         if (root.window)
             RuntimeEvents.attachWindow(root.window)
         else
             RuntimeEvents.start()
+        if (root.isGestureTrigger(root.trigger) && GestureEvents && GestureEvents.attachRuntime)
+            GestureEvents.attachRuntime(RuntimeEvents)
     }
 
     function fire(eventData) {
@@ -277,12 +322,73 @@ Item {
         }
     }
 
+    Connections {
+        target: GestureEvents
+        enabled: root.enabled && root.isGestureTrigger(root.trigger)
+
+        function onTouchStarted(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "touchStarted")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onTouchUpdated(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "touchUpdated")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onTouchEnded(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "touchEnded")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onTouchCancelled(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "touchCancelled")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onHoldStarted(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "holdStarted")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onDragStarted(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "dragStarted")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onDragUpdated(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "dragUpdated")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onDragEnded(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "dragEnded")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onSwipeDetected(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "swipeDetected")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onNativeGestureDetected(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "nativeGestureDetected")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onGestureRecognized(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "gestureRecognized")
+                root.fire(root.gesturePayload(eventData))
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         enabled: root.enabled && root.isPointerTrigger(root.trigger)
         hoverEnabled: root.trigger === "entered" || root.trigger === "exited" || root.trigger === "hoverChanged"
         acceptedButtons: root.acceptedButtons
         propagateComposedEvents: true
+        property bool runtimeHitTransparent: true
 
         onClicked: function(mouse) {
             if (root.trigger === "clicked")

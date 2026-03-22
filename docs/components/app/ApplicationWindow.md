@@ -116,6 +116,7 @@ Aliases to internal scaffold include:
 - layout policy: `scaffoldLayoutMode`, `scaffoldLayoutPlatform`, `scaffoldForceDesktopOnLargeMobile`, `scaffoldMobileDesktopMinWidth`
 - navigation mode policy: `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`, `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
 - page stack: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `internalPageStackEnabled`
+- interactive transition bridge: `pageTransitionController`
 
 Adaptive state outputs:
 
@@ -171,6 +172,7 @@ Signals:
 - Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
 - Default mobile sizing now comes from the `Theme` mobile token profile, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
+- `pageTransitionController` always follows the router that `activePageRouter` currently resolves to, so shell-level gesture drivers do not need to repeat router lookup.
 
 ## Usage
 

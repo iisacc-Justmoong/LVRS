@@ -24,12 +24,29 @@ Stack and path state:
 - `path` (SwiftUI-like stack entries)
 - `currentPath`, `currentParams`
 - `depth`, `canGoBack`, `currentPageItem`
+- interactive transition state:
+  - `interactiveTransitionActive`
+  - `interactiveTransitionProgress`
+  - `interactiveTransitionDirection`
+  - `interactiveTransitionOperation`
+  - `interactiveTransitionFromPath`, `interactiveTransitionToPath`
+  - `interactiveTransitionFromParams`, `interactiveTransitionToParams`
+  - `interactiveTransitionVelocityX`, `interactiveTransitionVelocityY`
+  - `interactiveTransitionMeta`
+  - `interactiveTransitionPreviewItem`
+  - `interactiveTransitionCanCommit`
 
 Presentation flags:
 
 - `enforcePageViewport`
 - `isolateInactivePages`
 - `retainInactivePageCount`
+- `interactiveTransitionsEnabled`
+- `interactiveTransitionSettleDuration`
+- `interactiveTransitionCommitProgress`
+- `interactiveTransitionVelocityThreshold`
+- `interactiveTransitionOutgoingParallaxFactor`
+- `interactiveTransitionIncomingPreviewFactor`
 
 Global registration:
 
@@ -40,11 +57,30 @@ Signals:
 - `navigated(path, params)`
 - `navigationFailed(path)`
 - `componentNavigated(component)`
+- `interactiveTransitionStarted(state)`
+- `interactiveTransitionUpdated(state)`
+- `interactiveTransitionCommitted(state)`
+- `interactiveTransitionCancelled(state)`
+- `interactiveTransitionRejected(reason, state)`
 
 Navigation methods:
 
 - path-based: `go`, `push`, `replace`, `setRoot`, `back`, `pop`, `popToRoot`
 - component-based: `goTo`, `replaceWith`, `setRootComponent`
+- interactive:
+  - `beginInteractiveTransition(spec)`
+  - `beginInteractiveBack(meta?)`
+  - `beginInteractivePush(path, params?, meta?)`
+  - `beginInteractiveReplace(path, params?, meta?)`
+  - `beginInteractiveSetRoot(path, params?, meta?)`
+  - `beginInteractivePushComponent(component, params?, meta?)`
+  - `beginInteractiveReplaceComponent(component, params?, meta?)`
+  - `beginInteractiveSetRootComponent(component, params?, meta?)`
+  - `updateInteractiveTransition(progress, details?)`
+  - `shouldCommitInteractiveTransition(progress?, velocityX?, velocityY?)`
+  - `finishInteractiveTransition(commit?)`
+  - `cancelInteractiveTransition()`
+  - `interactiveTransitionState()`
 
 ## Route Grammar
 
@@ -60,6 +96,11 @@ Navigation methods:
 - `applyPageViewportContract` and `applySingleChildViewportContract` enforce viewport-safe page sizing.
 - When `isolateInactivePages == true`, non-retained stack items are hidden/disabled/opacity-zero.
 - Router can sync bindings with `ViewModels` and snapshot with `ViewStateTracker` when available.
+- Interactive transition orchestration is delegated to an internal driver object so `PageRouter` stays the source of committed stack truth.
+- Interactive transitions do not mutate `path` or `currentPath` until `finishInteractiveTransition(true)` commits.
+- Backward interactive transitions reuse the previous stack item as the preview surface.
+- Forward interactive transitions instantiate a live preview item above the stack; preview pages therefore run ordinary QML lifecycle code before commit.
+- A competing non-interactive navigation call aborts the active interactive transition first.
 
 ## Usage
 
@@ -74,4 +115,14 @@ LV.PageRouter {
     ]
     initialPath: "/"
 }
+```
+
+Interactive back-swipe:
+
+```qml
+if (!router.interactiveTransitionActive)
+    router.beginInteractiveBack({ source: "edge-pan" })
+
+router.updateInteractiveTransition(progress, { velocityX: velocityX })
+router.finishInteractiveTransition()
 ```
