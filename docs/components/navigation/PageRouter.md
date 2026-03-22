@@ -100,6 +100,7 @@ Navigation methods:
 - Interactive transitions do not mutate `path` or `currentPath` until `finishInteractiveTransition(true)` commits.
 - Backward interactive transitions reuse the previous stack item as the preview surface.
 - Forward interactive transitions instantiate a live preview item above the stack; preview pages therefore run ordinary QML lifecycle code before commit.
+- Interactive transition commits suppress the built-in `StackView` push/pop animation and apply the stack mutation immediately, so the user-driven drag remains the only visible motion.
 - A competing non-interactive navigation call aborts the active interactive transition first.
 
 ## Usage

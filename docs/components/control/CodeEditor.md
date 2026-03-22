@@ -30,7 +30,7 @@ Layout/visual:
 - `headerHeight`, `headerSpacing`, `topInset`
 - `insetHorizontal`, `insetVertical`
 - `shapeStyle`, `cornerRadius`
-- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`
+- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`
 
 Signals and methods:
 
@@ -42,6 +42,7 @@ Signals and methods:
 - Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
 - Header area height is included in top inset only when `showSnippetHeader` is true.
 - Includes `InputMethodGuard` + `WheelScrollGuard` for IME/scroll safety.
+- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` uses `NativeRendering` so software-keyboard edit gestures and repeat delete stay on the platform-native path.
 
 ## Usage
 

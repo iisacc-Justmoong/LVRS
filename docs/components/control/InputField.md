@@ -33,7 +33,7 @@ Search/clear visuals:
 
 Inherited text/input API (from `AbstractInputBar`):
 
-- `text`, `placeholderText`, `readOnly`, `validator`, `maximumLength`, `inputMethodHints`, `echoMode`, `accepted()`, `textEdited(...)`
+- `text`, `placeholderText`, `readOnly`, `validator`, `maximumLength`, `inputMethodHints`, `echoMode`, `renderType`, `preferNativeGestures`, `preferNativeTextInteraction`, `accepted()`, `textEdited(...)`
 
 ## Behavior Contract
 
@@ -43,6 +43,7 @@ Inherited text/input API (from `AbstractInputBar`):
 - Search icon rendering uses a supersampled `Image.sourceSize` from `RenderQuality` and the active device pixel ratio instead of custom canvas painting.
 - Clear button appears only when `clearButtonVisible && enabled && !readOnly && text.length > 0`.
 - Clear click sets `text = ""` and calls `forceInputFocus()`.
+- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextInput` uses `NativeRendering` so software-keyboard repeat delete and keyboard-driven edit gestures stay on the platform-native path.
 - `style == inlineStyle` keeps spacing and affordances intact, but forces the field background fill to stay transparent across default, hover, pressed, focused, and disabled states.
 
 ## Usage

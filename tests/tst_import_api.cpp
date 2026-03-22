@@ -34,6 +34,7 @@ private slots:
     void hierarchy_editable_drag_per_item_lock_contract_loads();
     void hierarchy_mobile_drag_hold_contract_loads();
     void hierarchy_mobile_activation_commits_on_release_contract_loads();
+    void hierarchy_mobile_reactivation_reemits_active_signal();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -52,6 +53,7 @@ private slots:
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
     void control_icons_use_supersampled_raster_contract();
+    void input_field_ios_native_text_interaction_contract_loads();
     void input_field_search_icon_mobile_scaling_contract_loads();
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
@@ -1315,6 +1317,99 @@ Window {
     QTRY_COMPARE(list->property("activeItem").value<QObject *>(), branchItemObject);
     QTRY_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("branch"));
     QTRY_VERIFY(branchItemObject->property("active").toBool());
+}
+
+void ImportApiTests::hierarchy_mobile_reactivation_reemits_active_signal()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Window
+import LVRS as LV
+
+Window {
+    id: root
+    width: 320
+    height: 240
+    visible: true
+
+    Component.onCompleted: {
+        LV.Theme.targetOverride = "ios"
+        Qt.callLater(root.captureActiveItem)
+    }
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    property int lookupAttempts: 0
+    property var rootItemRef: null
+
+    LV.Hierarchy {
+        id: hierarchy
+        objectName: "hierarchy"
+        anchors.fill: parent
+        editable: true
+        model: [
+            { key: "root", depth: 0, label: "Root", expanded: true, selected: true },
+            { key: "branch", depth: 1, label: "Branch" },
+            { key: "sibling", depth: 0, label: "Sibling" }
+        ]
+    }
+
+    function captureActiveItem() {
+        if (rootItemRef || lookupAttempts >= 40)
+            return
+
+        lookupAttempts += 1
+        if (!hierarchy.activeListItem || hierarchy.activeListItemKey !== "root") {
+            Qt.callLater(captureActiveItem)
+            return
+        }
+
+        rootItemRef = hierarchy.activeListItem
+    }
+
+    property bool mobileRetapContractReady:
+        LV.Theme.mobileTarget
+        && rootItemRef !== null
+        && hierarchy.activeListItem === rootItemRef
+        && hierarchy.activeListItemKey === "root"
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+    QTRY_VERIFY(root->property("mobileRetapContractReady").toBool());
+
+    auto *hierarchy = root->findChild<QObject *>(QStringLiteral("hierarchy"));
+    QVERIFY(hierarchy);
+    QObject *rootItemObject = root->property("rootItemRef").value<QObject *>();
+    QVERIFY(rootItemObject);
+    auto *rootItem = qobject_cast<QQuickItem *>(rootItemObject);
+    QVERIFY(rootItem);
+
+    QSignalSpy activationSpy(hierarchy, SIGNAL(listItemActivated(QVariant,int,int)));
+    QVERIFY(activationSpy.isValid());
+
+    const QPointF rootPoint = rootItem->mapToScene(QPointF(rootItem->width() * 0.5,
+                                                           rootItem->height() * 0.5));
+    const QPoint rootPointInt(qRound(rootPoint.x()), qRound(rootPoint.y()));
+
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
+    QCoreApplication::processEvents();
+    QTest::qWait(50);
+    QCOMPARE(activationSpy.count(), 0);
+
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
+
+    QTRY_COMPARE(activationSpy.count(), 1);
+    QCOMPARE(hierarchy->property("activeListItem").value<QObject *>(), rootItemObject);
+    QCOMPARE(hierarchy->property("activeListItemKey").toString(), QStringLiteral("root"));
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()
@@ -2895,6 +2990,38 @@ Item {
     assertSupersampledCanvas(QStringLiteral("toggleSwitch"),
                              QStringLiteral("toggleSwitch_knobCanvas"),
                              "knobRasterScale");
+}
+
+void ImportApiTests::input_field_ios_native_text_interaction_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.InputField {
+        id: field
+        visible: false
+        placeholderText: "Search"
+    }
+
+    property bool iosNativeTextReady:
+        LV.Theme.mobileTarget
+        && field.preferNativeGestures
+        && field.preferNativeTextInteraction
+        && field.renderType === TextInput.NativeRendering
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
 }
 
 void ImportApiTests::input_field_search_icon_mobile_scaling_contract_loads()

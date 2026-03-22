@@ -19,6 +19,7 @@ class TextEditorTests : public QObject
 private slots:
     void text_editor_default_contract_and_utility_api();
     void text_editor_mode_independent_render_contract_and_submit_signal();
+    void text_editor_ios_native_text_interaction_contract();
 };
 
 void TextEditorTests::text_editor_default_contract_and_utility_api()
@@ -160,6 +161,42 @@ LV.ApplicationWindow {
     QKeyEvent submitEvent(QEvent::KeyPress, Qt::Key_Return, Qt::ControlModifier, QStringLiteral("\n"));
     QCoreApplication::sendEvent(textEdit, &submitEvent);
     QTRY_COMPARE(root->property("submitCount").toInt(), 1);
+}
+
+void TextEditorTests::text_editor_ios_native_text_interaction_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 480
+    height: 320
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    property bool iosNativeTextReady:
+        LV.Theme.mobileTarget
+        && editor.preferNativeGestures
+        && editor.preferNativeTextInteraction
+        && editor.editorItem.renderType === TextEdit.NativeRendering
+
+    LV.TextEditor {
+        id: editor
+        width: 320
+        height: 180
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
 }
 
 QTEST_MAIN(TextEditorTests)

@@ -1660,32 +1660,35 @@ Item {
             requestActivate(item)
     }
 
-    function applyActiveState(item, index, emitSignal) {
+    function applyActiveState(item, index, emitSignal, forceSignal) {
         const nextItem = item || null
         const nextIndex = nextItem ? index : -1
         const nextId = nextItem ? effectiveItemId(nextItem, nextIndex) : -1
         const nextKey = nextItem ? effectiveItemKey(nextItem, nextIndex) : ""
 
         const changed = activeItem !== nextItem || activeItemId !== nextId || activeItemKey !== nextKey
-        if (!changed)
+        const shouldEmit = !!emitSignal && (changed || !!forceSignal)
+        if (!changed && !shouldEmit)
             return false
 
-        _applyingActiveState = true
-        activeItem = nextItem
-        activeItemId = nextId
-        activeItemKey = nextKey
-        _applyingActiveState = false
+        if (changed) {
+            _applyingActiveState = true
+            activeItem = nextItem
+            activeItemId = nextId
+            activeItemKey = nextKey
+            _applyingActiveState = false
+        }
 
-        if (nextItem)
+        if (nextItem && (changed || !!forceSignal))
             ensureVisibleRequested(nextItem.y, nextItem.height)
 
-        if (emitSignal)
+        if (shouldEmit)
             activeChanged(nextItem, nextId, nextIndex)
 
-        return true
+        return changed || !!forceSignal
     }
 
-    function requestActivate(item) {
+    function requestActivate(item, forceSignalIfAlreadyActive) {
         if (!item || !itemCanBecomeActive(item) || !isManagedItem(item))
             return
         if (item.hierarchyList !== control)
@@ -1707,8 +1710,8 @@ Item {
         if (!isItemVisibleInList(currentItems, item, index))
             return
 
-        const changed = applyActiveState(item, index, true)
-        if (changed && keyboardNavigationEnabled && !control.activeFocus)
+        const activated = applyActiveState(item, index, true, !!forceSignalIfAlreadyActive)
+        if (activated && keyboardNavigationEnabled && !control.activeFocus)
             control.forceActiveFocus()
     }
 

@@ -36,7 +36,7 @@ Layout/visual:
 - `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`
 - `insetHorizontal`, `insetVertical`
 - `shapeStyle`, `cornerRadius`
-- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`
+- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`
 
 Signals and methods:
 
@@ -47,7 +47,8 @@ Signals and methods:
 
 - Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
 - Preview pane is shown only when `showRenderedOutput == true`.
-- Includes `InputMethodGuard` and two `WheelScrollGuard` instances (edit pane + preview pane).
+- Uses a `ScrollView`-hosted `TextArea` for the edit surface, plus `InputMethodGuard` and a `WheelScrollGuard` for the preview pane.
+- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` switches to `NativeRendering` so platform software-keyboard editing gestures and repeat delete stay on the native interaction path.
 - Current defaults force plain text wrapping (`resolvedWrapMode`, `resolvedTextFormat`) unless component logic is changed.
 
 ## Usage

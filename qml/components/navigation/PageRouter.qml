@@ -221,13 +221,20 @@ Item {
     function applyStackOperation(target, params, mode) {
         var payload = params !== undefined ? params : ({})
         var item = null
+        var immediate = interactiveTransitionDriver.commitApplying ? StackView.Immediate : undefined
         if (mode === "replace") {
-            item = stackView.replace(target, payload)
+            item = immediate !== undefined
+                ? stackView.replace(target, payload, immediate)
+                : stackView.replace(target, payload)
         } else if (mode === "set") {
             stackView.clear()
-            item = stackView.push(target, payload)
+            item = immediate !== undefined
+                ? stackView.push(target, payload, immediate)
+                : stackView.push(target, payload)
         } else {
-            item = stackView.push(target, payload)
+            item = immediate !== undefined
+                ? stackView.push(target, payload, immediate)
+                : stackView.push(target, payload)
         }
 
         applyPageViewportContract(item)
@@ -272,7 +279,10 @@ Item {
         if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
             abortInteractiveTransition()
         if (stackView.depth > 1) {
-            stackView.pop()
+            if (interactiveTransitionDriver.commitApplying)
+                stackView.pop(null, StackView.Immediate)
+            else
+                stackView.pop()
             applyPageViewportContract(stackView.currentItem)
             scheduleActivePagePresentationSync()
             if (path.length > 1) {
@@ -291,7 +301,10 @@ Item {
         if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
             abortInteractiveTransition()
         if (stackView.depth > 1) {
-            stackView.pop(stackView.get(0))
+            if (interactiveTransitionDriver.commitApplying)
+                stackView.pop(stackView.get(0), StackView.Immediate)
+            else
+                stackView.pop(stackView.get(0))
             applyPageViewportContract(stackView.currentItem)
             scheduleActivePagePresentationSync()
             if (path.length > 0) {

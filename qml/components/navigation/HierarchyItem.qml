@@ -411,7 +411,7 @@ AbstractButton {
             return
 
         if (control.hierarchyList && control.hierarchyList.requestActivate) {
-            control.hierarchyList.requestActivate(control)
+            control.hierarchyList.requestActivate(control, true)
             return
         }
 
@@ -521,8 +521,14 @@ AbstractButton {
                     : control.backgroundColor
     }
 
-    onPressed: control.requestActivationFromInteraction("press")
-    onClicked: control.requestActivationFromInteraction("click")
+    onPressed: {
+        if (!control.pointerDragRequiresLongPress)
+            control.requestActivationFromInteraction("press")
+    }
+    onClicked: {
+        if (!control.pointerDragRequiresLongPress)
+            control.requestActivationFromInteraction("click")
+    }
 
     DragHandler {
         id: itemDragHandler
@@ -686,7 +692,6 @@ AbstractButton {
                 control._mobilePointerPressed = true
                 control._mobilePointerDragging = false
                 control.requestActivationFromInteraction("press")
-                control.pressed()
             }
 
             onClicked: function(mouse) {

@@ -55,7 +55,9 @@ FocusScope {
     property int cornerRadius: Theme.radiusMd
     property bool showScrollBar: true
     property bool autoFocusOnPress: true
-    property bool preferNativeGestures: Platform.mobile
+    property bool preferNativeGestures: Theme.mobileTarget
+    readonly property bool preferNativeTextInteraction: preferNativeGestures
+        && Theme.effectiveRuntimeProfile.ios === true
     property bool showRenderedOutput: true
     property int outputSpacing: Theme.gap8
     property int outputMinHeight: Theme.controlHeightMd * 2
@@ -199,15 +201,11 @@ FocusScope {
             color: control.resolvedEditAreaBackgroundColor
         }
 
-        Flickable {
-            id: flickable
+        ScrollView {
+            id: editorScroll
             anchors.fill: parent
             clip: true
-            interactive: (contentHeight > height || contentWidth > width)
-                         && (!control.preferNativeGestures || !editor.activeFocus)
-            boundsBehavior: Flickable.StopAtBounds
-            contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
-            contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
+            enabled: control.enabled
 
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
@@ -216,15 +214,17 @@ FocusScope {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
 
-            TextEdit {
+            TextArea {
                 id: editor
                 objectName: "editorTextEdit"
-                x: control.insetHorizontal
-                y: control.centeredTextY
-                width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: Math.max(control.textLineBoxHeight, Math.ceil(contentHeight))
+                width: Math.max(1,
+                                editorScroll.availableWidth > 0
+                                    ? editorScroll.availableWidth
+                                    : editorScroll.width)
                 wrapMode: control.effectiveWrapMode
                 textFormat: control.effectiveTextFormat
+                placeholderText: control.placeholderText
+                placeholderTextColor: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
                 color: control.enabled ? control.textColor : control.textColorDisabled
                 selectionColor: control.selectionColor
                 selectedTextColor: control.selectedTextColor
@@ -234,12 +234,22 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
-                renderType: TextEdit.QtRendering
+                renderType: control.preferNativeTextInteraction
+                    ? TextEdit.NativeRendering
+                    : TextEdit.QtRendering
                 activeFocusOnPress: true
                 cursorVisible: control.enabled && activeFocus && !readOnly
+                leftPadding: control.insetHorizontal
+                rightPadding: control.insetHorizontal
+                topPadding: control.centeredTextY
+                bottomPadding: control.insetVertical
                 selectByMouse: true
                 persistentSelection: true
                 activeFocusOnTab: true
+                background: Item {
+                    implicitWidth: 0
+                    implicitHeight: 0
+                }
 
                 onTextChanged: control.textEdited(text)
 
@@ -265,31 +275,6 @@ FocusScope {
         InputMethodGuard {
             target: editor
             guardEnabled: control.enabled && !control.readOnly
-        }
-
-        WheelScrollGuard {
-            enabled: !control.preferNativeGestures
-            anchors.fill: parent
-            targetFlickable: flickable
-            consumeInside: true
-        }
-
-        Label {
-            style: body
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: control.insetHorizontal
-            anchors.rightMargin: control.insetHorizontal
-            anchors.topMargin: control.centeredTextY
-            text: control.placeholderText
-            color: control.enabled ? control.placeholderColor : control.placeholderColorDisabled
-            opacity: control.placeholderOpacity
-            visible: control.empty
-            wrapMode: Text.WordWrap
-            lineHeightMode: Text.FixedHeight
-            lineHeight: control.textLineBoxHeight
-            renderType: Text.QtRendering
         }
 
         MouseArea {

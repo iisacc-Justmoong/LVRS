@@ -573,6 +573,10 @@ Item {
     property string interactiveToPath: router.interactiveTransitionToPath
     property real currentPageX: router.currentPageItem ? router.currentPageItem.x : 0
     property bool currentPageEnabled: router.currentPageItem ? router.currentPageItem.enabled : false
+    property bool currentStackBusy: router.currentPageItem
+        && router.currentPageItem.StackView.view
+        ? router.currentPageItem.StackView.view.busy
+        : false
     property bool previewVisible: router.interactiveTransitionPreviewItem
         ? router.interactiveTransitionPreviewItem.visible
         : false
@@ -676,6 +680,8 @@ Item {
     QTRY_VERIFY(!root->property("interactiveActive").toBool());
     QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
     QCOMPARE(root->property("depth").toInt(), 1);
+    QVERIFY(!root->property("currentStackBusy").toBool());
+    QVERIFY(qAbs(root->property("currentPageX").toReal()) < 0.5);
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
     QTRY_VERIFY(root->property("interactiveActive").toBool());

@@ -43,7 +43,9 @@ FocusScope {
     property bool showSnippetHeader: true
     property bool showScrollBar: true
     property bool autoFocusOnPress: true
-    property bool preferNativeGestures: Platform.mobile
+    property bool preferNativeGestures: Theme.mobileTarget
+    readonly property bool preferNativeTextInteraction: preferNativeGestures
+        && Theme.effectiveRuntimeProfile.ios === true
 
     property int fieldMinHeight: Theme.controlHeightMd * 4
     property int editorHeight: fieldMinHeight
@@ -224,7 +226,9 @@ FocusScope {
                 font.styleName: control.fontStyleName
                 font.letterSpacing: control.fontLetterSpacing
                 font.preferShaping: true
-                renderType: TextEdit.QtRendering
+                renderType: control.preferNativeTextInteraction
+                    ? TextEdit.NativeRendering
+                    : TextEdit.QtRendering
                 activeFocusOnPress: true
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true

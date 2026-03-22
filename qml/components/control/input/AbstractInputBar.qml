@@ -52,7 +52,9 @@ FocusScope {
     property int insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
     property int centeredTextHeight: Theme.scaleTextMetric(16)
-    property bool preferNativeGestures: Platform.mobile
+    property bool preferNativeGestures: Theme.mobileTarget
+    readonly property bool preferNativeTextInteraction: preferNativeGestures
+        && Theme.effectiveRuntimeProfile.ios === true
 
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
@@ -239,7 +241,9 @@ FocusScope {
         font.letterSpacing: Theme.textBodyLetterSpacing
         font.preferShaping: true
         verticalAlignment: TextInput.AlignVCenter
-        renderType: TextInput.QtRendering
+        renderType: control.preferNativeTextInteraction
+            ? TextInput.NativeRendering
+            : TextInput.QtRendering
         activeFocusOnPress: true
         activeFocusOnTab: true
         clip: true
