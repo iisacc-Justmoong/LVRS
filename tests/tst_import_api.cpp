@@ -3307,6 +3307,20 @@ Item {
         selectionDirection: "auto"
     }
 
+    LV.MenuItem {
+        id: noTrailingConstrainedItem
+        objectName: "noTrailingConstrainedItem"
+        visible: false
+        itemWidth: 120
+        width: 160
+        label: "A Very Wide Menu Entry"
+        keyVisible: false
+        showChevron: false
+        hasChildItems: false
+        expanded: false
+        selectionDirection: "auto"
+    }
+
     property bool menuItemContract:
         collapsedSubmenu.keyVisible
         && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
@@ -3319,6 +3333,7 @@ Item {
         && hiddenKey.keyVisible === false
         && wideItem.implicitWidth > wideItem.itemWidth
         && constrainedItem.width === 120
+        && noTrailingConstrainedItem.width === 160
 }
 )";
 
@@ -3361,6 +3376,27 @@ Item {
              qPrintable(QStringLiteral("Chevron must stay within the trailing group (%1 <= %2).")
                             .arg(chevronRight)
                             .arg(trailingGroup->width())));
+
+    QObject *noTrailingConstrainedItem = root->findChild<QObject *>(QStringLiteral("noTrailingConstrainedItem"));
+    QVERIFY(noTrailingConstrainedItem);
+
+    auto *noTrailingContentRow =
+        qobject_cast<QQuickItem *>(noTrailingConstrainedItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
+    auto *noTrailingLabelNode =
+        qobject_cast<QQuickItem *>(noTrailingConstrainedItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
+    QObject *noTrailingGroup =
+        noTrailingConstrainedItem->findChild<QObject *>(QStringLiteral("menuItem_trailingGroup"));
+
+    QVERIFY(noTrailingContentRow);
+    QVERIFY(noTrailingLabelNode);
+    QVERIFY(noTrailingGroup);
+
+    const qreal noTrailingAvailableLabelWidth = noTrailingContentRow->width() - noTrailingLabelNode->x();
+    QVERIFY2(qAbs(noTrailingLabelNode->width() - noTrailingAvailableLabelWidth) < 0.01,
+             qPrintable(QStringLiteral("Label should consume the full available width when trailing content is absent (%1 vs %2).")
+                            .arg(noTrailingLabelNode->width())
+                            .arg(noTrailingAvailableLabelWidth)));
+    QVERIFY(!noTrailingGroup->property("visible").toBool());
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()
@@ -3516,6 +3552,19 @@ Item {
         ]
     }
 
+    LV.ContextMenu {
+        id: inferredShortcutMenu
+        visible: false
+        itemWidth: 120
+        items: [
+            {
+                label: "Entry Without Shortcut",
+                showChevron: false,
+                hasChildItems: false
+            }
+        ]
+    }
+
     readonly property real contentDrivenBaseWidth:
         contentDrivenMenu.itemWidth + contentDrivenMenu.leftPadding + contentDrivenMenu.rightPadding
     readonly property real widthDrivenContentWidth:
@@ -3537,7 +3586,8 @@ Item {
         + narrowWidthMenu.resolvedPopupWidth + ","
         + narrowWidthContentWidth + ","
         + narrowWidthMenu.resolvedItemWidth + ","
-        + narrowWidthMenu.contentItem.width
+        + narrowWidthMenu.contentItem.width + ","
+        + inferredShortcutMenu.itemKeyVisible(inferredShortcutMenu.entryAt(0))
 
     property bool widthExpansionContract:
         contentDrivenMenu.implicitWidth > contentDrivenBaseWidth
@@ -3551,6 +3601,7 @@ Item {
         && Math.abs(narrowWidthMenu.resolvedItemWidth - narrowWidthContentWidth) < 0.01
         && Math.abs(narrowWidthMenu.contentItem.width - narrowWidthContentWidth) < 0.01
         && narrowWidthMenu.width > 100
+        && !inferredShortcutMenu.itemKeyVisible(inferredShortcutMenu.entryAt(0))
 }
 )";
 

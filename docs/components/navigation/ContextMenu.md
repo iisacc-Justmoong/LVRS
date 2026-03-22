@@ -67,6 +67,7 @@ Supported object fields include:
 Callback receives context `{ index, item, menu, eventName, payload, emit(), close() }`.
 
 Chevron render condition is `showChevron && hasChildItems` (resolved from entry fields).
+Shortcut visibility defaults to `true` only when shortcut text exists; entries without `key`/`shortcut`/`keyText` do not reserve trailing shortcut space unless explicitly requested.
 
 ## Placement Contract
 
@@ -83,6 +84,7 @@ Chevron render condition is `showChevron && hasChildItems` (resolved from entry 
 - The popup frame itself is promoted to at least `implicitWidth`, so a narrow explicit `width` cannot clamp the menu below its content-driven size.
 - Delegate rows and dividers consume `resolvedItemWidth`, so a combo-triggered menu can grow wider than the trigger itself when content or caller sizing requires it.
 - Delegate `MenuItem` rows remain responsive inside `resolvedItemWidth`, so constrained menus do not push label/shortcut/chevron content outside the popup bounds or collapse the internal spacer into negative geometry.
+- Width probing uses each row's unconstrained natural content width, so visible text elision does not feed back into popup sizing.
 
 ## Usage
 

@@ -45,6 +45,7 @@ Layout and visuals:
 
 - `selected`/`inactive` states map to different background colors.
 - `implicitWidth` expands beyond `itemWidth` when icon/label/key/chevron content requires more space.
+- Natural label and shortcut widths are measured independently from the displayed elided text, so constrained rendering does not feed back into `implicitWidth`.
 - Row layout is responsive under constrained widths: label and shortcut text elide within the row, trailing metadata stays inside the item frame, and the flexible spacer never resolves to a negative width.
 - If icon source cannot be resolved, placeholder block is shown.
 - Key text is hidden when `keyVisible` is `false`.

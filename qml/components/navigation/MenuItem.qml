@@ -67,6 +67,11 @@ AbstractButton {
             return rawShortcut
         return control.keyPlaceholder
     }
+    // Measure text unconstrained so display elision does not collapse layout math.
+    readonly property int labelNaturalWidth: Math.max(0, Math.ceil(labelMetrics.advanceWidth))
+    readonly property int shortcutNaturalWidth: control.keyVisible && control.resolvedShortcutText.length > 0
+        ? Math.max(0, Math.ceil(shortcutMetrics.advanceWidth))
+        : 0
     readonly property int resolvedSelectionDirection: {
         const raw = selectionDirection
         if (raw === undefined || raw === null)
@@ -116,11 +121,31 @@ AbstractButton {
     backgroundColorPressed: resolvedBackgroundColor
     backgroundColorDisabled: resolvedBackgroundColor
 
+    TextMetrics {
+        id: labelMetrics
+        font.family: Theme.fontBody
+        font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
+        font.styleName: Theme.textBodyStyleName
+        font.letterSpacing: Theme.textBodyLetterSpacing
+        text: control.label
+    }
+
+    TextMetrics {
+        id: shortcutMetrics
+        font.family: Theme.fontBody
+        font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
+        font.styleName: Theme.textBodyStyleName
+        font.letterSpacing: Theme.textBodyLetterSpacing
+        text: control.resolvedShortcutText
+    }
+
     contentItem: Item {
         id: contentRoot
         objectName: "menuItem_contentRow"
         readonly property real layoutWidth: width > 0 ? width : implicitWidth
-        readonly property int shortcutNaturalWidth: control.keyVisible ? shortcutLabel.implicitWidth : 0
+        readonly property int shortcutNaturalWidth: control.shortcutNaturalWidth
         readonly property int chevronLayoutWidth: control.effectiveShowChevron ? control.chevronSize : 0
         readonly property int shortcutBudgetWidth: control.keyVisible
             ? Math.max(0,
@@ -133,7 +158,7 @@ AbstractButton {
         readonly property int resolvedTrailingWidth: resolvedShortcutWidth + trailingInnerGap + chevronLayoutWidth
         readonly property int resolvedLabelWidth: Math.max(
                                                       0,
-                                                      Math.min(labelNode.implicitWidth,
+                                                      Math.min(control.labelNaturalWidth,
                                                                Math.round(layoutWidth)
                                                                - control.iconSize
                                                                - Theme.gap8
@@ -150,7 +175,7 @@ AbstractButton {
                            control.itemWidth - control.leftPadding - control.rightPadding,
                            control.iconSize
                            + Theme.gap8
-                           + labelNode.implicitWidth
+                           + control.labelNaturalWidth
                            + (shortcutNaturalWidth > 0 || chevronLayoutWidth > 0
                                   ? Theme.gap8 + shortcutNaturalWidth + (shortcutNaturalWidth > 0 && chevronLayoutWidth > 0 ? Theme.gap8 : 0) + chevronLayoutWidth
                                   : 0))

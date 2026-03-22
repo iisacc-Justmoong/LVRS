@@ -270,14 +270,14 @@ Controls.Popup {
 
     function itemKeyVisible(entry) {
         if (!entry || typeof entry !== "object")
-            return true
+            return false
         if (entry.keyVisible !== undefined)
             return !!entry.keyVisible
         if (entry.shortcutVisible !== undefined)
             return !!entry.shortcutVisible
         if (entry.showShortcut !== undefined)
             return !!entry.showShortcut
-        return true
+        return itemShortcut(entry).trim().length > 0
     }
 
     function itemIconName(entry) {
@@ -694,6 +694,8 @@ Controls.Popup {
                     readonly property var entry: control.entryAt(index)
                     readonly property bool divider: control.isDivider(entry)
 
+                    width: implicitWidth
+                    height: implicitHeight
                     implicitWidth: divider ? control.minimumItemWidth : probeMenuItem.implicitWidth
                     implicitHeight: divider ? 0 : probeMenuItem.implicitHeight
 
