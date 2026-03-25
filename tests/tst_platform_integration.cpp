@@ -389,7 +389,7 @@ Item {
         listControl.listWidth === 255
         && listControl.minimumListHeight === 335
         && menuItem.itemWidth === 242
-        && menuItem.itemHeight === 33
+        && menuItem.itemHeight === 24
         && menuItem.iconSize === 24
         && checkBox.boxSize === 26
 }

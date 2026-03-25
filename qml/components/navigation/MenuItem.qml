@@ -21,21 +21,21 @@ AbstractButton {
 
     property alias key: shortcutStore.text
     property alias shortcut: shortcutStore.text
-    property bool keyVisible: true
-    property string keyPlaceholder: "key"
-    property bool showChevron: true
-    property bool hasChildItems: true
+    property bool keyVisible: false
+    property string keyPlaceholder: ""
+    property bool showChevron: false
+    property bool hasChildItems: false
     readonly property bool effectiveShowChevron: showChevron && hasChildItems
     property bool expanded: false
     // Supports int enum or string: auto|right|left|up|down
     property var selectionDirection: "auto"
     property int itemWidth: Theme.scaleMetric(161)
-    property int itemHeight: Theme.scaleMetric(22)
+    property int itemHeight: Theme.scaleMetric(16)
     property int iconSize: Theme.scaleMetric(16)
     property int chevronSize: Theme.scaleMetric(16)
     property string iconName: ""
     property url iconSource: ""
-    property color iconPlaceholderColor: Theme.darkGrey10
+    property color iconPlaceholderColor: Theme.accentBlueMuted
     property color chevronColor: Theme.descriptionColor
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
@@ -107,7 +107,7 @@ AbstractButton {
 
     tone: AbstractButton.Borderless
     horizontalPadding: Theme.gap4
-    verticalPadding: Theme.gap3
+    verticalPadding: Theme.gapNone
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
 
@@ -125,8 +125,8 @@ AbstractButton {
         id: labelMetrics
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
-        font.weight: Theme.textBodyWeight
-        font.styleName: Theme.textBodyStyleName
+        font.weight: Font.Normal
+        font.styleName: "Regular"
         font.letterSpacing: Theme.textBodyLetterSpacing
         text: control.label
     }
@@ -134,10 +134,10 @@ AbstractButton {
     TextMetrics {
         id: shortcutMetrics
         font.family: Theme.fontBody
-        font.pixelSize: Theme.textBody
-        font.weight: Theme.textBodyWeight
-        font.styleName: Theme.textBodyStyleName
-        font.letterSpacing: Theme.textBodyLetterSpacing
+        font.pixelSize: Theme.textDescription
+        font.weight: Theme.textDescriptionWeight
+        font.styleName: Theme.textDescriptionStyleName
+        font.letterSpacing: Theme.textDescriptionLetterSpacing
         text: control.resolvedShortcutText
     }
 
@@ -211,10 +211,21 @@ AbstractButton {
                 visible: !iconImage.visible
 
                 Rectangle {
-                    width: Theme.scaleMetric(12)
-                    height: Theme.scaleMetric(12)
-                    radius: Theme.gap3
+                    width: control.iconSize
+                    height: control.iconSize
+                    radius: width * 0.5
                     color: control.iconPlaceholderColor
+                    border.width: Theme.scaleMetric(1)
+                    border.color: Theme.accentBlue
+                    anchors.centerIn: parent
+                    antialiasing: true
+                }
+
+                Rectangle {
+                    width: Theme.scaleMetric(4)
+                    height: Theme.scaleMetric(4)
+                    radius: width * 0.5
+                    color: Theme.accentBlue
                     anchors.centerIn: parent
                     antialiasing: true
                 }
@@ -230,6 +241,8 @@ AbstractButton {
             height: implicitHeight
             style: body
             text: control.label
+            font.weight: Font.Normal
+            font.styleName: "Regular"
             color: control.isInactive ? Theme.titleHeaderColor
                                       : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
             elide: Text.ElideRight
@@ -258,7 +271,7 @@ AbstractButton {
             Label {
                 id: shortcutLabel
                 objectName: "menuItem_shortcutLabel"
-                style: body
+                style: description
                 visible: control.keyVisible && contentRoot.resolvedShortcutWidth > 0
                 x: 0
                 y: Math.round((parent.height - height) * 0.5)
@@ -302,8 +315,4 @@ AbstractButton {
 //     label: "Label"
 //     keyVisible: true
 //     key: "Cmd+K"
-//     hasChildItems: true
-//     showChevron: true
-//     expanded: false
-//     selectionDirection: "auto"
 // }

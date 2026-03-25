@@ -84,8 +84,8 @@ QtObject {
     }
 
     function settleDuration() {
-        var value = router ? Number(router.interactiveTransitionSettleDuration) : 220
-        return isFinite(value) ? Math.max(0, Math.round(value)) : 220
+        var value = router ? Number(router.interactiveTransitionSettleDuration) : 0
+        return isFinite(value) ? Math.max(0, Math.round(value)) : 0
     }
 
     function commitProgressThreshold() {

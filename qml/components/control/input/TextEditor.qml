@@ -201,26 +201,27 @@ FocusScope {
             color: control.resolvedEditAreaBackgroundColor
         }
 
-        ScrollView {
-            id: editorScroll
+        Flickable {
+            id: editorFlick
+            objectName: "editorViewportFlickable"
             anchors.fill: parent
             clip: true
             enabled: control.enabled
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+            interactive: contentHeight > height && (!control.preferNativeGestures || !editor.activeFocus)
 
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
             ScrollBar.horizontal: ScrollBar {
-                policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                policy: ScrollBar.AlwaysOff
             }
 
-            TextArea {
+            TextArea.flickable: TextArea {
                 id: editor
                 objectName: "editorTextEdit"
-                width: Math.max(1,
-                                editorScroll.availableWidth > 0
-                                    ? editorScroll.availableWidth
-                                    : editorScroll.width)
+                width: Math.max(1, editorFlick.width)
                 wrapMode: control.effectiveWrapMode
                 textFormat: control.effectiveTextFormat
                 placeholderText: control.placeholderText

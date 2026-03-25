@@ -20,6 +20,7 @@ private slots:
     void text_editor_default_contract_and_utility_api();
     void text_editor_mode_independent_render_contract_and_submit_signal();
     void text_editor_ios_native_text_interaction_contract();
+    void text_editor_mobile_focus_suspends_viewport_flick_for_selection();
 };
 
 void TextEditorTests::text_editor_default_contract_and_utility_api()
@@ -197,6 +198,59 @@ Item {
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+}
+
+void TextEditorTests::text_editor_mobile_focus_suspends_viewport_flick_for_selection()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 360
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        anchors.fill: parent
+        showRenderedOutput: false
+        editorHeight: 96
+        text: "line 01\nline 02\nline 03\nline 04\nline 05\nline 06\nline 07\nline 08\nline 09\nline 10\nline 11\nline 12"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *textEdit = root->findChild<QObject *>(QStringLiteral("editorTextEdit"));
+    QVERIFY(textEdit);
+    QObject *viewport = root->findChild<QObject *>(QStringLiteral("editorViewportFlickable"));
+    QVERIFY(viewport);
+
+    QTRY_VERIFY(viewport->property("contentHeight").toReal() > viewport->property("height").toReal());
+    QCOMPARE(viewport->property("flickableDirection").toInt(), 2);
+    QVERIFY(viewport->property("interactive").toBool());
+    QVERIFY(!textEdit->property("activeFocus").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    QTRY_VERIFY(textEdit->property("activeFocus").toBool());
+    QTRY_VERIFY(!viewport->property("interactive").toBool());
 }
 
 QTEST_MAIN(TextEditorTests)

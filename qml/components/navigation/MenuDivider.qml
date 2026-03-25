@@ -7,7 +7,7 @@ Item {
     // axis: "horizontal" | "vertical"
     property string axis: "horizontal"
     property color dividerColor: Theme.contextMenuDivider
-    property int thickness: Theme.scaleMetric(1)
+    property real thickness: Theme.scaleRealMetric(0.2)
     property int crossPadding: Theme.scaleMetric(1)
     property int lineLength: Theme.scaleMetric(220)
 
@@ -26,6 +26,7 @@ Item {
         width: control.verticalAxis ? control.thickness : parent.width
         height: control.verticalAxis ? parent.height : control.thickness
         color: control.dividerColor
+        antialiasing: true
     }
 }
 

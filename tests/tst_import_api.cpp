@@ -45,6 +45,7 @@ private slots:
     void hierarchy_item_hover_and_active_state_visual_contract_loads();
     void hierarchy_item_figma_defaults_contract_loads();
     void hierarchy_item_layout_geometry_contract_loads();
+    void hierarchy_item_count_view_contract_loads();
     void hierarchy_item_structure_api_contract_loads();
     void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
@@ -62,6 +63,7 @@ private slots:
     void modal_content_action_contract_loads();
     void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
+    void context_menu_visual_contract_loads();
     void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
     void table_cell_item_contract_loads();
@@ -662,11 +664,12 @@ Item {
         objectName: "hierarchy"
         width: 280
         height: 300
+        countRole: "counter"
         model: [
-            { key: "root", depth: 0, itemId: 10, text: "Root", icon: "viewMoreSymbolicDefault", expanded: true },
-            { key: "child-a", depth: 1, itemId: 11, text: "Child A", icon: "viewMoreSymbolicDefault", expanded: false },
-            { key: "leaf-a1", depth: 2, itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless" },
-            { key: "child-b", depth: 1, itemId: 20, text: "Child B", icon: "viewMoreSymbolicDisabled" }
+            { key: "root", depth: 0, itemId: 10, text: "Root", icon: "viewMoreSymbolicDefault", expanded: true, counter: 2 },
+            { key: "child-a", depth: 1, itemId: 11, text: "Child A", icon: "viewMoreSymbolicDefault", expanded: false, counter: 5 },
+            { key: "leaf-a1", depth: 2, itemId: 12, text: "Leaf A1", icon: "viewMoreSymbolicBorderless", counter: 14 },
+            { key: "child-b", depth: 1, itemId: 20, text: "Child B", icon: "viewMoreSymbolicDisabled", counter: 0 }
         ]
     }
 
@@ -676,11 +679,14 @@ Item {
 
     property bool treeApiReady:
         hierarchy.activeListItem !== null
+        && hierarchy.countRole === "counter"
         && hierarchy.activeListItemKey === "leaf-a1"
         && hierarchy.activeListItemId === 12
         && hierarchy.activeListItem.label === "Leaf A1"
         && hierarchy.activeListItem.iconName === "viewMoreSymbolicBorderless"
         && hierarchy.activeListItem.pathLabel === "Root / Child A / Leaf A1"
+        && hierarchy.activeListItem.count === 14
+        && hierarchy.activeListItem.effectiveShowCount
 }
 )";
 
@@ -2096,12 +2102,14 @@ Item {
         && item.childCount == 0
         && item.visibleChildCount == 0
         && item.descendantCount == 0
+        && item.count == -1
         && item.flatIndex == -1
         && item.visibleIndex == -1
         && item.textColorNormal === LV.Theme.bodyColor
         && item.rowBackgroundColorActive === LV.Theme.accentBlueMuted
         && item.rowBackgroundColorInactive === LV.Theme.panelBackground12
         && item.iconPlaceholderColor === LV.Theme.darkGrey10
+        && !item.effectiveShowCount
 }
 )";
 
@@ -2161,6 +2169,120 @@ Item {
     QVERIFY2(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
     QVERIFY2(qAbs(labelItem->width() - 148.0) <= 0.5, "Label width must match the Figma baseline layout.");
     QVERIFY2(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
+}
+
+void ImportApiTests::hierarchy_item_count_view_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 420
+    height: 160
+
+    LV.HierarchyItem {
+        id: defaultCountItem
+        objectName: "defaultCountItem"
+        width: 200
+        count: 7
+        showChevron: true
+        hasChildItems: true
+    }
+
+    LV.HierarchyItem {
+        id: customCountItem
+        objectName: "customCountItem"
+        y: 40
+        width: 200
+        count: 12
+        showChevron: false
+        hasChildItems: false
+        countView: Component {
+            Item {
+                objectName: "customCountView"
+                property int count: -1
+                property var hierarchyItem: null
+                implicitWidth: badge.implicitWidth
+                implicitHeight: badge.implicitHeight
+
+                LV.Label {
+                    id: badge
+                    text: "C" + parent.count
+                    style: description
+                    color: LV.Theme.descriptionColor
+                }
+            }
+        }
+    }
+
+    property bool countViewReady: {
+        const customCountObject = customCountItem.countViewItem
+        return defaultCountItem.effectiveShowCount
+            && customCountItem.effectiveShowCount
+            && customCountObject !== null
+            && customCountObject.count === 12
+            && customCountObject.hierarchyItem === customCountItem
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("countViewReady").toBool());
+
+    auto *defaultItemObject = root->findChild<QObject *>(QStringLiteral("defaultCountItem"));
+    auto *customItemObject = root->findChild<QObject *>(QStringLiteral("customCountItem"));
+    QVERIFY(defaultItemObject);
+    QVERIFY(customItemObject);
+    auto *defaultItem = qobject_cast<QQuickItem *>(defaultItemObject);
+    auto *customItem = qobject_cast<QQuickItem *>(customItemObject);
+    QVERIFY(defaultItem);
+    QVERIFY(customItem);
+
+    auto *defaultCountLabelObject = defaultItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemCountLabel"),
+                                                                            Qt::FindChildrenRecursively);
+    auto *defaultChevronObject = defaultItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemChevron"),
+                                                                         Qt::FindChildrenRecursively);
+    auto *customCountSlotObject = customItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemCount"),
+                                                                         Qt::FindChildrenRecursively);
+    auto *customCountObject = customItemObject->findChild<QObject *>(QStringLiteral("customCountView"),
+                                                                     Qt::FindChildrenRecursively);
+    auto *customChevronObject = customItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemChevron"),
+                                                                       Qt::FindChildrenRecursively);
+    QVERIFY(defaultCountLabelObject);
+    QVERIFY(defaultChevronObject);
+    QVERIFY(customCountSlotObject);
+    QVERIFY(customCountObject);
+    QVERIFY(customChevronObject);
+
+    auto *defaultCountLabel = qobject_cast<QQuickItem *>(defaultCountLabelObject);
+    auto *defaultChevron = qobject_cast<QQuickItem *>(defaultChevronObject);
+    auto *customCountSlot = qobject_cast<QQuickItem *>(customCountSlotObject);
+    auto *customCount = qobject_cast<QQuickItem *>(customCountObject);
+    auto *customChevron = qobject_cast<QQuickItem *>(customChevronObject);
+    QVERIFY(defaultCountLabel);
+    QVERIFY(defaultChevron);
+    QVERIFY(customCountSlot);
+    QVERIFY(customCount);
+    QVERIFY(customChevron);
+
+    QCOMPARE(defaultCountLabelObject->property("text").toString(), QStringLiteral("7"));
+    QCOMPARE(customCountObject->property("count").toInt(), 12);
+
+    const QPointF defaultCountPos = defaultCountLabel->mapToItem(defaultItem, QPointF(0, 0));
+    const QPointF defaultChevronPos = defaultChevron->mapToItem(defaultItem, QPointF(0, 0));
+    const qreal defaultGap = defaultChevronPos.x() - (defaultCountPos.x() + defaultCountLabel->width());
+    QVERIFY2(qAbs(defaultGap - 8.0) <= 0.5, "Count label must sit 8px left of the chevron slot.");
+
+    const QPointF customCountPos = customCountSlot->mapToItem(customItem, QPointF(0, 0));
+    const QPointF customChevronPos = customChevron->mapToItem(customItem, QPointF(0, 0));
+    const qreal customGap = customChevronPos.x() - (customCountPos.x() + customCountSlot->width());
+    QVERIFY2(qAbs(customGap - 8.0) <= 0.5, "Custom count view must align 8px left of the chevron anchor.");
 }
 
 void ImportApiTests::hierarchy_item_structure_api_contract_loads()
@@ -3359,6 +3481,12 @@ import LVRS as LV
 
 Item {
     LV.MenuItem {
+        id: defaultItem
+        visible: false
+        label: "Default"
+    }
+
+    LV.MenuItem {
         id: collapsedSubmenu
         visible: false
         label: "Collapsed"
@@ -3449,9 +3577,18 @@ Item {
     }
 
     property bool menuItemContract:
-        collapsedSubmenu.keyVisible
+        !defaultItem.keyVisible
+        && defaultItem.resolvedShortcutText === ""
+        && !defaultItem.effectiveShowChevron
+        && collapsedSubmenu.keyVisible
         && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
         && collapsedSubmenu.effectiveShowChevron
+        && collapsedSubmenu.itemHeight === 16
+        && collapsedSubmenu.leftPadding === 4
+        && collapsedSubmenu.rightPadding === 4
+        && collapsedSubmenu.topPadding === 0
+        && collapsedSubmenu.bottomPadding === 0
+        && collapsedSubmenu.iconPlaceholderColor === LV.Theme.accentBlueMuted
         && collapsedSubmenu.resolvedSelectionDirection === collapsedSubmenu.directionRight
         && expandedSubmenu.resolvedSelectionDirection === expandedSubmenu.directionDown
         && noChild.resolvedShortcutText === "key"
@@ -3484,6 +3621,7 @@ Item {
     QVERIFY(trailingGroup);
     QVERIFY(shortcutLabel);
     QVERIFY(chevronIcon);
+    QCOMPARE(shortcutLabel->property("style").toInt(), shortcutLabel->property("description").toInt());
 
     const qreal contentWidth = contentRow->width();
     const qreal labelRight = labelNode->x() + labelNode->width();
@@ -3620,6 +3758,62 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("actionContract").toBool());
+}
+
+void ImportApiTests::context_menu_visual_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    LV.ContextMenu {
+        id: menu
+        visible: false
+        items: [
+            {
+                label: "Label",
+                key: "Key",
+                keyVisible: true,
+                showChevron: false,
+                hasChildItems: false
+            },
+            { type: "divider" }
+        ]
+    }
+
+    LV.MenuDivider {
+        id: divider
+        visible: false
+    }
+
+    property bool visualContract:
+        menu.itemSpacing === LV.Theme.gap2
+        && menu.leftPadding === LV.Theme.gap4
+        && menu.rightPadding === LV.Theme.gap4
+        && menu.topPadding === LV.Theme.gap4
+        && menu.bottomPadding === LV.Theme.gap4
+        && menu.menuColor === LV.Theme.contextMenuSurface
+        && menu.menuColor === LV.Theme.panelBackground06
+        && menu.dividerColor === LV.Theme.contextMenuDivider
+        && menu.dividerColor === LV.Theme.disabledColor
+        && menu.background !== null
+        && menu.background.radius === LV.Theme.radiusMd
+        && divider.dividerColor === LV.Theme.contextMenuDivider
+        && divider.dividerColor === LV.Theme.disabledColor
+        && Math.abs(divider.thickness - LV.Theme.scaleRealMetric(0.2)) < 0.01
+        && Math.abs(divider.implicitHeight - ((divider.crossPadding * 2) + divider.thickness)) < 0.01
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("visualContract").toBool());
 }
 
 void ImportApiTests::context_menu_width_expansion_contract_loads()

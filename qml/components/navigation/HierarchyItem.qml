@@ -57,6 +57,8 @@ AbstractButton {
     property int visibleSiblingIndex: -1
     property int siblingCount: 0
     property int visibleSiblingCount: 0
+    property int count: -1
+    property Component countView: null
 
     text: "Label"
     property alias label: control.text
@@ -79,6 +81,8 @@ AbstractButton {
 
     property bool dragPreviewActive: false
     property real dragPreviewOpacity: 0.45
+    property bool _countViewAutoWidth: false
+    property bool _countViewAutoHeight: false
 
     property int indentLevel: 0
     property int indentStep: Theme.scaleMetric(8)
@@ -142,7 +146,9 @@ AbstractButton {
     readonly property bool hasHiddenChildItems: hiddenChildCount > 0
     readonly property bool hasVisibleDescendants: visibleDescendantCount > 0
     readonly property bool hasHiddenDescendants: hiddenDescendantCount > 0
+    readonly property bool effectiveShowCount: count >= 0
     readonly property bool effectiveShowChevron: showChevron && effectiveHasChildItems
+    readonly property bool trailingChevronAnchorVisible: effectiveShowChevron || effectiveShowCount
     readonly property bool chevronExpandable: effectiveShowChevron
     readonly property bool collapsed: !expanded
     readonly property bool canToggleExpanded: chevronExpandable && enabled
@@ -255,6 +261,7 @@ AbstractButton {
         && visibleSiblingIndex === visibleSiblingCount - 1
     readonly property bool isOnlyVisibleSibling: visibleSiblingCount === 1
     readonly property bool resolvedSelected: hierarchyList ? hierarchyList.activeItem === control : selected
+    readonly property var countViewItem: countLoader.item
     readonly property string resolvedIconName: {
         const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
         return rawName.trim()
@@ -400,6 +407,46 @@ AbstractButton {
         return normalizedStringArray(value).join(", ")
     }
 
+    function assignCountViewProperty(target, propertyName, value) {
+        if (!target)
+            return
+
+        try {
+            if (target[propertyName] === undefined
+                    && (!target.hasOwnProperty || !target.hasOwnProperty(propertyName))) {
+                return
+            }
+            target[propertyName] = value
+        } catch (error) {
+        }
+    }
+
+    function synchronizeCountView() {
+        const item = control.countViewItem
+        if (!item)
+            return
+
+        assignCountViewProperty(item, "count", control.count)
+        assignCountViewProperty(item, "hierarchyItem", control)
+
+        try {
+            if (item.width !== undefined && item.implicitWidth !== undefined) {
+                if (item.width <= 0 && item.implicitWidth > 0)
+                    control._countViewAutoWidth = true
+                if (control._countViewAutoWidth)
+                    item.width = item.implicitWidth
+            }
+
+            if (item.height !== undefined && item.implicitHeight !== undefined) {
+                if (item.height <= 0 && item.implicitHeight > 0)
+                    control._countViewAutoHeight = true
+                if (control._countViewAutoHeight)
+                    item.height = item.implicitHeight
+            }
+        } catch (error) {
+        }
+    }
+
     function requestActivationFromInteraction(interactionPhase) {
         const phase = interactionPhase === undefined || interactionPhase === null
             ? "click"
@@ -488,6 +535,21 @@ AbstractButton {
         return control.hierarchyList._applyEditableMoveByDropMode(control, null, "root")
     }
 
+    Component {
+        id: defaultCountViewComponent
+
+        Label {
+            objectName: "hierarchyItemCountLabel"
+            style: description
+            text: String(control.count)
+            color: control.enabled ? Theme.descriptionColor : control.textColorDisabled
+            horizontalAlignment: Text.AlignRight
+            verticalAlignment: Text.AlignVCenter
+            lineHeight: Theme.scaleTextMetric(16)
+            lineHeightMode: Text.FixedHeight
+        }
+    }
+
     tone: AbstractButton.Borderless
     state: control.uxStateName
     leftPadding: computedLeftPadding
@@ -564,7 +626,7 @@ AbstractButton {
 
         RowLayout {
             anchors.fill: parent
-            spacing: control.leadingSpacing
+            spacing: Theme.gapNone
 
             Item {
                 id: iconSlot
@@ -627,6 +689,11 @@ AbstractButton {
             }
 
             Item {
+                Layout.preferredWidth: control.leadingSpacing
+                Layout.preferredHeight: 1
+            }
+
+            Item {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 implicitHeight: control.rowHeight
@@ -647,15 +714,52 @@ AbstractButton {
             }
 
             Item {
+                visible: control.effectiveShowCount || control.trailingChevronAnchorVisible
+                Layout.preferredWidth: visible ? control.leadingSpacing : 0
+                Layout.preferredHeight: 1
+            }
+
+            Item {
+                id: countSlot
+                objectName: "hierarchyItemCount"
+                visible: control.effectiveShowCount
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredWidth: visible ? Math.max(0, Math.ceil(countLoader.implicitWidth)) : 0
+                Layout.preferredHeight: visible ? Math.max(1, countLoader.implicitHeight) : 0
+
+                Loader {
+                    id: countLoader
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    active: control.effectiveShowCount
+                    visible: status === Loader.Ready
+                    sourceComponent: control.countView ? control.countView : defaultCountViewComponent
+
+                    onLoaded: {
+                        control._countViewAutoWidth = !!item && item.width !== undefined && item.width <= 0
+                        control._countViewAutoHeight = !!item && item.height !== undefined && item.height <= 0
+                        control.synchronizeCountView()
+                    }
+                }
+            }
+
+            Item {
+                visible: control.effectiveShowCount && control.trailingChevronAnchorVisible
+                Layout.preferredWidth: visible ? Theme.gap8 : 0
+                Layout.preferredHeight: 1
+            }
+
+            Item {
                 id: chevronSlot
                 objectName: "hierarchyItemChevron"
-                visible: control.effectiveShowChevron
-                Layout.preferredWidth: control.effectiveShowChevron ? control.chevronSize : 0
+                visible: control.trailingChevronAnchorVisible
+                Layout.preferredWidth: control.trailingChevronAnchorVisible ? control.chevronSize : 0
                 Layout.preferredHeight: control.chevronSize
                 Layout.alignment: Qt.AlignVCenter
 
                 Image {
                     anchors.fill: parent
+                    visible: control.effectiveShowChevron
                     source: RenderQuality.resolveTextureSource(control.resolvedChevronSource)
                     sourceSize.width: control.chevronSourceSize
                     sourceSize.height: control.chevronSourceSize
@@ -667,6 +771,7 @@ AbstractButton {
 
                 MouseArea {
                     anchors.fill: parent
+                    visible: control.effectiveShowChevron
                     enabled: control.canToggleExpanded
                     acceptedButtons: Qt.LeftButton
                     onClicked: function(mouse) {
@@ -755,6 +860,12 @@ AbstractButton {
         if (control.hierarchyList && control.hierarchyList.scheduleRefreshState)
             control.hierarchyList.scheduleRefreshState()
     }
+    onCountChanged: {
+        Qt.callLater(control.synchronizeCountView)
+    }
+    onCountViewChanged: {
+        Qt.callLater(control.synchronizeCountView)
+    }
     onExpandedChanged: {
         if (control.hierarchyList && control.hierarchyList.notifyExpansionChanged)
             control.hierarchyList.notifyExpansionChanged(control)
@@ -794,6 +905,7 @@ AbstractButton {
 //     label: "Main Camera"
 //     iconName: "toolwindowhierarchy"
 //     indentLevel: 1
+//     count: 12
 //     showChevron: true
 //     activatable: true
 // }

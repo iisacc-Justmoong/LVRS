@@ -71,11 +71,16 @@ Sibling metadata:
 - `visibleSiblingCount`
 - `isFirstSibling`, `isLastSibling`, `isOnlySibling` (readonly)
 - `isFirstVisibleSibling`, `isLastVisibleSibling`, `isOnlyVisibleSibling` (readonly)
+- `count` (default `-1`; hidden until set to `0` or greater)
+- `countView` (`Component`; optional custom trailing count view)
+- `countViewItem` (readonly loaded count view instance)
+- `effectiveShowCount` (readonly)
 
 Expansion and chevron affordance:
 
 - `showChevron`
 - `effectiveShowChevron` (readonly)
+- `trailingChevronAnchorVisible` (readonly)
 - `chevronExpandable` (readonly)
 - `expanded`
 - `collapsed` (readonly)
@@ -175,6 +180,9 @@ Visual tokens:
 ## Behavior Contract
 
 - The default row matches the Figma baseline: `200x20`, `8px` horizontal padding, `2px` leading gap, `16px` icon and chevron.
+- `count` stays hidden at the default `-1`; set `count` to `0` or greater to render trailing count content.
+- Trailing count content is rendered immediately left of the chevron anchor with an `8px` gap, even when the chevron itself is not visible.
+- `countView` replaces the default trailing count label; if the custom view exposes `count` and/or `hierarchyItem` properties, `HierarchyItem` synchronizes them after load.
 - The detailed Figma component (`314:93`) defines three canonical visual fills: `Default` = transparent, `Inactive` = `Theme.panelBackground12`, `Active` = `Theme.accentBlueMuted`.
 - `HierarchyList` synchronizes parent/child/order/path metadata onto each managed row.
 - Item-level drag/drop is initiated and committed from `HierarchyItem`; `HierarchyList` only supplies the backing projection and array rewrite.
@@ -204,6 +212,7 @@ LV.HierarchyItem {
     label: "Camera"
     iconName: "toolwindowhierarchy"
     indentLevel: 1
+    count: 12
     showChevron: true
     activatable: true
     onDragEnded: function(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey) {

@@ -36,6 +36,7 @@ Behavior aliases:
 
 - `depthRole`
 - `draggableRole`
+- `countRole`
 - `keyboardListNavigationEnabled`
 - `editable`
 
@@ -71,13 +72,14 @@ Signals:
 import LVRS 1.0 as LV
 
 LV.Hierarchy {
+    countRole: "counter"
     toolbarItems: [
         { id: "structure", iconName: "projectStructure", eventName: "hierarchy.structure" },
         { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
     ]
     model: [
-        { key: "root", depth: 0, label: "Root", expanded: true },
-        { key: "child", depth: 1, label: "Child" }
+        { key: "root", depth: 0, label: "Root", expanded: true, counter: 2 },
+        { key: "child", depth: 1, label: "Child", counter: 7 }
     ]
     footerVisible: true
     footerButton1: ({ type: "icon", iconName: "projectStructure" })
@@ -89,6 +91,7 @@ LV.Hierarchy {
 ## How It Works
 
 - Toolbar and list communicate through explicit signals and forwarded aliases.
+- `countRole` forwards directly to the internal `HierarchyList`, so model-backed tree counters can be enabled from the panel wrapper.
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.

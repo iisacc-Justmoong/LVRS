@@ -586,8 +586,8 @@ QtObject {
 
     //ContextMenu
 
-    readonly property color contextMenuSurface: panelBackground03
-    readonly property color contextMenuDivider: panelBackground08
+    readonly property color contextMenuSurface: panelBackground06
+    readonly property color contextMenuDivider: disabledColor
     readonly property color contextMenuItemSelectedBackground: primary
     readonly property color contextMenuItemInactiveBackground: panelBackground08
 

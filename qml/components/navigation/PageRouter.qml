@@ -22,7 +22,7 @@ Item {
     property int retainInactivePageCount: 0
     property int routeResolveCacheCapacity: 256
     property bool interactiveTransitionsEnabled: true
-    property int interactiveTransitionSettleDuration: 220
+    property int interactiveTransitionSettleDuration: 0
     property real interactiveTransitionCommitProgress: 0.42
     property real interactiveTransitionVelocityThreshold: 960
     property real interactiveTransitionOutgoingParallaxFactor: 0.25

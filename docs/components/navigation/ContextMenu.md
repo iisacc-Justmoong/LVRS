@@ -30,10 +30,10 @@ Open/close behavior:
 
 Visual/layout:
 
-- `itemWidth`, `itemSpacing`
+- `itemWidth`, `itemSpacing` (default `Theme.gap2`)
 - `resolvedItemWidth` (readonly)
-- `menuColor`, `menuOpacity`, `resolvedMenuColor`
-- `dividerColor`
+- `menuColor`, `menuOpacity`, `resolvedMenuColor` (default surface `Theme.panelBackground06`)
+- `dividerColor` (default `Theme.disabledColor`)
 - `edgeMargin` (viewport inset used by auto placement; default `Theme.gap4`)
 - `openHorizontalDirection`, `openVerticalDirection` (last resolved placement direction)
 
@@ -53,6 +53,7 @@ Signals:
 
 Supported object fields include:
 
+- canonical compact item fields: `icon`, `label`, `keyVisible`, `key`
 - label/text: `label`, `text`, `title`
 - icon: `iconName`/`icon`, `iconSource`/`source`
 - key text: `key`, `shortcut`, `keyText`
@@ -85,6 +86,12 @@ Shortcut visibility defaults to `true` only when shortcut text exists; entries w
 - Delegate rows and dividers consume `resolvedItemWidth`, so a combo-triggered menu can grow wider than the trigger itself when content or caller sizing requires it.
 - Delegate `MenuItem` rows remain responsive inside `resolvedItemWidth`, so constrained menus do not push label/shortcut/chevron content outside the popup bounds or collapse the internal spacer into negative geometry.
 - Width probing uses each row's unconstrained natural content width, so visible text elision does not feed back into popup sizing.
+
+## Visual Contract
+
+- Popup chrome uses `Theme.panelBackground06`, `Theme.radiusMd`, and `Theme.gap4` padding on all sides.
+- Rows are stacked with `Theme.gap2` between entries.
+- Divider rows inherit `Theme.disabledColor`, so the default menu matches the compact Figma context-menu frame without caller overrides.
 
 ## Usage
 

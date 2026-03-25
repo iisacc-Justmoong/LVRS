@@ -22,6 +22,7 @@ Item {
     property string iconNameRole: "iconName"
     property string iconSourceRole: "iconSource"
     property string iconGlyphRole: "iconGlyph"
+    property string countRole: "count"
     property string enabledRole: "enabled"
     property string expandedRole: "expanded"
     property string selectedRole: "selected"
@@ -1836,6 +1837,9 @@ Item {
 
             const iconGlyphRaw = isObjectNode ? roleValue(node, iconGlyphRole, "") : ""
             const iconGlyph = iconGlyphRaw === undefined || iconGlyphRaw === null ? "" : String(iconGlyphRaw)
+            const rawCountValue = isObjectNode ? roleValue(node, countRole, roleValue(node, "count", -1)) : -1
+            const numericCountValue = Number(rawCountValue)
+            const count = Number.isFinite(numericCountValue) ? Math.trunc(numericCountValue) : -1
 
             const rawItemId = isObjectNode ? roleValue(node, itemIdRole, roleValue(node, "id", -1)) : -1
             const numericItemId = Number(rawItemId)
@@ -1899,6 +1903,7 @@ Item {
                           iconName: iconName,
                           iconSource: iconSource,
                           iconGlyph: iconGlyph,
+                          count: count,
                           showChevron: showChevron,
                           hasChildren: hasChildren,
                           expanded: expanded,
@@ -1961,6 +1966,7 @@ Item {
                                                                  iconName: descriptor.iconName,
                                                                  iconSource: descriptor.iconSource,
                                                                  iconGlyph: descriptor.iconGlyph,
+                                                                 count: descriptor.count,
                                                                  showChevron: descriptor.showChevron,
                                                                  hasChildItems: descriptor.hasChildren,
                                                                  expanded: descriptor.expanded,

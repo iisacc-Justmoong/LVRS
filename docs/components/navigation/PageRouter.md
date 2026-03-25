@@ -42,7 +42,7 @@ Presentation flags:
 - `isolateInactivePages`
 - `retainInactivePageCount`
 - `interactiveTransitionsEnabled`
-- `interactiveTransitionSettleDuration`
+- `interactiveTransitionSettleDuration` (default: `0`)
 - `interactiveTransitionCommitProgress`
 - `interactiveTransitionVelocityThreshold`
 - `interactiveTransitionOutgoingParallaxFactor`
@@ -101,6 +101,7 @@ Navigation methods:
 - Backward interactive transitions reuse the previous stack item as the preview surface.
 - Forward interactive transitions instantiate a live preview item above the stack; preview pages therefore run ordinary QML lifecycle code before commit.
 - Interactive transition commits suppress the built-in `StackView` push/pop animation and apply the stack mutation immediately, so the user-driven drag remains the only visible motion.
+- `interactiveTransitionSettleDuration` defaults to `0`, so releasing an interactive gesture does not play an additional post-release settle animation unless a host explicitly opts into one.
 - A competing non-interactive navigation call aborts the active interactive transition first.
 
 ## Usage

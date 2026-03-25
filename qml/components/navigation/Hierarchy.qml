@@ -22,6 +22,7 @@ Rectangle {
     property alias treeModel: hierarchyList.model
     property alias depthRole: hierarchyList.depthRole
     property alias draggableRole: hierarchyList.draggableRole
+    property alias countRole: hierarchyList.countRole
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     property alias editable: hierarchyList.editable
     default property alias listItems: hierarchyList.items
@@ -169,13 +170,14 @@ Rectangle {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.Hierarchy {
+//     countRole: "counter"
 //     toolbarItems: [
 //         { id: "structure", iconName: "projectStructure", eventName: "hierarchy.structure" },
 //         { id: "layers", iconName: "projectStructure", events: ["hierarchy.layers", "analytics.layers"] }
 //     ]
 //     model: [
-//         { key: "root", depth: 0, label: "Root", expanded: true },
-//         { key: "child", depth: 1, label: "Child" }
+//         { key: "root", depth: 0, label: "Root", expanded: true, counter: 2 },
+//         { key: "child", depth: 1, label: "Child", counter: 7 }
 //     ]
 //     footerVisible: true
 //     footerButton1: ({ type: "icon", iconName: "projectStructure" })

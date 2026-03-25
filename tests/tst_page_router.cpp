@@ -571,6 +571,7 @@ Item {
     property bool interactiveActive: router.interactiveTransitionActive
     property real interactiveProgress: router.interactiveTransitionProgress
     property string interactiveToPath: router.interactiveTransitionToPath
+    property int settleDuration: router.interactiveTransitionSettleDuration
     property real currentPageX: router.currentPageItem ? router.currentPageItem.x : 0
     property bool currentPageEnabled: router.currentPageItem ? router.currentPageItem.enabled : false
     property bool currentStackBusy: router.currentPageItem
@@ -603,7 +604,6 @@ Item {
         id: router
         anchors.fill: parent
         initialPath: "/"
-        interactiveTransitionSettleDuration: 0
         routes: [
             { path: "/", component: homePage },
             { path: "/detail", component: detailPage }
@@ -642,6 +642,7 @@ Item {
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
     QVERIFY(root);
+    QCOMPARE(root->property("settleDuration").toInt(), 0);
     QTRY_COMPARE(root->property("depth").toInt(), 1);
     QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
@@ -666,7 +667,7 @@ Item {
     QTRY_VERIFY(!root->property("currentPageEnabled").toBool());
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QVERIFY(!root->property("interactiveActive").toBool());
     QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
     QCOMPARE(root->property("depth").toInt(), 2);
     QVERIFY(qAbs(root->property("currentPageX").toReal()) < 0.5);
@@ -677,7 +678,7 @@ Item {
                                       Q_ARG(QVariant, QVariant(0.65)),
                                       Q_ARG(QVariant, QVariant(0.0))));
     QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QVERIFY(!root->property("interactiveActive").toBool());
     QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
     QCOMPARE(root->property("depth").toInt(), 1);
     QVERIFY(!root->property("currentStackBusy").toBool());
@@ -698,7 +699,7 @@ Item {
     QCOMPARE(root->property("depth").toInt(), 1);
 
     QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QVERIFY(!root->property("interactiveActive").toBool());
     QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
     QCOMPARE(root->property("depth").toInt(), 1);
 
@@ -708,7 +709,7 @@ Item {
                                       Q_ARG(QVariant, QVariant(0.7)),
                                       Q_ARG(QVariant, QVariant(-200.0))));
     QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
+    QVERIFY(!root->property("interactiveActive").toBool());
     QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
     QCOMPARE(root->property("depth").toInt(), 2);
     const QVariantMap currentParams = root->property("currentParams").toMap();

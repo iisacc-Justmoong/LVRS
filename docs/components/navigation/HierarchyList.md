@@ -15,7 +15,7 @@ Location: `qml/components/navigation/HierarchyList.qml`
 Model and roles:
 
 - `model` (main tree input), `treeModel` (compat alias)
-- `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`
+- `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`, `countRole`
 - `enabledRole`, `expandedRole`, `selectedRole`, `activatableRole`, `draggableRole`, `showChevronRole`
 - `depthRole` (default `depth`)
 
@@ -58,6 +58,7 @@ Primary methods:
 - Model input is expected to be a flat array/list of rows with explicit depth data (`indentLevel` first, then `depthRole`).
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
+- Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.
 - Managed rows are enriched with item metadata on every refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
 - Visibility is computed from ancestor expansion state and cached incrementally.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
@@ -77,8 +78,8 @@ import LVRS 1.0 as LV
 
 LV.HierarchyList {
     model: [
-        { key: "root", depth: 0, label: "Root", expanded: true },
-        { key: "child", depth: 1, label: "Child" }
+        { key: "root", depth: 0, label: "Root", expanded: true, count: 2 },
+        { key: "child", depth: 1, label: "Child", count: 7 }
     ]
 }
 ```

@@ -47,8 +47,8 @@ Signals and methods:
 
 - Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
 - Preview pane is shown only when `showRenderedOutput == true`.
-- Uses a `ScrollView`-hosted `TextArea` for the edit surface, plus `InputMethodGuard` and a `WheelScrollGuard` for the preview pane.
-- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` switches to `NativeRendering` so platform software-keyboard editing gestures and repeat delete stay on the native interaction path.
+- Uses a vertically constrained `Flickable`-hosted `TextArea` (`TextArea.flickable`) for the edit surface, plus `InputMethodGuard` and a `WheelScrollGuard` for the preview pane.
+- Mobile-target defaults follow `Theme.mobileTarget`; on iOS-target the underlying `TextEdit` switches to `NativeRendering` for rasterization, and the editor viewport suspends touch flicking while the text control holds focus so double-tap selection, selection-handle drag, and OS keyboard edit gestures are not pre-empted by container scrolling.
 - Current defaults force plain text wrapping (`resolvedWrapMode`, `resolvedTextFormat`) unless component logic is changed.
 
 ## Usage

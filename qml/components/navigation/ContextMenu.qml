@@ -8,7 +8,7 @@ Controls.Popup {
 
     property var items: []
     property int itemWidth: Theme.scaleMetric(161)
-    property int itemSpacing: 0
+    property int itemSpacing: Theme.gap2
     property int selectedIndex: -1
     property bool autoCloseOnTrigger: true
     property bool dismissOnGlobalPress: true
@@ -669,7 +669,7 @@ Controls.Popup {
     }
 
     background: Rectangle {
-        radius: Theme.radiusSm
+        radius: Theme.radiusMd
         color: control.resolvedMenuColor
         antialiasing: true
     }
