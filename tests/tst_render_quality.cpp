@@ -262,11 +262,27 @@ void RenderQualityTests::render_quality_gpu_policy_pso_texture_and_drs_contract(
     QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::LowTier));
     QCOMPARE(quality.framesInFlight(), 1);
     QVERIFY(quality.dynamicResolutionEnabled());
+#if defined(Q_OS_IOS)
+    QCOMPARE(quality.msaaSamples(), 4);
+#else
+    QCOMPARE(quality.msaaSamples(), 2);
+#endif
+    QQuickWindow lowTierWindow;
+    quality.applyWindow(&lowTierWindow);
+#if defined(Q_OS_IOS)
+    QCOMPARE(lowTierWindow.format().samples(), 4);
+#else
+    QCOMPARE(lowTierWindow.format().samples(), 2);
+#endif
 
     const qreal initialScale = quality.dynamicResolutionScale();
     for (int i = 0; i < 9; ++i)
         quality.sampleFrameTime(48.0);
+#if defined(Q_OS_IOS)
+    QCOMPARE(quality.dynamicResolutionScale(), 2.0);
+#else
     QVERIFY(quality.dynamicResolutionScale() < initialScale);
+#endif
     const qreal downgradedScale = quality.dynamicResolutionScale();
     for (int i = 0; i < 120; ++i)
         quality.sampleFrameTime(8.0);
@@ -280,6 +296,9 @@ void RenderQualityTests::render_quality_gpu_policy_pso_texture_and_drs_contract(
     QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::HighTier));
     QCOMPARE(quality.framesInFlight(), 3);
     QVERIFY(!quality.dynamicResolutionEnabled());
+    QQuickWindow highTierWindow;
+    quality.applyWindow(&highTierWindow);
+    QCOMPARE(highTierWindow.format().samples(), 12);
 
     quality.applyDeviceTierPreset(static_cast<int>(RenderQuality::UltraTier));
     QCOMPARE(quality.activeDeviceTier(), static_cast<int>(RenderQuality::UltraTier));

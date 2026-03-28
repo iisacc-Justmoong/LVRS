@@ -29,6 +29,24 @@ constexpr double kDynamicFrameHysteresisMaxMs = 10.0;
 constexpr int kDynamicDownshiftTriggerFrames = 3;
 constexpr int kDynamicUpshiftTriggerFrames = 30;
 
+constexpr int antialiasingSampleFloor()
+{
+#if defined(Q_OS_IOS)
+    return RenderQuality::kAntialiasingEnabled ? 4 : 0;
+#else
+    return RenderQuality::kAntialiasingEnabled ? 2 : 0;
+#endif
+}
+
+constexpr qreal dynamicResolutionScaleFloor()
+{
+#if defined(Q_OS_IOS)
+    return 2.0;
+#else
+    return 1.0;
+#endif
+}
+
 void seedSceneGraphBooleanEnvironment(const char *name, bool enabled)
 {
     if (enabled) {
@@ -106,6 +124,31 @@ RenderQuality::DeviceTier inferDeviceTier()
     if (threads <= 10)
         return RenderQuality::BalancedTier;
     return RenderQuality::HighTier;
+#endif
+}
+
+bool canMutateWindowSurfaceFormat(const QQuickWindow *window)
+{
+    if (!window)
+        return false;
+#if defined(Q_OS_IOS)
+    // iOS Metal surfaces must keep their native format stable once the platform
+    // window exists, otherwise swapchain-owned multisample textures can be
+    // destroyed while still referenced by in-flight command buffers.
+    return window->handle() == nullptr;
+#else
+    return true;
+#endif
+}
+
+bool canApplyWindowGraphicsConfiguration(const QQuickWindow *window)
+{
+    if (!window)
+        return false;
+#if defined(Q_OS_IOS)
+    return window->handle() == nullptr;
+#else
+    return true;
 #endif
 }
 
@@ -221,7 +264,7 @@ int RenderQuality::msaaSamples() const
 
 void RenderQuality::setMsaaSamples(int value)
 {
-    const int minimumSamples = kAntialiasingEnabled ? 2 : 0;
+    const int minimumSamples = antialiasingSampleFloor();
     const int next = qBound(minimumSamples, value, 16);
     if (m_msaaSamples == next)
         return;
@@ -474,7 +517,7 @@ qreal RenderQuality::dynamicResolutionMinScale() const
 
 void RenderQuality::setDynamicResolutionMinScale(qreal value)
 {
-    const qreal next = qBound(kDynamicScaleMin, value, kDynamicScaleMax);
+    const qreal next = qBound(dynamicResolutionScaleFloor(), value, kDynamicScaleMax);
     if (qFuzzyCompare(m_dynamicResolutionMinScale, next))
         return;
 
@@ -494,7 +537,7 @@ qreal RenderQuality::dynamicResolutionMaxScale() const
 
 void RenderQuality::setDynamicResolutionMaxScale(qreal value)
 {
-    const qreal next = qBound(kDynamicScaleMin, value, kDynamicScaleMax);
+    const qreal next = qBound(dynamicResolutionScaleFloor(), value, kDynamicScaleMax);
     if (qFuzzyCompare(m_dynamicResolutionMaxScale, next))
         return;
 
@@ -870,10 +913,10 @@ void RenderQuality::applyWindow(QObject *window)
 
     bindWindow(quickWindow);
 
-    const int minimumSamples = kAntialiasingEnabled ? 2 : 0;
+    const int minimumSamples = antialiasingSampleFloor();
     const int samples = qBound(minimumSamples, m_msaaSamples, 16);
     QSurfaceFormat format = quickWindow->format();
-    if (format.samples() < samples) {
+    if (format.samples() != samples && canMutateWindowSurfaceFormat(quickWindow)) {
         format.setSamples(samples);
         quickWindow->setFormat(format);
     }
@@ -933,10 +976,15 @@ void RenderQuality::configureGlobalDefaults(int msaaSamples,
     }
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    const int minimumSamples = kAntialiasingEnabled ? 2 : 0;
+    const int minimumSamples = antialiasingSampleFloor();
     const int samples = qBound(minimumSamples, msaaSamples, 16);
+#if defined(Q_OS_IOS)
+    if (format.samples() != samples)
+        format.setSamples(samples);
+#else
     if (format.samples() < samples)
         format.setSamples(samples);
+#endif
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_WASM)
     if (format.depthBufferSize() < 24)
         format.setDepthBufferSize(24);
@@ -972,13 +1020,13 @@ void RenderQuality::updateWindowPowerMode()
         resetDynamicResolutionController();
     }
 
-    const int minimumActiveSamples = kAntialiasingEnabled ? 2 : 0;
+    const int minimumActiveSamples = antialiasingSampleFloor();
     const int activeSamples = qBound(minimumActiveSamples, m_msaaSamples, 16);
     const int inactiveSamples = qBound(0, m_inactiveMsaaSamples, 16);
     const int targetSamples = m_powerSaveActive ? qMin(activeSamples, inactiveSamples) : activeSamples;
 
     QSurfaceFormat format = m_boundWindow->format();
-    if (format.samples() != targetSamples) {
+    if (format.samples() != targetSamples && canMutateWindowSurfaceFormat(m_boundWindow)) {
         format.setSamples(targetSamples);
         m_boundWindow->setFormat(format);
     }
@@ -1045,6 +1093,8 @@ void RenderQuality::applyGraphicsConfiguration(QQuickWindow *window)
 {
     if (!window)
         return;
+    if (!canApplyWindowGraphicsConfiguration(window))
+        return;
 
     QQuickGraphicsConfiguration configuration = window->graphicsConfiguration();
     configuration.setDepthBufferFor2D(m_depthBufferFor2D);
@@ -1068,7 +1118,9 @@ void RenderQuality::applyGraphicsConfiguration(QQuickWindow *window)
 
 qreal RenderQuality::clampedDynamicScale(qreal value) const
 {
-    const qreal minScale = qBound(kDynamicScaleMin, m_dynamicResolutionMinScale, kDynamicScaleMax);
+    const qreal minScale = qBound(dynamicResolutionScaleFloor(),
+                                  m_dynamicResolutionMinScale,
+                                  kDynamicScaleMax);
     const qreal maxScale = qBound(minScale, m_dynamicResolutionMaxScale, kDynamicScaleMax);
     return qBound(minScale, value, maxScale);
 }

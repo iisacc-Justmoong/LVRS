@@ -108,7 +108,7 @@ import LVRS as LV
         && internalRouterRegisterAsGlobalNavigator
         && !mobileOversizedHeightEnabled
         && useInternalPageStack
-        && autoApplyDeviceTierPreset
+        && !autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
         && pageInitialPath === initialRoutePath
 
@@ -175,7 +175,7 @@ LV.ApplicationWindow {
             && !delegateMobileWindowingToSystem)
         && mobileFullscreenGeometryHintOverride === ((backendRuntimeProfile.mobileFullscreenGeometryHintRecommended === true)
             && !delegateMobileWindowingToSystem)
-    property bool deviceTierPolicyReady: autoApplyDeviceTierPreset
+    property bool deviceTierPolicyReady: !autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
@@ -258,7 +258,7 @@ LV.Window {
         && (widthClass >= compact && widthClass <= expanded)
         && (heightClass >= compact && heightClass <= expanded)
         && typeof matchesMedia === "function"
-        && autoApplyDeviceTierPreset
+        && !autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
         && usePlatformSafeMargin === backendMobilePlatform
         && safeMargin === (backendMobilePlatform ? 16 : 0)
@@ -1320,9 +1320,11 @@ Window {
 
     QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
 
-    QTRY_COMPARE(list->property("activeItem").value<QObject *>(), branchItemObject);
     QTRY_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("branch"));
-    QTRY_VERIFY(branchItemObject->property("active").toBool());
+    QTRY_VERIFY(list->property("activeItem").value<QObject *>() != nullptr);
+    QObject *activeBranchObject = list->property("activeItem").value<QObject *>();
+    QCOMPARE(activeBranchObject->property("itemKey").toString(), QStringLiteral("branch"));
+    QTRY_VERIFY(activeBranchObject->property("active").toBool());
 }
 
 void ImportApiTests::hierarchy_mobile_reactivation_reemits_active_signal()

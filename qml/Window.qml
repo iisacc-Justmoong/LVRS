@@ -52,7 +52,7 @@ QtQuickWindow.Window {
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
     property bool autoApplyRenderQuality: true
-    property bool autoApplyDeviceTierPreset: true
+    property bool autoApplyDeviceTierPreset: false
     property int forcedDeviceTierPreset: -1
     property bool autoAttachRuntimeEvents: false
 

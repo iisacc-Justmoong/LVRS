@@ -378,7 +378,10 @@ QVariantMap buildRuntimeProfile(const QString &requested, const QString &hostCan
     int bootstrapTextureAtlasEdge = 2048;
     const AdaptiveViewProfile adaptiveView = adaptiveViewProfileForPlatform(normalized, backendReady);
 
-    if (android || ios) {
+    if (ios) {
+        bootstrapMsaaSamples = 4;
+        bootstrapTextureAtlasEdge = 1024;
+    } else if (android) {
         bootstrapMsaaSamples = 4;
         bootstrapTextureAtlasEdge = 1024;
     } else if (normalized == kPlatformMacos()) {

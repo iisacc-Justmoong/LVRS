@@ -17,7 +17,7 @@ Location: `qml/ApplicationWindow.qml`
 On completion, main flow is:
 
 1. `FontPolicy.enforceApplicationFallback()`
-2. optional `RenderQuality.applyDeviceTierPreset(...)`
+2. optional `RenderQuality.applyDeviceTierPreset(...)` when `autoApplyDeviceTierPreset == true`
 3. `RenderQuality.applyWindow(windowRoot)`
 4. `SvgManager.ensureMinimumScale(effectiveSupersampleScale)`
 5. optional runtime attach (`autoAttachRuntimeEvents`)
@@ -82,13 +82,13 @@ On completion, main flow is:
 - `effectiveSupersampleScale`, `sceneSupersamplingActive`
 - internal supersample host uses backend-resolved texture sizing and mipmap policy
 
-Default quality-first profile in current implementation:
+Default runtime-direct quality profile in current implementation:
 
 - `mobileViewScale: 1.0` (avoid unnecessary scaled composition blur in default path)
 - `inactiveRenderDowngradeEnabled: false`
 - `inactiveRenderMsaaSamples: 8`
-- `autoApplyDeviceTierPreset: true`
-- `forcedDeviceTierPreset: -1` (auto-detect tier)
+- `autoApplyDeviceTierPreset: false`
+- `forcedDeviceTierPreset: -1` (reserved for opt-in device-tier application)
 
 Default mobile sizing contract in current implementation:
 
@@ -167,6 +167,7 @@ Signals:
 - Runtime attach and backend hook are feature-flagged; both can be fully disabled for constrained hosts.
 - `scaffoldLayoutPlatform` is normalized through `Platform.normalizeTarget()` before adaptive mobile/desktop policy is resolved, so aliases such as `osx`, `ios-simulator`, and `android-arm64` are safe.
 - The standard bootstrap route contract now lives in `ApplicationWindow` itself, so downstream projects can seed `initialRoutePath` through `QmlAppLaunchSpec::initialProperties` without wrapping the root type.
+- Stock shells now default to the runtime-direct `RenderQuality` path; automatic device-tier preset application is disabled unless a downstream app explicitly turns `autoApplyDeviceTierPreset` back on.
 - Mobile system delegation defaults are platform-aware: Android still prefers OS-managed windowing/insets, while iOS now defaults to the framework-managed full-window coverage path so the render surface can extend into the status-bar, notch, and home-indicator regions.
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.
 - Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.

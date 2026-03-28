@@ -175,7 +175,7 @@ LV.ApplicationWindow {
     }
 }
 ```
-`LV.ApplicationWindow` is the reusable downstream root for the imported bootstrap profile. It now owns platform-profile-driven runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath` directly. `LV.ApplicationWindow` and `LV.Window` default `forcedDeviceTierPreset` to `-1`, which keeps automatic device-tier detection enabled unless a downstream app explicitly pins a preset. On iOS, `LV.ApplicationWindow` now defaults to the framework-managed full-window coverage path so the render surface extends into the status-bar, notch, and home-indicator regions; Android keeps the OS-managed windowing/inset policy by default. Both paths still apply only the fixed `16` logical-pixel layout inset to the internal viewport. `LV.AppBootstrapWindow` remains available as a compatibility wrapper when an existing codebase still wants the old type name plus `visible: true`.
+`LV.ApplicationWindow` is the reusable downstream root for the imported bootstrap profile. It now owns platform-profile-driven runtime attach, global navigator registration, and internal page-stack initialization from `initialRoutePath` directly. `LV.ApplicationWindow` and `LV.Window` default `autoApplyDeviceTierPreset` to `false` and keep `forcedDeviceTierPreset` at `-1`, so stock apps stay on the runtime-direct `RenderQuality` path unless a downstream app explicitly opts into device-tier preset application. On iOS, `LV.ApplicationWindow` now defaults to the framework-managed full-window coverage path so the render surface extends into the status-bar, notch, and home-indicator regions; Android keeps the OS-managed windowing/inset policy by default. Both paths still apply only the fixed `16` logical-pixel layout inset to the internal viewport. `LV.AppBootstrapWindow` remains available as a compatibility wrapper when an existing codebase still wants the old type name plus `visible: true`.
 It also creates cross-platform runtime targets automatically:
 - `run_<target>_macos`
 - `run_<target>_linux`
@@ -277,7 +277,7 @@ At runtime:
 - Startup fails fast if a required fixed backend cannot be initialized and no platform fallback is available.
 - Bootstrap stdout now emits structured `LVRS bootstrap.*` lines with render-profile, scenegraph environment, probe candidate, fallback-reason, import-path, and font-policy details so downstream apps can capture first-frame diagnostics without enabling `LV.Debug`.
 
-Bootstrap render defaults are selected conservatively before app construction. Mobile targets use a lighter MSAA / frames-in-flight profile than desktop targets so the first window starts with lower memory pressure before per-window `RenderQuality` presets are applied.
+Bootstrap render defaults are selected conservatively before app construction. Mobile targets use a lighter MSAA / frames-in-flight profile than desktop targets so the first window starts with lower memory pressure before the runtime-direct `RenderQuality` path attaches. Android and iOS both keep `4x/2`; on iOS the live Metal surface is then held stable after creation so later runtime policy changes do not tear down anti-aliased swapchain resources.
 
 ## Notes
 

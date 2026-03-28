@@ -2,7 +2,7 @@
 
 Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
 
-`RenderQuality` is a QML singleton responsible for LVRS rendering quality, GPU cost, and power/performance balance policy.
+`RenderQuality` is a QML singleton responsible for LVRS runtime rendering quality, GPU cost, and power/performance balance policy.
 
 ## 1. Responsibility Scope
 
@@ -15,7 +15,7 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 - PSO (pipeline state object) cache policy
 - compressed texture candidate selection and mipmap usage policy
 - DRS (dynamic resolution scaling) controller
-- device-tier presets (low/balanced/high)
+- optional device-tier presets (low/balanced/high/ultra) for explicit downstream overrides
 
 ## 2. P3 Implementation Mapping
 
@@ -37,7 +37,7 @@ Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp
 - `psoCacheFile`
 - `depthBufferFor2D`
 
-When `applyWindow()` is called, the values above are immediately applied to `QQuickWindow::graphicsConfiguration()`.
+When `applyWindow()` is called before the native window is created/shown, the values above are applied to `QQuickWindow::graphicsConfiguration()`. On iOS, once the native window exists, LVRS keeps the current Metal surface configuration stable and skips late graphics-configuration rewrites that would otherwise force swapchain churn, while preserving an iOS quality floor for `4x` MSAA and `2.0x+` dynamic supersampling.
 
 ### 3.2 Texture policy
 
@@ -73,7 +73,7 @@ When `applyWindow()` is called, the values above are immediately applied to `QQu
 - `activeDeviceTier`
 - `applyDeviceTierPreset(tier = -1)`
 
-If `tier=-1`, the automatically detected device tier is applied.
+If `tier=-1`, the automatically detected device tier is applied. Stock LVRS shells no longer auto-apply this at startup; device-tier presets are now an explicit opt-in override on top of the runtime-direct quality path.
 
 ## 4. DRS Behavior Rules
 
@@ -104,8 +104,8 @@ Applied behavior:
 
 - layer: `layer.mipmap: RenderQuality.mipmapEnabled`
 - image source: `source: RenderQuality.resolveTextureSource(...)`
-- startup preset apply: `RenderQuality.applyDeviceTierPreset(...)`
-- shell defaults keep startup policy in auto-detect mode (`forcedDeviceTierPreset: -1`) in `ApplicationWindow` and `Window`
+- startup window attach: `RenderQuality.applyWindow(...)`
+- shell defaults keep `autoApplyDeviceTierPreset: false` and `forcedDeviceTierPreset: -1` in `ApplicationWindow` and `Window`, so runtime-direct supersampling/MSAA defaults stay active unless a downstream app explicitly opts into a device-tier preset
 
 ## 7. Verification Commands
 

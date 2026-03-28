@@ -121,7 +121,7 @@ Controls.ApplicationWindow {
     property int windowDragHandleTopMargin: 0
     property bool inactiveRenderDowngradeEnabled: false
     property int inactiveRenderMsaaSamples: 8
-    property bool autoApplyDeviceTierPreset: true
+    property bool autoApplyDeviceTierPreset: false
     property int forcedDeviceTierPreset: -1
     property int pageRouterRetainInactivePages: 0
     property int pageRouterCacheCapacity: 256

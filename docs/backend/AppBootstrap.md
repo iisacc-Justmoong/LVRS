@@ -44,6 +44,7 @@ For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchS
 - Stage-by-stage bootstrap diagnostics logging with compact JSON payloads.
 - Optional graphics backend bootstrap and diagnostics logging.
 - Seeds scenegraph environment hints (for example pipeline-cache and atlas sizing) through the platform bootstrap profile before `RenderQuality` global defaults are applied.
+- Keeps bootstrap responsibility limited to backend selection and Qt pre-window defaults; live quality policy remains owned by runtime `RenderQuality.applyWindow(...)`.
 
 ### Platform bootstrap policy
 

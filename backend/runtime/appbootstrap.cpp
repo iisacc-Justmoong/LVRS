@@ -179,7 +179,11 @@ RenderQualityBootstrapProfile resolveRenderQualityBootstrapProfile()
 {
     RenderQualityBootstrapProfile profile;
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS)
+    profile.msaaSamples = 4;
+    profile.framesInFlight = 2;
+    profile.textureAtlasEdge = 1024;
+#elif defined(Q_OS_ANDROID)
     profile.msaaSamples = 4;
     profile.framesInFlight = 2;
     profile.textureAtlasEdge = 1024;
