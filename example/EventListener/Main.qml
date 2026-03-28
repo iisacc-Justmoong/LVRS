@@ -18,6 +18,8 @@ LV.ApplicationWindow {
     property string lastType: "-"
     property string lastDetail: "-"
     property var eventHistory: []
+    readonly property rect exampleViewport: layoutSafeAreaBounds
+    property bool viewportContractReady: exampleViewport.width > 0 && exampleViewport.height > 0
     property var eventCounters: ({
         "clicked": 0,
         "pressed": 0,
@@ -113,8 +115,10 @@ LV.ApplicationWindow {
     }
 
     Item {
-        anchors.fill: parent
-        anchors.margins: LV.Theme.gap24
+        x: root.exampleViewport.x + LV.Theme.gap24
+        y: root.exampleViewport.y + LV.Theme.gap24
+        width: Math.max(1, root.exampleViewport.width - (LV.Theme.gap24 * 2))
+        height: Math.max(1, root.exampleViewport.height - (LV.Theme.gap24 * 2))
 
         LV.AppCard {
             id: monitorCard

@@ -18,6 +18,7 @@ The checked-in launcher resolves the build-tree executable from `build/example/V
 
 - `qml/CatalogRegistry.qml` holds the catalog tree, component metadata, and sidebar model.
 - `qml/Main.qml` renders the application shell, hierarchy sidebar, and detail panels.
+- The catalog shell uses `layoutSafeAreaBounds` explicitly, and the Application section now includes `WindowSafeAreaObserver` as the safe-area reference entry.
 
 ## Intended Use
 

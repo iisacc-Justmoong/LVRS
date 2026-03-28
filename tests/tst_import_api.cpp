@@ -175,6 +175,14 @@ LV.ApplicationWindow {
             && !delegateMobileWindowingToSystem)
         && mobileFullscreenGeometryHintOverride === ((backendRuntimeProfile.mobileFullscreenGeometryHintRecommended === true)
             && !delegateMobileWindowingToSystem)
+    property bool mobileSystemSafeAreaApiReady:
+        typeof mobileSystemSafeLeftInset === "number"
+        && typeof mobileSystemSafeTopInset === "number"
+        && typeof mobileSystemSafeRightInset === "number"
+        && typeof mobileSystemSafeBottomInset === "number"
+        && typeof mobileSystemSafeAreaResolved === "boolean"
+        && mobileSystemSafeAreaBounds.width >= 0
+        && mobileSystemSafeAreaBounds.height >= 0
     property bool deviceTierPolicyReady: !autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
@@ -213,6 +221,16 @@ LV.ApplicationWindow {
         text: "Content Slot"
         style: body
     }
+    LV.WindowSafeAreaObserver {
+        id: safeAreaObserver
+        window: null
+    }
+    property bool safeAreaObserverReady:
+        safeAreaObserver.leftInset === 0
+        && safeAreaObserver.topInset === 0
+        && safeAreaObserver.rightInset === 0
+        && safeAreaObserver.bottomInset === 0
+        && !safeAreaObserver.resolved
     LV.Label { id: titleLabel; text: "Title"; style: title; visible: false }
     LV.Label { id: title2Label; text: "Title2"; style: title2; visible: false }
     LV.Label { id: headerLabel; text: "Header"; style: header; visible: false }
@@ -233,7 +251,9 @@ LV.ApplicationWindow {
     QVERIFY(root->property("backendOptimizationDefaultsReady").toBool());
     QVERIFY(root->property("bootstrapContractReady").toBool());
     QVERIFY(root->property("platformPolicyDefaultsReady").toBool());
+    QVERIFY(root->property("mobileSystemSafeAreaApiReady").toBool());
     QVERIFY(root->property("deviceTierPolicyReady").toBool());
+    QVERIFY(root->property("safeAreaObserverReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
@@ -269,6 +289,11 @@ LV.Window {
         text: "Window Content"
         style: body
     }
+
+    Item {
+        objectName: "contentProbe"
+        anchors.fill: parent
+    }
 }
 )";
 
@@ -302,6 +327,11 @@ LV.Window {
         text: "Window Content"
         style: body
     }
+
+    Item {
+        objectName: "contentProbe"
+        anchors.fill: parent
+    }
 }
 )";
 
@@ -318,6 +348,11 @@ LV.Window {
     QTRY_COMPARE(layoutHost->height(), rootHeight - 48.0);
     const QPointF layoutOrigin = layoutHost->mapToScene(QPointF(0.0, 0.0));
     QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
+    auto *contentProbe = root->findChild<QQuickItem *>(QStringLiteral("contentProbe"));
+    QVERIFY(contentProbe);
+    QTRY_COMPARE(contentProbe->width(), rootWidth);
+    QTRY_COMPARE(contentProbe->height(), rootHeight);
+    QCOMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
 }
 
 void ImportApiTests::application_window_safe_margin_scopes_to_layout_not_render_surface()
@@ -343,6 +378,11 @@ LV.ApplicationWindow {
         text: "Application Content"
         style: body
     }
+
+    Item {
+        objectName: "contentProbe"
+        anchors.fill: parent
+    }
 }
 )";
 
@@ -350,6 +390,7 @@ LV.ApplicationWindow {
     QVERIFY(root);
     const qreal rootWidth = root->property("width").toReal();
     const qreal rootHeight = root->property("height").toReal();
+    root->setProperty("visible", true);
     const QRectF renderSurfaceBounds = root->property("renderSurfaceBounds").toRectF();
     const QRectF layoutSafeAreaBounds = root->property("layoutSafeAreaBounds").toRectF();
     QCOMPARE(renderSurfaceBounds, QRectF(0.0, 0.0, rootWidth, rootHeight));
@@ -360,6 +401,11 @@ LV.ApplicationWindow {
     QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
     QCOMPARE(layoutHost->width(), rootWidth - 48.0);
     QCOMPARE(layoutHost->height(), rootHeight - 48.0);
+    auto *contentProbe = root->findChild<QQuickItem *>(QStringLiteral("contentProbe"));
+    QVERIFY(contentProbe);
+    QTRY_COMPARE(contentProbe->width(), rootWidth);
+    QTRY_COMPARE(contentProbe->height(), rootHeight);
+    QCOMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
 }
 
 void ImportApiTests::application_window_page_stack_state_loads()

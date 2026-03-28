@@ -9,6 +9,8 @@ LV.ApplicationWindow {
     title: "Example: ViewModel Registry"
     subtitle: "Model -> ViewModel -> LVRS QML"
     navigationEnabled: false
+    readonly property rect exampleViewport: layoutSafeAreaBounds
+    property bool viewportContractReady: exampleViewport.width > 0 && exampleViewport.height > 0
 
     property string viewId: "ExampleView"
     property var vm: LV.ViewModels.getForView(root.viewId)
@@ -19,7 +21,10 @@ LV.ApplicationWindow {
     }
 
     Item {
-        anchors.fill: parent
+        x: root.exampleViewport.x
+        y: root.exampleViewport.y
+        width: root.exampleViewport.width
+        height: root.exampleViewport.height
 
         LV.AppCard {
             id: vmCard

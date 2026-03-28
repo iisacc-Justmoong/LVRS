@@ -2,6 +2,8 @@
 
 This folder shows **multiple ways** to use `EventListener` in QML. The project is now buildable and runnable as a standalone example app.
 
+The example window now follows the full-bleed shell contract: rendering stays full-window, and the demo content is explicitly placed inside `layoutSafeAreaBounds`.
+
 > Note: component name is `EventListener` (spelled as in code).
 
 ## Run

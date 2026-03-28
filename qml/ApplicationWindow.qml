@@ -91,10 +91,15 @@ Controls.ApplicationWindow {
     // Mobile roots keep a fixed layout inset while the render surface stays full-bleed.
     property bool usePlatformSafeMargin: backendMobilePlatform
     property int safeMargin: usePlatformSafeMargin && isMobilePlatform ? 16 : 0
-    readonly property real mobileSystemSafeLeftInset: fullWindowAreaOnMobileEnabled ? Math.max(0, leftPadding) : 0
-    readonly property real mobileSystemSafeTopInset: fullWindowAreaOnMobileEnabled ? Math.max(0, topPadding) : 0
-    readonly property real mobileSystemSafeRightInset: fullWindowAreaOnMobileEnabled ? Math.max(0, rightPadding) : 0
-    readonly property real mobileSystemSafeBottomInset: fullWindowAreaOnMobileEnabled ? Math.max(0, bottomPadding) : 0
+    readonly property real mobileSystemSafeLeftInset: backendMobilePlatform ? windowSafeArea.leftInset : 0
+    readonly property real mobileSystemSafeTopInset: backendMobilePlatform ? windowSafeArea.topInset : 0
+    readonly property real mobileSystemSafeRightInset: backendMobilePlatform ? windowSafeArea.rightInset : 0
+    readonly property real mobileSystemSafeBottomInset: backendMobilePlatform ? windowSafeArea.bottomInset : 0
+    readonly property bool mobileSystemSafeAreaResolved: backendMobilePlatform ? windowSafeArea.resolved : true
+    readonly property rect mobileSystemSafeAreaBounds: Qt.rect(supersampleHost.x + mobileSystemSafeLeftInset,
+                                                               supersampleHost.y + mobileSystemSafeTopInset,
+                                                               Math.max(0, supersampleHost.width - mobileSystemSafeLeftInset - mobileSystemSafeRightInset),
+                                                               Math.max(0, supersampleHost.height - mobileSystemSafeTopInset - mobileSystemSafeBottomInset))
     readonly property real layoutSafeLeftInset: safeMargin
     readonly property real layoutSafeTopInset: safeMargin
     readonly property real layoutSafeRightInset: safeMargin
@@ -462,6 +467,11 @@ Controls.ApplicationWindow {
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
     readonly property bool sceneSupersamplingActive: RenderQuality.sceneSupersamplingActive
+
+    WindowSafeAreaObserver {
+        id: windowSafeArea
+        window: windowRoot
+    }
 
     component AdaptiveLayoutHost: Item {
             id: root
@@ -1284,26 +1294,26 @@ Controls.ApplicationWindow {
             y: windowRoot.layoutSafeTopInset
             width: Math.max(1, parent.width - windowRoot.layoutSafeLeftInset - windowRoot.layoutSafeRightInset)
             height: Math.max(1, parent.height - windowRoot.layoutSafeTopInset - windowRoot.layoutSafeBottomInset)
+        }
 
-            Item {
-                id: scaledContentHost
-                x: 0
-                y: 0
-                width: Math.max(1, Math.round(parent.width / windowRoot.effectiveMobileViewScale))
-                height: Math.max(1, Math.round(parent.height / windowRoot.effectiveMobileViewScale))
-                scale: windowRoot.effectiveMobileViewScale
-                transformOrigin: Item.TopLeft
+        Item {
+            id: scaledContentHost
+            x: 0
+            y: 0
+            width: Math.max(1, Math.round(parent.width / windowRoot.effectiveMobileViewScale))
+            height: Math.max(1, Math.round(parent.height / windowRoot.effectiveMobileViewScale))
+            scale: windowRoot.effectiveMobileViewScale
+            transformOrigin: Item.TopLeft
 
-                AdaptiveLayoutHost {
-                    id: scaffold
-                    anchors.fill: parent
-                    navModel: windowRoot.navItems
-                    layoutPlatform: windowRoot.platform
-                    onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
-                    onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
-                    onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
-                    onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
-                }
+            AdaptiveLayoutHost {
+                id: scaffold
+                anchors.fill: parent
+                navModel: windowRoot.navItems
+                layoutPlatform: windowRoot.platform
+                onLayoutStateChanged: function(profile, navigationMode) { windowRoot.adaptiveLayoutStateChanged(profile, navigationMode) }
+                onStackNavigated: function(path, params) { windowRoot.pageStackNavigated(path, params) }
+                onStackNavigationFailed: function(path) { windowRoot.pageStackNavigationFailed(path) }
+                onNavActivated: function(index, item) { windowRoot.navActivated(index, item) }
             }
         }
     }

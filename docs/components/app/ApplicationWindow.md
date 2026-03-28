@@ -35,6 +35,7 @@ On completion, main flow is:
 - `useBackendMobileScale`, `mobileViewScale`, `effectiveMobileViewScale`
 - `usePlatformSafeMargin`, `safeMargin`
 - `mobileSystemSafeLeftInset/TopInset/RightInset/BottomInset`
+- `mobileSystemSafeAreaResolved`, `mobileSystemSafeAreaBounds`
 - `layoutSafeLeftInset/TopInset/RightInset/BottomInset`
 - `renderSurfaceBounds`, `layoutSafeAreaBounds`
 
@@ -95,8 +96,9 @@ Default mobile sizing contract in current implementation:
 - `Theme` applies built-in `1.5x` metric and typography tokens on iOS and Android.
 - `usePlatformSafeMargin` defaults to `true` on iOS and Android, and `safeMargin` defaults to a fixed `16` logical pixels on each side.
 - The render surface remains full-bleed on mobile; `ApplicationWindow` forces its automatic `contentItem` safe-area paddings back to `0` in the default mobile path.
-- Only the fixed `safeMargin` inset is applied to the internal layout viewport, so the app can render into the notch/status-bar and home-indicator regions while layout stays `16px` from each edge.
-- `renderSurfaceBounds` exposes the full composited host, while `layoutSafeAreaBounds` exposes the absolute window-space layout viewport after the fixed layout inset.
+- The scaffold content is also full-bleed by default. `safeMargin` no longer constrains the internal content host automatically.
+- `layoutSafeAreaBounds` is now a helper rectangle only: it describes the fixed layout inset derived from `safeMargin`, but LVRS does not automatically place app content inside that box.
+- `mobileSystemSafeLeftInset/TopInset/RightInset/BottomInset` and `mobileSystemSafeAreaBounds` expose the real platform safe-area margins so downstream apps can decide which regions to reserve.
 - `mobileViewScale` remains `1.0`; the framework prefers token-level `1.5x` sizing over full-scene composition scaling in the default path.
 
 Default app-root bootstrap profile in current implementation:
@@ -170,7 +172,8 @@ Signals:
 - Stock shells now default to the runtime-direct `RenderQuality` path; automatic device-tier preset application is disabled unless a downstream app explicitly turns `autoApplyDeviceTierPreset` back on.
 - Mobile system delegation defaults are platform-aware: Android still prefers OS-managed windowing/insets, while iOS now defaults to the framework-managed full-window coverage path so the render surface can extend into the status-bar, notch, and home-indicator regions.
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.
-- Mobile safe-area fill keeps default layout bounds tied to the visible viewport. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
+- `WindowSafeAreaObserver` is the low-level API for downstream apps that want direct access to the platform safe-area margins without routing through the root convenience properties.
+- Mobile safe-area fill keeps default layout bounds available as metadata only. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
 - Default mobile sizing now comes from the `Theme` mobile token profile, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
 - `pageTransitionController` always follows the router that `activePageRouter` currently resolves to, so shell-level gesture drivers do not need to repeat router lookup.

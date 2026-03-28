@@ -9,6 +9,8 @@ This example is buildable and runnable, and demonstrates the MVVM flow used in t
 
 > This folder is both a reference implementation and a runnable sample target.
 
+The sample shell now opts into the new layout contract explicitly: the window remains full-bleed and the card content is placed from `layoutSafeAreaBounds` rather than relying on automatic scaffold insets.
+
 ## Run
 
 From repository root:

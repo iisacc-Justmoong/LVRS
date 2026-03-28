@@ -361,6 +361,50 @@ target_include_directories(LVRSCore
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/LVRS>
 )
 
+set(LVRS_QTGUI_PRIVATE_INCLUDE_DIR "")
+set(LVRS_QTGUI_QPA_INCLUDE_DIR "")
+if(DEFINED Qt6Gui_DIR)
+    get_filename_component(_lvrs_qt_prefix "${Qt6Gui_DIR}/../../.." ABSOLUTE)
+    get_filename_component(_lvrs_qt_lib_dir "${Qt6Gui_DIR}/../.." ABSOLUTE)
+    file(GLOB _lvrs_qtgui_private_include_candidates
+        "${_lvrs_qt_lib_dir}/QtGui.framework/Headers/*"
+        "${_lvrs_qt_prefix}/include/QtGui/*"
+    )
+    foreach(_lvrs_qtgui_private_include_dir IN LISTS _lvrs_qtgui_private_include_candidates)
+        if(EXISTS "${_lvrs_qtgui_private_include_dir}/QtGui/private/qwindow_p.h")
+            set(LVRS_QTGUI_PRIVATE_INCLUDE_DIR "${_lvrs_qtgui_private_include_dir}")
+            if(EXISTS "${_lvrs_qtgui_private_include_dir}/QtGui/qpa/qplatformwindow.h")
+                set(LVRS_QTGUI_QPA_INCLUDE_DIR "${_lvrs_qtgui_private_include_dir}/QtGui")
+            endif()
+            break()
+        endif()
+    endforeach()
+    unset(_lvrs_qtgui_private_include_candidates)
+    unset(_lvrs_qtgui_private_include_dir)
+    unset(_lvrs_qt_prefix)
+    unset(_lvrs_qt_lib_dir)
+endif()
+
+if(NOT LVRS_QTGUI_PRIVATE_INCLUDE_DIR)
+    message(FATAL_ERROR
+        "LVRS requires Qt private Gui headers (QtGui/private/qwindow_p.h) "
+        "to expose platform safe-area metrics."
+    )
+endif()
+
+if(NOT LVRS_QTGUI_QPA_INCLUDE_DIR)
+    message(FATAL_ERROR
+        "LVRS requires Qt private Gui qpa headers (qpa/qplatformwindow.h) "
+        "to expose platform safe-area metrics."
+    )
+endif()
+
+target_include_directories(LVRSCore
+    PRIVATE
+        "${LVRS_QTGUI_PRIVATE_INCLUDE_DIR}"
+        "${LVRS_QTGUI_QPA_INCLUDE_DIR}"
+)
+
 set(_lvrs_qml_module_options "")
 if(LVRS_BUILD_SHARED_LIBS)
     # Shared LVRS builds register QML types directly from LVRSCore. Disabling

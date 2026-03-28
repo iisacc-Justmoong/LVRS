@@ -84,7 +84,7 @@ QtObject {
                     roleLabel: "Bootstrap root",
                     summary: "Adaptive LVRS root shell that combines window policy, bootstrap defaults, navigation scaffold, runtime wiring, and page-stack hosting.",
                     usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
-                    related: ["app-shell", "page-router", "navigator"]
+                    related: ["app-shell", "page-router", "navigator", "window-safe-area-observer"]
                 }),
                 component({
                     key: "app-shell",
@@ -105,7 +105,18 @@ QtObject {
                     roleLabel: "Lightweight window",
                     summary: "Lower-level LVRS window wrapper for cases that need render-quality and platform policy without the application scaffold.",
                     usage: "LV.Window {\n    visible: true\n    width: 720\n    height: 480\n    title: \"Tool window\"\n}",
-                    related: ["application-window"]
+                    related: ["application-window", "window-safe-area-observer"]
+                }),
+                component({
+                    key: "window-safe-area-observer",
+                    label: "WindowSafeAreaObserver",
+                    location: "backend/platform/windowsafeareaobserver.h",
+                    docPath: "docs/components/app/WindowSafeAreaObserver.md",
+                    previewId: "safe-area-observer",
+                    roleLabel: "Safe-area observer",
+                    summary: "QML bridge that reports the live system safe-area insets for a specific window without forcing layout into that viewport.",
+                    usage: "LV.WindowSafeAreaObserver {\n    window: root\n}\n",
+                    related: ["application-window", "window"]
                 })
             ]
         }),

@@ -26,6 +26,8 @@ LV.ApplicationWindow {
     readonly property int catalogContentInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int catalogCardInset: catalogCompactLayout ? LV.Theme.gap8 : LV.Theme.gap12
     readonly property int sidebarWidth: catalogCompactLayout ? 264 : 320
+    readonly property rect catalogViewport: layoutSafeAreaBounds
+    property bool catalogViewportReady: catalogViewport.width > 0 && catalogViewport.height > 0
 
     readonly property var runtimeSnapshot: LV.AppState.runtimeSnapshot
     readonly property var viewStateSnapshot: LV.AppState.viewStateSnapshot
@@ -77,6 +79,8 @@ LV.ApplicationWindow {
     readonly property int catalogDocumentCount: catalogRegistry.totalEntryCount
     readonly property var activeChildren: catalogRegistry.directChildren(activeEntryKey)
     readonly property var activeRelated: root.recordsForKeys(activeEntry ? activeEntry.related : [])
+    readonly property bool catalogSafeAreaEntryReady:
+        catalogRegistry.entryByKey("window-safe-area-observer").key === "window-safe-area-observer"
 
     function syncRuntimeState() {
         LV.AppState.syncRuntimeSnapshot(LV.RuntimeEvents.snapshot())
@@ -124,6 +128,8 @@ LV.ApplicationWindow {
             return applicationShellPreview
         case "window-shell":
             return windowShellPreview
+        case "safe-area-observer":
+            return safeAreaObserverPreview
         case "app-header":
             return appHeaderPreview
         case "stack-layout":
@@ -486,7 +492,83 @@ LV.ApplicationWindow {
                             LV.Label {
                                 style: caption
                                 color: LV.Theme.textTertiary
-                                text: "safeMargin=" + root.safeMargin + " | supersample=" + root.effectiveSupersampleScale.toFixed(2)
+                                text: "layout viewport="
+                                    + Math.round(root.layoutSafeAreaBounds.width)
+                                    + "x"
+                                    + Math.round(root.layoutSafeAreaBounds.height)
+                                    + " | systemTopInset="
+                                    + Math.round(root.mobileSystemSafeTopInset)
+                                    + " | supersample="
+                                    + root.effectiveSupersampleScale.toFixed(2)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: safeAreaObserverPreview
+
+        Item {
+            id: preview
+            property var catalogEntry: ({})
+            implicitHeight: contentColumn.implicitHeight
+
+            Column {
+                id: contentColumn
+                width: parent.width
+                spacing: root.catalogSectionGap
+
+                LV.Label {
+                    width: parent.width
+                    style: description
+                    color: LV.Theme.textSecondary
+                    wrapMode: Text.WordWrap
+                    text: "WindowSafeAreaObserver exposes platform insets, while layout ownership remains with the consumer. Under the new contract, the render surface stays full-bleed and the app decides where to reserve the safe area."
+                }
+
+                GridLayout {
+                    width: parent.width
+                    columns: root.catalogCompactLayout ? 1 : 2
+                    rowSpacing: LV.Theme.gap8
+                    columnSpacing: LV.Theme.gap8
+
+                    Repeater {
+                        model: [
+                            { title: "Resolved", value: root.mobileSystemSafeAreaResolved ? "true" : "false" },
+                            { title: "Layout Viewport", value: Math.round(root.layoutSafeAreaBounds.width) + " x " + Math.round(root.layoutSafeAreaBounds.height) },
+                            { title: "System Insets", value: "top " + Math.round(root.mobileSystemSafeTopInset) + " | bottom " + Math.round(root.mobileSystemSafeBottomInset) },
+                            { title: "Horizontal Insets", value: "left " + Math.round(root.mobileSystemSafeLeftInset) + " | right " + Math.round(root.mobileSystemSafeRightInset) }
+                        ]
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            implicitHeight: 78
+                            radius: LV.Theme.radiusMd
+                            color: LV.Theme.surfaceAlt
+                            border.width: 1
+                            border.color: LV.Theme.contextMenuDivider
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: root.catalogContentInset
+                                spacing: LV.Theme.gap4
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: modelData.title
+                                }
+
+                                LV.Label {
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    wrapMode: Text.WordWrap
+                                    text: modelData.value
+                                }
                             }
                         }
                     }
@@ -1661,246 +1743,252 @@ LV.ApplicationWindow {
         }
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: root.catalogOuterMargin
-        spacing: root.catalogSectionGap
+    Item {
+        x: root.catalogViewport.x
+        y: root.catalogViewport.y
+        width: root.catalogViewport.width
+        height: root.catalogViewport.height
 
-        LV.AppCard {
-            Layout.fillWidth: true
-            implicitHeight: root.catalogCompactLayout ? 158 : 126
-
-            Column {
-                anchors.fill: parent
-                anchors.margins: root.catalogContentInset
-                spacing: LV.Theme.gap6
-
-                LV.Label {
-                    style: title2
-                    color: LV.Theme.textPrimary
-                    text: "Visual Documentation Browser"
-                }
-
-                LV.Label {
-                    width: parent.width
-                    style: description
-                    color: LV.Theme.textSecondary
-                    wrapMode: Text.WordWrap
-                    text: "The left hierarchy is the primary index. Section entries summarize domains, and component entries open dedicated reference pages with live LVRS previews."
-                }
-
-                Flow {
-                    width: parent.width
-                    spacing: LV.Theme.gap8
-
-                    Repeater {
-                        model: [
-                            { label: root.catalogComponentCount + " public types" },
-                            { label: root.catalogDocumentCount + " catalog entries" },
-                            { label: "health " + root.metricsSummary },
-                            { label: root.activeEntry ? root.activeEntry.roleLabel : "Overview" }
-                        ]
-
-                        delegate: Rectangle {
-                            required property var modelData
-                            radius: LV.Theme.radiusSm
-                            color: LV.Theme.surfaceAlt
-                            border.width: 1
-                            border.color: LV.Theme.contextMenuDivider
-                            implicitWidth: chipLabel.implicitWidth + LV.Theme.gap12
-                            implicitHeight: chipLabel.implicitHeight + LV.Theme.gap6
-
-                            LV.Label {
-                                id: chipLabel
-                                anchors.centerIn: parent
-                                style: caption
-                                color: LV.Theme.textPrimary
-                                text: modelData.label
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: root.catalogOuterMargin
             spacing: root.catalogSectionGap
 
-            ColumnLayout {
-                Layout.preferredWidth: root.sidebarWidth
-                Layout.minimumWidth: 240
-                Layout.maximumWidth: 360
-                Layout.fillHeight: true
-                spacing: root.catalogSectionGap
-
-                LV.AppCard {
-                    Layout.fillWidth: true
-                    implicitHeight: 124
-
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: root.catalogContentInset
-                        spacing: LV.Theme.gap4
-
-                        LV.Label {
-                            style: header2
-                            color: LV.Theme.textPrimary
-                            text: "Component Index"
-                        }
-
-                        LV.Label {
-                            width: parent.width
-                            style: description
-                            color: LV.Theme.textSecondary
-                            wrapMode: Text.WordWrap
-                            text: "Use O for overview, + to expand, and - to collapse the full tree."
-                        }
-                    }
-                }
-
-                LV.Hierarchy {
-                    id: catalogHierarchy
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    minimumPanelWidth: root.sidebarWidth
-                    model: catalogRegistry.hierarchyModel
-                    footerVisible: false
-
-                    onListItemActivated: function(item) {
-                        if (item && item.itemKey)
-                            root.activeEntryKey = String(item.itemKey)
-                    }
-
-                    onToolbarButtonTriggered: function(button, buttonId) {
-                        if (buttonId === "overview")
-                            root.activateCatalogEntry(catalogRegistry.overview.key)
-                        else if (buttonId === "expand")
-                            catalogHierarchy.expandAll()
-                        else if (buttonId === "collapse")
-                            catalogHierarchy.collapseAll(true)
-                    }
-
-                    LV.ToolbarButton {
-                        buttonId: "overview"
-                        iconGlyph: "O"
-                    }
-
-                    LV.ToolbarButton {
-                        buttonId: "expand"
-                        iconGlyph: "+"
-                    }
-
-                    LV.ToolbarButton {
-                        buttonId: "collapse"
-                        iconGlyph: "-"
-                    }
-                }
-            }
-
-            ScrollView {
+            LV.AppCard {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
+                implicitHeight: root.catalogCompactLayout ? 158 : 126
 
-                ColumnLayout {
-                    width: Math.max(parent.width, 720)
-                    spacing: root.catalogSectionGap
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: root.catalogContentInset
+                    spacing: LV.Theme.gap6
 
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        implicitHeight: heroColumn.implicitHeight + root.catalogContentInset * 2
-
-                        Column {
-                            id: heroColumn
-                            x: root.catalogContentInset
-                            y: root.catalogContentInset
-                            width: parent.width - root.catalogContentInset * 2
-                            spacing: LV.Theme.gap6
-
-                            LV.Label {
-                                style: caption
-                                color: LV.Theme.textTertiary
-                                text: root.breadcrumbText(root.activeBreadcrumb)
-                            }
-
-                            LV.Label {
-                                style: title
-                                color: LV.Theme.textPrimary
-                                text: root.activeEntry ? root.activeEntry.label : "Catalog Overview"
-                            }
-
-                            LV.Label {
-                                style: description
-                                color: LV.Theme.textSecondary
-                                text: root.activeEntry ? root.activeEntry.roleLabel : "Overview"
-                            }
-
-                            LV.Label {
-                                width: parent.width
-                                style: body
-                                color: LV.Theme.textPrimary
-                                wrapMode: Text.WordWrap
-                                text: root.activeEntry ? root.activeEntry.summary : ""
-                            }
-                        }
+                    LV.Label {
+                        style: title2
+                        color: LV.Theme.textPrimary
+                        text: "Visual Documentation Browser"
                     }
 
-                    LV.AppCard {
-                        Layout.fillWidth: true
-                        title: "Live Preview"
-                        subtitle: root.activeEntry ? root.activeEntry.label : ""
-                        implicitHeight: Math.max(root.catalogCompactLayout ? 320 : 360, (previewLoader.item && previewLoader.item.implicitHeight ? previewLoader.item.implicitHeight : 0) + root.catalogCardInset * 2)
+                    LV.Label {
+                        width: parent.width
+                        style: description
+                        color: LV.Theme.textSecondary
+                        wrapMode: Text.WordWrap
+                        text: "The left hierarchy is the primary index. Section entries summarize domains, and component entries open dedicated reference pages with live LVRS previews."
+                    }
 
-                        Item {
-                            anchors.fill: parent
-                            anchors.margins: root.catalogCardInset
+                    Flow {
+                        width: parent.width
+                        spacing: LV.Theme.gap8
 
-                            Loader {
-                                id: previewLoader
-                                anchors.fill: parent
-                                sourceComponent: root.previewComponentFor(root.activeEntry ? root.activeEntry.previewId : "")
-                                onLoaded: {
-                                    if (item && item.catalogEntry !== undefined)
-                                        item.catalogEntry = root.activeEntry
+                        Repeater {
+                            model: [
+                                { label: root.catalogComponentCount + " public types" },
+                                { label: root.catalogDocumentCount + " catalog entries" },
+                                { label: "health " + root.metricsSummary },
+                                { label: root.activeEntry ? root.activeEntry.roleLabel : "Overview" }
+                            ]
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                radius: LV.Theme.radiusSm
+                                color: LV.Theme.surfaceAlt
+                                border.width: 1
+                                border.color: LV.Theme.contextMenuDivider
+                                implicitWidth: chipLabel.implicitWidth + LV.Theme.gap12
+                                implicitHeight: chipLabel.implicitHeight + LV.Theme.gap6
+
+                                LV.Label {
+                                    id: chipLabel
+                                    anchors.centerIn: parent
+                                    style: caption
+                                    color: LV.Theme.textPrimary
+                                    text: modelData.label
                                 }
                             }
                         }
                     }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: root.catalogSectionGap
+
+                ColumnLayout {
+                    Layout.preferredWidth: root.sidebarWidth
+                    Layout.minimumWidth: 240
+                    Layout.maximumWidth: 360
+                    Layout.fillHeight: true
+                    spacing: root.catalogSectionGap
 
                     LV.AppCard {
                         Layout.fillWidth: true
-                        visible: root.activeEntry && root.activeEntry.usage.length > 0
-                        title: "Usage"
-                        subtitle: "Canonical QML snippet"
-                        implicitHeight: codePreview.editorHeight + root.catalogCardInset * 2
+                        implicitHeight: 124
 
-                        LV.CodeEditor {
-                            id: codePreview
-                            x: root.catalogCardInset
-                            y: root.catalogCardInset
-                            width: parent.width - root.catalogCardInset * 2
-                            readOnly: true
-                            editorHeight: Math.max(160, Math.min(260, contentHeight + LV.Theme.gap20))
-                            snippetTitle: root.activeEntry ? root.activeEntry.label + ".qml" : "usage.qml"
-                            snippetLanguage: "qml"
-                            text: root.activeEntry ? root.activeEntry.usage : ""
+                        Column {
+                            anchors.fill: parent
+                            anchors.margins: root.catalogContentInset
+                            spacing: LV.Theme.gap4
+
+                            LV.Label {
+                                style: header2
+                                color: LV.Theme.textPrimary
+                                text: "Component Index"
+                            }
+
+                            LV.Label {
+                                width: parent.width
+                                style: description
+                                color: LV.Theme.textSecondary
+                                wrapMode: Text.WordWrap
+                                text: "Use O for overview, + to expand, and - to collapse the full tree."
+                            }
                         }
                     }
 
-                    LV.AppCard {
+                    LV.Hierarchy {
+                        id: catalogHierarchy
                         Layout.fillWidth: true
-                        title: "Structure"
-                        subtitle: "Source, related types, and branch contents"
-                        implicitHeight: structureColumn.implicitHeight + root.catalogCardInset * 2
+                        Layout.fillHeight: true
+                        minimumPanelWidth: root.sidebarWidth
+                        model: catalogRegistry.hierarchyModel
+                        footerVisible: false
 
-                        Column {
-                            id: structureColumn
-                            x: root.catalogCardInset
-                            y: root.catalogCardInset
-                            width: parent.width - root.catalogCardInset * 2
-                            spacing: root.catalogSectionGap
+                        onListItemActivated: function(item) {
+                            if (item && item.itemKey)
+                                root.activeEntryKey = String(item.itemKey)
+                        }
+
+                        onToolbarButtonTriggered: function(button, buttonId) {
+                            if (buttonId === "overview")
+                                root.activateCatalogEntry(catalogRegistry.overview.key)
+                            else if (buttonId === "expand")
+                                catalogHierarchy.expandAll()
+                            else if (buttonId === "collapse")
+                                catalogHierarchy.collapseAll(true)
+                        }
+
+                        LV.ToolbarButton {
+                            buttonId: "overview"
+                            iconGlyph: "O"
+                        }
+
+                        LV.ToolbarButton {
+                            buttonId: "expand"
+                            iconGlyph: "+"
+                        }
+
+                        LV.ToolbarButton {
+                            buttonId: "collapse"
+                            iconGlyph: "-"
+                        }
+                    }
+                }
+
+                ScrollView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    ColumnLayout {
+                        width: Math.max(parent.width, 720)
+                        spacing: root.catalogSectionGap
+
+                        LV.AppCard {
+                            Layout.fillWidth: true
+                            implicitHeight: heroColumn.implicitHeight + root.catalogContentInset * 2
+
+                            Column {
+                                id: heroColumn
+                                x: root.catalogContentInset
+                                y: root.catalogContentInset
+                                width: parent.width - root.catalogContentInset * 2
+                                spacing: LV.Theme.gap6
+
+                                LV.Label {
+                                    style: caption
+                                    color: LV.Theme.textTertiary
+                                    text: root.breadcrumbText(root.activeBreadcrumb)
+                                }
+
+                                LV.Label {
+                                    style: title
+                                    color: LV.Theme.textPrimary
+                                    text: root.activeEntry ? root.activeEntry.label : "Catalog Overview"
+                                }
+
+                                LV.Label {
+                                    style: description
+                                    color: LV.Theme.textSecondary
+                                    text: root.activeEntry ? root.activeEntry.roleLabel : "Overview"
+                                }
+
+                                LV.Label {
+                                    width: parent.width
+                                    style: body
+                                    color: LV.Theme.textPrimary
+                                    wrapMode: Text.WordWrap
+                                    text: root.activeEntry ? root.activeEntry.summary : ""
+                                }
+                            }
+                        }
+
+                        LV.AppCard {
+                            Layout.fillWidth: true
+                            title: "Live Preview"
+                            subtitle: root.activeEntry ? root.activeEntry.label : ""
+                            implicitHeight: Math.max(root.catalogCompactLayout ? 320 : 360, (previewLoader.item && previewLoader.item.implicitHeight ? previewLoader.item.implicitHeight : 0) + root.catalogCardInset * 2)
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: root.catalogCardInset
+
+                                Loader {
+                                    id: previewLoader
+                                    anchors.fill: parent
+                                    sourceComponent: root.previewComponentFor(root.activeEntry ? root.activeEntry.previewId : "")
+                                    onLoaded: {
+                                        if (item && item.catalogEntry !== undefined)
+                                            item.catalogEntry = root.activeEntry
+                                    }
+                                }
+                            }
+                        }
+
+                        LV.AppCard {
+                            Layout.fillWidth: true
+                            visible: root.activeEntry && root.activeEntry.usage.length > 0
+                            title: "Usage"
+                            subtitle: "Canonical QML snippet"
+                            implicitHeight: codePreview.editorHeight + root.catalogCardInset * 2
+
+                            LV.CodeEditor {
+                                id: codePreview
+                                x: root.catalogCardInset
+                                y: root.catalogCardInset
+                                width: parent.width - root.catalogCardInset * 2
+                                readOnly: true
+                                editorHeight: Math.max(160, Math.min(260, contentHeight + LV.Theme.gap20))
+                                snippetTitle: root.activeEntry ? root.activeEntry.label + ".qml" : "usage.qml"
+                                snippetLanguage: "qml"
+                                text: root.activeEntry ? root.activeEntry.usage : ""
+                            }
+                        }
+
+                        LV.AppCard {
+                            Layout.fillWidth: true
+                            title: "Structure"
+                            subtitle: "Source, related types, and branch contents"
+                            implicitHeight: structureColumn.implicitHeight + root.catalogCardInset * 2
+
+                            Column {
+                                id: structureColumn
+                                x: root.catalogCardInset
+                                y: root.catalogCardInset
+                                width: parent.width - root.catalogCardInset * 2
+                                spacing: root.catalogSectionGap
 
                             Column {
                                 width: parent.width
@@ -2031,4 +2119,5 @@ LV.ApplicationWindow {
             }
         }
     }
+}
 }

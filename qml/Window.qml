@@ -141,16 +141,16 @@ QtQuickWindow.Window {
             y: root.layoutSafeTopInset
             width: Math.max(1, parent.width - root.layoutSafeLeftInset - root.layoutSafeRightInset)
             height: Math.max(1, parent.height - root.layoutSafeTopInset - root.layoutSafeBottomInset)
+        }
 
-            Item {
-                id: scaledContentHost
-                x: 0
-                y: 0
-                width: Math.max(1, Math.round(parent.width / root.effectiveMobileViewScale))
-                height: Math.max(1, Math.round(parent.height / root.effectiveMobileViewScale))
-                scale: root.effectiveMobileViewScale
-                transformOrigin: Item.TopLeft
-            }
+        Item {
+            id: scaledContentHost
+            x: 0
+            y: 0
+            width: Math.max(1, Math.round(parent.width / root.effectiveMobileViewScale))
+            height: Math.max(1, Math.round(parent.height / root.effectiveMobileViewScale))
+            scale: root.effectiveMobileViewScale
+            transformOrigin: Item.TopLeft
         }
     }
 

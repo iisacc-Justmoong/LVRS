@@ -10,6 +10,8 @@ LV.ApplicationWindow {
     title: "Typing Practice"
     subtitle: "LVRS Example"
     navigationEnabled: false
+    readonly property rect exampleViewport: layoutSafeAreaBounds
+    property bool viewportContractReady: exampleViewport.width > 0 && exampleViewport.height > 0
 
     readonly property var practiceTexts: [
         "Framework design drives implementation quality.",
@@ -106,8 +108,10 @@ LV.ApplicationWindow {
 
     Flickable {
         id: scrollArea
-        anchors.fill: parent
-        anchors.margins: LV.Theme.gap24
+        x: root.exampleViewport.x + LV.Theme.gap24
+        y: root.exampleViewport.y + LV.Theme.gap24
+        width: Math.max(1, root.exampleViewport.width - (LV.Theme.gap24 * 2))
+        height: Math.max(1, root.exampleViewport.height - (LV.Theme.gap24 * 2))
         clip: true
         contentWidth: width
         contentHeight: contentColumn.implicitHeight
