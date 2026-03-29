@@ -2,8 +2,10 @@
 
 #include <QScopedPointer>
 #include <QQmlEngine>
+#include <QWindow>
 #include <QtPlugin>
 
+#include "backend/platform/nativewindowstyle.h"
 #include "backend/platform/platforminfo.h"
 #include "test_utils.h"
 
@@ -20,6 +22,7 @@ private slots:
     void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
     void mobile_theme_scale_contract();
+    void native_window_style_mobile_coverage_flags();
 };
 
 void PlatformIntegrationTests::platform_flags_consistency()
@@ -429,6 +432,26 @@ QtObject {
         QVERIFY(root);
         QTRY_VERIFY(root->property("desktopContract").toBool());
     }
+}
+
+void PlatformIntegrationTests::native_window_style_mobile_coverage_flags()
+{
+    NativeWindowStyle nativeWindowStyle;
+    QWindow window;
+
+    QVERIFY(nativeWindowStyle.applyMobileCoverageFlags(&window, true, true));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    QVERIFY(window.flags().testFlag(Qt::ExpandedClientAreaHint));
+    QVERIFY(window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
+#endif
+    QVERIFY(window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
+
+    QVERIFY(nativeWindowStyle.applyMobileCoverageFlags(&window, false, false));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    QVERIFY(!window.flags().testFlag(Qt::ExpandedClientAreaHint));
+    QVERIFY(!window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
+#endif
+    QVERIFY(!window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
 }
 
 QTEST_MAIN(PlatformIntegrationTests)

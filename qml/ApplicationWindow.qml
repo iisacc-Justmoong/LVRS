@@ -371,23 +371,38 @@ Controls.ApplicationWindow {
         return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
     }
 
+    // Qt's iOS backend uses maximized + fullscreen-geometry-hint for edge-to-edge
+    // coverage while keeping the status indicators visible.
+    function mobileCoverageTargetVisibilityForPlatform(platformName) {
+        const normalizedPlatform = String(Platform.normalizeTarget(platformName) || "").trim().toLowerCase()
+        if (normalizedPlatform === "ios")
+            return Window.Maximized
+        return Window.FullScreen
+    }
+
     function applyMobileDisplayCoverageOverride() {
+        const expandedClientAreaEnabled = windowRoot.mobileDisplayCoverageOverrideEnabled
+            && windowRoot.fullWindowAreaOnMobileEnabled
         const geometryHintEnabled = windowRoot.mobileDisplayCoverageOverrideEnabled
             && windowRoot.fullWindowAreaOnMobileEnabled
             && windowRoot.mobileFullscreenGeometryHintOverride
 
-        if (typeof windowRoot.setFlag === "function")
-            windowRoot.setFlag(Qt.MaximizeUsingFullscreenGeometryHint, geometryHintEnabled)
+        NativeWindowStyle.applyMobileCoverageFlags(windowRoot,
+                                                   expandedClientAreaEnabled,
+                                                   geometryHintEnabled)
 
         const fullscreenEnabled = windowRoot.mobileDisplayCoverageOverrideEnabled
             && windowRoot.fullWindowAreaOnMobileEnabled
             && windowRoot.mobileFullscreenVisibilityOverride
+        const targetVisibility = windowRoot.mobileCoverageTargetVisibilityForPlatform(windowRoot.canonicalPlatform)
 
         if (!windowRoot.visible)
             return
 
         if (!fullscreenEnabled) {
-            if (windowRoot.mobileFullscreenForcedByFramework && windowRoot.visibility === Window.FullScreen) {
+            if (windowRoot.mobileFullscreenForcedByFramework
+                    && (windowRoot.visibility === Window.FullScreen
+                        || windowRoot.visibility === Window.Maximized)) {
                 if (typeof windowRoot.showNormal === "function")
                     windowRoot.showNormal()
                 else
@@ -397,11 +412,13 @@ Controls.ApplicationWindow {
             return
         }
 
-        if (windowRoot.visibility !== Window.FullScreen) {
-            if (typeof windowRoot.showFullScreen === "function")
+        if (windowRoot.visibility !== targetVisibility) {
+            if (targetVisibility === Window.Maximized && typeof windowRoot.showMaximized === "function")
+                windowRoot.showMaximized()
+            else if (targetVisibility === Window.FullScreen && typeof windowRoot.showFullScreen === "function")
                 windowRoot.showFullScreen()
             else
-                windowRoot.visibility = Window.FullScreen
+                windowRoot.visibility = targetVisibility
         }
 
         windowRoot.mobileFullscreenForcedByFramework = true

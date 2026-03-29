@@ -57,7 +57,7 @@ On completion, main flow is:
 - mobile coverage overrides:
   - `forceFullWindowAreaOnMobile` (defaults to `true` on mobile so the render surface stays full-bleed)
   - `mobileDisplayCoverageOverrideEnabled` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
-  - `mobileFullscreenVisibilityOverride` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
+  - `mobileFullscreenVisibilityOverride` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`; on iOS this resolves to maximized edge-to-edge coverage instead of hiding the status bar)
   - `mobileFullscreenGeometryHintOverride` (profile-driven capability; masked off while `delegateMobileWindowingToSystem=true`)
   - `mobileOversizedHeightEnabled` (default `false`; opt in only for explicit oversized-surface workarounds)
   - `mobileOversizedHeight`
@@ -158,7 +158,8 @@ Signals:
 - `matchesMedia(rule)`
 - `ensureRuntimeEventsAttached()`
 - `applyNativeWindowStyle()`
-- `applyMobileDisplayCoverageOverride()` (applies or releases framework-managed fullscreen/geometry hints)
+- `mobileCoverageTargetVisibilityForPlatform(platformName)` (maps iOS to `Window.Maximized` and other mobile coverage paths to `Window.FullScreen`)
+- `applyMobileDisplayCoverageOverride()` (applies or releases framework-managed edge-to-edge visibility, fullscreen-geometry, and expanded-client-area hints)
 - `requestWindowMove()`
 
 ## Behavior Notes
@@ -171,6 +172,8 @@ Signals:
 - The standard bootstrap route contract now lives in `ApplicationWindow` itself, so downstream projects can seed `initialRoutePath` through `QmlAppLaunchSpec::initialProperties` without wrapping the root type.
 - Stock shells now default to the runtime-direct `RenderQuality` path; automatic device-tier preset application is disabled unless a downstream app explicitly turns `autoApplyDeviceTierPreset` back on.
 - Mobile system delegation defaults are platform-aware: Android still prefers OS-managed windowing/insets, while iOS now defaults to the framework-managed full-window coverage path so the render surface can extend into the status-bar, notch, and home-indicator regions.
+- When that framework-managed coverage path is active, `ApplicationWindow` now pushes the underlying `QWindow` through `MaximizeUsingFullscreenGeometryHint` and, on Qt 6.9+, `ExpandedClientAreaHint`/`NoTitleBarBackgroundHint` as well.
+- iOS coverage now uses `Window.Maximized` together with `MaximizeUsingFullscreenGeometryHint`, which keeps the system status indicators visible while letting the render surface reach into the status-bar, notch, and home-indicator regions.
 - Android still exposes the legacy fullscreen coverage path through `mobileDisplayCoverageOverrideEnabled`, `mobileFullscreenVisibilityOverride`, and `mobileFullscreenGeometryHintOverride`; disabling `delegateMobileWindowingToSystem` is the first step when a downstream app intentionally wants that path back.
 - `WindowSafeAreaObserver` is the low-level API for downstream apps that want direct access to the platform safe-area margins without routing through the root convenience properties.
 - Mobile safe-area fill keeps default layout bounds available as metadata only. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.

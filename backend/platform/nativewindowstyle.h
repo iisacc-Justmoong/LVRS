@@ -21,4 +21,7 @@ public:
 
     Q_INVOKABLE bool applyTitleBarColor(QObject *window, const QColor &color, bool darkAppearance = true);
     Q_INVOKABLE bool applySolidChrome(QObject *window, const QColor &color, bool darkAppearance = true);
+    Q_INVOKABLE bool applyMobileCoverageFlags(QObject *window,
+                                              bool expandedClientArea = true,
+                                              bool fullscreenGeometryHint = true);
 };

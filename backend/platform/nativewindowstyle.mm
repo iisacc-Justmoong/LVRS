@@ -117,3 +117,22 @@ bool NativeWindowStyle::applySolidChrome(QObject *windowObject, const QColor &co
 
     return true;
 }
+
+bool NativeWindowStyle::applyMobileCoverageFlags(QObject *windowObject,
+                                                 bool expandedClientArea,
+                                                 bool fullscreenGeometryHint)
+{
+    auto *window = qobject_cast<QWindow *>(windowObject);
+    if (!window)
+        return false;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    window->setFlag(Qt::ExpandedClientAreaHint, expandedClientArea);
+    window->setFlag(Qt::NoTitleBarBackgroundHint, expandedClientArea);
+#else
+    Q_UNUSED(expandedClientArea);
+#endif
+
+    window->setFlag(Qt::MaximizeUsingFullscreenGeometryHint, fullscreenGeometryHint);
+    return true;
+}

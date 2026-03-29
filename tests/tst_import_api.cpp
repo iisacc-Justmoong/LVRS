@@ -19,6 +19,7 @@ class ImportApiTests : public QObject
 private slots:
     void app_bootstrap_window_loads();
     void versionless_import_application_window_loads();
+    void application_window_mobile_coverage_visibility_contract_loads();
     void application_window_page_stack_state_loads();
     void application_window_initial_properties_seed_page_stack();
     void application_window_safe_margin_scopes_to_layout_not_render_surface();
@@ -257,6 +258,34 @@ LV.ApplicationWindow {
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
     QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
+}
+
+void ImportApiTests::application_window_mobile_coverage_visibility_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Window
+import LVRS as LV
+
+LV.ApplicationWindow {
+    visible: false
+    width: 430
+    height: 932
+
+    property bool coverageVisibilityReady:
+        mobileCoverageTargetVisibilityForPlatform("ios") === Window.Maximized
+        && mobileCoverageTargetVisibilityForPlatform("ios-simulator") === Window.Maximized
+        && mobileCoverageTargetVisibilityForPlatform("android") === Window.FullScreen
+        && mobileCoverageTargetVisibilityForPlatform("macos") === Window.FullScreen
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("coverageVisibilityReady").toBool());
 }
 
 void ImportApiTests::versionless_import_window_loads()
