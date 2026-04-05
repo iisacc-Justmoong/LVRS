@@ -3,7 +3,7 @@
 Location: `qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
-It now applies a built-in mobile `1.5x` token profile, so spacing, radius, control sizes, and typography values resolve to enlarged mobile numbers on iOS and Android without relying on root-layer composition scaling.
+It now applies a built-in mobile `1.25x` token profile, so spacing, radius, control sizes, and typography values resolve to enlarged mobile numbers on iOS and Android without relying on root-layer composition scaling.
 
 ## Token Groups
 
@@ -13,12 +13,12 @@ It now applies a built-in mobile `1.5x` token profile, so spacing, radius, contr
 - Accent palette: iconset-derived color token set (`accentPaletteTokens`).
 - Metrics: spacing, radius, control size, dialog size, and interaction timings.
 
-## Mobile `1.5x` Scaling
+## Mobile `1.25x` Scaling
 
 - `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.
-- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `1.5x`.
+- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `1.25x`.
 - This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and text pixel sizes / line heights.
-- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `1.5x` sizing over scaled composition for the stock mobile path.
+- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `1.25x` sizing over scaled composition for the stock mobile path.
 
 Preview/test helpers:
 
@@ -98,10 +98,10 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
   - `contextMenuItemInactiveBackground`
 - Dialog sizing:
   - desktop: `dialogMinWidth: 280`, `dialogMaxWidth: 360`
-  - mobile: `dialogMinWidth: 420`, `dialogMaxWidth: 540`
+  - mobile: `dialogMinWidth: 350`, `dialogMaxWidth: 450`
 - Common radii:
   - desktop: `radiusSm: 4`, `radiusLg: 12`
-  - mobile: `radiusSm: 6`, `radiusLg: 18`
+  - mobile: `radiusSm: 5`, `radiusLg: 15`
 
 ## Usage
 

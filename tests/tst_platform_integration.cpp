@@ -362,17 +362,17 @@ Item {
     property bool tokenContract:
         LV.Theme.effectiveTarget === "android"
         && LV.Theme.mobileTarget
-        && LV.Theme.metricScaleFactor === 1.5
-        && LV.Theme.typographyScaleFactor === 1.5
-        && LV.Theme.gap8 === 12
-        && LV.Theme.dialogMinWidth === 420
-        && LV.Theme.textTitle === 39
-        && LV.Theme.textBody === 18
-        && LV.Theme.textCaption === 17
-        && LV.Theme.scaleMetric(17) === 26
-        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 2.25) < 0.01
-        && Math.abs(LV.Theme.scaleRealMetric(4) - 6.0) < 0.01
-        && LV.Theme.scaleTextMetric(13) === 20
+        && LV.Theme.metricScaleFactor === 1.25
+        && LV.Theme.typographyScaleFactor === 1.25
+        && LV.Theme.gap8 === 10
+        && LV.Theme.dialogMinWidth === 350
+        && LV.Theme.textTitle === 33
+        && LV.Theme.textBody === 15
+        && LV.Theme.textCaption === 14
+        && LV.Theme.scaleMetric(17) === 21
+        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 1.875) < 0.01
+        && Math.abs(LV.Theme.scaleRealMetric(4) - 5.0) < 0.01
+        && LV.Theme.scaleTextMetric(13) === 16
         && LV.Theme.isThemeTextStyleCompliant(LV.Theme.textBody, LV.Theme.textBodyWeight, LV.Theme.textBodyStyleName)
 
     LV.List {
@@ -391,12 +391,12 @@ Item {
     }
 
     property bool componentContract:
-        listControl.listWidth === 255
-        && listControl.minimumListHeight === 335
-        && menuItem.itemWidth === 242
-        && menuItem.itemHeight === 24
-        && menuItem.iconSize === 24
-        && checkBox.boxSize === 26
+        listControl.listWidth === 213
+        && listControl.minimumListHeight === 279
+        && menuItem.itemWidth === 201
+        && menuItem.itemHeight === 20
+        && menuItem.iconSize === 20
+        && checkBox.boxSize === 21
 }
 )";
 

@@ -46,6 +46,10 @@ FocusScope {
     property bool preferNativeGestures: Theme.mobileTarget
     readonly property bool preferNativeTextInteraction: preferNativeGestures
         && Theme.effectiveRuntimeProfile.ios === true
+    property int viewportFlickDeceleration: Theme.mobileTarget ? 1800 : 3200
+    property int viewportMaximumFlickVelocity: Theme.mobileTarget ? 12000 : 8000
+    readonly property int viewportBoundsBehavior: Flickable.StopAtBounds
+    readonly property int viewportBoundsMovement: Flickable.StopAtBounds
 
     property int fieldMinHeight: Theme.controlHeightMd * 4
     property int editorHeight: fieldMinHeight
@@ -193,11 +197,15 @@ FocusScope {
 
         Flickable {
             id: flickable
+            objectName: "codeEditorViewportFlickable"
             anchors.fill: parent
             clip: true
             interactive: (contentHeight > height || contentWidth > width)
                          && (!control.preferNativeGestures || !editor.activeFocus)
-            boundsBehavior: Flickable.StopAtBounds
+            boundsBehavior: control.viewportBoundsBehavior
+            boundsMovement: control.viewportBoundsMovement
+            flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
+            maximumFlickVelocity: Math.max(1, control.viewportMaximumFlickVelocity)
             contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
             contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
 

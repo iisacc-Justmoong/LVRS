@@ -9,6 +9,16 @@ Rectangle {
     property int minimumPanelHeight: Theme.scaleMetric(530)
     property color panelColor: Theme.panelBackground05
     property bool clipList: true
+    property bool listOvershootEnabled: Theme.mobileTarget
+    property int listFlickDeceleration: listOvershootEnabled ? 1800 : 3200
+    property int listMaximumFlickVelocity: listOvershootEnabled ? 12000 : 8000
+    property int listReboundDuration: listOvershootEnabled ? 220 : 160
+    readonly property int listBoundsBehavior: listOvershootEnabled
+        ? Flickable.DragAndOvershootBounds
+        : Flickable.StopAtBounds
+    readonly property int listBoundsMovement: listOvershootEnabled
+        ? Flickable.FollowBoundsBehavior
+        : Flickable.StopAtBounds
 
     property alias toolbarButtons: toolbar.buttons
     property alias toolbarItems: toolbar.buttonItems
@@ -107,14 +117,27 @@ Rectangle {
 
     Flickable {
         id: listViewport
+        objectName: "hierarchyListViewportFlickable"
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: toolbar.bottom
         anchors.bottom: footer.visible ? footer.top : parent.bottom
         clip: control.clipList
+        flickableDirection: Flickable.VerticalFlick
+        interactive: contentHeight > height
         contentWidth: width
         contentHeight: hierarchyList.implicitHeight
-        boundsBehavior: Flickable.StopAtBounds
+        boundsBehavior: control.listBoundsBehavior
+        boundsMovement: control.listBoundsMovement
+        flickDeceleration: Math.max(1, control.listFlickDeceleration)
+        maximumFlickVelocity: Math.max(1, control.listMaximumFlickVelocity)
+        rebound: Transition {
+            NumberAnimation {
+                properties: "x,y"
+                duration: control.listReboundDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
         HierarchyList {
             id: hierarchyList

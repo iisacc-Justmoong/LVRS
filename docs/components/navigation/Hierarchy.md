@@ -39,6 +39,8 @@ Behavior aliases:
 - `countRole`
 - `keyboardListNavigationEnabled`
 - `editable`
+- list scroll physics: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`
+- readonly list viewport policy: `listBoundsBehavior`, `listBoundsMovement`
 
 Optional footer:
 
@@ -98,6 +100,7 @@ LV.Hierarchy {
 - `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must be an array-backed object depth list.
 - In mobile-target runs, editable row drag requires a `1000ms` long press before `HierarchyItem` enters drag/drop mode, which preserves touch scrolling priority inside the panel `Flickable`.
 - In mobile-target runs, row activation also commits on release/click instead of press, so a vertical drag can still be claimed by the list scroll path before the active row changes.
+- Mobile-target list scrolling now enables overshoot + rebound (`DragAndOvershootBounds`/`FollowBoundsBehavior`) and tuned flick momentum (`listFlickDeceleration`, `listMaximumFlickVelocity`) for iOS-like inertial feel at edges.
 - `listItemActivated` mirrors deliberate repeat activation gestures on the already-active row, so panel hosts can treat a second tap/click as an action trigger without changing selection.
 
 ## Advanced Usage: Programmatic Activation

@@ -35,13 +35,13 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         int doubledPixelSize;
     };
     const QList<Token> expected = {
-        {26, QFont::Bold, "Bold", QFont::Bold, "Bold", 39, 52},
-        {22, QFont::Bold, "Bold", QFont::Bold, "Bold", 33, 44},
-        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 26, 34},
-        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 23, 30},
-        {12, QFont::Medium, "Medium", QFont::Medium, "Medium", 18, 24},
-        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 18, 24},
-        {11, QFont::Normal, "Regular", QFont::Normal, "Regular", 17, 22}
+        {26, QFont::Bold, "Bold", QFont::Bold, "Bold", 33, 52},
+        {22, QFont::Bold, "Bold", QFont::Bold, "Bold", 28, 44},
+        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 21, 34},
+        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 19, 30},
+        {12, QFont::Medium, "Medium", QFont::Medium, "Medium", 15, 24},
+        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 15, 24},
+        {11, QFont::Normal, "Regular", QFont::Normal, "Regular", 14, 22}
     };
 
     for (const Token &token : expected) {

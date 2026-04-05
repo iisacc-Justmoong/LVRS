@@ -12,6 +12,10 @@
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
 
+namespace {
+constexpr int kFlickableStopAtBounds = 0;
+}
+
 class TextEditorTests : public QObject
 {
     Q_OBJECT
@@ -20,6 +24,7 @@ private slots:
     void text_editor_default_contract_and_utility_api();
     void text_editor_mode_independent_render_contract_and_submit_signal();
     void text_editor_ios_native_text_interaction_contract();
+    void text_editor_ios_scroll_physics_contract();
     void text_editor_mobile_focus_suspends_viewport_flick_for_selection();
 };
 
@@ -198,6 +203,63 @@ Item {
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+}
+
+void TextEditorTests::text_editor_ios_scroll_physics_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 360
+    height: 280
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        anchors.fill: parent
+        showRenderedOutput: true
+        editorHeight: 96
+        outputMinHeight: 64
+        text: "line 01\nline 02\nline 03\nline 04\nline 05\nline 06\nline 07\nline 08\nline 09\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *editorViewport = root->findChild<QObject *>(QStringLiteral("editorViewportFlickable"));
+    QVERIFY(editorViewport);
+    QObject *previewViewport = root->findChild<QObject *>(QStringLiteral("editorPreviewFlickable"));
+    QVERIFY(previewViewport);
+
+    QCOMPARE(editorViewport->property("boundsBehavior").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(editorViewport->property("boundsMovement").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(editorViewport->property("boundsBehavior").toInt(), editor->property("viewportBoundsBehavior").toInt());
+    QCOMPARE(editorViewport->property("boundsMovement").toInt(), editor->property("viewportBoundsMovement").toInt());
+    QCOMPARE(editorViewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
+    QCOMPARE(editorViewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
+
+    QCOMPARE(previewViewport->property("boundsBehavior").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(previewViewport->property("boundsMovement").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(previewViewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
+    QCOMPARE(previewViewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
 }
 
 void TextEditorTests::text_editor_mobile_focus_suspends_viewport_flick_for_selection()

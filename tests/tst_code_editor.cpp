@@ -12,6 +12,10 @@
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
 
+namespace {
+constexpr int kFlickableStopAtBounds = 0;
+}
+
 class CodeEditorTests : public QObject
 {
     Q_OBJECT
@@ -20,6 +24,7 @@ private slots:
     void code_editor_default_contract_and_utility_api();
     void code_editor_submit_signal_and_fixed_plain_text_mode();
     void code_editor_ios_native_text_interaction_contract();
+    void code_editor_ios_scroll_physics_contract();
 };
 
 void CodeEditorTests::code_editor_default_contract_and_utility_api()
@@ -162,6 +167,54 @@ Item {
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+}
+
+void CodeEditorTests::code_editor_ios_scroll_physics_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 380
+    height: 260
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.CodeEditor {
+        id: editor
+        objectName: "codeEditor"
+        anchors.fill: parent
+        editorHeight: 120
+        text: "line 01\nline 02\nline 03\nline 04\nline 05\nline 06\nline 07\nline 08\nline 09\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
+    QVERIFY(editor);
+    QObject *viewport = root->findChild<QObject *>(QStringLiteral("codeEditorViewportFlickable"));
+    QVERIFY(viewport);
+
+    QCOMPARE(viewport->property("boundsBehavior").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(viewport->property("boundsMovement").toInt(), kFlickableStopAtBounds);
+    QCOMPARE(viewport->property("boundsBehavior").toInt(), editor->property("viewportBoundsBehavior").toInt());
+    QCOMPARE(viewport->property("boundsMovement").toInt(), editor->property("viewportBoundsMovement").toInt());
+    QCOMPARE(viewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
+    QCOMPARE(viewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
 }
 
 QTEST_MAIN(CodeEditorTests)

@@ -12,6 +12,11 @@
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
 
+namespace {
+constexpr int kFlickableDragAndOvershootBounds = 3;
+constexpr int kFlickableFollowBoundsBehavior = 1;
+}
+
 class ImportApiTests : public QObject
 {
     Q_OBJECT
@@ -36,6 +41,7 @@ private slots:
     void hierarchy_mobile_drag_hold_contract_loads();
     void hierarchy_mobile_activation_commits_on_release_contract_loads();
     void hierarchy_mobile_reactivation_reemits_active_signal();
+    void hierarchy_mobile_scroll_physics_contract_loads();
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
@@ -1493,6 +1499,66 @@ Window {
     QTRY_COMPARE(activationSpy.count(), 1);
     QCOMPARE(hierarchy->property("activeListItem").value<QObject *>(), rootItemObject);
     QCOMPARE(hierarchy->property("activeListItemKey").toString(), QStringLiteral("root"));
+}
+
+void ImportApiTests::hierarchy_mobile_scroll_physics_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 260
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.Hierarchy {
+        id: hierarchy
+        objectName: "hierarchy"
+        anchors.fill: parent
+        toolbarItems: [
+            { id: "structure", iconName: "projectStructure" }
+        ]
+        model: [
+            { key: "row-01", depth: 0, label: "Row 01", expanded: true },
+            { key: "row-02", depth: 0, label: "Row 02", expanded: true },
+            { key: "row-03", depth: 0, label: "Row 03", expanded: true },
+            { key: "row-04", depth: 0, label: "Row 04", expanded: true },
+            { key: "row-05", depth: 0, label: "Row 05", expanded: true },
+            { key: "row-06", depth: 0, label: "Row 06", expanded: true },
+            { key: "row-07", depth: 0, label: "Row 07", expanded: true },
+            { key: "row-08", depth: 0, label: "Row 08", expanded: true },
+            { key: "row-09", depth: 0, label: "Row 09", expanded: true },
+            { key: "row-10", depth: 0, label: "Row 10", expanded: true },
+            { key: "row-11", depth: 0, label: "Row 11", expanded: true },
+            { key: "row-12", depth: 0, label: "Row 12", expanded: true },
+            { key: "row-13", depth: 0, label: "Row 13", expanded: true },
+            { key: "row-14", depth: 0, label: "Row 14", expanded: true }
+        ]
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *hierarchy = root->findChild<QObject *>(QStringLiteral("hierarchy"));
+    QVERIFY(hierarchy);
+    QObject *viewport = root->findChild<QObject *>(QStringLiteral("hierarchyListViewportFlickable"));
+    QVERIFY(viewport);
+
+    QTRY_COMPARE(viewport->property("boundsBehavior").toInt(), kFlickableDragAndOvershootBounds);
+    QCOMPARE(viewport->property("boundsMovement").toInt(), kFlickableFollowBoundsBehavior);
+    QCOMPARE(viewport->property("boundsBehavior").toInt(), hierarchy->property("listBoundsBehavior").toInt());
+    QCOMPARE(viewport->property("boundsMovement").toInt(), hierarchy->property("listBoundsMovement").toInt());
+    QCOMPARE(viewport->property("flickDeceleration").toInt(), hierarchy->property("listFlickDeceleration").toInt());
+    QCOMPARE(viewport->property("maximumFlickVelocity").toInt(), hierarchy->property("listMaximumFlickVelocity").toInt());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()

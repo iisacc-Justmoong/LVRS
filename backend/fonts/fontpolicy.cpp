@@ -28,7 +28,7 @@ constexpr std::array<TextStyleToken, 7> kThemeTextTokens = {{
 
 constexpr std::array<qreal, 3> kThemeTokenScaleFactors = {{
     1.0,
-    1.5,
+    1.25,
     2.0
 }};
 

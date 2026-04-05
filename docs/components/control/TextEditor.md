@@ -37,6 +37,8 @@ Layout/visual:
 - `insetHorizontal`, `insetVertical`
 - `shapeStyle`, `cornerRadius`
 - `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`
+- viewport scroll physics: `viewportFlickDeceleration`, `viewportMaximumFlickVelocity`
+- readonly viewport policy: `viewportBoundsBehavior`, `viewportBoundsMovement`
 
 Signals and methods:
 
@@ -49,6 +51,7 @@ Signals and methods:
 - Preview pane is shown only when `showRenderedOutput == true`.
 - Uses a vertically constrained `Flickable`-hosted `TextArea` (`TextArea.flickable`) for the edit surface, plus `InputMethodGuard` and a `WheelScrollGuard` for the preview pane.
 - Mobile-target defaults follow `Theme.mobileTarget`; on iOS-target the underlying `TextEdit` switches to `NativeRendering` for rasterization, and the editor viewport suspends touch flicking while the text control holds focus so double-tap selection, selection-handle drag, and OS keyboard edit gestures are not pre-empted by container scrolling.
+- Mobile-target scroll defaults keep tuned flick momentum (`viewportFlickDeceleration`, `viewportMaximumFlickVelocity`) while bounds remain clamped (`StopAtBounds`) on both edit and preview viewports.
 - Current defaults force plain text wrapping (`resolvedWrapMode`, `resolvedTextFormat`) unless component logic is changed.
 
 ## Usage

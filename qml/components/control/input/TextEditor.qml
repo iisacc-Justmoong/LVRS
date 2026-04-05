@@ -58,6 +58,10 @@ FocusScope {
     property bool preferNativeGestures: Theme.mobileTarget
     readonly property bool preferNativeTextInteraction: preferNativeGestures
         && Theme.effectiveRuntimeProfile.ios === true
+    property int viewportFlickDeceleration: Theme.mobileTarget ? 1800 : 3200
+    property int viewportMaximumFlickVelocity: Theme.mobileTarget ? 12000 : 8000
+    readonly property int viewportBoundsBehavior: Flickable.StopAtBounds
+    readonly property int viewportBoundsMovement: Flickable.StopAtBounds
     property bool showRenderedOutput: true
     property int outputSpacing: Theme.gap8
     property int outputMinHeight: Theme.controlHeightMd * 2
@@ -208,7 +212,10 @@ FocusScope {
             clip: true
             enabled: control.enabled
             flickableDirection: Flickable.VerticalFlick
-            boundsBehavior: Flickable.StopAtBounds
+            boundsBehavior: control.viewportBoundsBehavior
+            boundsMovement: control.viewportBoundsMovement
+            flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
+            maximumFlickVelocity: Math.max(1, control.viewportMaximumFlickVelocity)
             interactive: contentHeight > height && (!control.preferNativeGestures || !editor.activeFocus)
 
             ScrollBar.vertical: ScrollBar {
@@ -306,10 +313,14 @@ FocusScope {
 
         Flickable {
             id: previewFlick
+            objectName: "editorPreviewFlickable"
             anchors.fill: parent
             clip: true
             interactive: contentHeight > height
-            boundsBehavior: Flickable.StopAtBounds
+            boundsBehavior: control.viewportBoundsBehavior
+            boundsMovement: control.viewportBoundsMovement
+            flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
+            maximumFlickVelocity: Math.max(1, control.viewportMaximumFlickVelocity)
             contentWidth: Math.max(width, previewText.implicitWidth + control.insetHorizontal * 2)
             contentHeight: Math.max(height, previewText.implicitHeight + control.insetVertical * 2)
 

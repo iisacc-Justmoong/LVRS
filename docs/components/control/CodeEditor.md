@@ -31,6 +31,8 @@ Layout/visual:
 - `insetHorizontal`, `insetVertical`
 - `shapeStyle`, `cornerRadius`
 - `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`
+- viewport scroll physics: `viewportFlickDeceleration`, `viewportMaximumFlickVelocity`
+- readonly viewport policy: `viewportBoundsBehavior`, `viewportBoundsMovement`
 
 Signals and methods:
 
@@ -43,6 +45,7 @@ Signals and methods:
 - Header area height is included in top inset only when `showSnippetHeader` is true.
 - Includes `InputMethodGuard` + `WheelScrollGuard` for IME/scroll safety.
 - Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` uses `NativeRendering` so software-keyboard edit gestures and repeat delete stay on the platform-native path.
+- Mobile-target scroll defaults keep tuned flick momentum (`viewportFlickDeceleration`, `viewportMaximumFlickVelocity`) while bounds remain clamped (`StopAtBounds`) on the editor viewport.
 
 ## Usage
 
