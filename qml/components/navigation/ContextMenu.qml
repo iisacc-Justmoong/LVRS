@@ -92,7 +92,7 @@ Controls.Popup {
     dim: false
     focus: true
     transformOrigin: Item.TopLeft
-    padding: Theme.gap4
+    padding: Theme.gap8
     closePolicy: Controls.Popup.CloseOnEscape
         | Controls.Popup.CloseOnPressOutside
         | Controls.Popup.CloseOnPressOutsideParent

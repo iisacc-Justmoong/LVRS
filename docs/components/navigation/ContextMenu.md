@@ -89,7 +89,7 @@ Shortcut visibility defaults to `true` only when shortcut text exists; entries w
 
 ## Visual Contract
 
-- Popup chrome uses `Theme.panelBackground06`, `Theme.radiusMd`, and `Theme.gap4` padding on all sides.
+- Popup chrome uses `Theme.panelBackground06`, `Theme.radiusMd`, and `Theme.gap8` padding on all sides.
 - Rows are stacked with `Theme.gap2` between entries.
 - Divider rows inherit `Theme.disabledColor`, so the default menu matches the compact Figma context-menu frame without caller overrides.
 

@@ -3937,10 +3937,10 @@ Item {
 
     property bool visualContract:
         menu.itemSpacing === LV.Theme.gap2
-        && menu.leftPadding === LV.Theme.gap4
-        && menu.rightPadding === LV.Theme.gap4
-        && menu.topPadding === LV.Theme.gap4
-        && menu.bottomPadding === LV.Theme.gap4
+        && menu.leftPadding === LV.Theme.gap8
+        && menu.rightPadding === LV.Theme.gap8
+        && menu.topPadding === LV.Theme.gap8
+        && menu.bottomPadding === LV.Theme.gap8
         && menu.menuColor === LV.Theme.contextMenuSurface
         && menu.menuColor === LV.Theme.panelBackground06
         && menu.dividerColor === LV.Theme.contextMenuDivider
