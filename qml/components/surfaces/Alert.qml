@@ -29,6 +29,9 @@ Item {
     property color appIconBackgroundColor: "#C9D4DB"
     property color appIconFrameColor: "#E8F0F5"
     property color appIconInnerColor: "#D8E0E6"
+    readonly property int actionButtonVerticalPadding: Theme.gap8
+    readonly property int actionButtonHeight: Math.max(Theme.gap20,
+                                                       Theme.textBodyLineHeight + (actionButtonVerticalPadding * 2))
 
     readonly property int preferredWidth: Theme.scaleMetric(328)
     readonly property int sidePadding: Theme.gap24
@@ -190,6 +193,9 @@ Item {
                         width: parent.width
                         text: root.resolvedPrimaryText
                         tone: AbstractButton.Primary
+                        verticalPadding: root.actionButtonVerticalPadding
+                        implicitHeight: root.actionButtonHeight
+                        height: root.actionButtonHeight
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
                     }
@@ -199,6 +205,9 @@ Item {
                         width: parent.width
                         text: root.resolvedSecondaryText
                         tone: AbstractButton.Default
+                        verticalPadding: root.actionButtonVerticalPadding
+                        implicitHeight: root.actionButtonHeight
+                        height: root.actionButtonHeight
                         enabled: root.secondaryEnabled
                         onClicked: root.secondaryClicked()
                     }
@@ -208,6 +217,9 @@ Item {
                         width: parent.width
                         text: root.resolvedTertiaryText
                         tone: AbstractButton.Default
+                        verticalPadding: root.actionButtonVerticalPadding
+                        implicitHeight: root.actionButtonHeight
+                        height: root.actionButtonHeight
                         enabled: root.tertiaryEnabled
                         onClicked: root.tertiaryClicked()
                     }
@@ -226,6 +238,9 @@ Item {
                         width: horizontalActions.buttonWidth
                         text: root.resolvedPrimaryText
                         tone: AbstractButton.Primary
+                        verticalPadding: root.actionButtonVerticalPadding
+                        implicitHeight: root.actionButtonHeight
+                        height: root.actionButtonHeight
                         enabled: root.primaryEnabled
                         onClicked: root.primaryClicked()
                     }
@@ -235,6 +250,9 @@ Item {
                         visible: root.hasSecondaryAction
                         text: root.resolvedSecondaryText
                         tone: AbstractButton.Default
+                        verticalPadding: root.actionButtonVerticalPadding
+                        implicitHeight: root.actionButtonHeight
+                        height: root.actionButtonHeight
                         enabled: root.secondaryEnabled
                         onClicked: root.secondaryClicked()
                     }
@@ -248,6 +266,9 @@ Item {
                     width: parent.width - (Theme.gap24 * 2)
                     text: root.resolvedPrimaryText
                     tone: AbstractButton.Primary
+                    verticalPadding: root.actionButtonVerticalPadding
+                    implicitHeight: root.actionButtonHeight
+                    height: root.actionButtonHeight
                     enabled: root.primaryEnabled
                     onClicked: root.primaryClicked()
                 }

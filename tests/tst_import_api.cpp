@@ -68,6 +68,7 @@ private slots:
     void radio_button_figma_contract_loads();
     void modal_empty_frame_contract_loads();
     void modal_content_action_contract_loads();
+    void alert_action_button_padding_scopes_to_alert();
     void menu_item_key_and_chevron_contract_loads();
     void context_menu_item_action_contract_loads();
     void context_menu_visual_contract_loads();
@@ -3316,10 +3317,10 @@ Item {
         && searchField.search
         && searchField.searchIconVisible
         && Math.abs(searchField.searchIconSize - LV.Theme.scaleMetric(12)) < 0.01
-        && Math.abs(searchField.searchIconSize - 18.0) < 0.01
+        && Math.abs(searchField.searchIconSize - 15.0) < 0.01
         && searchField.searchIconSource == LV.Theme.iconPath("generalsearch")
         && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
-        && LV.Theme.iconSm === 24
+        && LV.Theme.iconSm === 20
 }
 )";
 
@@ -3611,6 +3612,115 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("contractReady").toBool());
+}
+
+void ImportApiTests::alert_action_button_padding_scopes_to_alert()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 960
+    height: 720
+
+    property int expectedAlertVerticalPadding: LV.Theme.gap8
+    property int expectedDefaultVerticalPadding: LV.Theme.gap4
+    property int expectedAlertButtonHeight: Math.max(LV.Theme.gap20,
+                                                     LV.Theme.textBodyLineHeight + (LV.Theme.gap8 * 2))
+    property int expectedDefaultButtonHeight: LV.Theme.gap20
+
+    LV.Alert {
+        id: alert
+        width: root.width
+        height: root.height
+        open: true
+        buttonCount: 3
+        title: "Delete item?"
+        message: "This action cannot be undone."
+        primaryText: "AlertPrimary"
+        secondaryText: "AlertSecondary"
+        tertiaryText: "AlertTertiary"
+    }
+
+    LV.Modal {
+        id: modal
+        width: root.width
+        height: root.height
+        open: true
+        buttonCount: 3
+        title: "Continue?"
+        description: "Modal actions should keep their compact baseline."
+        primaryText: "ModalPrimary"
+        secondaryText: "ModalSecondary"
+        tertiaryText: "ModalTertiary"
+    }
+
+    LV.AlertButton {
+        id: standaloneAlertButton
+        visible: false
+        text: "StandaloneAlertButton"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    const auto findButtonByText = [&](const QString &text) -> QObject * {
+        const auto candidates = root->findChildren<QObject *>();
+        for (QObject *candidate : candidates) {
+            const QVariant textProperty = candidate->property("text");
+            const QVariant verticalPaddingProperty = candidate->property("verticalPadding");
+            if (!textProperty.isValid() || !verticalPaddingProperty.isValid())
+                continue;
+            if (textProperty.toString() == text)
+                return candidate;
+        }
+        return nullptr;
+    };
+
+    QObject *alertPrimary = findButtonByText("AlertPrimary");
+    QObject *alertSecondary = findButtonByText("AlertSecondary");
+    QObject *alertTertiary = findButtonByText("AlertTertiary");
+    QObject *modalPrimary = findButtonByText("ModalPrimary");
+    QObject *modalSecondary = findButtonByText("ModalSecondary");
+    QObject *modalTertiary = findButtonByText("ModalTertiary");
+    QObject *standaloneAlertButton = findButtonByText("StandaloneAlertButton");
+
+    QVERIFY(alertPrimary);
+    QVERIFY(alertSecondary);
+    QVERIFY(alertTertiary);
+    QVERIFY(modalPrimary);
+    QVERIFY(modalSecondary);
+    QVERIFY(modalTertiary);
+    QVERIFY(standaloneAlertButton);
+
+    const int expectedAlertVerticalPadding = root->property("expectedAlertVerticalPadding").toInt();
+    const int expectedDefaultVerticalPadding = root->property("expectedDefaultVerticalPadding").toInt();
+    const double expectedAlertButtonHeight = root->property("expectedAlertButtonHeight").toDouble();
+    const double expectedDefaultButtonHeight = root->property("expectedDefaultButtonHeight").toDouble();
+
+    QCOMPARE(alertPrimary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
+    QCOMPARE(alertSecondary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
+    QCOMPARE(alertTertiary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
+    QVERIFY(qAbs(alertPrimary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+    QVERIFY(qAbs(alertSecondary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+    QVERIFY(qAbs(alertTertiary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+
+    QCOMPARE(modalPrimary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    QCOMPARE(modalSecondary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    QCOMPARE(modalTertiary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    QVERIFY(qAbs(modalPrimary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    QVERIFY(qAbs(modalSecondary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    QVERIFY(qAbs(modalTertiary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+
+    QCOMPARE(standaloneAlertButton->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    QVERIFY(qAbs(standaloneAlertButton->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
 }
 
 void ImportApiTests::menu_item_key_and_chevron_contract_loads()

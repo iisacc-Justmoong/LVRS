@@ -10,11 +10,17 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/vulkanbootstrap.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appbootstrap.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appentry.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/bootstrapparallel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/foregroundservices.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/permissionsequencer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/qmlcontextbinder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/state/viewmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.cpp
@@ -38,12 +44,18 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/vulkanbootstrap.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appbootstrap.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/appentry.h
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/bootstrapparallel.h
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/foregroundservices.h
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/permissionsequencer.h
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/qmlcontextbinder.h
+    ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate_macros.h
+    ${CMAKE_CURRENT_LIST_DIR}/state/viewmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h

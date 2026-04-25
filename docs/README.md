@@ -53,6 +53,11 @@ This structure is intentional so the same question can be answered consistently 
 ## Backend Singletons
 
 - `docs/backend/AppBootstrap.md`
+- `docs/backend/BootstrapParallel.md`
+- `docs/backend/ForegroundServices.md`
+- `docs/backend/PermissionSequencer.md`
+- `docs/backend/QmlContextBinder.md`
+- `docs/backend/QmlTypeRegistrar.md`
 - `docs/backend/Backend.md`
 - `docs/backend/RuntimeEvents.md`
 - `docs/backend/GestureEvents.md`

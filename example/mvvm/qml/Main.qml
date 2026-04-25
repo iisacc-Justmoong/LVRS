@@ -16,10 +16,6 @@ LV.ApplicationWindow {
     property var vm: LV.ViewModels.getForView(root.viewId)
     property bool writeEnabled: LV.ViewModels.canWrite(root.viewId)
 
-    Component.onCompleted: {
-        LV.ViewModels.bindView(root.viewId, "Example", true)
-    }
-
     Item {
         x: root.exampleViewport.x
         y: root.exampleViewport.y

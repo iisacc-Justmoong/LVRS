@@ -53,6 +53,7 @@ Signals:
   - tertiary text exists -> vertical layout
   - secondary text exists -> horizontal 2-button layout
   - otherwise -> single primary button
+- Alert action buttons override the shared `AlertButton` baseline only within `Alert`: top/bottom padding uses `Theme.gap8`, and the resolved button height expands with that padding so the body label line box is not clipped.
 
 ## Behavior Contract
 

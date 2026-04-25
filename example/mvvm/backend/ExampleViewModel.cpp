@@ -3,9 +3,16 @@
 #include "ExampleModel.h"
 
 ExampleViewModel::ExampleViewModel(ExampleModel *model, QObject *parent)
-    : QObject(parent)
+    : ViewModel(parent)
     , m_model(model)
 {
+    setKey(QStringLiteral("Example"));
+    setDisplayName(QStringLiteral("Example"));
+    setMetadata({
+        {QStringLiteral("domain"), QStringLiteral("example")},
+        {QStringLiteral("role"), QStringLiteral("demo")}
+    });
+
     if (m_model) {
         connect(m_model, &ExampleModel::statusChanged, this, &ExampleViewModel::statusChanged);
     }

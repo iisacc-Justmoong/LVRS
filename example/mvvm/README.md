@@ -5,7 +5,7 @@ This example is buildable and runnable, and demonstrates the MVVM flow used in t
 - **Model (C++)** holds state and emits signals.
 - **ViewModel (C++)** exposes model state to QML and provides commands.
 - **View (QML)** binds to ViewModel and triggers commands.
-- **ViewModelRegistry (C++)** acts as the bridge that hands ViewModels to QML by key.
+- **QmlContextBinder + ViewModelRegistry (C++)** register ViewModels and hand them to QML by key.
 
 > This folder is both a reference implementation and a runnable sample target.
 
@@ -53,16 +53,18 @@ Wraps the model and exposes:
 It forwards `statusChanged()` to QML.
 
 ### `backend/ExampleBootstrap.h` / `backend/ExampleBootstrap.cpp`
-Registers the ViewModel into `ViewModels`:
+Builds a C++ ViewModel and registers it through `QmlContextBinder`:
 
-- Retrieves the QML singleton instance of `ViewModels` from the engine
 - Constructs `ExampleModel` and `ExampleViewModel`
+- Declares a `QmlViewModelBinding`
 - Stores the ViewModel by key: `"Example"`
+- Claims writable ownership for view id `"ExampleView"`
+- Optionally exposes the same object as the `exampleViewModel` context property
 
 ### `qml/Main.qml`
 Binds UI to the registered ViewModel:
 
-- Binds a view key with ownership: `LV.ViewModels.bindView("ExampleView", "Example", true)`
+- Uses the C++-declared view id: `"ExampleView"`
 - Fetches by view key: `LV.ViewModels.getForView("ExampleView")`
 - Reads `vm.status`
 - Updates model through permission check: `LV.ViewModels.updateProperty("ExampleView", "status", "Working")`
@@ -84,7 +86,7 @@ and the UI simply **requests them by key**.
 ## How to Wire It in a Real App (Pseudo-Flow)
 
 1) Create the QML engine
-2) Register ViewModels
+2) Register ViewModels through `QmlContextBinder`
 3) Load QML
 
 ```cpp
@@ -102,7 +104,6 @@ import LVRS 1.0 as LV
 
 LV.ApplicationWindow {
     property string viewId: "ExampleView"
-    Component.onCompleted: LV.ViewModels.bindView(viewId, "Example", true)
     property var vm: LV.ViewModels.getForView(viewId)
 
     Column {
@@ -123,14 +124,16 @@ LV.ApplicationWindow {
 
 - This is available as a build target.
 - The file paths use plain QObject classes for simplicity.
-- In real code, ViewModels can expose richer state and commands, but the registration pattern is the same.
+- ViewModels derive from the LVRS C++ `ViewModel` base, then expose app-specific state and commands.
+- In real code, ViewModels can expose richer state and commands, but the binder registration pattern is the same.
 
 ---
 
 ## Quick Checklist for New ViewModels
 
 - [ ] Create a model with Q_PROPERTY + signals
-- [ ] Wrap it in a ViewModel
-- [ ] Register it via `ViewModels.set("Key", vm)`
+- [ ] Wrap it in a C++ class derived from `ViewModel`
+- [ ] Set `key`, `displayName`, and useful `metadata`
+- [ ] Register it via `QmlContextBinder` or `ViewModels.registerViewModel(vm, "Key")`
 - [ ] Bind view ownership via `ViewModels.bindView("ViewId", "Key", true|false)`
 - [ ] Fetch in QML via `ViewModels.getForView("ViewId")`

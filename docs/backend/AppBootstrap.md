@@ -8,9 +8,84 @@ Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp` 
 
 - `lvrs::preApplicationBootstrap(options) -> AppBootstrapState`
 - `lvrs::postApplicationBootstrap(app, options) -> void`
+- `lvrs::loadQmlRootObjects(engine, roots, options) -> QmlRootLoadResult`
+- `lvrs::runQmlAppLifecycleStage(context, hooks, stage, logDiagnostics) -> QmlBootstrapQueueResult`
+- `lvrs::scheduleQmlAppLifecycleStage(receiver, context, hooks, stage, logDiagnostics) -> bool`
 - `lvrs::runBootstrappedQmlApp(argc, argv, launchSpec) -> int`
 
-For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchSpec` as the standard wrapper around the pre/post bootstrap sequence. It keeps the required bootstrap order intact and can seed root QML properties through `initialProperties` before `QQmlApplicationEngine::loadFromModule(...)`.
+For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchSpec` as the standard wrapper around the pre/post bootstrap sequence. It keeps the required bootstrap order intact and can seed root QML properties through `initialProperties` before `QQmlApplicationEngine::loadFromModule(...)`. `runBootstrappedQmlApp()` now delegates root creation to `loadQmlRootObjects()`, so downstream apps can load one root through the legacy `moduleUri/rootObject` fields or several roots through `QmlAppLaunchSpec::roots`.
+
+## QML Root Loading
+
+`QmlRootLoadSpec` describes one root object:
+
+- `moduleUri: QString`
+- `rootObject: QString` (default `Main`)
+- `initialProperties: QVariantMap`
+- `windowActivationPolicy: QmlWindowActivationPolicy` (default `Inherit`)
+
+`QmlAppLaunchSpec` keeps the single-root fields for compatibility and adds:
+
+- `roots: QList<QmlRootLoadSpec>` for multi-root apps
+- `windowActivationPolicy: QmlWindowActivationPolicy` as the app-level fallback
+
+When `roots` is empty, LVRS builds one `QmlRootLoadSpec` from `moduleUri`, `rootObject`, `initialProperties`, and `windowActivationPolicy`. When `roots` is non-empty, each root can omit `moduleUri` to inherit the app-level module URI; root-specific initial properties are not merged with app-level initial properties.
+
+`QmlRootLoadResult` reports:
+
+- `ok`
+- `errors`
+- `rootObjects`
+- `windows`
+- `errorMessage()`
+
+Root loading is strict: an empty module URI/root object or a `loadFromModule(...)` call that does not append a new engine root object is reported as a load failure instead of being ignored.
+
+## Window Activation Policy
+
+`QmlWindowActivationPolicy` controls what LVRS does when a loaded root object is a `QWindow`:
+
+- `Inherit`: use the app/default policy
+- `None`: leave QML visibility and activation untouched
+- `Show`: call `show()`
+- `ShowAndRaise`: call `show()` and `raise()`
+- `ShowRaiseAndActivate`: call `show()`, `raise()`, and `requestActivate()`
+
+The default app-level policy is `None` to preserve existing QML-driven visibility. Apps that previously repeated `show/raise/activate` after each root load can now set `windowActivationPolicy = QmlWindowActivationPolicy::ShowRaiseAndActivate` on the app spec or individual root specs.
+
+## Lifecycle Hooks and Queue
+
+`QmlAppLaunchSpec::lifecycle` provides three bootstrap stages:
+
+- `AfterRootLoaded` (`after-root-loaded`)
+- `AfterWindowActivated` (`after-window-activated`)
+- `AfterFirstIdle` (`after-first-idle`)
+
+Each stage supports a direct hook plus named queue tasks:
+
+- `afterRootLoaded`
+- `afterWindowActivated`
+- `afterFirstIdle`
+- `tasks: QList<QmlBootstrapTask>`
+
+`QmlBootstrapTask` fields:
+
+- `name: QString`
+- `stage: QmlAppLifecycleStage`
+- `priority: int` (lower values run first; insertion order is preserved for equal priority)
+- `fatal: bool`
+- `run(context, errorMessage) -> bool`
+
+`runBootstrappedQmlApp()` runs `AfterRootLoaded` and `AfterWindowActivated` synchronously after root creation. A fatal failure in either synchronous stage aborts startup with `-1`. `AfterFirstIdle` is scheduled with a zero-delay event-loop turn through `scheduleQmlAppLifecycleStage()`, matching the common `QTimer::singleShot(0, ...)` delayed-bootstrap pattern. A fatal failure in the scheduled idle stage exits the application with `-1`.
+
+The lifecycle context exposes:
+
+- `application`
+- `engine`
+- `rootLoadResult`
+- `stage`
+
+LVRS owns only stage timing, task ordering, and diagnostics. Downstream apps still decide which domain services or data loaders belong in each stage.
 
 ## `AppBootstrapOptions`
 
@@ -69,6 +144,15 @@ When `logBootstrapDiagnostics == true`, bootstrap writes compact structured line
 - `LVRS bootstrap.post.font-policy`
 - `LVRS bootstrap.entry.import-paths`
 - `LVRS bootstrap.entry.load-request`
+- `LVRS bootstrap.entry.root-load-request`
+- `LVRS bootstrap.entry.root-loaded`
+- `LVRS bootstrap.entry.root-load-failed`
+- `LVRS bootstrap.lifecycle.stage-start`
+- `LVRS bootstrap.lifecycle.queue-start`
+- `LVRS bootstrap.lifecycle.task-start`
+- `LVRS bootstrap.lifecycle.task-complete`
+- `LVRS bootstrap.lifecycle.task-failed`
+- `LVRS bootstrap.lifecycle.stage-complete`
 
 The payload includes platform tag, requested bootstrap options, effective render-profile defaults, scenegraph environment values, backend probe candidates, fallback reasons, and font-policy decisions.
 
@@ -113,6 +197,58 @@ options.bootstrapGraphicsBackend = false;
 options.installBundledFonts = true;
 options.installPretendardFallbacks = true;
 ```
+
+Multi-root app entry:
+
+```cpp
+lvrs::QmlAppLaunchSpec launchSpec;
+launchSpec.bootstrap.applicationName = QStringLiteral("MyApp");
+launchSpec.bootstrap.quickStyleName = QStringLiteral("Basic");
+launchSpec.moduleUri = QStringLiteral("MyApp");
+launchSpec.windowActivationPolicy = lvrs::QmlWindowActivationPolicy::ShowRaiseAndActivate;
+
+lvrs::QmlRootLoadSpec shellRoot;
+shellRoot.rootObject = QStringLiteral("Main");
+shellRoot.initialProperties.insert(QStringLiteral("initialRoutePath"), QStringLiteral("/"));
+
+lvrs::QmlRootLoadSpec inspectorRoot;
+inspectorRoot.rootObject = QStringLiteral("InspectorWindow");
+
+launchSpec.roots = {shellRoot, inspectorRoot};
+return lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);
+```
+
+Delayed bootstrap queue:
+
+```cpp
+lvrs::QmlBootstrapTask loadPresets;
+loadPresets.name = QStringLiteral("load-presets");
+loadPresets.stage = lvrs::QmlAppLifecycleStage::AfterFirstIdle;
+loadPresets.priority = 20;
+loadPresets.run = [](const lvrs::QmlAppLifecycleContext &, QString *errorMessage) {
+    const bool ok = startPresetLoad();
+    if (!ok && errorMessage)
+        *errorMessage = QStringLiteral("Preset load failed");
+    return ok;
+};
+
+launchSpec.lifecycle.afterWindowActivated = [](const lvrs::QmlAppLifecycleContext &context) {
+    qInfo() << "Activated windows:" << context.rootLoadResult.windows.size();
+};
+launchSpec.lifecycle.tasks = {loadPresets};
+```
+
+Parallel domain loading can be nested inside a lifecycle task when several startup domains can be loaded
+independently and then applied on the main thread. Use `docs/backend/BootstrapParallel.md` for the executor
+contract; keep domain parsing and ViewModel mutation policy in the app.
+
+Foreground service startup can be guarded with `ForegroundServiceGate` from an `AfterWindowActivated` task
+when services should start only once after at least one root window is visible. See
+`docs/backend/ForegroundServices.md`; service identity, permissions, and scheduler semantics remain app policy.
+
+Permission bootstrap can use `PermissionRequestSequencer` inside a foreground service or lifecycle task to run
+app-defined permission checks in order while preserving request history. See
+`docs/backend/PermissionSequencer.md`; native permission APIs and prompt policy remain app/platform code.
 
 ## Troubleshooting
 

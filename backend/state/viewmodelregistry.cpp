@@ -1,8 +1,13 @@
 #include "backend/state/viewmodelregistry.h"
 
+#include "backend/state/viewmodel.h"
+
 #include <QByteArray>
 #include <QJSValue>
 #include <QSet>
+#include <QVariantList>
+
+#include <utility>
 
 namespace {
 
@@ -72,9 +77,12 @@ QObject *ViewModelRegistry::get(const QString &key) const
 
 void ViewModelRegistry::set(const QString &key, QObject *object)
 {
+    setLastError(QString());
     const QString normalized = normalizeToken(key);
-    if (normalized.isEmpty())
+    if (normalized.isEmpty()) {
+        setLastError(QStringLiteral("Empty view model key"));
         return;
+    }
 
     QObject *previous = nullptr;
     auto existing = m_entries.constFind(normalized);
@@ -83,6 +91,13 @@ void ViewModelRegistry::set(const QString &key, QObject *object)
 
     if (object && !object->parent())
         object->setParent(const_cast<ViewModelRegistry *>(this));
+    if (auto *viewModel = qobject_cast<ViewModel *>(object)) {
+        if (viewModel->key().isEmpty())
+            viewModel->setKey(normalized);
+        observeDescriptorObject(viewModel);
+    } else {
+        observeDescriptorObject(object);
+    }
 
     bool changed = false;
     auto it = m_entries.find(normalized);
@@ -96,14 +111,48 @@ void ViewModelRegistry::set(const QString &key, QObject *object)
 
     if (changed)
         emit keysChanged();
+    if (changed)
+        emit descriptorsChanged();
 
-    if (changed && previous != object)
+    if (changed && previous != object) {
+        releaseDescriptorObjectIfUnreferenced(previous);
         maybeDisposeOwned(previous, normalized);
+    }
     prune();
+}
+
+bool ViewModelRegistry::registerViewModel(QObject *object, const QString &fallbackKey)
+{
+    setLastError(QString());
+    if (!object) {
+        setLastError(QStringLiteral("ViewModel object is null"));
+        return false;
+    }
+
+    QString key = normalizeToken(fallbackKey);
+    if (auto *viewModel = qobject_cast<ViewModel *>(object)) {
+        if (key.isEmpty())
+            key = normalizeToken(viewModel->key());
+        if (key.isEmpty()) {
+            setLastError(QStringLiteral("ViewModel key is empty"));
+            return false;
+        }
+        if (viewModel->key() != key)
+            viewModel->setKey(key);
+    }
+
+    if (key.isEmpty()) {
+        setLastError(QStringLiteral("ViewModel key is empty"));
+        return false;
+    }
+
+    set(key, object);
+    return lastError().isEmpty();
 }
 
 void ViewModelRegistry::remove(const QString &key)
 {
+    setLastError(QString());
     const QString normalized = normalizeToken(key);
     if (normalized.isEmpty())
         return;
@@ -115,7 +164,9 @@ void ViewModelRegistry::remove(const QString &key)
     QObject *object = it.value();
     m_entries.erase(it);
     emit keysChanged();
+    emit descriptorsChanged();
     pruneBindingsAndOwners();
+    releaseDescriptorObjectIfUnreferenced(object);
     maybeDisposeOwned(object);
 }
 
@@ -132,6 +183,11 @@ void ViewModelRegistry::clear()
     m_entries.clear();
     m_viewBindings.clear();
     m_owners.clear();
+    for (const QList<QMetaObject::Connection> &connections : std::as_const(m_descriptorConnections)) {
+        for (const QMetaObject::Connection &connection : connections)
+            disconnect(connection);
+    }
+    m_descriptorConnections.clear();
 
     if (hadEntries)
         emit keysChanged();
@@ -139,6 +195,8 @@ void ViewModelRegistry::clear()
         emit viewsChanged();
     if (hadOwners)
         emit ownershipChanged();
+    if (hadEntries || hadBindings || hadOwners)
+        emit descriptorsChanged();
 
     QSet<QObject *> processed;
     for (auto it = entries.begin(); it != entries.end(); ++it) {
@@ -217,6 +275,8 @@ bool ViewModelRegistry::bindView(const QString &viewId, const QString &key, bool
         emit viewsChanged();
     if (ownershipChangedFlag)
         emit ownershipChanged();
+    if (bindingsChanged || ownershipChangedFlag)
+        emit descriptorsChanged();
     return true;
 }
 
@@ -242,6 +302,8 @@ void ViewModelRegistry::unbindView(const QString &viewId)
         emit viewsChanged();
     if (ownershipChangedFlag)
         emit ownershipChanged();
+    if (bindingsChanged || ownershipChangedFlag)
+        emit descriptorsChanged();
 }
 
 QObject *ViewModelRegistry::getForView(const QString &viewId) const
@@ -298,6 +360,7 @@ bool ViewModelRegistry::releaseOwnership(const QString &viewId, const QString &k
     }
 
     emit ownershipChanged();
+    emit descriptorsChanged();
     return true;
 }
 
@@ -450,6 +513,51 @@ QVariantMap ViewModelRegistry::owners() const
     return map;
 }
 
+QVariantMap ViewModelRegistry::descriptor(const QString &key) const
+{
+    const QString normalizedKey = normalizeToken(key);
+    QVariantMap map;
+    if (normalizedKey.isEmpty())
+        return map;
+
+    QObject *object = objectForKey(normalizedKey);
+    if (!object)
+        return map;
+
+    map.insert(QStringLiteral("key"), normalizedKey);
+    map.insert(QStringLiteral("className"), QString::fromUtf8(object->metaObject()->className()));
+    map.insert(QStringLiteral("owner"), m_owners.value(normalizedKey));
+
+    QVariantList boundViews;
+    for (auto it = m_viewBindings.constBegin(); it != m_viewBindings.constEnd(); ++it) {
+        if (it.value() == normalizedKey)
+            boundViews.append(it.key());
+    }
+    map.insert(QStringLiteral("views"), boundViews);
+
+    if (auto *viewModel = qobject_cast<ViewModel *>(object)) {
+        map.insert(QStringLiteral("viewModel"), true);
+        map.insert(QStringLiteral("viewModelKey"), viewModel->key());
+        map.insert(QStringLiteral("displayName"), viewModel->displayName());
+        map.insert(QStringLiteral("busy"), viewModel->busy());
+        map.insert(QStringLiteral("error"), viewModel->error());
+        map.insert(QStringLiteral("hasError"), viewModel->hasError());
+        map.insert(QStringLiteral("metadata"), viewModel->metadata());
+    } else {
+        map.insert(QStringLiteral("viewModel"), false);
+    }
+
+    return map;
+}
+
+QVariantMap ViewModelRegistry::descriptors() const
+{
+    QVariantMap map;
+    for (const QString &key : m_entries.keys())
+        map.insert(key, descriptor(key));
+    return map;
+}
+
 QString ViewModelRegistry::lastError() const
 {
     return m_lastError;
@@ -494,6 +602,8 @@ void ViewModelRegistry::pruneBindingsAndOwners()
         emit viewsChanged();
     if (ownershipChangedFlag)
         emit ownershipChanged();
+    if (bindingsChanged || ownershipChangedFlag)
+        emit descriptorsChanged();
 }
 
 QString ViewModelRegistry::resolveKeyForWrite(const QString &viewId, const QString &key) const
@@ -521,6 +631,8 @@ void ViewModelRegistry::prune()
     }
     if (changed)
         emit keysChanged();
+    if (changed)
+        emit descriptorsChanged();
     pruneBindingsAndOwners();
 }
 
@@ -553,4 +665,42 @@ void ViewModelRegistry::maybeDisposeOwned(QObject *object, const QString &except
         return;
     if (object->parent() == this)
         object->deleteLater();
+}
+
+void ViewModelRegistry::observeDescriptorObject(QObject *object)
+{
+    if (!object || m_descriptorConnections.contains(object))
+        return;
+
+    QList<QMetaObject::Connection> connections;
+    connections.append(connect(object, &QObject::destroyed, this, [this, object]() {
+        m_descriptorConnections.remove(object);
+        emit descriptorsChanged();
+    }));
+
+    if (auto *viewModel = qobject_cast<ViewModel *>(object)) {
+        connections.append(connect(viewModel, &ViewModel::keyChanged, this, &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(viewModel,
+                                   &ViewModel::displayNameChanged,
+                                   this,
+                                   &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(viewModel, &ViewModel::busyChanged, this, &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(viewModel, &ViewModel::errorChanged, this, &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(viewModel,
+                                   &ViewModel::metadataChanged,
+                                   this,
+                                   &ViewModelRegistry::descriptorsChanged));
+    }
+
+    m_descriptorConnections.insert(object, connections);
+}
+
+void ViewModelRegistry::releaseDescriptorObjectIfUnreferenced(QObject *object)
+{
+    if (!object || hasReference(object))
+        return;
+
+    const QList<QMetaObject::Connection> connections = m_descriptorConnections.take(object);
+    for (const QMetaObject::Connection &connection : connections)
+        disconnect(connection);
 }

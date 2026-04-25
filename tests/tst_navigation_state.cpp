@@ -1,14 +1,19 @@
 #include <QtTest>
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QEvent>
 #include <QPointer>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QSignalSpy>
 #include <QtPlugin>
 
 #include "backend/navigation/pagemonitor.h"
 #include "backend/navigation/routematcher.h"
 #include "backend/navigation/viewstatetracker.h"
+#include "backend/runtime/qmlcontextbinder.h"
+#include "backend/state/viewmodel.h"
 #include "backend/state/viewmodelregistry.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -46,6 +51,37 @@ private:
     QString m_status = QStringLiteral("Idle");
 };
 
+class DedicatedStatusViewModel : public ViewModel
+{
+    Q_OBJECT
+    Q_PROPERTY(QString status READ status WRITE setStatus NOTIFY statusChanged)
+
+public:
+    explicit DedicatedStatusViewModel(QObject *parent = nullptr)
+        : ViewModel(parent)
+    {
+    }
+
+    QString status() const
+    {
+        return m_status;
+    }
+
+    void setStatus(const QString &value)
+    {
+        if (m_status == value)
+            return;
+        m_status = value;
+        emit statusChanged();
+    }
+
+signals:
+    void statusChanged();
+
+private:
+    QString m_status = QStringLiteral("Idle");
+};
+
 class NavigationStateTests : public QObject
 {
     Q_OBJECT
@@ -60,6 +96,9 @@ private slots:
     void viewmodels_registry_rebinding_clears_stale_ownership();
     void viewmodels_registry_tracks_keys_and_ownership();
     void viewmodels_registry_signal_and_prune_contract();
+    void viewmodel_base_and_registry_descriptors_track_cpp_state();
+    void qml_context_bind_plan_exposes_context_objects_and_viewmodels();
+    void qml_context_bind_plan_reports_missing_required_objects();
 };
 
 void NavigationStateTests::page_monitor_history_metrics()
@@ -411,6 +450,130 @@ void NavigationStateTests::viewmodels_registry_signal_and_prune_contract()
     QCOMPARE(keysSpy.count(), beforeClear + 1);
     registry.clear();
     QCOMPARE(registry.keys().size(), 0);
+}
+
+void NavigationStateTests::viewmodel_base_and_registry_descriptors_track_cpp_state()
+{
+    ViewModelRegistry registry;
+    auto *viewModel = new DedicatedStatusViewModel;
+    viewModel->setKey(QStringLiteral("StatusVM"));
+    viewModel->setDisplayName(QStringLiteral("Status"));
+    viewModel->setMetadata({{QStringLiteral("domain"), QStringLiteral("navigation-test")}});
+
+    QSignalSpy descriptorSpy(&registry, &ViewModelRegistry::descriptorsChanged);
+    QVERIFY(descriptorSpy.isValid());
+
+    QVERIFY(registry.registerViewModel(viewModel));
+    QCOMPARE(registry.get(QStringLiteral("StatusVM")), viewModel);
+
+    QVariantMap descriptor = registry.descriptor(QStringLiteral("StatusVM"));
+    QCOMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
+    QCOMPARE(descriptor.value(QStringLiteral("viewModelKey")).toString(), QStringLiteral("StatusVM"));
+    QCOMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    QCOMPARE(descriptor.value(QStringLiteral("busy")).toBool(), false);
+    QCOMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), false);
+    QCOMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
+             QStringLiteral("navigation-test"));
+
+    viewModel->setBusy(true);
+    viewModel->setError(QStringLiteral("loading failed"));
+
+    descriptor = registry.descriptor(QStringLiteral("StatusVM"));
+    QCOMPARE(descriptor.value(QStringLiteral("busy")).toBool(), true);
+    QCOMPARE(descriptor.value(QStringLiteral("error")).toString(), QStringLiteral("loading failed"));
+    QCOMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), true);
+    QVERIFY(descriptorSpy.count() >= 3);
+
+    const int beforeBindSignals = descriptorSpy.count();
+    QVERIFY(registry.bindView(QStringLiteral("StatusView"), QStringLiteral("StatusVM"), true));
+    QVERIFY(descriptorSpy.count() > beforeBindSignals);
+
+    descriptor = registry.descriptor(QStringLiteral("StatusVM"));
+    QCOMPARE(descriptor.value(QStringLiteral("owner")).toString(), QStringLiteral("StatusView"));
+    QVERIFY(descriptor.value(QStringLiteral("views")).toList().contains(QStringLiteral("StatusView")));
+
+    QVariantMap snapshot = viewModel->snapshot();
+    QCOMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("StatusVM"));
+    QCOMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    QCOMPARE(snapshot.value(QStringLiteral("busy")).toBool(), true);
+    QCOMPARE(snapshot.value(QStringLiteral("hasError")).toBool(), true);
+
+    viewModel->clearError();
+    QCOMPARE(viewModel->hasError(), false);
+}
+
+void NavigationStateTests::qml_context_bind_plan_exposes_context_objects_and_viewmodels()
+{
+    QQmlApplicationEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    QObject service;
+    auto *viewModel = new DedicatedStatusViewModel(&engine);
+
+    lvrs::QmlContextBindPlan plan;
+    lvrs::QmlContextObjectBinding serviceBinding;
+    serviceBinding.contextName = QStringLiteral("statusService");
+    serviceBinding.object = &service;
+    plan.contextObjects.append(serviceBinding);
+
+    lvrs::QmlViewModelBinding viewModelBinding;
+    viewModelBinding.key = QStringLiteral("StatusVM");
+    viewModelBinding.object = viewModel;
+    viewModelBinding.contextName = QStringLiteral("statusViewModel");
+    viewModelBinding.displayName = QStringLiteral("Status");
+    viewModelBinding.metadata = {{QStringLiteral("domain"), QStringLiteral("navigation-test")}};
+    viewModelBinding.viewId = QStringLiteral("StatusView");
+    viewModelBinding.writable = true;
+    plan.viewModels.append(viewModelBinding);
+
+    const lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);
+    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
+    QCOMPARE(result.contextNames,
+             (QStringList {QStringLiteral("statusService"), QStringLiteral("statusViewModel")}));
+    QCOMPARE(result.viewModelKeys, (QStringList {QStringLiteral("StatusVM")}));
+
+    QCOMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusService"))),
+             &service);
+    QCOMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusViewModel"))),
+             viewModel);
+
+    auto *registry = engine.singletonInstance<ViewModelRegistry *>(QStringLiteral("LVRS"),
+                                                                   QStringLiteral("ViewModels"));
+    QVERIFY(registry);
+    QCOMPARE(registry->get(QStringLiteral("StatusVM")), viewModel);
+    QCOMPARE(registry->ownerOf(QStringLiteral("StatusVM")), QStringLiteral("StatusView"));
+    QVERIFY(registry->canWrite(QStringLiteral("StatusView"), QStringLiteral("StatusVM")));
+
+    const QVariantMap descriptor = registry->descriptor(QStringLiteral("StatusVM"));
+    QCOMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    QCOMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
+             QStringLiteral("navigation-test"));
+}
+
+void NavigationStateTests::qml_context_bind_plan_reports_missing_required_objects()
+{
+    QQmlApplicationEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    lvrs::QmlContextBindPlan plan;
+    lvrs::QmlContextObjectBinding missingContext;
+    missingContext.contextName = QStringLiteral("missingContext");
+    missingContext.required = true;
+    plan.contextObjects.append(missingContext);
+
+    lvrs::QmlViewModelBinding missingViewModel;
+    missingViewModel.key = QStringLiteral("MissingVM");
+    missingViewModel.required = true;
+    plan.viewModels.append(missingViewModel);
+
+    const lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);
+    QVERIFY(!result.ok);
+    QVERIFY(result.errorMessage().contains(QStringLiteral("missingContext")));
+    QVERIFY(result.errorMessage().contains(QStringLiteral("MissingVM")));
+    QVERIFY(result.contextNames.isEmpty());
+    QVERIFY(result.viewModelKeys.isEmpty());
 }
 
 QTEST_MAIN(NavigationStateTests)

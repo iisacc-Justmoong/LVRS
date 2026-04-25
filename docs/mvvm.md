@@ -1,12 +1,29 @@
 # MVVM
 
-LVRS MVVM model is implemented by `ViewModels` (`ViewModelRegistry`) and route/view binding metadata emitted from `PageRouter`.
+LVRS MVVM is centered on C++ ViewModel classes, the `ViewModels` (`ViewModelRegistry`) singleton, and route/view binding metadata emitted from `PageRouter`.
 
 ## Purpose
 
 - Register view-model instances by logical key.
 - Bind a concrete view identity (`viewId`) to a model key.
 - Control write ownership explicitly so only one view can mutate one model key at a time.
+- Keep ViewModel lifetime, diagnostics, and registration policy in C++ bootstrap code.
+
+## ViewModel Shape
+
+Dedicated app ViewModels should derive from `ViewModel` (`backend/state/viewmodel.h`) and add domain-specific Q_PROPERTY state and invokable commands.
+
+The base class supplies:
+
+- `key`
+- `displayName`
+- `busy`
+- `error`
+- `hasError`
+- `metadata`
+- `snapshot()`
+
+The base type is uncreatable from QML. QML receives app-created instances through `ViewModels`.
 
 ## Core API (`ViewModels`)
 
@@ -15,6 +32,7 @@ Location: `backend/state/viewmodelregistry.h` / `backend/state/viewmodelregistry
 Registration lifecycle:
 
 - `set(key, object)`
+- `registerViewModel(object, fallbackKey?)`
 - `get(key)`
 - `remove(key)`
 - `clear()`
@@ -36,7 +54,9 @@ Data access helpers:
 
 State/diagnostics:
 
-- `keys`, `views`, `bindings`, `owners`, `lastError`
+- `keys`, `views`, `bindings`, `owners`, `descriptors`, `lastError`
+
+`set()` remains available for manual or compatibility wiring. New C++ bootstrap code should prefer `registerViewModel()` or `QmlContextBinder`.
 
 ## Binding from Router Metadata
 
@@ -57,21 +77,34 @@ Write access is allowed only when both conditions are true.
 
 If ownership is missing or conflicting, write APIs return `false` and set `lastError`.
 
-## Usage Pattern
+## C++ Bootstrap Pattern
+
+```cpp
+auto *sessionVm = new SessionViewModel(&engine);
+sessionVm->setKey(QStringLiteral("Session"));
+sessionVm->setDisplayName(QStringLiteral("Session"));
+
+lvrs::QmlContextBindPlan plan;
+
+lvrs::QmlViewModelBinding sessionBinding;
+sessionBinding.key = QStringLiteral("Session");
+sessionBinding.object = sessionVm;
+sessionBinding.contextName = QStringLiteral("sessionViewModel");
+sessionBinding.viewId = QStringLiteral("SessionPage");
+sessionBinding.writable = true;
+plan.viewModels.append(sessionBinding);
+
+const lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);
+if (!result.ok)
+    qWarning().noquote() << result.errorMessage();
+```
+
+QML then consumes the registered object:
 
 ```qml
 import LVRS 1.0 as LV
 
-Component.onCompleted: {
-    LV.ViewModels.set("Session", sessionViewModel)
-    if (!LV.ViewModels.bindView("SessionPage", "Session", true))
-        console.warn(LV.ViewModels.lastError)
-}
-
-function renameSession(nextName) {
-    if (!LV.ViewModels.updateProperty("SessionPage", "name", nextName))
-        console.warn(LV.ViewModels.lastError)
-}
+property var vm: LV.ViewModels.getForView("SessionPage")
 ```
 
 ## How It Works
@@ -80,6 +113,7 @@ function renameSession(nextName) {
 - Ownership map (`key -> viewId`) is pruned when keys are removed.
 - Orphaned model objects parented by `ViewModels` are auto-disposed when no key references remain.
 - Binding updates are signal-driven (`viewsChanged`, `ownershipChanged`) so QML observers can react.
+- Descriptor updates are signal-driven (`descriptorsChanged`) so tooling can inspect C++ ViewModel state and current ownership.
 
 ## Failure Modes to Handle
 

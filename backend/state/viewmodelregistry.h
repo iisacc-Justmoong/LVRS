@@ -4,9 +4,12 @@
 #include <QPointer>
 #include <QStringList>
 #include <QHash>
+#include <QMetaObject>
 #include <QVariant>
 #include <QVariantMap>
 #include <QtQml/qqml.h>
+
+class ViewModel;
 
 class ViewModelRegistry : public QObject
 {
@@ -18,6 +21,7 @@ class ViewModelRegistry : public QObject
     Q_PROPERTY(QStringList views READ views NOTIFY viewsChanged)
     Q_PROPERTY(QVariantMap bindings READ bindings NOTIFY viewsChanged)
     Q_PROPERTY(QVariantMap owners READ owners NOTIFY ownershipChanged)
+    Q_PROPERTY(QVariantMap descriptors READ descriptors NOTIFY descriptorsChanged)
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
@@ -25,6 +29,7 @@ public:
 
     Q_INVOKABLE QObject *get(const QString &key) const;
     Q_INVOKABLE void set(const QString &key, QObject *object);
+    Q_INVOKABLE bool registerViewModel(QObject *object, const QString &fallbackKey = QString());
     Q_INVOKABLE void remove(const QString &key);
     Q_INVOKABLE void clear();
 
@@ -42,6 +47,7 @@ public:
                                          const QString &property,
                                          const QVariant &value);
     Q_INVOKABLE QVariant readProperty(const QString &viewId, const QString &property) const;
+    Q_INVOKABLE QVariantMap descriptor(const QString &key) const;
     Q_INVOKABLE bool bindRouteViewModel(const QVariant &pathValue,
                                         const QVariant &routeEntry,
                                         const QVariant &paramsValue,
@@ -51,12 +57,14 @@ public:
     QStringList views() const;
     QVariantMap bindings() const;
     QVariantMap owners() const;
+    QVariantMap descriptors() const;
     QString lastError() const;
 
 signals:
     void keysChanged();
     void viewsChanged();
     void ownershipChanged();
+    void descriptorsChanged();
     void lastErrorChanged();
 
 private:
@@ -70,9 +78,12 @@ private:
     void prune();
     bool hasReference(QObject *object, const QString &exceptKey = QString()) const;
     void maybeDisposeOwned(QObject *object, const QString &exceptKey = QString());
+    void observeDescriptorObject(QObject *object);
+    void releaseDescriptorObjectIfUnreferenced(QObject *object);
 
     QHash<QString, QPointer<QObject>> m_entries;
     QHash<QString, QString> m_viewBindings;
     QHash<QString, QString> m_owners;
+    QHash<QObject *, QList<QMetaObject::Connection>> m_descriptorConnections;
     QString m_lastError;
 };

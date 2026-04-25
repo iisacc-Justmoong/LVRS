@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QObject>
+#include "backend/state/viewmodel.h"
 
 class ExampleModel;
 
-class ExampleViewModel : public QObject
+class ExampleViewModel : public ViewModel
 {
     Q_OBJECT
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
