@@ -57,6 +57,7 @@ private slots:
     void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
     void button_default_tone_fallback_borderless_loads();
+    void button_injected_methods_contract_loads();
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
@@ -75,6 +76,7 @@ private slots:
     void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
     void table_cell_item_contract_loads();
+    void table_cell_merge_split_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
 
@@ -2896,6 +2898,202 @@ Item {
     QVERIFY(root->property("defaultFallbackReady").toBool());
 }
 
+void ImportApiTests::button_injected_methods_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property int runCount: 0
+    property int objectInvokeCount: 0
+    property bool labelClickedEventReady: false
+    property bool stepperClickedEventReady: false
+    property bool comboClickedEventReady: false
+    property bool labelSegmentEventReady: false
+    property bool iconSegmentEventReady: false
+    property var manualResults: []
+    property string methodLog: ""
+
+    function collect(eventData, tag) {
+        runCount += 1
+        methodLog += tag + ":" + eventData.trigger + ";"
+        return tag + "-" + eventData.trigger
+    }
+
+    function runInjectedMethods() {
+        manualResults = labelButton.invokeMethods(labelButton.createMethodEvent("manual"))
+        labelButton.clicked()
+        iconButton.clicked()
+        labelMenuButton.clicked()
+        iconMenuButton.clicked()
+        stepper.clicked()
+        comboBox.clicked()
+        labelSegment.invokeMethods()
+        iconSegment.invokeMethods(iconSegment.createMethodEvent("custom"))
+    }
+
+    QtObject {
+        id: commandObject
+        function invoke(eventData) {
+            root.objectInvokeCount += 1
+            root.methodLog += "object:" + eventData.trigger + ";"
+            return "object-" + eventData.trigger
+        }
+    }
+
+    LV.LabelButton {
+        id: emptyButton
+        visible: false
+    }
+
+    LV.LabelButton {
+        id: labelButton
+        text: "Label"
+        visible: false
+        method: function(eventData) {
+            root.labelClickedEventReady = eventData.source === labelButton
+                && eventData.trigger === "clicked"
+                && eventData.effectiveEnabled
+            return root.collect(eventData, "label")
+        }
+        methods: [
+            function(eventData) {
+                return root.collect(eventData, "labelExtra")
+            },
+            commandObject
+        ]
+    }
+
+    LV.IconButton {
+        id: iconButton
+        visible: false
+        method: function(eventData) {
+            return root.collect(eventData, "icon")
+        }
+    }
+
+    LV.LabelMenuButton {
+        id: labelMenuButton
+        text: "Menu"
+        visible: false
+        method: function(eventData) {
+            return root.collect(eventData, "labelMenu")
+        }
+    }
+
+    LV.IconMenuButton {
+        id: iconMenuButton
+        visible: false
+        method: function(eventData) {
+            return root.collect(eventData, "iconMenu")
+        }
+    }
+
+    LV.Stepper {
+        id: stepper
+        visible: false
+        method: function(eventData) {
+            root.stepperClickedEventReady = eventData.source === stepper
+                && eventData.trigger === "clicked"
+                && eventData.effectiveEnabled
+            return root.collect(eventData, "stepper")
+        }
+    }
+
+    LV.ComboBox {
+        id: comboBox
+        visible: false
+        method: function(eventData) {
+            root.comboClickedEventReady = eventData.source === comboBox
+                && eventData.trigger === "clicked"
+                && eventData.effectiveEnabled
+            return root.collect(eventData, "combo")
+        }
+    }
+
+    LV.LabelSegmentedControl {
+        id: labelSegment
+        visible: false
+        method: function(eventData) {
+            root.labelSegmentEventReady = eventData.source === labelSegment
+                && eventData.trigger === "manual"
+            return root.collect(eventData, "labelSegment")
+        }
+    }
+
+    LV.IconSegmentedControl {
+        id: iconSegment
+        visible: false
+        methods: [
+            function(eventData) {
+                root.iconSegmentEventReady = eventData.source === iconSegment
+                    && eventData.trigger === "custom"
+                return root.collect(eventData, "iconSegment")
+            }
+        ]
+    }
+
+    Component.onCompleted: Qt.callLater(runInjectedMethods)
+
+    property bool directMethodApiReady:
+        typeof labelButton.createMethodEvent === "function"
+        && typeof labelButton.invokeMethod === "function"
+        && typeof labelButton.invokeMethods === "function"
+        && typeof stepper.createMethodEvent === "function"
+        && typeof stepper.invokeMethod === "function"
+        && typeof stepper.invokeMethods === "function"
+        && typeof comboBox.createMethodEvent === "function"
+        && typeof comboBox.invokeMethod === "function"
+        && typeof comboBox.invokeMethods === "function"
+        && typeof labelSegment.createMethodEvent === "function"
+        && typeof labelSegment.invokeMethod === "function"
+        && typeof labelSegment.invokeMethods === "function"
+        && typeof iconSegment.createMethodEvent === "function"
+        && typeof iconSegment.invokeMethod === "function"
+        && typeof iconSegment.invokeMethods === "function"
+        && !emptyButton.hasInjectedMethods
+        && labelButton.hasInjectedMethods
+        && iconButton.hasInjectedMethods
+        && labelMenuButton.hasInjectedMethods
+        && iconMenuButton.hasInjectedMethods
+        && stepper.hasInjectedMethods
+        && comboBox.hasInjectedMethods
+        && labelSegment.hasInjectedMethods
+        && iconSegment.hasInjectedMethods
+
+    property bool injectedMethodsReady:
+        directMethodApiReady
+        && manualResults.length === 3
+        && manualResults[0] === "label-manual"
+        && manualResults[1] === "labelExtra-manual"
+        && manualResults[2] === "object-manual"
+        && runCount === 11
+        && objectInvokeCount === 2
+        && labelClickedEventReady
+        && stepperClickedEventReady
+        && comboClickedEventReady
+        && labelSegmentEventReady
+        && iconSegmentEventReady
+        && methodLog.indexOf("label:manual;") >= 0
+        && methodLog.indexOf("label:clicked;") >= 0
+        && methodLog.indexOf("stepper:clicked;") >= 0
+        && methodLog.indexOf("combo:clicked;") >= 0
+        && methodLog.indexOf("iconSegment:custom;") >= 0
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("injectedMethodsReady").toBool(),
+                 qPrintable(root->property("methodLog").toString()));
+}
+
 void ImportApiTests::stepper_figma_contract_loads()
 {
     QQmlEngine engine;
@@ -4404,6 +4602,132 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("tableCellContractReady").toBool());
+}
+
+void ImportApiTests::table_cell_merge_split_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property bool mergeOk: false
+    property bool splitCoveredOk: false
+    property bool blockMergeOk: false
+    property bool splitAnchorOk: false
+    property bool invalidMergeRejected: false
+    property int mergedSignalCount: 0
+    property int splitSignalCount: 0
+    property int initialVisibleCount: -1
+    property int afterMergeVisibleCount: -1
+    property int afterSplitVisibleCount: -1
+    property int afterBlockMergeVisibleCount: -1
+    property int afterBlockSplitVisibleCount: -1
+    property real mergedWidth: -1
+    property real blockMergedHeight: -1
+    property bool mergeMarkerReady: false
+    property bool splitMarkerCleared: false
+    property bool staticSpanReady: false
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 300
+        height: 96
+        headerColumns: ["A", "B", "C"]
+        rows: [
+            [{ text: "A1" }, { text: "B1" }, { text: "C1" }],
+            [{ text: "A2" }, { text: "B2" }, { text: "C2" }]
+        ]
+        onCellsMerged: function(rowIndex, columnIndex, rowSpan, columnSpan) {
+            if (rowIndex === 0 && columnIndex === 0 && rowSpan >= 1 && columnSpan >= 2)
+                root.mergedSignalCount += 1
+        }
+        onCellSplit: function(rowIndex, columnIndex) {
+            if (rowIndex === 0 && columnIndex === 0)
+                root.splitSignalCount += 1
+        }
+    }
+
+    LV.Table {
+        id: staticSpanTable
+        visible: false
+        width: 300
+        height: 96
+        headerColumns: ["A", "B", "C"]
+        rows: [
+            [{ text: "S1", columnSpan: 2 }, { text: "S2" }, { text: "S3" }],
+            [{ text: "S4", rowSpan: 2 }, { text: "S5" }, { text: "S6" }],
+            [{ text: "S7" }, { text: "S8" }, { text: "S9" }]
+        ]
+    }
+
+    function runContract() {
+        initialVisibleCount = table.visibleCellItems.length
+        mergeOk = table.mergeCells(0, 0, 1, 2)
+        afterMergeVisibleCount = table.visibleCellItems.length
+        mergedWidth = table.visibleCellItems[0].width
+        mergeMarkerReady = table.visibleCellItems[0].columnSpan === 2
+            && table.visibleCellItems[0].rowSpan === 1
+            && table.isCoveredCell(0, 1)
+            && table.rows[0][1]._lvrsMerged === true
+            && table.rows[0][1]._lvrsMergeAnchorRow === 0
+            && table.rows[0][1]._lvrsMergeAnchorColumn === 0
+
+        splitCoveredOk = table.splitCell(0, 1)
+        afterSplitVisibleCount = table.visibleCellItems.length
+        splitMarkerCleared = table.visibleCellItems[0].columnSpan === 1
+            && !table.isCoveredCell(0, 1)
+            && table.rows[0][1]._lvrsMerged === undefined
+
+        blockMergeOk = table.mergeCells(0, 0, 2, 2)
+        afterBlockMergeVisibleCount = table.visibleCellItems.length
+        blockMergedHeight = table.visibleCellItems[0].height
+        splitAnchorOk = table.splitCell(0, 0)
+        afterBlockSplitVisibleCount = table.visibleCellItems.length
+        invalidMergeRejected = !table.mergeCells(0, 2, 1, 3)
+
+        staticSpanReady = staticSpanTable.visibleCellItems.length === 7
+            && staticSpanTable.visibleCellItems[0].columnSpan === 2
+            && Math.abs(staticSpanTable.visibleCellItems[0].width - 200) < 0.01
+            && staticSpanTable.isCoveredCell(0, 1)
+            && staticSpanTable.isCoveredCell(2, 0)
+            && staticSpanTable.splitCell(2, 0)
+            && staticSpanTable.visibleCellItems.length === 8
+            && !staticSpanTable.isCoveredCell(2, 0)
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool mergeSplitReady:
+        initialVisibleCount === 6
+        && mergeOk
+        && afterMergeVisibleCount === 5
+        && Math.abs(mergedWidth - 200) < 0.01
+        && mergeMarkerReady
+        && splitCoveredOk
+        && afterSplitVisibleCount === 6
+        && splitMarkerCleared
+        && blockMergeOk
+        && afterBlockMergeVisibleCount === 3
+        && Math.abs(blockMergedHeight - (table.rowHeight * 2)) < 0.01
+        && splitAnchorOk
+        && afterBlockSplitVisibleCount === 6
+        && invalidMergeRejected
+        && mergedSignalCount === 2
+        && splitSignalCount === 2
+        && staticSpanReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("mergeSplitReady").toBool());
 }
 
 void ImportApiTests::list_item_and_footer_figma_contract_loads()

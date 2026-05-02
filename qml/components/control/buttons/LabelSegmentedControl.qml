@@ -17,6 +17,9 @@ Item {
     property color borderColor: Theme.panelBackground12
     property bool forceBorderlessTone: true
     property bool _syncScheduled: false
+    property alias method: methodRegistry.method
+    property alias methods: methodRegistry.methods
+    readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
     readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder
         ? Math.max(0, Math.min(width, height) / 2)
         : cornerRadius
@@ -58,8 +61,26 @@ Item {
         })
     }
 
+    function createMethodEvent(triggerName) {
+        return methodRegistry.createEvent(triggerName)
+    }
+
+    function invokeMethod(candidate, eventData) {
+        return methodRegistry.invokeMethod(candidate, eventData)
+    }
+
+    function invokeMethods(eventData) {
+        return methodRegistry.invokeMethods(eventData)
+    }
+
     implicitWidth: segmentRow.implicitWidth + (horizontalPadding * 2)
     implicitHeight: segmentRow.implicitHeight + (verticalPadding * 2)
+
+    ButtonMethodRegistry {
+        id: methodRegistry
+        owner: control
+        defaultTrigger: "manual"
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -101,4 +122,5 @@ Item {
 // LV.LabelSegmentedControl {
 //     LV.LabelButton { text: "Button" }
 //     LV.LabelButton { text: "Button" }
+//     methods: [function(eventData) { ... }]
 // }

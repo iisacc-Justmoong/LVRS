@@ -24,6 +24,15 @@ Computed properties:
 - `resolvedIconColor` (enabled-aware arrow color)
 - `resolvedIconName` (maps `tone` + `arrow` to the shipped static SVG asset)
 
+Injected methods:
+
+- `method`: one callable injected directly into the stepper
+- `methods`: an array of callables or command objects
+- `hasInjectedMethods` (readonly)
+- `createMethodEvent(triggerName)`
+- `invokeMethod(candidate, eventData)`
+- `invokeMethods(eventData)`
+
 ## Visual Contract
 
 - Fixed frame: `16 x 16` (`Theme.iconSm`)
@@ -44,7 +53,7 @@ import LVRS 1.0 as LV
 LV.Stepper {
     tone: LV.AbstractButton.Borderless
     arrow: LV.Stepper.Up
-    onClicked: console.log("step up")
+    method: function(eventData) { increment() }
 }
 ```
 
@@ -54,6 +63,7 @@ LV.Stepper {
 - Requests a supersampled `Image.sourceSize` from `RenderQuality.effectiveSupersampleScaleValue` and `Screen.devicePixelRatio`, so the static SVG stays crisp on HiDPI targets.
 - Preserves the public chevron geometry contract (`10 x 6` or `6.436 x 11.146`) through `iconWidth`, `iconHeight`, and `iconBounds`.
 - Keeps the hover/press/disabled mouse pipeline local to the component, while the rendered artwork comes from the pre-extracted SVG resources.
+- Runs injected `method` and `methods` through the shared button method registry whenever `clicked()` is emitted.
 
 ## Practical Notes
 

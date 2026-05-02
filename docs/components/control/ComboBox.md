@@ -27,6 +27,15 @@ Signals:
 - `released()`
 - `canceled()`
 
+Injected methods:
+
+- `method`: one callable injected directly into the combo trigger
+- `methods`: an array of callables or command objects
+- `hasInjectedMethods` (readonly)
+- `createMethodEvent(triggerName)`
+- `invokeMethod(candidate, eventData)`
+- `invokeMethods(eventData)`
+
 ## Visual Contract
 
 - fixed frame: `97 x 18`
@@ -51,7 +60,7 @@ LV.ComboBox {
     text: "Control"
     tone: LV.ComboBox.Borderless
     arrow: LV.Stepper.Down
-    onClicked: menu.open()
+    method: function(eventData) { menu.open() }
 }
 ```
 
@@ -59,5 +68,6 @@ LV.ComboBox {
 
 - `tone` affects the `Stepper` appearance only (`Primary` blue / `Borderless` transparent).
 - `arrow` expresses open direction state (`Up`, `Down`, `UpDown`).
+- On `clicked()`, injected `method` and `methods` run in order as part of signal dispatch.
 - The component does not rely on `RowLayout` for the indicator slot, so the stepper cannot stretch or collapse when used inside other layout containers.
 - When paired with `ContextMenu`, popup sizing remains independent from the fixed `ComboBox` frame; the menu may expand beyond the trigger width when content or explicit popup width requires it, and a narrow trigger-width binding no longer clamps the popup below its implicit content width.

@@ -18,6 +18,9 @@ Controls.AbstractButton {
     property int tone: AbstractButton.Default
     property int shapeStyle: shapeRoundRect
     property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
+    property alias method: methodRegistry.method
+    property alias methods: methodRegistry.methods
+    readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
 
     readonly property color toneTextColor: {
         if (tone === AbstractButton.Borderless)
@@ -86,6 +89,30 @@ Controls.AbstractButton {
             control.focus = false
     }
 
+    function createMethodEvent(triggerName) {
+        return methodRegistry.createEvent(triggerName)
+    }
+
+    function invokeMethod(candidate, eventData) {
+        return methodRegistry.invokeMethod(candidate, eventData)
+    }
+
+    function invokeMethods(eventData) {
+        return methodRegistry.invokeMethods(eventData)
+    }
+
+    ButtonMethodRegistry {
+        id: methodRegistry
+        owner: control
+        defaultTrigger: "clicked"
+    }
+
+    Connections {
+        target: control
+        function onClicked() {
+            control.invokeMethods(control.createMethodEvent("clicked"))
+        }
+    }
 
     contentItem: Label {
         style: body
@@ -119,4 +146,4 @@ Controls.AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Primary }
+// LV.AbstractButton { text: "Action"; tone: LV.AbstractButton.Primary; method: function(eventData) { ... } }

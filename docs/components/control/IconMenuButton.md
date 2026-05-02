@@ -39,6 +39,10 @@ Layout:
 - `verticalPadding: Theme.gap2`
 - `spacing: Theme.gap4`
 
+Injected methods:
+
+- inherited from `AbstractButton`: `method`, `methods`, `hasInjectedMethods`, `invokeMethods(...)`
+
 ## Icon Resolution Order
 
 1. `iconSource` (`url`)
@@ -54,5 +58,8 @@ import LVRS 1.0 as LV
 LV.IconMenuButton {
     tone: LV.AbstractButton.Borderless
     iconName: "projectStructure"
+    method: function(eventData) {
+        menu.open()
+    }
 }
 ```

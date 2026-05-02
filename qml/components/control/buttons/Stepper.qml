@@ -15,6 +15,9 @@ Item {
     property bool enabled: true
     property int cornerRadius: Theme.radiusSm
     property color textColorDisabled: Theme.textOctonary
+    property alias method: methodRegistry.method
+    property alias methods: methodRegistry.methods
+    readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
@@ -91,6 +94,31 @@ Item {
     height: figmaStepperSize
     clip: true
 
+    function createMethodEvent(triggerName) {
+        return methodRegistry.createEvent(triggerName)
+    }
+
+    function invokeMethod(candidate, eventData) {
+        return methodRegistry.invokeMethod(candidate, eventData)
+    }
+
+    function invokeMethods(eventData) {
+        return methodRegistry.invokeMethods(eventData)
+    }
+
+    ButtonMethodRegistry {
+        id: methodRegistry
+        owner: control
+        defaultTrigger: "clicked"
+    }
+
+    Connections {
+        target: control
+        function onClicked() {
+            control.invokeMethods(control.createMethodEvent("clicked"))
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         visible: control.tone === AbstractButton.Borderless
@@ -138,4 +166,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.Stepper { tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
+// LV.Stepper { tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown; method: function(eventData) { ... } }

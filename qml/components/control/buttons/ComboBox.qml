@@ -12,6 +12,9 @@ Item {
     property int tone: ComboBox.Primary
     property int arrow: Stepper.UpDown
     property alias text: label.text
+    property alias method: methodRegistry.method
+    property alias methods: methodRegistry.methods
+    readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
 
     signal clicked()
     signal pressed()
@@ -56,6 +59,31 @@ Item {
     width: figmaComboWidth
     height: figmaComboHeight
     clip: true
+
+    function createMethodEvent(triggerName) {
+        return methodRegistry.createEvent(triggerName)
+    }
+
+    function invokeMethod(candidate, eventData) {
+        return methodRegistry.invokeMethod(candidate, eventData)
+    }
+
+    function invokeMethods(eventData) {
+        return methodRegistry.invokeMethods(eventData)
+    }
+
+    ButtonMethodRegistry {
+        id: methodRegistry
+        owner: control
+        defaultTrigger: "clicked"
+    }
+
+    Connections {
+        target: control
+        function onClicked() {
+            control.invokeMethods(control.createMethodEvent("clicked"))
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -106,4 +134,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.ComboBox { tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Down }
+// LV.ComboBox { tone: LV.ComboBox.Borderless; arrow: LV.Stepper.Down; method: function(eventData) { ... } }

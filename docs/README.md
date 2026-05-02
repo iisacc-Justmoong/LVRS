@@ -81,6 +81,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Control Components
 
 - `docs/components/control/AbstractButton.md`
+- `docs/components/control/ButtonMethodRegistry.md`
 - `docs/components/control/LabelButton.md`
 - `docs/components/control/IconButton.md`
 - `docs/components/control/LabelSegmentedControl.md`

@@ -15,6 +15,7 @@ Text and tone:
 
 - `text` (inherited)
 - `tone` (inherited, default fallback: `Borderless`)
+- injected method API inherited from `AbstractButton`: `method`, `methods`, `invokeMethods(...)`
 
 Indicator:
 
@@ -44,5 +45,8 @@ import LVRS 1.0 as LV
 LV.LabelMenuButton {
     text: "Options"
     tone: LV.AbstractButton.Borderless
+    method: function(eventData) {
+        menu.open()
+    }
 }
 ```

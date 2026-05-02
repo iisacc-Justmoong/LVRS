@@ -30,6 +30,10 @@ Layout:
 - fixed height: `Theme.gap20`
 - compact paddings (`Theme.gap2`)
 
+Injected methods:
+
+- inherited from `AbstractButton`: `method`, `methods`, `hasInjectedMethods`, `invokeMethods(...)`
+
 ## Resolution Order
 
 1. explicit `iconSource`
@@ -47,6 +51,9 @@ import LVRS 1.0 as LV
 LV.IconButton {
     tone: LV.AbstractButton.Borderless
     iconName: "add"
+    method: function(eventData) {
+        addItem()
+    }
 }
 ```
 
