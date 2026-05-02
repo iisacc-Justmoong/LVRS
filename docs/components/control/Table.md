@@ -99,8 +99,8 @@ Helper methods:
 - `insertColumn(columnIndex)`, `appendColumn()`, `deleteColumn(columnIndex)`, `removeColumn(columnIndex)`
 - `canInsertRow(rowIndex)`, `canDeleteRow(rowIndex)`
 - `canInsertColumn(columnIndex)`, `canDeleteColumn(columnIndex)`
-- `buildContextMenuItems()`
-- `openContextMenuForCell(rowIndex, columnIndex, item, xPos, yPos)`
+- `buildContextMenuItems(rowIndex, columnIndex)`
+- `openContextMenuForCell(rowIndex, columnIndex, menu, item, xPos, yPos)`
 - `setColumnWidth(columnIndex, width)`, `setRowHeight(rowIndex, height)`
 - `beginColumnResize(columnIndex, pointerX)`, `updateColumnResize(pointerX)`, `endColumnResize()`
 - `beginRowResize(rowIndex, pointerY)`, `updateRowResize(pointerY)`, `endRowResize()`
@@ -220,8 +220,7 @@ When `structureControlsVisible` is enabled and `rows` is a JavaScript array of r
 
 - a `+` button appears at the right end of each body row; clicking it inserts a row after that row,
 - a `+` button appears at the bottom end of each column; clicking it inserts a column after that column,
-- right-clicking a body cell opens a context menu with row and column deletion,
-- right-clicking a header column opens a context menu with column deletion.
+- right-clicking a body cell opens that cell's own context menu with row and column deletion.
 
 Programmatic calls:
 
@@ -243,6 +242,8 @@ LV.Table {
 ```
 
 Runtime structure edits require mutable array rows. Before row/column insertion or deletion, existing span metadata is normalized so stale merged-cell anchors cannot point at the wrong row or column after the structure changes. Column deletion is rejected when the table has only one column left.
+
+The delete context menu is not a table-level popup. Each rendered body cell owns its own `ContextMenu`, and `openContextMenuForCell(...)` rejects non-cell coordinates such as header-only or row-only context requests.
 
 ## Resize Editing
 

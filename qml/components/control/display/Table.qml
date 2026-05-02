@@ -930,42 +930,60 @@ Item {
         return deleteColumn(columnIndex)
     }
 
-    function buildContextMenuItems() {
+    function buildContextMenuItems(rowIndex, columnIndex) {
+        const targetRow = rowIndex === undefined || rowIndex === null
+            ? contextRowIndex
+            : Math.floor(Number(rowIndex))
+        const targetColumn = columnIndex === undefined || columnIndex === null
+            ? contextColumnIndex
+            : Math.floor(Number(columnIndex))
         const items = []
-        if (contextRowIndex >= 0) {
+        if (isNaN(targetRow) || isNaN(targetColumn) || targetRow < 0 || targetColumn < 0)
+            return items
+
+        if (targetRow >= 0) {
             items.push({
                 "label": "Delete row",
                 "eventName": "table.deleteRow",
-                "enabled": canDeleteRow(contextRowIndex),
+                "enabled": canDeleteRow(targetRow),
                 "onTriggered": function() {
-                    control.deleteRow(control.contextRowIndex)
+                    control.deleteRow(targetRow)
                 }
             })
         }
-        if (contextRowIndex >= 0 && contextColumnIndex >= 0)
+        if (targetRow >= 0 && targetColumn >= 0)
             items.push({ "type": "divider" })
-        if (contextColumnIndex >= 0) {
+        if (targetColumn >= 0) {
             items.push({
                 "label": "Delete column",
                 "eventName": "table.deleteColumn",
-                "enabled": canDeleteColumn(contextColumnIndex),
+                "enabled": canDeleteColumn(targetColumn),
                 "onTriggered": function() {
-                    control.deleteColumn(control.contextColumnIndex)
+                    control.deleteColumn(targetColumn)
                 }
             })
         }
         return items
     }
 
-    function openContextMenuForCell(rowIndex, columnIndex, item, xPos, yPos) {
+    function openContextMenuForCell(rowIndex, columnIndex, menu, item, xPos, yPos) {
         if (!deleteContextMenuEnabled || !structureMutationAvailable)
             return false
-        contextRowIndex = Math.floor(Number(rowIndex))
-        contextColumnIndex = Math.floor(Number(columnIndex))
+        const targetRow = Math.floor(Number(rowIndex))
+        const targetColumn = Math.floor(Number(columnIndex))
+        if (isNaN(targetRow) || isNaN(targetColumn) || targetRow < 0 || targetColumn < 0)
+            return false
+
+        contextRowIndex = targetRow
+        contextColumnIndex = targetColumn
+        if (!menu)
+            return true
+
+        menu.items = buildContextMenuItems(targetRow, targetColumn)
         if (item)
-            tableContextMenu.openFor(item, xPos, yPos)
+            menu.openFor(item, xPos, yPos)
         else
-            tableContextMenu.openAt(xPos, yPos)
+            menu.openAt(xPos, yPos)
         return true
     }
 
@@ -1165,42 +1183,19 @@ Item {
                             onPressed: function(mouse) {
                                 control.openContextMenuForCell(modelData.rowIndex,
                                                                modelData.columnIndex,
+                                                               cellDeleteContextMenu,
                                                                cellContextArea,
                                                                mouse.x,
                                                                mouse.y)
                                 mouse.accepted = true
                             }
                         }
-                    }
-                }
-            }
-        }
 
-        Item {
-            id: headerContextLayer
-            x: 0
-            y: 0
-            width: tableFrame.width
-            height: tableHeader.implicitHeight
-            visible: control.deleteContextMenuEnabled && control.structureMutationAvailable
-
-            Repeater {
-                model: Math.max(1, control.resolvedColumnCount)
-
-                delegate: MouseArea {
-                    id: headerContextArea
-                    required property int index
-
-                    x: control.structureColumnX(index)
-                    y: 0
-                    width: control.structureCellWidth(index)
-                    height: headerContextLayer.height
-                    acceptedButtons: Qt.RightButton
-                    preventStealing: true
-
-                    onPressed: function(mouse) {
-                        control.openContextMenuForCell(-1, index, headerContextArea, mouse.x, mouse.y)
-                        mouse.accepted = true
+                        ContextMenu {
+                            id: cellDeleteContextMenu
+                            itemWidth: Theme.scaleMetric(132)
+                            items: control.buildContextMenuItems(modelData.rowIndex, modelData.columnIndex)
+                        }
                     }
                 }
             }
@@ -1342,12 +1337,6 @@ Item {
             verticalPadding: 0
             onClicked: control.insertColumn(index + 1)
         }
-    }
-
-    ContextMenu {
-        id: tableContextMenu
-        items: control.buildContextMenuItems()
-        itemWidth: Theme.scaleMetric(132)
     }
 }
 

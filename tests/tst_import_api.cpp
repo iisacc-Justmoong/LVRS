@@ -4762,6 +4762,7 @@ Item {
     property bool oneColumnDeleteRejected: false
     property bool spanNormalizedOnMutation: false
     property bool contextItemsReady: false
+    property bool nonCellContextRejected: false
     property bool initialControlsReady: false
     property bool headerMutationReady: false
 
@@ -4847,25 +4848,22 @@ Item {
 
         headerMutationReady = table.headerColumns.length === table.resolvedColumnCount
 
-        table.contextRowIndex = 1
-        table.contextColumnIndex = 1
-        const bothItems = table.buildContextMenuItems()
+        const bothItems = table.buildContextMenuItems(1, 1)
         contextItemsReady = bothItems.length === 3
             && bothItems[0].label === "Delete row"
             && bothItems[2].label === "Delete column"
 
+        nonCellContextRejected = table.buildContextMenuItems(-1, 1).length === 0
+            && table.buildContextMenuItems(1, -1).length === 0
+
         const rowsBeforeContextDelete = table.rows.length
-        table.contextRowIndex = 1
-        table.contextColumnIndex = -1
-        const rowItems = table.buildContextMenuItems()
+        const rowItems = table.buildContextMenuItems(1, 1)
         rowItems[0].onTriggered({})
         contextRowDeleteOk = table.rows.length === rowsBeforeContextDelete - 1
 
         const columnsBeforeContextDelete = table.resolvedColumnCount
-        table.contextRowIndex = -1
-        table.contextColumnIndex = 0
-        const columnItems = table.buildContextMenuItems()
-        columnItems[0].onTriggered({})
+        const columnItems = table.buildContextMenuItems(0, 0)
+        columnItems[2].onTriggered({})
         contextColumnDeleteOk = table.resolvedColumnCount === columnsBeforeContextDelete - 1
 
         oneColumnDeleteRejected = !oneColumnTable.deleteColumn(0)
@@ -4890,6 +4888,7 @@ Item {
         && deleteRowOk
         && deleteColumnOk
         && contextItemsReady
+        && nonCellContextRejected
         && contextRowDeleteOk
         && contextColumnDeleteOk
         && oneColumnDeleteRejected
