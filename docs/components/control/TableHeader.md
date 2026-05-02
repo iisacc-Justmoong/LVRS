@@ -6,7 +6,7 @@ Location: `qml/components/control/display/TableHeader.qml`
 
 ## Purpose
 
-- Render column labels with uniform width distribution.
+- Render column labels with uniform or caller-supplied column widths.
 - Provide separator styling independent from row body.
 
 ## API
@@ -15,6 +15,9 @@ Location: `qml/components/control/display/TableHeader.qml`
 - `columns`
 - `rowHeight`
 - `cellHorizontalPadding`
+- `columnWidths`
+- `fallbackCellWidth`
+- `minColumnWidth`
 - `textColor`
 - `separatorHeight`
 - `separatorColor`
@@ -23,7 +26,12 @@ Helper methods:
 
 - `columnAt(index)`
 - `columnText(index)`
+- `columnType(index)`
+- `normalizeColumnType(value)`
+- `inferredColumnType(value)`
 - `columnPadding(index)`
+- `columnWidth(index)`
+- `columnX(index)`
 
 Computed:
 
@@ -36,10 +44,11 @@ Computed:
 import LVRS 1.0 as LV
 
 LV.TableHeader {
+    columnWidths: [160, 80, 120]
     cellItems: [
-        { label: "Column" },
-        { label: "Column" },
-        { label: "Column" }
+        { label: "Name", type: "string" },
+        { label: "Count", type: "int" },
+        { label: "Enabled", type: "bool" }
     ]
 }
 ```
@@ -47,10 +56,16 @@ LV.TableHeader {
 ## How It Works
 
 - `cellItems` is the primary contract; legacy `columns` remains fallback.
-- Column text accepts primitive or object entry (`label/text/title` fallback).
+- Column text accepts primitive or object entry (`label/text/title/value` fallback).
+- Column type accepts object keys `type`, `valueType`, `cellType`, or `dataType`.
+- Primitive header entries infer type: `string -> string`, integer number -> `int`, non-integer number -> `float`, boolean -> `bool`.
 - Optional per-column `contentSpacing`/`horizontalPadding` overrides are supported.
-- Repeater delegates use `Layout.fillWidth` for equal distribution.
+- Repeater delegates use `columnWidths` when provided, otherwise `fallbackCellWidth`, otherwise equal auto widths.
 - Bottom separator is rendered as dedicated rectangle (`panelBackground10` default).
+
+## Typed Header Contract
+
+`columnType(index)` returns one of `string`, `int`, `float`, or `bool`. It is intentionally header-only metadata; `Table` consumes the same contract to validate body cell edits.
 
 ## Practical Tip
 
@@ -63,9 +78,9 @@ import LVRS 1.0 as LV
 
 LV.TableHeader {
     cellItems: [
-        { label: "Service" },
-        { text: "State", contentSpacing: LV.Theme.gap8 },
-        { title: "Latency" }
+        { label: "Service", type: "string" },
+        { text: "State", type: "bool", contentSpacing: LV.Theme.gap8 },
+        { title: "Latency", type: "float" }
     ]
 }
 ```
@@ -78,5 +93,6 @@ A. Current contract keeps uniform left-aligned header text. Per-column layout re
 ## Validation Checklist
 
 - header count matches expected column count,
+- `columnType(index)` matches declared or inferred field type,
 - separator thickness/color comply with theme contract,
 - object-based column labels resolve via fallback keys.

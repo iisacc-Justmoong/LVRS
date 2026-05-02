@@ -22,6 +22,12 @@ Layout:
 
 - `rowHeight`
 - `cellWidth` (`0` means auto width)
+- `columnWidths` (per-column explicit widths)
+- `rowHeights` (per-row explicit heights)
+- `minColumnWidth`, `minRowHeight`
+- `resizeHandlesVisible` (default `true`)
+- `columnResizeHandleWidth`, `rowResizeHandleHeight`
+- `resizingColumnIndex`, `resizingRowIndex`
 - `resolvedColumnCount` (readonly)
 - `visibleCellItems` (readonly flattened render model)
 
@@ -35,13 +41,27 @@ Visual:
 - `rowDividerColor`
 - `headerSeparatorColor`
 - `inputable` (default `false`; table-level editable default for body cells)
+- `structureControlsVisible` (default `true`)
+- `addRowControlsVisible` (default `true`)
+- `addColumnControlsVisible` (default `true`)
+- `deleteContextMenuEnabled` (default `true`)
+- `structureGutterWidth`, `structureGutterHeight`
+- `defaultHeaderText`, `defaultCellText`
+- `contextRowIndex`, `contextColumnIndex`
 
 Signals:
 
 - `cellInputEdited(rowIndex, columnIndex, text)`
 - `cellInputSubmitted(rowIndex, columnIndex, text)`
+- `cellInputRejected(rowIndex, columnIndex, text, valueType)`
 - `cellsMerged(rowIndex, columnIndex, rowSpan, columnSpan)`
 - `cellSplit(rowIndex, columnIndex)`
+- `rowInserted(rowIndex)`
+- `rowDeleted(rowIndex)`
+- `columnInserted(columnIndex)`
+- `columnDeleted(columnIndex)`
+- `columnResized(columnIndex, width)`
+- `rowResized(rowIndex, height)`
 
 Helper methods:
 
@@ -49,13 +69,24 @@ Helper methods:
 - `cellAt(rowIndex, columnIndex)`
 - `columnCountForRow(rowEntry)`
 - `autoCellWidth(rowEntry)`
+- `columnWidth(columnIndex)`, `columnX(columnIndex)`, `columnSpanWidth(columnIndex, columnSpan)`
+- `rowHeightAt(rowIndex)`, `rowY(rowIndex)`, `rowSpanHeight(rowIndex, rowSpan)`, `totalBodyHeight()`
 - `rowCellWidth(rowEntry)`
 - `rowCellSpacing(rowEntry)`
 - `cellX(rowEntry, columnIndex)`
 - `cellSpanWidth(rowEntry, columnSpan)`
 - `rowInputable(rowEntry)`
 - `cellInputable(rowIndex, columnIndex)`
+- `headerAt(index)`
+- `headerCellType(columnIndex)`, `columnType(columnIndex)`
+- `normalizeHeaderCellType(value)`, `inferredCellType(value)`
+- `cellRawValue(rowIndex, columnIndex)`
+- `typedDefaultValue(valueType)`
+- `coerceCellValue(value, valueType)`
+- `validateCellInput(rowIndex, columnIndex, value)`
+- `cellValueAccepted(rowIndex, columnIndex, value)`
 - `cellText(rowIndex, columnIndex)`
+- `setCellValue(rowIndex, columnIndex, value)`
 - `cellRowSpan(rowIndex, columnIndex)`
 - `cellColumnSpan(rowIndex, columnIndex)`
 - `isCoveredCell(rowIndex, columnIndex)`
@@ -63,6 +94,16 @@ Helper methods:
 - `canMergeCells(rowIndex, columnIndex, rowSpan, columnSpan)`
 - `mergeCells(rowIndex, columnIndex, rowSpan, columnSpan)`
 - `splitCell(rowIndex, columnIndex)`
+- `canMutateStructure()`
+- `insertRow(rowIndex)`, `appendRow()`, `deleteRow(rowIndex)`, `removeRow(rowIndex)`
+- `insertColumn(columnIndex)`, `appendColumn()`, `deleteColumn(columnIndex)`, `removeColumn(columnIndex)`
+- `canInsertRow(rowIndex)`, `canDeleteRow(rowIndex)`
+- `canInsertColumn(columnIndex)`, `canDeleteColumn(columnIndex)`
+- `buildContextMenuItems()`
+- `openContextMenuForCell(rowIndex, columnIndex, item, xPos, yPos)`
+- `setColumnWidth(columnIndex, width)`, `setRowHeight(rowIndex, height)`
+- `beginColumnResize(columnIndex, pointerX)`, `updateColumnResize(pointerX)`, `endColumnResize()`
+- `beginRowResize(rowIndex, pointerY)`, `updateRowResize(pointerY)`, `endRowResize()`
 
 ## Usage
 
@@ -71,25 +112,78 @@ import LVRS 1.0 as LV
 
 LV.Table {
     headerCellItems: [
-        { label: "Name" },
-        { label: "State" },
-        { label: "Owner" }
+        { label: "Name", type: "string" },
+        { label: "State", type: "bool" },
+        { label: "Score", type: "float" }
     ]
     rows: [
-        [{ text: "Renderer", columnSpan: 2 }, { text: "Active" }, { text: "Core" }],
-        [{ text: "Metrics" }, { text: "Paused" }, { text: "Ops" }]
+        [{ text: "Renderer" }, { value: true }, { value: 0.98 }],
+        [{ text: "Metrics" }, { value: false }, { value: 0.72 }]
     ]
+    columnWidths: [160, 80, 120]
+    rowHeights: [28, 24]
 }
 ```
 
 ## How It Works
 
 - Header source resolves from `headerCellItems` first, then `headerColumns`.
+- Header entries define body column types. Objects may declare `type`, `valueType`, `cellType`, or `dataType`; primitive entries infer type from the primitive itself.
 - Row entries are flattened into `visibleCellItems`; covered cells are skipped and anchor cells receive merged width/height.
 - Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable`.
+- Each body `TableCellItem` receives an injected validator from `Table`, so inline edits are constrained by the header column type.
 - Header and row counts are resolved for both JS arrays and model-like objects.
-- Cell delegates compute width either from fixed `cellWidth` or the per-row auto-fit formula.
+- Cell delegates compute width from `columnWidths`, then `cellWidth`, then auto-fit column width.
+- Cell delegates compute height from `rowHeights`, then `rowHeight`.
+- Structure controls reserve a right gutter for row add buttons and a bottom gutter for column add buttons when `rows` is mutable.
+- Resize handles sit on column right borders and row bottom borders when `resizeHandlesVisible` is enabled.
 - Table container clips content and enforces internal divider contract.
+
+## Typed Columns
+
+Supported column types are:
+
+- `string`
+- `int`
+- `float`
+- `bool`
+
+Object headers may declare any of these equivalent type keys:
+
+```qml
+headerCellItems: [
+    { label: "Name", type: "string" },
+    { label: "Count", valueType: "int" },
+    { label: "Ratio", cellType: "float" },
+    { label: "Enabled", dataType: "bool" }
+]
+```
+
+Primitive headers infer type directly:
+
+```qml
+headerCellItems: ["Name", 1, 1.5, true]
+```
+
+`coerceCellValue(value, valueType)` returns `{ accepted, type, value, text }`. `setCellValue(rowIndex, columnIndex, value)` applies the same type check and mutates array-backed `rows` only when the value is accepted.
+
+```qml
+LV.Table {
+    id: table
+    headerCellItems: [
+        { label: "Name", type: "string" },
+        { label: "Count", type: "int" },
+        { label: "Visible", type: "bool" }
+    ]
+    rows: [[{ value: "Renderer" }, { value: 3 }, { value: true }]]
+
+    Component.onCompleted: {
+        table.setCellValue(0, 1, "4")      // accepted, stores number 4
+        table.setCellValue(0, 1, "4.2")    // rejected for int
+        table.setCellValue(0, 2, "false")  // accepted, stores boolean false
+    }
+}
+```
 
 ## Merge And Split
 
@@ -119,6 +213,59 @@ LV.Table {
 `mergeCells(...)` mutates array-backed `rows` by normalizing covered cells to objects and marking them as internal merge members. `splitCell(...)` accepts either the anchor cell or any covered cell and restores the covered cells as visible cells.
 
 `mergeCells(...)` returns `false` and warns if `rows` is not a JavaScript array of row arrays or if the requested rectangle is out of bounds. Model-like read-only inputs can still render static `rowSpan`/`columnSpan`, but runtime mutation requires array rows.
+
+## Structure Editing
+
+When `structureControlsVisible` is enabled and `rows` is a JavaScript array of row arrays:
+
+- a `+` button appears at the right end of each body row; clicking it inserts a row after that row,
+- a `+` button appears at the bottom end of each column; clicking it inserts a column after that column,
+- right-clicking a body cell opens a context menu with row and column deletion,
+- right-clicking a header column opens a context menu with column deletion.
+
+Programmatic calls:
+
+```qml
+LV.Table {
+    id: table
+    rows: [
+        [{ text: "A1" }, { text: "B1" }],
+        [{ text: "A2" }, { text: "B2" }]
+    ]
+
+    Component.onCompleted: {
+        table.appendRow()
+        table.appendColumn()
+        table.deleteRow(0)
+        table.deleteColumn(0)
+    }
+}
+```
+
+Runtime structure edits require mutable array rows. Before row/column insertion or deletion, existing span metadata is normalized so stale merged-cell anchors cannot point at the wrong row or column after the structure changes. Column deletion is rejected when the table has only one column left.
+
+## Resize Editing
+
+Users can drag column right borders to update `columnWidths[columnIndex]` and row bottom borders to update `rowHeights[rowIndex]`.
+
+Programmatic calls use the same sizing path:
+
+```qml
+LV.Table {
+    id: table
+    rows: [
+        [{ text: "A1" }, { text: "B1" }],
+        [{ text: "A2" }, { text: "B2" }]
+    ]
+
+    Component.onCompleted: {
+        table.setColumnWidth(0, 180)
+        table.setRowHeight(1, 36)
+    }
+}
+```
+
+Widths and heights are clamped by `minColumnWidth` and `minRowHeight`. `beginColumnResize/updateColumnResize/endColumnResize` and the row equivalents are exposed so tests or custom handles can reuse the built-in drag state machine.
 
 ## Advanced Example: Object Rows
 

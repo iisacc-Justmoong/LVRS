@@ -22,11 +22,16 @@ Location: `qml/components/control/display/TableCellItem.qml`
 - `textStyle` (Label style enum value)
 - `inputable` (default `false`; toggles inline input overlay at text bounds)
 - `inputResult` (latest editable string value)
+- `valueType` (`string`, `int`, `float`, `bool`; used by injected validators)
+- `valueValidator` (optional function injected by parent table)
+- `typedValue` (latest accepted typed value)
+- `inputAccepted` (last validation result)
 
 Input events:
 
 - `inputEdited(text)`
 - `inputSubmitted(text)`
+- `inputRejected(text, valueType)`
 - `applyInputResult(value)` returns normalized `string`
 
 Resolved read-only values:
@@ -56,9 +61,11 @@ LV.TableCellItem {
 ## How It Works
 
 - `itemData` supports object keys such as `label`, `text`, `title`.
+- `itemData.value` is also accepted when label/text/title keys are absent.
 - If object keys are missing, component-level fallback props are used.
 - Divider and text rendering stay dense (`24px` cell height, ellipsis text).
 - When `inputable` is enabled, `InputField` overlays the text area and keeps geometry aligned with the original label slot.
+- `valueValidator` is a parent-injected API. It may return `true/false` or `{ accepted, text, value }`; rejected edits leave `inputResult` unchanged and emit `inputRejected`.
 
 ## Practical Tip
 
@@ -77,10 +84,27 @@ LV.TableCellItem {
 }
 ```
 
+## Extended Example: Typed Edit Guard
+
+```qml
+import LVRS 1.0 as LV
+
+LV.TableCellItem {
+    valueType: "int"
+    valueValidator: function(value) {
+        const text = String(value).trim()
+        if (!/^-?\d+$/.test(text))
+            return { accepted: false, text: text, value: value }
+        const intValue = Number(text)
+        return { accepted: true, text: String(intValue), value: intValue }
+    }
+}
+```
+
 ## FAQ
 
 Q. Which text key is used when `itemData` contains multiple label fields?  
-A. Resolution order is `label -> text -> title`, then falls back to component `text`.
+A. Resolution order is `label -> text -> title -> value`, then falls back to component `text`.
 
 ## Validation Checklist
 

@@ -77,6 +77,9 @@ private slots:
     void context_menu_auto_placement_contract_loads();
     void table_cell_item_contract_loads();
     void table_cell_merge_split_contract_loads();
+    void table_structure_editing_contract_loads();
+    void table_resize_contract_loads();
+    void table_typed_header_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
 
@@ -4639,6 +4642,7 @@ Item {
         visible: false
         width: 300
         height: 96
+        structureControlsVisible: false
         headerColumns: ["A", "B", "C"]
         rows: [
             [{ text: "A1" }, { text: "B1" }, { text: "C1" }],
@@ -4659,6 +4663,7 @@ Item {
         visible: false
         width: 300
         height: 96
+        structureControlsVisible: false
         headerColumns: ["A", "B", "C"]
         rows: [
             [{ text: "S1", columnSpan: 2 }, { text: "S2" }, { text: "S3" }],
@@ -4728,6 +4733,480 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("mergeSplitReady").toBool());
+}
+
+void ImportApiTests::table_structure_editing_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property int rowInsertedCount: 0
+    property int rowDeletedCount: 0
+    property int columnInsertedCount: 0
+    property int columnDeletedCount: 0
+    property bool appendRowOk: false
+    property bool insertRowOk: false
+    property bool appendColumnOk: false
+    property bool insertColumnOk: false
+    property bool deleteRowOk: false
+    property bool deleteColumnOk: false
+    property bool contextRowDeleteOk: false
+    property bool contextColumnDeleteOk: false
+    property bool oneColumnDeleteRejected: false
+    property bool spanNormalizedOnMutation: false
+    property bool contextItemsReady: false
+    property bool initialControlsReady: false
+    property bool headerMutationReady: false
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 320
+        height: 140
+        headerColumns: ["A", "B"]
+        rows: [
+            [{ text: "A1" }, { text: "B1" }],
+            [{ text: "A2" }, { text: "B2" }]
+        ]
+
+        onRowInserted: function(rowIndex) {
+            root.rowInsertedCount += 1
+        }
+        onRowDeleted: function(rowIndex) {
+            root.rowDeletedCount += 1
+        }
+        onColumnInserted: function(columnIndex) {
+            root.columnInsertedCount += 1
+        }
+        onColumnDeleted: function(columnIndex) {
+            root.columnDeletedCount += 1
+        }
+    }
+
+    LV.Table {
+        id: oneColumnTable
+        visible: false
+        width: 120
+        height: 80
+        headerColumns: ["Only"]
+        rows: [[{ text: "Only" }]]
+    }
+
+    LV.Table {
+        id: spanTable
+        visible: false
+        width: 320
+        height: 120
+        headerColumns: ["A", "B"]
+        rows: [
+            [{ text: "A1" }, { text: "B1" }],
+            [{ text: "A2" }, { text: "B2" }]
+        ]
+    }
+
+    function runContract() {
+        initialControlsReady = table.structureMutationAvailable
+            && table.resolvedStructureControlsVisible
+            && table.resolvedStructureGutterWidth === table.structureGutterWidth
+            && table.resolvedStructureGutterHeight === table.structureGutterHeight
+            && Math.abs(table.structureCellWidth() - 150) < 0.01
+
+        appendRowOk = table.appendRow()
+            && table.rows.length === 3
+            && table.rows[2].length === 2
+            && table.rows[2][0].text === table.defaultCellText
+
+        insertRowOk = table.insertRow(1)
+            && table.rows.length === 4
+            && table.rows[1].length === 2
+
+        appendColumnOk = table.appendColumn()
+            && table.resolvedColumnCount === 3
+            && table.rows[0].length === 3
+            && table.headerColumns.length === 3
+
+        insertColumnOk = table.insertColumn(1)
+            && table.resolvedColumnCount === 4
+            && table.rows[0].length === 4
+            && table.rows[0][1].text === table.defaultCellText
+            && table.headerColumns[1].label === table.defaultHeaderText
+
+        deleteRowOk = table.deleteRow(0)
+            && table.rows.length === 3
+
+        deleteColumnOk = table.deleteColumn(1)
+            && table.resolvedColumnCount === 3
+            && table.headerColumns.length === 3
+
+        headerMutationReady = table.headerColumns.length === table.resolvedColumnCount
+
+        table.contextRowIndex = 1
+        table.contextColumnIndex = 1
+        const bothItems = table.buildContextMenuItems()
+        contextItemsReady = bothItems.length === 3
+            && bothItems[0].label === "Delete row"
+            && bothItems[2].label === "Delete column"
+
+        const rowsBeforeContextDelete = table.rows.length
+        table.contextRowIndex = 1
+        table.contextColumnIndex = -1
+        const rowItems = table.buildContextMenuItems()
+        rowItems[0].onTriggered({})
+        contextRowDeleteOk = table.rows.length === rowsBeforeContextDelete - 1
+
+        const columnsBeforeContextDelete = table.resolvedColumnCount
+        table.contextRowIndex = -1
+        table.contextColumnIndex = 0
+        const columnItems = table.buildContextMenuItems()
+        columnItems[0].onTriggered({})
+        contextColumnDeleteOk = table.resolvedColumnCount === columnsBeforeContextDelete - 1
+
+        oneColumnDeleteRejected = !oneColumnTable.deleteColumn(0)
+
+        spanTable.mergeCells(0, 0, 1, 2)
+        const coveredBeforeAppend = spanTable.isCoveredCell(0, 1)
+        spanTable.appendRow()
+        spanNormalizedOnMutation = coveredBeforeAppend
+            && !spanTable.isCoveredCell(0, 1)
+            && spanTable.rows[0][0].rowSpan === 1
+            && spanTable.rows[0][0].columnSpan === 1
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool structureEditingReady:
+        initialControlsReady
+        && appendRowOk
+        && insertRowOk
+        && appendColumnOk
+        && insertColumnOk
+        && deleteRowOk
+        && deleteColumnOk
+        && contextItemsReady
+        && contextRowDeleteOk
+        && contextColumnDeleteOk
+        && oneColumnDeleteRejected
+        && spanNormalizedOnMutation
+        && headerMutationReady
+        && rowInsertedCount === 2
+        && rowDeletedCount === 2
+        && columnInsertedCount === 2
+        && columnDeletedCount === 2
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("structureEditingReady").toBool());
+}
+
+void ImportApiTests::table_resize_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property int columnResizeCount: 0
+    property int rowResizeCount: 0
+    property bool initialGeometryReady: false
+    property bool columnDragReady: false
+    property bool rowDragReady: false
+    property bool minClampReady: false
+    property bool headerGeometryReady: false
+    property bool structureSizeShiftReady: false
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 300
+        height: 160
+        structureControlsVisible: false
+        minColumnWidth: 40
+        minRowHeight: 20
+        headerColumns: ["A", "B", "C"]
+        columnWidths: [80, 100, 120]
+        rowHeights: [24, 30]
+        rows: [
+            [{ text: "A1" }, { text: "B1" }, { text: "C1" }],
+            [{ text: "A2" }, { text: "B2" }, { text: "C2" }]
+        ]
+        onColumnResized: function(columnIndex, width) {
+            root.columnResizeCount += 1
+        }
+        onRowResized: function(rowIndex, height) {
+            root.rowResizeCount += 1
+        }
+    }
+
+    LV.TableHeader {
+        id: header
+        visible: false
+        width: 300
+        minColumnWidth: 40
+        columnWidths: [70, 90, 140]
+        cellItems: [
+            { label: "A" },
+            { label: "B" },
+            { label: "C" }
+        ]
+    }
+
+    LV.Table {
+        id: shiftTable
+        visible: false
+        width: 300
+        height: 160
+        structureControlsVisible: false
+        headerColumns: ["A", "B"]
+        columnWidths: [75, 125]
+        rowHeights: [26, 34]
+        rows: [
+            [{ text: "A1" }, { text: "B1" }],
+            [{ text: "A2" }, { text: "B2" }]
+        ]
+    }
+
+    function runContract() {
+        initialGeometryReady = table.columnWidth(0) === 80
+            && table.columnWidth(1) === 100
+            && table.columnX(2) === 180
+            && table.rowHeightAt(1) === 30
+            && table.rowY(1) === 24
+            && table.totalBodyHeight() === 54
+            && table.visibleCellItems[1].x === 80
+            && table.visibleCellItems[1].width === 100
+            && table.visibleCellItems[3].y === 24
+            && table.visibleCellItems[3].height === 30
+
+        columnDragReady = table.beginColumnResize(1, 100)
+            && table.updateColumnResize(135)
+            && table.resizingColumnIndex === 1
+            && table.columnWidths[1] === 135
+        table.endColumnResize()
+        columnDragReady = columnDragReady && table.resizingColumnIndex === -1
+
+        rowDragReady = table.beginRowResize(0, 20)
+            && table.updateRowResize(32)
+            && table.resizingRowIndex === 0
+            && table.rowHeights[0] === 36
+        table.endRowResize()
+        rowDragReady = rowDragReady && table.resizingRowIndex === -1
+
+        minClampReady = table.setColumnWidth(2, 1)
+            && table.columnWidths[2] === 40
+            && table.setRowHeight(1, 1)
+            && table.rowHeights[1] === 20
+
+        headerGeometryReady = header.columnWidth(0) === 70
+            && header.columnWidth(1) === 90
+            && header.columnX(2) === 160
+
+        shiftTable.insertColumn(1)
+        shiftTable.insertRow(1)
+        structureSizeShiftReady = shiftTable.columnWidths.length === 3
+            && shiftTable.columnWidths[0] === 75
+            && shiftTable.columnWidths[2] === 125
+            && shiftTable.rowHeights.length === 3
+            && shiftTable.rowHeights[0] === 26
+            && shiftTable.rowHeights[2] === 34
+        shiftTable.deleteColumn(0)
+        shiftTable.deleteRow(0)
+        structureSizeShiftReady = structureSizeShiftReady
+            && shiftTable.columnWidths.length === 2
+            && shiftTable.rowHeights.length === 2
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool resizeContractReady:
+        initialGeometryReady
+        && columnDragReady
+        && rowDragReady
+        && minClampReady
+        && headerGeometryReady
+        && structureSizeShiftReady
+        && columnResizeCount === 2
+        && rowResizeCount === 2
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("resizeContractReady").toBool());
+}
+
+void ImportApiTests::table_typed_header_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property bool objectHeaderTypesReady: false
+    property bool primitiveHeaderTypesReady: false
+    property bool cellCoercionReady: false
+    property bool setCellValueReady: false
+    property bool typedDefaultsReady: false
+    property bool injectedCellGuardReady: false
+    property int rejectedCount: 0
+
+    LV.Table {
+        id: typedTable
+        visible: false
+        width: 360
+        height: 120
+        structureControlsVisible: false
+        inputable: true
+        headerCellItems: [
+            { label: "Name", type: "string" },
+            { label: "Count", valueType: "int" },
+            { label: "Ratio", cellType: "float" },
+            { label: "Enabled", dataType: "bool" }
+        ]
+        rows: [
+            [
+                { value: "Renderer" },
+                { value: 3 },
+                { value: 1.5 },
+                { value: true }
+            ]
+        ]
+        onCellInputRejected: function(rowIndex, columnIndex, text, valueType) {
+            root.rejectedCount += 1
+        }
+    }
+
+    LV.Table {
+        id: primitiveTable
+        visible: false
+        width: 360
+        height: 120
+        structureControlsVisible: false
+        headerCellItems: ["Title", 1, 1.25, false]
+        rows: [["Renderer", 3, 1.5, true]]
+    }
+
+    LV.TableHeader {
+        id: primitiveHeader
+        visible: false
+        width: 360
+        cellItems: ["Title", 1, 1.25, false]
+    }
+
+    LV.TableCellItem {
+        id: intCell
+        visible: false
+        valueType: "int"
+        valueValidator: function(value, valueType) {
+            return typedTable.coerceCellValue(value, valueType)
+        }
+        onInputRejected: function(text, valueType) {
+            root.rejectedCount += 1
+        }
+    }
+
+    function runContract() {
+        objectHeaderTypesReady = typedTable.headerCellType(0) === "string"
+            && typedTable.headerCellType(1) === "int"
+            && typedTable.headerCellType(2) === "float"
+            && typedTable.headerCellType(3) === "bool"
+            && typedTable.columnType(2) === "float"
+            && typedTable.cellText(0, 0) === "Renderer"
+            && typedTable.cellText(0, 1) === "3"
+            && typedTable.cellText(0, 2) === "1.5"
+            && typedTable.cellText(0, 3) === "true"
+            && typedTable.visibleCellItems[1].valueType === "int"
+            && typedTable.visibleCellItems[2].valueType === "float"
+            && typedTable.visibleCellItems[3].valueType === "bool"
+
+        primitiveHeaderTypesReady = primitiveTable.headerCellType(0) === "string"
+            && primitiveTable.headerCellType(1) === "int"
+            && primitiveTable.headerCellType(2) === "float"
+            && primitiveTable.headerCellType(3) === "bool"
+            && primitiveHeader.columnType(0) === "string"
+            && primitiveHeader.columnType(1) === "int"
+            && primitiveHeader.columnType(2) === "float"
+            && primitiveHeader.columnType(3) === "bool"
+            && primitiveHeader.columnText(3) === "false"
+
+        const coercedInt = typedTable.coerceCellValue("42", "int")
+        const rejectedInt = typedTable.coerceCellValue("42.5", "int")
+        const coercedFloat = typedTable.coerceCellValue("4.25", "float")
+        const coercedBool = typedTable.coerceCellValue("false", "bool")
+        cellCoercionReady = coercedInt.accepted
+            && coercedInt.value === 42
+            && coercedInt.text === "42"
+            && !rejectedInt.accepted
+            && coercedFloat.accepted
+            && coercedFloat.value === 4.25
+            && coercedBool.accepted
+            && coercedBool.value === false
+            && coercedBool.text === "false"
+
+        const intSetOk = typedTable.setCellValue(0, 1, "42")
+        const intRejected = !typedTable.setCellValue(0, 1, "42.5")
+        const floatSetOk = typedTable.setCellValue(0, 2, "4.25")
+        const boolSetOk = typedTable.setCellValue(0, 3, "false")
+        setCellValueReady = intSetOk
+            && intRejected
+            && floatSetOk
+            && boolSetOk
+            && typedTable.rows[0][1].value === 42
+            && typedTable.rows[0][1].text === "42"
+            && typedTable.rows[0][2].value === 4.25
+            && typedTable.rows[0][2].text === "4.25"
+            && typedTable.rows[0][3].value === false
+            && typedTable.rows[0][3].text === "false"
+
+        typedDefaultsReady = typedTable.appendRow()
+            && typedTable.rows[1][0].text === typedTable.defaultCellText
+            && typedTable.rows[1][1].value === 0
+            && typedTable.rows[1][2].value === 0
+            && typedTable.rows[1][3].value === false
+
+        const acceptResult = intCell.applyInputResult("7")
+        const rejectResult = intCell.applyInputResult("7.5")
+        injectedCellGuardReady = acceptResult === "7"
+            && rejectResult === "7"
+            && intCell.inputResult === "7"
+            && intCell.typedValue === 7
+            && intCell.inputAccepted === false
+            && root.rejectedCount === 1
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool typedHeaderContractReady:
+        objectHeaderTypesReady
+        && primitiveHeaderTypesReady
+        && cellCoercionReady
+        && setCellValueReady
+        && typedDefaultsReady
+        && injectedCellGuardReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("typedHeaderContractReady").toBool());
 }
 
 void ImportApiTests::list_item_and_footer_figma_contract_loads()

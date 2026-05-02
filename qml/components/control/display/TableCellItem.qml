@@ -15,10 +15,15 @@ Item {
     property int textStyle: body
     property bool inputable: false
     property string inputResult: control.resolvedText
+    property string valueType: "string"
+    property var valueValidator: null
+    property var typedValue: control.inputResult
+    property bool inputAccepted: true
     property bool _hasInputOverride: false
 
     signal inputEdited(string text)
     signal inputSubmitted(string text)
+    signal inputRejected(string text, string valueType)
 
     readonly property int title: 0
     readonly property int title2: 1
@@ -38,6 +43,8 @@ Item {
                 return String(entry.text)
             if (entry.title !== undefined && entry.title !== null)
                 return String(entry.title)
+            if (entry.value !== undefined && entry.value !== null)
+                return String(entry.value)
         }
         return control.text
     }
@@ -82,9 +89,53 @@ Item {
         return String(value)
     }
 
-    function applyInputResult(value) {
+    function validationResult(value) {
         const normalized = normalizedText(value)
+        if (typeof control.valueValidator !== "function") {
+            return {
+                "accepted": true,
+                "text": normalized,
+                "value": normalized
+            }
+        }
+
+        const result = control.valueValidator(value, control.valueType)
+        if (typeof result === "boolean") {
+            return {
+                "accepted": result,
+                "text": normalized,
+                "value": normalized
+            }
+        }
+        if (!result || typeof result !== "object") {
+            return {
+                "accepted": !!result,
+                "text": normalized,
+                "value": normalized
+            }
+        }
+
+        const textValue = result.text !== undefined && result.text !== null
+            ? String(result.text)
+            : normalizedText(result.value)
+        return {
+            "accepted": result.accepted === undefined ? true : !!result.accepted,
+            "text": textValue,
+            "value": result.value !== undefined ? result.value : textValue
+        }
+    }
+
+    function applyInputResult(value) {
+        const validation = validationResult(value)
+        control.inputAccepted = validation.accepted
+        if (!validation.accepted) {
+            control.inputRejected(normalizedText(value), control.valueType)
+            return control.inputResult
+        }
+
+        const normalized = normalizedText(validation.text)
         control._hasInputOverride = true
+        control.typedValue = validation.value
         if (control.text !== normalized)
             control.text = normalized
         if (control.inputResult !== normalized)
@@ -152,9 +203,18 @@ Item {
 
                     onTextEdited: {
                         const value = control.applyInputResult(text)
-                        control.inputEdited(value)
+                        if (text !== value)
+                            text = value
+                        if (control.inputAccepted)
+                            control.inputEdited(value)
                     }
-                    onAccepted: control.inputSubmitted(control.applyInputResult(text))
+                    onAccepted: {
+                        const value = control.applyInputResult(text)
+                        if (text !== value)
+                            text = value
+                        if (control.inputAccepted)
+                            control.inputSubmitted(value)
+                    }
                 }
             }
 
@@ -171,6 +231,7 @@ Item {
         const normalized = control.normalizedText(control.resolvedText)
         if (control.inputResult !== normalized)
             control.inputResult = normalized
+        control.typedValue = normalized
         if (overlayInputLoader.status === Loader.Ready
             && overlayInputLoader.item
             && !overlayInputLoader.item.activeFocus
@@ -183,6 +244,7 @@ Item {
         const normalized = control.normalizedText(control.resolvedText)
         if (control.inputResult !== normalized)
             control.inputResult = normalized
+        control.typedValue = normalized
         if (overlayInputLoader.status === Loader.Ready
             && overlayInputLoader.item
             && !overlayInputLoader.item.activeFocus
@@ -202,4 +264,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableCellItem { itemData: ({ text: "Text" }); inputable: true }
+// LV.TableCellItem { itemData: ({ text: "Text" }); inputable: true; valueType: "string" }
