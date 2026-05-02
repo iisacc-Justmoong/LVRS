@@ -41,11 +41,7 @@ Item {
     readonly property bool editableSupported: Array.isArray(model) && depthArraySupportsEditing(model)
     readonly property bool editableEnabled: editable && editableSupported
 
-    property int _modelRevision: 0
-    readonly property bool usingTreeModel: {
-        _modelRevision
-        return modelCount(model) > 0
-    }
+    readonly property bool usingTreeModel: hierarchyModel.count > 0
     property int _itemCountInternal: 0
     property int _visibleItemCountInternal: 0
     readonly property int itemCount: _itemCountInternal
@@ -107,15 +103,28 @@ Item {
         HierarchyItem { }
     }
 
+    HierarchyModel {
+        id: hierarchyModel
+        source: control.model
+        column: control.modelColumn
+        itemIdRole: control.itemIdRole
+        itemKeyRole: control.itemKeyRole
+        labelRole: control.labelRole
+        iconNameRole: control.iconNameRole
+        iconSourceRole: control.iconSourceRole
+        iconGlyphRole: control.iconGlyphRole
+        countRole: control.countRole
+        enabledRole: control.enabledRole
+        expandedRole: control.expandedRole
+        selectedRole: control.selectedRole
+        activatableRole: control.activatableRole
+        draggableRole: control.draggableRole
+        showChevronRole: control.showChevronRole
+        depthRole: control.depthRole
+    }
+
     function roleValue(node, roleName, fallbackValue) {
-        if (!node || typeof node !== "object")
-            return fallbackValue
-        const key = roleName === undefined || roleName === null ? "" : String(roleName).trim()
-        if (key.length === 0)
-            return fallbackValue
-        if (node[key] !== undefined)
-            return node[key]
-        return fallbackValue
+        return hierarchyModel.roleValue(node, roleName, fallbackValue)
     }
 
     function boolRole(node, roleName, fallbackValue) {
@@ -158,33 +167,18 @@ Item {
     }
 
     function modelCount(modelData) {
-        if (modelData === undefined || modelData === null)
-            return 0
-        if (ModelAdapter.isItemModel(modelData))
-            return ModelAdapter.count(modelData)
-        if (Array.isArray(modelData))
-            return modelData.length
-        if (modelData.length !== undefined)
-            return Math.max(0, Number(modelData.length) || 0)
-        if (modelData.count !== undefined)
-            return Math.max(0, Number(modelData.count) || 0)
+        if (modelData === model)
+            return hierarchyModel.count
         return 0
     }
 
     function modelAt(modelData, index) {
-        if (modelData === undefined || modelData === null)
-            return null
-        if (ModelAdapter.isItemModel(modelData))
-            return ModelAdapter.row(modelData, index, modelColumn)
-        if (Array.isArray(modelData))
-            return modelData[index]
-        if (modelData.get !== undefined)
-            return modelData.get(index)
-        return modelData[index]
+        if (modelData === model)
+            return hierarchyModel.descriptorAt(index).nodeData
+        return null
     }
 
     function invalidateModel() {
-        _modelRevision += 1
         if (_dragActiveInternal)
             _endEditableDrag(false)
         markItemsDirty(true)
@@ -1805,137 +1799,9 @@ Item {
     }
 
     function buildModelDescriptors(nodes, depth, parentKey, parentPath, sink) {
-        const count = modelCount(nodes)
-        for (let i = 0; i < count; i++) {
-            const node = modelAt(nodes, i)
-            if (node === undefined || node === null)
-                continue
-
-            const isObjectNode = typeof node === "object"
-            const primitiveLabel = isObjectNode ? "" : String(node)
-            const labelRaw = isObjectNode
-                ? roleValue(node, labelRole,
-                            roleValue(node, "text",
-                                      roleValue(node, "title",
-                                                roleValue(node, "name",
-                                                          roleValue(node, "display",
-                                                                    roleValue(node, "edit", ""))))))
-                : primitiveLabel
-            const label = labelRaw === undefined || labelRaw === null ? "" : String(labelRaw)
-
-            let iconName = ""
-            let iconSource = ""
-            if (isObjectNode) {
-                const iconToken = roleValue(node, iconNameRole, roleValue(node, "icon", ""))
-                if (typeof iconToken === "object" && iconToken !== null) {
-                    const nestedIconNameRaw = iconToken.name === undefined || iconToken.name === null
-                        ? ""
-                        : String(iconToken.name)
-                    const nestedIconSourceRaw = iconToken.source === undefined || iconToken.source === null
-                        ? (iconToken.url === undefined || iconToken.url === null
-                               ? ""
-                               : String(iconToken.url))
-                        : String(iconToken.source)
-                    iconName = nestedIconNameRaw.trim()
-                    iconSource = nestedIconSourceRaw.trim()
-                } else {
-                    const iconTokenText = iconToken === undefined || iconToken === null
-                        ? ""
-                        : String(iconToken).trim()
-                    if (iconTokenText.startsWith("qrc:") || iconTokenText.startsWith(":/") || iconTokenText.indexOf("://") >= 0)
-                        iconSource = iconTokenText
-                    else
-                        iconName = iconTokenText
-                }
-                const explicitIconSourceRaw = roleValue(node, iconSourceRole, "")
-                const explicitIconSource = explicitIconSourceRaw === undefined || explicitIconSourceRaw === null
-                    ? ""
-                    : String(explicitIconSourceRaw).trim()
-                if (explicitIconSource.length > 0)
-                    iconSource = explicitIconSource
-            }
-
-            const iconGlyphRaw = isObjectNode ? roleValue(node, iconGlyphRole, "") : ""
-            const iconGlyph = iconGlyphRaw === undefined || iconGlyphRaw === null ? "" : String(iconGlyphRaw)
-            const rawCountValue = isObjectNode ? roleValue(node, countRole, roleValue(node, "count", -1)) : -1
-            const numericCountValue = Number(rawCountValue)
-            const count = Number.isFinite(numericCountValue) ? Math.trunc(numericCountValue) : -1
-
-            const rawItemId = isObjectNode ? roleValue(node, itemIdRole, roleValue(node, "id", -1)) : -1
-            const numericItemId = Number(rawItemId)
-            const itemId = Number.isFinite(numericItemId) ? Math.trunc(numericItemId) : -1
-
-            const explicitKeyRaw = isObjectNode ? roleValue(node, itemKeyRole, "") : ""
-            const explicitKey = explicitKeyRaw === undefined || explicitKeyRaw === null
-                ? ""
-                : String(explicitKeyRaw).trim()
-            const fallbackKey = String(i)
-            const itemKey = explicitKey.length > 0
-                ? explicitKey
-                : itemId >= 0
-                    ? String(itemId)
-                    : fallbackKey
-
-            const displayLabel = label.length > 0 ? label : itemKey
-
-            const explicitChevron = isObjectNode ? roleValue(node, showChevronRole, undefined) : undefined
-            const showChevronRequested = explicitChevron === undefined || explicitChevron === null
-                ? true
-                : !!explicitChevron
-            const showChevron = showChevronRequested
-
-            const indentLevel = isObjectNode
-                ? resolvedIndentLevel(node, depth)
-                : normalizedDepth(depth, 0)
-
-            const pathLabelRaw = isObjectNode ? roleValue(node, "pathLabel", "") : ""
-            const pathLabel = pathLabelRaw === undefined || pathLabelRaw === null
-                ? displayLabel
-                : String(pathLabelRaw).trim().length > 0
-                    ? String(pathLabelRaw).trim()
-                    : displayLabel
-
-            const parentItemKeyRaw = isObjectNode
-                ? roleValue(node, "parentItemKey", roleValue(node, "parentKey", parentKey))
-                : parentKey
-            const parentItemKey = parentItemKeyRaw === undefined || parentItemKeyRaw === null
-                ? ""
-                : String(parentItemKeyRaw).trim()
-
-            const hasChildren = boolRole(node, "hasChildItems", false)
-            const expanded = boolRole(node, expandedRole, false)
-            const selected = boolRole(node, selectedRole, false)
-            const enabled = boolRole(node, enabledRole, true)
-            const activatable = boolRole(node,
-                                         activatableRole,
-                                         roleValue(node, "selectable",
-                                                   roleValue(node, "activatable", true)))
-            const draggable = boolRole(node,
-                                       draggableRole,
-                                       roleValue(node, "dragAllowed",
-                                                 roleValue(node, "draggable", true)))
-
-            sink.push({
-                          itemId: itemId,
-                          itemKey: itemKey,
-                          parentItemKey: parentItemKey,
-                          label: displayLabel,
-                          iconName: iconName,
-                          iconSource: iconSource,
-                          iconGlyph: iconGlyph,
-                          count: count,
-                          showChevron: showChevron,
-                          hasChildren: hasChildren,
-                          expanded: expanded,
-                          selected: selected,
-                          enabled: enabled,
-                          activatable: activatable,
-                          draggable: draggable,
-                          indentLevel: indentLevel,
-                          pathLabel: pathLabel,
-                          nodeData: node
-                      })
-        }
+        const descriptors = hierarchyModel.descriptors
+        for (let i = 0; i < descriptors.length; i++)
+            sink.push(descriptors[i])
     }
 
     function clearGeneratedItems() {
@@ -2303,16 +2169,11 @@ Item {
     }
 
     Connections {
-        target: ModelAdapter.isItemModel(control.model) ? control.model : null
-        enabled: ModelAdapter.isItemModel(control.model)
-        ignoreUnknownSignals: true
+        target: hierarchyModel
 
-        function onRowsInserted() { control.invalidateModel() }
-        function onRowsRemoved() { control.invalidateModel() }
-        function onRowsMoved() { control.invalidateModel() }
-        function onModelReset() { control.invalidateModel() }
-        function onLayoutChanged() { control.invalidateModel() }
-        function onDataChanged() { control.invalidateModel() }
+        function onDescriptorsChanged() {
+            control.invalidateModel()
+        }
     }
 
     QtObject {

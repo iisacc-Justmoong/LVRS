@@ -41,91 +41,40 @@ Item {
     signal toolbarIconTriggered(int index, string source)
     signal footerButtonTriggered(int index, var config)
 
-    property int _modelRevision: 0
     readonly property bool usingModel: model !== undefined && model !== null
     readonly property var sourceModel: usingModel ? model : items
-    readonly property int entryCount: {
-        _modelRevision
-        return modelCount(sourceModel)
+    readonly property int entryCount: listModelSource.count
+
+    ModelSource {
+        id: listModelSource
+        source: control.sourceModel
+        column: control.modelColumn
     }
 
     function invalidateModel() {
-        _modelRevision += 1
-    }
-
-    function modelCount(source) {
-        if (!source)
-            return 0
-        if (ModelAdapter.isItemModel(source))
-            return ModelAdapter.count(source)
-        if (source.length !== undefined)
-            return Math.max(0, Number(source.length) || 0)
-        if (source.count !== undefined)
-            return Math.max(0, Number(source.count) || 0)
-        return 0
+        listModelSource.invalidate()
     }
 
     function entryAt(index) {
-        const source = sourceModel
-        if (!source)
-            return null
-        if (ModelAdapter.isItemModel(source))
-            return ModelAdapter.row(source, index, modelColumn)
-        if (source.get !== undefined)
-            return source.get(index)
-        if (source.length !== undefined)
-            return source[index]
-        if (source.data !== undefined)
-            return source.data(index)
-        if (source.at !== undefined)
-            return source.at(index)
-        return null
+        listModelSource.revision
+        return listModelSource.at(index)
     }
 
     function roleValue(entry, roleName, fallbackValue) {
-        if (!entry || typeof entry !== "object")
-            return fallbackValue
-        const key = roleName === undefined || roleName === null ? "" : String(roleName).trim()
-        if (key.length === 0)
-            return fallbackValue
-        if (entry[key] !== undefined)
-            return entry[key]
-        return fallbackValue
+        return listModelSource.roleValue(entry, roleName, fallbackValue)
     }
 
     function itemLabel(entry) {
-        if (entry === undefined || entry === null)
-            return ""
-        if (typeof entry !== "object")
-            return String(entry)
-        let value = roleValue(entry, labelRole, undefined)
-        if (value === undefined)
-            value = roleValue(entry, textRole, undefined)
-        if (value === undefined)
-            value = roleValue(entry, titleRole, undefined)
-        if (value === undefined)
-            value = roleValue(entry, "display", undefined)
-        if (value === undefined)
-            value = roleValue(entry, "edit", "")
-        if (value === undefined || value === null)
-            return ""
-        return String(value)
+        return listModelSource.textValue(entry, [labelRole, textRole, titleRole, "display", "edit"], "")
     }
 
     function itemEnabled(entry) {
-        if (!entry || typeof entry !== "object")
-            return true
-        const value = roleValue(entry, enabledRole, undefined)
-        if (value === undefined)
-            return true
-        return !!value
+        return listModelSource.boolValue(entry, enabledRole, true)
     }
 
     function itemSelected(entry, index) {
-        if (!entry || typeof entry !== "object")
-            return index === selectedIndex
-        const value = roleValue(entry, selectedRole, undefined)
-        if (value !== undefined)
+        const value = roleValue(entry, selectedRole, null)
+        if (value !== null && value !== undefined)
             return !!value
         return index === selectedIndex
     }
@@ -140,19 +89,6 @@ Item {
     implicitHeight: Math.max(control.minimumListHeight, contentHeight)
 
     onSourceModelChanged: invalidateModel()
-
-    Connections {
-        target: ModelAdapter.isItemModel(control.sourceModel) ? control.sourceModel : null
-        enabled: ModelAdapter.isItemModel(control.sourceModel)
-        ignoreUnknownSignals: true
-
-        function onRowsInserted() { control.invalidateModel() }
-        function onRowsRemoved() { control.invalidateModel() }
-        function onRowsMoved() { control.invalidateModel() }
-        function onModelReset() { control.invalidateModel() }
-        function onLayoutChanged() { control.invalidateModel() }
-        function onDataChanged() { control.invalidateModel() }
-    }
 
     Rectangle {
         anchors.fill: parent

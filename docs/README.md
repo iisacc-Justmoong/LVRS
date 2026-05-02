@@ -65,12 +65,20 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/RenderMonitor.md`
 - `docs/backend/RouteMatcher.md`
 - `docs/backend/ModelAdapter.md`
+- `docs/backend/StateModel.md`
 - `docs/backend/PageMonitor.md`
 - `docs/backend/ViewStateTracker.md`
 - `docs/backend/ViewModels.md`
 - `docs/backend/Platform.md`
 - `docs/backend/Debug.md`
 - `docs/backend/DebugOutput.md`
+
+## Backend Model Types
+
+- `docs/backend/ModelUndoStack.md`
+- `docs/backend/ModelSource.md`
+- `docs/backend/HierarchyModel.md`
+- `docs/backend/TableModel.md`
 
 ## App Layer
 

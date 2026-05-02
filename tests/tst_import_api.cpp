@@ -267,6 +267,7 @@ private slots:
     void table_structure_editing_contract_loads();
     void table_resize_contract_loads();
     void table_typed_header_contract_loads();
+    void table_undo_redo_contract_loads();
     void list_model_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
@@ -3672,6 +3673,16 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    LV.StateModel {
+        id: progressState
+        values: ({
+            minimumValue: -100,
+            maximumValue: 100,
+            startValue: -50,
+            currentValue: 25
+        })
+    }
+
     LV.ProgressBar {
         id: segmentBar
         visible: false
@@ -3712,6 +3723,19 @@ Item {
         currentValue: 10
     }
 
+    LV.ProgressBar {
+        id: stateBackedBar
+        visible: false
+        width: 200
+        minimumValue: 0
+        maximumValue: 10
+        startValue: 0
+        currentValue: 1
+        stateModel: progressState
+    }
+
+    Component.onCompleted: progressState.setValue("currentValue", 50)
+
     property bool progressBarRangeReady:
         segmentBar.minimumValue === -50
         && segmentBar.maximumValue === 150
@@ -3733,12 +3757,22 @@ Item {
         && Math.abs(zeroRangeBar.valueRange) < 0.01
         && zeroRangeBar.progress === 1
         && zeroRangeBar.fillProgress === 1
+        && stateBackedBar.usingStateModel
+        && stateBackedBar.minimumValue === 0
+        && Math.abs(stateBackedBar.effectiveMinimumValue + 100) < 0.01
+        && Math.abs(stateBackedBar.effectiveMaximumValue - 100) < 0.01
+        && Math.abs(stateBackedBar.effectiveStartValue + 50) < 0.01
+        && Math.abs(stateBackedBar.effectiveCurrentValue - 50) < 0.01
+        && Math.abs(stateBackedBar.valueRange - 200) < 0.01
+        && Math.abs(stateBackedBar.normalizedStart - 0.25) < 0.01
+        && Math.abs(stateBackedBar.normalizedCurrent - 0.75) < 0.01
+        && Math.abs(stateBackedBar.fillProgress - 0.5) < 0.01
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("progressBarRangeReady").toBool());
+    QTRY_VERIFY(root->property("progressBarRangeReady").toBool());
 }
 
 void ImportApiTests::control_icons_use_supersampled_raster_contract()
@@ -5688,6 +5722,110 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("typedHeaderContractReady").toBool());
+}
+
+void ImportApiTests::table_undo_redo_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property bool cellUndoRedoReady: false
+    property bool structureUndoRedoReady: false
+    property bool mergeUndoRedoReady: false
+    property bool resizeUndoRedoReady: false
+    property bool clearReady: false
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 320
+        height: 120
+        structureControlsVisible: false
+        headerCellItems: [
+            { label: "Name", type: "string" },
+            { label: "Count", type: "int" }
+        ]
+        rows: [
+            [{ value: "Renderer" }, { value: 3 }],
+            [{ value: "Writer" }, { value: 2 }]
+        ]
+    }
+
+    function runContract() {
+        const initialUndoReady = !table.canUndo && !table.canRedo && table.undoDepth === 0 && table.redoDepth === 0
+        const editOk = table.setCellValue(0, 1, "9")
+        const undoCellOk = table.canUndo
+            && table.undoDepth === 1
+            && table.rows[0][1].value === 9
+            && table.undo()
+            && table.rows[0][1].value === 3
+            && table.canRedo
+            && table.redo()
+            && table.rows[0][1].value === 9
+            && !table.canRedo
+        cellUndoRedoReady = initialUndoReady && editOk && undoCellOk
+
+        const insertRowOk = table.insertRow(1)
+        const insertColumnOk = table.insertColumn(1)
+        structureUndoRedoReady = insertRowOk
+            && insertColumnOk
+            && table.rows.length === 3
+            && table.resolvedColumnCount === 3
+            && table.undo()
+            && table.resolvedColumnCount === 2
+            && table.rows.length === 3
+            && table.undo()
+            && table.rows.length === 2
+            && table.redo()
+            && table.rows.length === 3
+            && table.redo()
+            && table.resolvedColumnCount === 3
+
+        mergeUndoRedoReady = table.mergeCells(0, 0, 1, 2)
+            && table.isCoveredCell(0, 1)
+            && table.undo()
+            && !table.isCoveredCell(0, 1)
+            && table.redo()
+            && table.isCoveredCell(0, 1)
+
+        const widthBeforeResize = table.columnWidth(0)
+        const heightBeforeResize = table.rowHeightAt(0)
+        resizeUndoRedoReady = table.setColumnWidth(0, widthBeforeResize + 24)
+            && table.columnWidth(0) === widthBeforeResize + 24
+            && table.undo()
+            && table.columnWidth(0) === widthBeforeResize
+            && table.redo()
+            && table.columnWidth(0) === widthBeforeResize + 24
+            && table.setRowHeight(0, heightBeforeResize + 12)
+            && table.rowHeightAt(0) === heightBeforeResize + 12
+            && table.undo()
+            && table.rowHeightAt(0) === heightBeforeResize
+
+        table.clearUndoStack()
+        clearReady = !table.canUndo && !table.canRedo && table.undoDepth === 0 && table.redoDepth === 0
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool undoRedoContractReady:
+        cellUndoRedoReady
+        && structureUndoRedoReady
+        && mergeUndoRedoReady
+        && resizeUndoRedoReady
+        && clearReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("undoRedoContractReady").toBool());
 }
 
 void ImportApiTests::list_model_contract_loads()

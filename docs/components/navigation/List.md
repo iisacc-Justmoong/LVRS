@@ -53,8 +53,8 @@ Signals:
   - object arrays,
   - QML `ListModel`/list-like objects with `count` and `get(index)`,
   - C++ `QAbstractItemModel` instances exposed to QML.
-- C++ item models are read through `ModelAdapter` and converted to a role-name map per row.
-- C++ item model changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate the list projection so `entryCount` and rows refresh.
+- Direct model input is read through the C++ `ModelSource` type; QML no longer owns per-source count/index/role dispatch.
+- C++ item model changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate `ModelSource.revision` so `entryCount` and rows refresh.
 - Primitive rows render with `String(value)`.
 - Object/model rows render label text from `labelRole`, then `textRole`, then `titleRole`, then `display`, then `edit`.
 - `enabledRole` and `selectedRole` are optional. Missing `enabledRole` means enabled; missing `selectedRole` falls back to `selectedIndex`.

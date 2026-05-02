@@ -3,14 +3,17 @@
 Location:
 
 - `backend/state/viewmodel.h` / `backend/state/viewmodel.cpp`
+- `backend/state/statemodel.h` / `backend/state/statemodel.cpp`
 - `backend/state/viewmodelregistry.h` / `backend/state/viewmodelregistry.cpp`
 
 `ViewModel` is the C++ base type for dedicated ViewModel objects.
+`StateModel` is the concrete key-value state model used while migrating component state out of QML.
 `ViewModels` is the singleton registry and ownership gate for MVVM model objects.
 
 ## Purpose
 
 - Give C++ ViewModels a consistent diagnostic surface.
+- Provide a reusable C++ state object for components that do not yet need a domain-specific subclass.
 - Register model objects by key.
 - Bind view ids to keys.
 - Enforce single-writer ownership semantics.
@@ -36,6 +39,20 @@ Base methods:
 - `snapshot()`
 
 The base type is registered to QML as an uncreatable C++ type. QML consumes concrete instances registered by the app bootstrap; it should not instantiate the base type.
+
+## StateModel
+
+`StateModel` derives from `ViewModel` and adds:
+
+- `values`
+- `stateKeys`
+- `revision`
+- `empty`
+- `value(...)`, `setValue(...)`, `applyPatch(...)`, `removeValue(...)`, `clearValues()`
+- `valueOr(...)`
+- `stateSnapshot()`
+
+It is the preferred first step when moving ad-hoc QML component state into C++ before designing a typed domain ViewModel.
 
 ## Properties
 
@@ -86,6 +103,7 @@ Descriptor maps include:
 - `views`
 - `viewModel`
 - `viewModelKey`, `displayName`, `busy`, `error`, `hasError`, `metadata` for objects derived from `ViewModel`
+- `stateModel`, `values`, `stateKeys`, `revision`, `empty` for objects derived from `StateModel`
 
 `descriptorsChanged` is emitted when registered ViewModel diagnostics change, when keys are added/removed, or when view bindings/ownership change.
 

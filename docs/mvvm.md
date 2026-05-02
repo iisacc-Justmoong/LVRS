@@ -1,10 +1,11 @@
 # MVVM
 
-LVRS MVVM is centered on C++ ViewModel classes, the `ViewModels` (`ViewModelRegistry`) singleton, and route/view binding metadata emitted from `PageRouter`.
+LVRS MVVM is centered on C++ ViewModel classes, `StateModel` for reusable component state, the `ViewModels` (`ViewModelRegistry`) singleton, and route/view binding metadata emitted from `PageRouter`.
 
 ## Purpose
 
 - Register view-model instances by logical key.
+- Move reusable component state into C++ state objects.
 - Bind a concrete view identity (`viewId`) to a model key.
 - Control write ownership explicitly so only one view can mutate one model key at a time.
 - Keep ViewModel lifetime, diagnostics, and registration policy in C++ bootstrap code.
@@ -24,6 +25,8 @@ The base class supplies:
 - `snapshot()`
 
 The base type is uncreatable from QML. QML receives app-created instances through `ViewModels`.
+
+`StateModel` (`backend/state/statemodel.h`) derives from `ViewModel` and provides a key-value state map (`values`) with `revision` and per-key change signals. Use it when migrating generic component state out of QML before a dedicated typed ViewModel exists.
 
 ## Core API (`ViewModels`)
 

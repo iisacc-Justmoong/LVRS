@@ -9,10 +9,14 @@
 #include <QSignalSpy>
 #include <QtPlugin>
 
+#include "backend/model/hierarchymodel.h"
+#include "backend/model/modelsource.h"
+#include "backend/model/tablemodel.h"
 #include "backend/navigation/pagemonitor.h"
 #include "backend/navigation/routematcher.h"
 #include "backend/navigation/viewstatetracker.h"
 #include "backend/runtime/qmlcontextbinder.h"
+#include "backend/state/statemodel.h"
 #include "backend/state/viewmodel.h"
 #include "backend/state/viewmodelregistry.h"
 
@@ -49,6 +53,32 @@ signals:
 
 private:
     QString m_status = QStringLiteral("Idle");
+};
+
+class VariantListObject : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(int count READ count CONSTANT)
+
+public:
+    explicit VariantListObject(const QVariantList &entries, QObject *parent = nullptr)
+        : QObject(parent)
+        , m_entries(entries)
+    {
+    }
+
+    int count() const
+    {
+        return m_entries.size();
+    }
+
+    Q_INVOKABLE QVariant get(int index) const
+    {
+        return index >= 0 && index < m_entries.size() ? m_entries.at(index) : QVariant();
+    }
+
+private:
+    QVariantList m_entries;
 };
 
 class DedicatedStatusViewModel : public ViewModel
@@ -97,6 +127,8 @@ private slots:
     void viewmodels_registry_tracks_keys_and_ownership();
     void viewmodels_registry_signal_and_prune_contract();
     void viewmodel_base_and_registry_descriptors_track_cpp_state();
+    void state_model_stores_state_and_registry_descriptors_track_values();
+    void cpp_model_sources_own_list_hierarchy_and_table_contracts();
     void qml_context_bind_plan_exposes_context_objects_and_viewmodels();
     void qml_context_bind_plan_reports_missing_required_objects();
 };
@@ -500,6 +532,296 @@ void NavigationStateTests::viewmodel_base_and_registry_descriptors_track_cpp_sta
 
     viewModel->clearError();
     QCOMPARE(viewModel->hasError(), false);
+}
+
+void NavigationStateTests::state_model_stores_state_and_registry_descriptors_track_values()
+{
+    StateModel model;
+    model.setKey(QStringLiteral("ProgressState"));
+    model.setDisplayName(QStringLiteral("Progress State"));
+
+    QSignalSpy valuesSpy(&model, &StateModel::valuesChanged);
+    QSignalSpy revisionSpy(&model, &StateModel::revisionChanged);
+    QSignalSpy valueSpy(&model, &StateModel::valueChanged);
+    QVERIFY(valuesSpy.isValid());
+    QVERIFY(revisionSpy.isValid());
+    QVERIFY(valueSpy.isValid());
+
+    QVERIFY(model.setValue(QStringLiteral(" currentValue "), 40));
+    QVERIFY(model.setValue(QStringLiteral("minimumValue"), -10));
+    QVERIFY(model.setValue(QStringLiteral("maximumValue"), 90));
+    QCOMPARE(model.value(QStringLiteral("currentValue")).toInt(), 40);
+    QCOMPARE(model.value(QStringLiteral("missing"), QStringLiteral("fallback")).toString(),
+             QStringLiteral("fallback"));
+    QVERIFY(model.hasValue(QStringLiteral("minimumValue")));
+    QCOMPARE(model.stateKeys(),
+             (QStringList {
+                 QStringLiteral("currentValue"),
+                 QStringLiteral("maximumValue"),
+                 QStringLiteral("minimumValue")
+             }));
+
+    QVERIFY(model.applyPatch(QVariantMap {
+        {QStringLiteral("currentValue"), 64},
+        {QStringLiteral("startValue"), 10}
+    }));
+    QCOMPARE(model.value(QStringLiteral("currentValue")).toInt(), 64);
+    QCOMPARE(model.value(QStringLiteral("startValue")).toInt(), 10);
+
+    const QVariantMap snapshot = model.stateSnapshot();
+    QCOMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("ProgressState"));
+    QCOMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Progress State"));
+    QCOMPARE(snapshot.value(QStringLiteral("values")).toMap().value(QStringLiteral("currentValue")).toInt(), 64);
+    QVERIFY(snapshot.value(QStringLiteral("revision")).toInt() >= 4);
+    QVERIFY(!snapshot.value(QStringLiteral("empty")).toBool());
+
+    QVERIFY(model.removeValue(QStringLiteral("minimumValue")));
+    QVERIFY(!model.hasValue(QStringLiteral("minimumValue")));
+    QVERIFY(!model.setValue(QStringLiteral(" "), 1));
+    QCOMPARE(model.error(), QStringLiteral("Empty state key"));
+    model.clearValues();
+    QVERIFY(model.empty());
+    QVERIFY(valuesSpy.count() >= 5);
+    QVERIFY(revisionSpy.count() >= 5);
+    QVERIFY(valueSpy.count() >= 5);
+
+    ViewModelRegistry registry;
+    auto *registered = new StateModel;
+    registered->setKey(QStringLiteral("PanelState"));
+    QVERIFY(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-a")));
+
+    QSignalSpy descriptorSpy(&registry, &ViewModelRegistry::descriptorsChanged);
+    QVERIFY(descriptorSpy.isValid());
+
+    QVERIFY(registry.registerViewModel(registered));
+    QVariantMap descriptor = registry.descriptor(QStringLiteral("PanelState"));
+    QCOMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
+    QCOMPARE(descriptor.value(QStringLiteral("stateModel")).toBool(), true);
+    QCOMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
+             QStringLiteral("row-a"));
+    QVERIFY(descriptor.value(QStringLiteral("stateKeys")).toStringList().contains(QStringLiteral("activeKey")));
+    QCOMPARE(descriptor.value(QStringLiteral("empty")).toBool(), false);
+
+    const int beforeStateChange = descriptorSpy.count();
+    QVERIFY(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-b")));
+    QVERIFY(descriptorSpy.count() > beforeStateChange);
+    descriptor = registry.descriptor(QStringLiteral("PanelState"));
+    QCOMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
+             QStringLiteral("row-b"));
+}
+
+void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contracts()
+{
+    ModelSource listSource;
+    listSource.setSource(QVariantList {
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Native A")},
+            {QStringLiteral("enabled"), true}
+        },
+        QVariantMap {
+            {QStringLiteral("label"), QStringLiteral("Native B")},
+            {QStringLiteral("enabled"), false}
+        }
+    });
+    QCOMPARE(listSource.count(), 2);
+    QCOMPARE(listSource.textValue(listSource.at(0), QStringList {QStringLiteral("label")}, QString()),
+             QStringLiteral("Native A"));
+    QCOMPARE(listSource.boolValue(listSource.at(1), QStringLiteral("enabled"), true), false);
+
+    HierarchyModel hierarchyModel;
+    hierarchyModel.setLabelRole(QStringLiteral("name"));
+    hierarchyModel.setCountRole(QStringLiteral("counter"));
+    hierarchyModel.setSource(QVariantList {
+        QVariantMap {
+            {QStringLiteral("key"), QStringLiteral("root")},
+            {QStringLiteral("name"), QStringLiteral("Root")},
+            {QStringLiteral("depth"), 0},
+            {QStringLiteral("expanded"), true},
+            {QStringLiteral("counter"), 2}
+        },
+        QVariantMap {
+            {QStringLiteral("key"), QStringLiteral("leaf")},
+            {QStringLiteral("name"), QStringLiteral("Leaf")},
+            {QStringLiteral("depth"), 1},
+            {QStringLiteral("selected"), true},
+            {QStringLiteral("counter"), 7}
+        }
+    });
+    QCOMPARE(hierarchyModel.count(), 2);
+    const QVariantMap leafDescriptor = hierarchyModel.descriptorAt(1);
+    QCOMPARE(leafDescriptor.value(QStringLiteral("itemKey")).toString(), QStringLiteral("leaf"));
+    QCOMPARE(leafDescriptor.value(QStringLiteral("label")).toString(), QStringLiteral("Leaf"));
+    QCOMPARE(leafDescriptor.value(QStringLiteral("indentLevel")).toInt(), 1);
+    QCOMPARE(leafDescriptor.value(QStringLiteral("count")).toInt(), 7);
+    QCOMPARE(leafDescriptor.value(QStringLiteral("selected")).toBool(), true);
+
+    VariantListObject readOnlyRows(QVariantList {
+        QVariantList {
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("Model Cell")}},
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("Second")}}
+        }
+    });
+    TableModel readOnlyTableModel;
+    readOnlyTableModel.setRows(QVariant::fromValue(static_cast<QObject *>(&readOnlyRows)));
+    QCOMPARE(readOnlyTableModel.rowCount(), 1);
+    QCOMPARE(readOnlyTableModel.cellText(0, 0), QStringLiteral("Model Cell"));
+    QVERIFY(!readOnlyTableModel.structureMutationAvailable());
+    QVERIFY(!readOnlyTableModel.insertRow(1));
+
+    TableModel layoutTableModel;
+    layoutTableModel.setTableWidth(300);
+    layoutTableModel.setMinColumnWidth(40);
+    layoutTableModel.setMinRowHeight(20);
+    layoutTableModel.setHeaderColumns(QStringList {
+        QStringLiteral("A"),
+        QStringLiteral("B"),
+        QStringLiteral("C")
+    });
+    layoutTableModel.setRows(QVariantList {
+        QVariantList {
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("A1")}},
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("B1")}},
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("C1")}}
+        },
+        QVariantList {
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("A2")}},
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("B2")}},
+            QVariantMap {{QStringLiteral("text"), QStringLiteral("C2")}}
+        }
+    });
+    layoutTableModel.setColumnWidths(QVariantList {80, 100, 120});
+    layoutTableModel.setRowHeights(QVariantList {24, 30});
+    QCOMPARE(layoutTableModel.columnWidth(0), 80);
+    QCOMPARE(layoutTableModel.columnX(2), 180);
+    QCOMPARE(layoutTableModel.columnSpanWidth(1, 2), 220);
+    QCOMPARE(layoutTableModel.rowHeightAt(1), 30);
+    QCOMPARE(layoutTableModel.rowY(1), 24);
+    QCOMPARE(layoutTableModel.totalBodyHeight(), 54);
+    const QVariantMap layoutCell = layoutTableModel.visibleCells().at(1).toMap();
+    QCOMPARE(layoutCell.value(QStringLiteral("x")).toInt(), 80);
+    QCOMPARE(layoutCell.value(QStringLiteral("width")).toInt(), 100);
+    QCOMPARE(layoutCell.value(QStringLiteral("height")).toInt(), 24);
+    QVERIFY(layoutTableModel.setColumnWidth(2, 1));
+    QCOMPARE(layoutTableModel.columnWidth(2), 40);
+    QVERIFY(layoutTableModel.undo());
+    QCOMPARE(layoutTableModel.columnWidth(2), 120);
+    QVERIFY(layoutTableModel.beginColumnResize(1, 100));
+    QVERIFY(layoutTableModel.updateColumnResize(135));
+    QCOMPARE(layoutTableModel.resizingColumnIndex(), 1);
+    QCOMPARE(layoutTableModel.columnWidth(1), 135);
+    layoutTableModel.endColumnResize();
+    QCOMPARE(layoutTableModel.resizingColumnIndex(), -1);
+    QVERIFY(layoutTableModel.undo());
+    QCOMPARE(layoutTableModel.columnWidth(1), 100);
+    QVERIFY(layoutTableModel.beginRowResize(0, 20));
+    QVERIFY(layoutTableModel.updateRowResize(32));
+    QCOMPARE(layoutTableModel.resizingRowIndex(), 0);
+    QCOMPARE(layoutTableModel.rowHeightAt(0), 36);
+    layoutTableModel.endRowResize();
+    QCOMPARE(layoutTableModel.resizingRowIndex(), -1);
+    QVERIFY(layoutTableModel.undo());
+    QCOMPARE(layoutTableModel.rowHeightAt(0), 24);
+    QVERIFY(layoutTableModel.setContextCell(0, 1));
+    QCOMPARE(layoutTableModel.contextRowIndex(), 0);
+    QCOMPARE(layoutTableModel.contextColumnIndex(), 1);
+    const QVariantList contextDescriptors = layoutTableModel.contextMenuDescriptors(0, 1);
+    QCOMPARE(contextDescriptors.size(), 3);
+    QCOMPARE(contextDescriptors.at(0).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteRow"));
+    QCOMPARE(contextDescriptors.at(2).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteColumn"));
+    const QVariantMap contextResult = layoutTableModel.triggerContextAction(QStringLiteral("deleteColumn"), 0, 1);
+    QVERIFY(contextResult.value(QStringLiteral("accepted")).toBool());
+    QCOMPARE(layoutTableModel.columnCount(), 2);
+    QCOMPARE(layoutTableModel.columnWidths().toList().size(), 2);
+    QCOMPARE(layoutTableModel.contextColumnIndex(), -1);
+    QVERIFY(layoutTableModel.undo());
+    QCOMPARE(layoutTableModel.columnCount(), 3);
+
+    ModelUndoStack stack;
+    stack.pushSnapshot(QVariantMap {{QStringLiteral("value"), 1}});
+    stack.pushSnapshot(QVariantMap {{QStringLiteral("value"), 2}});
+    QCOMPARE(stack.undoDepth(), 2);
+    QVERIFY(stack.canUndo());
+    const QVariant firstUndo = stack.takeUndoSnapshot(QVariantMap {{QStringLiteral("value"), 3}});
+    QCOMPARE(firstUndo.toMap().value(QStringLiteral("value")).toInt(), 2);
+    QCOMPARE(stack.undoDepth(), 1);
+    QCOMPARE(stack.redoDepth(), 1);
+    QVERIFY(stack.canRedo());
+    const QVariant firstRedo = stack.takeRedoSnapshot(firstUndo);
+    QCOMPARE(firstRedo.toMap().value(QStringLiteral("value")).toInt(), 3);
+    QCOMPARE(stack.undoDepth(), 2);
+    QCOMPARE(stack.redoDepth(), 0);
+
+    TableModel tableModel;
+    tableModel.setInputable(true);
+    tableModel.setHeaderCellItems(QVariantList {
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Name")}, {QStringLiteral("type"), QStringLiteral("string")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Count")}, {QStringLiteral("valueType"), QStringLiteral("int")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Ratio")}, {QStringLiteral("cellType"), QStringLiteral("float")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Enabled")}, {QStringLiteral("dataType"), QStringLiteral("bool")}}
+    });
+    tableModel.setRows(QVariantList {
+        QVariantList {
+            QVariantMap {{QStringLiteral("value"), QStringLiteral("Renderer")}},
+            QVariantMap {{QStringLiteral("value"), 3}},
+            QVariantMap {{QStringLiteral("value"), 1.5}},
+            QVariantMap {{QStringLiteral("value"), true}}
+        },
+        QVariantList {
+            QVariantMap {{QStringLiteral("value"), QStringLiteral("Writer")}},
+            QVariantMap {{QStringLiteral("value"), 2}},
+            QVariantMap {{QStringLiteral("value"), 0.5}},
+            QVariantMap {{QStringLiteral("value"), false}}
+        }
+    });
+
+    QCOMPARE(tableModel.rowCount(), 2);
+    QCOMPARE(tableModel.columnCount(), 4);
+    QCOMPARE(tableModel.headerCellType(0), QStringLiteral("string"));
+    QCOMPARE(tableModel.headerCellType(1), QStringLiteral("int"));
+    QCOMPARE(tableModel.headerCellType(2), QStringLiteral("float"));
+    QCOMPARE(tableModel.headerCellType(3), QStringLiteral("bool"));
+    QCOMPARE(tableModel.cellText(0, 0), QStringLiteral("Renderer"));
+    QVERIFY(tableModel.setCellValue(0, 1, QStringLiteral("42")));
+    QVERIFY(!tableModel.setCellValue(0, 1, QStringLiteral("42.5")));
+    QVERIFY(tableModel.setCellValue(0, 3, QStringLiteral("false")));
+    QCOMPARE(tableModel.cellAt(0, 1).toMap().value(QStringLiteral("value")).toInt(), 42);
+    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    QVERIFY(tableModel.canUndo());
+    QVERIFY(tableModel.undoDepth() >= 2);
+    QVERIFY(tableModel.undo());
+    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), true);
+    QVERIFY(tableModel.canRedo());
+    QVERIFY(tableModel.redo());
+    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    QVERIFY(!tableModel.canRedo());
+
+    QCOMPARE(tableModel.visibleCells().size(), 8);
+    QVERIFY(tableModel.mergeCells(0, 0, 1, 2));
+    QVERIFY(tableModel.isCoveredCell(0, 1));
+    QCOMPARE(tableModel.visibleCells().size(), 7);
+    QVERIFY(tableModel.splitCell(0, 1));
+    QVERIFY(!tableModel.isCoveredCell(0, 1));
+    QCOMPARE(tableModel.visibleCells().size(), 8);
+
+    QVERIFY(tableModel.insertRow(1));
+    QCOMPARE(tableModel.rowCount(), 3);
+    QCOMPARE(tableModel.cellAt(1, 1).toMap().value(QStringLiteral("value")).toInt(), 0);
+    QCOMPARE(tableModel.cellAt(1, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    QVERIFY(tableModel.insertColumn(2));
+    QCOMPARE(tableModel.columnCount(), 5);
+    QVERIFY(tableModel.deleteColumn(2));
+    QCOMPARE(tableModel.columnCount(), 4);
+    QVERIFY(tableModel.deleteRow(1));
+    QCOMPARE(tableModel.rowCount(), 2);
+    QVERIFY(tableModel.undo());
+    QCOMPARE(tableModel.rowCount(), 3);
+    QVERIFY(tableModel.redo());
+    QCOMPARE(tableModel.rowCount(), 2);
+
+    tableModel.setRows(QVariantList {QVariantList {QStringLiteral("External")}});
+    QVERIFY(!tableModel.canUndo());
+    QVERIFY(!tableModel.canRedo());
+    QCOMPARE(tableModel.rowCount(), 1);
 }
 
 void NavigationStateTests::qml_context_bind_plan_exposes_context_objects_and_viewmodels()

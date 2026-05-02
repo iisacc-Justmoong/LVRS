@@ -1,5 +1,6 @@
 #include "backend/state/viewmodelregistry.h"
 
+#include "backend/state/statemodel.h"
 #include "backend/state/viewmodel.h"
 
 #include <QByteArray>
@@ -547,6 +548,16 @@ QVariantMap ViewModelRegistry::descriptor(const QString &key) const
         map.insert(QStringLiteral("viewModel"), false);
     }
 
+    if (auto *stateModel = qobject_cast<StateModel *>(object)) {
+        map.insert(QStringLiteral("stateModel"), true);
+        map.insert(QStringLiteral("values"), stateModel->values());
+        map.insert(QStringLiteral("stateKeys"), stateModel->stateKeys());
+        map.insert(QStringLiteral("revision"), stateModel->revision());
+        map.insert(QStringLiteral("empty"), stateModel->empty());
+    } else {
+        map.insert(QStringLiteral("stateModel"), false);
+    }
+
     return map;
 }
 
@@ -690,6 +701,12 @@ void ViewModelRegistry::observeDescriptorObject(QObject *object)
                                    &ViewModel::metadataChanged,
                                    this,
                                    &ViewModelRegistry::descriptorsChanged));
+    }
+
+    if (auto *stateModel = qobject_cast<StateModel *>(object)) {
+        connections.append(connect(stateModel, &StateModel::valuesChanged, this, &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(stateModel, &StateModel::stateKeysChanged, this, &ViewModelRegistry::descriptorsChanged));
+        connections.append(connect(stateModel, &StateModel::revisionChanged, this, &ViewModelRegistry::descriptorsChanged));
     }
 
     m_descriptorConnections.insert(object, connections);

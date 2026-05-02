@@ -58,10 +58,10 @@ Primary methods:
 - `model` is present: list generates managed `HierarchyItem` instances.
 - `model` is empty: uses manually slotted `items` as managed rows.
 - Model input can be a flat JavaScript array, primitive array, QML `ListModel`/list-like object, or C++ `QAbstractItemModel`.
-- `QAbstractItemModel` rows are projected through `ModelAdapter.row(model, row, modelColumn)` into role-name keyed objects.
+- Model rows are projected by the C++ `HierarchyModel`, which uses `ModelSource` for arrays, list-like objects, and `QAbstractItemModel` sources.
 - Model rows still need explicit depth data (`indentLevel` first, then `depthRole`) unless they are top-level primitives.
 - Label fallback order for object rows is `labelRole`, `text`, `title`, `name`, `display`, then `edit`.
-- `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate and rebuild generated rows.
+- `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate the C++ model projection and rebuild generated rows.
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
 - Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.

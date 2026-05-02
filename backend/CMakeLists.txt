@@ -17,10 +17,15 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/modelundostack.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/modelsource.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/hierarchymodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/tablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/state/statemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
@@ -52,11 +57,16 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/modelundostack.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/modelsource.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/hierarchymodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/tablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate.h
     ${CMAKE_CURRENT_LIST_DIR}/state/appstate_macros.h
+    ${CMAKE_CURRENT_LIST_DIR}/state/statemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h

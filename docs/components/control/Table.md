@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/display/Table.qml`
 
-`Table` composes `TableHeader` and positioned `TableCellItem` delegates for compact data display with optional cell spanning.
+`Table` composes `TableHeader` and positioned `TableCellItem` delegates for compact data display. Its table behavior is backed by C++ `TableModel`; QML remains the render and event adapter.
 
 ## Purpose
 
@@ -30,6 +30,8 @@ Layout:
 - `resizingColumnIndex`, `resizingRowIndex`
 - `resolvedColumnCount` (readonly)
 - `visibleCellItems` (readonly flattened render model)
+- `canUndo`, `canRedo` (readonly)
+- `undoDepth`, `redoDepth` (readonly)
 
 Visual:
 
@@ -104,6 +106,7 @@ Helper methods:
 - `setColumnWidth(columnIndex, width)`, `setRowHeight(rowIndex, height)`
 - `beginColumnResize(columnIndex, pointerX)`, `updateColumnResize(pointerX)`, `endColumnResize()`
 - `beginRowResize(rowIndex, pointerY)`, `updateRowResize(pointerY)`, `endRowResize()`
+- `undo()`, `redo()`, `clearUndoStack()`
 
 ## Usage
 
@@ -127,14 +130,17 @@ LV.Table {
 
 ## How It Works
 
-- Header source resolves from `headerCellItems` first, then `headerColumns`.
+- `TableModel` owns header resolution, body row lookup, column type inference, value coercion, merge/split metadata, and row/column structure mutations.
+- `TableModel` also owns table geometry, row/column resize state, cell context-menu descriptors, and context action dispatch.
+- `Table.qml` forwards model methods to `TableModel`, renders backend-provided cell descriptors, and emits public QML signals after backend mutations succeed.
+- `TableModel` records accepted cell edits, merge/split operations, row/column insert/delete operations, and row/column resize operations in a C++ `ModelUndoStack`.
 - Header entries define body column types. Objects may declare `type`, `valueType`, `cellType`, or `dataType`; primitive entries infer type from the primitive itself.
-- Row entries are flattened into `visibleCellItems`; covered cells are skipped and anchor cells receive merged width/height.
-- Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable`.
-- Each body `TableCellItem` receives an injected validator from `Table`, so inline edits are constrained by the header column type.
-- Header and row counts are resolved for both JS arrays and model-like objects.
-- Cell delegates compute width from `columnWidths`, then `cellWidth`, then auto-fit column width.
-- Cell delegates compute height from `rowHeights`, then `rowHeight`.
+- `TableModel.visibleCells()` already includes `x`, `y`, `width`, and `height`; covered cells are skipped and anchor cells receive merged width/height.
+- Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable` through `TableModel`.
+- Each body `TableCellItem` receives an injected validator from `Table`, which delegates to `TableModel` so inline edits are constrained by the header column type.
+- Header and row counts are resolved for both JS arrays and model-like objects; structure editing stays limited to mutable array/list inputs.
+- Backend geometry computes width from `columnWidths`, then `cellWidth`, then auto-fit column width.
+- Backend geometry computes height from `rowHeights`, then `rowHeight`.
 - Structure controls reserve a right gutter for row add buttons and a bottom gutter for column add buttons when `rows` is mutable.
 - Resize handles sit on column right borders and row bottom borders when `resizeHandlesVisible` is enabled.
 - Table container clips content and enforces internal divider contract.
@@ -165,7 +171,7 @@ Primitive headers infer type directly:
 headerCellItems: ["Name", 1, 1.5, true]
 ```
 
-`coerceCellValue(value, valueType)` returns `{ accepted, type, value, text }`. `setCellValue(rowIndex, columnIndex, value)` applies the same type check and mutates array-backed `rows` only when the value is accepted.
+`coerceCellValue(value, valueType)` returns `{ accepted, type, value, text }`. `setCellValue(rowIndex, columnIndex, value)` applies the same type check through `TableModel` and syncs accepted values back to `rows`.
 
 ```qml
 LV.Table {
@@ -210,7 +216,7 @@ LV.Table {
 }
 ```
 
-`mergeCells(...)` mutates array-backed `rows` by normalizing covered cells to objects and marking them as internal merge members. `splitCell(...)` accepts either the anchor cell or any covered cell and restores the covered cells as visible cells.
+`mergeCells(...)` delegates to `TableModel`, which normalizes covered cells to objects and marks them as internal merge members. `splitCell(...)` accepts either the anchor cell or any covered cell and restores the covered cells as visible cells.
 
 `mergeCells(...)` returns `false` and warns if `rows` is not a JavaScript array of row arrays or if the requested rectangle is out of bounds. Model-like read-only inputs can still render static `rowSpan`/`columnSpan`, but runtime mutation requires array rows.
 
@@ -245,9 +251,40 @@ Runtime structure edits require mutable array rows. Before row/column insertion 
 
 The delete context menu is not a table-level popup. Each rendered body cell owns its own `ContextMenu`, and `openContextMenuForCell(...)` rejects non-cell coordinates such as header-only or row-only context requests.
 
+## Undo And Redo
+
+`Table` exposes the C++ history stack through:
+
+- `canUndo`, `canRedo`
+- `undoDepth`, `redoDepth`
+- `undo()`, `redo()`, `clearUndoStack()`
+
+Recorded operations:
+
+- `setCellValue(...)`
+- `mergeCells(...)`
+- `splitCell(...)`
+- `insertRow(...)`, `deleteRow(...)`
+- `insertColumn(...)`, `deleteColumn(...)`
+- `setColumnWidth(...)`, `setRowHeight(...)`
+- resize drag updates through `begin*/update*/end*Resize(...)`
+
+```qml
+LV.Table {
+    id: table
+    rows: [[{ value: "Renderer" }, { value: 3 }]]
+
+    Component.onCompleted: {
+        table.setCellValue(0, 1, "4")
+        table.undo()
+        table.redo()
+    }
+}
+```
+
 ## Resize Editing
 
-Users can drag column right borders to update `columnWidths[columnIndex]` and row bottom borders to update `rowHeights[rowIndex]`.
+Users can drag column right borders to update `columnWidths[columnIndex]` and row bottom borders to update `rowHeights[rowIndex]`. The drag state and size mutation live in `TableModel`; QML handles only forward pointer coordinates from the visible handles.
 
 Programmatic calls use the same sizing path:
 

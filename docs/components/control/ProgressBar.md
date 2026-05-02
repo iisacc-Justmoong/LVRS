@@ -7,6 +7,7 @@ Location: `qml/components/control/display/ProgressBar.qml`
 ## Purpose
 
 - Render normalized progress from custom numeric ranges.
+- Read range state from a C++ `StateModel` when provided.
 - Support compact size presets and shape policy.
 
 ## Core API
@@ -25,6 +26,16 @@ Range:
 - `startValue`
 - `currentValue`
 - `endValue` (compatibility alias for `maximumValue`)
+- `stateModel`
+- `minimumValueStateKey`
+- `maximumValueStateKey`
+- `startValueStateKey`
+- `currentValueStateKey`
+- `usingStateModel` (readonly)
+- `effectiveMinimumValue` (readonly)
+- `effectiveMaximumValue` (readonly)
+- `effectiveStartValue` (readonly)
+- `effectiveCurrentValue` (readonly)
 - `valueRange` (readonly)
 - `normalizedStart` (readonly, clamped to `0..1`)
 - `normalizedCurrent` (readonly, clamped to `0..1`)
@@ -41,7 +52,8 @@ Colors:
 
 - `minimumValue` and `maximumValue` define the full numeric range.
 - `startValue` and `currentValue` define the filled segment inside that range.
-- `progress = (currentValue - minimumValue) / (maximumValue - minimumValue)` with clamping.
+- If `stateModel` is present, the bar reads `effective*` values from that C++ state object by key and falls back to the direct QML properties when a key is missing or non-numeric.
+- `progress = (effectiveCurrentValue - effectiveMinimumValue) / (effectiveMaximumValue - effectiveMinimumValue)` with clamping.
 - The visual fill starts at `fillStart = min(normalizedStart, normalizedCurrent)`.
 - The visual fill width is `fillProgress = abs(normalizedCurrent - normalizedStart)`.
 - Near-zero range falls back to binary output (`0` or `1`).
@@ -59,6 +71,27 @@ LV.ProgressBar {
     maximumValue: 100
     startValue: 0
     currentValue: 64
+}
+```
+
+## C++ State Example
+
+```qml
+import LVRS 1.0 as LV
+
+LV.StateModel {
+    id: progressState
+    values: ({
+        minimumValue: 0,
+        maximumValue: 100,
+        startValue: 0,
+        currentValue: 64
+    })
+}
+
+LV.ProgressBar {
+    width: 180
+    stateModel: progressState
 }
 ```
 

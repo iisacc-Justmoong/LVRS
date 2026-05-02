@@ -2,7 +2,7 @@
 
 Location: `backend/navigation/modeladapter.h`, `backend/navigation/modeladapter.cpp`
 
-`ModelAdapter` is a QML singleton used by list and hierarchy components to read C++ `QAbstractItemModel` rows through role names.
+`ModelAdapter` is a legacy QML singleton for reading C++ `QAbstractItemModel` rows through role names.
 
 ## Purpose
 
@@ -33,4 +33,4 @@ const count = LV.ModelAdapter.count(backendModel)
 const first = LV.ModelAdapter.row(backendModel, 0)
 ```
 
-`LV.List`, `LV.HierarchyList`, and `LV.Hierarchy` use this adapter internally when their `model` property receives a `QAbstractItemModel`.
+Current model-bearing components use `ModelSource` / `HierarchyModel` for their internal projections. Keep `ModelAdapter` for direct compatibility with callers that already use the singleton.

@@ -354,6 +354,7 @@ target_include_directories(LVRSCore
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/platform>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/runtime>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/navigation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/model>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
