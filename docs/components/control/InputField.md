@@ -44,6 +44,7 @@ Inherited text/input API (from `AbstractInputBar`):
 - Clear button appears only when `clearButtonVisible && enabled && !readOnly && text.length > 0`.
 - Clear click sets `text = ""` and calls `forceInputFocus()`.
 - Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextInput` uses `NativeRendering` so software-keyboard repeat delete and keyboard-driven edit gestures stay on the platform-native path.
+- The input surface does not install a full-cover `MouseArea`; pointer, IME, selection, and keyboard gestures are handled by the underlying `TextInput`.
 - `style == inlineStyle` keeps spacing and affordances intact, but forces the field background fill to stay transparent across default, hover, pressed, focused, and disabled states.
 
 ## Usage

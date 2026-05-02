@@ -55,9 +55,12 @@ FocusScope {
     property int cornerRadius: Theme.radiusMd
     property bool showScrollBar: true
     property bool autoFocusOnPress: true
+    property bool submitShortcutEnabled: true
     property bool preferNativeGestures: Theme.mobileTarget
     readonly property bool preferNativeTextInteraction: preferNativeGestures
         && Theme.effectiveRuntimeProfile.ios === true
+    readonly property bool effectiveSubmitShortcutEnabled: submitShortcutEnabled
+        && !preferNativeTextInteraction
     property int viewportFlickDeceleration: Theme.mobileTarget ? 1800 : 3200
     property int viewportMaximumFlickVelocity: Theme.mobileTarget ? 12000 : 8000
     readonly property int viewportBoundsBehavior: Flickable.StopAtBounds
@@ -108,8 +111,8 @@ FocusScope {
         Math.floor((resolvedEditorHeight - textLineBoxHeight) / 2)
     )
     readonly property bool focused: activeFocus || editor.activeFocus
-    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
-    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
+    readonly property bool hovered: control.enabled && hoverHandler.hovered
+    readonly property bool pressed: false
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property bool canUndo: editor.canUndo
     readonly property bool canRedo: editor.canRedo
@@ -216,7 +219,9 @@ FocusScope {
             boundsMovement: control.viewportBoundsMovement
             flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
             maximumFlickVelocity: Math.max(1, control.viewportMaximumFlickVelocity)
-            interactive: contentHeight > height && (!control.preferNativeGestures || !editor.activeFocus)
+            interactive: contentHeight > height
+                && !control.preferNativeTextInteraction
+                && (!control.preferNativeGestures || !editor.activeFocus)
 
             ScrollBar.vertical: ScrollBar {
                 policy: control.showScrollBar ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
@@ -245,7 +250,7 @@ FocusScope {
                 renderType: control.preferNativeTextInteraction
                     ? TextEdit.NativeRendering
                     : TextEdit.QtRendering
-                activeFocusOnPress: true
+                activeFocusOnPress: control.autoFocusOnPress
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 leftPadding: control.insetHorizontal
                 rightPadding: control.insetHorizontal
@@ -261,8 +266,10 @@ FocusScope {
 
                 onTextChanged: control.textEdited(text)
 
+                Keys.priority: control.preferNativeTextInteraction ? Keys.AfterItem : Keys.BeforeItem
                 Keys.onReturnPressed: function(event) {
-                    if ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier)) {
+                    if (control.effectiveSubmitShortcutEnabled
+                            && ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier))) {
                         control.submitted(text)
                         event.accepted = true
                     } else {
@@ -270,7 +277,8 @@ FocusScope {
                     }
                 }
                 Keys.onEnterPressed: function(event) {
-                    if ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier)) {
+                    if (control.effectiveSubmitShortcutEnabled
+                            && ((event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier))) {
                         control.submitted(text)
                         event.accepted = true
                     } else {
@@ -285,18 +293,10 @@ FocusScope {
             guardEnabled: control.enabled && !control.readOnly
         }
 
-        MouseArea {
-            id: interactionArea
-            anchors.fill: parent
+        HoverHandler {
+            id: hoverHandler
             enabled: control.enabled && !control.preferNativeGestures
-            acceptedButtons: Qt.LeftButton
-            hoverEnabled: enabled
-            cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
-            onPressed: function(mouse) {
-                if (control.autoFocusOnPress)
-                    control.forceEditorFocus()
-                mouse.accepted = false
-            }
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         }
     }
 

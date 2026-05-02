@@ -84,8 +84,8 @@ FocusScope {
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
-    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
-    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
+    readonly property bool hovered: control.enabled && hoverHandler.hovered
+    readonly property bool pressed: false
     readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
     readonly property int centeredTextY: Math.max(0, Math.floor((height - textLineBoxHeight) / 2))
     readonly property int contentBoxHeight: textLineBoxHeight + insetVertical * 2
@@ -278,19 +278,10 @@ FocusScope {
         renderType: Text.QtRendering
     }
 
-    MouseArea {
-        id: interactionArea
-        anchors.fill: parent
+    HoverHandler {
+        id: hoverHandler
         enabled: control.enabled && !control.preferNativeGestures
-        acceptedButtons: Qt.LeftButton
-        hoverEnabled: enabled
-        cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
-        onPressed: function(mouse) {
-            if (!control.enabled)
-                return
-            control.forceInputFocus()
-            mouse.accepted = false
-        }
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
     }
 }
 

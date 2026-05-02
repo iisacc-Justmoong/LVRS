@@ -44,7 +44,8 @@ Signals and methods:
 - Submit shortcut: `Ctrl+Enter` or `Cmd+Enter`.
 - Header area height is included in top inset only when `showSnippetHeader` is true.
 - Includes `InputMethodGuard` + `WheelScrollGuard` for IME/scroll safety.
-- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` uses `NativeRendering` so software-keyboard edit gestures and repeat delete stay on the platform-native path.
+- The edit surface does not install a full-cover `MouseArea`; pointer, IME, selection, and keyboard gestures are handled by the underlying `TextEdit`.
+- Mobile-target defaults now follow `Theme.mobileTarget`; on iOS-target runs the underlying `TextEdit` uses `NativeRendering` and the editor viewport does not take interactive touch flicks in native text mode, so software-keyboard edit gestures, repeat delete, and text selection gestures stay on the platform-native path.
 - Mobile-target scroll defaults keep tuned flick momentum (`viewportFlickDeceleration`, `viewportMaximumFlickVelocity`) while bounds remain clamped (`StopAtBounds`) on the editor viewport.
 
 ## Usage

@@ -11,9 +11,11 @@ Item {
 
     property int size: large
     property int shapeStyle: shapeRoundRect
+    property real minimumValue: 0
+    property real maximumValue: 100
     property real startValue: 0
-    property real endValue: 100
     property real currentValue: 0
+    property alias endValue: control.maximumValue
 
     property color trackColor: "#0D000000"
     property color fillColor: "#007AFF"
@@ -22,17 +24,27 @@ Item {
     property real regularHeight: Theme.scaleRealMetric(3)
 
     readonly property real barHeight: size === regular ? regularHeight : largeHeight
-    readonly property real valueRange: endValue - startValue
-    readonly property real progress: {
-        if (Math.abs(valueRange) < 0.000001)
-            return currentValue >= endValue ? 1 : 0
-        return Math.max(0, Math.min(1, (currentValue - startValue) / valueRange))
-    }
+    readonly property real valueRange: maximumValue - minimumValue
+    readonly property real normalizedStart: normalizedValue(startValue)
+    readonly property real normalizedCurrent: normalizedValue(currentValue)
+    readonly property real fillStart: Math.min(normalizedStart, normalizedCurrent)
+    readonly property real fillProgress: Math.abs(normalizedCurrent - normalizedStart)
+    readonly property real progress: normalizedCurrent
 
     function resolvedRadius(rectWidth, rectHeight) {
         if (shapeStyle === shapeCylinder)
             return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
         return cornerRadius
+    }
+
+    function normalizedValue(value) {
+        const range = control.valueRange
+        if (Math.abs(range) < 0.000001)
+            return Number(value) >= control.maximumValue ? 1 : 0
+        const normalized = (Number(value) - control.minimumValue) / range
+        if (isNaN(normalized))
+            return 0
+        return Math.max(0, Math.min(1, normalized))
     }
 
     implicitWidth: Theme.scaleMetric(100)
@@ -48,9 +60,9 @@ Item {
 
     Rectangle {
         id: fill
-        x: 0
+        x: track.width * control.fillStart
         y: 0
-        width: track.width * control.progress
+        width: track.width * control.fillProgress
         height: track.height
         radius: control.resolvedRadius(width, height)
         color: control.fillColor
@@ -73,7 +85,8 @@ Item {
 // LV.ProgressBar {
 //     width: 180
 //     size: regular
+//     minimumValue: 0
+//     maximumValue: 100
 //     startValue: 0
-//     endValue: 100
 //     currentValue: 64
 // }

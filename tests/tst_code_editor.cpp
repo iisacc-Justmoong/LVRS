@@ -1,7 +1,10 @@
 #include <QtTest>
 
 #include <QCoreApplication>
+#include <QInputMethodEvent>
 #include <QKeyEvent>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QScopedPointer>
 #include <QQmlEngine>
 #include <QtPlugin>
@@ -14,6 +17,28 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 namespace {
 constexpr int kFlickableStopAtBounds = 0;
+
+QPoint scenePoint(QQuickItem *item, const QPointF &localPoint)
+{
+    const QPointF scene = item->mapToScene(localPoint);
+    return QPoint(qRound(scene.x()), qRound(scene.y()));
+}
+
+bool mouseAreaContainsScenePoint(QObject *root, const QPoint &scenePoint)
+{
+    const QPointF point(scenePoint);
+    const auto items = root->findChildren<QQuickItem *>();
+    for (QQuickItem *item : items) {
+        const QString className = QString::fromLatin1(item->metaObject()->className());
+        if (!className.contains(QStringLiteral("MouseArea")))
+            continue;
+        if (!item->isVisible() || !item->property("enabled").toBool())
+            continue;
+        if (item->contains(item->mapFromScene(point)))
+            return true;
+    }
+    return false;
+}
 }
 
 class CodeEditorTests : public QObject
@@ -24,6 +49,7 @@ private slots:
     void code_editor_default_contract_and_utility_api();
     void code_editor_submit_signal_and_fixed_plain_text_mode();
     void code_editor_ios_native_text_interaction_contract();
+    void code_editor_native_event_input_matrix();
     void code_editor_ios_scroll_physics_contract();
 };
 
@@ -155,6 +181,8 @@ Item {
         && editor.preferNativeGestures
         && editor.preferNativeTextInteraction
         && editor.editorItem.renderType === TextEdit.NativeRendering
+        && editor.editorItem.activeFocusOnPress === editor.autoFocusOnPress
+        && !editor.pressed
 
     LV.CodeEditor {
         id: editor
@@ -167,6 +195,97 @@ Item {
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+}
+
+void CodeEditorTests::code_editor_native_event_input_matrix()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 460
+    height: 260
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.CodeEditor {
+        id: editor
+        objectName: "codeEditor"
+        anchors.fill: parent
+        showSnippetHeader: false
+        editorHeight: 190
+        text: "alpha beta gamma\nsecond line words\nthird paragraph text"
+
+        Component.onCompleted: editor.editorItem.objectName = "codeTextEdit"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
+    QVERIFY(editor);
+    auto *textEdit = root->findChild<QQuickItem *>(QStringLiteral("codeTextEdit"));
+    QVERIFY(textEdit);
+    QObject *viewport = root->findChild<QObject *>(QStringLiteral("codeEditorViewportFlickable"));
+    QVERIFY(viewport);
+    QVERIFY(!viewport->property("interactive").toBool());
+
+    const QPoint wordPoint = scenePoint(textEdit, QPointF(26.0, 8.0));
+    const QPoint dragStart = scenePoint(textEdit, QPointF(8.0, 8.0));
+    const QPoint dragEnd = scenePoint(textEdit, QPointF(128.0, 8.0));
+
+    QVERIFY(!mouseAreaContainsScenePoint(root.data(), wordPoint));
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(textEdit->property("activeFocus").toBool());
+
+    textEdit->setProperty("cursorPosition", 0);
+    QTest::keyClick(window, Qt::Key_Z, Qt::NoModifier, 10);
+    QTRY_VERIFY(editor->property("text").toString().startsWith(QStringLiteral("z")));
+
+    QInputMethodEvent preeditEvent(QStringLiteral("preedit"), {});
+    QCoreApplication::sendEvent(textEdit, &preeditEvent);
+    QTRY_COMPARE(textEdit->property("preeditText").toString(), QStringLiteral("preedit"));
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(textEdit, &commitEvent);
+    QTRY_VERIFY(editor->property("text").toString().contains(QStringLiteral("한")));
+
+    textEdit->setProperty("text", QStringLiteral("alpha beta gamma\nsecond line words\nthird paragraph text"));
+    textEdit->setProperty("cursorPosition", 0);
+    QVERIFY(QMetaObject::invokeMethod(editor, "deselect"));
+    QTest::mouseDClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(textEdit->property("selectedText").toString().contains(QStringLiteral("alpha")));
+    const QString doubleClickSelection = textEdit->property("selectedText").toString();
+    QVERIFY(!doubleClickSelection.isEmpty());
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(textEdit->property("selectedText").toString() != doubleClickSelection);
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "deselect"));
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, dragStart, 10);
+    QTest::mouseMove(window, dragEnd, 10);
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, dragEnd, 10);
+    QTRY_VERIFY(textEdit->property("selectedText").toString().size() > 0);
 }
 
 void CodeEditorTests::code_editor_ios_scroll_physics_contract()
@@ -215,6 +334,7 @@ LV.ApplicationWindow {
     QCOMPARE(viewport->property("boundsMovement").toInt(), editor->property("viewportBoundsMovement").toInt());
     QCOMPARE(viewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
     QCOMPARE(viewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
+    QVERIFY(!viewport->property("interactive").toBool());
 }
 
 QTEST_MAIN(CodeEditorTests)

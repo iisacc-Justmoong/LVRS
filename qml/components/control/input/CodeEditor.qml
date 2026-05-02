@@ -85,8 +85,8 @@ FocusScope {
     property int centeredTextHeight: Theme.scaleTextMetric(16)
 
     readonly property bool focused: activeFocus || editor.activeFocus
-    readonly property bool hovered: interactionArea.enabled && interactionArea.containsMouse
-    readonly property bool pressed: interactionArea.enabled && interactionArea.pressed
+    readonly property bool hovered: control.enabled && hoverHandler.hovered
+    readonly property bool pressed: false
     readonly property bool empty: editor.text.length === 0 && editor.preeditText.length === 0
     readonly property int headerBlockHeight: showSnippetHeader ? (headerHeight + headerSpacing) : 0
     readonly property int topInset: insetVertical + headerBlockHeight
@@ -201,7 +201,8 @@ FocusScope {
             anchors.fill: parent
             clip: true
             interactive: (contentHeight > height || contentWidth > width)
-                         && (!control.preferNativeGestures || !editor.activeFocus)
+                && !control.preferNativeTextInteraction
+                && (!control.preferNativeGestures || !editor.activeFocus)
             boundsBehavior: control.viewportBoundsBehavior
             boundsMovement: control.viewportBoundsMovement
             flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
@@ -222,7 +223,9 @@ FocusScope {
                 x: control.insetHorizontal
                 y: control.centeredTextY
                 width: Math.max(1, flickable.width - control.insetHorizontal * 2)
-                height: Math.max(control.textLineBoxHeight, Math.ceil(contentHeight))
+                height: Math.max(control.textLineBoxHeight,
+                                 Math.ceil(contentHeight),
+                                 flickable.height - y - control.insetVertical)
                 wrapMode: TextEdit.NoWrap
                 textFormat: TextEdit.PlainText
                 color: control.enabled ? control.textColor : control.textColorDisabled
@@ -237,7 +240,7 @@ FocusScope {
                 renderType: control.preferNativeTextInteraction
                     ? TextEdit.NativeRendering
                     : TextEdit.QtRendering
-                activeFocusOnPress: true
+                activeFocusOnPress: control.autoFocusOnPress
                 cursorVisible: control.enabled && activeFocus && !readOnly
                 selectByMouse: true
                 persistentSelection: true
@@ -294,18 +297,10 @@ FocusScope {
             renderType: Text.QtRendering
         }
 
-        MouseArea {
-            id: interactionArea
-            anchors.fill: parent
+        HoverHandler {
+            id: hoverHandler
             enabled: control.enabled && !control.preferNativeGestures
-            acceptedButtons: Qt.LeftButton
-            hoverEnabled: enabled
-            cursorShape: control.enabled ? Qt.IBeamCursor : Qt.ArrowCursor
-            onPressed: function(mouse) {
-                if (control.autoFocusOnPress)
-                    control.forceEditorFocus()
-                mouse.accepted = false
-            }
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         }
     }
 }

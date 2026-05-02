@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QGuiApplication>
+#include <QInputMethodEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QtPlugin>
@@ -15,6 +16,28 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 namespace {
 constexpr int kFlickableDragAndOvershootBounds = 3;
 constexpr int kFlickableFollowBoundsBehavior = 1;
+
+QPoint scenePoint(QQuickItem *item, const QPointF &localPoint)
+{
+    const QPointF scene = item->mapToScene(localPoint);
+    return QPoint(qRound(scene.x()), qRound(scene.y()));
+}
+
+bool mouseAreaContainsScenePoint(QObject *root, const QPoint &scenePoint)
+{
+    const QPointF point(scenePoint);
+    const auto items = root->findChildren<QQuickItem *>();
+    for (QQuickItem *item : items) {
+        const QString className = QString::fromLatin1(item->metaObject()->className());
+        if (!className.contains(QStringLiteral("MouseArea")))
+            continue;
+        if (!item->isVisible() || !item->property("enabled").toBool())
+            continue;
+        if (item->contains(item->mapFromScene(point)))
+            return true;
+    }
+    return false;
+}
 }
 
 class ImportApiTests : public QObject
@@ -61,8 +84,10 @@ private slots:
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
+    void progress_bar_range_contract_loads();
     void control_icons_use_supersampled_raster_contract();
     void input_field_ios_native_text_interaction_contract_loads();
+    void input_field_native_event_input_contract_loads();
     void input_field_search_icon_mobile_scaling_contract_loads();
     void toggle_switch_figma_color_contract_loads();
     void checkbox_figma_contract_loads();
@@ -3350,6 +3375,85 @@ Item {
     QVERIFY(root->property("figmaInputFieldReady").toBool());
 }
 
+void ImportApiTests::progress_bar_range_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.ProgressBar {
+        id: segmentBar
+        visible: false
+        width: 200
+        minimumValue: -50
+        maximumValue: 150
+        startValue: 50
+        currentValue: 100
+    }
+
+    LV.ProgressBar {
+        id: reverseBar
+        visible: false
+        width: 200
+        minimumValue: 0
+        maximumValue: 100
+        startValue: 80
+        currentValue: 20
+    }
+
+    LV.ProgressBar {
+        id: legacyEndAliasBar
+        visible: false
+        width: 200
+        minimumValue: 0
+        endValue: 50
+        startValue: 0
+        currentValue: 25
+    }
+
+    LV.ProgressBar {
+        id: zeroRangeBar
+        visible: false
+        width: 200
+        minimumValue: 10
+        maximumValue: 10
+        startValue: 0
+        currentValue: 10
+    }
+
+    property bool progressBarRangeReady:
+        segmentBar.minimumValue === -50
+        && segmentBar.maximumValue === 150
+        && segmentBar.startValue === 50
+        && segmentBar.currentValue === 100
+        && Math.abs(segmentBar.valueRange - 200) < 0.01
+        && Math.abs(segmentBar.normalizedStart - 0.5) < 0.01
+        && Math.abs(segmentBar.normalizedCurrent - 0.75) < 0.01
+        && Math.abs(segmentBar.fillStart - 0.5) < 0.01
+        && Math.abs(segmentBar.fillProgress - 0.25) < 0.01
+        && Math.abs(segmentBar.progress - 0.75) < 0.01
+        && Math.abs(reverseBar.normalizedStart - 0.8) < 0.01
+        && Math.abs(reverseBar.normalizedCurrent - 0.2) < 0.01
+        && Math.abs(reverseBar.fillStart - 0.2) < 0.01
+        && Math.abs(reverseBar.fillProgress - 0.6) < 0.01
+        && legacyEndAliasBar.maximumValue === 50
+        && legacyEndAliasBar.endValue === 50
+        && Math.abs(legacyEndAliasBar.progress - 0.5) < 0.01
+        && Math.abs(zeroRangeBar.valueRange) < 0.01
+        && zeroRangeBar.progress === 1
+        && zeroRangeBar.fillProgress === 1
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("progressBarRangeReady").toBool());
+}
+
 void ImportApiTests::control_icons_use_supersampled_raster_contract()
 {
     QQmlEngine engine;
@@ -3483,12 +3587,103 @@ Item {
         && field.preferNativeGestures
         && field.preferNativeTextInteraction
         && field.renderType === TextInput.NativeRendering
+        && field.inputItem.activeFocusOnPress
+        && !field.pressed
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+}
+
+void ImportApiTests::input_field_native_event_input_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 360
+    height: 120
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.InputField {
+        id: field
+        objectName: "inputField"
+        width: 280
+        height: implicitHeight
+        anchors.centerIn: parent
+        text: "alpha beta gamma"
+        placeholderText: "Search"
+
+        Component.onCompleted: field.inputItem.objectName = "nativeInput"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *field = root->findChild<QObject *>(QStringLiteral("inputField"));
+    QVERIFY(field);
+    auto *inputItem = root->findChild<QQuickItem *>(QStringLiteral("nativeInput"));
+    QVERIFY(inputItem);
+
+    const QPoint wordPoint = scenePoint(inputItem, QPointF(28.0, inputItem->height() * 0.5));
+    const QPoint dragStart = scenePoint(inputItem, QPointF(8.0, inputItem->height() * 0.5));
+    const QPoint dragEnd = scenePoint(inputItem, QPointF(132.0, inputItem->height() * 0.5));
+
+    QVERIFY(!mouseAreaContainsScenePoint(root.data(), wordPoint));
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(inputItem->property("activeFocus").toBool());
+
+    inputItem->setProperty("cursorPosition", 0);
+    QTest::keyClick(window, Qt::Key_Z, Qt::NoModifier, 10);
+    QTRY_VERIFY(field->property("text").toString().startsWith(QStringLiteral("z")));
+
+    QInputMethodEvent preeditEvent(QStringLiteral("preedit"), {});
+    QCoreApplication::sendEvent(inputItem, &preeditEvent);
+    QTRY_COMPARE(inputItem->property("preeditText").toString(), QStringLiteral("preedit"));
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(inputItem, &commitEvent);
+    QTRY_VERIFY(field->property("text").toString().contains(QStringLiteral("한")));
+
+    inputItem->setProperty("text", QStringLiteral("alpha beta gamma"));
+    inputItem->setProperty("cursorPosition", 0);
+    QVERIFY(QMetaObject::invokeMethod(field, "deselect"));
+    QTest::mouseDClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(inputItem->property("selectedText").toString().contains(QStringLiteral("alpha")));
+    const QString doubleClickSelection = inputItem->property("selectedText").toString();
+    QVERIFY(!doubleClickSelection.isEmpty());
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    QTRY_VERIFY(inputItem->property("selectedText").toString() != doubleClickSelection);
+
+    QVERIFY(QMetaObject::invokeMethod(field, "deselect"));
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, dragStart, 10);
+    QTest::mouseMove(window, dragEnd, 10);
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, dragEnd, 10);
+    QTRY_VERIFY(inputItem->property("selectedText").toString().size() > 0);
 }
 
 void ImportApiTests::input_field_search_icon_mobile_scaling_contract_loads()

@@ -20,10 +20,16 @@ Size and shape:
 
 Range:
 
+- `minimumValue`
+- `maximumValue`
 - `startValue`
-- `endValue`
 - `currentValue`
+- `endValue` (compatibility alias for `maximumValue`)
 - `valueRange` (readonly)
+- `normalizedStart` (readonly, clamped to `0..1`)
+- `normalizedCurrent` (readonly, clamped to `0..1`)
+- `fillStart` (readonly, clamped segment start)
+- `fillProgress` (readonly, clamped segment length)
 - `progress` (readonly, clamped to `0..1`)
 
 Colors:
@@ -33,7 +39,11 @@ Colors:
 
 ## Behavior Contract
 
-- `progress = (currentValue - startValue) / (endValue - startValue)` with clamping.
+- `minimumValue` and `maximumValue` define the full numeric range.
+- `startValue` and `currentValue` define the filled segment inside that range.
+- `progress = (currentValue - minimumValue) / (maximumValue - minimumValue)` with clamping.
+- The visual fill starts at `fillStart = min(normalizedStart, normalizedCurrent)`.
+- The visual fill width is `fillProgress = abs(normalizedCurrent - normalizedStart)`.
 - Near-zero range falls back to binary output (`0` or `1`).
 - Cylinder shape uses min(width,height)/2 radius.
 
@@ -45,8 +55,25 @@ import LVRS 1.0 as LV
 LV.ProgressBar {
     width: 180
     size: regular
+    minimumValue: 0
+    maximumValue: 100
     startValue: 0
-    endValue: 100
     currentValue: 64
 }
 ```
+
+## Segment Example
+
+```qml
+import LVRS 1.0 as LV
+
+LV.ProgressBar {
+    width: 180
+    minimumValue: -50
+    maximumValue: 150
+    startValue: 50
+    currentValue: 100
+}
+```
+
+This fills the segment from 50% to 75% of the track. If `currentValue` is lower than `startValue`, the component still renders the segment between the two values.

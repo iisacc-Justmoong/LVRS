@@ -38,6 +38,7 @@ Any component that owns an internal scroll viewport inside a larger scrollable p
 ## Rule 6: Text composition safety is mandatory
 
 All text entry surfaces must include `InputMethodGuard` so IME composition is committed safely on visibility/focus transitions.
+Text entry surfaces must not place full-cover press/tap handlers such as `MouseArea` above the native `TextInput`, `TextEdit`, or `TextArea`; selection, IME, keyboard, double-click, triple-click, and platform text gestures must reach the native text item directly. Native text interaction mode must not consume key shortcuts ahead of the native text item. Non-grabbing hover observation is allowed for visual state only when native gestures are not active.
 
 ## Rule 7: Dedup windows must remain explicit
 
@@ -59,7 +60,9 @@ During code review, reject changes that:
 - duplicate global event plumbing per page without `EventListener`,
 - rely on local-only coordinates for global dismiss behavior,
 - remove `WheelScrollGuard` from nested `Flickable` surfaces,
-- disable IME composition guard on editable text controls.
+- disable IME composition guard on editable text controls,
+- place full-cover press/tap handlers above editable text controls,
+- consume editable text key events before the native text item in native interaction mode.
 
 ## Enforcement Note
 
@@ -70,4 +73,6 @@ If behavior changes with click speed or scroll burst, pipeline design is incompl
 
 - global behaviors use global triggers, not local click hacks,
 - nested scroll surfaces include explicit wheel isolation,
-- text-input components include IME guard integration.
+- text-input components include IME guard integration,
+- editable text controls receive pointer and gesture input directly,
+- text-input tests cover direct native item ownership, focus by click, keyboard input, IME preedit/commit, double-click selection, triple-click selection-state delivery, drag selection, shortcut pass-through, and native text-mode scroll competition.
