@@ -6,7 +6,14 @@ import LVRS 1.0
 Item {
     id: control
 
+    property var model: null
     property var items: ["Label", "Label", "Label", "Label", "Label", "Label"]
+    property int modelColumn: 0
+    property string labelRole: "label"
+    property string textRole: "text"
+    property string titleRole: "title"
+    property string enabledRole: "enabled"
+    property string selectedRole: "selected"
     property int selectedIndex: 1
     property bool interactive: true
 
@@ -34,45 +41,92 @@ Item {
     signal toolbarIconTriggered(int index, string source)
     signal footerButtonTriggered(int index, var config)
 
+    property int _modelRevision: 0
+    readonly property bool usingModel: model !== undefined && model !== null
+    readonly property var sourceModel: usingModel ? model : items
     readonly property int entryCount: {
-        if (!items)
+        _modelRevision
+        return modelCount(sourceModel)
+    }
+
+    function invalidateModel() {
+        _modelRevision += 1
+    }
+
+    function modelCount(source) {
+        if (!source)
             return 0
-        if (items.length !== undefined)
-            return items.length
-        if (items.count !== undefined)
-            return items.count
+        if (ModelAdapter.isItemModel(source))
+            return ModelAdapter.count(source)
+        if (source.length !== undefined)
+            return Math.max(0, Number(source.length) || 0)
+        if (source.count !== undefined)
+            return Math.max(0, Number(source.count) || 0)
         return 0
     }
 
     function entryAt(index) {
-        if (!items)
+        const source = sourceModel
+        if (!source)
             return null
-        if (items.length !== undefined)
-            return items[index]
-        if (items.get !== undefined)
-            return items.get(index)
+        if (ModelAdapter.isItemModel(source))
+            return ModelAdapter.row(source, index, modelColumn)
+        if (source.get !== undefined)
+            return source.get(index)
+        if (source.length !== undefined)
+            return source[index]
+        if (source.data !== undefined)
+            return source.data(index)
+        if (source.at !== undefined)
+            return source.at(index)
         return null
     }
 
-    function itemLabel(entry) {
-        if (typeof entry === "string")
-            return entry
+    function roleValue(entry, roleName, fallbackValue) {
         if (!entry || typeof entry !== "object")
+            return fallbackValue
+        const key = roleName === undefined || roleName === null ? "" : String(roleName).trim()
+        if (key.length === 0)
+            return fallbackValue
+        if (entry[key] !== undefined)
+            return entry[key]
+        return fallbackValue
+    }
+
+    function itemLabel(entry) {
+        if (entry === undefined || entry === null)
             return ""
-        return entry.label || entry.text || entry.title || ""
+        if (typeof entry !== "object")
+            return String(entry)
+        let value = roleValue(entry, labelRole, undefined)
+        if (value === undefined)
+            value = roleValue(entry, textRole, undefined)
+        if (value === undefined)
+            value = roleValue(entry, titleRole, undefined)
+        if (value === undefined)
+            value = roleValue(entry, "display", undefined)
+        if (value === undefined)
+            value = roleValue(entry, "edit", "")
+        if (value === undefined || value === null)
+            return ""
+        return String(value)
     }
 
     function itemEnabled(entry) {
         if (!entry || typeof entry !== "object")
             return true
-        if (entry.enabled === undefined)
+        const value = roleValue(entry, enabledRole, undefined)
+        if (value === undefined)
             return true
-        return !!entry.enabled
+        return !!value
     }
 
     function itemSelected(entry, index) {
-        if (entry && typeof entry === "object" && entry.selected !== undefined)
-            return !!entry.selected
+        if (!entry || typeof entry !== "object")
+            return index === selectedIndex
+        const value = roleValue(entry, selectedRole, undefined)
+        if (value !== undefined)
+            return !!value
         return index === selectedIndex
     }
 
@@ -84,6 +138,21 @@ Item {
 
     implicitWidth: control.listWidth
     implicitHeight: Math.max(control.minimumListHeight, contentHeight)
+
+    onSourceModelChanged: invalidateModel()
+
+    Connections {
+        target: ModelAdapter.isItemModel(control.sourceModel) ? control.sourceModel : null
+        enabled: ModelAdapter.isItemModel(control.sourceModel)
+        ignoreUnknownSignals: true
+
+        function onRowsInserted() { control.invalidateModel() }
+        function onRowsRemoved() { control.invalidateModel() }
+        function onRowsMoved() { control.invalidateModel() }
+        function onModelReset() { control.invalidateModel() }
+        function onLayoutChanged() { control.invalidateModel() }
+        function onDataChanged() { control.invalidateModel() }
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -195,4 +264,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.List { items: [{ label: "Item 1" }, { label: "Item 2" }] }
+// LV.List { model: [{ label: "Item 1" }, { label: "Item 2" }] }

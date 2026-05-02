@@ -1,12 +1,15 @@
 #include <QtTest>
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QQmlEngine>
+#include <QAbstractListModel>
 #include <QCoreApplication>
 #include <QDir>
 #include <QGuiApplication>
 #include <QInputMethodEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QVector>
 #include <QtPlugin>
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -38,6 +41,164 @@ bool mouseAreaContainsScenePoint(QObject *root, const QPoint &scenePoint)
     }
     return false;
 }
+
+class NativeListModel : public QAbstractListModel
+{
+public:
+    enum Roles {
+        NameRole = Qt::UserRole + 1,
+        EnabledRole,
+        SelectedRole
+    };
+
+    explicit NativeListModel(QObject *parent = nullptr)
+        : QAbstractListModel(parent)
+    {
+        m_rows.append({QStringLiteral("Native A"), true, false});
+        m_rows.append({QStringLiteral("Native B"), false, false});
+        m_rows.append({QStringLiteral("Native C"), true, true});
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+
+        const Row &row = m_rows.at(index.row());
+        if (role == NameRole || role == Qt::DisplayRole)
+            return row.name;
+        if (role == EnabledRole)
+            return row.enabled;
+        if (role == SelectedRole)
+            return row.selected;
+
+        return {};
+    }
+
+    QHash<int, QByteArray> roleNames() const override
+    {
+        return {
+            {NameRole, QByteArrayLiteral("name")},
+            {EnabledRole, QByteArrayLiteral("enabled")},
+            {SelectedRole, QByteArrayLiteral("selected")},
+        };
+    }
+
+    void appendRow(const QString &name, bool enabled, bool selected)
+    {
+        const int insertIndex = m_rows.size();
+        beginInsertRows(QModelIndex(), insertIndex, insertIndex);
+        m_rows.append({name, enabled, selected});
+        endInsertRows();
+    }
+
+private:
+    struct Row
+    {
+        QString name;
+        bool enabled = true;
+        bool selected = false;
+    };
+
+    QVector<Row> m_rows;
+};
+
+class NativeHierarchyModel : public QAbstractListModel
+{
+public:
+    enum Roles {
+        KeyRole = Qt::UserRole + 1,
+        NameRole,
+        DepthRole,
+        ExpandedRole,
+        CounterRole,
+        EnabledRole,
+        SelectedRole
+    };
+
+    explicit NativeHierarchyModel(QObject *parent = nullptr)
+        : QAbstractListModel(parent)
+    {
+        m_rows.append({QStringLiteral("native-root"), QStringLiteral("Native Root"), 0, true, 2, true, false});
+        m_rows.append({QStringLiteral("native-child"), QStringLiteral("Native Child"), 1, true, 1, true, false});
+        m_rows.append({QStringLiteral("native-leaf"), QStringLiteral("Native Leaf"), 2, false, 7, true, true});
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+
+        const Row &row = m_rows.at(index.row());
+        if (role == KeyRole)
+            return row.key;
+        if (role == NameRole || role == Qt::DisplayRole)
+            return row.name;
+        if (role == DepthRole)
+            return row.depth;
+        if (role == ExpandedRole)
+            return row.expanded;
+        if (role == CounterRole)
+            return row.counter;
+        if (role == EnabledRole)
+            return row.enabled;
+        if (role == SelectedRole)
+            return row.selected;
+
+        return {};
+    }
+
+    QHash<int, QByteArray> roleNames() const override
+    {
+        return {
+            {KeyRole, QByteArrayLiteral("key")},
+            {NameRole, QByteArrayLiteral("name")},
+            {DepthRole, QByteArrayLiteral("depth")},
+            {ExpandedRole, QByteArrayLiteral("expanded")},
+            {CounterRole, QByteArrayLiteral("counter")},
+            {EnabledRole, QByteArrayLiteral("enabled")},
+            {SelectedRole, QByteArrayLiteral("selected")},
+        };
+    }
+
+    void appendRow(const QString &key,
+                   const QString &name,
+                   int depth,
+                   bool expanded,
+                   int counter,
+                   bool enabled,
+                   bool selected)
+    {
+        const int insertIndex = m_rows.size();
+        beginInsertRows(QModelIndex(), insertIndex, insertIndex);
+        m_rows.append({key, name, depth, expanded, counter, enabled, selected});
+        endInsertRows();
+    }
+
+private:
+    struct Row
+    {
+        QString key;
+        QString name;
+        int depth = 0;
+        bool expanded = false;
+        int counter = -1;
+        bool enabled = true;
+        bool selected = false;
+    };
+
+    QVector<Row> m_rows;
+};
 }
 
 class ImportApiTests : public QObject
@@ -58,6 +219,7 @@ private slots:
     void icon_name_mapping_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
+    void hierarchy_direct_model_contract_loads();
     void hierarchy_nested_children_indent_contract_loads();
     void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_editable_drag_per_item_lock_contract_loads();
@@ -105,6 +267,7 @@ private slots:
     void table_structure_editing_contract_loads();
     void table_resize_contract_loads();
     void table_typed_header_contract_loads();
+    void list_model_contract_loads();
     void list_item_and_footer_figma_contract_loads();
 };
 
@@ -834,6 +997,130 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("stringModelReady").toBool());
+}
+
+void ImportApiTests::hierarchy_direct_model_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    NativeHierarchyModel nativeModel;
+    engine.rootContext()->setContextProperty(QStringLiteral("nativeHierarchyModel"), &nativeModel);
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    width: 360
+    height: 360
+
+    ListModel {
+        id: qmlRows
+        ListElement { key: "qml-root"; name: "QML Root"; depth: 0; expanded: true; counter: 1; enabled: true; selected: false }
+        ListElement { key: "qml-child"; name: "QML Child"; depth: 1; expanded: false; counter: 3; enabled: true; selected: true }
+    }
+
+    LV.Hierarchy {
+        id: nativeHierarchy
+        width: 260
+        height: 260
+        model: nativeHierarchyModel
+        itemKeyRole: "key"
+        labelRole: "name"
+        depthRole: "depth"
+        countRole: "counter"
+        expandedRole: "expanded"
+        selectedRole: "selected"
+        enabledRole: "enabled"
+    }
+
+    LV.HierarchyList {
+        id: nativeHierarchyList
+        visible: false
+        width: 260
+        model: nativeHierarchyModel
+        itemKeyRole: "key"
+        labelRole: "name"
+        depthRole: "depth"
+        countRole: "counter"
+        expandedRole: "expanded"
+        selectedRole: "selected"
+        enabledRole: "enabled"
+    }
+
+    LV.HierarchyList {
+        id: qmlModelHierarchyList
+        visible: false
+        width: 260
+        model: qmlRows
+        itemKeyRole: "key"
+        labelRole: "name"
+        depthRole: "depth"
+        countRole: "counter"
+        expandedRole: "expanded"
+        selectedRole: "selected"
+        enabledRole: "enabled"
+    }
+
+    property int nativeListItemCount: nativeHierarchyList.itemCount
+
+    property bool nativeHierarchyReady:
+        nativeHierarchy.activeListItem !== null
+        && nativeHierarchy.modelColumn === 0
+        && nativeHierarchy.itemKeyRole === "key"
+        && nativeHierarchy.labelRole === "name"
+        && nativeHierarchy.activeListItemKey === "native-leaf"
+        && nativeHierarchy.activeListItem.label === "Native Leaf"
+        && nativeHierarchy.activeListItem.pathLabel === "Native Root / Native Child / Native Leaf"
+        && nativeHierarchy.activeListItem.count === 7
+        && nativeHierarchy.activeListItem.effectiveShowCount
+
+    property bool nativeListReady:
+        nativeHierarchyList.usingTreeModel
+        && nativeHierarchyList.itemCount === 3
+        && nativeHierarchyList.activeItem !== null
+        && nativeHierarchyList.activeItemKey === "native-leaf"
+        && nativeHierarchyList.activeItem.label === "Native Leaf"
+        && nativeHierarchyList.activeItem.pathLabel === "Native Root / Native Child / Native Leaf"
+        && nativeHierarchyList.activeItem.count === 7
+
+    property bool qmlModelListReady:
+        qmlModelHierarchyList.usingTreeModel
+        && qmlModelHierarchyList.itemCount === 2
+        && qmlModelHierarchyList.activeItem !== null
+        && qmlModelHierarchyList.activeItemKey === "qml-child"
+        && qmlModelHierarchyList.activeItem.label === "QML Child"
+        && qmlModelHierarchyList.activeItem.count === 3
+
+    property bool appendedNativeModelReady:
+        nativeHierarchyList.itemCount === 4
+        && nativeHierarchyList.resolveByKey("native-extra") !== null
+        && nativeHierarchyList.resolveByKey("native-extra").label === "Native Extra"
+
+    property bool directModelContractReady:
+        nativeHierarchyReady
+        && nativeListReady
+        && qmlModelListReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("directModelContractReady").toBool());
+
+    nativeModel.appendRow(QStringLiteral("native-extra"),
+                          QStringLiteral("Native Extra"),
+                          0,
+                          false,
+                          0,
+                          true,
+                          false);
+    QTRY_COMPARE(root->property("nativeListItemCount").toInt(), 4);
+    QTRY_VERIFY(root->property("appendedNativeModelReady").toBool());
 }
 
 void ImportApiTests::hierarchy_nested_children_indent_contract_loads()
@@ -5401,6 +5688,117 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("typedHeaderContractReady").toBool());
+}
+
+void ImportApiTests::list_model_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    NativeListModel nativeModel;
+    engine.rootContext()->setContextProperty(QStringLiteral("nativeListModel"), &nativeModel);
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    ListModel {
+        id: qmlRows
+        ListElement { label: "QML A"; enabled: true; selected: false }
+        ListElement { label: "QML B"; enabled: false; selected: true }
+    }
+
+    LV.List {
+        id: qmlModelList
+        visible: false
+        footerVisible: false
+        model: qmlRows
+    }
+
+    LV.List {
+        id: nativeModelList
+        visible: false
+        footerVisible: false
+        model: nativeListModel
+        labelRole: "name"
+    }
+
+    LV.List {
+        id: primitiveModelList
+        visible: false
+        footerVisible: false
+        selectedIndex: 2
+        model: ["String", 7, true]
+    }
+
+    LV.List {
+        id: itemsFallbackList
+        visible: false
+        footerVisible: false
+        items: [{ label: "Legacy A" }, { label: "Legacy B" }]
+    }
+
+    LV.List {
+        id: modelOverridesItemsList
+        visible: false
+        footerVisible: false
+        items: [{ label: "Old" }]
+        model: [{ label: "New" }]
+    }
+
+    property bool qmlModelReady:
+        qmlModelList.usingModel
+        && qmlModelList.entryCount === 2
+        && qmlModelList.itemLabel(qmlModelList.entryAt(0)) === "QML A"
+        && qmlModelList.itemLabel(qmlModelList.entryAt(1)) === "QML B"
+        && qmlModelList.itemEnabled(qmlModelList.entryAt(0))
+        && !qmlModelList.itemEnabled(qmlModelList.entryAt(1))
+        && qmlModelList.itemSelected(qmlModelList.entryAt(1), 1)
+
+    property bool nativeModelReady:
+        nativeModelList.usingModel
+        && nativeModelList.entryCount === 3
+        && nativeModelList.entryAt(0).name === "Native A"
+        && nativeModelList.entryAt(1).display === "Native B"
+        && nativeModelList.itemLabel(nativeModelList.entryAt(0)) === "Native A"
+        && !nativeModelList.itemEnabled(nativeModelList.entryAt(1))
+        && nativeModelList.itemSelected(nativeModelList.entryAt(2), 2)
+    property int nativeModelEntryCount: nativeModelList.entryCount
+
+    property bool primitiveModelReady:
+        primitiveModelList.usingModel
+        && primitiveModelList.entryCount === 3
+        && primitiveModelList.itemLabel(primitiveModelList.entryAt(0)) === "String"
+        && primitiveModelList.itemLabel(primitiveModelList.entryAt(1)) === "7"
+        && primitiveModelList.itemLabel(primitiveModelList.entryAt(2)) === "true"
+        && primitiveModelList.itemSelected(primitiveModelList.entryAt(2), 2)
+
+    property bool fallbackReady:
+        !itemsFallbackList.usingModel
+        && itemsFallbackList.entryCount === 2
+        && itemsFallbackList.itemLabel(itemsFallbackList.entryAt(0)) === "Legacy A"
+        && modelOverridesItemsList.usingModel
+        && modelOverridesItemsList.entryCount === 1
+        && modelOverridesItemsList.itemLabel(modelOverridesItemsList.entryAt(0)) === "New"
+
+    property bool listModelContractReady:
+        qmlModelReady
+        && nativeModelReady
+        && primitiveModelReady
+        && fallbackReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("listModelContractReady").toBool());
+
+    nativeModel.appendRow(QStringLiteral("Native D"), true, false);
+    QTRY_COMPARE(root->property("nativeModelEntryCount").toInt(), 4);
 }
 
 void ImportApiTests::list_item_and_footer_figma_contract_loads()

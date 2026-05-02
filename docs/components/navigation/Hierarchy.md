@@ -6,7 +6,7 @@ Location: `qml/components/navigation/Hierarchy.qml`
 
 ## Purpose
 
-- Render depth-array hierarchy data with explicit expand/collapse controls.
+- Render depth-array/list/model hierarchy data with explicit expand/collapse controls.
 - Provide activation and expansion callbacks for host features.
 - Keep tree navigation usable inside nested scroll containers.
 
@@ -20,9 +20,27 @@ Required inputs:
 Model and selection aliases:
 
 - `model` / `treeModel`
+- `modelColumn`
 - `activeListItem`
 - `activeListItemId`
 - `activeListItemKey`
+
+Model role aliases:
+
+- `itemIdRole`
+- `itemKeyRole`
+- `labelRole`
+- `iconNameRole`
+- `iconSourceRole`
+- `iconGlyphRole`
+- `depthRole`
+- `countRole`
+- `enabledRole`
+- `expandedRole`
+- `selectedRole`
+- `activatableRole`
+- `draggableRole`
+- `showChevronRole`
 
 Toolbar aliases:
 
@@ -34,9 +52,6 @@ Toolbar aliases:
 
 Behavior aliases:
 
-- `depthRole`
-- `draggableRole`
-- `countRole`
 - `keyboardListNavigationEnabled`
 - `editable`
 - list scroll physics: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`
@@ -90,10 +105,22 @@ LV.Hierarchy {
 }
 ```
 
+```qml
+import LVRS 1.0 as LV
+
+LV.Hierarchy {
+    model: backendHierarchyModel
+    itemKeyRole: "key"
+    labelRole: "name"
+    depthRole: "depth"
+    countRole: "counter"
+}
+```
+
 ## How It Works
 
 - Toolbar and list communicate through explicit signals and forwarded aliases.
-- `countRole` forwards directly to the internal `HierarchyList`, so model-backed tree counters can be enabled from the panel wrapper.
+- `model`, `modelColumn`, and role aliases forward directly to the internal `HierarchyList`, so arrays, QML `ListModel`, and C++ `QAbstractItemModel` sources can be injected at the panel level.
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.

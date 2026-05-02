@@ -64,6 +64,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/RenderQuality.md`
 - `docs/backend/RenderMonitor.md`
 - `docs/backend/RouteMatcher.md`
+- `docs/backend/ModelAdapter.md`
 - `docs/backend/PageMonitor.md`
 - `docs/backend/ViewStateTracker.md`
 - `docs/backend/ViewModels.md`
@@ -112,6 +113,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/PageTransitionController.md`
 - `docs/components/navigation/Link.md`
+- `docs/components/navigation/List.md`
 - `docs/components/navigation/Hierarchy.md`
 - `docs/components/navigation/HierarchyList.md`
 - `docs/components/navigation/HierarchyItem.md`

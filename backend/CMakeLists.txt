@@ -16,6 +16,7 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmlcontextbinder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
@@ -50,6 +51,7 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmlcontextbinder.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/qmltyperegistrar.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/pagemonitor.h
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h

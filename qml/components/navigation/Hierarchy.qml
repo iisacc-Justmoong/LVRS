@@ -30,8 +30,20 @@ Rectangle {
     property alias activeListItemKey: hierarchyList.activeItemKey
     property alias model: hierarchyList.model
     property alias treeModel: hierarchyList.model
+    property alias modelColumn: hierarchyList.modelColumn
+    property alias itemIdRole: hierarchyList.itemIdRole
+    property alias itemKeyRole: hierarchyList.itemKeyRole
+    property alias labelRole: hierarchyList.labelRole
+    property alias iconNameRole: hierarchyList.iconNameRole
+    property alias iconSourceRole: hierarchyList.iconSourceRole
+    property alias iconGlyphRole: hierarchyList.iconGlyphRole
     property alias depthRole: hierarchyList.depthRole
+    property alias enabledRole: hierarchyList.enabledRole
+    property alias expandedRole: hierarchyList.expandedRole
+    property alias selectedRole: hierarchyList.selectedRole
+    property alias activatableRole: hierarchyList.activatableRole
     property alias draggableRole: hierarchyList.draggableRole
+    property alias showChevronRole: hierarchyList.showChevronRole
     property alias countRole: hierarchyList.countRole
     property alias keyboardListNavigationEnabled: hierarchyList.keyboardNavigationEnabled
     property alias editable: hierarchyList.editable

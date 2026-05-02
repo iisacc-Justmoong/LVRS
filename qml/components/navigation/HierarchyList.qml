@@ -16,6 +16,7 @@ Item {
     property var model: []
     // Backward compatibility alias.
     property alias treeModel: control.model
+    property int modelColumn: 0
     property string itemIdRole: "itemId"
     property string itemKeyRole: "key"
     property string labelRole: "label"
@@ -40,7 +41,11 @@ Item {
     readonly property bool editableSupported: Array.isArray(model) && depthArraySupportsEditing(model)
     readonly property bool editableEnabled: editable && editableSupported
 
-    readonly property bool usingTreeModel: modelCount(model) > 0
+    property int _modelRevision: 0
+    readonly property bool usingTreeModel: {
+        _modelRevision
+        return modelCount(model) > 0
+    }
     property int _itemCountInternal: 0
     property int _visibleItemCountInternal: 0
     readonly property int itemCount: _itemCountInternal
@@ -155,6 +160,8 @@ Item {
     function modelCount(modelData) {
         if (modelData === undefined || modelData === null)
             return 0
+        if (ModelAdapter.isItemModel(modelData))
+            return ModelAdapter.count(modelData)
         if (Array.isArray(modelData))
             return modelData.length
         if (modelData.length !== undefined)
@@ -167,11 +174,22 @@ Item {
     function modelAt(modelData, index) {
         if (modelData === undefined || modelData === null)
             return null
+        if (ModelAdapter.isItemModel(modelData))
+            return ModelAdapter.row(modelData, index, modelColumn)
         if (Array.isArray(modelData))
             return modelData[index]
         if (modelData.get !== undefined)
             return modelData.get(index)
         return modelData[index]
+    }
+
+    function invalidateModel() {
+        _modelRevision += 1
+        if (_dragActiveInternal)
+            _endEditableDrag(false)
+        markItemsDirty(true)
+        scheduleRebuildTreeItems()
+        scheduleRefreshState()
     }
 
     function normalizedRoleName(roleName, fallbackValue) {
@@ -1799,7 +1817,9 @@ Item {
                 ? roleValue(node, labelRole,
                             roleValue(node, "text",
                                       roleValue(node, "title",
-                                                roleValue(node, "name", ""))))
+                                                roleValue(node, "name",
+                                                          roleValue(node, "display",
+                                                                    roleValue(node, "edit", ""))))))
                 : primitiveLabel
             const label = labelRaw === undefined || labelRaw === null ? "" : String(labelRaw)
 
@@ -2154,11 +2174,9 @@ Item {
         scheduleRefreshState()
     }
     onModelChanged: {
-        if (_dragActiveInternal)
-            _endEditableDrag(false)
-        markItemsDirty(true)
-        scheduleRebuildTreeItems()
+        invalidateModel()
     }
+    onModelColumnChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onItemIdRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onItemKeyRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onLabelRoleChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
@@ -2282,6 +2300,19 @@ Item {
             if (control.usingTreeModel)
                 control.scheduleNormalizeActiveItem()
         }
+    }
+
+    Connections {
+        target: ModelAdapter.isItemModel(control.model) ? control.model : null
+        enabled: ModelAdapter.isItemModel(control.model)
+        ignoreUnknownSignals: true
+
+        function onRowsInserted() { control.invalidateModel() }
+        function onRowsRemoved() { control.invalidateModel() }
+        function onRowsMoved() { control.invalidateModel() }
+        function onModelReset() { control.invalidateModel() }
+        function onLayoutChanged() { control.invalidateModel() }
+        function onDataChanged() { control.invalidateModel() }
     }
 
     QtObject {

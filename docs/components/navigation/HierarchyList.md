@@ -2,11 +2,12 @@
 
 Location: `qml/components/navigation/HierarchyList.qml`
 
-`HierarchyList` is a depth-aware view list that renders `HierarchyItem` rows from either manual children or a flat model array with explicit depth values.
+`HierarchyList` is a depth-aware view list that renders `HierarchyItem` rows from manual children, flat JavaScript/list models, or a direct `QAbstractItemModel` with explicit depth values.
 
 ## Purpose
 
-- Render a depth-array model into visible hierarchy rows.
+- Render a depth-array/list model into visible hierarchy rows.
+- Read QML `ListModel` and C++ `QAbstractItemModel` sources directly.
 - Maintain activation, visibility, and expansion state efficiently.
 - Provide keyboard navigation and ancestor auto-expansion behavior.
 
@@ -15,6 +16,7 @@ Location: `qml/components/navigation/HierarchyList.qml`
 Model and roles:
 
 - `model` (main tree input), `treeModel` (compat alias)
+- `modelColumn` (column used when reading a `QAbstractItemModel`, default `0`)
 - `itemIdRole`, `itemKeyRole`, `labelRole`, `iconNameRole`, `iconSourceRole`, `iconGlyphRole`, `countRole`
 - `enabledRole`, `expandedRole`, `selectedRole`, `activatableRole`, `draggableRole`, `showChevronRole`
 - `depthRole` (default `depth`)
@@ -55,7 +57,11 @@ Primary methods:
 
 - `model` is present: list generates managed `HierarchyItem` instances.
 - `model` is empty: uses manually slotted `items` as managed rows.
-- Model input is expected to be a flat array/list of rows with explicit depth data (`indentLevel` first, then `depthRole`).
+- Model input can be a flat JavaScript array, primitive array, QML `ListModel`/list-like object, or C++ `QAbstractItemModel`.
+- `QAbstractItemModel` rows are projected through `ModelAdapter.row(model, row, modelColumn)` into role-name keyed objects.
+- Model rows still need explicit depth data (`indentLevel` first, then `depthRole`) unless they are top-level primitives.
+- Label fallback order for object rows is `labelRole`, `text`, `title`, `name`, `display`, then `edit`.
+- `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate and rebuild generated rows.
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
 - Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.
@@ -65,7 +71,7 @@ Primary methods:
 - User interaction can re-emit `activeChanged` for the already-active row, so host behaviors can bind actions to deliberate repeat taps/clicks without mutating selection.
 - Generated rows can consume per-node activation affordance through `activatableRole` (default `activatable`, with `selectable` fallback), and non-activatable rows are excluded from activation normalization and keyboard activation targets.
 - Generated rows can consume per-node drag affordance through `draggableRole` (default `draggable`, with `dragAllowed` fallback), so editable lists can keep selected rows interactive while locking specific nodes against drag startup.
-- `editable` currently supports only array-backed object depth models; `ListModel` and primitive-only arrays are not editable.
+- `editable` currently supports only array-backed object depth models; `QAbstractItemModel`, `ListModel`, and primitive-only arrays are not editable.
 - `editable` does not expose the drag API on the list itself; it only enables the item-level drag/drop contract on generated `HierarchyItem` rows.
 - Generated editable rows keep desktop drag immediate, but mobile-target pointer drag starts only after a `1000ms` long press so touch scrolling stays with the surrounding `Flickable` until the hold gate is met.
 - Mobile-target row activation is committed on release/click rather than press, so list scrolling can claim the gesture before `activeItem` changes.
@@ -81,5 +87,18 @@ LV.HierarchyList {
         { key: "root", depth: 0, label: "Root", expanded: true, count: 2 },
         { key: "child", depth: 1, label: "Child", count: 7 }
     ]
+}
+```
+
+```qml
+import LVRS 1.0 as LV
+
+LV.HierarchyList {
+    model: backendHierarchyModel
+    itemKeyRole: "key"
+    labelRole: "name"
+    depthRole: "depth"
+    countRole: "counter"
+    expandedRole: "expanded"
 }
 ```
