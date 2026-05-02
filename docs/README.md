@@ -66,6 +66,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/RouteMatcher.md`
 - `docs/backend/ModelAdapter.md`
 - `docs/backend/StateModel.md`
+- `docs/backend/ProgressModel.md`
 - `docs/backend/PageMonitor.md`
 - `docs/backend/ViewStateTracker.md`
 - `docs/backend/ViewModels.md`
@@ -78,7 +79,9 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/ModelUndoStack.md`
 - `docs/backend/ModelSource.md`
 - `docs/backend/HierarchyModel.md`
+- `docs/backend/TableHeaderModel.md`
 - `docs/backend/TableModel.md`
+- `docs/backend/NavigationStackModel.md`
 
 ## App Layer
 

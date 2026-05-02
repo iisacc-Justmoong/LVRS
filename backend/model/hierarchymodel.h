@@ -93,6 +93,21 @@ public:
     Q_INVOKABLE QVariant roleValue(const QVariant &entry,
                                    const QString &roleName,
                                    const QVariant &fallbackValue = QVariant()) const;
+    Q_INVOKABLE bool depthArraySupportsEditing(const QVariant &nodes) const;
+    Q_INVOKABLE QVariantMap projectInteractionState(const QVariantList &items) const;
+    Q_INVOKABLE int descendantRangeEnd(const QVariantList &items, int itemIndex) const;
+    Q_INVOKABLE QVariantMap resolveDragTarget(const QVariantList &items,
+                                              int sourceStart,
+                                              int sourceEnd,
+                                              int rawInsertionIndex,
+                                              double localX,
+                                              double indentStep,
+                                              double basePadding) const;
+    Q_INVOKABLE QVariantMap moveDescriptors(const QVariantList &items,
+                                            int sourceStart,
+                                            int sourceEnd,
+                                            int targetIndex,
+                                            int targetDepth) const;
     Q_INVOKABLE void invalidate();
 
 signals:
@@ -106,6 +121,11 @@ private:
     static bool variantLooksObjectLike(const QVariant &value);
     static bool stringStartsLikeUrl(const QString &value);
     static int normalizedDepth(const QVariant &rawDepth, int fallbackDepth);
+    static int descriptorIndent(const QVariantMap &descriptor);
+    static bool descriptorCanBecomeActive(const QVariantMap &descriptor);
+    static QString descriptorKey(const QVariantMap &descriptor, int index);
+    static QString descriptorLabel(const QVariantMap &descriptor, int index);
+    static QVariantMap dropDescriptorFor(const QVariantList &remainingItems, int insertionIndex, int depth);
 
     bool setRole(QString *target, const QString &value);
     QVariant firstRoleValue(const QVariant &entry,

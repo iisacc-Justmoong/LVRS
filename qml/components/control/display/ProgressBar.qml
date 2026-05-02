@@ -1,4 +1,5 @@
 import QtQuick
+import LVRS 1.0
 
 Item {
     id: control
@@ -28,51 +29,43 @@ Item {
     property real largeHeight: Theme.scaleRealMetric(6)
     property real regularHeight: Theme.scaleRealMetric(3)
 
-    readonly property bool usingStateModel: stateModel !== undefined && stateModel !== null
-    readonly property int stateRevision: usingStateModel && stateModel.revision !== undefined ? stateModel.revision : 0
-    readonly property real effectiveMinimumValue: stateNumber(minimumValueStateKey, minimumValue)
-    readonly property real effectiveMaximumValue: stateNumber(maximumValueStateKey, maximumValue)
-    readonly property real effectiveStartValue: stateNumber(startValueStateKey, startValue)
-    readonly property real effectiveCurrentValue: stateNumber(currentValueStateKey, currentValue)
+    ProgressModel {
+        id: progressModel
+        minimumValue: control.minimumValue
+        maximumValue: control.maximumValue
+        startValue: control.startValue
+        currentValue: control.currentValue
+        stateModel: control.stateModel
+        minimumValueStateKey: control.minimumValueStateKey
+        maximumValueStateKey: control.maximumValueStateKey
+        startValueStateKey: control.startValueStateKey
+        currentValueStateKey: control.currentValueStateKey
+    }
+
+    readonly property bool usingStateModel: progressModel.usingStateModel
+    readonly property int stateRevision: progressModel.stateRevision
+    readonly property real effectiveMinimumValue: progressModel.effectiveMinimumValue
+    readonly property real effectiveMaximumValue: progressModel.effectiveMaximumValue
+    readonly property real effectiveStartValue: progressModel.effectiveStartValue
+    readonly property real effectiveCurrentValue: progressModel.effectiveCurrentValue
     readonly property real barHeight: size === regular ? regularHeight : largeHeight
-    readonly property real valueRange: effectiveMaximumValue - effectiveMinimumValue
-    readonly property real normalizedStart: normalizedValue(effectiveStartValue)
-    readonly property real normalizedCurrent: normalizedValue(effectiveCurrentValue)
-    readonly property real fillStart: Math.min(normalizedStart, normalizedCurrent)
-    readonly property real fillProgress: Math.abs(normalizedCurrent - normalizedStart)
-    readonly property real progress: normalizedCurrent
+    readonly property real valueRange: progressModel.valueRange
+    readonly property real normalizedStart: progressModel.normalizedStart
+    readonly property real normalizedCurrent: progressModel.normalizedCurrent
+    readonly property real fillStart: progressModel.fillStart
+    readonly property real fillProgress: progressModel.fillProgress
+    readonly property real progress: progressModel.progress
 
     function stateNumber(key, fallbackValue) {
-        stateRevision
-        const fallbackNumber = Number(fallbackValue)
-        const model = control.stateModel
-        if (!model || model.value === undefined)
-            return Number.isFinite(fallbackNumber) ? fallbackNumber : 0
-        const rawValue = model.valueOr !== undefined
-            ? model.valueOr(key, fallbackNumber)
-            : model.value(key, fallbackNumber)
-        const nextNumber = Number(rawValue)
-        return Number.isFinite(nextNumber)
-            ? nextNumber
-            : Number.isFinite(fallbackNumber)
-                ? fallbackNumber
-                : 0
+        return progressModel.stateNumber(key, fallbackValue)
     }
 
     function resolvedRadius(rectWidth, rectHeight) {
-        if (shapeStyle === shapeCylinder)
-            return Math.max(0, Math.min(rectWidth, rectHeight) / 2)
-        return cornerRadius
+        return progressModel.radiusFor(shapeStyle, cornerRadius, rectWidth, rectHeight)
     }
 
     function normalizedValue(value) {
-        const range = control.valueRange
-        if (Math.abs(range) < 0.000001)
-            return Number(value) >= control.effectiveMaximumValue ? 1 : 0
-        const normalized = (Number(value) - control.effectiveMinimumValue) / range
-        if (isNaN(normalized))
-            return 0
-        return Math.max(0, Math.min(1, normalized))
+        return progressModel.normalizedValue(value)
     }
 
     implicitWidth: Theme.scaleMetric(100)

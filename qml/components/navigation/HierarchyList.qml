@@ -200,21 +200,7 @@ Item {
     }
 
     function depthArraySupportsEditing(nodes) {
-        if (!Array.isArray(nodes))
-            return false
-
-        for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i]
-            if (!node || typeof node !== "object" || Array.isArray(node))
-                return false
-            if (Array.isArray(node.children)
-                    || Array.isArray(node.items)
-                    || Array.isArray(node.nodes)) {
-                return false
-            }
-        }
-
-        return true
+        return hierarchyModel.depthArraySupportsEditing(nodes)
     }
 
     function isManagedItem(item) {
@@ -329,6 +315,34 @@ Item {
                 return false
         }
         return true
+    }
+
+    function modelList(value) {
+        if (Array.isArray(value))
+            return value.slice()
+        const result = []
+        if (!value)
+            return result
+        if (typeof value === "string")
+            return value.length > 0 ? [value] : result
+        if (value instanceof String) {
+            const textValue = String(value)
+            return textValue.length > 0 ? [textValue] : result
+        }
+        if (value.charAt !== undefined && value.length !== undefined) {
+            const textValue = String(value)
+            return textValue.length > 0 ? [textValue] : result
+        }
+        if (value.length !== undefined) {
+            for (let i = 0; i < value.length; i++)
+                result.push(value[i])
+            return result
+        }
+        if (value.count !== undefined && value.get !== undefined) {
+            for (let i = 0; i < value.count; i++)
+                result.push(value.get(i))
+        }
+        return result
     }
 
     function syncItemExposedMetadata(currentItems) {
@@ -676,6 +690,10 @@ Item {
     }
 
     function refreshVisibleRange(currentItems, startIndex, endIndex) {
+        const projection = hierarchyModel.projectInteractionState(buildInteractionDescriptors(currentItems))
+        applyProjectedMetadata(currentItems, projection)
+        return
+
         if (currentItems.length === 0) {
             _visibilityFlags = []
             _visibleItemIndices = []
@@ -800,18 +818,7 @@ Item {
     }
 
     function descendantRangeEndInList(currentItems, itemIndex) {
-        if (itemIndex < 0 || itemIndex >= currentItems.length)
-            return itemIndex
-
-        const parentIndent = itemIndentLevel(currentItems[itemIndex])
-        let descendantEnd = itemIndex
-        for (let i = itemIndex + 1; i < currentItems.length; i++) {
-            const candidateIndent = itemIndentLevel(currentItems[i])
-            if (candidateIndent <= parentIndent)
-                break
-            descendantEnd = i
-        }
-        return descendantEnd
+        return hierarchyModel.descendantRangeEnd(buildInteractionDescriptors(currentItems), itemIndex)
     }
 
     function itemAtPositionInList(currentItems, localX, localY) {
@@ -1002,35 +1009,28 @@ Item {
     }
 
     function resolvedDragTargetInList(currentItems, rawInsertionIndex, localX) {
-        const insertionIndex = adjustedInsertionIndexForDraggedBlock(rawInsertionIndex,
-                                                                     _dragSourceIndex,
-                                                                     _dragSourceEndIndex)
-        if (insertionIndex < 0)
+        const resolved = hierarchyModel.resolveDragTarget(buildInteractionDescriptors(currentItems),
+                                                          _dragSourceIndex,
+                                                          _dragSourceEndIndex,
+                                                          rawInsertionIndex,
+                                                          localX,
+                                                          dragIndentStep(),
+                                                          dragBasePadding())
+        if (!resolved || resolved.insertionIndex === undefined)
             return null
-
-        const resolvedDepth = resolvedEditableDepthForInsertionIndex(currentItems,
-                                                                     insertionIndex,
-                                                                     desiredDepthForPointerX(localX))
-        if (!resolvedDepth)
-            return null
-
-        const dropDescriptor = resolvedEditableDropDescriptor(currentItems,
-                                                              insertionIndex,
-                                                              resolvedDepth.depth)
-
         return {
-            insertionIndex: insertionIndex,
-            depth: resolvedDepth.depth,
-            minDepth: resolvedDepth.minDepth,
-            maxDepth: resolvedDepth.maxDepth,
-            modeName: dropDescriptor.modeName,
-            parentItem: dropDescriptor.parentItem,
-            parentItemKey: dropDescriptor.parentItemKey,
-            parentLabel: dropDescriptor.parentLabel,
-            parentPathLabel: dropDescriptor.parentPathLabel,
-            anchorItem: dropDescriptor.anchorItem,
-            anchorItemKey: dropDescriptor.anchorItemKey,
-            anchorLabel: dropDescriptor.anchorLabel
+            insertionIndex: resolved.insertionIndex,
+            depth: resolved.depth,
+            minDepth: resolved.minDepth,
+            maxDepth: resolved.maxDepth,
+            modeName: resolved.modeName,
+            parentItem: resolveByKeyInList(currentItems, resolved.parentItemKey),
+            parentItemKey: resolved.parentItemKey,
+            parentLabel: resolved.parentLabel,
+            parentPathLabel: resolved.parentPathLabel,
+            anchorItem: resolveByKeyInList(currentItems, resolved.anchorItemKey),
+            anchorItemKey: resolved.anchorItemKey,
+            anchorLabel: resolved.anchorLabel
         }
     }
 
@@ -1078,6 +1078,112 @@ Item {
             descriptors.push(descriptor)
         }
         return descriptors
+    }
+
+    function interactionDescriptorFromItem(item, index) {
+        if (!item)
+            return null
+        return {
+            itemId: effectiveItemId(item, index),
+            itemKey: effectiveItemKey(item, index),
+            label: itemDisplayLabel(item, index),
+            pathLabel: item.pathLabel === undefined || item.pathLabel === null ? "" : String(item.pathLabel),
+            indentLevel: itemIndentLevel(item),
+            enabled: !!item.enabled,
+            activatable: item.activatable === undefined ? true : !!item.activatable,
+            draggable: item.dragAllowed === undefined ? true : !!item.dragAllowed,
+            expanded: !!item.expanded,
+            selected: !!item.selected,
+            showChevron: !!item.showChevron,
+            x: item.x,
+            y: item.y,
+            width: item.width,
+            height: item.height,
+            nodeData: item.nodeData
+        }
+    }
+
+    function buildInteractionDescriptors(currentItems) {
+        const descriptors = []
+        for (let i = 0; i < currentItems.length; i++) {
+            const descriptor = interactionDescriptorFromItem(currentItems[i], i)
+            if (descriptor)
+                descriptors.push(descriptor)
+        }
+        return descriptors
+    }
+
+    function applyProjectedMetadata(currentItems, projection) {
+        if (!projection)
+            return
+        _visibilityFlags = modelList(projection.visibilityFlags)
+        _visibleItemIndices = modelList(projection.visibleItemIndices)
+        _visibleEnabledItemIndices = modelList(projection.visibleEnabledItemIndices)
+        _idIndexMap = projection.idIndexMap || ({})
+        _keyIndexMap = projection.keyIndexMap || ({})
+        _visibilityCacheInitialized = true
+        _itemCountInternal = projection.itemCount || currentItems.length
+        _visibleItemCountInternal = projection.visibleItemCount || _visibleItemIndices.length
+
+        const metadata = modelList(projection.metadata)
+        for (let i = 0; i < currentItems.length && i < metadata.length; i++) {
+            const item = currentItems[i]
+            const row = metadata[i]
+            if (!item || !row)
+                continue
+            if (item.hierarchyList !== control)
+                item.hierarchyList = control
+            if (item.hasChildItems !== undefined && item.hasChildItems !== row.hasChildren)
+                item.hasChildItems = row.hasChildren
+            if (item._rowVisibleInternal !== row.visible)
+                item._rowVisibleInternal = row.visible
+            if (item.parentItemKey !== row.parentItemKey)
+                item.parentItemKey = row.parentItemKey
+            if (item.parentLabel !== row.parentLabel)
+                item.parentLabel = row.parentLabel
+            if (item.parentPathLabel !== row.parentPathLabel)
+                item.parentPathLabel = row.parentPathLabel
+            if (item.pathLabel !== row.pathLabel)
+                item.pathLabel = row.pathLabel
+            if (item.flatIndex !== row.flatIndex)
+                item.flatIndex = row.flatIndex
+            if (item.visibleIndex !== row.visibleIndex)
+                item.visibleIndex = row.visibleIndex
+            if (item.siblingIndex !== row.siblingIndex)
+                item.siblingIndex = row.siblingIndex
+            if (item.visibleSiblingIndex !== row.visibleSiblingIndex)
+                item.visibleSiblingIndex = row.visibleSiblingIndex
+            if (item.childCount !== row.childCount)
+                item.childCount = row.childCount
+            if (item.visibleChildCount !== row.visibleChildCount)
+                item.visibleChildCount = row.visibleChildCount
+            if (item.descendantCount !== row.descendantCount)
+                item.descendantCount = row.descendantCount
+            if (item.visibleDescendantCount !== row.visibleDescendantCount)
+                item.visibleDescendantCount = row.visibleDescendantCount
+            if (item.siblingCount !== row.siblingCount)
+                item.siblingCount = row.siblingCount
+            if (item.visibleSiblingCount !== row.visibleSiblingCount)
+                item.visibleSiblingCount = row.visibleSiblingCount
+            const childKeys = modelList(row.childItemKeys)
+            const childLabels = modelList(row.childItemLabels)
+            const ancestorKeys = modelList(row.ancestorItemKeys)
+            const ancestorLabels = modelList(row.ancestorLabels)
+            const pathKeys = modelList(row.pathItemKeys)
+            const pathLabels = modelList(row.pathItemLabels)
+            if (!arrayTextEquals(item.childItemKeys, childKeys))
+                item.childItemKeys = childKeys
+            if (!arrayTextEquals(item.childItemLabels, childLabels))
+                item.childItemLabels = childLabels
+            if (!arrayTextEquals(item.ancestorItemKeys, ancestorKeys))
+                item.ancestorItemKeys = ancestorKeys
+            if (!arrayTextEquals(item.ancestorLabels, ancestorLabels))
+                item.ancestorLabels = ancestorLabels
+            if (!arrayTextEquals(item.pathItemKeys, pathKeys))
+                item.pathItemKeys = pathKeys
+            if (!arrayTextEquals(item.pathItemLabels, pathLabels))
+                item.pathItemLabels = pathLabels
+        }
     }
 
     function assignNodeDescriptorState(node, descriptor, parentDescriptor) {
@@ -1289,40 +1395,20 @@ Item {
         if (!editableDescriptors)
             return false
 
-        const blockDescriptors = editableDescriptors.slice(_dragSourceIndex, _dragSourceEndIndex + 1)
-        const remainingDescriptors = editableDescriptors.slice(0, _dragSourceIndex)
-            .concat(editableDescriptors.slice(_dragSourceEndIndex + 1))
-        if (blockDescriptors.length === 0)
+        const moveResult = hierarchyModel.moveDescriptors(editableDescriptors,
+                                                          _dragSourceIndex,
+                                                          _dragSourceEndIndex,
+                                                          normalizeFromIndex(targetIndex),
+                                                          normalizedDepth(targetDepth, 0))
+        if (!moveResult || !moveResult.accepted)
             return false
 
-        const clampedTargetIndex = Math.max(0,
-                                            Math.min(normalizeFromIndex(targetIndex),
-                                                     remainingDescriptors.length))
-        const resolvedDepth = resolvedEditableDepthForInsertionIndex(currentItems,
-                                                                     clampedTargetIndex,
-                                                                     targetDepth)
-        if (!resolvedDepth)
-            return false
-
-        const dropDescriptor = resolvedEditableDropDescriptor(currentItems,
-                                                              clampedTargetIndex,
-                                                              resolvedDepth.depth)
-
-        const sourceDepth = blockDescriptors[0].indentLevel
-        const depthDelta = resolvedDepth.depth - sourceDepth
-        for (let i = 0; i < blockDescriptors.length; i++)
-            blockDescriptors[i].indentLevel = Math.max(0, blockDescriptors[i].indentLevel + depthDelta)
-
-        if (clampedTargetIndex === _dragSourceIndex && depthDelta === 0)
-            return false
-
-        const reorderedDescriptors = remainingDescriptors.slice(0, clampedTargetIndex)
-            .concat(blockDescriptors)
-            .concat(remainingDescriptors.slice(clampedTargetIndex))
+        const reorderedDescriptors = modelList(moveResult.reorderedDescriptors)
         if (!applyEditableTreeOrder(reorderedDescriptors))
             return false
 
-        const movedDescriptor = blockDescriptors[0]
+        const movedDescriptor = moveResult.movedDescriptor
+        const dropDescriptor = moveResult.drop || ({})
         markItemsDirty(true)
         scheduleRebuildTreeItems()
         scheduleRefreshState()
@@ -1331,12 +1417,12 @@ Item {
                   movedDescriptor.itemId,
                   movedDescriptor.itemKey,
                   _dragSourceIndex,
-                  clampedTargetIndex,
+                  moveResult.toIndex,
                   movedDescriptor.indentLevel)
         _emitDragEnded(item,
                        true,
                        _dragSourceIndex,
-                       clampedTargetIndex,
+                       moveResult.toIndex,
                        movedDescriptor.indentLevel,
                        dropDescriptor.modeName,
                        dropDescriptor.parentItemKey,

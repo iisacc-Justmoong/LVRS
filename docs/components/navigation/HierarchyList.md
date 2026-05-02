@@ -59,6 +59,7 @@ Primary methods:
 - `model` is empty: uses manually slotted `items` as managed rows.
 - Model input can be a flat JavaScript array, primitive array, QML `ListModel`/list-like object, or C++ `QAbstractItemModel`.
 - Model rows are projected by the C++ `HierarchyModel`, which uses `ModelSource` for arrays, list-like objects, and `QAbstractItemModel` sources.
+- Visibility, lookup maps, parent/path metadata, sibling/child/descendant counts, descendant range, drag target calculation, and editable descriptor movement are projected by `HierarchyModel`.
 - Model rows still need explicit depth data (`indentLevel` first, then `depthRole`) unless they are top-level primitives.
 - Label fallback order for object rows is `labelRole`, `text`, `title`, `name`, `display`, then `edit`.
 - `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate the C++ model projection and rebuild generated rows.
@@ -76,6 +77,10 @@ Primary methods:
 - Generated editable rows keep desktop drag immediate, but mobile-target pointer drag starts only after a `1000ms` long press so touch scrolling stays with the surrounding `Flickable` until the hold gate is met.
 - Mobile-target row activation is committed on release/click rather than press, so list scrolling can claim the gesture before `activeItem` changes.
 - Depth reorder operations update the flat backing array and rewrite each moved row's depth plus `parentKey` / `parentItemKey` fields.
+
+## Backend Model
+
+`HierarchyModel` now owns the stateful model calculations behind `HierarchyList`: source descriptors, interaction metadata, visibility projection, editable-array eligibility, drag target normalization, and descriptor reordering. `HierarchyList.qml` collects live `HierarchyItem` objects, applies projected metadata to them, renders rows, and forwards user input.
 
 ## Usage
 

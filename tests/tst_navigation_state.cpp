@@ -11,7 +11,10 @@
 
 #include "backend/model/hierarchymodel.h"
 #include "backend/model/modelsource.h"
+#include "backend/model/progressmodel.h"
+#include "backend/model/tableheadermodel.h"
 #include "backend/model/tablemodel.h"
+#include "backend/navigation/navigationstackmodel.h"
 #include "backend/navigation/pagemonitor.h"
 #include "backend/navigation/routematcher.h"
 #include "backend/navigation/viewstatetracker.h"
@@ -654,6 +657,97 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     QCOMPARE(leafDescriptor.value(QStringLiteral("indentLevel")).toInt(), 1);
     QCOMPARE(leafDescriptor.value(QStringLiteral("count")).toInt(), 7);
     QCOMPARE(leafDescriptor.value(QStringLiteral("selected")).toBool(), true);
+    const QVariantList hierarchyInteractionRows {
+        QVariantMap {
+            {QStringLiteral("itemId"), 0},
+            {QStringLiteral("itemKey"), QStringLiteral("root")},
+            {QStringLiteral("label"), QStringLiteral("Root")},
+            {QStringLiteral("indentLevel"), 0},
+            {QStringLiteral("expanded"), true},
+            {QStringLiteral("enabled"), true},
+            {QStringLiteral("activatable"), true},
+            {QStringLiteral("showChevron"), true}
+        },
+        QVariantMap {
+            {QStringLiteral("itemId"), 1},
+            {QStringLiteral("itemKey"), QStringLiteral("child")},
+            {QStringLiteral("label"), QStringLiteral("Child")},
+            {QStringLiteral("indentLevel"), 1},
+            {QStringLiteral("expanded"), false},
+            {QStringLiteral("enabled"), true},
+            {QStringLiteral("activatable"), true},
+            {QStringLiteral("showChevron"), true}
+        },
+        QVariantMap {
+            {QStringLiteral("itemId"), 2},
+            {QStringLiteral("itemKey"), QStringLiteral("leaf")},
+            {QStringLiteral("label"), QStringLiteral("Leaf")},
+            {QStringLiteral("indentLevel"), 2},
+            {QStringLiteral("enabled"), true},
+            {QStringLiteral("activatable"), true}
+        }
+    };
+    const QVariantMap interactionState = hierarchyModel.projectInteractionState(hierarchyInteractionRows);
+    QCOMPARE(interactionState.value(QStringLiteral("visibleItemCount")).toInt(), 2);
+    QCOMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("childCount")).toInt(), 1);
+    QCOMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("pathLabel")).toString(),
+             QStringLiteral("Root"));
+    const QVariantMap childMetadata = interactionState.value(QStringLiteral("metadata")).toList().at(1).toMap();
+    QCOMPARE(childMetadata.value(QStringLiteral("ancestorItemKeys")).toList().at(0).toString(), QStringLiteral("root"));
+    QCOMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(0).toString(), QStringLiteral("Root"));
+    QCOMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(1).toString(), QStringLiteral("Child"));
+    QCOMPARE(hierarchyModel.descendantRangeEnd(hierarchyInteractionRows, 0), 2);
+    const QVariantMap dragTarget = hierarchyModel.resolveDragTarget(hierarchyInteractionRows, 1, 2, 3, 8, 8, 8);
+    QVERIFY(!dragTarget.isEmpty());
+    QVERIFY(dragTarget.value(QStringLiteral("depth")).toInt() >= 0);
+    const QVariantMap moveResult = hierarchyModel.moveDescriptors(hierarchyInteractionRows, 1, 2, 0, 0);
+    QVERIFY(moveResult.value(QStringLiteral("accepted")).toBool());
+    QCOMPARE(moveResult.value(QStringLiteral("reorderedDescriptors")).toList().size(), 3);
+
+    TableHeaderModel headerModel;
+    headerModel.setTableWidth(300);
+    headerModel.setMinColumnWidth(40);
+    headerModel.setCellItems(QVariantList {
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Name")}, {QStringLiteral("type"), QStringLiteral("string")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Count")}, {QStringLiteral("valueType"), QStringLiteral("int")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Ratio")}, {QStringLiteral("cellType"), QStringLiteral("float")}}
+    });
+    headerModel.setColumnWidths(QVariantList {80, 100, 120});
+    QCOMPARE(headerModel.columnCount(), 3);
+    QCOMPARE(headerModel.columnType(1), QStringLiteral("int"));
+    QCOMPARE(headerModel.columnX(2), 180);
+    QCOMPARE(headerModel.descriptorAt(2).value(QStringLiteral("width")).toInt(), 120);
+    TableHeaderModel emptyHeaderModel;
+    emptyHeaderModel.setTableWidth(120);
+    emptyHeaderModel.setCellItems(QVariantList {});
+    QCOMPARE(emptyHeaderModel.columnCount(), 0);
+    QCOMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("text")).toString(), QStringLiteral("Column"));
+    QCOMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("width")).toInt(), 120);
+
+    StateModel progressState;
+    progressState.setValue(QStringLiteral("minimumValue"), 10);
+    progressState.setValue(QStringLiteral("maximumValue"), 110);
+    progressState.setValue(QStringLiteral("startValue"), 30);
+    progressState.setValue(QStringLiteral("currentValue"), 80);
+    ProgressModel progressModel;
+    progressModel.setStateModel(&progressState);
+    QCOMPARE(progressModel.effectiveMinimumValue(), 10.0);
+    QCOMPARE(progressModel.effectiveMaximumValue(), 110.0);
+    QVERIFY(qAbs(progressModel.normalizedStart() - 0.2) < 0.001);
+    QVERIFY(qAbs(progressModel.normalizedCurrent() - 0.7) < 0.001);
+    QVERIFY(qAbs(progressModel.fillProgress() - 0.5) < 0.001);
+    QVERIFY(qFuzzyCompare(progressModel.radiusFor(1, 6, 100, 8), 4.0));
+
+    NavigationStackModel navigationStack;
+    navigationStack.applyPathOperation(QStringLiteral("/"), QVariantMap(), QStringLiteral("set"));
+    navigationStack.applyPathOperation(QStringLiteral("reports"), QVariantMap {{QStringLiteral("page"), 2}}, QStringLiteral("push"));
+    QCOMPARE(navigationStack.depth(), 2);
+    QCOMPARE(navigationStack.currentPath(), QStringLiteral("/reports"));
+    QCOMPARE(navigationStack.currentParams().toMap().value(QStringLiteral("page")).toInt(), 2);
+    QCOMPARE(navigationStack.viewTrackingEntries().size(), 2);
+    navigationStack.pop();
+    QCOMPARE(navigationStack.depth(), 1);
+    QCOMPARE(navigationStack.currentPath(), QStringLiteral("/"));
 
     VariantListObject readOnlyRows(QVariantList {
         QVariantList {

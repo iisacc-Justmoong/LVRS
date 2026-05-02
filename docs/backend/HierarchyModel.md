@@ -32,6 +32,11 @@ Methods:
 
 - `descriptorAt(index)`
 - `roleValue(entry, roleName, fallbackValue)`
+- `depthArraySupportsEditing(nodes)`
+- `projectInteractionState(items)`
+- `descendantRangeEnd(items, itemIndex)`
+- `resolveDragTarget(items, sourceStart, sourceEnd, rawInsertionIndex, localX, indentStep, basePadding)`
+- `moveDescriptors(items, sourceStart, sourceEnd, targetIndex, targetDepth)`
 - `invalidate()`
 
 ## Descriptor Contract
@@ -51,3 +56,11 @@ Each descriptor contains:
 - `indentLevel` wins over `depthRole`; missing depth defaults to `0`.
 - `itemKey` uses the explicit key role, then numeric `itemId`, then row index.
 - `activatableRole` falls back through `selectable`/`activatable`; `draggableRole` falls back through `dragAllowed`/`draggable`.
+- `projectInteractionState` owns visibility, visible indices, lookup maps, parent/path metadata, sibling counts, child counts, and descendant counts.
+- Path arrays are returned as nested `QVariantList` values so QML rows receive `ancestorItemKeys`, `pathItemKeys`, and `pathItemLabels` as arrays, not flattened strings.
+- `resolveDragTarget` applies source-block removal, insertion index adjustment, depth bounds, parent lookup, and drop mode derivation.
+- `moveDescriptors` returns reordered descriptors plus moved/drop metadata for editable depth-array models.
+
+## QML Boundary
+
+`HierarchyList.qml` still creates/destroys visual `HierarchyItem` instances and forwards pointer/keyboard events. `HierarchyModel` owns descriptor projection, metadata projection, editable-model eligibility checks, descendant range calculation, drag target calculation, and descriptor reordering.

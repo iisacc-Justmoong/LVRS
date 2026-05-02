@@ -19,8 +19,11 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/model/modelundostack.cpp
     ${CMAKE_CURRENT_LIST_DIR}/model/modelsource.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/progressmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/model/hierarchymodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/model/tableheadermodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/model/tablemodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/navigationstackmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.cpp
@@ -59,8 +62,11 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/navigation/modeladapter.h
     ${CMAKE_CURRENT_LIST_DIR}/model/modelundostack.h
     ${CMAKE_CURRENT_LIST_DIR}/model/modelsource.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/progressmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/model/hierarchymodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/model/tableheadermodel.h
     ${CMAKE_CURRENT_LIST_DIR}/model/tablemodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/navigation/navigationstackmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routematcher.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/routeresolver.h
     ${CMAKE_CURRENT_LIST_DIR}/navigation/viewstatetracker.h

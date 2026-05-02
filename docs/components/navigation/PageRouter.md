@@ -90,6 +90,7 @@ Navigation methods:
 
 ## Behavior Contract
 
+- Committed path-stack mutation is delegated to the C++ `NavigationStackModel`.
 - Route resolution uses internal `RouteResolver` and cache capacity from `routeResolveCacheCapacity`.
 - `navigate(...)` merges resolved params with caller params.
 - Missing route falls back to not-found target when configured; otherwise emits `navigationFailed`.
@@ -103,6 +104,10 @@ Navigation methods:
 - Interactive transition commits suppress the built-in `StackView` push/pop animation and apply the stack mutation immediately, so the user-driven drag remains the only visible motion.
 - `interactiveTransitionSettleDuration` defaults to `0`, so releasing an interactive gesture does not play an additional post-release settle animation unless a host explicitly opts into one.
 - A competing non-interactive navigation call aborts the active interactive transition first.
+
+## Backend Model
+
+`NavigationStackModel` owns normalized path entries, component stack entries, push/replace/set-root/pop stack results, `currentPath`, `currentParams`, and view-tracking descriptors. `PageRouter.qml` remains responsible for route resolution, `StackView` item operations, and interactive transition control.
 
 ## Usage
 

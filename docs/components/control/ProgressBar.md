@@ -50,6 +50,7 @@ Colors:
 
 ## Behavior Contract
 
+- `ProgressBar` delegates range normalization to the C++ `ProgressModel`.
 - `minimumValue` and `maximumValue` define the full numeric range.
 - `startValue` and `currentValue` define the filled segment inside that range.
 - If `stateModel` is present, the bar reads `effective*` values from that C++ state object by key and falls back to the direct QML properties when a key is missing or non-numeric.
@@ -58,6 +59,10 @@ Colors:
 - The visual fill width is `fillProgress = abs(normalizedCurrent - normalizedStart)`.
 - Near-zero range falls back to binary output (`0` or `1`).
 - Cylinder shape uses min(width,height)/2 radius.
+
+## Backend Model
+
+`ProgressModel` owns effective values, state-model fallback, normalized values, fill segment math, and radius calculation. `ProgressBar.qml` is a render adapter around that model.
 
 ## Usage
 

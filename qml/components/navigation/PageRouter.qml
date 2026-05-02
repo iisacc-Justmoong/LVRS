@@ -58,6 +58,10 @@ Item {
     signal interactiveTransitionCancelled(var state)
     signal interactiveTransitionRejected(string reason, var state)
 
+    NavigationStackModel {
+        id: navigationStackModel
+    }
+
     function hasAnyAnchors(item) {
         if (!item || item.anchors === undefined)
             return false
@@ -285,12 +289,11 @@ Item {
                 stackView.pop()
             applyPageViewportContract(stackView.currentItem)
             scheduleActivePagePresentationSync()
-            if (path.length > 1) {
-                var nextPath = path.slice(0, path.length - 1)
+            navigationStackModel.path = path
+            var nextPath = navigationStackModel.stackAfterPop()
+            if (nextPath.length > 0) {
                 setPathInternal(nextPath)
                 applyCurrentFromPathEntry(nextPath[nextPath.length - 1])
-            } else if (path.length === 1) {
-                applyCurrentFromPathEntry(path[0])
             } else {
                 setCurrent("", {})
             }
@@ -307,9 +310,11 @@ Item {
                 stackView.pop(stackView.get(0))
             applyPageViewportContract(stackView.currentItem)
             scheduleActivePagePresentationSync()
-            if (path.length > 0) {
-                setPathInternal([path[0]])
-                applyCurrentFromPathEntry(path[0])
+            navigationStackModel.path = path
+            var nextPath = navigationStackModel.stackAfterPopToRoot()
+            if (nextPath.length > 0) {
+                setPathInternal(nextPath)
+                applyCurrentFromPathEntry(nextPath[0])
             } else {
                 setCurrent("", {})
             }
@@ -317,18 +322,7 @@ Item {
     }
 
     function normalizePath(path) {
-        if (typeof RouteMatcher !== "undefined"
-                && RouteMatcher
-                && RouteMatcher.normalizePath) {
-            return RouteMatcher.normalizePath(String(path === undefined || path === null ? "" : path))
-        }
-
-        var value = String(path || "/")
-        if (!value.startsWith("/"))
-            value = "/" + value
-        if (value.length > 1 && value.endsWith("/"))
-            value = value.slice(0, -1)
-        return value
+        return navigationStackModel.normalizePath(path)
     }
 
     function routeModelCount() {
@@ -474,6 +468,7 @@ Item {
     }
 
     Component.onCompleted: {
+        navigationStackModel.path = path
         if (registerAsGlobalNavigator)
             Navigator.registerRouter(root)
         syncRouteResolverRoutes(true)
@@ -551,6 +546,7 @@ Item {
     onPathChanged: {
         if (_syncingPath)
             return
+        navigationStackModel.path = path
         if (interactiveTransitionDriver.transitionLocked && !interactiveTransitionDriver.commitApplying)
             abortInteractiveTransition()
         rebuildFromPath()
@@ -602,8 +598,9 @@ Item {
     }
 
     function setPathInternal(nextPath) {
+        navigationStackModel.path = nextPath
         _syncingPath = true
-        path = nextPath
+        path = navigationStackModel.path
         _syncingPath = false
         syncViewStateTracker()
     }
@@ -637,105 +634,24 @@ Item {
     }
 
     function createPathEntry(pathValue, params) {
-        if (pathValue && typeof pathValue === "object" && pathValue.path !== undefined) {
-            return {
-                path: pathValue.path === "" ? "" : normalizePath(pathValue.path),
-                params: pathValue.params !== undefined ? pathValue.params : ({})
-            }
-        }
-        if (pathValue === undefined || pathValue === null || pathValue === "") {
-            return {
-                path: "",
-                params: params !== undefined ? params : ({})
-            }
-        }
-        return {
-            path: normalizePath(pathValue),
-            params: params !== undefined ? params : ({})
-        }
+        return navigationStackModel.createPathEntry(pathValue, params)
     }
 
     function updatePathStack(pathValue, params, mode) {
-        var nextEntry = createPathEntry(pathValue, params)
-        if (mode === "set" || path.length === 0) {
-            setPathInternal([nextEntry])
-        } else if (mode === "replace") {
-            if (path.length === 0)
-                setPathInternal([nextEntry])
-            else {
-                var next = path.slice(0)
-                next[next.length - 1] = nextEntry
-                setPathInternal(next)
-            }
-        } else {
-            var nextPush = path.slice(0)
-            nextPush.push(nextEntry)
-            setPathInternal(nextPush)
-        }
+        navigationStackModel.path = path
+        setPathInternal(navigationStackModel.stackAfterPathOperation(pathValue, params, mode))
     }
 
     function createComponentPathEntry(component, params) {
-        return {
-            path: "",
-            params: params !== undefined ? params : ({}),
-            component: component
-        }
+        return navigationStackModel.createComponentPathEntry(component, params)
     }
 
     function createViewTrackingEntry(entry, index) {
-        if (typeof entry === "string") {
-            var normalized = normalizePath(entry)
-            return {
-                viewId: normalized,
-                path: normalized,
-                enabled: true
-            }
-        }
-
-        if (typeof entry !== "object" || entry === null)
-            return null
-
-        var pathValue = ""
-        if (entry.path !== undefined && entry.path !== null && entry.path !== "")
-            pathValue = normalizePath(entry.path)
-
-        var viewId = ""
-        if (entry.viewId !== undefined && entry.viewId !== null) {
-            var candidate = String(entry.viewId).trim()
-            if (candidate.length > 0)
-                viewId = candidate
-        }
-        if (viewId === "" && pathValue !== "")
-            viewId = pathValue
-        if (viewId === "")
-            viewId = "_component_" + index
-
-        var enabled = true
-        if (entry.enabled !== undefined)
-            enabled = !!entry.enabled
-        if (entry.disabled !== undefined && !!entry.disabled)
-            enabled = false
-        if (entry.params !== undefined && entry.params !== null && entry.params.disabled !== undefined && !!entry.params.disabled)
-            enabled = false
-
-        return {
-            viewId: viewId,
-            path: pathValue,
-            enabled: enabled
-        }
+        return navigationStackModel.createViewTrackingEntry(entry, index)
     }
 
     function buildViewTrackingEntries() {
-        var entries = []
-        if (!path || path.length === undefined)
-            return entries
-
-        for (var i = 0; i < path.length; i++) {
-            var entry = createViewTrackingEntry(path[i], i)
-            if (entry)
-                entries.push(entry)
-        }
-        return entries
+        return navigationStackModel.buildViewTrackingEntries(path)
     }
 
     function syncViewStateTracker() {
@@ -757,21 +673,10 @@ Item {
         if (typeof ViewModels === "undefined" || !ViewModels || !ViewModels.unbindView)
             return
 
-        var nextIds = {}
-        for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i]
-            if (!entry || !entry.viewId)
-                continue
-            nextIds[String(entry.viewId)] = true
-        }
-
-        for (var j = 0; j < _trackedViewIds.length; j++) {
-            var existingId = _trackedViewIds[j]
-            if (!nextIds[existingId])
-                ViewModels.unbindView(existingId)
-        }
-
-        _trackedViewIds = Object.keys(nextIds)
+        const removedIds = navigationStackModel.updateTrackedViewIds(entries)
+        for (var i = 0; i < removedIds.length; i++)
+            ViewModels.unbindView(removedIds[i])
+        _trackedViewIds = navigationStackModel.trackedViewIds
     }
 
     function releaseTrackedViewBindings() {
@@ -780,28 +685,15 @@ Item {
             return
         }
 
-        for (var i = 0; i < _trackedViewIds.length; i++)
-            ViewModels.unbindView(_trackedViewIds[i])
+        const trackedIds = navigationStackModel.trackedViewIds
+        for (var i = 0; i < trackedIds.length; i++)
+            ViewModels.unbindView(trackedIds[i])
         _trackedViewIds = []
     }
 
     function updateComponentPathStack(component, params, mode) {
-        var nextEntry = createComponentPathEntry(component, params)
-        if (mode === "set" || path.length === 0) {
-            setPathInternal([nextEntry])
-        } else if (mode === "replace") {
-            if (path.length === 0)
-                setPathInternal([nextEntry])
-            else {
-                var next = path.slice(0)
-                next[next.length - 1] = nextEntry
-                setPathInternal(next)
-            }
-        } else {
-            var nextPush = path.slice(0)
-            nextPush.push(nextEntry)
-            setPathInternal(nextPush)
-        }
+        navigationStackModel.path = path
+        setPathInternal(navigationStackModel.stackAfterComponentOperation(component, params, mode))
     }
 
 }

@@ -392,6 +392,16 @@ AbstractButton {
     }
 
     function normalizedStringArray(value) {
+        if (typeof value === "string")
+            return value.length > 0 ? [value] : []
+        if (value instanceof String) {
+            const textValue = String(value)
+            return textValue.length > 0 ? [textValue] : []
+        }
+        if (value && value.charAt !== undefined && value.length !== undefined) {
+            const textValue = String(value)
+            return textValue.length > 0 ? [textValue] : []
+        }
         const source = Array.isArray(value) ? value : []
         const normalized = []
         for (let i = 0; i < source.length; i++) {

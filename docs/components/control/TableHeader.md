@@ -55,6 +55,7 @@ LV.TableHeader {
 
 ## How It Works
 
+- `TableHeader` delegates source resolution, typing, and geometry to the C++ `TableHeaderModel`.
 - `cellItems` is the primary contract; legacy `columns` remains fallback.
 - Column text accepts primitive or object entry (`label/text/title/value` fallback).
 - Column type accepts object keys `type`, `valueType`, `cellType`, or `dataType`.
@@ -62,6 +63,10 @@ LV.TableHeader {
 - Optional per-column `contentSpacing`/`horizontalPadding` overrides are supported.
 - Repeater delegates use `columnWidths` when provided, otherwise `fallbackCellWidth`, otherwise equal auto widths.
 - Bottom separator is rendered as dedicated rectangle (`panelBackground10` default).
+
+## Backend Model
+
+`TableHeaderModel` owns `resolvedColumnSource`, column descriptors, type normalization, type inference, padding, column width, and x-offset calculation. `TableHeader.qml` renders model descriptors and keeps legacy helper methods as pass-through API.
 
 ## Typed Header Contract
 
