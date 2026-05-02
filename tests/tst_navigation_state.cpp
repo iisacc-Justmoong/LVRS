@@ -1,5 +1,7 @@
 #include <QtTest>
 
+#include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <QCoreApplication>
 #include <QDir>
 #include <QEvent>
@@ -82,6 +84,242 @@ public:
 
 private:
     QVariantList m_entries;
+};
+
+class EditableHierarchyRows : public QAbstractListModel
+{
+public:
+    enum Roles {
+        KeyRole = Qt::UserRole + 1,
+        NameRole,
+        DepthRole,
+        ParentKeyRole,
+        ParentItemKeyRole
+    };
+
+    explicit EditableHierarchyRows(QObject *parent = nullptr)
+        : QAbstractListModel(parent)
+    {
+        m_rows.append({QStringLiteral("root"), QStringLiteral("Root"), 0, QString()});
+        m_rows.append({QStringLiteral("branch"), QStringLiteral("Branch"), 1, QStringLiteral("root")});
+        m_rows.append({QStringLiteral("leaf"), QStringLiteral("Leaf"), 2, QStringLiteral("branch")});
+        m_rows.append({QStringLiteral("sibling"), QStringLiteral("Sibling"), 0, QString()});
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+
+        const Row &row = m_rows.at(index.row());
+        if (role == KeyRole)
+            return row.key;
+        if (role == NameRole || role == Qt::DisplayRole)
+            return row.name;
+        if (role == DepthRole)
+            return row.depth;
+        if (role == ParentKeyRole || role == ParentItemKeyRole)
+            return row.parentKey;
+
+        return {};
+    }
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return false;
+
+        Row &row = m_rows[index.row()];
+        if (role == DepthRole) {
+            row.depth = qMax(0, value.toInt());
+        } else if (role == ParentKeyRole || role == ParentItemKeyRole) {
+            row.parentKey = value.toString();
+        } else {
+            return false;
+        }
+
+        emit dataChanged(index, index, {role});
+        return true;
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        if (!index.isValid())
+            return Qt::ItemIsDropEnabled;
+        return QAbstractListModel::flags(index)
+            | Qt::ItemIsEditable
+            | Qt::ItemIsDragEnabled
+            | Qt::ItemIsDropEnabled;
+    }
+
+    bool moveRows(const QModelIndex &sourceParent,
+                  int sourceRow,
+                  int count,
+                  const QModelIndex &destinationParent,
+                  int destinationChild) override
+    {
+        if (sourceParent.isValid() || destinationParent.isValid())
+            return false;
+        if (sourceRow < 0 || count <= 0 || sourceRow + count > m_rows.size())
+            return false;
+        if (destinationChild < 0 || destinationChild > m_rows.size())
+            return false;
+        if (destinationChild >= sourceRow && destinationChild <= sourceRow + count)
+            return false;
+
+        beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+        QVector<Row> moved;
+        moved.reserve(count);
+        for (int offset = 0; offset < count; ++offset)
+            moved.append(m_rows.at(sourceRow + offset));
+        for (int offset = 0; offset < count; ++offset)
+            m_rows.removeAt(sourceRow);
+
+        int insertionRow = destinationChild;
+        if (destinationChild > sourceRow)
+            insertionRow -= count;
+        for (int offset = 0; offset < moved.size(); ++offset)
+            m_rows.insert(insertionRow + offset, moved.at(offset));
+        endMoveRows();
+        return true;
+    }
+
+    QHash<int, QByteArray> roleNames() const override
+    {
+        return {
+            {KeyRole, QByteArrayLiteral("key")},
+            {NameRole, QByteArrayLiteral("name")},
+            {DepthRole, QByteArrayLiteral("depth")},
+            {ParentKeyRole, QByteArrayLiteral("parentKey")},
+            {ParentItemKeyRole, QByteArrayLiteral("parentItemKey")},
+        };
+    }
+
+    QString keyAt(int index) const
+    {
+        return index >= 0 && index < m_rows.size() ? m_rows.at(index).key : QString();
+    }
+
+    int depthAt(int index) const
+    {
+        return index >= 0 && index < m_rows.size() ? m_rows.at(index).depth : -1;
+    }
+
+    QString parentKeyAt(int index) const
+    {
+        return index >= 0 && index < m_rows.size() ? m_rows.at(index).parentKey : QString();
+    }
+
+private:
+    struct Row
+    {
+        QString key;
+        QString name;
+        int depth = 0;
+        QString parentKey;
+    };
+
+    QVector<Row> m_rows;
+};
+
+class EditableTableRows : public QAbstractTableModel
+{
+public:
+    explicit EditableTableRows(QObject *parent = nullptr)
+        : QAbstractTableModel(parent)
+    {
+        m_rows.append({QStringLiteral("Renderer"), 3});
+        m_rows.append({QStringLiteral("Writer"), 2});
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : 2;
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+        if (index.column() < 0 || index.column() >= 2)
+            return {};
+
+        const Row &row = m_rows.at(index.row());
+        const QVariant value = index.column() == 0 ? QVariant(row.name) : QVariant(row.count);
+        if (role == Qt::DisplayRole || role == Qt::EditRole)
+            return value;
+        return {};
+    }
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    {
+        if (role != Qt::EditRole || !index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return false;
+        if (index.column() < 0 || index.column() >= 2)
+            return false;
+
+        Row &row = m_rows[index.row()];
+        if (index.column() == 0) {
+            row.name = value.toString();
+        } else {
+            bool ok = false;
+            const int parsed = value.toInt(&ok);
+            if (!ok)
+                return false;
+            row.count = parsed;
+        }
+
+        emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+        return true;
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        if (!index.isValid())
+            return Qt::NoItemFlags;
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    {
+        if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+            return {};
+        if (section == 0)
+            return QStringLiteral("Name");
+        if (section == 1)
+            return QStringLiteral("Count");
+        return {};
+    }
+
+    QVariant valueAt(int row, int column) const
+    {
+        if (row < 0 || row >= m_rows.size())
+            return {};
+        if (column == 0)
+            return m_rows.at(row).name;
+        if (column == 1)
+            return m_rows.at(row).count;
+        return {};
+    }
+
+private:
+    struct Row
+    {
+        QString name;
+        int count = 0;
+    };
+
+    QVector<Row> m_rows;
 };
 
 class DedicatedStatusViewModel : public ViewModel
@@ -704,6 +942,25 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     QVERIFY(moveResult.value(QStringLiteral("accepted")).toBool());
     QCOMPARE(moveResult.value(QStringLiteral("reorderedDescriptors")).toList().size(), 3);
 
+    EditableHierarchyRows editableRows;
+    HierarchyModel editableHierarchyModel;
+    editableHierarchyModel.setLabelRole(QStringLiteral("name"));
+    editableHierarchyModel.setSource(QVariant::fromValue(static_cast<QObject *>(&editableRows)));
+    QCOMPARE(editableHierarchyModel.count(), 4);
+    QVERIFY(editableHierarchyModel.sourceSupportsEditing());
+    const QVariantMap sourceMoveResult = editableHierarchyModel.moveSourceRows(1, 2, 0, 0);
+    QVERIFY(sourceMoveResult.value(QStringLiteral("accepted")).toBool());
+    QVERIFY(sourceMoveResult.value(QStringLiteral("sourceWritten")).toBool());
+    QCOMPARE(editableRows.keyAt(0), QStringLiteral("branch"));
+    QCOMPARE(editableRows.depthAt(0), 0);
+    QCOMPARE(editableRows.parentKeyAt(0), QString());
+    QCOMPARE(editableRows.keyAt(1), QStringLiteral("leaf"));
+    QCOMPARE(editableRows.depthAt(1), 1);
+    QCOMPARE(editableRows.parentKeyAt(1), QStringLiteral("branch"));
+    QCOMPARE(editableRows.keyAt(2), QStringLiteral("root"));
+    QCOMPARE(editableHierarchyModel.descriptorAt(0).value(QStringLiteral("itemKey")).toString(), QStringLiteral("branch"));
+    QCOMPARE(editableHierarchyModel.descriptorAt(1).value(QStringLiteral("indentLevel")).toInt(), 1);
+
     TableHeaderModel headerModel;
     headerModel.setTableWidth(300);
     headerModel.setMinColumnWidth(40);
@@ -761,6 +1018,29 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     QCOMPARE(readOnlyTableModel.cellText(0, 0), QStringLiteral("Model Cell"));
     QVERIFY(!readOnlyTableModel.structureMutationAvailable());
     QVERIFY(!readOnlyTableModel.insertRow(1));
+
+    EditableTableRows editableTableRows;
+    TableModel editableTableModel;
+    editableTableModel.setHeaderCellItems(QVariantList {
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Name")}, {QStringLiteral("type"), QStringLiteral("string")}},
+        QVariantMap {{QStringLiteral("label"), QStringLiteral("Count")}, {QStringLiteral("type"), QStringLiteral("int")}}
+    });
+    editableTableModel.setRows(QVariant::fromValue(static_cast<QObject *>(&editableTableRows)));
+    QCOMPARE(editableTableModel.rowCount(), 2);
+    QCOMPARE(editableTableModel.columnCount(), 2);
+    QVERIFY(editableTableModel.rowsModelBacked());
+    QVERIFY(editableTableModel.cellEditingAvailable());
+    QCOMPARE(editableTableModel.cellText(0, 0), QStringLiteral("Renderer"));
+    QCOMPARE(editableTableModel.cellText(0, 1), QStringLiteral("3"));
+    QVERIFY(editableTableModel.setCellValue(0, 1, QStringLiteral("42")));
+    QCOMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
+    QCOMPARE(editableTableModel.cellText(0, 1), QStringLiteral("42"));
+    QVERIFY(!editableTableModel.setCellValue(0, 1, QStringLiteral("42.5")));
+    QCOMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
+    QVERIFY(editableTableModel.setCellValue(1, 0, QStringLiteral("Compiler")));
+    QCOMPARE(editableTableRows.valueAt(1, 0).toString(), QStringLiteral("Compiler"));
+    QVERIFY(!editableTableModel.structureMutationAvailable());
+    QVERIFY(!editableTableModel.appendColumn());
 
     TableModel layoutTableModel;
     layoutTableModel.setTableWidth(300);

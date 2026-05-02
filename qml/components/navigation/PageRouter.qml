@@ -345,6 +345,10 @@ Item {
         return routes[index]
     }
 
+    function hasInitialPathStack() {
+        return path && path.length !== undefined && path.length > 0
+    }
+
     function markRouteResolverDirty() {
         _routeResolverDirty = true
     }
@@ -472,9 +476,20 @@ Item {
         if (registerAsGlobalNavigator)
             Navigator.registerRouter(root)
         syncRouteResolverRoutes(true)
-        if (initialPath)
+        if (hasInitialPathStack()) {
+            if (stackView.depth === 0)
+                rebuildFromPath()
+            else {
+                applyCurrentFromPathEntry(path[path.length - 1])
+                syncViewStateTracker()
+                scheduleActivePagePresentationSync()
+            }
+        } else if (stackView.depth > 0) {
+            syncViewStateTracker()
+            scheduleActivePagePresentationSync()
+        } else if (initialPath) {
             setRoot(initialPath)
-        else {
+        } else {
             syncViewStateTracker()
             scheduleActivePagePresentationSync()
         }

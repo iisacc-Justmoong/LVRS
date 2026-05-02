@@ -38,7 +38,8 @@ Item {
     property int generatedIconSize: Theme.scaleMetric(16)
     property int generatedChevronSize: Theme.scaleMetric(16)
     property bool autoExpandAncestorsOnActivate: true
-    readonly property bool editableSupported: Array.isArray(model) && depthArraySupportsEditing(model)
+    readonly property bool editableSupported: hierarchyModel.revision >= 0
+        && (hierarchyModel.sourceSupportsEditing() || qmlListModelSupportsEditing())
     readonly property bool editableEnabled: editable && editableSupported
 
     readonly property bool usingTreeModel: hierarchyModel.count > 0
@@ -1274,6 +1275,67 @@ Item {
         return true
     }
 
+    function qmlListModelSupportsEditing() {
+        return model !== undefined
+            && model !== null
+            && !Array.isArray(model)
+            && typeof model === "object"
+            && typeof model.move === "function"
+            && typeof model.setProperty === "function"
+    }
+
+    function parentKeyForEditableDescriptorAt(flatDescriptors, row) {
+        if (!Array.isArray(flatDescriptors) || row < 0 || row >= flatDescriptors.length)
+            return ""
+        const descriptor = flatDescriptors[row]
+        const depth = descriptor ? normalizedDepth(descriptor.indentLevel, 0) : 0
+        if (depth <= 0)
+            return ""
+        for (let i = row - 1; i >= 0; i--) {
+            const candidate = flatDescriptors[i]
+            if (candidate && normalizedDepth(candidate.indentLevel, 0) < depth)
+                return candidate.itemKey === undefined || candidate.itemKey === null ? "" : String(candidate.itemKey)
+        }
+        return ""
+    }
+
+    function applyEditableListModelMove(moveResult) {
+        if (!qmlListModelSupportsEditing() || !moveResult || !moveResult.accepted)
+            return false
+
+        const reorderedDescriptors = modelList(moveResult.reorderedDescriptors)
+        const toIndex = normalizeFromIndex(moveResult.toIndex)
+        const blockSize = Math.max(0, _dragSourceEndIndex - _dragSourceIndex + 1)
+        if (!Array.isArray(reorderedDescriptors) || blockSize <= 0
+                || toIndex < 0 || toIndex + blockSize > reorderedDescriptors.length) {
+            return false
+        }
+
+        if (toIndex !== _dragSourceIndex)
+            model.move(_dragSourceIndex, toIndex, blockSize)
+
+        const depthRoleName = normalizedRoleName(depthRole, "depth")
+        for (let row = toIndex; row < toIndex + blockSize; row++) {
+            const descriptor = reorderedDescriptors[row]
+            if (!descriptor)
+                return false
+            const depth = normalizedDepth(descriptor.indentLevel, 0)
+            const node = descriptor.nodeData
+            if (node && typeof node === "object" && node.indentLevel !== undefined)
+                model.setProperty(row, "indentLevel", depth)
+            if (depthRoleName.length > 0)
+                model.setProperty(row, depthRoleName, depth)
+
+            const parentItemKey = parentKeyForEditableDescriptorAt(reorderedDescriptors, row)
+            if (node && typeof node === "object" && node.parentKey !== undefined)
+                model.setProperty(row, "parentKey", parentItemKey)
+            if (node && typeof node === "object" && node.parentItemKey !== undefined)
+                model.setProperty(row, "parentItemKey", parentItemKey)
+        }
+
+        return true
+    }
+
     function _rawInsertionIndexForDropMode(currentItems, targetItem, dropModeName) {
         const normalizedMode = dropModeName === undefined || dropModeName === null
             ? ""
@@ -1346,7 +1408,7 @@ Item {
     }
 
     function _applyEditableMoveByRawInsertion(item, rawInsertionIndex, targetDepth) {
-        if (!editableEnabled || !usingTreeModel || !item || !Array.isArray(model))
+        if (!editableEnabled || !usingTreeModel || !item)
             return false
 
         const currentItems = collectItems()
@@ -1380,7 +1442,7 @@ Item {
     }
 
     function _applyEditableMove(item, targetIndex, targetDepth) {
-        if (!editableEnabled || !usingTreeModel || !item || !Array.isArray(model))
+        if (!editableEnabled || !usingTreeModel || !item)
             return false
 
         const currentItems = collectItems()
@@ -1395,17 +1457,29 @@ Item {
         if (!editableDescriptors)
             return false
 
-        const moveResult = hierarchyModel.moveDescriptors(editableDescriptors,
-                                                          _dragSourceIndex,
-                                                          _dragSourceEndIndex,
-                                                          normalizeFromIndex(targetIndex),
-                                                          normalizedDepth(targetDepth, 0))
+        const normalizedTargetIndex = normalizeFromIndex(targetIndex)
+        const normalizedTargetDepth = normalizedDepth(targetDepth, 0)
+        const moveResult = Array.isArray(model) || qmlListModelSupportsEditing()
+            ? hierarchyModel.moveDescriptors(editableDescriptors,
+                                             _dragSourceIndex,
+                                             _dragSourceEndIndex,
+                                             normalizedTargetIndex,
+                                             normalizedTargetDepth)
+            : hierarchyModel.moveSourceRows(_dragSourceIndex,
+                                            _dragSourceEndIndex,
+                                            normalizedTargetIndex,
+                                            normalizedTargetDepth)
         if (!moveResult || !moveResult.accepted)
             return false
 
-        const reorderedDescriptors = modelList(moveResult.reorderedDescriptors)
-        if (!applyEditableTreeOrder(reorderedDescriptors))
-            return false
+        if (Array.isArray(model)) {
+            const reorderedDescriptors = modelList(moveResult.reorderedDescriptors)
+            if (!applyEditableTreeOrder(reorderedDescriptors))
+                return false
+        } else if (qmlListModelSupportsEditing()) {
+            if (!applyEditableListModelMove(moveResult))
+                return false
+        }
 
         const movedDescriptor = moveResult.movedDescriptor
         const dropDescriptor = moveResult.drop || ({})
@@ -1519,8 +1593,7 @@ Item {
         if (!_dragActiveInternal
                 || !_dragItem
                 || _dragTargetIndex < 0
-                || _dragTargetDepth < 0
-                || !Array.isArray(model)) {
+                || _dragTargetDepth < 0) {
             return false
         }
         return _applyEditableMove(_dragItem, _dragTargetIndex, _dragTargetDepth)

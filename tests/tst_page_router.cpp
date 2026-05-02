@@ -16,6 +16,7 @@ class PageRouterTests : public QObject
 
 private slots:
     void route_params_are_passed_to_target_component();
+    void default_initial_path_does_not_override_bound_path();
     void component_navigation_keeps_path_stack_in_sync();
     void route_pages_are_isolated_and_forced_to_viewport();
     void page_router_retain_inactive_depth_contract();
@@ -98,6 +99,63 @@ Item {
     const QVariantMap currentParams = root->property("currentParams").toMap();
     QCOMPARE(currentParams.value(QStringLiteral("runId")).toString(), QStringLiteral("42"));
     QCOMPARE(currentParams.value(QStringLiteral("mode")).toString(), QStringLiteral("push"));
+}
+
+void PageRouterTests::default_initial_path_does_not_override_bound_path()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 240
+
+    property bool homeLoaded: false
+    property bool reportsLoaded: false
+    property int depth: router.depth
+    property int pathLength: router.path.length
+    property string currentPath: router.currentPath
+    property string firstPath: router.path.length > 0 ? router.path[0] : ""
+
+    Component {
+        id: homePage
+        Item {
+            Component.onCompleted: root.homeLoaded = true
+        }
+    }
+
+    Component {
+        id: reportsPage
+        Item {
+            Component.onCompleted: root.reportsLoaded = true
+        }
+    }
+
+    LV.PageRouter {
+        id: router
+        anchors.fill: parent
+        path: ["/reports"]
+        routes: [
+            { path: "/", component: homePage },
+            { path: "/reports", component: reportsPage }
+        ]
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    QCOMPARE(root->property("depth").toInt(), 1);
+    QCOMPARE(root->property("pathLength").toInt(), 1);
+    QCOMPARE(root->property("firstPath").toString(), QStringLiteral("/reports"));
+    QCOMPARE(root->property("reportsLoaded").toBool(), true);
+    QCOMPARE(root->property("homeLoaded").toBool(), false);
 }
 
 void PageRouterTests::component_navigation_keeps_path_stack_in_sync()

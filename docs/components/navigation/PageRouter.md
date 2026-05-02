@@ -94,6 +94,7 @@ Navigation methods:
 - Route resolution uses internal `RouteResolver` and cache capacity from `routeResolveCacheCapacity`.
 - `navigate(...)` merges resolved params with caller params.
 - Missing route falls back to not-found target when configured; otherwise emits `navigationFailed`.
+- `initialPath` is used only when no initial `path` stack or existing stack item is already present. A router with `path: [...]` is not reset to the default `initialPath: "/"` during `Component.onCompleted`.
 - `applyPageViewportContract` and `applySingleChildViewportContract` enforce viewport-safe page sizing.
 - When `isolateInactivePages == true`, non-retained stack items are hidden/disabled/opacity-zero.
 - Router can sync bindings with `ViewModels` and snapshot with `ViewStateTracker` when available.

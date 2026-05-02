@@ -84,6 +84,8 @@ Item {
     readonly property int resolvedRowCount: tableModel.rowCount
     readonly property int resolvedHeaderCount: tableModel.headerCount
     readonly property int resolvedColumnCount: tableModel.columnCount
+    readonly property bool rowsModelBacked: tableModel.rowsModelBacked
+    readonly property bool cellEditingAvailable: tableModel.cellEditingAvailable
     readonly property var visibleCellItems: buildVisibleCellItems()
     readonly property bool structureMutationAvailable: tableModel.structureMutationAvailable
     readonly property bool canUndo: tableModel.canUndo
@@ -241,7 +243,8 @@ Item {
                 console.warn("LVRS Table.setCellValue rejected value for " + result.type + " column.")
             return false
         }
-        syncRowsFromModel()
+        if (!rowsModelBacked)
+            syncRowsFromModel()
         return true
     }
 
@@ -270,6 +273,8 @@ Item {
     }
 
     function syncRowsFromModel() {
+        if (rowsModelBacked)
+            return
         _syncingFromTableModel = true
         rows = tableModel.rows
         _syncingFromTableModel = false
@@ -319,7 +324,10 @@ Item {
     }
 
     function refreshRows() {
-        syncRowsFromModel()
+        if (rowsModelBacked)
+            syncRowsToModel()
+        else
+            syncRowsFromModel()
     }
 
     function refreshColumnWidths() {
@@ -397,7 +405,8 @@ Item {
     function undo() {
         if (!tableModel.undo())
             return false
-        syncRowsFromModel()
+        if (!rowsModelBacked)
+            syncRowsFromModel()
         syncHeadersFromModel()
         syncColumnWidthsFromModel()
         syncRowHeightsFromModel()
@@ -407,7 +416,8 @@ Item {
     function redo() {
         if (!tableModel.redo())
             return false
-        syncRowsFromModel()
+        if (!rowsModelBacked)
+            syncRowsFromModel()
         syncHeadersFromModel()
         syncColumnWidthsFromModel()
         syncRowHeightsFromModel()

@@ -1,7 +1,10 @@
 #include "backend/model/hierarchymodel.h"
 
+#include <QAbstractItemModel>
 #include <QJSValue>
 #include <QHash>
+#include <QMetaObject>
+#include <QModelIndex>
 #include <QObject>
 #include <QtMath>
 
@@ -249,6 +252,25 @@ bool HierarchyModel::depthArraySupportsEditing(const QVariant &nodes) const
         }
     }
     return true;
+}
+
+bool HierarchyModel::sourceSupportsEditing() const
+{
+    const QVariant currentSource = m_source.source();
+    if (depthArraySupportsEditing(currentSource))
+        return true;
+
+    if (currentSource.userType() == qMetaTypeId<QJSValue>())
+        return jsModelSupportsEditing(currentSource.value<QJSValue>());
+
+    if (QAbstractItemModel *model = itemModelFromVariant(currentSource))
+        return itemModelSupportsEditing(model);
+
+    QObject *object = objectFromVariant(currentSource);
+    if (!object || qobject_cast<QAbstractItemModel *>(object))
+        return false;
+
+    return objectModelSupportsEditing(object);
 }
 
 QVariantMap HierarchyModel::projectInteractionState(const QVariantList &items) const
@@ -533,6 +555,37 @@ QVariantMap HierarchyModel::moveDescriptors(const QVariantList &items,
     return result;
 }
 
+QVariantMap HierarchyModel::moveSourceRows(int sourceStart, int sourceEnd, int targetIndex, int targetDepth)
+{
+    QVariantMap result = moveDescriptors(m_descriptors,
+                                         sourceStart,
+                                         sourceEnd,
+                                         targetIndex,
+                                         targetDepth);
+    if (!result.value(QStringLiteral("accepted")).toBool())
+        return result;
+
+    const QVariant currentSource = m_source.source();
+    bool written = false;
+    if (currentSource.userType() == qMetaTypeId<QJSValue>()) {
+        written = applyMoveToJsModel(currentSource.value<QJSValue>(), result, sourceStart, sourceEnd);
+    } else if (QAbstractItemModel *model = itemModelFromVariant(currentSource)) {
+        written = applyMoveToItemModel(model, result, sourceStart, sourceEnd);
+    } else if (QObject *object = objectFromVariant(currentSource)) {
+        written = applyMoveToObjectModel(object, result, sourceStart, sourceEnd);
+    }
+
+    if (!written) {
+        result.insert(QStringLiteral("accepted"), false);
+        result.insert(QStringLiteral("sourceWritten"), false);
+        return result;
+    }
+
+    result.insert(QStringLiteral("sourceWritten"), true);
+    m_source.invalidate();
+    return result;
+}
+
 void HierarchyModel::invalidate()
 {
     m_source.invalidate();
@@ -643,6 +696,21 @@ QVariantMap HierarchyModel::dropDescriptorFor(const QVariantList &remainingItems
     };
 }
 
+QObject *HierarchyModel::objectFromVariant(const QVariant &value)
+{
+    QObject *object = nullptr;
+    if (value.canConvert<QObject *>())
+        object = value.value<QObject *>();
+    if (!object)
+        object = qvariant_cast<QObject *>(value);
+    return object;
+}
+
+QAbstractItemModel *HierarchyModel::itemModelFromVariant(const QVariant &value)
+{
+    return qobject_cast<QAbstractItemModel *>(objectFromVariant(value));
+}
+
 bool HierarchyModel::setRole(QString *target, const QString &value)
 {
     if (!target)
@@ -685,6 +753,381 @@ int HierarchyModel::intRole(const QVariant &entry, const QString &roleName, int 
     if (!variantLooksObjectLike(entry))
         return fallbackValue;
     return m_source.intValue(entry, roleName, fallbackValue);
+}
+
+namespace {
+int roleIdForName(QAbstractItemModel *model, const QString &roleName)
+{
+    if (!model)
+        return -1;
+    const QString normalized = roleName.trimmed();
+    if (normalized.isEmpty())
+        return -1;
+    if (normalized == QStringLiteral("display"))
+        return Qt::DisplayRole;
+    if (normalized == QStringLiteral("edit"))
+        return Qt::EditRole;
+
+    const QByteArray roleBytes = normalized.toUtf8();
+    const QHash<int, QByteArray> roles = model->roleNames();
+    for (auto it = roles.cbegin(); it != roles.cend(); ++it) {
+        if (it.value() == roleBytes)
+            return it.key();
+    }
+    return -1;
+}
+
+bool setModelRole(QAbstractItemModel *model, int row, int column, const QString &roleName, const QVariant &value)
+{
+    const int roleId = roleIdForName(model, roleName);
+    if (roleId < 0)
+        return true;
+
+    const QModelIndex index = model->index(row, qMax(0, column), QModelIndex());
+    if (!index.isValid())
+        return false;
+    return model->setData(index, value, roleId);
+}
+
+QString parentKeyForDescriptorAt(const QVariantList &descriptors, int row)
+{
+    if (row < 0 || row >= descriptors.size())
+        return QString();
+
+    auto depthFor = [](const QVariantMap &rowDescriptor) {
+        bool ok = false;
+        const double numericDepth = rowDescriptor.value(QStringLiteral("indentLevel")).toDouble(&ok);
+        return ok && std::isfinite(numericDepth)
+            ? qMax(0, static_cast<int>(qFloor(numericDepth)))
+            : 0;
+    };
+
+    const QVariantMap descriptor = descriptors.at(row).toMap();
+    const int depth = depthFor(descriptor);
+    if (depth <= 0)
+        return QString();
+
+    for (int index = row - 1; index >= 0; --index) {
+        const QVariantMap candidate = descriptors.at(index).toMap();
+        const int candidateDepth = depthFor(candidate);
+        if (candidateDepth < depth)
+            return candidate.value(QStringLiteral("itemKey")).toString();
+    }
+    return QString();
+}
+
+bool objectRoleExists(const QVariant &entry, const QString &roleName)
+{
+    const QString normalized = roleName.trimmed();
+    if (normalized.isEmpty())
+        return false;
+    if (entry.userType() == qMetaTypeId<QJSValue>()) {
+        const QJSValue value = entry.value<QJSValue>();
+        return value.isObject() && !value.property(normalized).isUndefined();
+    }
+    if (entry.canConvert<QVariantMap>())
+        return entry.toMap().contains(normalized);
+    if (entry.canConvert<QObject *>()) {
+        if (QObject *object = entry.value<QObject *>())
+            return object->property(normalized.toUtf8().constData()).isValid();
+    }
+    return false;
+}
+
+bool objectHasInvokable(QObject *object, const char *signature)
+{
+    if (!object || !signature)
+        return false;
+    const QByteArray normalized = QMetaObject::normalizedSignature(signature);
+    return object->metaObject()->indexOfMethod(normalized.constData()) >= 0;
+}
+} // namespace
+
+bool HierarchyModel::jsModelSupportsEditing(const QJSValue &value) const
+{
+    if (!value.isObject())
+        return false;
+
+    const int itemCount = m_source.count();
+    if (itemCount <= 0)
+        return true;
+    return m_descriptors.size() == itemCount;
+}
+
+bool HierarchyModel::itemModelSupportsEditing(QAbstractItemModel *model) const
+{
+    if (!model)
+        return false;
+
+    const bool hasDepthRole = roleIdForName(model, QStringLiteral("indentLevel")) >= 0
+        || roleIdForName(model, m_depthRole) >= 0;
+    if (!hasDepthRole)
+        return false;
+
+    if (model->rowCount(QModelIndex()) <= 0)
+        return true;
+
+    int column = qMax(0, m_source.column());
+    if (column >= model->columnCount(QModelIndex()))
+        column = 0;
+    const QModelIndex first = model->index(0, column, QModelIndex());
+    return !first.isValid() || model->flags(first).testFlag(Qt::ItemIsEditable);
+}
+
+bool HierarchyModel::objectModelSupportsEditing(QObject *object) const
+{
+    if (!object)
+        return false;
+    if (!objectHasInvokable(object, "move(int,int,int)")
+            || !objectHasInvokable(object, "setProperty(int,QString,QVariant)")) {
+        return false;
+    }
+
+    const int itemCount = m_source.count();
+    if (itemCount <= 0)
+        return true;
+    return m_descriptors.size() == itemCount;
+}
+
+bool HierarchyModel::descriptorHasWritableDepthRole(const QVariantMap &descriptor) const
+{
+    const QVariant node = descriptor.value(QStringLiteral("nodeData"));
+    return objectRoleExists(node, QStringLiteral("indentLevel"))
+        || objectRoleExists(node, m_depthRole);
+}
+
+bool HierarchyModel::setJsDescriptorState(QJSValue *instance,
+                                          int row,
+                                          const QVariantMap &descriptor,
+                                          const QString &parentItemKey) const
+{
+    if (!instance || !instance->isObject() || row < 0)
+        return false;
+
+    QJSValue setter = instance->property(QStringLiteral("setProperty"));
+    if (!setter.isCallable())
+        return false;
+
+    auto setProperty = [&](const QString &roleName, const QVariant &value) {
+        if (roleName.trimmed().isEmpty())
+            return false;
+        QJSValueList args;
+        args << QJSValue(row)
+             << QJSValue(roleName)
+             << QJSValue(value.toString());
+        if (value.metaType().id() == QMetaType::Int)
+            args[2] = QJSValue(value.toInt());
+        else if (value.metaType().id() == QMetaType::Bool)
+            args[2] = QJSValue(value.toBool());
+        else if (value.metaType().id() == QMetaType::Double || value.metaType().id() == QMetaType::Float)
+            args[2] = QJSValue(value.toDouble());
+
+        const QJSValue result = setter.callWithInstance(*instance, args);
+        return !result.isError();
+    };
+
+    const QVariant node = descriptor.value(QStringLiteral("nodeData"));
+    const int depth = descriptorIndent(descriptor);
+    bool depthWritten = false;
+    if (objectRoleExists(node, QStringLiteral("indentLevel")))
+        depthWritten = setProperty(QStringLiteral("indentLevel"), depth);
+    if (objectRoleExists(node, m_depthRole))
+        depthWritten = setProperty(m_depthRole, depth) || depthWritten;
+    if (!depthWritten && !m_depthRole.trimmed().isEmpty())
+        depthWritten = setProperty(m_depthRole, depth);
+    if (!depthWritten)
+        return false;
+
+    if (objectRoleExists(node, QStringLiteral("parentKey")))
+        setProperty(QStringLiteral("parentKey"), parentItemKey);
+    if (objectRoleExists(node, QStringLiteral("parentItemKey")))
+        setProperty(QStringLiteral("parentItemKey"), parentItemKey);
+    return true;
+}
+
+bool HierarchyModel::setItemModelDescriptorState(QAbstractItemModel *model,
+                                                 int row,
+                                                 const QVariantMap &descriptor,
+                                                 const QString &parentItemKey) const
+{
+    if (!model || row < 0)
+        return false;
+
+    const int depth = descriptorIndent(descriptor);
+    const bool hasIndentLevelRole = roleIdForName(model, QStringLiteral("indentLevel")) >= 0;
+    const bool hasDepthRole = roleIdForName(model, m_depthRole) >= 0;
+    if (!hasIndentLevelRole && !hasDepthRole)
+        return false;
+
+    bool depthWritten = false;
+    if (hasIndentLevelRole)
+        depthWritten = setModelRole(model, row, m_source.column(), QStringLiteral("indentLevel"), depth);
+    if (hasDepthRole)
+        depthWritten = setModelRole(model, row, m_source.column(), m_depthRole, depth) || depthWritten;
+    if (!depthWritten)
+        return false;
+
+    setModelRole(model, row, m_source.column(), QStringLiteral("parentKey"), parentItemKey);
+    setModelRole(model, row, m_source.column(), QStringLiteral("parentItemKey"), parentItemKey);
+    return true;
+}
+
+bool HierarchyModel::setObjectDescriptorState(QObject *object,
+                                              int row,
+                                              const QVariantMap &descriptor,
+                                              const QString &parentItemKey) const
+{
+    if (!object || row < 0)
+        return false;
+
+    const QVariant currentRow = m_source.at(row);
+    const int depth = descriptorIndent(descriptor);
+    bool depthWritten = false;
+    if (objectRoleExists(currentRow, QStringLiteral("indentLevel"))) {
+        depthWritten = QMetaObject::invokeMethod(object,
+                                                 "setProperty",
+                                                 Q_ARG(int, row),
+                                                 Q_ARG(QString, QStringLiteral("indentLevel")),
+                                                 Q_ARG(QVariant, QVariant(depth)));
+    }
+    if (objectRoleExists(currentRow, m_depthRole)) {
+        depthWritten = QMetaObject::invokeMethod(object,
+                                                 "setProperty",
+                                                 Q_ARG(int, row),
+                                                 Q_ARG(QString, m_depthRole),
+                                                 Q_ARG(QVariant, QVariant(depth))) || depthWritten;
+    }
+    if (!depthWritten)
+        return false;
+
+    if (objectRoleExists(currentRow, QStringLiteral("parentKey"))) {
+        QMetaObject::invokeMethod(object,
+                                  "setProperty",
+                                  Q_ARG(int, row),
+                                  Q_ARG(QString, QStringLiteral("parentKey")),
+                                  Q_ARG(QVariant, QVariant(parentItemKey)));
+    }
+    if (objectRoleExists(currentRow, QStringLiteral("parentItemKey"))) {
+        QMetaObject::invokeMethod(object,
+                                  "setProperty",
+                                  Q_ARG(int, row),
+                                  Q_ARG(QString, QStringLiteral("parentItemKey")),
+                                  Q_ARG(QVariant, QVariant(parentItemKey)));
+    }
+    return true;
+}
+
+bool HierarchyModel::applyMoveToItemModel(QAbstractItemModel *model,
+                                          const QVariantMap &moveResult,
+                                          int sourceStart,
+                                          int sourceEnd) const
+{
+    if (!model || sourceStart < 0 || sourceEnd < sourceStart)
+        return false;
+
+    const int blockSize = sourceEnd - sourceStart + 1;
+    const int toIndex = moveResult.value(QStringLiteral("toIndex")).toInt();
+    const int rowCount = model->rowCount(QModelIndex());
+    if (sourceEnd >= rowCount || toIndex < 0 || toIndex + blockSize > rowCount)
+        return false;
+
+    if (toIndex != sourceStart) {
+        int destinationChild = toIndex;
+        if (toIndex > sourceStart)
+            destinationChild += blockSize;
+        if (!model->moveRows(QModelIndex(), sourceStart, blockSize, QModelIndex(), destinationChild))
+            return false;
+    }
+
+    const QVariantList reordered = moveResult.value(QStringLiteral("reorderedDescriptors")).toList();
+    if (reordered.size() != rowCount)
+        return false;
+
+    for (int offset = 0; offset < blockSize; ++offset) {
+        const int row = toIndex + offset;
+        const QVariantMap descriptor = reordered.at(row).toMap();
+        if (!setItemModelDescriptorState(model, row, descriptor, parentKeyForDescriptorAt(reordered, row)))
+            return false;
+    }
+    return true;
+}
+
+bool HierarchyModel::applyMoveToObjectModel(QObject *object,
+                                            const QVariantMap &moveResult,
+                                            int sourceStart,
+                                            int sourceEnd) const
+{
+    if (!object || sourceStart < 0 || sourceEnd < sourceStart)
+        return false;
+
+    const int blockSize = sourceEnd - sourceStart + 1;
+    const int toIndex = moveResult.value(QStringLiteral("toIndex")).toInt();
+    const int itemCount = m_source.count();
+    if (sourceEnd >= itemCount || toIndex < 0 || toIndex + blockSize > itemCount)
+        return false;
+
+    if (toIndex != sourceStart) {
+        if (!QMetaObject::invokeMethod(object,
+                                       "move",
+                                       Q_ARG(int, sourceStart),
+                                       Q_ARG(int, toIndex),
+                                       Q_ARG(int, blockSize))) {
+            return false;
+        }
+    }
+
+    const QVariantList reordered = moveResult.value(QStringLiteral("reorderedDescriptors")).toList();
+    if (reordered.size() != itemCount)
+        return false;
+
+    for (int offset = 0; offset < blockSize; ++offset) {
+        const int row = toIndex + offset;
+        const QVariantMap descriptor = reordered.at(row).toMap();
+        if (!setObjectDescriptorState(object, row, descriptor, parentKeyForDescriptorAt(reordered, row)))
+            return false;
+    }
+
+    return true;
+}
+
+bool HierarchyModel::applyMoveToJsModel(QJSValue value,
+                                        const QVariantMap &moveResult,
+                                        int sourceStart,
+                                        int sourceEnd) const
+{
+    if (!value.isObject() || sourceStart < 0 || sourceEnd < sourceStart)
+        return false;
+
+    const int blockSize = sourceEnd - sourceStart + 1;
+    const int toIndex = moveResult.value(QStringLiteral("toIndex")).toInt();
+    const int itemCount = m_source.count();
+    if (sourceEnd >= itemCount || toIndex < 0 || toIndex + blockSize > itemCount)
+        return false;
+
+    QJSValue instance = value;
+    if (toIndex != sourceStart) {
+        QJSValue mover = instance.property(QStringLiteral("move"));
+        if (!mover.isCallable())
+            return false;
+        QJSValueList args;
+        args << QJSValue(sourceStart) << QJSValue(toIndex) << QJSValue(blockSize);
+        const QJSValue moveCall = mover.callWithInstance(instance, args);
+        if (moveCall.isError())
+            return false;
+    }
+
+    const QVariantList reordered = moveResult.value(QStringLiteral("reorderedDescriptors")).toList();
+    if (reordered.size() != itemCount)
+        return false;
+
+    for (int offset = 0; offset < blockSize; ++offset) {
+        const int row = toIndex + offset;
+        const QVariantMap descriptor = reordered.at(row).toMap();
+        if (!setJsDescriptorState(&instance, row, descriptor, parentKeyForDescriptorAt(reordered, row)))
+            return false;
+    }
+
+    return true;
 }
 
 void HierarchyModel::rebuildDescriptors()

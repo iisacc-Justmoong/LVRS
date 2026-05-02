@@ -34,6 +34,8 @@ Readonly:
 - `rowCount`
 - `headerCount`
 - `columnCount`
+- `rowsModelBacked`
+- `cellEditingAvailable`
 - `structureMutationAvailable`
 - `resizingColumnIndex`, `resizingRowIndex`
 - `contextRowIndex`, `contextColumnIndex`
@@ -59,17 +61,23 @@ Methods:
 ## How It Works
 
 - Header source resolves from `headerCellItems` first, then `headerColumns`.
+- When `rows` is a `QAbstractItemModel`, `TableModel` keeps the C++ model as the source of truth and builds render rows from `rowCount()`, `columnCount()`, `data(index, Qt::DisplayRole)`, and `data(index, Qt::EditRole)`.
+- If default table headers are still in use, a C++ item model's horizontal `headerData(..., Qt::DisplayRole)` supplies the visible header labels.
 - Header objects may declare `type`, `valueType`, `cellType`, or `dataType`.
 - Primitive headers infer `string`, `int`, `float`, or `bool` from their value.
 - `visibleCells()` returns a flattened render model with `x`, `y`, `width`, and `height`, and excludes covered merge members.
 - Arrays and list-like objects can be displayed, including objects with `count`/`get(index)`.
+- C++ item models can be displayed directly by assigning the model object to `rows`.
+- `setCellValue(rowIndex, columnIndex, value)` writes C++ item-model rows through the standard `QAbstractItemModel::setData(index, coercedValue, Qt::EditRole)` path. If the model exposes named `value`, `edit`, or `text` roles, those roles are attempted after `Qt::EditRole`.
+- C++ item-model edits are source-owned. The model should emit `dataChanged`, `rowsInserted`, `rowsRemoved`, `columnsInserted`, `columnsRemoved`, `layoutChanged`, `modelReset`, or `headerDataChanged` as appropriate; `TableModel` listens to these and refreshes its render descriptors.
 - Structural mutations are accepted only when rows came from a mutable array/list value; read-only list-like objects stay display-only.
+- Row/column structure editing and cell merge/split still require mutable array rows. C++ models own their own structural editing API.
 - Before structural changes, merge metadata is normalized so old spans do not point to the wrong row or column.
 - Row/column insert and delete operations keep `rowHeights` and `columnWidths` aligned with the edited structure.
 - Resize operations are backend mutations and use the same undo stack as data and structure edits.
 - Cell context menus are backend-described. QML only maps descriptors to visible `ContextMenu` items and forwards the selected action.
-- Before each accepted mutation, `TableModel` records a snapshot in `ModelUndoStack`.
-- `undo()` and `redo()` restore `rows`, `headerCellItems`, `headerColumns`, `columnWidths`, `rowHeights`, and row mutability state, then emit the same model/header/geometry change signals used by normal mutations.
+- Before each accepted array-backed mutation, `TableModel` records a snapshot in `ModelUndoStack`.
+- `undo()` and `redo()` restore `rows`, the retained C++ source object when present, `headerCellItems`, `headerColumns`, `columnWidths`, `rowHeights`, and row mutability state, then emit the same model/header/geometry change signals used by normal mutations.
 
 ## QML Boundary
 

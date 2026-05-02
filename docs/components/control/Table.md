@@ -29,6 +29,8 @@ Layout:
 - `columnResizeHandleWidth`, `rowResizeHandleHeight`
 - `resizingColumnIndex`, `resizingRowIndex`
 - `resolvedColumnCount` (readonly)
+- `rowsModelBacked` (readonly; true when `rows` is a C++ `QAbstractItemModel`)
+- `cellEditingAvailable` (readonly; true when a model-backed or array-backed cell edit path exists)
 - `visibleCellItems` (readonly flattened render model)
 - `canUndo`, `canRedo` (readonly)
 - `undoDepth`, `redoDepth` (readonly)
@@ -133,12 +135,14 @@ LV.Table {
 - `TableModel` owns header resolution, body row lookup, column type inference, value coercion, merge/split metadata, and row/column structure mutations.
 - `TableModel` also owns table geometry, row/column resize state, cell context-menu descriptors, and context action dispatch.
 - `Table.qml` forwards model methods to `TableModel`, renders backend-provided cell descriptors, and emits public QML signals after backend mutations succeed.
-- `TableModel` records accepted cell edits, merge/split operations, row/column insert/delete operations, and row/column resize operations in a C++ `ModelUndoStack`.
+- `TableModel` records array-backed cell edits, merge/split operations, row/column insert/delete operations, and row/column resize operations in a C++ `ModelUndoStack`.
+- When `rows` is a C++ `QAbstractItemModel`, `TableModel` keeps that model object as the source and renders from `rowCount`, `columnCount`, `data`, and horizontal `headerData`.
+- Model-backed `setCellValue(...)` calls the source model's `setData(index, coercedValue, Qt::EditRole)`, then falls back to named `value`, `edit`, and `text` roles when present. QML does not replace `rows` with a snapshot after the edit.
 - Header entries define body column types. Objects may declare `type`, `valueType`, `cellType`, or `dataType`; primitive entries infer type from the primitive itself.
 - `TableModel.visibleCells()` already includes `x`, `y`, `width`, and `height`; covered cells are skipped and anchor cells receive merged width/height.
 - Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable` through `TableModel`.
 - Each body `TableCellItem` receives an injected validator from `Table`, which delegates to `TableModel` so inline edits are constrained by the header column type.
-- Header and row counts are resolved for both JS arrays and model-like objects; structure editing stays limited to mutable array/list inputs.
+- Header and row counts are resolved for JS arrays, model-like objects, and C++ item models; structure editing stays limited to mutable array/list inputs.
 - Backend geometry computes width from `columnWidths`, then `cellWidth`, then auto-fit column width.
 - Backend geometry computes height from `rowHeights`, then `rowHeight`.
 - Structure controls reserve a right gutter for row add buttons and a bottom gutter for column add buttons when `rows` is mutable.
@@ -171,7 +175,7 @@ Primitive headers infer type directly:
 headerCellItems: ["Name", 1, 1.5, true]
 ```
 
-`coerceCellValue(value, valueType)` returns `{ accepted, type, value, text }`. `setCellValue(rowIndex, columnIndex, value)` applies the same type check through `TableModel` and syncs accepted values back to `rows`.
+`coerceCellValue(value, valueType)` returns `{ accepted, type, value, text }`. `setCellValue(rowIndex, columnIndex, value)` applies the same type check through `TableModel` and syncs accepted values back to array rows or writes them to the C++ item model through `setData`.
 
 ```qml
 LV.Table {
@@ -250,6 +254,31 @@ LV.Table {
 Runtime structure edits require mutable array rows. Before row/column insertion or deletion, existing span metadata is normalized so stale merged-cell anchors cannot point at the wrong row or column after the structure changes. Column deletion is rejected when the table has only one column left.
 
 The delete context menu is not a table-level popup. Each rendered body cell owns its own `ContextMenu`, and `openContextMenuForCell(...)` rejects non-cell coordinates such as header-only or row-only context requests.
+
+## C++ Model Rows
+
+`rows` can point directly at a C++ `QAbstractItemModel` exposed to QML:
+
+```qml
+LV.Table {
+    inputable: true
+    rows: nativeTableModel
+    headerCellItems: [
+        { label: "Name", type: "string" },
+        { label: "Count", type: "int" }
+    ]
+}
+```
+
+The minimum C++ editing contract is the standard Qt model contract:
+
+```cpp
+QVariant data(const QModelIndex &index, int role) const override;
+bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+Qt::ItemFlags flags(const QModelIndex &index) const override;
+```
+
+Return display/edit values from `Qt::DisplayRole` and `Qt::EditRole`, mark editable cells with `Qt::ItemIsEditable`, and accept updates in `setData(index, value, Qt::EditRole)`. Header labels come from horizontal `headerData(..., Qt::DisplayRole)` unless `headerCellItems` or custom `headerColumns` are supplied.
 
 ## Undo And Redo
 

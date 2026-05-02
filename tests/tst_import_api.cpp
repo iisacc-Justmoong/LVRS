@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <QCoreApplication>
 #include <QDir>
 #include <QGuiApplication>
@@ -118,7 +119,9 @@ public:
         ExpandedRole,
         CounterRole,
         EnabledRole,
-        SelectedRole
+        SelectedRole,
+        ParentKeyRole,
+        ParentItemKeyRole
     };
 
     explicit NativeHierarchyModel(QObject *parent = nullptr)
@@ -154,8 +157,69 @@ public:
             return row.enabled;
         if (role == SelectedRole)
             return row.selected;
+        if (role == ParentKeyRole || role == ParentItemKeyRole)
+            return row.parentKey;
 
         return {};
+    }
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return false;
+
+        Row &row = m_rows[index.row()];
+        if (role == DepthRole) {
+            row.depth = qMax(0, value.toInt());
+        } else if (role == ParentKeyRole || role == ParentItemKeyRole) {
+            row.parentKey = value.toString();
+        } else {
+            return false;
+        }
+
+        emit dataChanged(index, index, {role});
+        return true;
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        if (!index.isValid())
+            return Qt::ItemIsDropEnabled;
+        return QAbstractListModel::flags(index)
+            | Qt::ItemIsEditable
+            | Qt::ItemIsDragEnabled
+            | Qt::ItemIsDropEnabled;
+    }
+
+    bool moveRows(const QModelIndex &sourceParent,
+                  int sourceRow,
+                  int count,
+                  const QModelIndex &destinationParent,
+                  int destinationChild) override
+    {
+        if (sourceParent.isValid() || destinationParent.isValid())
+            return false;
+        if (sourceRow < 0 || count <= 0 || sourceRow + count > m_rows.size())
+            return false;
+        if (destinationChild < 0 || destinationChild > m_rows.size())
+            return false;
+        if (destinationChild >= sourceRow && destinationChild <= sourceRow + count)
+            return false;
+
+        beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+        QVector<Row> moved;
+        moved.reserve(count);
+        for (int offset = 0; offset < count; ++offset)
+            moved.append(m_rows.at(sourceRow + offset));
+        for (int offset = 0; offset < count; ++offset)
+            m_rows.removeAt(sourceRow);
+        int insertionRow = destinationChild;
+        if (destinationChild > sourceRow)
+            insertionRow -= count;
+        for (int offset = 0; offset < moved.size(); ++offset)
+            m_rows.insert(insertionRow + offset, moved.at(offset));
+        endMoveRows();
+        return true;
     }
 
     QHash<int, QByteArray> roleNames() const override
@@ -168,6 +232,8 @@ public:
             {CounterRole, QByteArrayLiteral("counter")},
             {EnabledRole, QByteArrayLiteral("enabled")},
             {SelectedRole, QByteArrayLiteral("selected")},
+            {ParentKeyRole, QByteArrayLiteral("parentKey")},
+            {ParentItemKeyRole, QByteArrayLiteral("parentItemKey")},
         };
     }
 
@@ -195,6 +261,91 @@ private:
         int counter = -1;
         bool enabled = true;
         bool selected = false;
+        QString parentKey;
+    };
+
+    QVector<Row> m_rows;
+};
+
+class NativeTableModel : public QAbstractTableModel
+{
+public:
+    explicit NativeTableModel(QObject *parent = nullptr)
+        : QAbstractTableModel(parent)
+    {
+        m_rows.append({QStringLiteral("Renderer"), 3});
+        m_rows.append({QStringLiteral("Writer"), 2});
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : 2;
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return {};
+        if (index.column() < 0 || index.column() >= 2)
+            return {};
+
+        const Row &row = m_rows.at(index.row());
+        const QVariant value = index.column() == 0 ? QVariant(row.name) : QVariant(row.count);
+        if (role == Qt::DisplayRole || role == Qt::EditRole)
+            return value;
+        return {};
+    }
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
+    {
+        if (role != Qt::EditRole || !index.isValid() || index.row() < 0 || index.row() >= m_rows.size())
+            return false;
+        if (index.column() < 0 || index.column() >= 2)
+            return false;
+
+        Row &row = m_rows[index.row()];
+        if (index.column() == 0) {
+            row.name = value.toString();
+        } else {
+            bool ok = false;
+            const int parsed = value.toInt(&ok);
+            if (!ok)
+                return false;
+            row.count = parsed;
+        }
+
+        emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+        return true;
+    }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        if (!index.isValid())
+            return Qt::NoItemFlags;
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    {
+        if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+            return {};
+        if (section == 0)
+            return QStringLiteral("Name");
+        if (section == 1)
+            return QStringLiteral("Count");
+        return {};
+    }
+
+private:
+    struct Row
+    {
+        QString name;
+        int count = 0;
     };
 
     QVector<Row> m_rows;
@@ -220,6 +371,7 @@ private slots:
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
     void hierarchy_direct_model_contract_loads();
+    void hierarchy_direct_model_editing_contract_loads();
     void hierarchy_nested_children_indent_contract_loads();
     void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_editable_drag_per_item_lock_contract_loads();
@@ -267,6 +419,7 @@ private slots:
     void table_structure_editing_contract_loads();
     void table_resize_contract_loads();
     void table_typed_header_contract_loads();
+    void table_cpp_model_contract_loads();
     void table_undo_redo_contract_loads();
     void list_model_contract_loads();
     void list_item_and_footer_figma_contract_loads();
@@ -1122,6 +1275,168 @@ Item {
                           false);
     QTRY_COMPARE(root->property("nativeListItemCount").toInt(), 4);
     QTRY_VERIFY(root->property("appendedNativeModelReady").toBool());
+}
+
+void ImportApiTests::hierarchy_direct_model_editing_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    NativeHierarchyModel nativeModel;
+    engine.rootContext()->setContextProperty(QStringLiteral("nativeHierarchyModel"), &nativeModel);
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 360
+    height: 360
+
+    ListModel {
+        id: qmlRows
+        ListElement { key: "qml-root"; name: "QML Root"; depth: 0; expanded: true; parentItemKey: "" }
+        ListElement { key: "qml-child"; name: "QML Child"; depth: 1; expanded: false; parentItemKey: "qml-root" }
+        ListElement { key: "qml-sibling"; name: "QML Sibling"; depth: 0; expanded: false; parentItemKey: "" }
+    }
+
+    property int lookupAttempts: 0
+    property bool itemsReady: false
+    property bool nativeMoveIssued: false
+    property bool qmlMoveIssued: false
+    property bool nativeModelMovedReady: false
+    property bool qmlModelMovedReady: false
+    property int moveStateAttempts: 0
+    property string readinessState: ""
+
+    function ensureItems() {
+        if (itemsReady || lookupAttempts >= 80)
+            return
+
+        lookupAttempts += 1
+        const nativeRoot = nativeList.resolveByKey("native-root")
+        const nativeLeaf = nativeList.resolveByKey("native-leaf")
+        const qmlChild = qmlList.resolveByKey("qml-child")
+        const qmlSibling = qmlList.resolveByKey("qml-sibling")
+        readinessState = "attempts=" + lookupAttempts
+            + ", nativeCount=" + nativeList.itemCount
+            + ", qmlCount=" + qmlList.itemCount
+            + ", nativeEditable=" + nativeList.editableSupported
+            + ", qmlEditable=" + qmlList.editableSupported
+            + ", nativeRoot=" + (nativeRoot !== null)
+            + ", nativeLeaf=" + (nativeLeaf !== null)
+            + ", qmlChild=" + (qmlChild !== null)
+            + ", qmlSibling=" + (qmlSibling !== null)
+        if (!nativeRoot || !nativeLeaf || !qmlChild || !qmlSibling
+                || !nativeList.editableSupported
+                || !qmlList.editableSupported) {
+            Qt.callLater(ensureItems)
+            return
+        }
+
+        itemsReady = true
+    }
+
+    function performNativeModelMove() {
+        const leaf = nativeList.resolveByKey("native-leaf")
+        const rootItem = nativeList.resolveByKey("native-root")
+        if (!leaf || !rootItem)
+            return false
+        nativeMoveIssued = leaf.moveBefore(rootItem)
+        moveStateAttempts = 0
+        Qt.callLater(refreshMoveStates)
+        return nativeMoveIssued
+    }
+
+    function performQmlListModelMove() {
+        const child = qmlList.resolveByKey("qml-child")
+        const sibling = qmlList.resolveByKey("qml-sibling")
+        if (!child || !sibling)
+            return false
+        qmlMoveIssued = child.moveAfter(sibling)
+        moveStateAttempts = 0
+        Qt.callLater(refreshMoveStates)
+        return qmlMoveIssued
+    }
+
+    function refreshMoveStates() {
+        nativeModelMovedReady =
+            nativeMoveIssued
+            && nativeList.resolveByKey("native-leaf") !== null
+            && nativeList.resolveByKey("native-leaf").flatIndex === 0
+            && nativeList.resolveByKey("native-leaf").indentLevel === 0
+            && nativeList.resolveByKey("native-root") !== null
+            && nativeList.resolveByKey("native-root").flatIndex === 1
+
+        qmlModelMovedReady =
+            qmlMoveIssued
+            && qmlRows.get(2).key === "qml-child"
+            && qmlRows.get(2).depth === 0
+            && qmlRows.get(2).parentItemKey === ""
+            && qmlList.resolveByKey("qml-child") !== null
+            && qmlList.resolveByKey("qml-child").flatIndex === 2
+            && qmlList.resolveByKey("qml-child").indentLevel === 0
+
+        if ((!nativeModelMovedReady && nativeMoveIssued) || (!qmlModelMovedReady && qmlMoveIssued)) {
+            if (moveStateAttempts < 80) {
+                moveStateAttempts += 1
+                Qt.callLater(refreshMoveStates)
+            }
+        }
+    }
+
+    LV.HierarchyList {
+        id: nativeList
+        width: 260
+        height: 260
+        editable: true
+        model: nativeHierarchyModel
+        itemKeyRole: "key"
+        labelRole: "name"
+        depthRole: "depth"
+        countRole: "counter"
+        expandedRole: "expanded"
+        selectedRole: "selected"
+        enabledRole: "enabled"
+    }
+
+    LV.HierarchyList {
+        id: qmlList
+        x: 280
+        width: 260
+        height: 260
+        editable: true
+        model: qmlRows
+        itemKeyRole: "key"
+        labelRole: "name"
+        depthRole: "depth"
+        expandedRole: "expanded"
+    }
+
+    Component.onCompleted: Qt.callLater(root.ensureItems)
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("itemsReady").toBool(),
+                 qPrintable(root->property("readinessState").toString()));
+
+    QVariant nativeMovePerformed;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "performNativeModelMove",
+                                      Q_RETURN_ARG(QVariant, nativeMovePerformed)));
+    QVERIFY(nativeMovePerformed.toBool());
+    QTRY_VERIFY(root->property("nativeModelMovedReady").toBool());
+
+    QVariant qmlMovePerformed;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "performQmlListModelMove",
+                                      Q_RETURN_ARG(QVariant, qmlMovePerformed)));
+    QVERIFY(qmlMovePerformed.toBool());
+    QTRY_VERIFY(root->property("qmlModelMovedReady").toBool());
 }
 
 void ImportApiTests::hierarchy_nested_children_indent_contract_loads()
@@ -5722,6 +6037,86 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("typedHeaderContractReady").toBool());
+}
+
+void ImportApiTests::table_cpp_model_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    NativeTableModel nativeTableModel;
+    QQmlContext context(engine.rootContext());
+    context.setContextProperty(QStringLiteral("nativeTableModel"), &nativeTableModel);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property bool displayReady: false
+    property bool editingReady: false
+
+    LV.Table {
+        id: displayTable
+        visible: false
+        width: 240
+        height: 96
+        structureControlsVisible: false
+        rows: nativeTableModel
+    }
+
+    LV.Table {
+        id: editTable
+        visible: false
+        width: 240
+        height: 96
+        structureControlsVisible: false
+        inputable: true
+        headerCellItems: [
+            { label: "Name", type: "string" },
+            { label: "Count", type: "int" }
+        ]
+        rows: nativeTableModel
+    }
+
+    function runContract() {
+        displayReady = displayTable.rowsModelBacked
+            && displayTable.resolvedRowCount === 2
+            && displayTable.resolvedColumnCount === 2
+            && displayTable.resolvedHeaderCount === 2
+            && displayTable.headerAt(0).label === "Name"
+            && displayTable.headerAt(1).label === "Count"
+            && displayTable.cellText(0, 0) === "Renderer"
+            && displayTable.cellText(0, 1) === "3"
+
+        const editOk = editTable.setCellValue(0, 1, "11")
+        const rejectOk = !editTable.setCellValue(0, 1, "11.5")
+        editingReady = editTable.rowsModelBacked
+            && editTable.cellEditingAvailable
+            && editTable.cellText(0, 1) === "11"
+            && displayTable.cellText(0, 1) === "11"
+            && editTable.rows === nativeTableModel
+            && editOk
+            && rejectOk
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool cppModelContractReady: displayReady && editingReady
+}
+)";
+
+    QQmlComponent component(&engine);
+    component.setData(qml, QUrl());
+    QScopedPointer<QObject> root(component.create(&context));
+    if (component.isError()) {
+        const auto errors = component.errors();
+        for (const auto &err : errors)
+            qWarning() << err;
+    }
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("cppModelContractReady").toBool());
 }
 
 void ImportApiTests::table_undo_redo_contract_loads()

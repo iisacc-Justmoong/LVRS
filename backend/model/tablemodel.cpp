@@ -1,8 +1,11 @@
 #include "backend/model/tablemodel.h"
 
+#include <QAbstractItemModel>
 #include <QJSValue>
 #include <QMetaObject>
 #include <QtMath>
+
+#include <utility>
 
 namespace {
 QVariantMap resultMap(bool accepted, const QString &type, const QVariant &value, const QString &text)
@@ -64,6 +67,56 @@ QObject *objectFromVariant(const QVariant &value)
         object = qvariant_cast<QObject *>(value);
     return object;
 }
+
+int roleIdForName(QAbstractItemModel *model, const QByteArray &name)
+{
+    if (!model)
+        return -1;
+    const QHash<int, QByteArray> roles = model->roleNames();
+    for (auto it = roles.cbegin(); it != roles.cend(); ++it) {
+        if (it.value() == name)
+            return it.key();
+    }
+    return -1;
+}
+
+QVariantMap cellMapFromModelIndex(QAbstractItemModel *model, const QModelIndex &index)
+{
+    if (!model || !index.isValid())
+        return {};
+
+    QVariantMap result;
+    const QHash<int, QByteArray> roles = model->roleNames();
+    for (auto it = roles.cbegin(); it != roles.cend(); ++it) {
+        const QString key = QString::fromUtf8(it.value());
+        if (key.isEmpty())
+            continue;
+        const QVariant roleData = model->data(index, it.key());
+        if (roleData.isValid())
+            result.insert(key, roleData);
+    }
+
+    const QVariant displayValue = model->data(index, Qt::DisplayRole);
+    const QVariant editValue = model->data(index, Qt::EditRole);
+    if (displayValue.isValid())
+        result.insert(QStringLiteral("display"), displayValue);
+    if (editValue.isValid())
+        result.insert(QStringLiteral("edit"), editValue);
+    if (!result.contains(QStringLiteral("value"))) {
+        if (editValue.isValid())
+            result.insert(QStringLiteral("value"), editValue);
+        else if (displayValue.isValid())
+            result.insert(QStringLiteral("value"), displayValue);
+    }
+    if (!result.contains(QStringLiteral("text"))) {
+        const QVariant textValue = displayValue.isValid()
+            ? displayValue
+            : result.value(QStringLiteral("value"));
+        if (textValue.isValid() && !textValue.isNull())
+            result.insert(QStringLiteral("text"), textValue.toString());
+    }
+    return result;
+}
 } // namespace
 
 TableModel::TableModel(QObject *parent)
@@ -76,6 +129,7 @@ TableModel::TableModel(QObject *parent)
         QVariantList {QStringLiteral("Text"), QStringLiteral("Text"), QStringLiteral("Text")},
         QVariantList {QStringLiteral("Text"), QStringLiteral("Text"), QStringLiteral("Text")}
     };
+    m_rowsSource = m_rows;
     connect(&m_undoStack, &ModelUndoStack::stackChanged, this, &TableModel::undoStackChanged);
 }
 
@@ -88,13 +142,14 @@ void TableModel::setRows(const QVariant &rows)
 {
     const QVariantList next = listFromVariant(rows);
     const bool mutableRows = isMutableListVariant(rows);
-    if (m_rows == next && m_rowsStructureMutable == mutableRows)
-        return;
+    m_rowsSource = rows;
     m_rows = next;
     m_rowsStructureMutable = mutableRows;
+    reconnectRowsSourceSignals();
     clearHistory();
     bumpRevision();
     emit rowsChanged();
+    emit headersChanged();
     emit geometryChanged();
     emit modelChanged();
 }
@@ -330,6 +385,29 @@ bool TableModel::structureMutationAvailable() const
     return canMutateStructureInternal();
 }
 
+bool TableModel::rowsModelBacked() const
+{
+    return itemModelFromVariant(m_rowsSource) != nullptr;
+}
+
+bool TableModel::cellEditingAvailable() const
+{
+    QAbstractItemModel *model = itemModelFromVariant(m_rowsSource);
+    if (!model)
+        return canMutateStructureInternal();
+
+    const int rows = model->rowCount(QModelIndex());
+    const int columns = model->columnCount(QModelIndex());
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
+            const QModelIndex index = model->index(row, column, QModelIndex());
+            if (index.isValid() && model->flags(index).testFlag(Qt::ItemIsEditable))
+                return true;
+        }
+    }
+    return false;
+}
+
 int TableModel::revision() const
 {
     return m_revision;
@@ -532,6 +610,9 @@ bool TableModel::setCellValue(int rowIndex, int columnIndex, const QVariant &val
     const QVariantMap result = validateCellInput(rowIndex, columnIndex, value);
     if (!result.value(QStringLiteral("accepted")).toBool())
         return false;
+
+    if (QAbstractItemModel *model = itemModelFromVariant(m_rowsSource))
+        return setItemModelCellValue(model, rowIndex, columnIndex, result);
 
     if (!canMutateStructureInternal() || rowIndex < 0 || rowIndex >= m_rows.size())
         return false;
@@ -1213,6 +1294,8 @@ QVariantList TableModel::listFromVariant(const QVariant &value)
             result.append(jsEntryAt(jsValue, index));
         return result;
     }
+    if (QAbstractItemModel *model = itemModelFromVariant(value))
+        return rowsFromItemModel(model);
     if (value.canConvert<QVariantList>())
         return value.toList();
     if (value.canConvert<QStringList>()) {
@@ -1261,6 +1344,31 @@ QVariantMap TableModel::mapFromVariant(const QVariant &value)
     return {};
 }
 
+QAbstractItemModel *TableModel::itemModelFromVariant(const QVariant &value)
+{
+    return qobject_cast<QAbstractItemModel *>(objectFromVariant(value));
+}
+
+QVariantList TableModel::rowsFromItemModel(QAbstractItemModel *model)
+{
+    if (!model)
+        return {};
+
+    const QModelIndex parent;
+    const int rows = qMax(0, model->rowCount(parent));
+    const int columns = qMax(0, model->columnCount(parent));
+    QVariantList result;
+    result.reserve(rows);
+    for (int row = 0; row < rows; ++row) {
+        QVariantList rowItems;
+        rowItems.reserve(columns);
+        for (int column = 0; column < columns; ++column)
+            rowItems.append(cellMapFromModelIndex(model, model->index(row, column, parent)));
+        result.append(QVariant(rowItems));
+    }
+    return result;
+}
+
 bool TableModel::isListLike(const QVariant &value)
 {
     if (!value.isValid() || value.isNull())
@@ -1282,6 +1390,8 @@ bool TableModel::isMutableListVariant(const QVariant &value)
         return false;
     if (value.userType() == qMetaTypeId<QJSValue>())
         return value.value<QJSValue>().isArray();
+    if (itemModelFromVariant(value))
+        return false;
     return value.canConvert<QVariantList>() || value.canConvert<QStringList>();
 }
 
@@ -1351,6 +1461,10 @@ QVariant TableModel::headerSourceVariant() const
 {
     if (m_headerCellItems.isValid() && !m_headerCellItems.isNull())
         return m_headerCellItems;
+    if (QAbstractItemModel *model = itemModelFromVariant(m_rowsSource)) {
+        if (usingDefaultHeaderColumns())
+            return headersFromItemModel(model);
+    }
     return m_headerColumns;
 }
 
@@ -1359,10 +1473,49 @@ QVariantList TableModel::headerSourceList() const
     return listFromVariant(headerSourceVariant());
 }
 
+QVariantList TableModel::headersFromItemModel(QAbstractItemModel *model) const
+{
+    if (!model)
+        return {};
+
+    const QModelIndex parent;
+    const int columns = qMax(0, model->columnCount(parent));
+    QVariantList result;
+    result.reserve(columns);
+    for (int column = 0; column < columns; ++column) {
+        const QVariant displayValue = model->headerData(column, Qt::Horizontal, Qt::DisplayRole);
+        const QVariant labelValue = displayValue.isValid() && !displayValue.isNull()
+            ? displayValue
+            : QVariant(m_defaultHeaderText);
+        result.append(QVariantMap {
+            {QStringLiteral("label"), labelValue.toString()}
+        });
+    }
+    return result;
+}
+
+bool TableModel::usingDefaultHeaderColumns() const
+{
+    if (m_headerCellItems.isValid() && !m_headerCellItems.isNull())
+        return false;
+
+    const QVariantList headers = listFromVariant(m_headerColumns);
+    if (headers.size() != 3)
+        return false;
+
+    for (const QVariant &entry : headers) {
+        const QString text = entry.toString();
+        if (text != QStringLiteral("Column") && text != m_defaultHeaderText)
+            return false;
+    }
+    return true;
+}
+
 QVariantMap TableModel::snapshot() const
 {
     return QVariantMap {
         {QStringLiteral("rows"), m_rows},
+        {QStringLiteral("rowsSource"), m_rowsSource},
         {QStringLiteral("headerCellItems"), m_headerCellItems},
         {QStringLiteral("headerColumns"), m_headerColumns},
         {QStringLiteral("columnWidths"), m_columnWidths},
@@ -1378,11 +1531,17 @@ void TableModel::restoreSnapshot(const QVariant &snapshot)
         return;
 
     m_rows = map.value(QStringLiteral("rows")).toList();
+    m_rowsSource = map.value(QStringLiteral("rowsSource"), m_rows);
     m_headerCellItems = map.value(QStringLiteral("headerCellItems"));
     m_headerColumns = map.value(QStringLiteral("headerColumns"));
     m_columnWidths = map.value(QStringLiteral("columnWidths")).toList();
     m_rowHeights = map.value(QStringLiteral("rowHeights")).toList();
     m_rowsStructureMutable = map.value(QStringLiteral("rowsStructureMutable"), true).toBool();
+    reconnectRowsSourceSignals();
+    if (rowsModelBacked()) {
+        m_rows = listFromVariant(m_rowsSource);
+        m_rowsStructureMutable = isMutableListVariant(m_rowsSource);
+    }
 
     m_resizingColumnIndex = -1;
     m_resizingRowIndex = -1;
@@ -1415,6 +1574,76 @@ void TableModel::bumpRevision()
     emit revisionChanged();
 }
 
+void TableModel::reconnectRowsSourceSignals()
+{
+    for (const QMetaObject::Connection &connection : std::as_const(m_rowsSourceConnections))
+        QObject::disconnect(connection);
+    m_rowsSourceConnections.clear();
+    m_rowsSourceObject = objectFromVariant(m_rowsSource);
+
+    QAbstractItemModel *model = itemModelFromVariant(m_rowsSource);
+    if (!model)
+        return;
+
+    auto refreshRows = [this]() {
+        refreshRowsFromSource(true);
+    };
+    m_rowsSourceConnections.append(connect(model,
+                                           &QAbstractItemModel::dataChanged,
+                                           this,
+                                           [this](const QModelIndex &, const QModelIndex &, const QList<int> &) {
+                                               refreshRowsFromSource(true);
+                                           }));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::rowsInserted, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::rowsRemoved, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::rowsMoved, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::columnsInserted, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::columnsRemoved, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::columnsMoved, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::layoutChanged, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model, &QAbstractItemModel::modelReset, this, refreshRows));
+    m_rowsSourceConnections.append(connect(model,
+                                           &QAbstractItemModel::headerDataChanged,
+                                           this,
+                                           [this](Qt::Orientation, int, int) {
+                                               refreshRowsFromSource(true);
+                                           }));
+    m_rowsSourceConnections.append(connect(model, &QObject::destroyed, this, [this]() {
+        m_rowsSourceConnections.clear();
+        m_rowsSourceObject.clear();
+        m_rowsSource = QVariant();
+        m_rows.clear();
+        m_rowsStructureMutable = false;
+        clearHistory();
+        bumpRevision();
+        emit rowsChanged();
+        emit headersChanged();
+        emit geometryChanged();
+        emit modelChanged();
+    }));
+}
+
+void TableModel::refreshRowsFromSource(bool emitSignals)
+{
+    if (m_refreshingRowsSource)
+        return;
+
+    m_refreshingRowsSource = true;
+    m_rows = listFromVariant(m_rowsSource);
+    m_rowsStructureMutable = isMutableListVariant(m_rowsSource);
+    m_refreshingRowsSource = false;
+
+    if (!emitSignals)
+        return;
+
+    clearHistory();
+    bumpRevision();
+    emit rowsChanged();
+    emit headersChanged();
+    emit geometryChanged();
+    emit modelChanged();
+}
+
 bool TableModel::canMutateStructureInternal() const
 {
     if (!m_rowsStructureMutable)
@@ -1425,6 +1654,56 @@ bool TableModel::canMutateStructureInternal() const
         if (!isListLike(row))
             return false;
     }
+    return true;
+}
+
+bool TableModel::setItemModelCellValue(QAbstractItemModel *model,
+                                       int rowIndex,
+                                       int columnIndex,
+                                       const QVariantMap &coercedValue)
+{
+    if (!model || rowIndex < 0 || columnIndex < 0)
+        return false;
+
+    const QModelIndex parent;
+    if (rowIndex >= model->rowCount(parent) || columnIndex >= model->columnCount(parent))
+        return false;
+
+    const QModelIndex index = model->index(rowIndex, columnIndex, parent);
+    if (!index.isValid())
+        return false;
+
+    const QVariant value = coercedValue.value(QStringLiteral("value"));
+    const int valueRole = roleIdForName(model, QByteArrayLiteral("value"));
+    const int editRole = roleIdForName(model, QByteArrayLiteral("edit"));
+    const int textRole = roleIdForName(model, QByteArrayLiteral("text"));
+    QList<int> roles {Qt::EditRole};
+    const QList<int> fallbackRoles {
+        valueRole,
+        editRole,
+        textRole,
+        static_cast<int>(Qt::DisplayRole)
+    };
+    for (int role : fallbackRoles) {
+        if (role >= 0 && !roles.contains(role))
+            roles.append(role);
+    }
+
+    bool accepted = false;
+    m_refreshingRowsSource = true;
+    for (int role : roles) {
+        if (model->setData(index, value, role)) {
+            accepted = true;
+            break;
+        }
+    }
+    m_refreshingRowsSource = false;
+
+    if (!accepted)
+        return false;
+
+    refreshRowsFromSource(false);
+    emitRowsMutated();
     return true;
 }
 
@@ -1610,6 +1889,8 @@ bool TableModel::applyRowHeight(int rowIndex, int heightValue, bool recordHistor
 
 void TableModel::emitRowsMutated()
 {
+    if (!rowsModelBacked())
+        m_rowsSource = m_rows;
     bumpRevision();
     emit rowsChanged();
     emit geometryChanged();

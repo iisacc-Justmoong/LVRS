@@ -7,6 +7,9 @@
 #include <QVariantList>
 #include <QtQml/qqml.h>
 
+class QAbstractItemModel;
+class QJSValue;
+
 class HierarchyModel : public QObject
 {
     Q_OBJECT
@@ -94,6 +97,7 @@ public:
                                    const QString &roleName,
                                    const QVariant &fallbackValue = QVariant()) const;
     Q_INVOKABLE bool depthArraySupportsEditing(const QVariant &nodes) const;
+    Q_INVOKABLE bool sourceSupportsEditing() const;
     Q_INVOKABLE QVariantMap projectInteractionState(const QVariantList &items) const;
     Q_INVOKABLE int descendantRangeEnd(const QVariantList &items, int itemIndex) const;
     Q_INVOKABLE QVariantMap resolveDragTarget(const QVariantList &items,
@@ -108,6 +112,10 @@ public:
                                             int sourceEnd,
                                             int targetIndex,
                                             int targetDepth) const;
+    Q_INVOKABLE QVariantMap moveSourceRows(int sourceStart,
+                                           int sourceEnd,
+                                           int targetIndex,
+                                           int targetDepth);
     Q_INVOKABLE void invalidate();
 
 signals:
@@ -126,6 +134,8 @@ private:
     static QString descriptorKey(const QVariantMap &descriptor, int index);
     static QString descriptorLabel(const QVariantMap &descriptor, int index);
     static QVariantMap dropDescriptorFor(const QVariantList &remainingItems, int insertionIndex, int depth);
+    static QObject *objectFromVariant(const QVariant &value);
+    static QAbstractItemModel *itemModelFromVariant(const QVariant &value);
 
     bool setRole(QString *target, const QString &value);
     QVariant firstRoleValue(const QVariant &entry,
@@ -133,6 +143,34 @@ private:
                             const QVariant &fallbackValue = QVariant()) const;
     bool boolRole(const QVariant &entry, const QString &roleName, bool fallbackValue) const;
     int intRole(const QVariant &entry, const QString &roleName, int fallbackValue) const;
+    bool jsModelSupportsEditing(const QJSValue &value) const;
+    bool itemModelSupportsEditing(QAbstractItemModel *model) const;
+    bool objectModelSupportsEditing(QObject *object) const;
+    bool descriptorHasWritableDepthRole(const QVariantMap &descriptor) const;
+    bool setJsDescriptorState(QJSValue *instance,
+                              int row,
+                              const QVariantMap &descriptor,
+                              const QString &parentItemKey) const;
+    bool setItemModelDescriptorState(QAbstractItemModel *model,
+                                     int row,
+                                     const QVariantMap &descriptor,
+                                     const QString &parentItemKey) const;
+    bool setObjectDescriptorState(QObject *object,
+                                  int row,
+                                  const QVariantMap &descriptor,
+                                  const QString &parentItemKey) const;
+    bool applyMoveToItemModel(QAbstractItemModel *model,
+                              const QVariantMap &moveResult,
+                              int sourceStart,
+                              int sourceEnd) const;
+    bool applyMoveToObjectModel(QObject *object,
+                                const QVariantMap &moveResult,
+                                int sourceStart,
+                                int sourceEnd) const;
+    bool applyMoveToJsModel(QJSValue value,
+                            const QVariantMap &moveResult,
+                            int sourceStart,
+                            int sourceEnd) const;
     void rebuildDescriptors();
 
     ModelSource m_source;

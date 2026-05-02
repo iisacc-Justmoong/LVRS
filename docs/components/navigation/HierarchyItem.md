@@ -185,12 +185,12 @@ Visual tokens:
 - `countView` replaces the default trailing count label; if the custom view exposes `count` and/or `hierarchyItem` properties, `HierarchyItem` synchronizes them after load.
 - The detailed Figma component (`314:93`) defines three canonical visual fills: `Default` = transparent, `Inactive` = `Theme.panelBackground12`, `Active` = `Theme.accentBlueMuted`.
 - `HierarchyList` synchronizes parent/child/order/path metadata onto each managed row.
-- Item-level drag/drop is initiated and committed from `HierarchyItem`; `HierarchyList` only supplies the backing projection and array rewrite.
+- Item-level drag/drop is initiated and committed from `HierarchyItem`; `HierarchyList` supplies the backing projection and delegates source mutation to the hierarchy model.
 - `childCount` is the immediate child count; `descendantCount` is the full subtree count below the row.
 - `visibleDescendantCount` counts only currently visible descendants under the row, so collapsed descendants remain measurable through `hiddenDescendantCount`.
 - `childItemKeysText` and `childItemLabelsText` provide the string-form child summary requested by consumers that do not want to inspect arrays directly.
 - `ancestor*`, `pathItem*`, and sibling-count fields expose lineage and local ordering directly on the row without an additional lookup back into `HierarchyList`.
-- Dragging a generated row rewrites the connected flat depth-array model in place: row order changes, moved subtree depth changes, and `parentKey` / `parentItemKey` are recomputed on the backing objects.
+- Dragging a generated row rewrites the connected flat depth model in place: row order changes, moved subtree depth changes, and `parentKey` / `parentItemKey` are recomputed on array objects or writable model roles.
 - `dragAllowed` lets hosts keep a row selectable and visible while preventing drag startup for protected nodes inside an otherwise editable hierarchy.
 - On mobile targets (`Theme.mobileTarget == true`), pointer drag startup is delayed until the row is held for `1000ms`; desktop targets keep immediate drag pickup.
 - On mobile targets, touch activation is committed on release/click instead of press, so surrounding `Flickable` surfaces can steal the gesture for scrolling before the row becomes active.

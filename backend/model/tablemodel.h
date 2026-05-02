@@ -3,10 +3,14 @@
 #include "backend/model/modelundostack.h"
 
 #include <QObject>
+#include <QMetaObject>
+#include <QPointer>
 #include <QVariant>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtQml/qqml.h>
+
+class QAbstractItemModel;
 
 class TableModel : public QObject
 {
@@ -33,6 +37,8 @@ class TableModel : public QObject
     Q_PROPERTY(int rowCount READ rowCount NOTIFY rowsChanged)
     Q_PROPERTY(int headerCount READ headerCount NOTIFY headersChanged)
     Q_PROPERTY(int columnCount READ columnCount NOTIFY modelChanged)
+    Q_PROPERTY(bool rowsModelBacked READ rowsModelBacked NOTIFY rowsChanged)
+    Q_PROPERTY(bool cellEditingAvailable READ cellEditingAvailable NOTIFY rowsChanged)
     Q_PROPERTY(bool structureMutationAvailable READ structureMutationAvailable NOTIFY rowsChanged)
     Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
     Q_PROPERTY(ModelUndoStack *undoStack READ undoStack CONSTANT)
@@ -91,6 +97,8 @@ public:
     int rowCount() const;
     int headerCount() const;
     int columnCount() const;
+    bool rowsModelBacked() const;
+    bool cellEditingAvailable() const;
     bool structureMutationAvailable() const;
     int revision() const;
     ModelUndoStack *undoStack();
@@ -192,6 +200,8 @@ signals:
 private:
     static QVariantList listFromVariant(const QVariant &value);
     static QVariantMap mapFromVariant(const QVariant &value);
+    static QAbstractItemModel *itemModelFromVariant(const QVariant &value);
+    static QVariantList rowsFromItemModel(QAbstractItemModel *model);
     static bool isListLike(const QVariant &value);
     static bool isMutableListVariant(const QVariant &value);
     static QVariant entryAt(const QVariant &value, int index);
@@ -211,12 +221,17 @@ private:
 
     QVariant headerSourceVariant() const;
     QVariantList headerSourceList() const;
+    QVariantList headersFromItemModel(QAbstractItemModel *model) const;
+    bool usingDefaultHeaderColumns() const;
     QVariantMap snapshot() const;
     void restoreSnapshot(const QVariant &snapshot);
     void clearHistory();
     void recordUndoSnapshot();
     void bumpRevision();
+    void reconnectRowsSourceSignals();
+    void refreshRowsFromSource(bool emitSignals);
     bool canMutateStructureInternal() const;
+    bool setItemModelCellValue(QAbstractItemModel *model, int rowIndex, int columnIndex, const QVariantMap &coercedValue);
     bool isValidBodyCell(int rowIndex, int columnIndex) const;
     QVariantMap normalizeCellObject(int rowIndex, int columnIndex);
     bool setCellObject(int rowIndex, int columnIndex, const QVariantMap &cell);
@@ -236,6 +251,9 @@ private:
     void emitHeadersMutated(bool cellItemsChanged, bool columnsChanged);
 
     QVariantList m_rows;
+    QVariant m_rowsSource;
+    QPointer<QObject> m_rowsSourceObject;
+    QList<QMetaObject::Connection> m_rowsSourceConnections;
     QVariant m_headerCellItems;
     QVariant m_headerColumns = QVariant(QStringList {QStringLiteral("Column"), QStringLiteral("Column"), QStringLiteral("Column")});
     QVariantList m_columnWidths;
@@ -260,4 +278,5 @@ private:
     int m_revision = 0;
     bool m_inputable = false;
     bool m_rowsStructureMutable = true;
+    bool m_refreshingRowsSource = false;
 };

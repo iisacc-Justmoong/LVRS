@@ -124,7 +124,7 @@ LV.Hierarchy {
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
 - `WheelScrollGuard` is installed to prevent nested scroll bleed.
 - Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.
-- `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must be an array-backed object depth list.
+- `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must expose mutable object rows with depth state, either as an object array, QML `ListModel`/list-like model, or C++ `QAbstractItemModel` with writable depth roles and row moving.
 - In mobile-target runs, editable row drag requires a `1000ms` long press before `HierarchyItem` enters drag/drop mode, which preserves touch scrolling priority inside the panel `Flickable`.
 - In mobile-target runs, row activation also commits on release/click instead of press, so a vertical drag can still be claimed by the list scroll path before the active row changes.
 - Mobile-target list scrolling now enables overshoot + rebound (`DragAndOvershootBounds`/`FollowBoundsBehavior`) and tuned flick momentum (`listFlickDeceleration`, `listMaximumFlickVelocity`) for iOS-like inertial feel at edges.
