@@ -108,6 +108,27 @@ FocusScope {
         property int selectionAnchorPosition: -1
         property bool mouseSelectionMoved: false
 
+        function focusInputSurface() {
+            if (inputAdapter.enabled)
+                inputAdapter.forceActiveFocus()
+            else
+                control.forceActiveFocus()
+        }
+
+        function hasModifier(event, modifier) {
+            return (event.modifiers & modifier) !== 0
+        }
+
+        function usesCommandShortcut(event) {
+            return hasModifier(event, Qt.MetaModifier)
+                || hasModifier(event, Qt.ControlModifier)
+        }
+
+        function usesWordModifier(event) {
+            return hasModifier(event, Qt.AltModifier)
+                || hasModifier(event, Qt.ControlModifier)
+        }
+
         function hasSelection() {
             return selectionAnchorPosition >= 0
                 && selectionAnchorPosition !== document.cursorPosition
@@ -127,6 +148,53 @@ FocusScope {
 
         function clearSelection() {
             selectionAnchorPosition = -1
+        }
+
+        function selectRange(start, end) {
+            const boundedStart = Math.max(0, Math.min(start, document.characterCount))
+            const boundedEnd = Math.max(0, Math.min(end, document.characterCount))
+            selectionAnchorPosition = boundedStart
+            document.cursorPosition = boundedEnd
+        }
+
+        function selectAll() {
+            selectRange(0, document.characterCount)
+        }
+
+        function selectedText() {
+            if (!hasSelection())
+                return ""
+            return document.textRange(selectionStartPosition(), selectionEndPosition())
+        }
+
+        function copySelection() {
+            if (!hasSelection())
+                return true
+
+            adapterClearing = true
+            inputAdapter.text = selectedText()
+            inputAdapter.selectAll()
+            inputAdapter.copy()
+            inputAdapter.text = ""
+            adapterClearing = false
+            return true
+        }
+
+        function cutSelection() {
+            copySelection()
+            if (hasSelection()) {
+                document.replaceRange(selectionStartPosition(), selectionEndPosition(), "")
+                clearSelection()
+            }
+            return true
+        }
+
+        function pasteClipboard() {
+            adapterClearing = true
+            inputAdapter.text = ""
+            adapterClearing = false
+            inputAdapter.paste()
+            return true
         }
 
         function replaceSelectionOrInsert(value) {
@@ -158,8 +226,52 @@ FocusScope {
             return document.removeNextCharacter()
         }
 
-        function moveCursorWithSelection(event, moveFunction) {
+        function removeRange(start, end) {
+            const boundedStart = Math.max(0, Math.min(start, end))
+            const boundedEnd = Math.min(document.characterCount, Math.max(start, end))
+            if (boundedStart === boundedEnd)
+                return false
+
+            document.replaceRange(boundedStart, boundedEnd, "")
+            clearSelection()
+            return true
+        }
+
+        function removePreviousWord() {
+            if (hasSelection())
+                return removeRange(selectionStartPosition(), selectionEndPosition())
+            const cursor = document.cursorPosition
+            return removeRange(document.previousWordBoundaryPosition(cursor), cursor)
+        }
+
+        function removeNextWord() {
+            if (hasSelection())
+                return removeRange(selectionStartPosition(), selectionEndPosition())
+            const cursor = document.cursorPosition
+            return removeRange(cursor, document.nextWordBoundaryPosition(cursor))
+        }
+
+        function removeToLineStart() {
+            if (hasSelection())
+                return removeRange(selectionStartPosition(), selectionEndPosition())
+            return removeRange(document.positionForLineColumn(document.cursorLine, 0), document.cursorPosition)
+        }
+
+        function removeToLineEnd() {
+            if (hasSelection())
+                return removeRange(selectionStartPosition(), selectionEndPosition())
+            return removeRange(document.cursorPosition, document.positionForLineColumn(document.cursorLine, document.lineLength(document.cursorLine)))
+        }
+
+        function moveCursorWithSelection(event, moveFunction, collapseFunction) {
             const extend = (event.modifiers & Qt.ShiftModifier) !== 0
+            if (!extend && hasSelection() && collapseFunction) {
+                document.cursorPosition = collapseFunction()
+                clearSelection()
+                event.accepted = true
+                return
+            }
+
             const anchor = document.cursorPosition
             if (extend && selectionAnchorPosition < 0)
                 selectionAnchorPosition = anchor
@@ -194,8 +306,125 @@ FocusScope {
             return document.positionForLineColumn(line, column)
         }
 
+        function selectWordAt(position) {
+            const start = document.previousWordBoundaryPosition(position)
+            const end = document.nextWordBoundaryPosition(position)
+            if (start === end) {
+                document.cursorPosition = position
+                clearSelection()
+                return
+            }
+            selectRange(start, end)
+        }
+
         function handleKey(event) {
-            if (!control.enabled || control.readOnly || control.reading) {
+            if (!control.enabled || control.reading) {
+                event.accepted = false
+                return
+            }
+
+            const commandShortcut = usesCommandShortcut(event)
+            const wordModifier = usesWordModifier(event)
+            const metaModifier = hasModifier(event, Qt.MetaModifier)
+
+            if (commandShortcut && event.key === Qt.Key_A) {
+                selectAll()
+                event.accepted = true
+                return
+            }
+
+            if (commandShortcut && event.key === Qt.Key_C) {
+                event.accepted = copySelection()
+                return
+            }
+
+            if (!control.readOnly && commandShortcut && event.key === Qt.Key_X) {
+                event.accepted = cutSelection()
+                return
+            }
+
+            if (!control.readOnly && commandShortcut && event.key === Qt.Key_V) {
+                event.accepted = pasteClipboard()
+                return
+            }
+
+            if (event.key === Qt.Key_Left) {
+                if (metaModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorLineStart() }, function() { return privateState.selectionStartPosition() })
+                    return
+                }
+                if (wordModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorWordLeft() }, function() { return privateState.selectionStartPosition() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorLeft() }, function() { return privateState.selectionStartPosition() })
+                return
+            }
+
+            if (event.key === Qt.Key_Right) {
+                if (metaModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorLineEnd() }, function() { return privateState.selectionEndPosition() })
+                    return
+                }
+                if (wordModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorWordRight() }, function() { return privateState.selectionEndPosition() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorRight() }, function() { return privateState.selectionEndPosition() })
+                return
+            }
+
+            if (event.key === Qt.Key_Up) {
+                if (metaModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorDocumentStart() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorUp() })
+                return
+            }
+
+            if (event.key === Qt.Key_Down) {
+                if (metaModifier) {
+                    moveCursorWithSelection(event, function() { document.moveCursorDocumentEnd() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorDown() })
+                return
+            }
+
+            if (event.key === Qt.Key_Home) {
+                if (commandShortcut) {
+                    moveCursorWithSelection(event, function() { document.moveCursorDocumentStart() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorLineStart() })
+                return
+            }
+
+            if (event.key === Qt.Key_End) {
+                if (commandShortcut) {
+                    moveCursorWithSelection(event, function() { document.moveCursorDocumentEnd() })
+                    return
+                }
+                moveCursorWithSelection(event, function() { document.moveCursorLineEnd() })
+                return
+            }
+
+            if (event.key === Qt.Key_PageUp) {
+                moveCursorWithSelection(event, function() {
+                    document.moveCursor(Math.max(0, document.cursorLine - Math.max(1, Math.floor(lineView.height / control.lineHeight))), document.cursorColumn)
+                })
+                return
+            }
+
+            if (event.key === Qt.Key_PageDown) {
+                moveCursorWithSelection(event, function() {
+                    document.moveCursor(Math.min(document.lineCount - 1, document.cursorLine + Math.max(1, Math.floor(lineView.height / control.lineHeight))), document.cursorColumn)
+                })
+                return
+            }
+
+            if (control.readOnly) {
                 event.accepted = false
                 return
             }
@@ -207,42 +436,22 @@ FocusScope {
             }
 
             if (event.key === Qt.Key_Backspace) {
-                event.accepted = removePrevious()
+                if (metaModifier)
+                    event.accepted = removeToLineStart()
+                else if (wordModifier)
+                    event.accepted = removePreviousWord()
+                else
+                    event.accepted = removePrevious()
                 return
             }
 
             if (event.key === Qt.Key_Delete) {
-                event.accepted = removeNext()
-                return
-            }
-
-            if (event.key === Qt.Key_Left) {
-                moveCursorWithSelection(event, function() { document.moveCursorLeft() })
-                return
-            }
-
-            if (event.key === Qt.Key_Right) {
-                moveCursorWithSelection(event, function() { document.moveCursorRight() })
-                return
-            }
-
-            if (event.key === Qt.Key_Up) {
-                moveCursorWithSelection(event, function() { document.moveCursorUp() })
-                return
-            }
-
-            if (event.key === Qt.Key_Down) {
-                moveCursorWithSelection(event, function() { document.moveCursorDown() })
-                return
-            }
-
-            if (event.key === Qt.Key_Home) {
-                moveCursorWithSelection(event, function() { document.moveCursorLineStart() })
-                return
-            }
-
-            if (event.key === Qt.Key_End) {
-                moveCursorWithSelection(event, function() { document.moveCursorLineEnd() })
+                if (metaModifier)
+                    event.accepted = removeToLineEnd()
+                else if (wordModifier)
+                    event.accepted = removeNextWord()
+                else
+                    event.accepted = removeNext()
                 return
             }
 
@@ -532,7 +741,7 @@ FocusScope {
             enabled: control.enabled
             onPressed: function(mouse) {
                 if (control.autoFocusOnPress)
-                    inputAdapter.forceActiveFocus()
+                    privateState.focusInputSurface()
 
                 const previousPosition = document.cursorPosition
                 const nextPosition = privateState.documentPositionAt(mouse.x, mouse.y)
@@ -557,6 +766,12 @@ FocusScope {
                     privateState.clearSelection()
                 mouse.accepted = true
             }
+            onDoubleClicked: function(mouse) {
+                if (control.autoFocusOnPress)
+                    privateState.focusInputSurface()
+                privateState.selectWordAt(privateState.documentPositionAt(mouse.x, mouse.y))
+                mouse.accepted = true
+            }
         }
 
         TapHandler {
@@ -564,7 +779,7 @@ FocusScope {
             enabled: control.enabled
             onTapped: {
                 if (control.autoFocusOnPress)
-                    inputAdapter.forceActiveFocus()
+                    privateState.focusInputSurface()
             }
         }
 

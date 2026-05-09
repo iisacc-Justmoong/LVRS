@@ -76,7 +76,10 @@ public:
 
     Q_INVOKABLE QString lineText(int line) const;
     Q_INVOKABLE int lineLength(int line) const;
+    Q_INVOKABLE QString textRange(int start, int end) const;
     Q_INVOKABLE int positionForLineColumn(int line, int column) const;
+    Q_INVOKABLE int previousWordBoundaryPosition(int position) const;
+    Q_INVOKABLE int nextWordBoundaryPosition(int position) const;
     Q_INVOKABLE bool loadFile(const QString &path = QString());
     Q_INVOKABLE bool saveFile(const QString &path = QString());
     Q_INVOKABLE bool reloadFile();
@@ -90,6 +93,10 @@ public:
     Q_INVOKABLE void moveCursorDown();
     Q_INVOKABLE void moveCursorLineStart();
     Q_INVOKABLE void moveCursorLineEnd();
+    Q_INVOKABLE void moveCursorDocumentStart();
+    Q_INVOKABLE void moveCursorDocumentEnd();
+    Q_INVOKABLE void moveCursorWordLeft();
+    Q_INVOKABLE void moveCursorWordRight();
     Q_INVOKABLE void insertText(const QString &value);
     Q_INVOKABLE void insertNewline();
     Q_INVOKABLE void replaceRange(int start, int end, const QString &value);
@@ -127,6 +134,9 @@ private:
     static QString decodeUtf8Line(const QByteArray &data);
     static LineRecord memoryLine(const QString &text);
     static LineRecord fileLine(qint64 byteOffset, qint64 byteLength, int length);
+    static bool isWordCharacter(QChar character);
+    static int previousGraphemeBoundary(const QString &text, int position);
+    static int nextGraphemeBoundary(const QString &text, int position);
     QString resolvedPath(const QString &path) const;
     QString lineTextForRecord(const LineRecord &record) const;
     void replaceLineRecord(int line, const LineRecord &record);

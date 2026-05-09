@@ -1,9 +1,11 @@
 #include <QtTest>
 
 #include <QCoreApplication>
+#include <QClipboard>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QGuiApplication>
 #include <QInputMethodEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -75,7 +77,11 @@ private slots:
     void text_editor_ime_adapter_commit_contract();
     void text_editor_shift_selection_replaces_commit_contract();
     void text_editor_drag_selection_replaces_commit_contract();
+    void text_editor_modifier_navigation_contract();
+    void text_editor_clipboard_shortcut_contract();
+    void text_editor_word_line_delete_shortcut_contract();
     void text_editor_internal_document_model_editing_contract();
+    void text_editor_unicode_grapheme_editing_contract();
     void text_editor_view_keyboard_input_contract();
     void text_editor_ios_scroll_physics_contract();
     void text_editor_mobile_focus_suspends_viewport_flick_for_selection();
@@ -248,6 +254,9 @@ void TextEditorTests::text_editor_api_usage_manual_contract()
     QVERIFY(docs.contains(QStringLiteral("Use the read/sync state properties")));
     QVERIFY(docs.contains(QStringLiteral("Changing `filePath` changes the connected file")));
     QVERIFY(docs.contains(QStringLiteral("Application code should not depend on internal document objects")));
+    QVERIFY(docs.contains(QStringLiteral("Option+Left")));
+    QVERIFY(docs.contains(QStringLiteral("Cmd+A")));
+    QVERIFY(docs.contains(QStringLiteral("These are internal input behaviors")));
     QVERIFY(docs.contains(QStringLiteral("`documentModel`")));
     QVERIFY(docs.contains(QStringLiteral("`write()`, `loadFile(path)`, `saveFile(path)`, `reloadFile()`")));
     QVERIFY(docs.contains(QStringLiteral("`loadFile(path)`, `saveFile(path)`, `reloadFile()`")));
@@ -694,6 +703,251 @@ LV.ApplicationWindow {
     QTRY_COMPARE(model->property("text").toString(), QStringLiteral("한"));
 }
 
+void TextEditorTests::text_editor_modifier_navigation_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 480
+    height: 260
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/modifier-navigation.txt");
+    const QString sourceText = QStringLiteral("alpha beta\n한글 delta");
+    QFile sourceFile(sourcePath);
+    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QCOMPARE(sourceFile.write(sourceText.toUtf8()), qint64(sourceText.toUtf8().size()));
+    sourceFile.close();
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    QTRY_VERIFY(qobject_cast<QQuickItem *>(adapter)->hasActiveFocus());
+
+    QTest::keyClick(window, Qt::Key_Right, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), 5);
+
+    QTest::keyClick(window, Qt::Key_Right, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), 10);
+
+    QTest::keyClick(window, Qt::Key_Left, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), 6);
+
+    QTest::keyClick(window, Qt::Key_Right, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), 10);
+
+    QTest::keyClick(window, Qt::Key_Down, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), sourceText.size());
+
+    QTest::keyClick(window, Qt::Key_Left, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), sourceText.indexOf(QStringLiteral("delta")));
+
+    QTest::keyClick(window, Qt::Key_Left, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), sourceText.indexOf(QStringLiteral("한글")));
+
+    QTest::keyClick(window, Qt::Key_Up, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("cursorPosition").toInt(), 0);
+
+    QTest::keyClick(window, Qt::Key_Right, Qt::KeyboardModifiers(Qt::AltModifier | Qt::ShiftModifier), 10);
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(adapter, &commitEvent);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("한 beta\n한글 delta"));
+}
+
+void TextEditorTests::text_editor_clipboard_shortcut_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 420
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/clipboard.txt");
+    QFile sourceFile(sourcePath);
+    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QCOMPARE(sourceFile.write("alpha beta"), qint64(10));
+    sourceFile.close();
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QVERIFY(clipboard);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    QTRY_VERIFY(qobject_cast<QQuickItem *>(adapter)->hasActiveFocus());
+
+    clipboard->clear();
+    QTest::keyClick(window, Qt::Key_A, Qt::MetaModifier, 10);
+    QTest::keyClick(window, Qt::Key_C, Qt::MetaModifier, 10);
+    QTRY_COMPARE(clipboard->text(), QStringLiteral("alpha beta"));
+
+    clipboard->setText(QStringLiteral("붙여넣기"));
+    QTest::keyClick(window, Qt::Key_V, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("붙여넣기"));
+
+    QTest::keyClick(window, Qt::Key_A, Qt::MetaModifier, 10);
+    QTest::keyClick(window, Qt::Key_X, Qt::MetaModifier, 10);
+    QTRY_COMPARE(clipboard->text(), QStringLiteral("붙여넣기"));
+    QTRY_COMPARE(model->property("text").toString(), QString());
+
+    QVERIFY(model->setProperty("text", QStringLiteral("read only copy")));
+    QVERIFY(model->setProperty("cursorPosition", 0));
+    QVERIFY(editor->setProperty("readOnly", true));
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    clipboard->clear();
+    QTest::keyClick(window, Qt::Key_A, Qt::MetaModifier, 10);
+    QTest::keyClick(window, Qt::Key_C, Qt::MetaModifier, 10);
+    QTRY_COMPARE(clipboard->text(), QStringLiteral("read only copy"));
+}
+
+void TextEditorTests::text_editor_word_line_delete_shortcut_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 420
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/delete-shortcuts.txt");
+    QFile sourceFile(sourcePath);
+    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QCOMPARE(sourceFile.write("alpha beta"), qint64(10));
+    sourceFile.close();
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    QTRY_VERIFY(qobject_cast<QQuickItem *>(adapter)->hasActiveFocus());
+
+    QVERIFY(model->setProperty("text", QStringLiteral("alpha beta")));
+    QVERIFY(model->setProperty("cursorPosition", 0));
+    QTest::keyClick(window, Qt::Key_Delete, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral(" beta"));
+
+    QVERIFY(model->setProperty("text", QStringLiteral("alpha beta")));
+    QVERIFY(model->setProperty("cursorPosition", 10));
+    QTest::keyClick(window, Qt::Key_Backspace, Qt::AltModifier, 10);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("alpha "));
+
+    QVERIFY(model->setProperty("text", QStringLiteral("alpha beta")));
+    QVERIFY(model->setProperty("cursorPosition", 6));
+    QTest::keyClick(window, Qt::Key_Backspace, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("beta"));
+
+    QVERIFY(model->setProperty("text", QStringLiteral("alpha beta")));
+    QVERIFY(model->setProperty("cursorPosition", 6));
+    QTest::keyClick(window, Qt::Key_Delete, Qt::MetaModifier, 10);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("alpha "));
+}
+
 void TextEditorTests::text_editor_internal_document_model_editing_contract()
 {
     QQmlEngine engine;
@@ -744,6 +998,58 @@ Item {
     QVERIFY(QMetaObject::invokeMethod(model, "removePreviousCharacter", Q_RETURN_ARG(bool, removed)));
     QVERIFY(removed);
     QCOMPARE(model->property("text").toString(), QStringLiteral("alpha\nbeta\ngamma"));
+}
+
+void TextEditorTests::text_editor_unicode_grapheme_editing_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    width: 480
+    height: 320
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: "/tmp/lvrs_text_editor_grapheme.txt"
+        width: 320
+        height: 180
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+
+    const char32_t emojiCodepoints[] = { 0x1F642, 0 };
+    const QString emoji = QString::fromUcs4(emojiCodepoints);
+
+    QVERIFY(model->setProperty("text", emoji + QStringLiteral("a")));
+    QVERIFY(model->setProperty("cursorPosition", emoji.size()));
+    bool removed = false;
+    QVERIFY(QMetaObject::invokeMethod(model, "removePreviousCharacter", Q_RETURN_ARG(bool, removed)));
+    QVERIFY(removed);
+    QCOMPARE(model->property("text").toString(), QStringLiteral("a"));
+
+    QVERIFY(model->setProperty("text", emoji + QStringLiteral("a")));
+    QVERIFY(model->setProperty("cursorPosition", 0));
+    QVERIFY(QMetaObject::invokeMethod(model, "moveCursorRight"));
+    QCOMPARE(model->property("cursorPosition").toInt(), emoji.size());
+
+    removed = false;
+    QVERIFY(QMetaObject::invokeMethod(model, "removeNextCharacter", Q_RETURN_ARG(bool, removed)));
+    QVERIFY(removed);
+    QCOMPARE(model->property("text").toString(), emoji);
 }
 
 void TextEditorTests::text_editor_view_keyboard_input_contract()

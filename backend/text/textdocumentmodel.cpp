@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSaveFile>
+#include <QTextBoundaryFinder>
 #include <QTimer>
 
 #include <limits>
@@ -225,11 +226,80 @@ int TextDocumentModel::lineLength(int line) const
     return m_lines.at(line).length;
 }
 
+QString TextDocumentModel::textRange(int start, int end) const
+{
+    const int boundedStart = qBound(0, qMin(start, end), boundedCharacterCount());
+    const int boundedEnd = qBound(0, qMax(start, end), boundedCharacterCount());
+    if (boundedStart == boundedEnd)
+        return QString();
+
+    const QPair<int, int> startPosition = lineColumnForPosition(boundedStart);
+    const QPair<int, int> endPosition = lineColumnForPosition(boundedEnd);
+    const int startLine = startPosition.first;
+    const int startColumn = startPosition.second;
+    const int endLine = endPosition.first;
+    const int endColumn = endPosition.second;
+
+    if (startLine == endLine)
+        return lineTextForRecord(m_lines.at(startLine)).mid(startColumn, endColumn - startColumn);
+
+    QString range = lineTextForRecord(m_lines.at(startLine)).mid(startColumn);
+    for (int line = startLine + 1; line < endLine; ++line) {
+        range.append(QLatin1Char('\n'));
+        range.append(lineTextForRecord(m_lines.at(line)));
+    }
+    range.append(QLatin1Char('\n'));
+    range.append(lineTextForRecord(m_lines.at(endLine)).left(endColumn));
+    return range;
+}
+
 int TextDocumentModel::positionForLineColumn(int line, int column) const
 {
     const int boundedLine = qBound(0, line, lineCount() - 1);
     const int boundedColumn = qBound(0, column, lineLength(boundedLine));
     return lineStartPosition(boundedLine) + boundedColumn;
+}
+
+int TextDocumentModel::previousWordBoundaryPosition(int position) const
+{
+    QPair<int, int> cursorPosition = lineColumnForPosition(qBound(0, position, boundedCharacterCount()));
+    for (int line = cursorPosition.first; line >= 0; --line) {
+        const QString lineText = lineTextForRecord(m_lines.at(line));
+        int column = line == cursorPosition.first ? qBound(0, cursorPosition.second, lineText.size()) : lineText.size();
+
+        while (column > 0 && !isWordCharacter(lineText.at(column - 1)))
+            --column;
+
+        const int wordEnd = column;
+        while (column > 0 && isWordCharacter(lineText.at(column - 1)))
+            --column;
+
+        if (wordEnd > column)
+            return positionForLineColumn(line, column);
+    }
+
+    return 0;
+}
+
+int TextDocumentModel::nextWordBoundaryPosition(int position) const
+{
+    QPair<int, int> cursorPosition = lineColumnForPosition(qBound(0, position, boundedCharacterCount()));
+    for (int line = cursorPosition.first; line < m_lines.size(); ++line) {
+        const QString lineText = lineTextForRecord(m_lines.at(line));
+        int column = line == cursorPosition.first ? qBound(0, cursorPosition.second, lineText.size()) : 0;
+
+        while (column < lineText.size() && !isWordCharacter(lineText.at(column)))
+            ++column;
+
+        const int wordStart = column;
+        while (column < lineText.size() && isWordCharacter(lineText.at(column)))
+            ++column;
+
+        if (column > wordStart)
+            return positionForLineColumn(line, column);
+    }
+
+    return boundedCharacterCount();
 }
 
 bool TextDocumentModel::loadFile(const QString &path)
@@ -351,7 +421,8 @@ void TextDocumentModel::moveCursor(int line, int column)
 void TextDocumentModel::moveCursorLeft()
 {
     if (m_cursorColumn > 0) {
-        moveCursor(m_cursorLine, m_cursorColumn - 1);
+        moveCursor(m_cursorLine,
+                   previousGraphemeBoundary(lineTextForRecord(m_lines.at(m_cursorLine)), m_cursorColumn));
         return;
     }
     if (m_cursorLine > 0)
@@ -361,7 +432,8 @@ void TextDocumentModel::moveCursorLeft()
 void TextDocumentModel::moveCursorRight()
 {
     if (m_cursorColumn < lineLength(m_cursorLine)) {
-        moveCursor(m_cursorLine, m_cursorColumn + 1);
+        moveCursor(m_cursorLine,
+                   nextGraphemeBoundary(lineTextForRecord(m_lines.at(m_cursorLine)), m_cursorColumn));
         return;
     }
     if (m_cursorLine < lineCount() - 1)
@@ -388,6 +460,26 @@ void TextDocumentModel::moveCursorLineStart()
 void TextDocumentModel::moveCursorLineEnd()
 {
     moveCursor(m_cursorLine, lineLength(m_cursorLine));
+}
+
+void TextDocumentModel::moveCursorDocumentStart()
+{
+    setCursorPosition(0);
+}
+
+void TextDocumentModel::moveCursorDocumentEnd()
+{
+    setCursorPosition(boundedCharacterCount());
+}
+
+void TextDocumentModel::moveCursorWordLeft()
+{
+    setCursorPosition(previousWordBoundaryPosition(cursorPosition()));
+}
+
+void TextDocumentModel::moveCursorWordRight()
+{
+    setCursorPosition(nextWordBoundaryPosition(cursorPosition()));
 }
 
 void TextDocumentModel::insertText(const QString &value)
@@ -494,9 +586,10 @@ bool TextDocumentModel::removePreviousCharacter()
     cancelLoad();
     if (m_cursorColumn > 0) {
         QString line = lineTextForRecord(m_lines.at(m_cursorLine));
-        line.remove(m_cursorColumn - 1, 1);
+        const int removeStart = previousGraphemeBoundary(line, m_cursorColumn);
+        line.remove(removeStart, m_cursorColumn - removeStart);
         replaceLineRecord(m_cursorLine, memoryLine(line));
-        m_cursorColumn -= 1;
+        m_cursorColumn = removeStart;
     } else if (m_cursorLine > 0) {
         const int previousLine = m_cursorLine - 1;
         const int previousLength = lineLength(previousLine);
@@ -521,7 +614,8 @@ bool TextDocumentModel::removeNextCharacter()
     cancelLoad();
     if (m_cursorColumn < lineLength(m_cursorLine)) {
         QString line = lineTextForRecord(m_lines.at(m_cursorLine));
-        line.remove(m_cursorColumn, 1);
+        const int removeEnd = nextGraphemeBoundary(line, m_cursorColumn);
+        line.remove(m_cursorColumn, removeEnd - m_cursorColumn);
         replaceLineRecord(m_cursorLine, memoryLine(line));
     } else if (m_cursorLine < lineCount() - 1) {
         const QString merged = lineTextForRecord(m_lines.at(m_cursorLine)) + lineTextForRecord(m_lines.at(m_cursorLine + 1));
@@ -580,6 +674,35 @@ TextDocumentModel::LineRecord TextDocumentModel::fileLine(qint64 byteOffset, qin
     record.length = qMax(0, length);
     record.fileBacked = true;
     return record;
+}
+
+bool TextDocumentModel::isWordCharacter(QChar character)
+{
+    return character.isLetterOrNumber() || character == QLatin1Char('_');
+}
+
+int TextDocumentModel::previousGraphemeBoundary(const QString &text, int position)
+{
+    const int boundedPosition = qBound(0, position, text.size());
+    if (boundedPosition <= 0)
+        return 0;
+
+    QTextBoundaryFinder finder(QTextBoundaryFinder::Grapheme, text);
+    finder.setPosition(boundedPosition);
+    const int boundary = finder.toPreviousBoundary();
+    return boundary < 0 ? 0 : boundary;
+}
+
+int TextDocumentModel::nextGraphemeBoundary(const QString &text, int position)
+{
+    const int boundedPosition = qBound(0, position, text.size());
+    if (boundedPosition >= text.size())
+        return text.size();
+
+    QTextBoundaryFinder finder(QTextBoundaryFinder::Grapheme, text);
+    finder.setPosition(boundedPosition);
+    const int boundary = finder.toNextBoundary();
+    return boundary < 0 ? text.size() : boundary;
 }
 
 QString TextDocumentModel::resolvedPath(const QString &path) const

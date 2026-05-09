@@ -114,8 +114,25 @@ Selection is model-backed:
 
 - Drag across text to select a range.
 - Hold `Shift` while using arrow, Home, or End keys to extend selection.
+- Double-click a word to select that word.
 - Typing or IME commit replaces the selected range.
 - Backspace/Delete removes the selected range.
+
+### OS Text Editing Keys
+
+`LV.TextEditor` keeps the public API file-oriented, but the focused editor accepts common desktop text editing gestures:
+
+- Left/Right/Up/Down move the cursor; holding `Shift` extends selection.
+- `Option+Left` and `Option+Right` move by word on macOS. `Ctrl+Left` and `Ctrl+Right` are accepted for the same word movement on desktop platforms that use Ctrl for this convention.
+- `Cmd+Left` and `Cmd+Right` move to the start/end of the current line.
+- `Cmd+Up` and `Cmd+Down` move to the start/end of the document.
+- `Home` and `End` move to the start/end of the current line; `Ctrl+Home`/`Ctrl+End` or `Cmd+Home`/`Cmd+End` move to the start/end of the document.
+- `PageUp` and `PageDown` move by the visible viewport height.
+- `Cmd+A`, `Cmd+C`, `Cmd+X`, and `Cmd+V` provide select-all, copy, cut, and paste. Ctrl variants are also accepted for platforms where those are the normal GUI shortcuts.
+- `Option+Backspace` and `Option+Delete` delete the previous/next word. Ctrl variants are also accepted.
+- `Cmd+Backspace` and `Cmd+Delete` delete from the cursor to the start/end of the current line.
+
+These are internal input behaviors, not public `selectAll()`, `copy()`, `cut()`, or `paste()` component methods.
 
 ### Track State
 
@@ -220,7 +237,8 @@ Layout/visual:
 - Synchronization is skipped while `reading` is true so a partial document is not written accidentally.
 - A hidden `TextInput` acts as the IME adapter. It is not a text document model and should not be used by application code.
 - IME preedit text is painted at the model cursor; commit text replaces the active selection or inserts at the cursor.
-- Shift navigation and mouse drag maintain a selection anchor. Text input, IME commit, Backspace, and Delete replace/remove that range.
+- Shift navigation, double-click word selection, and mouse drag maintain a selection anchor. Text input, IME commit, Backspace, Delete, cut, and paste replace/remove that range.
+- Desktop editing shortcuts follow common GUI conventions for word movement, line/document movement, select-all, clipboard, and word/line deletion without expanding the public component API.
 - Constructing `LV.TextEditor` without `filePath` is invalid QML because the connected file is part of the component contract.
 - Empty paths and file read/sync failures do not intentionally replace the current document; they set `error` and emit the matching failure signal.
 - `Enter`, `Ctrl+Enter`, and `Cmd+Enter` insert newlines.
