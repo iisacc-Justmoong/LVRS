@@ -36,11 +36,13 @@ Model roles:
 Methods:
 
 - `lineText(line)`, `lineLength(line)`
+- `positionForLineColumn(line, column)`
 - `loadFile(path?)`, `reloadFile()`, `saveFile(path?)`, `cancelLoad()`
 - `markClean()`, `clear()`
 - `moveCursor(line, column)`, `moveCursorLeft()`, `moveCursorRight()`, `moveCursorUp()`, `moveCursorDown()`
 - `moveCursorLineStart()`, `moveCursorLineEnd()`
 - `insertText(value)`, `insertNewline()`
+- `replaceRange(start, end, value)`
 - `removePreviousCharacter()`, `removeNextCharacter()`
 
 Signals:
@@ -64,6 +66,7 @@ Signals:
 - Newlines are normalized to `\n` inside the model.
 - The model always contains at least one line, even for an empty document.
 - Edit operations mutate line storage and set `dirty`.
+- `replaceRange()` is used by `LV.TextEditor` selection and IME commit handling. It preserves untouched line records where possible and promotes only the changed range to memory-backed records.
 - `loadFile()` resets line storage, resets cursor to the document start, clears `dirty`, streams file content into rows, and emits `fileLoaded` when the stream is complete.
 - Edit operations call `cancelLoad()` before mutating loaded text; saving while `loading` fails instead of writing a partial document.
 - `saveFile()` streams current line records to a `QSaveFile`, rebuilds file-backed line records for the saved file, clears `dirty`, and emits `fileSaved`.

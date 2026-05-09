@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QInputMethodEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QScopedPointer>
@@ -71,6 +72,9 @@ private slots:
     void text_editor_file_realtime_sync_contract();
     void text_editor_chunked_lazy_read_contract();
     void text_editor_keyboard_realtime_sync_contract();
+    void text_editor_ime_adapter_commit_contract();
+    void text_editor_shift_selection_replaces_commit_contract();
+    void text_editor_drag_selection_replaces_commit_contract();
     void text_editor_internal_document_model_editing_contract();
     void text_editor_view_keyboard_input_contract();
     void text_editor_ios_scroll_physics_contract();
@@ -498,6 +502,196 @@ LV.ApplicationWindow {
 
     QTest::keyClick(window, Qt::Key_Return, Qt::ControlModifier, 10);
     QTRY_VERIFY(model->property("text").toString().startsWith(QStringLiteral("z\nalpha")));
+}
+
+void TextEditorTests::text_editor_ime_adapter_commit_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 420
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/ime.txt");
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    QTRY_VERIFY(qobject_cast<QQuickItem *>(adapter)->hasActiveFocus());
+
+    QInputMethodEvent preeditEvent(QStringLiteral("ㅎ"), {});
+    QCoreApplication::sendEvent(adapter, &preeditEvent);
+    QCOMPARE(adapter->property("preeditText").toString(), QStringLiteral("ㅎ"));
+    QCOMPARE(model->property("text").toString(), QString());
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(adapter, &commitEvent);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("한"));
+    QCOMPARE(adapter->property("text").toString(), QString());
+}
+
+void TextEditorTests::text_editor_shift_selection_replaces_commit_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 420
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/shift-selection.txt");
+    QFile sourceFile(sourcePath);
+    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QCOMPARE(sourceFile.write("alpha"), qint64(5));
+    sourceFile.close();
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+    qobject_cast<QQuickItem *>(editor)->forceActiveFocus();
+    QTRY_VERIFY(qobject_cast<QQuickItem *>(adapter)->hasActiveFocus());
+
+    QTest::keyClick(window, Qt::Key_Right, Qt::ShiftModifier, 10);
+    QTest::keyClick(window, Qt::Key_Right, Qt::ShiftModifier, 10);
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(adapter, &commitEvent);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("한pha"));
+}
+
+void TextEditorTests::text_editor_drag_selection_replaces_commit_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    width: 420
+    height: 240
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: initialFilePath
+        anchors.fill: parent
+    }
+}
+)";
+
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString sourcePath = tempDir.path() + QStringLiteral("/drag-selection.txt");
+    QFile sourceFile(sourcePath);
+    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    QCOMPARE(sourceFile.write("alpha"), qint64(5));
+    sourceFile.close();
+    engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *model = documentModelFor(editor);
+    QVERIFY(model);
+    QObject *adapter = root->findChild<QObject *>(QStringLiteral("editorImeAdapter"));
+    QVERIFY(adapter);
+
+    QTRY_VERIFY(!editor->property("reading").toBool());
+
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, QPoint(12, 18), 10);
+    QTest::mouseMove(window, QPoint(220, 18), 10);
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, QPoint(220, 18), 10);
+
+    QInputMethodEvent commitEvent;
+    commitEvent.setCommitString(QStringLiteral("한"));
+    QCoreApplication::sendEvent(adapter, &commitEvent);
+    QTRY_COMPARE(model->property("text").toString(), QStringLiteral("한"));
 }
 
 void TextEditorTests::text_editor_internal_document_model_editing_contract()

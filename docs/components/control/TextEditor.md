@@ -8,6 +8,7 @@ Location: `qml/components/control/input/TextEditor.qml`
 
 - Bind an editable plain-text surface directly to a filesystem path.
 - Load UTF-8 text lazily through the internal C++ document engine and synchronize edits through atomic write-through semantics.
+- Route platform IME composition through a hidden adapter so committed text, including Korean Hangul syllables, reaches the document as composed text.
 - Keep QML as the visible line viewport and input dispatcher.
 - Keep whole-document storage, line indexing, cursor state, pending-sync state, and file I/O out of QML.
 - Avoid `TextArea`/`TextEdit` as the document model.
@@ -102,6 +103,19 @@ LV.TextEditor {
 ```
 
 `Enter`, `Ctrl+Enter`, and `Cmd+Enter` insert newlines. They do not trigger a save command because saving is not a separate user action.
+
+### IME and Selection
+
+The visible document remains a virtualized line viewport, but keyboard composition is handled by an internal `TextInput` adapter. The adapter is not document storage; it only receives platform preedit/commit events and forwards committed text to the C++ document model.
+
+This means Korean input should arrive as composed Hangul syllables instead of separated jamo. While an IME preedit is active, the editor paints the composing text at the current cursor line so the user can see the composition.
+
+Selection is model-backed:
+
+- Drag across text to select a range.
+- Hold `Shift` while using arrow, Home, or End keys to extend selection.
+- Typing or IME commit replaces the selected range.
+- Backspace/Delete removes the selected range.
 
 ### Track State
 
@@ -204,6 +218,9 @@ Layout/visual:
 - Editing promotes only touched lines to memory-backed records, while untouched lines stay file-backed.
 - Local edits schedule automatic write-through synchronization to `filePath` through `QSaveFile`; successful sync clears `dirty`, clears `error`, and emits `syncFinished`.
 - Synchronization is skipped while `reading` is true so a partial document is not written accidentally.
+- A hidden `TextInput` acts as the IME adapter. It is not a text document model and should not be used by application code.
+- IME preedit text is painted at the model cursor; commit text replaces the active selection or inserts at the cursor.
+- Shift navigation and mouse drag maintain a selection anchor. Text input, IME commit, Backspace, and Delete replace/remove that range.
 - Constructing `LV.TextEditor` without `filePath` is invalid QML because the connected file is part of the component contract.
 - Empty paths and file read/sync failures do not intentionally replace the current document; they set `error` and emit the matching failure signal.
 - `Enter`, `Ctrl+Enter`, and `Cmd+Enter` insert newlines.

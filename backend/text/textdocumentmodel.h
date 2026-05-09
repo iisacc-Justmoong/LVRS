@@ -76,6 +76,7 @@ public:
 
     Q_INVOKABLE QString lineText(int line) const;
     Q_INVOKABLE int lineLength(int line) const;
+    Q_INVOKABLE int positionForLineColumn(int line, int column) const;
     Q_INVOKABLE bool loadFile(const QString &path = QString());
     Q_INVOKABLE bool saveFile(const QString &path = QString());
     Q_INVOKABLE bool reloadFile();
@@ -91,6 +92,7 @@ public:
     Q_INVOKABLE void moveCursorLineEnd();
     Q_INVOKABLE void insertText(const QString &value);
     Q_INVOKABLE void insertNewline();
+    Q_INVOKABLE void replaceRange(int start, int end, const QString &value);
     Q_INVOKABLE bool removePreviousCharacter();
     Q_INVOKABLE bool removeNextCharacter();
 
@@ -139,6 +141,7 @@ private:
     void failLoad(const QString &path, const QString &error);
     bool writeModelToFile(const QString &path, QString *error);
     int boundedCharacterCount() const;
+    QPair<int, int> lineColumnForPosition(int position) const;
     void setDirty(bool dirty);
     void setLastError(const QString &error);
     void setLoading(bool loading);

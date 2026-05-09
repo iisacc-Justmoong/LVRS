@@ -225,6 +225,13 @@ int TextDocumentModel::lineLength(int line) const
     return m_lines.at(line).length;
 }
 
+int TextDocumentModel::positionForLineColumn(int line, int column) const
+{
+    const int boundedLine = qBound(0, line, lineCount() - 1);
+    const int boundedColumn = qBound(0, column, lineLength(boundedLine));
+    return lineStartPosition(boundedLine) + boundedColumn;
+}
+
 bool TextDocumentModel::loadFile(const QString &path)
 {
     const QString targetPath = resolvedPath(path);
@@ -423,6 +430,63 @@ void TextDocumentModel::insertText(const QString &value)
 void TextDocumentModel::insertNewline()
 {
     insertText(QStringLiteral("\n"));
+}
+
+void TextDocumentModel::replaceRange(int start, int end, const QString &value)
+{
+    const int boundedStart = qBound(0, qMin(start, end), boundedCharacterCount());
+    const int boundedEnd = qBound(0, qMax(start, end), boundedCharacterCount());
+    if (boundedStart == boundedEnd) {
+        setCursorPosition(boundedStart);
+        insertText(value);
+        return;
+    }
+
+    cancelLoad();
+
+    const QPair<int, int> startPosition = lineColumnForPosition(boundedStart);
+    const QPair<int, int> endPosition = lineColumnForPosition(boundedEnd);
+    const int startLine = startPosition.first;
+    const int startColumn = startPosition.second;
+    const int endLine = endPosition.first;
+    const int endColumn = endPosition.second;
+    const QString prefix = lineTextForRecord(m_lines.at(startLine)).left(startColumn);
+    const QString suffix = lineTextForRecord(m_lines.at(endLine)).mid(endColumn);
+    const QStringList insertedLines = splitLines(value);
+
+    QVector<LineRecord> records;
+    records.reserve(m_lines.size() - (endLine - startLine) + insertedLines.size());
+    for (int i = 0; i < startLine; ++i)
+        records.append(m_lines.at(i));
+
+    if (insertedLines.size() == 1) {
+        records.append(memoryLine(prefix + insertedLines.first() + suffix));
+        m_cursorLine = startLine;
+        m_cursorColumn = prefix.size() + insertedLines.first().size();
+    } else {
+        records.append(memoryLine(prefix + insertedLines.first()));
+        for (int i = 1; i < insertedLines.size() - 1; ++i)
+            records.append(memoryLine(insertedLines.at(i)));
+        records.append(memoryLine(insertedLines.last() + suffix));
+        m_cursorLine = startLine + insertedLines.size() - 1;
+        m_cursorColumn = insertedLines.last().size();
+    }
+
+    for (int i = endLine + 1; i < m_lines.size(); ++i)
+        records.append(m_lines.at(i));
+    if (records.isEmpty())
+        records.append(memoryLine(QString()));
+
+    beginResetModel();
+    m_lines = records;
+    clampCursor();
+    endResetModel();
+    updateCharacterCountFromLines();
+    setDirty(true);
+    emit textChanged();
+    emit lineCountChanged();
+    emit lineStorageChanged();
+    emit cursorChanged();
 }
 
 bool TextDocumentModel::removePreviousCharacter()
@@ -775,6 +839,23 @@ bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
 int TextDocumentModel::boundedCharacterCount() const
 {
     return static_cast<int>(qMin<qint64>(m_characterCount, std::numeric_limits<int>::max()));
+}
+
+QPair<int, int> TextDocumentModel::lineColumnForPosition(int position) const
+{
+    int remaining = qBound(0, position, boundedCharacterCount());
+    int line = 0;
+    for (; line < m_lines.size(); ++line) {
+        const int length = m_lines.at(line).length;
+        if (remaining <= length)
+            return { line, remaining };
+        remaining -= length;
+        if (line < m_lines.size() - 1)
+            remaining -= 1;
+    }
+
+    const int lastLine = qMax(0, lineCount() - 1);
+    return { lastLine, lineLength(lastLine) };
 }
 
 void TextDocumentModel::setDirty(bool dirty)

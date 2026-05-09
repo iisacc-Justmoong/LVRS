@@ -96,9 +96,183 @@ FocusScope {
             read()
     }
 
+    onActiveFocusChanged: {
+        if (activeFocus && inputAdapter.enabled && !inputAdapter.activeFocus)
+            inputAdapter.forceActiveFocus()
+    }
+
     QtObject {
         id: privateState
         property bool completed: false
+        property bool adapterClearing: false
+        property int selectionAnchorPosition: -1
+        property bool mouseSelectionMoved: false
+
+        function hasSelection() {
+            return selectionAnchorPosition >= 0
+                && selectionAnchorPosition !== document.cursorPosition
+        }
+
+        function selectionStartPosition() {
+            return hasSelection()
+                ? Math.min(selectionAnchorPosition, document.cursorPosition)
+                : document.cursorPosition
+        }
+
+        function selectionEndPosition() {
+            return hasSelection()
+                ? Math.max(selectionAnchorPosition, document.cursorPosition)
+                : document.cursorPosition
+        }
+
+        function clearSelection() {
+            selectionAnchorPosition = -1
+        }
+
+        function replaceSelectionOrInsert(value) {
+            if (value.length === 0)
+                return
+            if (hasSelection()) {
+                document.replaceRange(selectionStartPosition(), selectionEndPosition(), value)
+                clearSelection()
+            } else {
+                document.insertText(value)
+            }
+        }
+
+        function removePrevious() {
+            if (hasSelection()) {
+                document.replaceRange(selectionStartPosition(), selectionEndPosition(), "")
+                clearSelection()
+                return true
+            }
+            return document.removePreviousCharacter()
+        }
+
+        function removeNext() {
+            if (hasSelection()) {
+                document.replaceRange(selectionStartPosition(), selectionEndPosition(), "")
+                clearSelection()
+                return true
+            }
+            return document.removeNextCharacter()
+        }
+
+        function moveCursorWithSelection(event, moveFunction) {
+            const extend = (event.modifiers & Qt.ShiftModifier) !== 0
+            const anchor = document.cursorPosition
+            if (extend && selectionAnchorPosition < 0)
+                selectionAnchorPosition = anchor
+            moveFunction()
+            if (!extend)
+                clearSelection()
+            event.accepted = true
+        }
+
+        function columnAtX(line, x) {
+            const text = document.lineText(line)
+            const targetX = Math.max(0, x)
+            let low = 0
+            let high = text.length
+            while (low < high) {
+                const mid = Math.ceil((low + high) / 2)
+                hitMetrics.text = text.slice(0, mid)
+                if (hitMetrics.advanceWidth <= targetX)
+                    low = mid
+                else
+                    high = mid - 1
+            }
+            return Math.max(0, Math.min(text.length, low))
+        }
+
+        function documentPositionAt(x, y) {
+            const line = Math.max(0, Math.min(
+                document.lineCount - 1,
+                Math.floor((y - lineView.y + lineView.contentY) / control.lineHeight)
+            ))
+            const column = columnAtX(line, x - lineView.x)
+            return document.positionForLineColumn(line, column)
+        }
+
+        function handleKey(event) {
+            if (!control.enabled || control.readOnly || control.reading) {
+                event.accepted = false
+                return
+            }
+
+            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                replaceSelectionOrInsert("\n")
+                event.accepted = true
+                return
+            }
+
+            if (event.key === Qt.Key_Backspace) {
+                event.accepted = removePrevious()
+                return
+            }
+
+            if (event.key === Qt.Key_Delete) {
+                event.accepted = removeNext()
+                return
+            }
+
+            if (event.key === Qt.Key_Left) {
+                moveCursorWithSelection(event, function() { document.moveCursorLeft() })
+                return
+            }
+
+            if (event.key === Qt.Key_Right) {
+                moveCursorWithSelection(event, function() { document.moveCursorRight() })
+                return
+            }
+
+            if (event.key === Qt.Key_Up) {
+                moveCursorWithSelection(event, function() { document.moveCursorUp() })
+                return
+            }
+
+            if (event.key === Qt.Key_Down) {
+                moveCursorWithSelection(event, function() { document.moveCursorDown() })
+                return
+            }
+
+            if (event.key === Qt.Key_Home) {
+                moveCursorWithSelection(event, function() { document.moveCursorLineStart() })
+                return
+            }
+
+            if (event.key === Qt.Key_End) {
+                moveCursorWithSelection(event, function() { document.moveCursorLineEnd() })
+                return
+            }
+
+            if (event.key === Qt.Key_Tab) {
+                replaceSelectionOrInsert("    ")
+                event.accepted = true
+                return
+            }
+
+            event.accepted = false
+        }
+    }
+
+    TextMetrics {
+        id: hitMetrics
+        font.family: control.fontFamily
+        font.pixelSize: control.fontPixelSize
+        font.weight: control.fontWeight
+        font.styleName: control.fontStyleName
+        font.letterSpacing: control.fontLetterSpacing
+    }
+
+    TextMetrics {
+        id: adapterCursorMetrics
+        font.family: control.fontFamily
+        font.pixelSize: control.fontPixelSize
+        font.weight: control.fontWeight
+        font.styleName: control.fontStyleName
+        font.letterSpacing: control.fontLetterSpacing
+        text: document.lineText(document.cursorLine).slice(0, document.cursorColumn)
     }
 
     TextDocumentModel {
@@ -160,83 +334,8 @@ FocusScope {
         return fallbackRadius
     }
 
-    function handleKey(event) {
-        if (!control.enabled || control.readOnly || control.reading) {
-            event.accepted = false
-            return
-        }
-
-        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-            document.insertNewline()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Backspace) {
-            event.accepted = document.removePreviousCharacter()
-            return
-        }
-
-        if (event.key === Qt.Key_Delete) {
-            event.accepted = document.removeNextCharacter()
-            return
-        }
-
-        if (event.key === Qt.Key_Left) {
-            document.moveCursorLeft()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Right) {
-            document.moveCursorRight()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Up) {
-            document.moveCursorUp()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Down) {
-            document.moveCursorDown()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Home) {
-            document.moveCursorLineStart()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_End) {
-            document.moveCursorLineEnd()
-            event.accepted = true
-            return
-        }
-
-        if (event.key === Qt.Key_Tab) {
-            document.insertText("    ")
-            event.accepted = true
-            return
-        }
-
-        if (event.text.length > 0
-                && !(event.modifiers & Qt.ControlModifier)
-                && !(event.modifiers & Qt.MetaModifier)) {
-            document.insertText(event.text)
-            event.accepted = true
-            return
-        }
-
-        event.accepted = false
-    }
-
     Keys.onPressed: function(event) {
-        handleKey(event)
+        privateState.handleKey(event)
     }
 
     Item {
@@ -248,6 +347,40 @@ FocusScope {
             anchors.fill: parent
             radius: control.resolvedRectangleRadius(width, height, control.cornerRadius)
             color: control.resolvedEditAreaBackgroundColor
+        }
+
+        TextInput {
+            id: inputAdapter
+            objectName: "editorImeAdapter"
+            x: lineView.x + adapterCursorMetrics.advanceWidth
+            y: lineView.y + document.cursorLine * control.lineHeight - lineView.contentY
+            width: 1
+            height: control.lineHeight
+            opacity: 0.01
+            enabled: control.enabled && !control.readOnly
+            focus: control.activeFocus
+            activeFocusOnPress: false
+            color: "transparent"
+            selectedTextColor: "transparent"
+            selectionColor: "transparent"
+            cursorVisible: false
+            clip: true
+            inputMethodHints: Qt.ImhMultiLine
+            Keys.priority: Keys.BeforeItem
+            Keys.onPressed: function(event) {
+                privateState.handleKey(event)
+            }
+            onTextChanged: {
+                if (privateState.adapterClearing)
+                    return
+                if (text.length === 0)
+                    return
+                const committedText = text
+                privateState.adapterClearing = true
+                text = ""
+                privateState.adapterClearing = false
+                privateState.replaceSelectionOrInsert(committedText)
+            }
         }
 
         ListView {
@@ -284,6 +417,43 @@ FocusScope {
 
                 width: ListView.view ? ListView.view.width : 0
                 height: control.lineHeight
+                readonly property int documentLineStart: document.positionForLineColumn(lineIndex, 0)
+                readonly property int selectedStartColumn: privateState.hasSelection()
+                    ? Math.max(0, Math.min(text.length, privateState.selectionStartPosition() - documentLineStart))
+                    : 0
+                readonly property int selectedEndColumn: privateState.hasSelection()
+                    ? Math.max(0, Math.min(text.length, privateState.selectionEndPosition() - documentLineStart))
+                    : 0
+                readonly property bool lineSelected: selectedEndColumn > selectedStartColumn
+
+                TextMetrics {
+                    id: selectionPrefixMetrics
+                    font.family: control.fontFamily
+                    font.pixelSize: control.fontPixelSize
+                    font.weight: control.fontWeight
+                    font.styleName: control.fontStyleName
+                    font.letterSpacing: control.fontLetterSpacing
+                    text: lineDelegate.text.slice(0, lineDelegate.selectedStartColumn)
+                }
+
+                TextMetrics {
+                    id: selectionTextMetrics
+                    font.family: control.fontFamily
+                    font.pixelSize: control.fontPixelSize
+                    font.weight: control.fontWeight
+                    font.styleName: control.fontStyleName
+                    font.letterSpacing: control.fontLetterSpacing
+                    text: lineDelegate.text.slice(lineDelegate.selectedStartColumn, lineDelegate.selectedEndColumn)
+                }
+
+                Rectangle {
+                    x: selectionPrefixMetrics.advanceWidth
+                    y: Math.max(0, Math.floor((parent.height - control.textLineBoxHeight) / 2))
+                    width: Math.max(Theme.scaleMetric(2), selectionTextMetrics.advanceWidth)
+                    height: control.textLineBoxHeight
+                    color: Theme.accentBlueMuted
+                    visible: lineDelegate.lineSelected
+                }
 
                 Text {
                     id: lineText
@@ -306,6 +476,19 @@ FocusScope {
                     id: cursorMetrics
                     font: lineText.font
                     text: lineDelegate.text.slice(0, document.cursorColumn)
+                }
+
+                Text {
+                    x: cursorMetrics.advanceWidth
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: inputAdapter.preeditText
+                    color: control.enabled ? control.textColor : control.textColorDisabled
+                    font: lineText.font
+                    textFormat: Text.PlainText
+                    renderType: Text.QtRendering
+                    visible: control.focused
+                        && document.cursorLine === lineDelegate.lineIndex
+                        && inputAdapter.preeditText.length > 0
                 }
 
                 Rectangle {
@@ -340,12 +523,48 @@ FocusScope {
             wrapMode: Text.WordWrap
         }
 
+        MouseArea {
+            anchors.fill: parent
+            z: 10
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.IBeamCursor
+            preventStealing: true
+            enabled: control.enabled
+            onPressed: function(mouse) {
+                if (control.autoFocusOnPress)
+                    inputAdapter.forceActiveFocus()
+
+                const previousPosition = document.cursorPosition
+                const nextPosition = privateState.documentPositionAt(mouse.x, mouse.y)
+                if ((mouse.modifiers & Qt.ShiftModifier) && privateState.selectionAnchorPosition < 0)
+                    privateState.selectionAnchorPosition = previousPosition
+                else if (!(mouse.modifiers & Qt.ShiftModifier))
+                    privateState.selectionAnchorPosition = nextPosition
+
+                document.cursorPosition = nextPosition
+                privateState.mouseSelectionMoved = false
+                mouse.accepted = true
+            }
+            onPositionChanged: function(mouse) {
+                if (!pressed)
+                    return
+                privateState.mouseSelectionMoved = true
+                document.cursorPosition = privateState.documentPositionAt(mouse.x, mouse.y)
+                mouse.accepted = true
+            }
+            onReleased: function(mouse) {
+                if (!privateState.mouseSelectionMoved && !(mouse.modifiers & Qt.ShiftModifier))
+                    privateState.clearSelection()
+                mouse.accepted = true
+            }
+        }
+
         TapHandler {
             id: tapHandler
             enabled: control.enabled
             onTapped: {
                 if (control.autoFocusOnPress)
-                    control.forceActiveFocus()
+                    inputAdapter.forceActiveFocus()
             }
         }
 
