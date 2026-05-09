@@ -78,6 +78,7 @@ This structure is intentional so the same question can be answered consistently 
 
 - `docs/backend/ModelUndoStack.md`
 - `docs/backend/ModelSource.md`
+- `docs/backend/TextDocumentModel.md`
 - `docs/backend/HierarchyModel.md`
 - `docs/backend/TableHeaderModel.md`
 - `docs/backend/TableModel.md`

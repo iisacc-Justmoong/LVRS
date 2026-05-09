@@ -35,6 +35,8 @@ Controls.Popup {
     readonly property int directionUp: 3
     property int openHorizontalDirection: directionRight
     property int openVerticalDirection: directionDown
+    property Component itemDelegate: defaultItemDelegate
+    property Component dividerDelegate: defaultDividerDelegate
     readonly property var backendRuntimeProfile: Platform.runtimeProfile(Platform.canonicalOs)
     readonly property bool backendTransitionReady: backendRuntimeProfile.backendFeatureReady !== false
     readonly property real backendTransitionSpeedFactor: {
@@ -87,6 +89,42 @@ Controls.Popup {
 
     signal itemTriggered(int index, var item)
     signal itemEventTriggered(string eventName, var payload, int index, var item)
+
+    Component {
+        id: defaultItemDelegate
+
+        MenuItem {
+            property var modelData: ({})
+            property int index: modelData.index === undefined ? -1 : modelData.index
+            property var entry: modelData.entry
+
+            width: parent ? parent.width : control.resolvedItemWidth
+            itemWidth: control.minimumItemWidth
+            state: modelData.state === undefined ? defaultState : modelData.state
+            label: modelData.label || ""
+            key: modelData.shortcut || ""
+            keyVisible: modelData.keyVisible === true
+            iconName: modelData.iconName || ""
+            iconSource: modelData.iconSource || ""
+            showChevron: modelData.showChevron === true
+            hasChildItems: modelData.hasChildItems === true
+            expanded: modelData.expanded === true
+            selectionDirection: modelData.selectionDirection === undefined ? "auto" : modelData.selectionDirection
+            enabled: modelData.enabled !== false
+            onClicked: control.triggerEntry(index)
+        }
+    }
+
+    Component {
+        id: defaultDividerDelegate
+
+        MenuDivider {
+            property var modelData: ({})
+            property int index: modelData.index === undefined ? -1 : modelData.index
+            width: parent ? parent.width : control.resolvedItemWidth
+            dividerColor: control.dividerColor
+        }
+    }
 
     modal: true
     dim: false
@@ -169,6 +207,7 @@ Controls.Popup {
             return items.count
         return 0
     }
+    readonly property var entryDelegateItems: buildEntryDelegateItems()
 
     implicitWidth: implicitItemContentWidth + leftPadding + rightPadding
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
@@ -523,6 +562,47 @@ Controls.Popup {
         return true
     }
 
+    function buildEntryDelegateItems() {
+        const count = entryCount
+        const result = []
+        for (let i = 0; i < count; i++) {
+            const entry = entryAt(i)
+            const divider = isDivider(entry)
+            const stateProbe = {
+                "defaultState": 0,
+                "selectedState": 1,
+                "inactiveState": 2
+            }
+            result.push({
+                "index": i,
+                "entry": entry,
+                "divider": divider,
+                "label": itemLabel(entry),
+                "shortcut": itemShortcut(entry),
+                "keyVisible": itemKeyVisible(entry),
+                "iconName": itemIconName(entry),
+                "iconSource": itemIconSource(entry),
+                "showChevron": itemShowChevron(entry),
+                "hasChildItems": itemHasChildItems(entry),
+                "expanded": itemExpanded(entry),
+                "selectionDirection": itemSelectionDirection(entry),
+                "enabled": itemEnabled(entry),
+                "state": divider ? 0 : itemState(entry, i, stateProbe),
+                "trigger": function() { return control.triggerEntry(i) }
+            })
+        }
+        return result
+    }
+
+    function createEntryDelegate(parentItem, descriptor) {
+        const component = descriptor.divider ? dividerDelegate : itemDelegate
+        if (!component)
+            return null
+        return component.createObject(parentItem, {
+            "modelData": descriptor
+        })
+    }
+
     function openAt(xPos, yPos) {
         var targetWidth = Math.max(implicitWidth, width)
         var targetHeight = Math.max(implicitHeight, height)
@@ -726,42 +806,43 @@ Controls.Popup {
         width: control.resolvedItemWidth
 
         Repeater {
-            model: control.entryCount
+            model: control.entryDelegateItems
 
             delegate: Item {
                 id: delegateRoot
-                required property int index
-                readonly property var entry: control.entryAt(index)
-                readonly property bool divider: control.isDivider(entry)
+                required property var modelData
+                property Item delegateItem: null
 
                 width: control.resolvedItemWidth
-                implicitWidth: divider ? control.minimumItemWidth : menuItem.implicitWidth
-                implicitHeight: divider ? dividerItem.implicitHeight : menuItem.implicitHeight
+                implicitWidth: delegateItem ? delegateItem.implicitWidth : control.minimumItemWidth
+                implicitHeight: delegateItem ? delegateItem.implicitHeight : 0
+                height: implicitHeight
 
-                MenuDivider {
-                    id: dividerItem
-                    visible: delegateRoot.divider
-                    width: control.resolvedItemWidth
-                    dividerColor: control.dividerColor
+                function rebuildDelegate() {
+                    if (delegateItem) {
+                        delegateItem.destroy()
+                        delegateItem = null
+                    }
+                    delegateItem = control.createEntryDelegate(delegateRoot, modelData)
+                    if (!delegateItem)
+                        return
+                    delegateItem.width = Qt.binding(function() { return delegateRoot.width })
+                    delegateItem.height = Qt.binding(function() { return delegateRoot.height })
                 }
 
-                MenuItem {
-                    id: menuItem
-                    visible: !delegateRoot.divider
-                    width: control.resolvedItemWidth
-                    itemWidth: control.minimumItemWidth
-                    state: control.itemState(delegateRoot.entry, delegateRoot.index, menuItem)
-                    label: control.itemLabel(delegateRoot.entry)
-                    key: control.itemShortcut(delegateRoot.entry)
-                    keyVisible: control.itemKeyVisible(delegateRoot.entry)
-                    iconName: control.itemIconName(delegateRoot.entry)
-                    iconSource: control.itemIconSource(delegateRoot.entry)
-                    showChevron: control.itemShowChevron(delegateRoot.entry)
-                    hasChildItems: control.itemHasChildItems(delegateRoot.entry)
-                    expanded: control.itemExpanded(delegateRoot.entry)
-                    selectionDirection: control.itemSelectionDirection(delegateRoot.entry)
-                    enabled: control.itemEnabled(delegateRoot.entry)
-                    onClicked: control.triggerEntry(delegateRoot.index)
+                Component.onCompleted: rebuildDelegate()
+                onModelDataChanged: rebuildDelegate()
+
+                Connections {
+                    target: control
+                    function onItemDelegateChanged() {
+                        if (!delegateRoot.modelData.divider)
+                            delegateRoot.rebuildDelegate()
+                    }
+                    function onDividerDelegateChanged() {
+                        if (delegateRoot.modelData.divider)
+                            delegateRoot.rebuildDelegate()
+                    }
                 }
             }
         }

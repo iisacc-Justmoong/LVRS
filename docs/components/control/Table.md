@@ -17,6 +17,8 @@ Data:
 - `headerCellItems` (preferred)
 - `headerColumns`
 - `rows`
+- `headerCellDelegate`: optional component forwarded to `TableHeader.cellDelegate`.
+- `cellDelegate`: optional per-body-cell component delegate. The default delegate is `TableCellItem`.
 
 Layout:
 
@@ -140,6 +142,9 @@ LV.Table {
 - Model-backed `setCellValue(...)` calls the source model's `setData(index, coercedValue, Qt::EditRole)`, then falls back to named `value`, `edit`, and `text` roles when present. QML does not replace `rows` with a snapshot after the edit.
 - Header entries define body column types. Objects may declare `type`, `valueType`, `cellType`, or `dataType`; primitive entries infer type from the primitive itself.
 - `TableModel.visibleCells()` already includes `x`, `y`, `width`, and `height`; covered cells are skipped and anchor cells receive merged width/height.
+- Each visible body cell instantiates `cellDelegate` and injects one `modelData` object. The descriptor includes `index`, `rowIndex`, `columnIndex`, `cellData`, `text`, `valueType`, `inputable`, `rowSpan`, `columnSpan`, `x`, `y`, `width`, and `height`.
+- Custom body-cell delegates should declare `property var modelData`; their root item is sized to the backend-computed cell rectangle.
+- `headerCellDelegate` uses the `TableHeader.cellDelegate` contract, so header and body rendering can be customized independently.
 - Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable` through `TableModel`.
 - Each body `TableCellItem` receives an injected validator from `Table`, which delegates to `TableModel` so inline edits are constrained by the header column type.
 - Header and row counts are resolved for JS arrays, model-like objects, and C++ item models; structure editing stays limited to mutable array/list inputs.
@@ -192,6 +197,28 @@ LV.Table {
         table.setCellValue(0, 1, "4.2")    // rejected for int
         table.setCellValue(0, 2, "false")  // accepted, stores boolean false
     }
+}
+```
+
+## Delegate Example
+
+```qml
+Component {
+    id: bodyCell
+
+    LV.TableCellItem {
+        property var modelData: ({})
+        itemData: modelData.cellData
+        text: modelData.text
+        valueType: modelData.valueType
+        inputable: modelData.inputable === true
+    }
+}
+
+LV.Table {
+    headerCellItems: [{ label: "Name" }, { label: "Count", type: "int" }]
+    rows: [[{ value: "Renderer" }, { value: 3 }]]
+    cellDelegate: bodyCell
 }
 ```
 

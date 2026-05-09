@@ -21,6 +21,7 @@ Location: `qml/components/control/display/TableHeader.qml`
 - `textColor`
 - `separatorHeight`
 - `separatorColor`
+- `cellDelegate`: optional per-header-cell component delegate. The default delegate renders the existing text label.
 
 Helper methods:
 
@@ -62,6 +63,8 @@ LV.TableHeader {
 - Primitive header entries infer type: `string -> string`, integer number -> `int`, non-integer number -> `float`, boolean -> `bool`.
 - Optional per-column `contentSpacing`/`horizontalPadding` overrides are supported.
 - Repeater delegates use `columnWidths` when provided, otherwise `fallbackCellWidth`, otherwise equal auto widths.
+- Every rendered header cell instantiates `cellDelegate` and injects one `modelData` object. The descriptor includes `index`, `descriptor`, `cellData`, `text`, `valueType`, `x`, `width`, `height`, and `padding`.
+- Custom delegates should declare `property var modelData`; their root item is sized to the resolved header cell bounds.
 - Bottom separator is rendered as dedicated rectangle (`panelBackground10` default).
 
 ## Backend Model
@@ -87,6 +90,30 @@ LV.TableHeader {
         { text: "State", type: "bool", contentSpacing: LV.Theme.gap8 },
         { title: "Latency", type: "float" }
     ]
+}
+```
+
+## Delegate Example
+
+```qml
+Component {
+    id: compactHeaderCell
+
+    Item {
+        property var modelData: ({})
+
+        LV.Label {
+            anchors.left: parent.left
+            anchors.leftMargin: modelData.padding || 0
+            anchors.verticalCenter: parent.verticalCenter
+            text: modelData.text
+        }
+    }
+}
+
+LV.TableHeader {
+    cellItems: [{ label: "Name" }, { label: "Count", type: "int" }]
+    cellDelegate: compactHeaderCell
 }
 ```
 

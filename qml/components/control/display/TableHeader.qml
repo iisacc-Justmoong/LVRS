@@ -15,6 +15,28 @@ Item {
     property color textColor: Theme.descriptionColor
     property real separatorHeight: Theme.strokeThin
     property color separatorColor: Theme.panelBackground10
+    property Component cellDelegate: null
+    readonly property Component resolvedCellDelegate: cellDelegate || defaultCellDelegate
+
+    Component {
+        id: defaultCellDelegate
+
+        Item {
+            property var modelData: ({})
+            property int index: modelData.index === undefined ? -1 : modelData.index
+            readonly property var descriptor: modelData.descriptor || ({})
+
+            Label {
+                anchors.left: parent.left
+                anchors.leftMargin: descriptor.padding || 0
+                anchors.verticalCenter: parent.verticalCenter
+                style: description
+                text: descriptor.text || ""
+                color: control.textColor
+                elide: Text.ElideRight
+            }
+        }
+    }
 
     TableHeaderModel {
         id: headerModel
@@ -31,6 +53,7 @@ Item {
     readonly property var resolvedColumnSource: headerModel.resolvedColumnSource()
     readonly property int resolvedColumnCount: headerModel.columnCount
     readonly property var headerDescriptors: headerModel.descriptors
+    readonly property var cellDelegateItems: buildCellDelegateItems()
 
     function columnAt(index) {
         return headerModel.columnAt(index)
@@ -72,6 +95,35 @@ Item {
         return headerModel.columnX(index)
     }
 
+    function buildCellDelegateItems() {
+        headerModel.revision
+        const count = Math.max(1, resolvedColumnCount)
+        const result = []
+        for (let i = 0; i < count; i++) {
+            const descriptor = headerModel.descriptorAt(i)
+            result.push({
+                "index": i,
+                "descriptor": descriptor,
+                "cellData": descriptor.cellData,
+                "text": descriptor.text,
+                "valueType": descriptor.valueType,
+                "x": descriptor.x,
+                "width": descriptor.width,
+                "height": control.rowHeight,
+                "padding": descriptor.padding
+            })
+        }
+        return result
+    }
+
+    function createCellDelegate(parentItem, descriptor) {
+        if (!resolvedCellDelegate)
+            return null
+        return resolvedCellDelegate.createObject(parentItem, {
+            "modelData": descriptor
+        })
+    }
+
     implicitWidth: Theme.scaleMetric(717)
     implicitHeight: rowHeight + separatorHeight
 
@@ -84,25 +136,37 @@ Item {
             height: control.rowHeight
 
             Repeater {
-                model: Math.max(1, control.resolvedColumnCount)
+                model: control.cellDelegateItems
 
                 delegate: Item {
                     id: headerCell
-                    required property int index
-                    readonly property var descriptor: headerModel.descriptorAt(index)
+                    required property var modelData
+                    property Item delegateItem: null
 
-                    x: descriptor.x
-                    width: descriptor.width
+                    x: modelData.x
+                    width: modelData.width
                     height: control.rowHeight
 
-                    Label {
-                        anchors.left: parent.left
-                        anchors.leftMargin: headerCell.descriptor.padding
-                        anchors.verticalCenter: parent.verticalCenter
-                        style: description
-                        text: headerCell.descriptor.text
-                        color: control.textColor
-                        elide: Text.ElideRight
+                    function rebuildDelegate() {
+                        if (delegateItem) {
+                            delegateItem.destroy()
+                            delegateItem = null
+                        }
+                        delegateItem = control.createCellDelegate(headerCell, modelData)
+                        if (!delegateItem)
+                            return
+                        delegateItem.width = Qt.binding(function() { return headerCell.width })
+                        delegateItem.height = Qt.binding(function() { return headerCell.height })
+                    }
+
+                    Component.onCompleted: rebuildDelegate()
+                    onModelDataChanged: rebuildDelegate()
+
+                    Connections {
+                        target: control
+                        function onCellDelegateChanged() {
+                            headerCell.rebuildDelegate()
+                        }
                     }
                 }
             }

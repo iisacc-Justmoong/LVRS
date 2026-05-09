@@ -692,6 +692,7 @@ bool TableModel::isCoveredCell(int rowIndex, int columnIndex) const
 QVariantList TableModel::visibleCells() const
 {
     QVariantList result;
+    int visibleIndex = 0;
     for (int row = 0; row < rowCount(); ++row) {
         const int count = columnCountForRow(rowAt(row));
         for (int column = 0; column < count; ++column) {
@@ -700,6 +701,7 @@ QVariantList TableModel::visibleCells() const
             const int rowSpan = cellRowSpan(row, column);
             const int columnSpan = cellColumnSpan(row, column);
             result.append(QVariantMap {
+                {QStringLiteral("index"), visibleIndex},
                 {QStringLiteral("rowIndex"), row},
                 {QStringLiteral("columnIndex"), column},
                 {QStringLiteral("rowSpan"), rowSpan},
@@ -713,6 +715,7 @@ QVariantList TableModel::visibleCells() const
                 {QStringLiteral("height"), rowSpanHeight(row, rowSpan)},
                 {QStringLiteral("inputable"), cellInputable(row, column)}
             });
+            ++visibleIndex;
         }
     }
     return result;

@@ -1034,8 +1034,10 @@ LV.ApplicationWindow {
 
                 LV.TextEditor {
                     width: parent.width
+                    filePath: "/tmp/lvrs-visual-catalog-notes.txt"
+                    chunkSize: 65536
                     editorHeight: 180
-                    text: "TextEditor keeps a fixed outer height while the internal editor scrolls.\n\nThis makes it suitable for forms, notes, and documentation panels."
+                    placeholderText: "Open or create /tmp/lvrs-visual-catalog-notes.txt"
                 }
             }
         }

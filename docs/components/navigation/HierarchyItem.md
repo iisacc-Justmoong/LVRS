@@ -14,6 +14,8 @@ Location: `qml/components/navigation/HierarchyItem.qml`
 
 Identity and list context:
 
+- `modelData` (descriptor injected by `HierarchyList.itemDelegate` for generated rows)
+- `index` (generated descriptor index injected by `HierarchyList.itemDelegate`; default `-1`)
 - `itemId`, `itemKey`, `parentItemKey`
 - `parentLabel`
 - `pathLabel`, `parentPathLabel`

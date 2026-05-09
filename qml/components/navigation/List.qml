@@ -36,6 +36,7 @@ Item {
     property color selectedRowColor: Theme.primary
     property color separatorColor: "#1A000000"
     property real separatorOpacity: 0.5
+    property Component itemDelegate: defaultItemDelegate
 
     signal itemTriggered(int index, var item)
     signal toolbarIconTriggered(int index, string source)
@@ -44,6 +45,69 @@ Item {
     readonly property bool usingModel: model !== undefined && model !== null
     readonly property var sourceModel: usingModel ? model : items
     readonly property int entryCount: listModelSource.count
+    readonly property var itemDelegateItems: buildItemDelegateItems()
+
+    Component {
+        id: defaultItemDelegate
+
+        AbstractButton {
+            id: rowButton
+            property var modelData: ({})
+            property int index: modelData.index === undefined ? -1 : modelData.index
+            readonly property var entry: modelData.entry
+            readonly property bool rowSelected: modelData.selected === true
+            readonly property bool rowEnabled: modelData.enabled === true
+
+            width: parent ? parent.width : control.listWidth
+            height: control.itemHeight
+            implicitHeight: control.itemHeight
+            tone: AbstractButton.Borderless
+            enabled: rowEnabled
+            horizontalPadding: Theme.gapNone
+            verticalPadding: Theme.gapNone
+            spacing: Theme.gapNone
+            cornerRadius: Theme.gapNone
+            backgroundColor: rowSelected ? control.selectedRowColor : "transparent"
+            backgroundColorHover: rowSelected ? control.selectedRowColor : "transparent"
+            backgroundColorPressed: rowSelected ? control.selectedRowColor : Theme.accentBlueMuted
+            backgroundColorDisabled: rowSelected ? control.selectedRowColor : "transparent"
+            textColor: Theme.bodyColor
+            textColorDisabled: Theme.disabledColor
+
+            contentItem: Item {
+                Label {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: control.itemLabelLeftPadding
+                    anchors.rightMargin: Theme.gap8
+                    anchors.verticalCenter: parent.verticalCenter
+                    style: body
+                    text: rowButton.modelData.label || ""
+                    color: rowButton.rowEnabled ? Theme.bodyColor : Theme.disabledColor
+                    font.pixelSize: Theme.scaleTextMetric(13)
+                    font.weight: Font.Normal
+                    font.styleName: "Regular"
+                    lineHeight: Theme.scaleTextMetric(16)
+                    lineHeightMode: Text.FixedHeight
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: Theme.scaleMetric(1)
+                    color: control.separatorColor
+                    opacity: control.separatorOpacity
+                    visible: !rowButton.rowSelected
+                }
+            }
+
+            onClicked: control.triggerItem(index)
+        }
+    }
 
     ModelSource {
         id: listModelSource
@@ -77,6 +141,37 @@ Item {
         if (value !== null && value !== undefined)
             return !!value
         return index === selectedIndex
+    }
+
+    function triggerItem(index) {
+        const entry = entryAt(index)
+        itemTriggered(index, entry)
+    }
+
+    function buildItemDelegateItems() {
+        listModelSource.revision
+        const count = entryCount
+        const result = []
+        for (let i = 0; i < count; i++) {
+            const entry = entryAt(i)
+            result.push({
+                "index": i,
+                "entry": entry,
+                "label": itemLabel(entry),
+                "enabled": interactive && itemEnabled(entry),
+                "selected": itemSelected(entry, i),
+                "trigger": function() { control.triggerItem(i) }
+            })
+        }
+        return result
+    }
+
+    function createDelegateItem(parentItem, component, descriptor) {
+        if (!component)
+            return null
+        return component.createObject(parentItem, {
+            "modelData": descriptor
+        })
     }
 
     readonly property int contentHeight: {
@@ -123,63 +218,42 @@ Item {
                 spacing: Theme.gapNone
 
                 Repeater {
-                    model: control.entryCount
+                    model: control.itemDelegateItems
 
-                    delegate: AbstractButton {
-                        id: rowButton
-                        required property int index
-                        readonly property var entry: control.entryAt(index)
-                        readonly property bool rowSelected: control.itemSelected(entry, index)
-                        readonly property bool rowEnabled: control.interactive && control.itemEnabled(entry)
+                    delegate: Item {
+                        id: delegateRoot
+                        required property var modelData
+                        property Item delegateItem: null
 
                         width: listItemsColumn.width
-                        height: control.itemHeight
-                        implicitHeight: control.itemHeight
-                        tone: AbstractButton.Borderless
-                        enabled: rowEnabled
-                        horizontalPadding: Theme.gapNone
-                        verticalPadding: Theme.gapNone
-                        spacing: Theme.gapNone
-                        cornerRadius: Theme.gapNone
-                        backgroundColor: rowSelected ? control.selectedRowColor : "transparent"
-                        backgroundColorHover: rowSelected ? control.selectedRowColor : "transparent"
-                        backgroundColorPressed: rowSelected ? control.selectedRowColor : Theme.accentBlueMuted
-                        backgroundColorDisabled: rowSelected ? control.selectedRowColor : "transparent"
-                        textColor: Theme.bodyColor
-                        textColorDisabled: Theme.disabledColor
+                        height: delegateItem
+                            ? Math.max(control.itemHeight, delegateItem.implicitHeight)
+                            : control.itemHeight
+                        implicitHeight: height
 
-                        contentItem: Item {
-                            Label {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: control.itemLabelLeftPadding
-                                anchors.rightMargin: Theme.gap8
-                                anchors.verticalCenter: parent.verticalCenter
-                                style: body
-                                text: control.itemLabel(rowButton.entry)
-                                color: rowButton.rowEnabled ? Theme.bodyColor : Theme.disabledColor
-                                font.pixelSize: Theme.scaleTextMetric(13)
-                                font.weight: Font.Normal
-                                font.styleName: "Regular"
-                                lineHeight: Theme.scaleTextMetric(16)
-                                lineHeightMode: Text.FixedHeight
-                                horizontalAlignment: Text.AlignLeft
-                                verticalAlignment: Text.AlignVCenter
-                                elide: Text.ElideRight
+                        function rebuildDelegate() {
+                            if (delegateItem) {
+                                delegateItem.destroy()
+                                delegateItem = null
                             }
-
-                            Rectangle {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
-                                height: Theme.scaleMetric(1)
-                                color: control.separatorColor
-                                opacity: control.separatorOpacity
-                                visible: !rowButton.rowSelected
-                            }
+                            delegateItem = control.createDelegateItem(delegateRoot,
+                                                                      control.itemDelegate,
+                                                                      modelData)
+                            if (!delegateItem)
+                                return
+                            delegateItem.width = Qt.binding(function() { return delegateRoot.width })
+                            delegateItem.height = Qt.binding(function() { return delegateRoot.height })
                         }
 
-                        onClicked: control.itemTriggered(index, entry)
+                        Component.onCompleted: rebuildDelegate()
+                        onModelDataChanged: rebuildDelegate()
+
+                        Connections {
+                            target: control
+                            function onItemDelegateChanged() {
+                                delegateRoot.rebuildDelegate()
+                            }
+                        }
                     }
                 }
             }

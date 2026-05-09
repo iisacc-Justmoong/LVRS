@@ -37,6 +37,8 @@ AbstractButton {
     property string parentPathLabel: ""
     property var hierarchyList: null
     property var nodeData: null
+    property var modelData: null
+    property int index: -1
     property bool generatedByTreeModel: false
     property bool dragAllowed: true
     property int mobileDragHoldInterval: 1000

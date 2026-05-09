@@ -414,6 +414,7 @@ private slots:
     void context_menu_visual_contract_loads();
     void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
+    void model_component_delegate_contract_loads();
     void table_cell_item_contract_loads();
     void table_cell_merge_split_contract_loads();
     void table_structure_editing_contract_loads();
@@ -5269,6 +5270,182 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("placementContract").toBool());
+}
+
+void ImportApiTests::model_component_delegate_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 640
+    height: 480
+
+    property string listDelegateLabel: ""
+    property bool listTriggered: false
+    property string menuDelegateLabel: ""
+    property bool menuDividerReady: false
+    property bool menuTriggered: false
+    property string headerDelegateText: ""
+    property string cellDelegateText: ""
+    property bool hierarchyDelegateReady: false
+
+    Component {
+        id: listItemDelegate
+        Rectangle {
+            property var modelData: ({})
+            width: parent ? parent.width : 120
+            height: 20
+            color: modelData.selected ? "steelblue" : "transparent"
+
+            Component.onCompleted: {
+                if (modelData.index === 0)
+                    root.listDelegateLabel = modelData.label
+                if (modelData.index === 1 && modelData.trigger)
+                    modelData.trigger()
+            }
+        }
+    }
+
+    Component {
+        id: menuItemDelegate
+        LV.MenuItem {
+            property var modelData: ({})
+            label: modelData.label || ""
+            key: modelData.shortcut || ""
+            keyVisible: modelData.keyVisible === true
+            itemWidth: 120
+            Component.onCompleted: {
+                if (modelData.index === 0)
+                    root.menuDelegateLabel = modelData.label
+                if (modelData.index === 0 && modelData.trigger)
+                    root.menuTriggered = modelData.trigger()
+            }
+        }
+    }
+
+    Component {
+        id: menuDividerDelegate
+        LV.MenuDivider {
+            property var modelData: ({})
+            width: 120
+            Component.onCompleted: root.menuDividerReady = modelData.divider === true
+        }
+    }
+
+    Component {
+        id: headerCellDelegate
+        Item {
+            property var modelData: ({})
+            Component.onCompleted: {
+                if (modelData.index === 1)
+                    root.headerDelegateText = modelData.text
+            }
+        }
+    }
+
+    Component {
+        id: tableCellDelegate
+        Item {
+            property var modelData: ({})
+            Component.onCompleted: {
+                if (modelData.index === 1 && modelData.rowIndex === 0 && modelData.columnIndex === 1)
+                    root.cellDelegateText = modelData.text
+            }
+        }
+    }
+
+    Component {
+        id: hierarchyItemDelegate
+        LV.HierarchyItem {
+            property bool delegateMarker: true
+            Component.onCompleted: {
+                if (modelData && modelData.itemKey === "child")
+                    root.hierarchyDelegateReady = delegateMarker
+            }
+        }
+    }
+
+    LV.List {
+        id: list
+        visible: false
+        model: [
+            { label: "List A", selected: true },
+            { label: "List B" }
+        ]
+        itemDelegate: listItemDelegate
+        onItemTriggered: function(index, item) {
+            if (index === 1 && item.label === "List B")
+                root.listTriggered = true
+        }
+    }
+
+    LV.ContextMenu {
+        id: menu
+        itemDelegate: menuItemDelegate
+        dividerDelegate: menuDividerDelegate
+        items: [
+            { label: "Open", key: "O", eventName: "open" },
+            { type: "divider" }
+        ]
+        onItemTriggered: function(index, item) {
+            if (index === 0 && item.label === "Open")
+                root.menuTriggered = true
+        }
+    }
+
+    LV.TableHeader {
+        id: header
+        visible: false
+        width: 240
+        cellDelegate: headerCellDelegate
+        cellItems: [
+            { label: "Name" },
+            { label: "Count" }
+        ]
+    }
+
+    LV.Table {
+        id: table
+        visible: false
+        width: 240
+        height: 96
+        structureControlsVisible: false
+        headerColumns: ["Name", "Count"]
+        cellDelegate: tableCellDelegate
+        rows: [[{ value: "Renderer" }, { value: 3 }]]
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        visible: false
+        model: [
+            { key: "root", label: "Root", depth: 0, expanded: true },
+            { key: "child", label: "Child", depth: 1 }
+        ]
+        itemDelegate: hierarchyItemDelegate
+    }
+
+    property bool delegateContractReady:
+        listDelegateLabel === "List A"
+        && listTriggered
+        && menuDelegateLabel === "Open"
+        && menuDividerReady
+        && menuTriggered
+        && headerDelegateText === "Count"
+        && cellDelegateText === "3"
+        && hierarchyDelegateReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("delegateContractReady").toBool());
 }
 
 void ImportApiTests::table_cell_item_contract_loads()

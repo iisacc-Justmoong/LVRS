@@ -33,6 +33,7 @@ Layout and state:
 - `selectedIndex`, `interactive`
 - `listWidth`, `minimumListHeight`, `itemHeight`, `itemLabelLeftPadding`
 - `backgroundColor`, `selectedRowColor`, `separatorColor`, `separatorOpacity`
+- `itemDelegate`: optional per-row component delegate. The default delegate renders the existing compact button row.
 
 Toolbar/footer:
 
@@ -59,6 +60,8 @@ Signals:
 - Object/model rows render label text from `labelRole`, then `textRole`, then `titleRole`, then `display`, then `edit`.
 - `enabledRole` and `selectedRole` are optional. Missing `enabledRole` means enabled; missing `selectedRole` falls back to `selectedIndex`.
 - `itemTriggered` emits the resolved row entry returned by `entryAt(index)`.
+- Every rendered row instantiates `itemDelegate` and injects one `modelData` object. The descriptor includes `index`, `entry`, `label`, `enabled`, `selected`, and `trigger()`.
+- Custom delegates should declare `property var modelData` and call `modelData.trigger()` when they want the list to emit the normalized `itemTriggered` signal.
 
 ## Usage
 
@@ -77,5 +80,23 @@ LV.List {
 LV.List {
     model: backendModel
     labelRole: "name"
+}
+```
+
+```qml
+Component {
+    id: customRow
+
+    LV.AbstractButton {
+        property var modelData: ({})
+        text: modelData.label || ""
+        enabled: modelData.enabled === true
+        onClicked: modelData.trigger()
+    }
+}
+
+LV.List {
+    model: [{ label: "Overview" }, { label: "Settings" }]
+    itemDelegate: customRow
 }
 ```

@@ -445,8 +445,8 @@ QtObject {
                             docPath: "docs/components/control/TextEditor.md",
                             previewId: "text-editor",
                             roleLabel: "Multi-line editor",
-                            summary: "Scrollable multi-line text editor with explicit outer height and embedded guard helpers.",
-                            usage: "LV.TextEditor {\n    editorHeight: 160\n    text: \"Notes go here\"\n}",
+                            summary: "File-connected plain-text multi-line editor with automatic read-through/write-through synchronization, chunked lazy loading, and embedded guard helpers.",
+                            usage: "LV.TextEditor {\n    filePath: \"/tmp/notes.txt\"\n    chunkSize: 65536\n    onSyncFinished: console.log(path)\n}",
                             related: ["code-editor", "input-method-guard", "wheel-scroll-guard"]
                         }),
                         component({

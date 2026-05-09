@@ -37,6 +37,7 @@ Item {
     property int generatedItemWidth: Theme.scaleMetric(200)
     property int generatedIconSize: Theme.scaleMetric(16)
     property int generatedChevronSize: Theme.scaleMetric(16)
+    property Component itemDelegate: defaultItemDelegate
     property bool autoExpandAncestorsOnActivate: true
     readonly property bool editableSupported: hierarchyModel.revision >= 0
         && (hierarchyModel.sourceSupportsEditing() || qmlListModelSupportsEditing())
@@ -99,7 +100,7 @@ Item {
     property real _dragIndicatorX: 0
 
     Component {
-        id: generatedItemComponent
+        id: defaultItemDelegate
 
         HierarchyItem { }
     }
@@ -1999,9 +2000,12 @@ Item {
         const endExclusive = Math.min(startIndex + _rebuildChunkSize, descriptors.length)
         for (let i = startIndex; i < endExclusive; i++) {
             const descriptor = descriptors[i]
-            const item = generatedItemComponent.createObject(generatedColumn, {
+            const delegateComponent = control.itemDelegate || defaultItemDelegate
+            const item = delegateComponent.createObject(generatedColumn, {
                                                                  generatedByTreeModel: true,
                                                                  hierarchyList: control,
+                                                                 modelData: descriptor,
+                                                                 index: i,
                                                                  itemId: descriptor.itemId,
                                                                  itemKey: descriptor.itemKey,
                                                                  parentItemKey: descriptor.parentItemKey,
@@ -2219,6 +2223,7 @@ Item {
     onGeneratedItemWidthChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onGeneratedIconSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
     onGeneratedChevronSizeChanged: { markItemsDirty(true); scheduleRebuildTreeItems() }
+    onItemDelegateChanged: { clearGeneratedItems(); scheduleRebuildTreeItems() }
     onEditableChanged: {
         if (!editable && _dragActiveInternal)
             _endEditableDrag(false)

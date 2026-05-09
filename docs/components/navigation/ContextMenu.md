@@ -32,6 +32,8 @@ Visual/layout:
 
 - `itemWidth`, `itemSpacing` (default `Theme.gap2`)
 - `resolvedItemWidth` (readonly)
+- `itemDelegate`: optional component used for non-divider entries.
+- `dividerDelegate`: optional component used for divider entries.
 - `menuColor`, `menuOpacity`, `resolvedMenuColor` (default surface `Theme.panelBackground06`)
 - `dividerColor` (default `Theme.disabledColor`)
 - `edgeMargin` (viewport inset used by auto placement; default `Theme.gap4`)
@@ -70,6 +72,14 @@ Callback receives context `{ index, item, menu, eventName, payload, emit(), clos
 Chevron render condition is `showChevron && hasChildItems` (resolved from entry fields).
 Shortcut visibility defaults to `true` only when shortcut text exists; entries without `key`/`shortcut`/`keyText` do not reserve trailing shortcut space unless explicitly requested.
 
+## Delegate Contract
+
+- Each non-divider entry instantiates `itemDelegate`; each divider entry instantiates `dividerDelegate`.
+- Both delegates receive one injected `modelData` object and should declare `property var modelData`.
+- `modelData` includes `index`, `entry`, `divider`, `label`, `shortcut`, `keyVisible`, `iconName`, `iconSource`, `showChevron`, `hasChildItems`, `expanded`, `selectionDirection`, `enabled`, `state`, and `trigger()`.
+- `modelData.trigger()` invokes `triggerEntry(index)`, emits normalized menu signals, runs callbacks/events, and applies close policy.
+- Custom delegates are responsible for wiring their own click/tap action to `modelData.trigger()`.
+
 ## Placement Contract
 
 - `openAt(x, y)` performs built-in edge-aware placement against overlay bounds.
@@ -86,6 +96,7 @@ Shortcut visibility defaults to `true` only when shortcut text exists; entries w
 - Delegate rows and dividers consume `resolvedItemWidth`, so a combo-triggered menu can grow wider than the trigger itself when content or caller sizing requires it.
 - Delegate `MenuItem` rows remain responsive inside `resolvedItemWidth`, so constrained menus do not push label/shortcut/chevron content outside the popup bounds or collapse the internal spacer into negative geometry.
 - Width probing uses each row's unconstrained natural content width, so visible text elision does not feed back into popup sizing.
+- Width probing uses the default `MenuItem` metric contract. Custom delegates that need wider chrome should set `itemWidth` or explicit popup `width`.
 
 ## Visual Contract
 
@@ -105,5 +116,23 @@ LV.ContextMenu {
         { type: "divider" },
         { label: "Inspect", keepOpen: true, events: ["menu.inspect"] }
     ]
+}
+```
+
+```qml
+Component {
+    id: destructiveMenuRow
+
+    LV.MenuItem {
+        property var modelData: ({})
+        label: modelData.label || ""
+        enabled: modelData.enabled === true
+        onClicked: modelData.trigger()
+    }
+}
+
+LV.ContextMenu {
+    itemDelegate: destructiveMenuRow
+    items: [{ label: "Delete", eventName: "delete" }]
 }
 ```

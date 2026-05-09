@@ -44,6 +44,8 @@ Item {
     property int structureGutterHeight: Theme.gap20
     property string defaultHeaderText: "Column"
     property string defaultCellText: "Text"
+    property Component headerCellDelegate: null
+    property Component cellDelegate: defaultCellDelegate
     readonly property int contextRowIndex: tableModel.contextRowIndex
     readonly property int contextColumnIndex: tableModel.contextColumnIndex
     property bool _syncingFromTableModel: false
@@ -60,6 +62,36 @@ Item {
     signal columnDeleted(int columnIndex)
     signal columnResized(int columnIndex, int width)
     signal rowResized(int rowIndex, int height)
+
+    Component {
+        id: defaultCellDelegate
+
+        TableCellItem {
+            property var modelData: ({})
+            property int index: modelData.index === undefined ? -1 : modelData.index
+
+            itemData: modelData.cellData
+            text: modelData.text || ""
+            cellHeight: modelData.height || control.rowHeight
+            dividerColor: control.rowDividerColor
+            textColor: control.cellTextColor
+            clipContent: true
+            inputable: modelData.inputable === true
+            valueType: modelData.valueType || "string"
+            valueValidator: function(value) {
+                return control.validateCellInput(modelData.rowIndex, modelData.columnIndex, value)
+            }
+            onInputEdited: function(text) {
+                control.cellInputEdited(modelData.rowIndex, modelData.columnIndex, text)
+            }
+            onInputSubmitted: function(text) {
+                control.cellInputSubmitted(modelData.rowIndex, modelData.columnIndex, text)
+            }
+            onInputRejected: function(text, valueType) {
+                control.cellInputRejected(modelData.rowIndex, modelData.columnIndex, text, valueType)
+            }
+        }
+    }
 
     TableModel {
         id: tableModel
@@ -680,6 +712,7 @@ Item {
                 minColumnWidth: control.minColumnWidth
                 textColor: control.headerTextColor
                 separatorColor: control.headerSeparatorColor
+                cellDelegate: control.headerCellDelegate
             }
 
             Item {
@@ -690,32 +723,41 @@ Item {
                 Repeater {
                     model: control.visibleCellItems
 
-                    delegate: TableCellItem {
+                    delegate: Item {
+                        id: cellDelegateRoot
+                        required property int index
                         required property var modelData
+                        property Item delegateItem: null
 
                         x: modelData.x
                         y: modelData.y
                         width: modelData.width
                         height: modelData.height
-                        itemData: modelData.cellData
-                        text: modelData.text
-                        cellHeight: modelData.height
-                        dividerColor: control.rowDividerColor
-                        textColor: control.cellTextColor
-                        clipContent: true
-                        inputable: modelData.inputable
-                        valueType: modelData.valueType
-                        valueValidator: function(value) {
-                            return control.validateCellInput(modelData.rowIndex, modelData.columnIndex, value)
+
+                        function rebuildDelegate() {
+                            if (delegateItem) {
+                                delegateItem.destroy()
+                                delegateItem = null
+                            }
+                            if (!control.cellDelegate)
+                                return
+                            delegateItem = control.cellDelegate.createObject(cellDelegateRoot, {
+                                "modelData": modelData
+                            })
+                            if (!delegateItem)
+                                return
+                            delegateItem.width = Qt.binding(function() { return cellDelegateRoot.width })
+                            delegateItem.height = Qt.binding(function() { return cellDelegateRoot.height })
                         }
-                        onInputEdited: function(text) {
-                            control.cellInputEdited(modelData.rowIndex, modelData.columnIndex, text)
-                        }
-                        onInputSubmitted: function(text) {
-                            control.cellInputSubmitted(modelData.rowIndex, modelData.columnIndex, text)
-                        }
-                        onInputRejected: function(text, valueType) {
-                            control.cellInputRejected(modelData.rowIndex, modelData.columnIndex, text, valueType)
+
+                        Component.onCompleted: rebuildDelegate()
+                        onModelDataChanged: rebuildDelegate()
+
+                        Connections {
+                            target: control
+                            function onCellDelegateChanged() {
+                                cellDelegateRoot.rebuildDelegate()
+                            }
                         }
 
                         MouseArea {

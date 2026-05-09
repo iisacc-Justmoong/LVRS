@@ -25,6 +25,7 @@ Generated row defaults:
 
 - `generatedIndentStep` (default `8`), `generatedRowHeight` (default `20`), `generatedItemWidth` (default `200`)
 - `generatedIconSize` (default `16`), `generatedChevronSize` (default `16`)
+- `itemDelegate`: optional generated-row component delegate. The default delegate is `HierarchyItem`.
 
 State:
 
@@ -63,6 +64,9 @@ Primary methods:
 - Model rows still need explicit depth data (`indentLevel` first, then `depthRole`) unless they are top-level primitives.
 - Label fallback order for object rows is `labelRole`, `text`, `title`, `name`, `display`, then `edit`.
 - `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate the C++ model projection and rebuild generated rows.
+- Generated model rows instantiate `itemDelegate` once per source descriptor.
+- `itemDelegate` receives injected `modelData` and `index`, plus the same `HierarchyItem`-compatible properties that the default row consumes: identity, label/icon/count, depth, expansion, selection, enablement, activation, drag affordance, and generated geometry defaults.
+- Custom hierarchy delegates should use `HierarchyItem` directly or expose the same row contract, including `__isHierarchyItem`, because `HierarchyList` still manages activation, expansion, visibility, and editable drag state through live row items.
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
 - Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.
@@ -105,5 +109,28 @@ LV.HierarchyList {
     depthRole: "depth"
     countRole: "counter"
     expandedRole: "expanded"
+}
+```
+
+```qml
+Component {
+    id: customTreeRow
+
+    LV.HierarchyItem {
+        id: row
+        countView: Component {
+            LV.Label {
+                text: row.count >= 0 ? row.count : ""
+            }
+        }
+    }
+}
+
+LV.HierarchyList {
+    model: [
+        { key: "root", label: "Root", depth: 0, expanded: true },
+        { key: "child", label: "Child", depth: 1 }
+    ]
+    itemDelegate: customTreeRow
 }
 ```
