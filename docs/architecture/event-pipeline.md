@@ -12,7 +12,7 @@ This document describes the end-to-end event path from OS/Qt events to high-leve
 2. Recognition Stage: `GestureEvents`
 - Subscribes to `RuntimeEvents::eventRecorded`.
 - Interprets raw `touch-event` and `native-gesture` entries.
-- Emits normalized high-level gesture payloads (`touch*`, `holdStarted`, `drag*`, `swipeDetected`, `nativeGestureDetected`).
+- Emits normalized high-level gesture payloads (`touch*`, `press*`, `scroll*`, `holdStarted`, `drag*`, `swipeDetected`, `nativeGestureDetected`).
 
 3. Hook Stage: `Backend`
 - `hookUserEvents()` subscribes to `RuntimeEvents::eventRecorded`.
@@ -54,8 +54,10 @@ Touch/gesture flows additionally carry:
 - gesture identity: `gestureType`, `interactionKind`, `sequence`, `sessionId`
 - geometry: `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`
 - timing: `timestampEpochMs`, `durationMs`
+- press lifecycle: `pressDurationMs`, `released`, `cancelled`, `releaseEpochMs`
 - direction: `directionX`, `directionY`, `dominantAxis`
-- optional semantic extensions such as `swipeDirection`, `velocityX`, `velocityY`
+- contact detail: `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `multiTouch`, native `points[]`
+- optional semantic extensions such as `scrollAxis`, `scrollDirection`, `swipeDirection`, `velocityX`, `velocityY`
 
 ## Why Backend-First Exists (Opt-In)
 

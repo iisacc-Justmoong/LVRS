@@ -7,7 +7,8 @@ Item {
 
     // Supported triggers: clicked, pressed, released, entered, exited, hoverChanged, wheel, keyPressed, keyReleased,
     // globalPressed, globalContextRequested, touchStarted, touchUpdated, touchEnded, touchCancelled,
-    // holdStarted/longPressed, dragStarted, dragUpdated, dragEnded, swipeDetected, nativeGestureDetected, gestureRecognized
+    // pressStarted, pressEnded, holdStarted/longPressed, dragStarted, dragUpdated, dragEnded,
+    // scrollStarted, scrollUpdated, scrollEnded, swipeDetected, nativeGestureDetected, gestureRecognized
     property string trigger: "clicked"
     property var action: null
     property var payload: ({})
@@ -67,10 +68,15 @@ Item {
             || normalized === "touchUpdated"
             || normalized === "touchEnded"
             || normalized === "touchCancelled"
+            || normalized === "pressStarted"
+            || normalized === "pressEnded"
             || normalized === "holdStarted"
             || normalized === "dragStarted"
             || normalized === "dragUpdated"
             || normalized === "dragEnded"
+            || normalized === "scrollStarted"
+            || normalized === "scrollUpdated"
+            || normalized === "scrollEnded"
             || normalized === "swipeDetected"
             || normalized === "nativeGestureDetected"
             || normalized === "gestureRecognized"
@@ -346,6 +352,16 @@ Item {
                 root.fire(root.gesturePayload(eventData))
         }
 
+        function onPressStarted(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "pressStarted")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onPressEnded(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "pressEnded")
+                root.fire(root.gesturePayload(eventData))
+        }
+
         function onHoldStarted(eventData) {
             if (root.normalizedGestureTrigger(root.trigger) === "holdStarted")
                 root.fire(root.gesturePayload(eventData))
@@ -363,6 +379,21 @@ Item {
 
         function onDragEnded(eventData) {
             if (root.normalizedGestureTrigger(root.trigger) === "dragEnded")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onScrollStarted(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "scrollStarted")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onScrollUpdated(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "scrollUpdated")
+                root.fire(root.gesturePayload(eventData))
+        }
+
+        function onScrollEnded(eventData) {
+            if (root.normalizedGestureTrigger(root.trigger) === "scrollEnded")
                 root.fire(root.gesturePayload(eventData))
         }
 

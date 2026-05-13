@@ -20,6 +20,7 @@ class GestureEvents : public QObject
     Q_PROPERTY(bool runtimeAttached READ runtimeAttached NOTIFY runtimeAttachedChanged)
     Q_PROPERTY(int holdThresholdMs READ holdThresholdMs WRITE setHoldThresholdMs NOTIFY holdThresholdMsChanged)
     Q_PROPERTY(qreal dragThresholdPx READ dragThresholdPx WRITE setDragThresholdPx NOTIFY dragThresholdPxChanged)
+    Q_PROPERTY(qreal scrollThresholdPx READ scrollThresholdPx WRITE setScrollThresholdPx NOTIFY scrollThresholdPxChanged)
     Q_PROPERTY(qreal swipeThresholdPx READ swipeThresholdPx WRITE setSwipeThresholdPx NOTIFY swipeThresholdPxChanged)
     Q_PROPERTY(int swipeMaxDurationMs READ swipeMaxDurationMs WRITE setSwipeMaxDurationMs NOTIFY swipeMaxDurationMsChanged)
     Q_PROPERTY(qreal axisDominanceRatio READ axisDominanceRatio WRITE setAxisDominanceRatio NOTIFY axisDominanceRatioChanged)
@@ -36,6 +37,9 @@ public:
 
     qreal dragThresholdPx() const;
     void setDragThresholdPx(qreal value);
+
+    qreal scrollThresholdPx() const;
+    void setScrollThresholdPx(qreal value);
 
     qreal swipeThresholdPx() const;
     void setSwipeThresholdPx(qreal value);
@@ -57,6 +61,7 @@ signals:
     void runtimeAttachedChanged();
     void holdThresholdMsChanged();
     void dragThresholdPxChanged();
+    void scrollThresholdPxChanged();
     void swipeThresholdPxChanged();
     void swipeMaxDurationMsChanged();
     void axisDominanceRatioChanged();
@@ -67,10 +72,15 @@ signals:
     void touchUpdated(const QVariantMap &eventData);
     void touchEnded(const QVariantMap &eventData);
     void touchCancelled(const QVariantMap &eventData);
+    void pressStarted(const QVariantMap &eventData);
+    void pressEnded(const QVariantMap &eventData);
     void holdStarted(const QVariantMap &eventData);
     void dragStarted(const QVariantMap &eventData);
     void dragUpdated(const QVariantMap &eventData);
     void dragEnded(const QVariantMap &eventData);
+    void scrollStarted(const QVariantMap &eventData);
+    void scrollUpdated(const QVariantMap &eventData);
+    void scrollEnded(const QVariantMap &eventData);
     void swipeDetected(const QVariantMap &eventData);
     void nativeGestureDetected(const QVariantMap &eventData);
 
@@ -107,6 +117,7 @@ private:
     bool m_touchActive = false;
     bool m_holdActive = false;
     bool m_dragActive = false;
+    bool m_scrollActive = false;
     quint64 m_activeSessionId = 0;
     quint64 m_nextSessionId = 1;
     qint64 m_touchStartEpochMs = -1;
@@ -115,9 +126,11 @@ private:
     QPointF m_lastTouchPos;
     QVariantMap m_touchStartUi;
     QVariantMap m_lastTouchPayload;
+    int m_maximumFingerCount = 0;
 
     int m_holdThresholdMs = 450;
     qreal m_dragThresholdPx = 12.0;
+    qreal m_scrollThresholdPx = 12.0;
     qreal m_swipeThresholdPx = 48.0;
     int m_swipeMaxDurationMs = 700;
     qreal m_axisDominanceRatio = 1.35;

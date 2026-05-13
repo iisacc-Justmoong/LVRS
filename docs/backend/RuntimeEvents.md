@@ -17,7 +17,7 @@ It is designed to provide observability while giving explicit controls for laten
 
 `RuntimeEvents` does **not** own:
 
-- high-level gesture classification (`GestureEvents` owns hold/drag/swipe/native-gesture normalization),
+- high-level gesture classification (`GestureEvents` owns press/scroll/hold/drag/swipe/native-gesture normalization),
 - persistence/export policy (`Backend` owns mirrored cache/export),
 - rendering-quality policy (`RenderQuality` owns this),
 - UI layout semantics (`ApplicationWindow`/QML owns this).
@@ -168,8 +168,12 @@ Input-centric state payload:
 - Touch input is normalized onto the same primary-pointer contract as desktop mouse input:
   the active touch contact is reported as `Qt::LeftButton`, updates contribute to mouse counters/signals,
   and release/cancel clears the button state.
+- Raw `touch-event` records preserve native `QTouchEvent` / `QEventPoint` detail for recognizers:
+  `fingerCount`, `activeFingerCount`, phase counts, `primaryPointId`, `multiTouch`, release/cancel flags,
+  `nativeTimestamp`, device metadata, and per-point press/last/scene/global positions, pressure, rotation,
+  ellipse, velocity, timestamp, press timestamp, and `timeHeld`.
 - High-level gesture semantics are intentionally not added here; consumers should use `GestureEvents`
-  when they need hold/drag/swipe/native-gesture classification.
+  when they need press/scroll/hold/drag/swipe/native-gesture classification.
 
 #### `recentEvents(): list` / `clearRecentEvents()`
 

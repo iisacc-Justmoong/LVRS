@@ -117,12 +117,14 @@ Major `type` values and key `payload` fields:
 - `mouse-move`, `hover-move`: `x`, `y`, `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`, `pointerUi`, `pointerObjectName`, `pointerClassName`, `pointerPath`
 - `mouse-press`, `mouse-release`, `mouse-double-click`: keys above + `button`, `lastMousePressEpochMs`/`lastMouseReleaseEpochMs`, elapsed fields
 - `mouse-wheel`: keys above + `angleDeltaX/Y`, `pixelDeltaX/Y`, `phase`, `inverted`
-- `touch-event`: `phase`, `pointCount`, `x`, `y`, `buttons`, `pressedMouseButtons`, `mouseButtonPressed`,
-  `lastMousePressEpochMs`, `lastMouseReleaseEpochMs`, elapsed timing fields, `points[]`, `pointerUi`,
-  `pointerObjectName`, `pointerClassName`, `pointerPath`
+- `touch-event`: `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, phase counts,
+  `primaryPointId`, `multiTouch`, `released`, `cancelled`, `nativeTimestamp`, touch-device metadata,
+  `x`, `y`, `buttons`, `pressedMouseButtons`, `mouseButtonPressed`,
+  `lastMousePressEpochMs`, `lastMouseReleaseEpochMs`, `releaseEpochMs`, `pressDurationMs`,
+  elapsed timing fields, native `points[]`, `pointerUi`, `pointerObjectName`, `pointerClassName`, `pointerPath`
 - `tablet-event`: `phase`, `pressure`, `rotation`, `xTilt`, `yTilt`, `pointerType`, etc.
 - `tablet-proximity`: `phase`
-- `native-gesture`: `gestureType`, `value`, pointer information
+- `native-gesture`: `gestureType`, `fingerCount`, `value`, `deltaX/Y`, pointer/device information
 - `context-requested`: `x`, `y`, `modifiers`, `buttons`, `reason`, `pointerUi`
 - `ui-event`: `eventType`, `objectName`, `className`, `visible`
 - `daemon-started`, `daemon-stopped`, `window-attached`, `window-detached`, `counters-reset`
@@ -226,12 +228,13 @@ Based on `qml/components/control/util/EventListener.qml`:
   - `input` (optional, `includeInputState=true`)
   - `backend` (optional)
   - for context events, `reason` and `source(mouse|context)` are added
-- Gesture triggers (`touchStarted|touchUpdated|touchEnded|touchCancelled|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):
-  - common: `sequence`, `gestureType`, `interactionKind`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`
-  - touch-derived: `sessionId`, `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`, `durationMs`, `directionX`, `directionY`, `dominantAxis`, `holdActive`, `dragActive`, `phase`, `pointCount`, `points`, pointer/button state, `ui`, `originUi`
+- Gesture triggers (`touchStarted|touchUpdated|touchEnded|touchCancelled|pressStarted|pressEnded|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|scrollStarted|scrollUpdated|scrollEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):
+  - common: `sequence`, `gestureType`, `interactionKind`, `classification`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`
+  - touch-derived: `sessionId`, `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`, `durationMs`, `pressDurationMs`, `directionX`, `directionY`, `dominantAxis`, `holdActive`, `dragActive`, `scrollActive`, `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`, release/cancel fields, pointer/button state, `ui`, `originUi`
   - `ui` / `originUi` carry logical-target metadata (`objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`, `layerKind`, `hierarchy`) and raw leaf metadata (`hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`)
   - swipe-specific: `swipeDirection`, `velocityX`, `velocityY`, `speed`
-  - native-gesture-specific: `nativeGestureType`, `value`
+  - scroll-specific: `scrollAxis`, `scrollDirection`, `scrollDeltaX/Y`
+  - native-gesture-specific: `nativeGestureType`, `fingerCount`, `value`, `deltaX/Y`
   - optional `input` / `backend` enrichments follow the same opt-in switches as other triggers
 - Key/wheel triggers pass Qt event objects directly.
 

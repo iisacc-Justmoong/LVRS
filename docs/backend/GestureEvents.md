@@ -11,7 +11,8 @@ It sits above `RuntimeEvents` and turns raw touch / native gesture runtime recor
 
 - touch session tracking on top of `RuntimeEvents::eventRecorded`,
 - high-level gesture classification for `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`,
-- derived semantic events for `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`,
+- derived semantic events for `pressStarted`, `pressEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`,
+  `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`,
 - native gesture passthrough normalization via `nativeGestureDetected`,
 - stable last-event inspection via `gestureSequence` and `lastGesture`.
 
@@ -29,6 +30,7 @@ It sits above `RuntimeEvents` and turns raw touch / native gesture runtime recor
 | `runtimeAttached` | `false` | True when a `RuntimeEvents` source is bound. |
 | `holdThresholdMs` | `450` | Minimum stationary press duration required for `holdStarted`. |
 | `dragThresholdPx` | `12.0` | Travel distance required before drag classification starts. |
+| `scrollThresholdPx` | `12.0` | Dominant-axis one-finger travel distance required before scroll classification starts. |
 | `swipeThresholdPx` | `48.0` | Minimum total travel distance required for swipe detection. |
 | `swipeMaxDurationMs` | `700` | Swipe must finish within this duration. |
 | `axisDominanceRatio` | `1.35` | Axis ratio used to classify dominant direction (`x`, `y`, `diagonal`). |
@@ -61,10 +63,15 @@ It sits above `RuntimeEvents` and turns raw touch / native gesture runtime recor
 - `touchUpdated(eventData)`
 - `touchEnded(eventData)`
 - `touchCancelled(eventData)`
+- `pressStarted(eventData)`
+- `pressEnded(eventData)`
 - `holdStarted(eventData)`
 - `dragStarted(eventData)`
 - `dragUpdated(eventData)`
 - `dragEnded(eventData)`
+- `scrollStarted(eventData)`
+- `scrollUpdated(eventData)`
+- `scrollEnded(eventData)`
 - `swipeDetected(eventData)`
 - `nativeGestureDetected(eventData)`
 
@@ -79,6 +86,7 @@ Every published payload includes:
 - `sequence`
 - `gestureType`
 - `interactionKind`
+- `classification`
 - `source`
 - `timestampEpochMs`
 - `x`, `y`, `globalX`, `globalY`
@@ -92,7 +100,7 @@ Every published payload includes:
 
 ### 5.2 Touch-derived gesture fields
 
-`touch*`, `holdStarted`, `drag*`, and `swipeDetected` additionally include:
+`touch*`, `press*`, `scroll*`, `holdStarted`, `drag*`, and `swipeDetected` additionally include:
 
 - `sessionId`
 - `previousX`, `previousY`
@@ -102,13 +110,16 @@ Every published payload includes:
 - `absoluteDeltaX`, `absoluteDeltaY`
 - `distance`
 - `durationMs`
+- `pressDurationMs`
 - `directionX` (`positive|negative|none`)
 - `directionY` (`positive|negative|none`)
 - `dominantAxis` (`x|y|diagonal|none`)
-- `holdActive`, `dragActive`
-- `holdThresholdMs`, `dragThresholdPx`, `swipeThresholdPx`, `swipeMaxDurationMs`
+- `holdActive`, `dragActive`, `scrollActive`
+- `holdThresholdMs`, `dragThresholdPx`, `scrollThresholdPx`, `swipeThresholdPx`, `swipeMaxDurationMs`
 - `phase`
-- `pointCount`
+- `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`
+- `pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`
+- `primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`
 - `points`
 - `buttons`
 - `pressedMouseButtons`
@@ -116,7 +127,20 @@ Every published payload includes:
 - `mouseButtonPressed`
 - `originUi`
 
-### 5.3 Swipe-specific fields
+Each entry in `points` mirrors native `QEventPoint` detail from `RuntimeEvents`, including state name,
+timestamp/pressTimestamp/timeHeld, pressure/rotation/ellipse, velocity, and position families
+(`position*`, `pressPosition*`, `lastPosition*`, `scene*`, `global*`).
+
+### 5.3 Scroll-specific fields
+
+`scrollStarted`, `scrollUpdated`, and `scrollEnded` add:
+
+- `scrollAxis` (`x|y`)
+- `scrollDirection`
+- `scrollDeltaX`
+- `scrollDeltaY`
+
+### 5.4 Swipe-specific fields
 
 `swipeDetected` adds:
 
@@ -133,17 +157,32 @@ Every published payload includes:
 - `bottomToTop`
 - one of the four diagonal tokens
 
-### 5.4 Native gesture fields
+### 5.5 Native gesture fields
 
 `nativeGestureDetected` adds:
 
 - `nativeGestureType`
+- `fingerCount`
 - `value`
+- `deltaX`
+- `deltaY`
 - `buttons`
 - `pressedMouseButtons`
 - `modifiers`
 
 ## 6. Recognition Rules
+
+### Press
+
+- Starts from `TouchBegin`.
+- Emits `pressStarted` immediately with native finger-count and point metadata.
+- Emits `pressEnded` on release/cancel with `pressDurationMs`, `releaseEpochMs`, `released`, `cancelled`, and `finalInteractionKind`.
+
+### Scroll
+
+- Starts after one active touch contact moves beyond `scrollThresholdPx` on a dominant `x` or `y` axis.
+- Emits `scrollStarted` once, `scrollUpdated` on subsequent recognized movement, and `scrollEnded` on release/cancel.
+- Scroll classification is continuous-motion oriented; a fast release can still also qualify for `swipeDetected`.
 
 ### Hold
 
@@ -165,7 +204,7 @@ Every published payload includes:
 ### Native gesture
 
 - Uses the raw `native-gesture` records already captured by `RuntimeEvents`.
-- Preserves the platform gesture kind and scalar `value`.
+- Preserves the platform gesture kind, `fingerCount`, scalar `value`, and `deltaX/Y` where Qt reports them.
 
 ## 7. Integration Patterns
 
@@ -206,7 +245,8 @@ LV.EventListener {
 ## 8. Current Recognition Boundary
 
 - Recognition is primary-contact centric.
-- Multi-touch point arrays are forwarded in `points`, but the semantic classifier tracks a single active contact path.
+- Multi-touch point arrays, finger counts, and maximum session finger count are forwarded. Directional scroll/drag/swipe
+  classification still tracks the primary contact path unless the platform emits a native gesture.
 - Raw desktop mouse semantics remain handled by `EventListener` pointer/global triggers, not by `GestureEvents`.
 
 ## 9. Troubleshooting Matrix

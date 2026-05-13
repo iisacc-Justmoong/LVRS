@@ -17,7 +17,7 @@ Current policy is incident-centric: it avoids continuous state harvesting unless
 - Wheel: `wheel`
 - Keyboard: `keyPressed`, `keyReleased`
 - Global runtime: `globalPressed`, `globalContextRequested`
-- Gesture runtime: `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`, `holdStarted`, `longPressed`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`, `nativeGestureDetected`, `gestureRecognized`
+- Gesture runtime: `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`, `pressStarted`, `pressEnded`, `holdStarted`, `longPressed`, `dragStarted`, `dragUpdated`, `dragEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`, `swipeDetected`, `nativeGestureDetected`, `gestureRecognized`
 
 ## 3. Core API
 
@@ -105,6 +105,7 @@ Gesture triggers receive the normalized payload published by `GestureEvents`.
 Always:
 
 - `sequence`, `gestureType`, `interactionKind`, `source`
+- `classification`
 - `timestampEpochMs`
 - `x`, `y`, `globalX`, `globalY`
 
@@ -117,9 +118,12 @@ Touch-derived gesture triggers additionally receive:
 - `totalDeltaX`, `totalDeltaY`
 - `absoluteDeltaX`, `absoluteDeltaY`
 - `distance`, `durationMs`
+- `pressDurationMs`
 - `directionX`, `directionY`, `dominantAxis`
-- `holdActive`, `dragActive`
-- `phase`, `pointCount`, `points`
+- `holdActive`, `dragActive`, `scrollActive`
+- `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`
+- `pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`
+- `primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`
 - `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`
 - `ui`, `originUi`
 
@@ -136,10 +140,19 @@ Swipe-specific additions:
 - `velocityY`
 - `speed`
 
+Scroll-specific additions:
+
+- `scrollAxis`
+- `scrollDirection`
+- `scrollDeltaX`
+- `scrollDeltaY`
+
 Native-gesture additions:
 
 - `nativeGestureType`
+- `fingerCount`
 - `value`
+- `deltaX`, `deltaY`
 
 ## 6. Dedup Behavior
 
@@ -205,6 +218,26 @@ LV.EventListener {
 }
 ```
 
+### 7.5 Mobile press/scroll listeners
+
+```qml
+import LVRS 1.0 as LV
+
+LV.EventListener {
+    trigger: "pressEnded"
+    action: function(eventData) {
+        console.log(eventData.pressDurationMs, eventData.fingerCount, eventData.released)
+    }
+}
+
+LV.EventListener {
+    trigger: "scrollStarted"
+    action: function(eventData) {
+        console.log(eventData.scrollAxis, eventData.scrollDirection)
+    }
+}
+```
+
 ## 8. Common Pitfalls
 
 - Enabling `includeInputState` everywhere by habit.
@@ -212,7 +245,8 @@ LV.EventListener {
 - Using `hoverChanged` for business logic that should be press/release driven.
 - Treating global triggers as local geometry-only events without global coordinate checks.
 - Expecting `longPressed` to be a separate payload type; it is an alias of `holdStarted`.
-- Expecting multi-touch semantic classification from `EventListener`; only the primary contact is classified today.
+- Expecting full multi-touch gesture taxonomy from `EventListener`; it forwards finger counts and native point arrays,
+  while directional scroll/drag/swipe classification follows the primary contact unless Qt emits `nativeGestureDetected`.
 
 ## 9. Troubleshooting Matrix
 
@@ -246,7 +280,7 @@ After edits:
 
 1. global press/context listeners still fire exactly once per incident,
 2. outside-dismiss flows still work with minimal payload,
-3. gesture triggers auto-attach runtime and deliver recognized payloads,
+3. gesture triggers auto-attach runtime and deliver recognized press/scroll/gesture payloads,
 4. enriched listeners still receive requested optional fields when enabled.
 
 ## 11. Related APIs

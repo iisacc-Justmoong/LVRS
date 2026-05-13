@@ -54,8 +54,10 @@ private slots:
     void runtime_events_context_menu_signal_contract();
     void runtime_events_single_input_event_is_counted_once();
     void runtime_events_touch_input_normalizes_to_pointer_contract();
+    void runtime_events_touch_payload_exposes_native_point_details();
     void runtime_events_hit_test_exposes_ui_hierarchy_metadata();
     void gesture_events_recognize_hold_drag_and_swipe();
+    void gesture_events_classify_mobile_press_scroll_and_multitouch();
     void runtime_events_window_replacement_survives_old_window_destruction();
     void render_monitor_counts_frames_when_swapped();
     void render_monitor_active_signal_and_destroy_path();
@@ -383,6 +385,90 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
     QVERIFY(!payload.value(QStringLiteral("mouseButtonPressed")).toBool());
 }
 
+void RuntimeServicesTests::runtime_events_touch_payload_exposes_native_point_details()
+{
+    RuntimeEvents events;
+    QQuickWindow window;
+    window.setWidth(480);
+    window.setHeight(320);
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+
+    events.resetCounters();
+
+    const QPointF firstBegin(40.0, 28.0);
+    const QPointF secondBegin(74.0, 36.0);
+    QTouchEvent touchBegin(QEvent::TouchBegin,
+                           testTouchDevice(),
+                           Qt::NoModifier,
+                           {
+                               QEventPoint(0, QEventPoint::State::Pressed, firstBegin, firstBegin),
+                               QEventPoint(1, QEventPoint::State::Pressed, secondBegin, secondBegin),
+                           });
+    QCoreApplication::sendEvent(&window, &touchBegin);
+
+    const QVariantMap beginEvent = events.lastEvent();
+    QCOMPARE(beginEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    const QVariantMap beginPayload = beginEvent.value(QStringLiteral("payload")).toMap();
+    QCOMPARE(beginPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("begin"));
+    QCOMPARE(beginPayload.value(QStringLiteral("pointCount")).toInt(), 2);
+    QCOMPARE(beginPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
+    QCOMPARE(beginPayload.value(QStringLiteral("activeFingerCount")).toInt(), 2);
+    QCOMPARE(beginPayload.value(QStringLiteral("pressedFingerCount")).toInt(), 2);
+    QCOMPARE(beginPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 0);
+    QCOMPARE(beginPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
+    QVERIFY(beginPayload.value(QStringLiteral("multiTouch")).toBool());
+    QVERIFY(!beginPayload.value(QStringLiteral("released")).toBool());
+    QVERIFY(!beginPayload.value(QStringLiteral("cancelled")).toBool());
+    QCOMPARE(beginPayload.value(QStringLiteral("touchDeviceName")).toString(),
+             QStringLiteral("LVRS Test Touchscreen"));
+    QCOMPARE(beginPayload.value(QStringLiteral("maximumTouchPoints")).toInt(), 10);
+    QVERIFY(beginPayload.contains(QStringLiteral("nativeTimestamp")));
+
+    const QVariantList beginPoints = beginPayload.value(QStringLiteral("points")).toList();
+    QCOMPARE(beginPoints.size(), 2);
+    const QVariantMap firstPoint = beginPoints.constFirst().toMap();
+    QCOMPARE(firstPoint.value(QStringLiteral("id")).toInt(), 0);
+    QCOMPARE(firstPoint.value(QStringLiteral("stateName")).toString(), QStringLiteral("pressed"));
+    QVERIFY(firstPoint.contains(QStringLiteral("positionX")));
+    QCOMPARE(firstPoint.value(QStringLiteral("scenePositionX")).toReal(), firstBegin.x());
+    QCOMPARE(firstPoint.value(QStringLiteral("globalX")).toReal(), firstBegin.x());
+    QVERIFY(firstPoint.contains(QStringLiteral("pressPositionX")));
+    QVERIFY(firstPoint.contains(QStringLiteral("globalPressPositionX")));
+    QVERIFY(firstPoint.contains(QStringLiteral("lastPositionX")));
+    QVERIFY(firstPoint.contains(QStringLiteral("timestamp")));
+    QVERIFY(firstPoint.contains(QStringLiteral("pressTimestamp")));
+    QVERIFY(firstPoint.contains(QStringLiteral("timeHeld")));
+    QVERIFY(firstPoint.contains(QStringLiteral("velocityX")));
+    QVERIFY(firstPoint.contains(QStringLiteral("pressure")));
+
+    QTest::qWait(2);
+
+    const QPointF firstEnd(48.0, 44.0);
+    const QPointF secondEnd(82.0, 52.0);
+    QTouchEvent touchEnd(QEvent::TouchEnd,
+                         testTouchDevice(),
+                         Qt::NoModifier,
+                         {
+                             QEventPoint(0, QEventPoint::State::Released, firstEnd, firstEnd),
+                             QEventPoint(1, QEventPoint::State::Released, secondEnd, secondEnd),
+                         });
+    QCoreApplication::sendEvent(&window, &touchEnd);
+
+    const QVariantMap endEvent = events.lastEvent();
+    QCOMPARE(endEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    const QVariantMap endPayload = endEvent.value(QStringLiteral("payload")).toMap();
+    QCOMPARE(endPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
+    QCOMPARE(endPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
+    QCOMPARE(endPayload.value(QStringLiteral("activeFingerCount")).toInt(), 0);
+    QCOMPARE(endPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 2);
+    QVERIFY(endPayload.value(QStringLiteral("released")).toBool());
+    QVERIFY(!endPayload.value(QStringLiteral("cancelled")).toBool());
+    QVERIFY(endPayload.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
+    QVERIFY(endPayload.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+    QCOMPARE(endPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
+}
+
 void RuntimeServicesTests::runtime_events_hit_test_exposes_ui_hierarchy_metadata()
 {
     RuntimeEvents events;
@@ -551,6 +637,122 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
     QCOMPARE(swipeEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
     QCOMPARE(swipeEndPayload.value(QStringLiteral("directionX")).toString(), QStringLiteral("positive"));
     QCOMPARE(swipeEndPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
+}
+
+void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multitouch()
+{
+    RuntimeEvents events;
+    GestureEvents gestures;
+    QQuickWindow window;
+    window.setWidth(480);
+    window.setHeight(320);
+    events.attachWindow(&window);
+    QTRY_VERIFY(events.running());
+    QVERIFY(gestures.attachRuntime(&events));
+    QVERIFY(gestures.runtimeAttached());
+
+    gestures.setHoldThresholdMs(500);
+    gestures.setDragThresholdPx(10.0);
+    gestures.setSwipeThresholdPx(96.0);
+    QVERIFY(gestures.setProperty("scrollThresholdPx", 10.0));
+    gestures.resetState();
+
+    QSignalSpy pressStartedSpy(&gestures, SIGNAL(pressStarted(QVariantMap)));
+    QSignalSpy pressEndedSpy(&gestures, SIGNAL(pressEnded(QVariantMap)));
+    QSignalSpy scrollStartedSpy(&gestures, SIGNAL(scrollStarted(QVariantMap)));
+    QSignalSpy scrollUpdatedSpy(&gestures, SIGNAL(scrollUpdated(QVariantMap)));
+    QSignalSpy scrollEndedSpy(&gestures, SIGNAL(scrollEnded(QVariantMap)));
+    QVERIFY(pressStartedSpy.isValid());
+    QVERIFY(pressEndedSpy.isValid());
+    QVERIFY(scrollStartedSpy.isValid());
+    QVERIFY(scrollUpdatedSpy.isValid());
+    QVERIFY(scrollEndedSpy.isValid());
+
+    const QPointF pressPoint(40.0, 28.0);
+    QTouchEvent pressBegin(QEvent::TouchBegin,
+                           testTouchDevice(),
+                           Qt::NoModifier,
+                           {QEventPoint(0, QEventPoint::State::Pressed, pressPoint, pressPoint)});
+    QCoreApplication::sendEvent(&window, &pressBegin);
+    QTRY_COMPARE(pressStartedSpy.count(), 1);
+
+    QTest::qWait(2);
+
+    QTouchEvent pressEnd(QEvent::TouchEnd,
+                         testTouchDevice(),
+                         Qt::NoModifier,
+                         {QEventPoint(0, QEventPoint::State::Released, pressPoint, pressPoint)});
+    QCoreApplication::sendEvent(&window, &pressEnd);
+    QTRY_COMPARE(pressEndedSpy.count(), 1);
+
+    const QVariantMap pressEnded = pressEndedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(pressEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("pressEnded"));
+    QCOMPARE(pressEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("press"));
+    QCOMPARE(pressEnded.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("press"));
+    QVERIFY(pressEnded.value(QStringLiteral("released")).toBool());
+    QVERIFY(pressEnded.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
+    QVERIFY(pressEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+    QCOMPARE(pressEnded.value(QStringLiteral("fingerCount")).toInt(), 1);
+    QCOMPARE(pressEnded.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
+
+    const QPointF scrollBeginPoint(64.0, 34.0);
+    const QPointF scrollUpdatePoint(67.0, 78.0);
+    const QPointF scrollEndPoint(69.0, 104.0);
+    QTouchEvent scrollBeginEvent(QEvent::TouchBegin,
+                                 testTouchDevice(),
+                                 Qt::NoModifier,
+                                 {QEventPoint(0, QEventPoint::State::Pressed, scrollBeginPoint, scrollBeginPoint)});
+    QCoreApplication::sendEvent(&window, &scrollBeginEvent);
+    QTRY_COMPARE(pressStartedSpy.count(), 2);
+
+    QTouchEvent scrollUpdateEvent(QEvent::TouchUpdate,
+                                  testTouchDevice(),
+                                  Qt::NoModifier,
+                                  {QEventPoint(0, QEventPoint::State::Updated, scrollUpdatePoint, scrollUpdatePoint)});
+    QCoreApplication::sendEvent(&window, &scrollUpdateEvent);
+    QTRY_COMPARE(scrollStartedSpy.count(), 1);
+    QTRY_VERIFY(scrollUpdatedSpy.count() >= 1);
+
+    const QVariantMap scrollStarted = scrollStartedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(scrollStarted.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollStarted"));
+    QCOMPARE(scrollStarted.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
+    QCOMPARE(scrollStarted.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("scroll"));
+    QCOMPARE(scrollStarted.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
+    QCOMPARE(scrollStarted.value(QStringLiteral("scrollDirection")).toString(), QStringLiteral("topToBottom"));
+    QCOMPARE(scrollStarted.value(QStringLiteral("fingerCount")).toInt(), 1);
+    QCOMPARE(scrollStarted.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
+
+    QTouchEvent scrollEndEvent(QEvent::TouchEnd,
+                               testTouchDevice(),
+                               Qt::NoModifier,
+                               {QEventPoint(0, QEventPoint::State::Released, scrollEndPoint, scrollEndPoint)});
+    QCoreApplication::sendEvent(&window, &scrollEndEvent);
+    QTRY_COMPARE(scrollEndedSpy.count(), 1);
+
+    const QVariantMap scrollEnded = scrollEndedSpy.constFirst().constFirst().toMap();
+    QCOMPARE(scrollEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollEnded"));
+    QCOMPARE(scrollEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
+    QCOMPARE(scrollEnded.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
+    QVERIFY(scrollEnded.value(QStringLiteral("released")).toBool());
+    QVERIFY(scrollEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+
+    const QPointF firstPoint(110.0, 40.0);
+    const QPointF secondPoint(146.0, 42.0);
+    QTouchEvent multiBegin(QEvent::TouchBegin,
+                           testTouchDevice(),
+                           Qt::NoModifier,
+                           {
+                               QEventPoint(0, QEventPoint::State::Pressed, firstPoint, firstPoint),
+                               QEventPoint(1, QEventPoint::State::Pressed, secondPoint, secondPoint),
+                           });
+    QCoreApplication::sendEvent(&window, &multiBegin);
+    QTRY_COMPARE(pressStartedSpy.count(), 3);
+
+    const QVariantMap multiPress = pressStartedSpy.at(2).at(0).toMap();
+    QCOMPARE(multiPress.value(QStringLiteral("fingerCount")).toInt(), 2);
+    QCOMPARE(multiPress.value(QStringLiteral("activeFingerCount")).toInt(), 2);
+    QCOMPARE(multiPress.value(QStringLiteral("maximumFingerCount")).toInt(), 2);
+    QVERIFY(multiPress.value(QStringLiteral("multiTouch")).toBool());
 }
 
 void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window_destruction()

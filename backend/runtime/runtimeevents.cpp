@@ -49,6 +49,28 @@ QString touchPhaseLabel(QEvent::Type type)
     }
 }
 
+QString eventPointStateLabel(QEventPoint::State state)
+{
+    switch (state) {
+    case QEventPoint::Pressed:
+        return QStringLiteral("pressed");
+    case QEventPoint::Updated:
+        return QStringLiteral("updated");
+    case QEventPoint::Stationary:
+        return QStringLiteral("stationary");
+    case QEventPoint::Released:
+        return QStringLiteral("released");
+    default:
+        return QStringLiteral("unknown");
+    }
+}
+
+void insertPointFields(QVariantMap &map, const QString &prefix, const QPointF &point)
+{
+    map.insert(prefix + QStringLiteral("X"), point.x());
+    map.insert(prefix + QStringLiteral("Y"), point.y());
+}
+
 } // namespace
 
 RuntimeEvents *RuntimeEvents::s_instance = nullptr;
@@ -982,17 +1004,53 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
     case QEvent::TouchCancel: {
         auto *touchEvent = static_cast<QTouchEvent *>(event);
         const QEvent::Type touchType = event->type();
+        const qint64 eventEpochMs = nowEpochMs();
+        const bool touchEnded = touchType == QEvent::TouchEnd;
+        const bool touchCancelled = touchType == QEvent::TouchCancel;
         QVariantList points;
         points.reserve(touchEvent->points().size());
+        int activeFingerCount = 0;
+        int pressedFingerCount = 0;
+        int updatedFingerCount = 0;
+        int stationaryFingerCount = 0;
+        int releasedFingerCount = 0;
         for (const QEventPoint &point : touchEvent->points()) {
             QVariantMap pointMap;
             pointMap.insert(QStringLiteral("id"), point.id());
             pointMap.insert(QStringLiteral("state"), static_cast<int>(point.state()));
-            pointMap.insert(QStringLiteral("positionX"), point.position().x());
-            pointMap.insert(QStringLiteral("positionY"), point.position().y());
-            pointMap.insert(QStringLiteral("globalX"), point.globalPosition().x());
-            pointMap.insert(QStringLiteral("globalY"), point.globalPosition().y());
+            pointMap.insert(QStringLiteral("stateName"), eventPointStateLabel(point.state()));
+            pointMap.insert(QStringLiteral("timestamp"), QVariant::fromValue(point.timestamp()));
+            pointMap.insert(QStringLiteral("lastTimestamp"), QVariant::fromValue(point.lastTimestamp()));
+            pointMap.insert(QStringLiteral("pressTimestamp"), QVariant::fromValue(point.pressTimestamp()));
+            pointMap.insert(QStringLiteral("timeHeld"), point.timeHeld());
             pointMap.insert(QStringLiteral("pressure"), point.pressure());
+            pointMap.insert(QStringLiteral("rotation"), point.rotation());
+            pointMap.insert(QStringLiteral("ellipseWidth"), point.ellipseDiameters().width());
+            pointMap.insert(QStringLiteral("ellipseHeight"), point.ellipseDiameters().height());
+            pointMap.insert(QStringLiteral("velocityX"), point.velocity().x());
+            pointMap.insert(QStringLiteral("velocityY"), point.velocity().y());
+            insertPointFields(pointMap, QStringLiteral("position"), point.position());
+            insertPointFields(pointMap, QStringLiteral("pressPosition"), point.pressPosition());
+            insertPointFields(pointMap, QStringLiteral("grabPosition"), point.grabPosition());
+            insertPointFields(pointMap, QStringLiteral("lastPosition"), point.lastPosition());
+            insertPointFields(pointMap, QStringLiteral("scenePosition"), point.scenePosition());
+            insertPointFields(pointMap, QStringLiteral("scenePressPosition"), point.scenePressPosition());
+            insertPointFields(pointMap, QStringLiteral("sceneGrabPosition"), point.sceneGrabPosition());
+            insertPointFields(pointMap, QStringLiteral("sceneLastPosition"), point.sceneLastPosition());
+            insertPointFields(pointMap, QStringLiteral("global"), point.globalPosition());
+            insertPointFields(pointMap, QStringLiteral("globalPressPosition"), point.globalPressPosition());
+            insertPointFields(pointMap, QStringLiteral("globalGrabPosition"), point.globalGrabPosition());
+            insertPointFields(pointMap, QStringLiteral("globalLastPosition"), point.globalLastPosition());
+            if (point.state() == QEventPoint::Pressed)
+                pressedFingerCount += 1;
+            else if (point.state() == QEventPoint::Updated)
+                updatedFingerCount += 1;
+            else if (point.state() == QEventPoint::Stationary)
+                stationaryFingerCount += 1;
+            else if (point.state() == QEventPoint::Released)
+                releasedFingerCount += 1;
+            if (point.state() != QEventPoint::Released && !touchEnded && !touchCancelled)
+                activeFingerCount += 1;
             points.append(pointMap);
         }
 
@@ -1019,11 +1077,11 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
                                       : static_cast<int>(Qt::NoButton);
 
         if (pressedTransition) {
-            m_lastMousePressEpochMs = nowEpochMs();
+            m_lastMousePressEpochMs = eventEpochMs;
             m_mousePressCount += 1;
             m_mouseButtonPressed = true;
         } else if (releasedTransition) {
-            m_lastMouseReleaseEpochMs = nowEpochMs();
+            m_lastMouseReleaseEpochMs = eventEpochMs;
             m_mouseReleaseCount += 1;
             m_mouseButtonPressed = false;
         } else if (hasActiveTouchPoint) {
@@ -1056,6 +1114,23 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             QVariantMap payload;
             payload.insert(QStringLiteral("phase"), touchPhaseLabel(touchType));
             payload.insert(QStringLiteral("pointCount"), touchEvent->points().size());
+            payload.insert(QStringLiteral("fingerCount"), touchEvent->points().size());
+            payload.insert(QStringLiteral("activeFingerCount"), activeFingerCount);
+            payload.insert(QStringLiteral("pressedFingerCount"), pressedFingerCount);
+            payload.insert(QStringLiteral("updatedFingerCount"), updatedFingerCount);
+            payload.insert(QStringLiteral("stationaryFingerCount"), stationaryFingerCount);
+            payload.insert(QStringLiteral("releasedFingerCount"), releasedFingerCount);
+            payload.insert(QStringLiteral("primaryPointId"), trackedPoint ? trackedPoint->id() : -1);
+            payload.insert(QStringLiteral("multiTouch"), touchEvent->points().size() > 1);
+            payload.insert(QStringLiteral("released"), touchEnded || releasedTransition);
+            payload.insert(QStringLiteral("cancelled"), touchCancelled);
+            payload.insert(QStringLiteral("nativeTimestamp"), QVariant::fromValue(touchEvent->timestamp()));
+            if (const QPointingDevice *device = touchEvent->pointingDevice()) {
+                payload.insert(QStringLiteral("touchDeviceName"), device->name());
+                payload.insert(QStringLiteral("touchDeviceType"), static_cast<int>(device->type()));
+                payload.insert(QStringLiteral("pointerType"), static_cast<int>(device->pointerType()));
+                payload.insert(QStringLiteral("maximumTouchPoints"), device->maximumPoints());
+            }
             payload.insert(QStringLiteral("x"), m_lastMouseX);
             payload.insert(QStringLiteral("y"), m_lastMouseY);
             payload.insert(QStringLiteral("buttons"), m_lastMouseButtons);
@@ -1064,6 +1139,14 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("mouseButtonPressed"), m_mouseButtonPressed);
             payload.insert(QStringLiteral("lastMousePressEpochMs"), QVariant::fromValue(m_lastMousePressEpochMs));
             payload.insert(QStringLiteral("lastMouseReleaseEpochMs"), QVariant::fromValue(m_lastMouseReleaseEpochMs));
+            payload.insert(QStringLiteral("releaseEpochMs"),
+                           QVariant::fromValue((touchEnded || touchCancelled || releasedTransition)
+                                               ? m_lastMouseReleaseEpochMs
+                                               : qint64(-1)));
+            const qint64 pressDurationMs = m_lastMousePressEpochMs >= 0
+                ? qMax<qint64>(0, eventEpochMs - m_lastMousePressEpochMs)
+                : qint64(0);
+            payload.insert(QStringLiteral("pressDurationMs"), QVariant::fromValue(pressDurationMs));
             payload.insert(QStringLiteral("mousePressElapsedMs"), QVariant::fromValue(mousePressElapsedMs()));
             payload.insert(QStringLiteral("mouseReleaseElapsedMs"), QVariant::fromValue(mouseReleaseElapsedMs()));
             payload.insert(QStringLiteral("activePressDurationMs"), QVariant::fromValue(activePressDurationMs()));
@@ -1155,7 +1238,15 @@ bool RuntimeEvents::eventFilter(QObject *watched, QEvent *event)
             payload.insert(QStringLiteral("pressedMouseButtons"), pressedMouseButtonNames());
             payload.insert(QStringLiteral("modifiers"), m_lastMouseModifiers);
             payload.insert(QStringLiteral("gestureType"), static_cast<int>(gestureEvent->gestureType()));
+            payload.insert(QStringLiteral("fingerCount"), gestureEvent->fingerCount());
             payload.insert(QStringLiteral("value"), gestureEvent->value());
+            payload.insert(QStringLiteral("deltaX"), gestureEvent->delta().x());
+            payload.insert(QStringLiteral("deltaY"), gestureEvent->delta().y());
+            if (const QPointingDevice *device = gestureEvent->pointingDevice()) {
+                payload.insert(QStringLiteral("deviceName"), device->name());
+                payload.insert(QStringLiteral("deviceType"), static_cast<int>(device->type()));
+                payload.insert(QStringLiteral("pointerType"), static_cast<int>(device->pointerType()));
+            }
             payload.insert(QStringLiteral("pointerUi"), pointerUi());
             recordRuntimeEvent(QStringLiteral("native-gesture"), payload);
         }

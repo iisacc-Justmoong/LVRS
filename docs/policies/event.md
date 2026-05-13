@@ -17,7 +17,8 @@ For overlay dismissal, global context menu control, app-level interaction hooks,
 
 - `globalPressed`
 - `globalContextRequested`
-- `touchStarted`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`
+- `touchStarted`, `pressStarted`, `pressEnded`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`
+- `scrollStarted`, `scrollUpdated`, `scrollEnded`
 - `swipeDetected`, `nativeGestureDetected`
 
 These triggers are resilient to nested local event boundaries and share the framework-managed payload contract.

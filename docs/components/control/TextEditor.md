@@ -2,16 +2,15 @@
 
 Location: `qml/components/control/input/TextEditor.qml`
 
-`TextEditor` is a file-connected plain-text editor. Its public API is intentionally small: bind a required file path, let the component read that file, and let edits synchronize back to the same path without a separate save step.
+`TextEditor` is a file-connected rich text editor. It uses a native Qt Quick `TextEdit` surface fixed to `TextEdit.RichText`, so the editing behavior is closer to Mac TextEdit-style rich document editing than to a code or plain-text buffer.
 
 ## Purpose
 
-- Bind an editable plain-text surface directly to a filesystem path.
-- Load UTF-8 text lazily through the internal C++ document engine and synchronize edits through atomic write-through semantics.
-- Route platform IME composition through a hidden adapter so committed text, including Korean Hangul syllables, reaches the document as composed text.
-- Keep QML as the visible line viewport and input dispatcher.
-- Keep whole-document storage, line indexing, cursor state, pending-sync state, and file I/O out of QML.
-- Avoid `TextArea`/`TextEdit` as the document model.
+- Bind an editable rich text surface directly to a filesystem path.
+- Load UTF-8 HTML/rich text through the internal C++ document engine and synchronize edits through atomic write-through semantics.
+- Use the native `TextEdit` editor for rich text rendering, wrapping, IME, selection, cursor movement, clipboard commands, and platform text gestures.
+- Keep file I/O, read progress, dirty state, and sync errors out of the visual editor.
+- Leave plain text editing to `CodeEditor` or simpler input components.
 
 ## Core API
 
@@ -20,17 +19,26 @@ File connection:
 - `filePath` (required): connected filesystem path. `LV.TextEditor` must be created with this property.
 - `chunkSize`: byte budget per lazy read step. The internal model clamps very small or very large values.
 
+Rich text surface:
+
+- `editorItem` (readonly alias): the underlying `TextEdit` for advanced rich text integration.
+- `text`: the rich text/HTML document string shown by the editor.
+- `textFormat` (readonly): always `TextEdit.RichText`.
+- `textDocument`: the native document object exposed by the underlying `TextEdit`.
+- Selection, cursor, and clipboard compatibility aliases mirror the native `TextEdit` surface.
+
 Read/sync state:
 
 - `dirty`: true while local edits are waiting for filesystem synchronization; false after successful `read()` or automatic sync.
 - `reading`: true while the connected file is being decoded in chunks.
 - `bytesRead`, `bytesTotal`, `progress`: byte-level read progress.
 - `error`: most recent read/sync error.
-- `empty`: true when the internal document contains no characters.
+- `empty`: true when the editor contains no rich text characters.
 
 Methods:
 
 - `read()`: reload `filePath`. Normal construction and `filePath` changes already read automatically.
+- `forceEditorFocus()`, `insertText(value)`, `selectAll()`, `copy()`, `paste()`, `undo()`, and `redo()` forward to the native editor.
 
 Signals:
 
@@ -39,6 +47,7 @@ Signals:
 - `readProgress(path, bytesRead, bytesTotal)`
 - `syncFinished(path)`
 - `syncFailed(path, error)`
+- `textEdited(text)`
 
 ## API Usage Manual
 
@@ -57,7 +66,32 @@ import LVRS 1.0 as LV
 ```qml
 LV.TextEditor {
     id: editor
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
+}
+```
+
+### Rich Text Editing
+
+The edit surface is always `TextEdit.RichText`. Bind or assign HTML when programmatically setting content:
+
+```qml
+LV.TextEditor {
+    id: editor
+    filePath: "/tmp/notes.html"
+    text: "<h1>Notes</h1><p>Hello <b>bold</b> text.</p>"
+}
+```
+
+Use `editorItem` when application code needs lower-level rich text behavior from Qt Quick `TextEdit`:
+
+```qml
+LV.TextEditor {
+    id: editor
+    filePath: "/tmp/notes.html"
+
+    Component.onCompleted: {
+        editor.editorItem.selectAll()
+    }
 }
 ```
 
@@ -68,7 +102,7 @@ The editor reads the connected file automatically after construction:
 ```qml
 LV.TextEditor {
     id: editor
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
 }
 ```
 
@@ -77,7 +111,7 @@ Call `read()` only when the caller explicitly wants to reload `filePath`. It ret
 ```qml
 LV.TextEditor {
     id: editor
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
 
     Component.onCompleted: {
         if (!read())
@@ -96,52 +130,20 @@ There is no public save API. Text edits are synchronized back to `filePath` auto
 ```qml
 LV.TextEditor {
     id: editor
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
     onSyncFinished: console.log("Synchronized", path)
     onSyncFailed: console.warn("Sync failed", path, error)
 }
 ```
 
-`Enter`, `Ctrl+Enter`, and `Cmd+Enter` insert newlines. They do not trigger a save command because saving is not a separate user action.
-
-### IME and Selection
-
-The visible document remains a virtualized line viewport, but keyboard composition is handled by an internal `TextInput` adapter. The adapter is not document storage; it only receives platform preedit/commit events and forwards committed text to the C++ document model.
-
-This means Korean input should arrive as composed Hangul syllables instead of separated jamo. While an IME preedit is active, the editor paints the composing text at the current cursor line so the user can see the composition.
-
-Selection is model-backed:
-
-- Drag across text to select a range.
-- Hold `Shift` while using arrow, Home, or End keys to extend selection.
-- Double-click a word to select that word.
-- Typing or IME commit replaces the selected range.
-- Backspace/Delete removes the selected range.
-
-### OS Text Editing Keys
-
-`LV.TextEditor` keeps the public API file-oriented, but the focused editor accepts common desktop text editing gestures:
-
-- Left/Right/Up/Down move the cursor; holding `Shift` extends selection.
-- `Option+Left` and `Option+Right` move by word on macOS. `Ctrl+Left` and `Ctrl+Right` are accepted for the same word movement on desktop platforms that use Ctrl for this convention.
-- `Cmd+Left` and `Cmd+Right` move to the start/end of the current line.
-- `Cmd+Up` and `Cmd+Down` move to the start/end of the document.
-- `Home` and `End` move to the start/end of the current line; `Ctrl+Home`/`Ctrl+End` or `Cmd+Home`/`Cmd+End` move to the start/end of the document.
-- `PageUp` and `PageDown` move by the visible viewport height.
-- `Cmd+A`, `Cmd+C`, `Cmd+X`, and `Cmd+V` provide select-all, copy, cut, and paste. Ctrl variants are also accepted for platforms where those are the normal GUI shortcuts.
-- `Option+Backspace` and `Option+Delete` delete the previous/next word. Ctrl variants are also accepted.
-- `Cmd+Backspace` and `Cmd+Delete` delete from the cursor to the start/end of the current line.
-
-These are internal input behaviors, not public `selectAll()`, `copy()`, `cut()`, or `paste()` component methods.
-
 ### Track State
 
-Use the read/sync state properties instead of reading the whole document out of the component.
+Use the read/sync state properties for file status:
 
 ```qml
 LV.TextEditor {
     id: editor
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
     chunkSize: 65536
 
     onReadProgress: console.log(bytesRead, bytesTotal)
@@ -157,26 +159,18 @@ LV.Label {
 }
 ```
 
-State properties:
-
-- `dirty`: local edits are waiting for write-through synchronization.
-- `reading`: `read()` is still loading chunks.
-- `bytesRead`, `bytesTotal`, `progress`: byte-level read progress.
-- `error`: most recent read/sync error.
-- `empty`: no document characters are loaded.
-
 ### Work with Large Files
 
-Set `chunkSize` to tune lazy loading. The default is suitable for normal use; larger chunks reduce scheduling overhead, smaller chunks keep each event-loop step shorter.
+Set `chunkSize` to tune lazy loading. The default is suitable for normal rich text documents; larger chunks reduce scheduling overhead, smaller chunks keep each event-loop step shorter.
 
 ```qml
 LV.TextEditor {
-    filePath: "/var/log/system.log"
+    filePath: "/tmp/large-notes.html"
     chunkSize: 262144
 }
 ```
 
-While `reading` is true, keyboard edits are ignored and write-through synchronization is not scheduled, so a partial document is not written accidentally.
+While `reading` is true, editor-originated synchronization is skipped so a partial document is not written accidentally.
 
 ### Change Files
 
@@ -193,25 +187,24 @@ function openPath(path) {
 
 ### Read-Only View
 
-Set `readOnly` when the editor should load and display a file without accepting text edits.
+Set `readOnly` when the editor should load and display a rich text file without accepting text edits.
 
 ```qml
 LV.TextEditor {
-    filePath: "/tmp/report.txt"
+    filePath: "/tmp/report.html"
     readOnly: true
 }
 ```
 
 ### Not Public API
 
-Application code should not depend on internal document objects or whole-text compatibility aliases. These names are intentionally not part of `LV.TextEditor`:
+Application code should not depend on the internal `TextDocumentModel`; it exists to provide file loading, progress, dirty state, and atomic synchronization. Use `editorItem` for rich text editor behavior and the read/sync properties for file state.
 
-- `text`
-- `documentModel`
-- `editorItem`, `editorViewport`
+These names are intentionally not part of `LV.TextEditor`:
+
 - `write()`, `loadFile(path)`, `saveFile(path)`, `reloadFile()`
-- `insertText()`, `clear()`, `selectAll()`, `submit()`
-- mode or preview APIs such as `mode`, `markdownMode`, `richTextMode`, `renderedOutput`
+- mode or preview APIs such as `mode`, `markdownMode`, `plainTextMode`, `renderedOutput`
+- save-as path parameters
 
 Layout/visual:
 
@@ -220,36 +213,26 @@ Layout/visual:
 - `insetHorizontal`, `insetVertical`
 - `shapeStyle`, `cornerRadius`
 - `showScrollBar`, `autoFocusOnPress`
-- `preferNativeGestures`
+- `preferNativeGestures`, `preferNativeTextInteraction`
+- `viewportBoundsBehavior`, `viewportBoundsMovement`
 - `viewportFlickDeceleration`, `viewportMaximumFlickVelocity`
-- font and color tokens for the visible line viewport
+- font and color tokens for the rich text viewport
 
 ## Behavior Contract
 
 - The editor automatically calls `read()` after construction and after `filePath` changes.
-- `read()` opens UTF-8 text from the required `filePath`, clears `dirty`, clears `error`, and schedules chunked line loading.
-- `read()` returns whether the file stream was opened and scheduled; `readFinished` reports completion.
+- `read()` opens UTF-8 rich text/HTML from the required `filePath`, clears `dirty`, clears `error`, and schedules chunked loading.
 - Reading a nonexistent path connects an empty document to that path without creating the file. The first edit creates the file through synchronization if the parent directory is writable.
-- During lazy reading, visible rows are appended to the `ListView` model incrementally and progress is exposed through `readProgress` and `progress`.
-- Clean loaded lines remain file-backed line records; visible delegate text decodes individual lines on demand.
-- Editing promotes only touched lines to memory-backed records, while untouched lines stay file-backed.
 - Local edits schedule automatic write-through synchronization to `filePath` through `QSaveFile`; successful sync clears `dirty`, clears `error`, and emits `syncFinished`.
 - Synchronization is skipped while `reading` is true so a partial document is not written accidentally.
-- A hidden `TextInput` acts as the IME adapter. It is not a text document model and should not be used by application code.
-- IME preedit text is painted at the model cursor; commit text replaces the active selection or inserts at the cursor.
-- Shift navigation, double-click word selection, and mouse drag maintain a selection anchor. Text input, IME commit, Backspace, Delete, cut, and paste replace/remove that range.
-- Desktop editing shortcuts follow common GUI conventions for word movement, line/document movement, select-all, clipboard, and word/line deletion without expanding the public component API.
+- The edit surface is a native `TextEdit` with `textFormat: TextEdit.RichText`, `wrapMode: TextEdit.Wrap`, mouse selection, persistent selection, IME handling, and clipboard behavior.
+- Mobile-target defaults follow `Theme.mobileTarget`; focused mobile viewports suspend touch flicking so native text gestures stay on the editor path.
 - Constructing `LV.TextEditor` without `filePath` is invalid QML because the connected file is part of the component contract.
 - Empty paths and file read/sync failures do not intentionally replace the current document; they set `error` and emit the matching failure signal.
-- `Enter`, `Ctrl+Enter`, and `Cmd+Enter` insert newlines.
-- Uses a vertically constrained `ListView` backed by an internal `TextDocumentModel`; visible delegates are text-line views, not document storage.
-- The edit surface does not install a full-cover `MouseArea`; focus is handled by pointer handlers and edits are routed through model methods.
-- Mobile-target defaults follow `Theme.mobileTarget`; focused mobile viewports suspend touch flicking so cursor/key interactions stay on the editor path.
-- Markdown, rich text, rendered preview, mode switching, submit events, text compatibility aliases, selection API, and save-as path parameters are intentionally outside this component.
 
 ## Internal Engine
 
-`TextDocumentModel` is owned by `LV.TextEditor` and is not part of the public QML component API. Tests may locate it by object name to verify storage behavior, but application code should treat `LV.TextEditor` as the file read/write surface.
+`TextDocumentModel` is owned by `LV.TextEditor` and is not part of the public QML component API. Tests may locate it by object name to verify storage behavior, but application code should treat `LV.TextEditor` as the file read/write state engine and use the native rich `editorItem` for editing behavior.
 
 ## Usage
 
@@ -257,7 +240,7 @@ Layout/visual:
 import LVRS 1.0 as LV
 
 LV.TextEditor {
-    filePath: "/tmp/notes.txt"
+    filePath: "/tmp/notes.html"
     chunkSize: 65536
 
     onSyncFinished: console.log("Synchronized", path)

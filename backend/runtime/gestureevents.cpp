@@ -18,6 +18,24 @@ QVariantMap runtimePayload(const QVariantMap &eventData)
     return eventData.value(QStringLiteral("payload")).toMap();
 }
 
+int rawInt(const QVariantMap &payload, const QString &key, int fallback = 0)
+{
+    const QVariant value = payload.value(key);
+    return value.isValid() ? value.toInt() : fallback;
+}
+
+int rawFingerCount(const QVariantMap &payload)
+{
+    return rawInt(payload,
+                  QStringLiteral("fingerCount"),
+                  rawInt(payload, QStringLiteral("pointCount"), 0));
+}
+
+int rawActiveFingerCount(const QVariantMap &payload)
+{
+    return rawInt(payload, QStringLiteral("activeFingerCount"), rawFingerCount(payload));
+}
+
 QVariantMap pointerUiFallbackMap(const QVariantMap &rawPayload)
 {
     QVariantMap ui = rawPayload.value(QStringLiteral("pointerUi")).toMap();
@@ -72,6 +90,19 @@ QString swipeDirectionForDeltas(const qreal deltaX, const qreal deltaY, const qr
     return QStringLiteral("bottomRightToTopLeft");
 }
 
+QString classificationForInteraction(const QString &gestureType, const QString &interactionKind)
+{
+    if (gestureType == QStringLiteral("pressStarted")
+        || gestureType == QStringLiteral("pressEnded")) {
+        return QStringLiteral("press");
+    }
+    if (interactionKind == QStringLiteral("nativeGesture"))
+        return QStringLiteral("gesture");
+    if (interactionKind.isEmpty())
+        return QStringLiteral("touch");
+    return interactionKind;
+}
+
 qreal distanceBetween(const QPointF &a, const QPointF &b)
 {
     return QLineF(a, b).length();
@@ -122,6 +153,20 @@ void GestureEvents::setDragThresholdPx(qreal value)
         return;
     m_dragThresholdPx = bounded;
     emit dragThresholdPxChanged();
+}
+
+qreal GestureEvents::scrollThresholdPx() const
+{
+    return m_scrollThresholdPx;
+}
+
+void GestureEvents::setScrollThresholdPx(qreal value)
+{
+    const qreal bounded = qMax<qreal>(0.0, value);
+    if (qFuzzyCompare(m_scrollThresholdPx, bounded))
+        return;
+    m_scrollThresholdPx = bounded;
+    emit scrollThresholdPxChanged();
 }
 
 qreal GestureEvents::swipeThresholdPx() const
@@ -297,6 +342,7 @@ void GestureEvents::startTouchSession(const QVariantMap &eventData, const QVaria
     m_lastTouchPos = currentPos;
     m_touchStartUi = resolvedPointerUi(rawPayload);
     m_lastTouchPayload = rawPayload;
+    m_maximumFingerCount = qMax(rawFingerCount(rawPayload), rawActiveFingerCount(rawPayload));
 
     const QVariantMap payload = publishGesture(buildTouchPayload(QStringLiteral("touchStarted"),
                                                                  rawPayload,
@@ -305,6 +351,14 @@ void GestureEvents::startTouchSession(const QVariantMap &eventData, const QVaria
                                                                  currentPos,
                                                                  currentPos));
     emit touchStarted(payload);
+
+    const QVariantMap pressPayload = publishGesture(buildTouchPayload(QStringLiteral("pressStarted"),
+                                                                      rawPayload,
+                                                                      timestampEpochMs,
+                                                                      QStringLiteral("press"),
+                                                                      currentPos,
+                                                                      currentPos));
+    emit pressStarted(pressPayload);
 
     if (m_holdThresholdMs > 0)
         m_holdTimer.start(m_holdThresholdMs);
@@ -322,9 +376,28 @@ void GestureEvents::updateTouchSession(const QVariantMap &eventData, const QVari
                              rawPayload.value(QStringLiteral("y")).toReal());
     const QPointF previousPos = m_lastTouchPos;
     const qreal totalDistance = distanceBetween(m_touchStartPos, currentPos);
+    m_maximumFingerCount = qMax(m_maximumFingerCount,
+                                qMax(rawFingerCount(rawPayload), rawActiveFingerCount(rawPayload)));
 
-    if (!m_holdActive && totalDistance >= m_dragThresholdPx)
+    if (!m_holdActive && totalDistance >= qMin(m_dragThresholdPx, m_scrollThresholdPx))
         m_holdTimer.stop();
+
+    const QString dominantAxis = dominantAxisForDeltas(currentPos.x() - m_touchStartPos.x(),
+                                                       currentPos.y() - m_touchStartPos.y(),
+                                                       m_axisDominanceRatio);
+    const bool scrollCandidate = !rawPayload.value(QStringLiteral("multiTouch")).toBool()
+        && (dominantAxis == QStringLiteral("x") || dominantAxis == QStringLiteral("y"))
+        && totalDistance >= m_scrollThresholdPx;
+    if (!m_scrollActive && scrollCandidate) {
+        m_scrollActive = true;
+        const QVariantMap payload = publishGesture(buildTouchPayload(QStringLiteral("scrollStarted"),
+                                                                     rawPayload,
+                                                                     timestampEpochMs,
+                                                                     QStringLiteral("scroll"),
+                                                                     currentPos,
+                                                                     previousPos));
+        emit scrollStarted(payload);
+    }
 
     if (!m_dragActive && totalDistance >= m_dragThresholdPx) {
         m_dragActive = true;
@@ -340,7 +413,9 @@ void GestureEvents::updateTouchSession(const QVariantMap &eventData, const QVari
     const QVariantMap touchPayload = publishGesture(buildTouchPayload(QStringLiteral("touchUpdated"),
                                                                       rawPayload,
                                                                       timestampEpochMs,
-                                                                      m_dragActive
+                                                                      m_scrollActive
+                                                                      ? QStringLiteral("scroll")
+                                                                      : m_dragActive
                                                                       ? QStringLiteral("drag")
                                                                       : (m_holdActive ? QStringLiteral("hold")
                                                                                       : QStringLiteral("touch")),
@@ -356,6 +431,16 @@ void GestureEvents::updateTouchSession(const QVariantMap &eventData, const QVari
                                                                          currentPos,
                                                                          previousPos));
         emit dragUpdated(dragPayload);
+    }
+
+    if (m_scrollActive) {
+        const QVariantMap scrollPayload = publishGesture(buildTouchPayload(QStringLiteral("scrollUpdated"),
+                                                                           rawPayload,
+                                                                           timestampEpochMs,
+                                                                           QStringLiteral("scroll"),
+                                                                           currentPos,
+                                                                           previousPos));
+        emit scrollUpdated(scrollPayload);
     }
 
     m_lastTouchEpochMs = timestampEpochMs;
@@ -384,6 +469,8 @@ void GestureEvents::endTouchSession(const QVariantMap &eventData,
     const qint64 durationMs = m_touchStartEpochMs >= 0
         ? qMax<qint64>(0, timestampEpochMs - m_touchStartEpochMs)
         : 0;
+    m_maximumFingerCount = qMax(m_maximumFingerCount,
+                                qMax(rawFingerCount(rawPayload), rawActiveFingerCount(rawPayload)));
     const bool swipeQualified = !cancelled
         && durationMs <= m_swipeMaxDurationMs
         && totalDistance >= m_swipeThresholdPx;
@@ -398,6 +485,16 @@ void GestureEvents::endTouchSession(const QVariantMap &eventData,
         emit dragEnded(dragPayload);
     }
 
+    if (m_scrollActive) {
+        const QVariantMap scrollPayload = publishGesture(buildTouchPayload(QStringLiteral("scrollEnded"),
+                                                                           rawPayload,
+                                                                           timestampEpochMs,
+                                                                           QStringLiteral("scroll"),
+                                                                           currentPos,
+                                                                           previousPos));
+        emit scrollEnded(scrollPayload);
+    }
+
     if (swipeQualified) {
         const QVariantMap swipePayload = publishGesture(buildSwipePayload(rawPayload,
                                                                          timestampEpochMs,
@@ -409,11 +506,13 @@ void GestureEvents::endTouchSession(const QVariantMap &eventData,
         ? QStringLiteral("cancel")
         : swipeQualified
             ? QStringLiteral("swipe")
-            : m_dragActive
-                ? QStringLiteral("drag")
-                : m_holdActive
-                    ? QStringLiteral("hold")
-                    : QStringLiteral("tap");
+            : m_scrollActive
+                ? QStringLiteral("scroll")
+                : m_dragActive
+                    ? QStringLiteral("drag")
+                    : m_holdActive
+                        ? QStringLiteral("hold")
+                        : QStringLiteral("tap");
     const QString gestureType = cancelled
         ? QStringLiteral("touchCancelled")
         : QStringLiteral("touchEnded");
@@ -427,6 +526,16 @@ void GestureEvents::endTouchSession(const QVariantMap &eventData,
         emit touchCancelled(touchPayload);
     else
         emit touchEnded(touchPayload);
+
+    QVariantMap pressPayload = buildTouchPayload(QStringLiteral("pressEnded"),
+                                                 rawPayload,
+                                                 timestampEpochMs,
+                                                 QStringLiteral("press"),
+                                                 currentPos,
+                                                 previousPos);
+    pressPayload.insert(QStringLiteral("finalInteractionKind"), interactionKind);
+    pressPayload = publishGesture(pressPayload);
+    emit pressEnded(pressPayload);
 
     resetTouchSessionInternal(true);
 }
@@ -474,6 +583,7 @@ QVariantMap GestureEvents::buildTouchPayload(const QString &gestureType,
     const qreal deltaY = currentPos.y() - previousPos.y();
     const qreal totalDeltaX = currentPos.x() - m_touchStartPos.x();
     const qreal totalDeltaY = currentPos.y() - m_touchStartPos.y();
+    const QString dominantAxis = dominantAxisForDeltas(totalDeltaX, totalDeltaY, m_axisDominanceRatio);
     const qint64 durationMs = m_touchStartEpochMs >= 0
         ? qMax<qint64>(0, timestampEpochMs - m_touchStartEpochMs)
         : 0;
@@ -481,6 +591,7 @@ QVariantMap GestureEvents::buildTouchPayload(const QString &gestureType,
 
     payload.insert(QStringLiteral("gestureType"), gestureType);
     payload.insert(QStringLiteral("interactionKind"), interactionKind);
+    payload.insert(QStringLiteral("classification"), classificationForInteraction(gestureType, interactionKind));
     payload.insert(QStringLiteral("source"), QStringLiteral("touch"));
     payload.insert(QStringLiteral("sessionId"), QVariant::fromValue(m_activeSessionId));
     payload.insert(QStringLiteral("timestampEpochMs"), QVariant::fromValue(timestampEpochMs));
@@ -502,21 +613,40 @@ QVariantMap GestureEvents::buildTouchPayload(const QString &gestureType,
     payload.insert(QStringLiteral("absoluteDeltaY"), qAbs(totalDeltaY));
     payload.insert(QStringLiteral("distance"), distanceBetween(m_touchStartPos, currentPos));
     payload.insert(QStringLiteral("durationMs"), QVariant::fromValue(durationMs));
+    payload.insert(QStringLiteral("pressDurationMs"),
+                   rawPayload.contains(QStringLiteral("pressDurationMs"))
+                   ? rawPayload.value(QStringLiteral("pressDurationMs"))
+                   : QVariant::fromValue(durationMs));
     payload.insert(QStringLiteral("directionX"), signedDirectionToken(totalDeltaX));
     payload.insert(QStringLiteral("directionY"), signedDirectionToken(totalDeltaY));
-    payload.insert(QStringLiteral("dominantAxis"),
-                   dominantAxisForDeltas(totalDeltaX, totalDeltaY, m_axisDominanceRatio));
+    payload.insert(QStringLiteral("dominantAxis"), dominantAxis);
     payload.insert(QStringLiteral("holdActive"), m_holdActive);
     payload.insert(QStringLiteral("dragActive"), m_dragActive);
+    payload.insert(QStringLiteral("scrollActive"), m_scrollActive);
     payload.insert(QStringLiteral("holdThresholdMs"), m_holdThresholdMs);
     payload.insert(QStringLiteral("dragThresholdPx"), m_dragThresholdPx);
+    payload.insert(QStringLiteral("scrollThresholdPx"), m_scrollThresholdPx);
     payload.insert(QStringLiteral("swipeThresholdPx"), m_swipeThresholdPx);
     payload.insert(QStringLiteral("swipeMaxDurationMs"), m_swipeMaxDurationMs);
+    payload.insert(QStringLiteral("fingerCount"), rawFingerCount(rawPayload));
+    payload.insert(QStringLiteral("activeFingerCount"), rawActiveFingerCount(rawPayload));
+    payload.insert(QStringLiteral("maximumFingerCount"), m_maximumFingerCount);
+    payload.insert(QStringLiteral("multiTouch"), rawPayload.value(QStringLiteral("multiTouch")).toBool());
 
     if (rawPayload.contains(QStringLiteral("phase")))
         payload.insert(QStringLiteral("phase"), rawPayload.value(QStringLiteral("phase")));
     if (rawPayload.contains(QStringLiteral("pointCount")))
         payload.insert(QStringLiteral("pointCount"), rawPayload.value(QStringLiteral("pointCount")));
+    if (rawPayload.contains(QStringLiteral("pressedFingerCount")))
+        payload.insert(QStringLiteral("pressedFingerCount"), rawPayload.value(QStringLiteral("pressedFingerCount")));
+    if (rawPayload.contains(QStringLiteral("updatedFingerCount")))
+        payload.insert(QStringLiteral("updatedFingerCount"), rawPayload.value(QStringLiteral("updatedFingerCount")));
+    if (rawPayload.contains(QStringLiteral("stationaryFingerCount")))
+        payload.insert(QStringLiteral("stationaryFingerCount"), rawPayload.value(QStringLiteral("stationaryFingerCount")));
+    if (rawPayload.contains(QStringLiteral("releasedFingerCount")))
+        payload.insert(QStringLiteral("releasedFingerCount"), rawPayload.value(QStringLiteral("releasedFingerCount")));
+    if (rawPayload.contains(QStringLiteral("primaryPointId")))
+        payload.insert(QStringLiteral("primaryPointId"), rawPayload.value(QStringLiteral("primaryPointId")));
     if (rawPayload.contains(QStringLiteral("points")))
         payload.insert(QStringLiteral("points"), rawPayload.value(QStringLiteral("points")));
     if (rawPayload.contains(QStringLiteral("buttons")))
@@ -527,6 +657,34 @@ QVariantMap GestureEvents::buildTouchPayload(const QString &gestureType,
         payload.insert(QStringLiteral("modifiers"), rawPayload.value(QStringLiteral("modifiers")));
     if (rawPayload.contains(QStringLiteral("mouseButtonPressed")))
         payload.insert(QStringLiteral("mouseButtonPressed"), rawPayload.value(QStringLiteral("mouseButtonPressed")));
+    if (rawPayload.contains(QStringLiteral("released")))
+        payload.insert(QStringLiteral("released"), rawPayload.value(QStringLiteral("released")));
+    if (rawPayload.contains(QStringLiteral("cancelled")))
+        payload.insert(QStringLiteral("cancelled"), rawPayload.value(QStringLiteral("cancelled")));
+    if (rawPayload.contains(QStringLiteral("releaseEpochMs")))
+        payload.insert(QStringLiteral("releaseEpochMs"), rawPayload.value(QStringLiteral("releaseEpochMs")));
+    if (rawPayload.contains(QStringLiteral("lastMousePressEpochMs")))
+        payload.insert(QStringLiteral("lastMousePressEpochMs"), rawPayload.value(QStringLiteral("lastMousePressEpochMs")));
+    if (rawPayload.contains(QStringLiteral("lastMouseReleaseEpochMs")))
+        payload.insert(QStringLiteral("lastMouseReleaseEpochMs"), rawPayload.value(QStringLiteral("lastMouseReleaseEpochMs")));
+    if (rawPayload.contains(QStringLiteral("nativeTimestamp")))
+        payload.insert(QStringLiteral("nativeTimestamp"), rawPayload.value(QStringLiteral("nativeTimestamp")));
+    if (rawPayload.contains(QStringLiteral("touchDeviceName")))
+        payload.insert(QStringLiteral("touchDeviceName"), rawPayload.value(QStringLiteral("touchDeviceName")));
+    if (rawPayload.contains(QStringLiteral("touchDeviceType")))
+        payload.insert(QStringLiteral("touchDeviceType"), rawPayload.value(QStringLiteral("touchDeviceType")));
+    if (rawPayload.contains(QStringLiteral("pointerType")))
+        payload.insert(QStringLiteral("pointerType"), rawPayload.value(QStringLiteral("pointerType")));
+    if (rawPayload.contains(QStringLiteral("maximumTouchPoints")))
+        payload.insert(QStringLiteral("maximumTouchPoints"), rawPayload.value(QStringLiteral("maximumTouchPoints")));
+
+    if (interactionKind == QStringLiteral("scroll") || m_scrollActive) {
+        payload.insert(QStringLiteral("scrollAxis"), dominantAxis);
+        payload.insert(QStringLiteral("scrollDirection"),
+                       swipeDirectionForDeltas(totalDeltaX, totalDeltaY, m_axisDominanceRatio));
+        payload.insert(QStringLiteral("scrollDeltaX"), totalDeltaX);
+        payload.insert(QStringLiteral("scrollDeltaY"), totalDeltaY);
+    }
 
     payload.insert(QStringLiteral("ui"), currentUi);
     payload.insert(QStringLiteral("originUi"), m_touchStartUi);
@@ -561,6 +719,7 @@ QVariantMap GestureEvents::buildNativeGesturePayload(const QVariantMap &eventDat
     QVariantMap payload;
     payload.insert(QStringLiteral("gestureType"), QStringLiteral("nativeGestureDetected"));
     payload.insert(QStringLiteral("interactionKind"), QStringLiteral("nativeGesture"));
+    payload.insert(QStringLiteral("classification"), QStringLiteral("gesture"));
     payload.insert(QStringLiteral("source"), QStringLiteral("nativeGesture"));
     payload.insert(QStringLiteral("timestampEpochMs"), QVariant::fromValue(eventTimestampEpochMs(eventData)));
     payload.insert(QStringLiteral("x"), rawPayload.value(QStringLiteral("x")));
@@ -571,7 +730,16 @@ QVariantMap GestureEvents::buildNativeGesturePayload(const QVariantMap &eventDat
     payload.insert(QStringLiteral("pressedMouseButtons"), rawPayload.value(QStringLiteral("pressedMouseButtons")));
     payload.insert(QStringLiteral("modifiers"), rawPayload.value(QStringLiteral("modifiers")));
     payload.insert(QStringLiteral("nativeGestureType"), rawPayload.value(QStringLiteral("gestureType")));
+    payload.insert(QStringLiteral("fingerCount"), rawPayload.value(QStringLiteral("fingerCount")));
     payload.insert(QStringLiteral("value"), rawPayload.value(QStringLiteral("value")));
+    payload.insert(QStringLiteral("deltaX"), rawPayload.value(QStringLiteral("deltaX")));
+    payload.insert(QStringLiteral("deltaY"), rawPayload.value(QStringLiteral("deltaY")));
+    if (rawPayload.contains(QStringLiteral("deviceName")))
+        payload.insert(QStringLiteral("deviceName"), rawPayload.value(QStringLiteral("deviceName")));
+    if (rawPayload.contains(QStringLiteral("deviceType")))
+        payload.insert(QStringLiteral("deviceType"), rawPayload.value(QStringLiteral("deviceType")));
+    if (rawPayload.contains(QStringLiteral("pointerType")))
+        payload.insert(QStringLiteral("pointerType"), rawPayload.value(QStringLiteral("pointerType")));
     payload.insert(QStringLiteral("ui"), resolvedPointerUi(rawPayload));
     return payload;
 }
@@ -591,6 +759,7 @@ void GestureEvents::resetTouchSessionInternal(bool keepLastGesture)
     m_touchActive = false;
     m_holdActive = false;
     m_dragActive = false;
+    m_scrollActive = false;
     m_activeSessionId = 0;
     m_touchStartEpochMs = -1;
     m_lastTouchEpochMs = -1;
@@ -598,6 +767,7 @@ void GestureEvents::resetTouchSessionInternal(bool keepLastGesture)
     m_lastTouchPos = QPointF();
     m_touchStartUi.clear();
     m_lastTouchPayload.clear();
+    m_maximumFingerCount = 0;
     if (!keepLastGesture) {
         m_lastGesture.clear();
         emit gestureChanged();

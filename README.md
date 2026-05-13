@@ -261,11 +261,12 @@ When enabled, configure fails if:
 
 The event system now centers on a daemon-style flow:
 
-1. `RuntimeEvents` installs a global event filter and records input/UI lifecycle events.
+1. `RuntimeEvents` installs a global event filter and records input/UI lifecycle events, including native touch point detail.
 2. `Backend.hookUserEvents()` subscribes to the runtime stream and keeps a bounded cache.
-3. `EventListener` consumes backend state first (`currentUserInputState()`), then runtime fallback.
-4. `ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.
-5. UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.
+3. `GestureEvents` classifies mobile press, scroll, hold, drag, swipe, and native gesture payloads.
+4. `EventListener` consumes backend state first (`currentUserInputState()`), then runtime fallback.
+5. `ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.
+6. UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.
 
 ## Main Visual Catalog
 

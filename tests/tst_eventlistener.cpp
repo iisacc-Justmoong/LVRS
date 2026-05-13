@@ -25,6 +25,7 @@ private slots:
     void application_window_global_context_signal();
     void context_menu_dismisses_on_global_press_outside();
     void gesture_triggers_receive_touch_and_swipe();
+    void mobile_press_and_scroll_triggers_are_distinct();
 };
 
 namespace {
@@ -388,6 +389,125 @@ LV.ApplicationWindow {
     QCOMPARE(object->property("lastSwipeDirection").toString(), QStringLiteral("leftToRight"));
     QVERIFY(object->property("lastSwipeDx").toReal() > 0.0);
     QVERIFY(qAbs(object->property("lastSwipeDy").toReal()) < 12.0);
+}
+
+void EventListenerTests::mobile_press_and_scroll_triggers_are_distinct()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 260
+    height: 180
+    autoAttachRuntimeEvents: true
+    visible: false
+    title: "EventListenerMobileClassificationTest"
+
+    Component.onCompleted: {
+        LV.GestureEvents.holdThresholdMs = 500
+        LV.GestureEvents.dragThresholdPx = 10
+        LV.GestureEvents.scrollThresholdPx = 10
+        LV.GestureEvents.swipeThresholdPx = 96
+        LV.GestureEvents.resetState()
+    }
+
+    property int pressStartCount: 0
+    property int pressEndCount: 0
+    property int scrollStartCount: 0
+    property int scrollEndCount: 0
+    property string lastPressKind: ""
+    property string lastScrollAxis: ""
+    property string lastScrollDirection: ""
+    property int lastFingerCount: 0
+    property int lastMaximumFingerCount: 0
+    property bool lastReleased: false
+    property real lastPressDurationMs: -1
+
+    LV.EventListener {
+        trigger: "pressStarted"
+        action: function(eventData) {
+            root.pressStartCount += 1
+            root.lastFingerCount = eventData.fingerCount || 0
+            root.lastMaximumFingerCount = eventData.maximumFingerCount || 0
+        }
+    }
+
+    LV.EventListener {
+        trigger: "pressEnded"
+        action: function(eventData) {
+            root.pressEndCount += 1
+            root.lastPressKind = eventData.classification || ""
+            root.lastReleased = !!eventData.released
+            root.lastPressDurationMs = eventData.pressDurationMs === undefined ? -1 : eventData.pressDurationMs
+        }
+    }
+
+    LV.EventListener {
+        trigger: "scrollStarted"
+        action: function(eventData) {
+            root.scrollStartCount += 1
+            root.lastScrollAxis = eventData.scrollAxis || ""
+            root.lastScrollDirection = eventData.scrollDirection || ""
+            root.lastFingerCount = eventData.fingerCount || 0
+            root.lastMaximumFingerCount = eventData.maximumFingerCount || 0
+        }
+    }
+
+    LV.EventListener {
+        trigger: "scrollEnded"
+        action: function(eventData) {
+            root.scrollEndCount += 1
+            root.lastReleased = !!eventData.released
+            root.lastPressDurationMs = eventData.pressDurationMs === undefined ? -1 : eventData.pressDurationMs
+        }
+    }
+}
+)";
+
+    QQmlComponent component(&engine);
+    component.setData(qml, QUrl());
+    QScopedPointer<QObject> object(component.create());
+    QVERIFY(object);
+
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    QVERIFY(window);
+
+    const QPointF beginPoint(52.0, 34.0);
+    const QPointF updatePoint(55.0, 84.0);
+    const QPointF endPoint(56.0, 112.0);
+
+    QTouchEvent touchBegin(QEvent::TouchBegin,
+                           eventListenerTouchDevice(),
+                           Qt::NoModifier,
+                           {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
+    QCoreApplication::sendEvent(window, &touchBegin);
+    QTRY_COMPARE(object->property("pressStartCount").toInt(), 1);
+    QCOMPARE(object->property("lastFingerCount").toInt(), 1);
+    QCOMPARE(object->property("lastMaximumFingerCount").toInt(), 1);
+
+    QTouchEvent touchUpdate(QEvent::TouchUpdate,
+                            eventListenerTouchDevice(),
+                            Qt::NoModifier,
+                            {QEventPoint(0, QEventPoint::State::Updated, updatePoint, updatePoint)});
+    QCoreApplication::sendEvent(window, &touchUpdate);
+    QTRY_COMPARE(object->property("scrollStartCount").toInt(), 1);
+    QCOMPARE(object->property("lastScrollAxis").toString(), QStringLiteral("y"));
+    QCOMPARE(object->property("lastScrollDirection").toString(), QStringLiteral("topToBottom"));
+
+    QTouchEvent touchEnd(QEvent::TouchEnd,
+                         eventListenerTouchDevice(),
+                         Qt::NoModifier,
+                         {QEventPoint(0, QEventPoint::State::Released, endPoint, endPoint)});
+    QCoreApplication::sendEvent(window, &touchEnd);
+    QTRY_COMPARE(object->property("scrollEndCount").toInt(), 1);
+    QTRY_COMPARE(object->property("pressEndCount").toInt(), 1);
+    QVERIFY(object->property("lastReleased").toBool());
+    QVERIFY(object->property("lastPressDurationMs").toReal() >= 0.0);
 }
 
 QTEST_MAIN(EventListenerTests)

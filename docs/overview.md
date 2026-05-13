@@ -16,7 +16,7 @@ LVRS runtime is split into three cooperating layers.
 1. Event capture daemon (`RuntimeEvents`)  
    Captures keyboard, pointer, context, touch/tablet/native-gesture, UI lifecycle, and process telemetry.
 2. High-level gesture recognizer (`GestureEvents`)
-   Classifies the raw touch/native stream into `hold`, `drag`, `swipe`, and normalized touch-session payloads.
+   Classifies the raw touch/native stream into `press`, `scroll`, `hold`, `drag`, `swipe`, and normalized touch-session payloads.
 3. Backend cache/bridge (`Backend`)
    Mirrors the raw runtime event stream into a bounded cache and provides stable snapshots for QML consumers.
 
@@ -51,7 +51,7 @@ A production startup path should follow this order.
 - Global context/click signals can be consumed at app root through `ApplicationWindow` event bridge.
 - Nested wheel behavior can be isolated by `WheelScrollGuard`.
 - IME composition integrity can be enforced by `InputMethodGuard`.
-- High-level touch/gesture semantics can be consumed through `GestureEvents` or `EventListener` gesture triggers.
+- High-level touch/gesture semantics, including mobile press/scroll lifecycle and finger counts, can be consumed through `GestureEvents` or `EventListener` gesture triggers.
 
 ## Recommended Entry Documents by Use Case
 
@@ -78,7 +78,7 @@ This chain provides deterministic behavior from startup through UI interaction.
 ## Common Integration Mistakes
 
 - Starting `RuntimeEvents` without attaching a window, then expecting UI hit-test data.
-- Expecting raw `RuntimeEvents` touch records to already distinguish hold/drag/swipe semantics.
+- Expecting raw `RuntimeEvents` touch records to own high-level press/scroll/hold/drag/swipe semantics; use `GestureEvents` for classification.
 - Writing model properties from views that never claimed ownership in `ViewModels`.
 - Using nested `Flickable` surfaces without `WheelScrollGuard`.
 - Building context-menu close logic only from local click handlers instead of global coordinates.
