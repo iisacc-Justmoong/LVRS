@@ -226,7 +226,7 @@ Layout/visual:
 - Local edits schedule automatic write-through synchronization to `filePath` through `QSaveFile`; successful sync clears `dirty`, clears `error`, and emits `syncFinished`.
 - Synchronization is skipped while `reading` is true so a partial document is not written accidentally.
 - The edit surface is a native `TextEdit` with `textFormat: TextEdit.RichText`, `wrapMode: TextEdit.Wrap`, mouse selection, persistent selection, IME handling, and clipboard behavior.
-- Mobile-target defaults follow `Theme.mobileTarget`; focused mobile viewports suspend touch flicking so native text gestures stay on the editor path.
+- Mobile-target defaults follow `Theme.mobileTarget`; mobile touch drags scroll the internal viewport whenever rich text content overflows, including while the editor is focused. Taps, IME input, cursor placement, and selection remain on the underlying native `TextEdit` path.
 - Constructing `LV.TextEditor` without `filePath` is invalid QML because the connected file is part of the component contract.
 - Empty paths and file read/sync failures do not intentionally replace the current document; they set `error` and emit the matching failure signal.
 

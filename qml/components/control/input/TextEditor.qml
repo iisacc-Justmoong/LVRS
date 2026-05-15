@@ -276,9 +276,7 @@ FocusScope {
             boundsMovement: control.viewportBoundsMovement
             flickDeceleration: Math.max(1, control.viewportFlickDeceleration)
             maximumFlickVelocity: Math.max(1, control.viewportMaximumFlickVelocity)
-            interactive: (contentHeight > height || contentWidth > width)
-                && !control.preferNativeTextInteraction
-                && (!control.preferNativeGestures || !editor.activeFocus)
+            interactive: control.enabled && (contentHeight > height || contentWidth > width)
             contentWidth: Math.max(width, editor.x + editor.paintedWidth + control.insetHorizontal)
             contentHeight: Math.max(height, editor.y + editor.height + control.insetVertical)
 

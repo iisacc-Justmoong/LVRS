@@ -9,6 +9,7 @@
 #include <QQmlContext>
 #include <QTemporaryDir>
 #include <QQmlEngine>
+#include <QQuickWindow>
 #include <QtPlugin>
 
 #include "test_utils.h"
@@ -49,6 +50,7 @@ class TextEditorTests : public QObject
 private slots:
     void text_editor_requires_file_path_contract();
     void text_editor_rich_text_surface_contract();
+    void text_editor_mobile_native_gesture_viewport_scroll_contract();
     void text_editor_api_usage_manual_contract();
     void text_editor_rich_text_file_realtime_sync_contract();
 };
@@ -157,6 +159,60 @@ Item {
     QVERIFY(hasMetaMethod(editor, "paste"));
 }
 
+void TextEditorTests::text_editor_mobile_native_gesture_viewport_scroll_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.ApplicationWindow {
+    id: root
+    width: 380
+    height: 260
+    visible: false
+    desktopMinWidth: 0
+    desktopMinHeight: 0
+    mobileMinWidth: 0
+    mobileMinHeight: 0
+
+    Component.onCompleted: LV.Theme.targetOverride = "ios"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.TextEditor {
+        id: editor
+        objectName: "textEditor"
+        filePath: ""
+        width: 320
+        height: 120
+        editorHeight: 120
+        text: "<p>line 01</p><p>line 02</p><p>line 03</p><p>line 04</p><p>line 05</p><p>line 06</p><p>line 07</p><p>line 08</p><p>line 09</p><p>line 10</p><p>line 11</p><p>line 12</p>"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    window->show();
+    QTRY_VERIFY(window->isVisible());
+
+    QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
+    QVERIFY(editor);
+    QObject *viewport = root->findChild<QObject *>(QStringLiteral("editorViewportFlickable"));
+    QVERIFY(viewport);
+
+    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    QTRY_VERIFY(editor->property("preferNativeGestures").toBool());
+    QTRY_VERIFY(editor->property("preferNativeTextInteraction").toBool());
+    QTRY_VERIFY(editor->property("focused").toBool());
+    QTRY_VERIFY(viewport->property("contentHeight").toReal() > viewport->property("height").toReal());
+    QTRY_VERIFY(viewport->property("interactive").toBool());
+}
+
 void TextEditorTests::text_editor_api_usage_manual_contract()
 {
     const QString docsPath = QDir(QString::fromUtf8(LVRS_TEST_SOURCE_DIR))
@@ -172,6 +228,7 @@ void TextEditorTests::text_editor_api_usage_manual_contract()
     QVERIFY(docs.contains(QStringLiteral("The editor reads the connected file automatically")));
     QVERIFY(docs.contains(QStringLiteral("There is no public save API")));
     QVERIFY(docs.contains(QStringLiteral("Use `editorItem`")));
+    QVERIFY(docs.contains(QStringLiteral("mobile touch drags scroll the internal viewport")));
     QVERIFY(docs.contains(QStringLiteral("syncFinished(path)")));
     QVERIFY(!docs.contains(QStringLiteral("plain-text editor")));
     QVERIFY(!docs.contains(QStringLiteral("Avoid `TextArea`/`TextEdit` as the document model")));
