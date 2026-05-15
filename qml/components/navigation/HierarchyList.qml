@@ -71,6 +71,7 @@ Item {
     property bool _refreshScheduled: false
     property int _pendingRefreshFrom: -1
     property int _pendingRefreshTo: -1
+    property int _pendingExpansionRootIndex: -1
     property bool _fullRefreshRequested: true
     property bool _applyingActiveState: false
     property bool _isRefreshing: false
@@ -78,6 +79,8 @@ Item {
     property var _rebuildDescriptors: []
     property int _rebuildDescriptorIndex: 0
     property int _rebuildChunkSize: 240
+    property int _fullProjectionRefreshCount: 0
+    property int _incrementalVisibilityRefreshCount: 0
     property bool _isBuildingGeneratedItems: false
     property bool _dragActiveInternal: false
     property var _dragItem: null
@@ -691,59 +694,132 @@ Item {
         }
     }
 
-    function refreshVisibleRange(currentItems, startIndex, endIndex) {
+    function ancestorIndicesForIndexInList(currentItems, itemIndex) {
+        const ancestors = []
+        if (itemIndex <= 0 || itemIndex >= currentItems.length)
+            return ancestors
+
+        let requiredIndent = itemIndentLevel(currentItems[itemIndex])
+        for (let i = itemIndex - 1; i >= 0 && requiredIndent > 0; i--) {
+            const candidateIndent = itemIndentLevel(currentItems[i])
+            if (candidateIndent < requiredIndent) {
+                ancestors.unshift(i)
+                requiredIndent = candidateIndent
+            }
+        }
+        return ancestors
+    }
+
+    function refreshFullInteractionProjection(currentItems) {
+        _fullProjectionRefreshCount += 1
         const projection = hierarchyModel.projectInteractionState(buildInteractionDescriptors(currentItems))
         applyProjectedMetadata(currentItems, projection)
-        return
+    }
 
-        if (currentItems.length === 0) {
-            _visibilityFlags = []
-            _visibleItemIndices = []
-            _visibleEnabledItemIndices = []
-            _visibilityCacheInitialized = false
-            _itemCountInternal = 0
-            _visibleItemCountInternal = 0
+    function updateVisibleIndicesAfterRange(currentItems, startIndex, endIndex, visibleDelta) {
+        let nextVisibleIndex = 0
+        for (let i = startIndex - 1; i >= 0; i--) {
+            if (i < _visibilityFlags.length && _visibilityFlags[i]) {
+                const previousItem = currentItems[i]
+                nextVisibleIndex = previousItem && previousItem.visibleIndex >= 0
+                    ? previousItem.visibleIndex + 1
+                    : 0
+                break
+            }
+        }
+
+        for (let i = startIndex; i <= endIndex; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+            if (_visibilityFlags[i]) {
+                if (item.visibleIndex !== nextVisibleIndex)
+                    item.visibleIndex = nextVisibleIndex
+                nextVisibleIndex += 1
+            } else if (item.visibleIndex !== -1) {
+                item.visibleIndex = -1
+            }
+        }
+
+        if (visibleDelta === 0)
             return
+
+        for (let i = endIndex + 1; i < currentItems.length; i++) {
+            if (!_visibilityFlags[i])
+                continue
+            const item = currentItems[i]
+            if (item && item.visibleIndex >= 0)
+                item.visibleIndex = item.visibleIndex + visibleDelta
         }
+    }
 
-        let fromIndex = Math.max(0, Math.min(startIndex, currentItems.length - 1))
-        let toIndex = endIndex < 0 ? currentItems.length - 1 : Math.max(fromIndex, Math.min(endIndex, currentItems.length - 1))
+    function refreshIncrementalVisibilityRange(currentItems, startIndex, endIndex, expansionRootIndex) {
+        if (currentItems.length === 0)
+            return false
+        if (!_visibilityCacheInitialized || _visibilityFlags.length !== currentItems.length)
+            return false
+        if (startIndex <= 0 || endIndex < startIndex || endIndex >= currentItems.length)
+            return false
 
-        if (_visibilityFlags.length !== currentItems.length || !_visibilityCacheInitialized) {
-            const seededVisibility = new Array(currentItems.length)
-            for (let i = 0; i < seededVisibility.length; i++)
-                seededVisibility[i] = false
-            _visibilityFlags = seededVisibility
-            _visibleItemIndices = []
-            _visibleEnabledItemIndices = []
-            fromIndex = 0
-            toIndex = currentItems.length - 1
+        const rootIndex = normalizeFromIndex(expansionRootIndex)
+        if (rootIndex < 0 || startIndex !== rootIndex + 1)
+            return false
+
+        const descendantEnd = descendantRangeEndInList(currentItems, rootIndex)
+        if (descendantEnd < startIndex || endIndex > descendantEnd)
+            return false
+
+        _incrementalVisibilityRefreshCount += 1
+
+        const oldVisibleCount = _visibleItemIndices.length
+        let oldRangeVisibleCount = 0
+        for (let i = startIndex; i <= endIndex; i++) {
+            if (_visibilityFlags[i])
+                oldRangeVisibleCount += 1
         }
-
-        syncItemChildPresence(currentItems)
 
         const visibleByDepth = []
         const expandedByDepth = []
-        seedVisibilityState(currentItems, fromIndex, visibleByDepth, expandedByDepth)
+        seedVisibilityState(currentItems, rootIndex, visibleByDepth, expandedByDepth)
 
+        const ancestorIndices = ancestorIndicesForIndexInList(currentItems, rootIndex)
+        const ancestorStack = []
+        for (let i = 0; i < ancestorIndices.length; i++) {
+            const ancestorIndex = ancestorIndices[i]
+            const ancestorIndent = itemIndentLevel(currentItems[ancestorIndex])
+            ancestorStack[ancestorIndent] = ancestorIndex
+        }
+
+        const visibleChildCounts = ({})
+        const visibleDescendantCounts = ({})
+        const visibleSiblingCounts = ({})
+        const visibleSiblingIndices = ({})
+        const nextVisibleSiblingByParent = ({})
         const rangeVisible = []
         const rangeVisibleEnabled = []
+        let newRangeVisibleCount = 0
 
-        for (let i = fromIndex; i <= toIndex; i++) {
+        for (let i = rootIndex; i <= endIndex; i++) {
+            visibleChildCounts[String(i)] = 0
+            visibleDescendantCounts[String(i)] = 0
+        }
+
+        for (let i = rootIndex; i <= endIndex; i++) {
             const item = currentItems[i]
-            if (!item) {
-                _visibilityFlags[i] = false
+            if (!item)
                 continue
-            }
-
-            if (item.hierarchyList !== control)
-                item.hierarchyList = control
 
             const indent = itemIndentLevel(item)
             if (visibleByDepth.length > indent) {
                 visibleByDepth.length = indent
                 expandedByDepth.length = indent
             }
+            if (ancestorStack.length > indent)
+                ancestorStack.length = indent
+
+            const parentIndex = indent > 0 && ancestorStack.length >= indent
+                ? ancestorStack[indent - 1]
+                : -1
 
             let rowVisible = true
             if (indent > 0 && expandedByDepth.length >= indent) {
@@ -760,22 +836,124 @@ Item {
             visibleByDepth[indent] = rowVisible
             expandedByDepth[indent] = !itemCanExpandInList(currentItems, item, i) || !!item.expanded
 
-            if (rowVisible) {
-                rangeVisible.push(i)
-                if (itemCanBecomeActive(item))
-                    rangeVisibleEnabled.push(i)
+            if (i >= startIndex) {
+                if (rowVisible) {
+                    rangeVisible.push(i)
+                    newRangeVisibleCount += 1
+                    if (itemCanBecomeActive(item))
+                        rangeVisibleEnabled.push(i)
+                }
+            }
+
+            if (parentIndex >= rootIndex && parentIndex <= endIndex) {
+                if (rowVisible) {
+                    const parentKey = String(parentIndex)
+                    const siblingIndex = nextVisibleSiblingByParent[parentKey] === undefined
+                        ? 0
+                        : nextVisibleSiblingByParent[parentKey]
+                    visibleSiblingIndices[String(i)] = siblingIndex
+                    nextVisibleSiblingByParent[parentKey] = siblingIndex + 1
+                    visibleSiblingCounts[parentKey] = (visibleSiblingCounts[parentKey] || 0) + 1
+                    visibleChildCounts[parentKey] = (visibleChildCounts[parentKey] || 0) + 1
+                } else {
+                    visibleSiblingIndices[String(i)] = -1
+                }
+            }
+
+            if (rowVisible && i > rootIndex) {
+                for (let depth = 0; depth < ancestorStack.length; depth++) {
+                    const ancestorIndex = ancestorStack[depth]
+                    if (ancestorIndex === undefined || ancestorIndex < rootIndex || ancestorIndex > endIndex)
+                        continue
+                    const ancestorKey = String(ancestorIndex)
+                    visibleDescendantCounts[ancestorKey] = (visibleDescendantCounts[ancestorKey] || 0) + 1
+                }
+            }
+
+            ancestorStack[indent] = i
+            if (ancestorStack.length > indent + 1)
+                ancestorStack.length = indent + 1
+        }
+
+        _visibleItemIndices = patchIndexRange(_visibleItemIndices, startIndex, endIndex, rangeVisible)
+        _visibleEnabledItemIndices = patchIndexRange(_visibleEnabledItemIndices, startIndex, endIndex, rangeVisibleEnabled)
+        _visibleItemCountInternal = _visibleItemIndices.length
+        _itemCountInternal = currentItems.length
+        _visibilityCacheInitialized = true
+
+        const visibleDelta = newRangeVisibleCount - oldRangeVisibleCount
+        updateVisibleIndicesAfterRange(currentItems, startIndex, endIndex, visibleDelta)
+
+        for (let i = rootIndex; i <= endIndex; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+            const itemKey = String(i)
+            const visibleChildCount = visibleChildCounts[itemKey] || 0
+            const visibleDescendantCount = visibleDescendantCounts[itemKey] || 0
+            if (item.visibleChildCount !== visibleChildCount)
+                item.visibleChildCount = visibleChildCount
+            if (item.visibleDescendantCount !== visibleDescendantCount)
+                item.visibleDescendantCount = visibleDescendantCount
+        }
+
+        for (let i = rootIndex + 1; i <= endIndex; i++) {
+            const item = currentItems[i]
+            if (!item)
+                continue
+            const parentKey = item.parentItemKey === undefined || item.parentItemKey === null
+                ? ""
+                : String(item.parentItemKey)
+            const parentIndex = parentKey.length > 0 ? _keyIndexMap[parentKey] : -1
+            if (parentIndex === undefined || parentIndex < rootIndex || parentIndex > endIndex)
+                continue
+            const siblingIndex = visibleSiblingIndices[String(i)]
+            const siblingCount = visibleSiblingCounts[String(parentIndex)] || 0
+            const nextSiblingIndex = siblingIndex === undefined ? -1 : siblingIndex
+            if (item.visibleSiblingIndex !== nextSiblingIndex)
+                item.visibleSiblingIndex = nextSiblingIndex
+            if (item.visibleSiblingCount !== siblingCount)
+                item.visibleSiblingCount = siblingCount
+        }
+
+        if (visibleDelta !== 0) {
+            for (let i = 0; i < ancestorIndices.length; i++) {
+                const ancestorItem = currentItems[ancestorIndices[i]]
+                if (ancestorItem)
+                    ancestorItem.visibleDescendantCount = Math.max(0, ancestorItem.visibleDescendantCount + visibleDelta)
             }
         }
 
-        _visibleItemIndices = patchIndexRange(_visibleItemIndices, fromIndex, toIndex, rangeVisible)
-        _visibleEnabledItemIndices = patchIndexRange(_visibleEnabledItemIndices, fromIndex, toIndex, rangeVisibleEnabled)
-        _visibilityCacheInitialized = true
-        syncItemExposedMetadata(currentItems)
-
-        if (_itemCountInternal !== currentItems.length)
-            _itemCountInternal = currentItems.length
-        if (_visibleItemCountInternal !== _visibleItemIndices.length)
+        if (oldVisibleCount !== _visibleItemIndices.length)
             _visibleItemCountInternal = _visibleItemIndices.length
+
+        return true
+    }
+
+    function refreshVisibleRange(currentItems, startIndex, endIndex, expansionRootIndex) {
+        if (currentItems.length === 0) {
+            _visibilityFlags = []
+            _visibleItemIndices = []
+            _visibleEnabledItemIndices = []
+            _visibilityCacheInitialized = false
+            _itemCountInternal = 0
+            _visibleItemCountInternal = 0
+            return
+        }
+
+        if (endIndex < startIndex
+                || !_visibilityCacheInitialized
+                || _visibilityFlags.length !== currentItems.length) {
+            refreshFullInteractionProjection(currentItems)
+            return
+        }
+
+        if (expansionRootIndex >= 0
+                && refreshIncrementalVisibilityRange(currentItems, startIndex, endIndex, expansionRootIndex)) {
+            return
+        }
+
+        refreshFullInteractionProjection(currentItems)
     }
 
     function collectVisibleItems(enabledOnly) {
@@ -1628,13 +1806,17 @@ Item {
         return committed
     }
 
-    function scheduleRefreshState(fromIndex, toIndex) {
+    function scheduleRefreshState(fromIndex, toIndex, expansionRootIndex) {
         const normalizedFrom = normalizeFromIndex(fromIndex)
         const normalizedTo = normalizeToIndex(toIndex)
+        const normalizedExpansionRoot = expansionRootIndex === undefined || expansionRootIndex === null
+            ? -1
+            : normalizeToIndex(expansionRootIndex)
 
         if (_pendingRefreshFrom < 0) {
             _pendingRefreshFrom = normalizedFrom
             _pendingRefreshTo = normalizedTo
+            _pendingExpansionRootIndex = normalizedExpansionRoot
         } else {
             if (normalizedFrom < _pendingRefreshFrom)
                 _pendingRefreshFrom = normalizedFrom
@@ -1642,6 +1824,8 @@ Item {
                 _pendingRefreshTo = -1
             else if (normalizedTo > _pendingRefreshTo)
                 _pendingRefreshTo = normalizedTo
+            if (_pendingExpansionRootIndex !== normalizedExpansionRoot)
+                _pendingExpansionRootIndex = -1
         }
 
         if (_refreshScheduled)
@@ -1680,16 +1864,22 @@ Item {
 
             let fromIndex = _pendingRefreshFrom
             let toIndex = _pendingRefreshTo
+            let expansionRootIndex = _pendingExpansionRootIndex
             _pendingRefreshFrom = -1
             _pendingRefreshTo = -1
+            _pendingExpansionRootIndex = -1
 
             if (_fullRefreshRequested || fromIndex < 0) {
                 fromIndex = 0
                 toIndex = -1
+                expansionRootIndex = -1
                 _fullRefreshRequested = false
             }
 
-            refreshVisibleRange(currentItems, normalizeFromIndex(fromIndex), normalizeToIndex(toIndex))
+            refreshVisibleRange(currentItems,
+                                normalizeFromIndex(fromIndex),
+                                normalizeToIndex(toIndex),
+                                normalizeToIndex(expansionRootIndex))
 
             const activeIndex = indexOfItemInList(currentItems, activeItem)
             const activeVisible = activeIndex >= 0 && activeIndex < _visibilityFlags.length
@@ -1821,7 +2011,7 @@ Item {
             const descendantEnd = descendantRangeEndInList(currentItems, index)
             const refreshFrom = index + 1
             if (refreshFrom <= descendantEnd)
-                scheduleRefreshState(refreshFrom, descendantEnd)
+                scheduleRefreshState(refreshFrom, descendantEnd, index)
             else
                 scheduleRefreshState(index, index)
         } else {
@@ -1877,7 +2067,7 @@ Item {
             const expandedRangeEnd = descendantRangeEndInList(currentItems, expandedAncestorIndex)
             const refreshFrom = expandedAncestorIndex + 1
             if (refreshFrom <= expandedRangeEnd)
-                scheduleRefreshState(refreshFrom, expandedRangeEnd)
+                scheduleRefreshState(refreshFrom, expandedRangeEnd, expandedAncestorIndex)
         }
 
         if (!isItemVisibleInList(currentItems, item, index))

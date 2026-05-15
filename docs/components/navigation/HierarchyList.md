@@ -60,7 +60,7 @@ Primary methods:
 - `model` is empty: uses manually slotted `items` as managed rows.
 - Model input can be a flat JavaScript array, primitive array, QML `ListModel`/list-like object, or C++ `QAbstractItemModel`.
 - Model rows are projected by the C++ `HierarchyModel`, which uses `ModelSource` for arrays, list-like objects, and `QAbstractItemModel` sources.
-- Visibility, lookup maps, parent/path metadata, sibling/child/descendant counts, descendant range, drag target calculation, editable descriptor movement, and direct model write-back are projected by `HierarchyModel`.
+- Visibility, lookup maps, parent/path metadata, sibling/child/descendant counts, descendant range, drag target calculation, editable descriptor movement, and direct model write-back are projected by `HierarchyModel` for initial builds and source-shape changes.
 - Model rows still need explicit depth data (`indentLevel` first, then `depthRole`) unless they are top-level primitives.
 - Label fallback order for object rows is `labelRole`, `text`, `title`, `name`, `display`, then `edit`.
 - `QAbstractItemModel` changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate the C++ model projection and rebuild generated rows.
@@ -70,8 +70,8 @@ Primary methods:
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
 - Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.
-- Managed rows are enriched with item metadata on every refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
-- Visibility is computed from ancestor expansion state and cached incrementally.
+- Managed rows are enriched with item metadata on refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
+- Visibility is computed from ancestor expansion state and cached incrementally. Initial projection, model invalidation, role changes, delegate changes, and structural reorders use the full `HierarchyModel` projection; single-row expansion/collapse refreshes only the toggled row's descendant range, the affected visible-index tail, and visible descendant counts for its ancestors.
 - Activation can auto-expand ancestors and requests viewport alignment via `ensureVisibleRequested`.
 - User interaction can re-emit `activeChanged` for the already-active row, so host behaviors can bind actions to deliberate repeat taps/clicks without mutating selection.
 - Generated rows can consume per-node activation affordance through `activatableRole` (default `activatable`, with `selectable` fallback), and non-activatable rows are excluded from activation normalization and keyboard activation targets.

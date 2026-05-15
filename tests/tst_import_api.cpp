@@ -373,6 +373,7 @@ private slots:
     void hierarchy_direct_model_contract_loads();
     void hierarchy_direct_model_editing_contract_loads();
     void hierarchy_nested_children_indent_contract_loads();
+    void hierarchy_expansion_uses_incremental_visibility_refresh();
     void hierarchy_editable_drag_depth_contract_loads();
     void hierarchy_editable_drag_per_item_lock_contract_loads();
     void hierarchy_mobile_drag_hold_contract_loads();
@@ -1526,6 +1527,264 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("nestedContractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_expansion_uses_incremental_visibility_refresh()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 260
+
+    property int lookupAttempts: 0
+    property bool collapseReady: false
+    property bool expandReady: false
+    property bool fastRefreshContractReady: false
+    property string readinessState: ""
+    property int initialCreated: 0
+    property int createdAfterCollapse: 0
+    property int destroyedAfterCollapse: 0
+    property int createdDuringToggle: 0
+    property int destroyedDuringToggle: 0
+    property int rowVisibleChangedDuringCollapse: 0
+    property int visibleIndexChangedDuringCollapse: 0
+    property int initialFullProjectionCount: -1
+    property int initialIncrementalRefreshCount: -1
+    property int fullProjectionAfterCollapse: -1
+    property int incrementalAfterCollapse: -1
+    property int fullProjectionAfterExpand: -1
+    property int incrementalAfterExpand: -1
+    property int fullBeforeToggle: -1
+    property int incrementalBeforeToggle: -1
+
+    property var rows: [
+        { key: "root", depth: 0, label: "Root", expanded: true },
+        { key: "a", depth: 1, label: "A", expanded: true },
+        { key: "a1", depth: 2, label: "A1" },
+        { key: "a-folder", depth: 2, label: "A Folder", expanded: false },
+        { key: "a-folder-leaf", depth: 3, label: "A Folder Leaf" },
+        { key: "b", depth: 1, label: "B", expanded: true },
+        { key: "b1", depth: 2, label: "B1" },
+        { key: "tail", depth: 0, label: "Tail" }
+    ]
+
+    function counterValue(name) {
+        const value = hierarchyList[name]
+        if (value === undefined || value === null)
+            return -1
+        return Number(value)
+    }
+
+    function captureItemState(key) {
+        const item = hierarchyList.resolveByKey(key)
+        if (!item)
+            return key + ":missing"
+        return key
+            + ":visible=" + item.rowVisible
+            + ",visibleIndex=" + item.visibleIndex
+            + ",visibleChildCount=" + item.visibleChildCount
+            + ",visibleDescendantCount=" + item.visibleDescendantCount
+    }
+
+    function ensureItems() {
+        if (fastRefreshContractReady || lookupAttempts >= 80)
+            return
+
+        lookupAttempts += 1
+        hierarchyList.ensureStateUpToDate()
+        const branch = hierarchyList.resolveByKey("a")
+        const folder = hierarchyList.resolveByKey("a-folder")
+        const nestedLeaf = hierarchyList.resolveByKey("a-folder-leaf")
+        const tail = hierarchyList.resolveByKey("tail")
+        readinessState = "attempts=" + lookupAttempts
+            + ", itemCount=" + hierarchyList.itemCount
+            + ", visibleItemCount=" + hierarchyList.visibleItemCount
+            + ", full=" + counterValue("_fullProjectionRefreshCount")
+            + ", incremental=" + counterValue("_incrementalVisibilityRefreshCount")
+            + ", refreshScheduled=" + hierarchyList._refreshScheduled
+            + ", normalizeScheduled=" + hierarchyList._normalizeScheduled
+            + ", rebuildScheduled=" + hierarchyList._rebuildScheduled
+            + ", itemsDirty=" + hierarchyList._itemsDirty
+            + ", a=" + (branch !== null)
+            + ", folder=" + (folder !== null)
+            + ", nestedLeaf=" + (nestedLeaf !== null)
+            + ", tail=" + (tail !== null)
+        if (hierarchyList.itemCount !== 8
+                || !branch || !folder || !nestedLeaf || !tail
+                || hierarchyList._refreshScheduled
+                || hierarchyList._normalizeScheduled
+                || hierarchyList._rebuildScheduled
+                || hierarchyList._itemsDirty) {
+            Qt.callLater(ensureItems)
+            return
+        }
+
+        initialCreated = delegateStats.created
+        initialFullProjectionCount = counterValue("_fullProjectionRefreshCount")
+        initialIncrementalRefreshCount = counterValue("_incrementalVisibilityRefreshCount")
+        fullBeforeToggle = initialFullProjectionCount
+        incrementalBeforeToggle = initialIncrementalRefreshCount
+        delegateStats.created = 0
+        delegateStats.destroyed = 0
+        delegateStats.rowVisibleChanged = 0
+        delegateStats.visibleIndexChanged = 0
+        branch.expanded = false
+        Qt.callLater(captureCollapse)
+    }
+
+    function captureCollapse() {
+        hierarchyList.ensureStateUpToDate()
+        fullProjectionAfterCollapse = counterValue("_fullProjectionRefreshCount")
+        incrementalAfterCollapse = counterValue("_incrementalVisibilityRefreshCount")
+        createdAfterCollapse = delegateStats.created
+        destroyedAfterCollapse = delegateStats.destroyed
+        rowVisibleChangedDuringCollapse = delegateStats.rowVisibleChanged
+        visibleIndexChangedDuringCollapse = delegateStats.visibleIndexChanged
+
+        const rootItem = hierarchyList.resolveByKey("root")
+        const branch = hierarchyList.resolveByKey("a")
+        const a1 = hierarchyList.resolveByKey("a1")
+        const folder = hierarchyList.resolveByKey("a-folder")
+        const nestedLeaf = hierarchyList.resolveByKey("a-folder-leaf")
+        const b = hierarchyList.resolveByKey("b")
+        const b1 = hierarchyList.resolveByKey("b1")
+        const tail = hierarchyList.resolveByKey("tail")
+
+        collapseReady =
+            initialCreated === 8
+            && initialFullProjectionCount >= 1
+            && fullProjectionAfterCollapse === fullBeforeToggle
+            && incrementalAfterCollapse > incrementalBeforeToggle
+            && createdAfterCollapse === 0
+            && destroyedAfterCollapse === 0
+            && rowVisibleChangedDuringCollapse === 2
+            && visibleIndexChangedDuringCollapse >= 5
+            && hierarchyList.visibleItemCount === 5
+            && rootItem.visibleDescendantCount === 3
+            && branch.visibleDescendantCount === 0
+            && !a1.rowVisible
+            && !folder.rowVisible
+            && !nestedLeaf.rowVisible
+            && b.rowVisible
+            && b.visibleIndex === 2
+            && b1.visibleIndex === 3
+            && tail.visibleIndex === 4
+
+        if (!collapseReady) {
+            readinessState = "collapse failed: "
+                + "initialCreated=" + initialCreated
+                + ", fullBefore=" + fullBeforeToggle
+                + ", fullAfter=" + fullProjectionAfterCollapse
+                + ", incrementalBefore=" + incrementalBeforeToggle
+                + ", incrementalAfter=" + incrementalAfterCollapse
+                + ", created=" + createdAfterCollapse
+                + ", destroyed=" + destroyedAfterCollapse
+                + ", rowVisibleChanged=" + rowVisibleChangedDuringCollapse
+                + ", visibleIndexChanged=" + visibleIndexChangedDuringCollapse
+                + ", root=" + captureItemState("root")
+                + ", a=" + captureItemState("a")
+                + ", a1=" + captureItemState("a1")
+                + ", folder=" + captureItemState("a-folder")
+                + ", nestedLeaf=" + captureItemState("a-folder-leaf")
+                + ", b=" + captureItemState("b")
+                + ", b1=" + captureItemState("b1")
+                + ", tail=" + captureItemState("tail")
+            return
+        }
+
+        fullBeforeToggle = fullProjectionAfterCollapse
+        incrementalBeforeToggle = incrementalAfterCollapse
+        delegateStats.created = 0
+        delegateStats.destroyed = 0
+        const branchForExpand = hierarchyList.resolveByKey("a")
+        branchForExpand.expanded = true
+        Qt.callLater(captureExpand)
+    }
+
+    function captureExpand() {
+        hierarchyList.ensureStateUpToDate()
+        fullProjectionAfterExpand = counterValue("_fullProjectionRefreshCount")
+        incrementalAfterExpand = counterValue("_incrementalVisibilityRefreshCount")
+        createdDuringToggle = delegateStats.created
+        destroyedDuringToggle = delegateStats.destroyed
+
+        const rootItem = hierarchyList.resolveByKey("root")
+        const branch = hierarchyList.resolveByKey("a")
+        const a1 = hierarchyList.resolveByKey("a1")
+        const folder = hierarchyList.resolveByKey("a-folder")
+        const nestedLeaf = hierarchyList.resolveByKey("a-folder-leaf")
+        const b = hierarchyList.resolveByKey("b")
+        const b1 = hierarchyList.resolveByKey("b1")
+        const tail = hierarchyList.resolveByKey("tail")
+
+        expandReady =
+            fullProjectionAfterExpand === fullBeforeToggle
+            && incrementalAfterExpand > incrementalBeforeToggle
+            && createdDuringToggle === 0
+            && destroyedDuringToggle === 0
+            && hierarchyList.visibleItemCount === 7
+            && rootItem.visibleDescendantCount === 5
+            && branch.visibleDescendantCount === 2
+            && a1.rowVisible
+            && folder.rowVisible
+            && !nestedLeaf.rowVisible
+            && b.visibleIndex === 4
+            && b1.visibleIndex === 5
+            && tail.visibleIndex === 6
+
+        readinessState = "collapseReady=" + collapseReady
+            + ", expandReady=" + expandReady
+            + ", fullCollapse=" + fullProjectionAfterCollapse
+            + ", fullExpand=" + fullProjectionAfterExpand
+            + ", incrementalCollapse=" + incrementalAfterCollapse
+            + ", incrementalExpand=" + incrementalAfterExpand
+            + ", root=" + captureItemState("root")
+            + ", a=" + captureItemState("a")
+            + ", folder=" + captureItemState("a-folder")
+            + ", nestedLeaf=" + captureItemState("a-folder-leaf")
+            + ", b=" + captureItemState("b")
+            + ", b1=" + captureItemState("b1")
+            + ", tail=" + captureItemState("tail")
+        fastRefreshContractReady = collapseReady && expandReady
+    }
+
+    QtObject {
+        id: delegateStats
+        property int created: 0
+        property int destroyed: 0
+        property int rowVisibleChanged: 0
+        property int visibleIndexChanged: 0
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        width: 260
+        model: root.rows
+        itemDelegate: Component {
+            LV.HierarchyItem {
+                Component.onCompleted: delegateStats.created += 1
+                Component.onDestruction: delegateStats.destroyed += 1
+                onRowVisibleChanged: delegateStats.rowVisibleChanged += 1
+                onVisibleIndexChanged: delegateStats.visibleIndexChanged += 1
+            }
+        }
+    }
+
+    Component.onCompleted: Qt.callLater(root.ensureItems)
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("fastRefreshContractReady").toBool(),
+                 qPrintable(root->property("readinessState").toString()));
 }
 
 void ImportApiTests::hierarchy_editable_drag_depth_contract_loads()
