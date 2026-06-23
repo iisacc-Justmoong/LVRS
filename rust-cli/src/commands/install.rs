@@ -1454,7 +1454,9 @@ fn resolve_project_root_from_install_prefix(install_prefix: &Path) -> Result<Opt
     let metadata_path = source_install_dir.join(INSTALL_SOURCE_INFO_FILE);
 
     if let Some(path) = parse_installed_source_project_root(&metadata_path)? {
-        if let Ok(resolved) = validate_project_root_candidate(path, "installed source metadata") {
+        if let Ok(resolved) =
+            validate_project_root_candidate_inner(path, "installed source metadata", false)
+        {
             return Ok(Some(resolved));
         }
     }
@@ -1499,6 +1501,14 @@ fn resolve_root_from_env() -> Option<PathBuf> {
 }
 
 fn validate_project_root_candidate(candidate: PathBuf, source: &str) -> Result<PathBuf> {
+    validate_project_root_candidate_inner(candidate, source, true)
+}
+
+fn validate_project_root_candidate_inner(
+    candidate: PathBuf,
+    source: &str,
+    allow_install_prefix: bool,
+) -> Result<PathBuf> {
     let normalized = if candidate.is_absolute() {
         candidate
     } else {
@@ -1513,6 +1523,12 @@ fn validate_project_root_candidate(candidate: PathBuf, source: &str) -> Result<P
 
     if let Some(path) = find_project_root(&normalized) {
         return Ok(path);
+    }
+
+    if allow_install_prefix {
+        if let Some(path) = resolve_project_root_from_install_prefix(&normalized)? {
+            return Ok(path);
+        }
     }
 
     if let Some(path) = relocate_project_root_candidate(&normalized) {
@@ -2363,6 +2379,30 @@ mod tests {
 
         let resolved = validate_project_root_candidate(stale_root, "test")?;
         assert_eq!(resolved, relocated_root);
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn validate_project_root_candidate_accepts_installed_prefix_from_environment() -> Result<()> {
+        let root = temp_test_dir("env-prefix");
+        let checkout = root.join("Workspace").join("LVRS");
+        let install_prefix = root.join("prefix");
+        let snapshot = install_prefix.join("src").join("LVRS");
+
+        create_project_root(&checkout)?;
+        create_project_root(&snapshot)?;
+        fs::write(
+            snapshot.join(INSTALL_SOURCE_INFO_FILE),
+            format!(
+                "LVRS source snapshot\nproject_root={}\n",
+                checkout.display()
+            ),
+        )?;
+
+        let resolved = validate_project_root_candidate(install_prefix, "environment")?;
+        assert_eq!(resolved, checkout);
 
         remove_path(&root)?;
         Ok(())
