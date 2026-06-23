@@ -30,6 +30,7 @@ Content:
 - `keyVisible` (boolean, default `false`)
 - `keyPlaceholder` (default `""`)
 - `iconName`, `iconSource`
+- `showIconSlot` (boolean, default `true`)
 - `showChevron` (default `false`)
 - `hasChildItems` (default `false`)
 - `expanded`
@@ -40,7 +41,7 @@ Layout and visuals:
 - `itemWidth`, `itemHeight`
 - `iconSize`, `chevronSize`
 - `iconPlaceholderColor`, `chevronColor`
-- resolved: `resolvedIconSource`, `resolvedShortcutText`, `resolvedSelectionDirection`, `resolvedChevronRotation`, `resolvedBackgroundColor`
+- resolved: `effectiveShowIconSlot`, `resolvedIconSlotWidth`, `resolvedIconLabelGap`, `resolvedIconSource`, `resolvedShortcutText`, `resolvedSelectionDirection`, `resolvedChevronRotation`, `resolvedBackgroundColor`
 
 ## Behavior Contract
 
@@ -49,6 +50,7 @@ Layout and visuals:
 - `implicitWidth` expands beyond `itemWidth` when icon/label/key/chevron content requires more space.
 - Natural label and shortcut widths are measured independently from the displayed elided text, so constrained rendering does not feed back into `implicitWidth`.
 - Row layout is responsive under constrained widths: label and shortcut text elide within the row, trailing metadata stays inside the item frame, and the flexible spacer never resolves to a negative width.
+- `showIconSlot: false` removes the left icon slot itself, not just the icon image. The row does not reserve icon width or the icon-to-label gap, and the label starts at the row origin.
 - Shortcut text uses the `description` typography token so trailing key hints stay visually secondary to the label.
 - If icon source cannot be resolved, a compact circular accent placeholder is shown.
 - Key text is hidden when `keyVisible` is `false`.
@@ -63,6 +65,7 @@ import LVRS 1.0 as LV
 
 LV.MenuItem {
     label: "Open Recent"
+    showIconSlot: false
     key: "Cmd+O"
     keyVisible: true
     hasChildItems: true

@@ -31,6 +31,7 @@ AbstractButton {
     property var selectionDirection: "auto"
     property int itemWidth: Theme.scaleMetric(161)
     property int itemHeight: Theme.scaleMetric(16)
+    property bool showIconSlot: true
     property int iconSize: Theme.scaleMetric(16)
     property int chevronSize: Theme.scaleMetric(16)
     property string iconName: ""
@@ -48,6 +49,9 @@ AbstractButton {
 
     readonly property bool isSelected: state === selectedState
     readonly property bool isInactive: state === inactiveState
+    readonly property bool effectiveShowIconSlot: showIconSlot
+    readonly property int resolvedIconSlotWidth: effectiveShowIconSlot ? iconSize : 0
+    readonly property int resolvedIconLabelGap: effectiveShowIconSlot ? Theme.gap8 : 0
     readonly property string resolvedIconName: {
         const rawName = iconName === undefined || iconName === null ? "" : String(iconName)
         return rawName.trim()
@@ -149,7 +153,11 @@ AbstractButton {
         readonly property int chevronLayoutWidth: control.effectiveShowChevron ? control.chevronSize : 0
         readonly property int shortcutBudgetWidth: control.keyVisible
             ? Math.max(0,
-                       Math.round((layoutWidth - control.iconSize - chevronLayoutWidth - (Theme.gap8 * 3)) * 0.45))
+                       Math.round((layoutWidth
+                                   - control.resolvedIconSlotWidth
+                                   - control.resolvedIconLabelGap
+                                   - chevronLayoutWidth
+                                   - (Theme.gap8 * 2)) * 0.45))
             : 0
         readonly property int resolvedShortcutWidth: control.keyVisible
             ? Math.max(0, Math.min(shortcutNaturalWidth, shortcutBudgetWidth))
@@ -159,13 +167,13 @@ AbstractButton {
         readonly property int resolvedLabelWidth: Math.max(
                                                       0,
                                                       Math.min(control.labelNaturalWidth,
-                                                               Math.round(layoutWidth)
-                                                               - control.iconSize
-                                                               - Theme.gap8
-                                                               - (resolvedTrailingWidth > 0
+                                                              Math.round(layoutWidth)
+                                                              - control.resolvedIconSlotWidth
+                                                              - control.resolvedIconLabelGap
+                                                              - (resolvedTrailingWidth > 0
                                                                       ? Theme.gap8 + resolvedTrailingWidth
                                                                       : 0)))
-        readonly property real labelX: control.iconSize + Theme.gap8
+        readonly property real labelX: control.resolvedIconSlotWidth + control.resolvedIconLabelGap
         readonly property real labelRight: labelX + resolvedLabelWidth
         readonly property real trailingX: layoutWidth - resolvedTrailingWidth
         readonly property real spacerX: labelRight
@@ -173,28 +181,29 @@ AbstractButton {
 
         implicitWidth: Math.max(
                            control.itemWidth - control.leftPadding - control.rightPadding,
-                           control.iconSize
-                           + Theme.gap8
+                           control.resolvedIconSlotWidth
+                           + control.resolvedIconLabelGap
                            + control.labelNaturalWidth
                            + (shortcutNaturalWidth > 0 || chevronLayoutWidth > 0
                                   ? Theme.gap8 + shortcutNaturalWidth + (shortcutNaturalWidth > 0 && chevronLayoutWidth > 0 ? Theme.gap8 : 0) + chevronLayoutWidth
                                   : 0))
         implicitHeight: Math.max(
-                            control.iconSize,
+                            control.resolvedIconSlotWidth,
                             labelNode.implicitHeight,
                             shortcutLabel.implicitHeight,
                             chevronLayoutWidth)
 
         Item {
             objectName: "menuItem_iconSlot"
+            visible: control.effectiveShowIconSlot
             x: 0
             y: Math.round((contentRoot.height - height) * 0.5)
-            width: control.iconSize
-            height: control.iconSize
+            width: control.resolvedIconSlotWidth
+            height: control.effectiveShowIconSlot ? control.iconSize : 0
 
             Image {
                 id: iconImage
-                visible: control.resolvedIconSource.toString().length > 0
+                visible: control.effectiveShowIconSlot && control.resolvedIconSource.toString().length > 0
                 anchors.centerIn: parent
                 width: control.iconSize
                 height: control.iconSize
@@ -208,7 +217,7 @@ AbstractButton {
 
             Item {
                 anchors.fill: parent
-                visible: !iconImage.visible
+                visible: control.effectiveShowIconSlot && !iconImage.visible
 
                 Rectangle {
                     width: control.iconSize
@@ -311,6 +320,7 @@ AbstractButton {
 // import LVRS 1.0 as LV
 // LV.MenuItem {
 //     iconName: "iconname"
+//     showIconSlot: true
 //     state: selectedState
 //     label: "Label"
 //     keyVisible: true

@@ -411,8 +411,10 @@ private slots:
     void modal_content_action_contract_loads();
     void alert_action_button_padding_scopes_to_alert();
     void menu_item_key_and_chevron_contract_loads();
+    void menu_item_icon_slot_switch_contract_loads();
     void context_menu_item_action_contract_loads();
     void context_menu_visual_contract_loads();
+    void context_menu_icon_slot_switch_contract_loads();
     void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
     void model_component_delegate_contract_loads();
@@ -5209,6 +5211,72 @@ Item {
     QVERIFY(!noTrailingGroup->property("visible").toBool());
 }
 
+void ImportApiTests::menu_item_icon_slot_switch_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    LV.MenuItem {
+        id: defaultSlotItem
+        objectName: "defaultSlotItem"
+        itemWidth: 0
+        label: "Same Label"
+    }
+
+    LV.MenuItem {
+        id: hiddenSlotItem
+        objectName: "hiddenSlotItem"
+        itemWidth: 0
+        label: "Same Label"
+        showIconSlot: false
+    }
+
+    property real expectedIconSlotDelta: defaultSlotItem.iconSize + LV.Theme.gap8
+    property bool iconSlotSwitchContract:
+        defaultSlotItem.showIconSlot === true
+        && defaultSlotItem.effectiveShowIconSlot === true
+        && hiddenSlotItem.showIconSlot === false
+        && hiddenSlotItem.effectiveShowIconSlot === false
+        && Math.abs((defaultSlotItem.implicitWidth - hiddenSlotItem.implicitWidth) - expectedIconSlotDelta) < 0.01
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("iconSlotSwitchContract").toBool());
+
+    QObject *defaultSlotItem = root->findChild<QObject *>(QStringLiteral("defaultSlotItem"));
+    QObject *hiddenSlotItem = root->findChild<QObject *>(QStringLiteral("hiddenSlotItem"));
+    QVERIFY(defaultSlotItem);
+    QVERIFY(hiddenSlotItem);
+
+    auto *defaultIconSlot =
+        qobject_cast<QQuickItem *>(defaultSlotItem->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
+    auto *hiddenIconSlot =
+        qobject_cast<QQuickItem *>(hiddenSlotItem->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
+    auto *defaultLabel =
+        qobject_cast<QQuickItem *>(defaultSlotItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
+    auto *hiddenLabel =
+        qobject_cast<QQuickItem *>(hiddenSlotItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
+
+    QVERIFY(defaultIconSlot);
+    QVERIFY(hiddenIconSlot);
+    QVERIFY(defaultLabel);
+    QVERIFY(hiddenLabel);
+
+    QVERIFY(defaultIconSlot->property("visible").toBool());
+    QVERIFY(!hiddenIconSlot->property("visible").toBool());
+    QCOMPARE(defaultIconSlot->width(), defaultSlotItem->property("iconSize").toDouble());
+    QCOMPARE(hiddenIconSlot->width(), 0.0);
+    QVERIFY(defaultLabel->x() > hiddenLabel->x());
+    QCOMPARE(hiddenLabel->x(), 0.0);
+}
+
 void ImportApiTests::context_menu_item_action_contract_loads()
 {
     QQmlEngine engine;
@@ -5359,6 +5427,81 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("visualContract").toBool());
+}
+
+void ImportApiTests::context_menu_icon_slot_switch_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 320
+    height: 120
+
+    Item {
+        id: delegateHost
+        objectName: "delegateHost"
+        width: 240
+        height: 80
+    }
+
+    LV.ContextMenu {
+        id: menu
+        visible: false
+        itemWidth: 0
+        showIconSlot: false
+        items: [
+            { label: "No Slot", iconName: "projectStructure" },
+            { label: "Override Slot", iconName: "projectStructure", showIconSlot: true }
+        ]
+    }
+
+    property var noSlotDelegate: null
+    property var overrideSlotDelegate: null
+
+    Component.onCompleted: {
+        noSlotDelegate = menu.createEntryDelegate(delegateHost, menu.entryDelegateItems[0])
+        noSlotDelegate.objectName = "contextMenuNoSlotDelegate"
+        overrideSlotDelegate = menu.createEntryDelegate(delegateHost, menu.entryDelegateItems[1])
+        overrideSlotDelegate.objectName = "contextMenuOverrideSlotDelegate"
+    }
+
+    property bool iconSlotSwitchContract:
+        menu.showIconSlot === false
+        && menu.itemShowIconSlot(menu.entryAt(0)) === false
+        && menu.itemShowIconSlot(menu.entryAt(1)) === true
+        && menu.entryDelegateItems[0].showIconSlot === false
+        && menu.entryDelegateItems[1].showIconSlot === true
+        && noSlotDelegate !== null
+        && overrideSlotDelegate !== null
+        && noSlotDelegate.showIconSlot === false
+        && overrideSlotDelegate.showIconSlot === true
+        && overrideSlotDelegate.implicitWidth > noSlotDelegate.implicitWidth
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY(root->property("iconSlotSwitchContract").toBool());
+
+    QObject *noSlotDelegate = root->findChild<QObject *>(QStringLiteral("contextMenuNoSlotDelegate"));
+    QObject *overrideSlotDelegate = root->findChild<QObject *>(QStringLiteral("contextMenuOverrideSlotDelegate"));
+    QVERIFY(noSlotDelegate);
+    QVERIFY(overrideSlotDelegate);
+
+    auto *noSlotIcon =
+        qobject_cast<QQuickItem *>(noSlotDelegate->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
+    auto *overrideSlotIcon =
+        qobject_cast<QQuickItem *>(overrideSlotDelegate->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
+    QVERIFY(noSlotIcon);
+    QVERIFY(overrideSlotIcon);
+    QVERIFY(!noSlotIcon->isVisible());
+    QVERIFY(overrideSlotIcon->isVisible());
 }
 
 void ImportApiTests::context_menu_width_expansion_contract_loads()

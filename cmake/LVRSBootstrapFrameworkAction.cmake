@@ -441,14 +441,22 @@ endif()
 set(_lvrs_build_cmd
     "${CMAKE_COMMAND}"
     --build "${LVRS_BOOTSTRAP_BINARY_DIR}"
+    --parallel 1
 )
 if(NOT LVRS_BOOTSTRAP_BUILD_TYPE STREQUAL "")
     list(APPEND _lvrs_build_cmd --config "${LVRS_BOOTSTRAP_BUILD_TYPE}")
 endif()
+set(_lvrs_build_env_cmd
+    "${CMAKE_COMMAND}"
+    -E env
+    "MAKEFLAGS="
+    "MFLAGS="
+    "CMAKE_BUILD_PARALLEL_LEVEL="
+)
 
 message(STATUS "LVRS framework bootstrap: build default targets for '${LVRS_BOOTSTRAP_PLATFORM}'")
 execute_process(
-    COMMAND ${_lvrs_build_cmd}
+    COMMAND ${_lvrs_build_env_cmd} ${_lvrs_build_cmd}
     RESULT_VARIABLE _lvrs_build_result
     COMMAND_ECHO STDOUT
 )

@@ -9,6 +9,7 @@ Controls.Popup {
     property var items: []
     property int itemWidth: Theme.scaleMetric(161)
     property int itemSpacing: Theme.gap2
+    property bool showIconSlot: true
     property int selectedIndex: -1
     property bool autoCloseOnTrigger: true
     property bool dismissOnGlobalPress: true
@@ -104,6 +105,7 @@ Controls.Popup {
             label: modelData.label || ""
             key: modelData.shortcut || ""
             keyVisible: modelData.keyVisible === true
+            showIconSlot: modelData.showIconSlot !== false
             iconName: modelData.iconName || ""
             iconSource: modelData.iconSource || ""
             showChevron: modelData.showChevron === true
@@ -317,6 +319,16 @@ Controls.Popup {
         if (entry.showShortcut !== undefined)
             return !!entry.showShortcut
         return itemShortcut(entry).trim().length > 0
+    }
+
+    function itemShowIconSlot(entry) {
+        if (!entry || typeof entry !== "object")
+            return control.showIconSlot
+        if (entry.showIconSlot !== undefined)
+            return !!entry.showIconSlot
+        if (entry.iconSlotVisible !== undefined)
+            return !!entry.iconSlotVisible
+        return control.showIconSlot
     }
 
     function itemIconName(entry) {
@@ -580,6 +592,7 @@ Controls.Popup {
                 "label": itemLabel(entry),
                 "shortcut": itemShortcut(entry),
                 "keyVisible": itemKeyVisible(entry),
+                "showIconSlot": itemShowIconSlot(entry),
                 "iconName": itemIconName(entry),
                 "iconSource": itemIconSource(entry),
                 "showChevron": itemShowChevron(entry),
@@ -787,6 +800,7 @@ Controls.Popup {
                         label: control.itemLabel(probeDelegate.entry)
                         key: control.itemShortcut(probeDelegate.entry)
                         keyVisible: control.itemKeyVisible(probeDelegate.entry)
+                        showIconSlot: control.itemShowIconSlot(probeDelegate.entry)
                         iconName: control.itemIconName(probeDelegate.entry)
                         iconSource: control.itemIconSource(probeDelegate.entry)
                         showChevron: control.itemShowChevron(probeDelegate.entry)
@@ -852,10 +866,12 @@ Controls.Popup {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.ContextMenu {
+//     showIconSlot: false
 //     items: [
 //         {
 //             id: "openRecent",
 //             label: "Open Recent",
+//             showIconSlot: true,
 //             eventName: "menu.openRecent",
 //             eventPayload: ({ source: "context-menu" }),
 //             onTriggered: function(ctx) { console.log(ctx.eventName) },

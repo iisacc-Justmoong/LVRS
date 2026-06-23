@@ -32,6 +32,7 @@ Visual/layout:
 
 - `itemWidth`, `itemSpacing` (default `Theme.gap2`)
 - `resolvedItemWidth` (readonly)
+- `showIconSlot` (default `true`; forwarded to default `MenuItem` rows)
 - `itemDelegate`: optional component used for non-divider entries.
 - `dividerDelegate`: optional component used for divider entries.
 - `menuColor`, `menuOpacity`, `resolvedMenuColor` (default surface `Theme.panelBackground06`)
@@ -58,6 +59,7 @@ Supported object fields include:
 - canonical compact item fields: `icon`, `label`, `keyVisible`, `key`
 - label/text: `label`, `text`, `title`
 - icon: `iconName`/`icon`, `iconSource`/`source`
+- icon slot visibility: `showIconSlot` or `iconSlotVisible`
 - key text: `key`, `shortcut`, `keyText`
 - key visibility: `keyVisible`, `shortcutVisible`, `showShortcut`
 - state: `enabled`, `state`, `selected`
@@ -71,12 +73,13 @@ Callback receives context `{ index, item, menu, eventName, payload, emit(), clos
 
 Chevron render condition is `showChevron && hasChildItems` (resolved from entry fields).
 Shortcut visibility defaults to `true` only when shortcut text exists; entries without `key`/`shortcut`/`keyText` do not reserve trailing shortcut space unless explicitly requested.
+Icon slot visibility defaults to the menu-level `showIconSlot` value. Individual entries can override it with `showIconSlot` or the compatibility alias `iconSlotVisible`.
 
 ## Delegate Contract
 
 - Each non-divider entry instantiates `itemDelegate`; each divider entry instantiates `dividerDelegate`.
 - Both delegates receive one injected `modelData` object and should declare `property var modelData`.
-- `modelData` includes `index`, `entry`, `divider`, `label`, `shortcut`, `keyVisible`, `iconName`, `iconSource`, `showChevron`, `hasChildItems`, `expanded`, `selectionDirection`, `enabled`, `state`, and `trigger()`.
+- `modelData` includes `index`, `entry`, `divider`, `label`, `shortcut`, `keyVisible`, `showIconSlot`, `iconName`, `iconSource`, `showChevron`, `hasChildItems`, `expanded`, `selectionDirection`, `enabled`, `state`, and `trigger()`.
 - `modelData.trigger()` invokes `triggerEntry(index)`, emits normalized menu signals, runs callbacks/events, and applies close policy.
 - Custom delegates are responsible for wiring their own click/tap action to `modelData.trigger()`.
 
@@ -97,6 +100,7 @@ Shortcut visibility defaults to `true` only when shortcut text exists; entries w
 - Delegate `MenuItem` rows remain responsive inside `resolvedItemWidth`, so constrained menus do not push label/shortcut/chevron content outside the popup bounds or collapse the internal spacer into negative geometry.
 - Width probing uses each row's unconstrained natural content width, so visible text elision does not feed back into popup sizing.
 - Width probing uses the default `MenuItem` metric contract. Custom delegates that need wider chrome should set `itemWidth` or explicit popup `width`.
+- Width probing forwards the same icon-slot visibility as rendered delegates, so `showIconSlot: false` reduces the content-driven menu width instead of leaving a hidden leading gutter.
 
 ## Visual Contract
 
@@ -111,10 +115,11 @@ import LVRS 1.0 as LV
 
 LV.ContextMenu {
     id: menu
+    showIconSlot: false
     items: [
         { label: "Copy", eventName: "menu.copy", showChevron: false },
         { type: "divider" },
-        { label: "Inspect", keepOpen: true, events: ["menu.inspect"] }
+        { label: "Inspect", showIconSlot: true, keepOpen: true, events: ["menu.inspect"] }
     ]
 }
 ```

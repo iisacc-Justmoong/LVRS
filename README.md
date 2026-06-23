@@ -217,6 +217,7 @@ For framework-only multi-platform install, LVRS also generates:
 - `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/framework/...`, build `LVRSCore`, and install each platform package into `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>` (default: `<build>/lvrs-install/<platform>`).
+Nested framework builds run with `--parallel 1` and clear inherited Make/jobserver parallel environment (`MAKEFLAGS`, `MFLAGS`, and `CMAKE_BUILD_PARALLEL_LEVEL`) before invoking the per-platform build.
 Default framework bootstrap platform set is all runtime platforms unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is set.
 Any platform without a matching Qt kit is skipped with a configure-time status message.
 Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.

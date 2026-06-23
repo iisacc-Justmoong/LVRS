@@ -254,6 +254,7 @@ Framework-only bootstrap targets are generated at project root:
 - `bootstrap_lvrs_wasm`
 - `bootstrap_lvrs_all`
 `bootstrap_lvrs_all` builds the selected framework bootstrap platform set under `<build>/lvrs-bootstrap/framework/<platform>`, builds `LVRSCore`, and installs to `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>`.
+The nested per-platform build runs with `--parallel 1` and clears inherited `MAKEFLAGS`, `MFLAGS`, and `CMAKE_BUILD_PARALLEL_LEVEL` so an outer Make jobserver cannot leak into the inner framework build.
 Default framework bootstrap platform set is all runtime platforms (`macos;linux;windows;ios;android;wasm`) unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is provided.
 Any platform without a discoverable Qt kit is skipped with a configure-time status message.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.

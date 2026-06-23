@@ -42,6 +42,7 @@ FocusScope {
     readonly property alias bytesTotal: document.totalByteCount
     readonly property alias progress: document.loadProgress
     readonly property alias error: document.lastError
+    readonly property int documentRevision: privateState.documentRevision
 
     readonly property int textFormat: editor.textFormat
     property string placeholderText: ""
@@ -108,6 +109,7 @@ FocusScope {
     signal syncFinished(string path)
     signal syncFailed(string path, string error)
     signal textEdited(string text)
+    signal documentEdited(string documentText, int documentRevision)
 
     implicitWidth: Math.max(Theme.inputMinWidth, editor.implicitWidth + insetHorizontal * 2)
     implicitHeight: control.resolvedEditorHeight
@@ -138,6 +140,8 @@ FocusScope {
     QtObject {
         id: privateState
         property bool completed: false
+        property bool composingDocumentEditPending: false
+        property int documentRevision: 0
         property bool syncingEditorFromDocument: false
         property bool syncingDocumentFromEditor: false
 
@@ -147,6 +151,36 @@ FocusScope {
             syncingEditorFromDocument = true
             editor.text = document.text
             syncingEditorFromDocument = false
+        }
+
+        function syncDocumentFromEditor(documentText) {
+            syncingDocumentFromEditor = true
+            document.text = documentText
+            syncingDocumentFromEditor = false
+        }
+
+        function publishDocumentEdit(documentText) {
+            if (editor.inputMethodComposing) {
+                composingDocumentEditPending = true
+                return
+            }
+
+            composingDocumentEditPending = false
+            documentRevision += 1
+            control.documentEdited(documentText, documentRevision)
+        }
+
+        function publishPendingComposedDocumentEdit() {
+            if (!composingDocumentEditPending
+                    || editor.inputMethodComposing
+                    || syncingEditorFromDocument
+                    || control.reading)
+                return
+
+            const documentText = editor.text
+            if (document.text !== documentText)
+                syncDocumentFromEditor(documentText)
+            publishDocumentEdit(documentText)
         }
     }
 
@@ -320,9 +354,17 @@ FocusScope {
                     control.textEdited(text)
                     if (privateState.syncingEditorFromDocument || control.reading)
                         return
-                    privateState.syncingDocumentFromEditor = true
-                    document.text = text
-                    privateState.syncingDocumentFromEditor = false
+                    if (editor.inputMethodComposing) {
+                        privateState.composingDocumentEditPending = true
+                        return
+                    }
+                    privateState.syncDocumentFromEditor(text)
+                    privateState.publishDocumentEdit(text)
+                }
+
+                onInputMethodComposingChanged: {
+                    if (!inputMethodComposing)
+                        Qt.callLater(privateState.publishPendingComposedDocumentEdit)
                 }
             }
         }

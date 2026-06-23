@@ -9,6 +9,7 @@ Location: `qml/components/control/input/TextEditor.qml`
 - Bind an editable rich text surface directly to a filesystem path.
 - Load UTF-8 HTML/rich text through the internal C++ document engine and synchronize edits through atomic write-through semantics.
 - Use the native `TextEdit` editor for rich text rendering, wrapping, IME, selection, cursor movement, clipboard commands, and platform text gestures.
+- Native Return/Enter handling leaves the caret on the inserted line; wrappers should not replace the document in a way that clamps the cursor back to the previous line.
 - Keep file I/O, read progress, dirty state, and sync errors out of the visual editor.
 - Leave plain text editing to `CodeEditor` or simpler input components.
 
@@ -34,6 +35,7 @@ Read/sync state:
 - `bytesRead`, `bytesTotal`, `progress`: byte-level read progress.
 - `error`: most recent read/sync error.
 - `empty`: true when the editor contains no rich text characters.
+- `documentRevision`: monotonically increases for editor-originated document edits. File reads do not advance it.
 
 Methods:
 
@@ -48,6 +50,7 @@ Signals:
 - `syncFinished(path)`
 - `syncFailed(path, error)`
 - `textEdited(text)`
+- `documentEdited(documentText, documentRevision)`
 
 ## API Usage Manual
 
@@ -126,11 +129,15 @@ LV.TextEditor {
 ### Realtime Output
 
 There is no public save API. Text edits are synchronized back to `filePath` automatically. The editor emits `syncFinished(path)` after a successful write-through step and `syncFailed(path, error)` if the filesystem write fails.
+For consumers that need the exact edited document in the same event turn as the native editor change, use `documentEdited(documentText, documentRevision)`. The signal carries the latest rich document payload and a monotonically increasing revision so downstream code can treat that pair as authoritative instead of rereading a binding that may settle later in the turn. While native input method composition is active, the signal and file write-through are deferred until the committed document payload is visible on the editor surface.
 
 ```qml
 LV.TextEditor {
     id: editor
     filePath: "/tmp/notes.html"
+    onDocumentEdited: function(documentText, documentRevision) {
+        console.log("Document revision", documentRevision, documentText.length)
+    }
     onSyncFinished: console.log("Synchronized", path)
     onSyncFailed: console.warn("Sync failed", path, error)
 }
@@ -224,6 +231,8 @@ Layout/visual:
 - `read()` opens UTF-8 rich text/HTML from the required `filePath`, clears `dirty`, clears `error`, and schedules chunked loading.
 - Reading a nonexistent path connects an empty document to that path without creating the file. The first edit creates the file through synchronization if the parent directory is writable.
 - Local edits schedule automatic write-through synchronization to `filePath` through `QSaveFile`; successful sync clears `dirty`, clears `error`, and emits `syncFinished`.
+- Local edits emit `documentEdited(documentText, documentRevision)` after the internal document model receives the latest editor payload. `documentText` is the authoritative rich document text for that edit turn, and `documentRevision` increases once per emitted editor-originated edit.
+- During input method composition, local edit publication is held until composition settles. The internal document model, file sync, and `documentEdited(...)` then receive the committed document payload together, avoiding partial preedit text such as a Korean syllable that has not been committed yet.
 - Synchronization is skipped while `reading` is true so a partial document is not written accidentally.
 - The edit surface is a native `TextEdit` with `textFormat: TextEdit.RichText`, `wrapMode: TextEdit.Wrap`, mouse selection, persistent selection, IME handling, and clipboard behavior.
 - Mobile-target defaults follow `Theme.mobileTarget`; mobile touch drags scroll the internal viewport whenever rich text content overflows, including while the editor is focused. Taps, IME input, cursor placement, and selection remain on the underlying native `TextEdit` path.
