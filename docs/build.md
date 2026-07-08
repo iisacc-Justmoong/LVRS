@@ -6,10 +6,22 @@
 ./install.sh
 ```
 
+On Windows PowerShell:
+
+```powershell
+.\install.ps1
+```
+
 `install.sh` is now a thin wrapper around Rust CLI `lvrs install`.
 - If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
+- `install.ps1` is the Windows wrapper. It auto-detects a Qt 6 MinGW prefix,
+  uses Ninja, defaults the bootstrap platform set to `windows`, and invokes the
+  same `lvrs install` flow so the Windows framework package is installed under
+  `<prefix>/platforms/windows`. If the Rust CLI is not available, it falls back
+  to the equivalent direct CMake `bootstrap_lvrs_all` flow for the Windows
+  framework package.
 - Direct `lvrs install` can recover the repository root from `<prefix>/src/LVRS/INSTALL_SOURCE_INFO.txt` when launched outside the checkout. If the stored absolute path went stale after an upper-directory rename, the CLI re-locates the root by matching trailing path segments and otherwise falls back to the installed source snapshot in place.
 - If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, direct CLI commands treat that value as the prefix and resolve the source through `<prefix>/src/LVRS`.
 
@@ -55,6 +67,29 @@ Before running, it validates `main.cpp` contains the expected LVRS bootstrap ent
 ```bash
 cmake -S . -B build
 ```
+
+On Windows with the bundled CLion MinGW toolchain, point CMake at the matching Qt
+MinGW package prefix:
+
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH=C:/Qt/6.8.3/mingw_64
+```
+
+For local Debug builds on Windows, prefer static LVRS linkage until the Windows
+DLL export surface is explicitly maintained:
+
+```bash
+cmake -S . -B build -DLVRS_BUILD_SHARED_LIBS=OFF
+```
+
+Keep the Qt runtime and matching MinGW toolchain on `PATH` while building:
+
+```powershell
+$env:PATH = "C:/Qt/6.8.3/mingw_64/bin;C:/Qt/Tools/mingw1310_64/bin;$env:PATH"
+```
+
+The CLion Debug profile in this repository uses the same prefix and `PATH`, and
+writes build artifacts to `build/`.
 
 ## Build
 
