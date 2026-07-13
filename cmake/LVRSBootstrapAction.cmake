@@ -4,12 +4,7 @@ function(_lvrs_bootstrap_fail message_text)
     message(FATAL_ERROR "LVRS bootstrap: ${message_text}")
 endfunction()
 
-macro(_lvrs_bootstrap_append_cache_arg cmd_list key value)
-    if(NOT "${value}" STREQUAL "")
-        string(REPLACE ";" "\\;" _lvrs_cache_value "${value}")
-        list(APPEND ${cmd_list} "-D${key}=${_lvrs_cache_value}")
-    endif()
-endmacro()
+include("${CMAKE_CURRENT_LIST_DIR}/LVRSBootstrapCacheArgs.cmake")
 
 function(_lvrs_bootstrap_filter_apple_x86_architectures architectures out_var)
     if(architectures STREQUAL "")

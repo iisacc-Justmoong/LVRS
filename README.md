@@ -244,6 +244,8 @@ Build-time optimization policy is controlled by:
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (default `ON`)
 - `LVRS_ENABLE_IPO` (default `ON`)
 
+Framework bootstrap propagation preserves explicit `OFF` values for these options. Empty values alone are omitted from a nested platform configure.
+
 When enabled, configure fails if:
 - The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` for Android).
 
