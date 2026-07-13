@@ -21,6 +21,27 @@ foreach(_lvrs_action IN ITEMS
     endif()
 endforeach()
 
+file(READ
+    "${LVRS_SOURCE_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
+    _lvrs_framework_action_content
+)
+foreach(_lvrs_framework_required IN ITEMS
+    "if(NOT DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS)"
+    "if(NOT DEFINED LVRS_BOOTSTRAP_LVRS_ENABLE_IPO)"
+    "_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd \"LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS\" \"\${LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS}\")"
+    "_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd \"LVRS_ENABLE_IPO\" \"\${LVRS_BOOTSTRAP_LVRS_ENABLE_IPO}\")"
+)
+    string(FIND
+        "${_lvrs_framework_action_content}"
+        "${_lvrs_framework_required}"
+        _lvrs_framework_required_index
+    )
+    if(_lvrs_framework_required_index EQUAL -1)
+        message(FATAL_ERROR
+            "LVRSBootstrapFrameworkAction.cmake must contain '${_lvrs_framework_required}'.")
+    endif()
+endforeach()
+
 set(_lvrs_command cmake)
 _lvrs_bootstrap_append_cache_arg(_lvrs_command "BOOL_OFF" "OFF")
 _lvrs_bootstrap_append_cache_arg(_lvrs_command "BOOL_ON" "ON")
