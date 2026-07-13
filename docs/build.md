@@ -259,7 +259,7 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (propagate `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` into bootstrap reconfigure)
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_IPO` (propagate `LVRS_ENABLE_IPO` into bootstrap reconfigure)
 
-Bootstrap cache arguments preserve explicit false values such as `OFF`; only a genuinely empty value is omitted. This ensures that a caller can disable platform optimizations or IPO in every nested platform configure.
+Both application and framework bootstrap actions propagate the optimization controls to their nested platform configure. Bootstrap cache arguments preserve explicit false values such as `OFF`; only a genuinely empty value is omitted. This ensures that a caller can disable platform optimizations or IPO in every nested platform configure.
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
 When the host build consumes LVRS from an installed multi-platform prefix, bootstrap rewrites `LVRS_DIR` to the requested platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so iOS/Android/WASM toolchains do not depend on root-prefix package discovery.
 LVRS package config exports platform/toolchain hint variables for scripts:
