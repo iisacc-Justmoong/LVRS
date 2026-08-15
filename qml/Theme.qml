@@ -632,8 +632,8 @@ QtObject {
     readonly property int buttonMinWidth: scaleMetric(100)
     readonly property int dialogMinWidth: scaleMetric(280)
     readonly property int dialogMaxWidth: scaleMetric(360)
-    readonly property int iconSm: scaleMetric(16)
-    readonly property int controlIndicatorSize: scaleMetric(18)
+    readonly property int iconSm: scaleMetric(18)
+    readonly property int controlIndicatorSize: iconSm
     readonly property int toggleTrackWidth: scaleMetric(38)
     readonly property int toggleTransitionDuration: scaleMetric(140)
     readonly property int headerMinHeight: scaleMetric(56)

@@ -14,6 +14,7 @@ Item {
     property int horizontalPadding: Theme.gap8
     property int verticalPadding: Theme.gap4
     property int spacing: Theme.gap4
+    readonly property int iconButtonPadding: Math.max(0, Math.floor((buttonSize - iconSize) * 0.5))
     property color backgroundColor: Theme.subSurface
     property bool interactive: true
     readonly property real iconSupersampleScale: RenderQuality.enabled
@@ -78,8 +79,8 @@ Item {
 
                 tone: AbstractButton.Borderless
                 enabled: control.interactive && slotIconSource.length > 0
-                horizontalPadding: Theme.gap4
-                verticalPadding: Theme.gap4
+                horizontalPadding: control.iconButtonPadding
+                verticalPadding: control.iconButtonPadding
                 backgroundColor: "transparent"
                 backgroundColorDisabled: "transparent"
                 backgroundColorHover: Theme.surfaceAlt

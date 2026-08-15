@@ -11,7 +11,7 @@
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
 - Direct `lvrs install` can recover the repository root from `<prefix>/src/LVRS/INSTALL_SOURCE_INFO.txt` when launched outside the checkout. If the stored absolute path went stale after an upper-directory rename, the CLI re-locates the root by matching trailing path segments and otherwise falls back to the installed source snapshot in place.
-- If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, direct CLI commands treat that value as the prefix and resolve the source through `<prefix>/src/LVRS`.
+- If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, direct CLI commands treat that value as the prefix and resolve the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
 
 The install flow builds `bootstrap_lvrs_all`.
 By default, the framework bootstrap platform set follows the current host:
@@ -258,6 +258,7 @@ Framework-only bootstrap targets are generated at project root:
 The nested per-platform build runs with `--parallel 1` and clears inherited `MAKEFLAGS`, `MFLAGS`, and `CMAKE_BUILD_PARALLEL_LEVEL` so an outer Make jobserver cannot leak into the inner framework build.
 Default framework bootstrap platform set is all runtime platforms (`macos;linux;windows;ios;android;wasm`) unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is provided.
 Any platform without a discoverable Qt kit is skipped with a configure-time status message.
+iOS framework bootstrap also requires a selected full Xcode with an iPhoneOS SDK; hosts using only Command Line Tools skip `bootstrap_lvrs_ios` instead of failing `bootstrap_lvrs_all`.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`.
 

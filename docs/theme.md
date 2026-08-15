@@ -13,6 +13,13 @@ It now applies a built-in mobile `1.25x` token profile, so spacing, radius, cont
 - Accent palette: iconset-derived color token set (`accentPaletteTokens`).
 - Metrics: spacing, radius, control size, dialog size, and interaction timings.
 
+Compact icon baseline:
+
+- `iconSm` resolves to `18 x 18` logical pixels on desktop.
+- The existing mobile token profile scales that baseline to `23 x 23` after rounding.
+- Stock action, menu, hierarchy, input, and selection-control icons consume this token unless a public size property is explicitly overridden.
+- Icon images keep a square logical frame and `Image.PreserveAspectFit`, so non-square SVG artwork scales proportionally without distortion.
+
 ## Mobile `1.25x` Scaling
 
 - `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.

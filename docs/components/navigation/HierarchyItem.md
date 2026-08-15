@@ -159,8 +159,8 @@ Layout defaults from Figma:
 
 - `rowHeight` (default `20`)
 - `itemWidth` (default `200`)
-- `iconSize` (default `16`)
-- `chevronSize` (default `16`)
+- `iconSize` (default `Theme.iconSm`: desktop `18`, mobile `23`)
+- `chevronSize` (default `Theme.iconSm`: desktop `18`, mobile `23`)
 - `baseLeftPadding` (default `8`)
 - `rowRightPadding` (default `8`)
 - `leadingSpacing` (default `2`)
@@ -181,7 +181,7 @@ Visual tokens:
 
 ## Behavior Contract
 
-- The default row matches the Figma baseline: `200x20`, `8px` horizontal padding, `2px` leading gap, `16px` icon and chevron.
+- The desktop baseline row remains `200x20` with `8px` horizontal padding and a `2px` leading gap; its icon and chevron frames are enlarged proportionally to `18px`. The mobile token profile resolves them to `23px`.
 - `count` stays hidden at the default `-1`; set `count` to `0` or greater to render trailing count content.
 - Trailing count content is rendered immediately left of the chevron anchor with an `8px` gap, even when the chevron itself is not visible.
 - `countView` replaces the default trailing count label; if the custom view exposes `count` and/or `hierarchyItem` properties, `HierarchyItem` synchronizes them after load.

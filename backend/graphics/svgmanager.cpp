@@ -63,6 +63,7 @@ QString SvgManager::icon(const QString &svgUrl, int logicalSize, qreal scale)
         setLastError(QStringLiteral("Invalid SVG payload"));
         return QString();
     }
+    renderer.setAspectRatioMode(Qt::KeepAspectRatio);
 
     const int rasterSize = qMax(1, qRound(static_cast<qreal>(targetLogicalSize) * targetScale));
     QImage image(rasterSize, rasterSize, QImage::Format_ARGB32_Premultiplied);

@@ -24,7 +24,7 @@ Model and roles:
 Generated row defaults:
 
 - `generatedIndentStep` (default `8`), `generatedRowHeight` (default `20`), `generatedItemWidth` (default `200`)
-- `generatedIconSize` (default `16`), `generatedChevronSize` (default `16`)
+- `generatedIconSize`, `generatedChevronSize` (default `Theme.iconSm`: desktop `18`, mobile `23`)
 - `itemDelegate`: optional generated-row component delegate. The default delegate is `HierarchyItem`.
 
 State:

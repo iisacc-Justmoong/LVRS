@@ -90,8 +90,8 @@ AbstractButton {
     property int indentStep: Theme.scaleMetric(8)
     property int rowHeight: Theme.scaleMetric(20)
     property int itemWidth: Theme.scaleMetric(200)
-    property int iconSize: Theme.scaleMetric(16)
-    property int chevronSize: Theme.scaleMetric(16)
+    property int iconSize: Theme.iconSm
+    property int chevronSize: Theme.iconSm
     property int baseLeftPadding: Theme.gap8
     property int rowRightPadding: Theme.gap8
     property int leadingSpacing: Theme.gap2
@@ -663,36 +663,43 @@ AbstractButton {
 
                 Label {
                     anchors.centerIn: parent
+                    width: control.iconSize
+                    height: control.iconSize
                     visible: control.iconGlyph.length > 0
                     text: control.iconGlyph
                     style: body
                     color: control.enabled ? control.textColorNormal : control.textColorDisabled
                     font.pixelSize: control.iconSize
+                    fontSizeMode: Text.Fit
+                    minimumPixelSize: 1
                     font.weight: Font.Normal
                     font.styleName: "Regular"
                     lineHeight: control.iconSize
                     lineHeightMode: Text.FixedHeight
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    clip: true
                 }
 
                 Item {
                     anchors.centerIn: parent
                     visible: !iconImage.visible && control.iconGlyph.length === 0
-                    width: Theme.scaleMetric(12)
-                    height: Theme.scaleMetric(12)
+                    width: control.iconSize * 0.75
+                    height: control.iconSize * 0.75
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: Theme.scaleMetric(3)
+                        radius: control.iconSize * (3.0 / 16.0)
                         color: "transparent"
-                        border.width: Theme.scaleRealMetric(1)
+                        border.width: control.iconSize * (1.0 / 16.0)
                         border.color: control.iconPlaceholderColor
                         antialiasing: true
                     }
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: Theme.scaleMetric(2)
-                        radius: Theme.scaleMetric(2)
+                        anchors.margins: control.iconSize * (2.0 / 16.0)
+                        radius: control.iconSize * (2.0 / 16.0)
                         color: control.iconPlaceholderColor
                         opacity: 0.16
                         antialiasing: true

@@ -27,8 +27,10 @@ Computed/icon resolution:
 Layout:
 
 - default tone fallback: `Borderless`
-- fixed height: `Theme.gap20`
-- compact paddings (`Theme.gap2`)
+- default icon frame: `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile)
+- fixed height: `Theme.gap20` (`20` on desktop, `25` on mobile)
+- compact inset: `Theme.scaleMetric(1)` so the stock frame fits without clipping
+- `iconGlyph` uses the same square frame as SVG icons
 
 Injected methods:
 
@@ -41,7 +43,7 @@ Injected methods:
 3. `icon.name` from grouped icon API
 4. default fallback icon (`projectStructure`)
 
-Rendered source is normalized through `SvgManager.icon(...)` and refreshed by `SvgManager.revision`.
+Rendered source is resolved through `RenderQuality.resolveTextureSource(...)`; its square supersampled `sourceSize` tracks the logical icon size and device pixel ratio.
 
 ## Usage
 
@@ -68,6 +70,8 @@ LV.IconButton {
     text: "Add"
 }
 ```
+
+The explicit `14` above demonstrates the supported per-instance override; the stock default remains `Theme.iconSm` (`18` on desktop, `23` on mobile).
 
 ## Troubleshooting
 

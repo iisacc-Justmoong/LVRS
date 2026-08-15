@@ -29,7 +29,8 @@ cd LVRS
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
 If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
 Direct `lvrs install` now also reuses the installed source metadata under `<prefix>/src/LVRS` when launched outside the repository tree. If the recorded checkout path became stale because an upper directory was renamed, the CLI relocates the project root by matching the preserved trailing path segments before falling back to the installed source snapshot itself.
-If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`.
+Source snapshots omit repository build directories and `rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.
+If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
 The install flow builds `bootstrap_lvrs_all`.
 By default, the bootstrap platform set follows the current host:
 - Linux: `linux`
@@ -43,7 +44,7 @@ Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs 
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
 Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to move the install root.
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
-`find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic.
+`find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.
@@ -221,6 +222,7 @@ For framework-only multi-platform install, LVRS also generates:
 Nested framework builds run with `--parallel 1` and clear inherited Make/jobserver parallel environment (`MAKEFLAGS`, `MFLAGS`, and `CMAKE_BUILD_PARALLEL_LEVEL`) before invoking the per-platform build.
 Default framework bootstrap platform set is all runtime platforms unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is set.
 Any platform without a matching Qt kit is skipped with a configure-time status message.
+iOS framework bootstrap also requires a selected full Xcode with an iPhoneOS SDK; Command Line Tools-only hosts skip the iOS target instead of failing the aggregate install.
 Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
 

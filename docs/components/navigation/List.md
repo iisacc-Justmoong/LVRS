@@ -39,6 +39,7 @@ Toolbar/footer:
 
 - `toolbarVisible`, `toolbarIcon1`, `toolbarIcon2`, `toolbarIcon3`
 - `footerVisible`, `footerButton1`, `footerButton2`, `footerButton3`
+- Stock toolbar/footer buttons use `Theme.iconSm` icon frames (`18 x 18` desktop, `23 x 23` mobile) and a scaled `Theme.scaleMetric(1)` compact inset (`ListFooter.stockButtonPadding`).
 
 Signals:
 

@@ -582,10 +582,11 @@ configure_file(
     @ONLY
 )
 
-configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSConfigVersionRoot.cmake.in"
+write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/LVRSConfigVersionRoot.cmake"
-    @ONLY
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+    ARCH_INDEPENDENT
 )
 
 install(FILES

@@ -27,6 +27,7 @@ Item {
     property int verticalPadding: Theme.gap2
     property int spacing: Theme.gapNone
     property bool interactive: true
+    readonly property int stockButtonPadding: Theme.scaleMetric(1)
 
     signal buttonClicked(int index, var config)
 
@@ -69,8 +70,8 @@ Item {
         button.visible = configValue(config, "visible", true)
         if (source !== undefined)
             button.iconSource = source
-        button.horizontalPadding = configValue(config, "horizontalPadding", Theme.gap2)
-        button.verticalPadding = configValue(config, "verticalPadding", Theme.gap2)
+        button.horizontalPadding = configValue(config, "horizontalPadding", control.stockButtonPadding)
+        button.verticalPadding = configValue(config, "verticalPadding", control.stockButtonPadding)
         button.cornerRadius = configValue(config, "cornerRadius", Theme.radiusSm)
         button.backgroundColor = configValue(config, "backgroundColor", "transparent")
         button.backgroundColorDisabled = configValue(config, "backgroundColorDisabled", "transparent")

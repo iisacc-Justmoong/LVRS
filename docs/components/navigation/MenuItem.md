@@ -46,7 +46,7 @@ Layout and visuals:
 ## Behavior Contract
 
 - `selected`/`inactive` states map to different background colors.
-- Default row height is `Theme.scaleMetric(16)` with `Theme.gap4` horizontal padding and no vertical inset, matching the compact context-menu row contract.
+- Default row, icon, and chevron frames are `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile), with `Theme.gap4` horizontal padding and no vertical inset.
 - `implicitWidth` expands beyond `itemWidth` when icon/label/key/chevron content requires more space.
 - Natural label and shortcut widths are measured independently from the displayed elided text, so constrained rendering does not feed back into `implicitWidth`.
 - Row layout is responsive under constrained widths: label and shortcut text elide within the row, trailing metadata stays inside the item frame, and the flexible spacer never resolves to a negative width.

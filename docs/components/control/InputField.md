@@ -28,6 +28,7 @@ Style:
 Search/clear visuals:
 
 - `searchIconSize`, `searchIconSource`
+- `clearIconSize`, `clearIconMarkLength`, `clearIconMarkThickness` (readonly proportional geometry)
 - `clearIconBackgroundColor`, `clearIconBackgroundColorHover`, `clearIconBackgroundColorPressed`, `clearIconBackgroundColorDisabled`
 - `clearIconForegroundColor`
 
@@ -39,7 +40,8 @@ Inherited text/input API (from `AbstractInputBar`):
 
 - `search: true` enables the leading search affordance; legacy `mode: searchMode` still resolves to the same visual state.
 - Search icon uses the shipped `generalsearch.svg` asset and is shown when `searchIconVisible == true`.
-- Search icon frame follows a `12 x 12` contract on desktop and scales through `Theme.scaleMetric(12)` on mobile targets.
+- Search and clear icon frames follow the common `Theme.iconSm` contract: `18 x 18` on desktop and `23 x 23` on mobile targets.
+- The clear icon's X mark retains the former `8 / 14` length and `1.4 / 14` thickness ratios as the frame grows.
 - Search icon rendering uses a supersampled `Image.sourceSize` from `RenderQuality` and the active device pixel ratio instead of custom canvas painting.
 - Clear button appears only when `clearButtonVisible && enabled && !readOnly && text.length > 0`.
 - Clear click sets `text = ""` and calls `forceInputFocus()`.

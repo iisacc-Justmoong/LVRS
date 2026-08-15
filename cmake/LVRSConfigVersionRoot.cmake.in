@@ -1,1 +1,0 @@
-include("${CMAKE_CURRENT_LIST_DIR}/@LVRS_INSTALL_CMAKE_DIR@/LVRSConfigVersion.cmake")

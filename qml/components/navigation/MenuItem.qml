@@ -30,10 +30,10 @@ AbstractButton {
     // Supports int enum or string: auto|right|left|up|down
     property var selectionDirection: "auto"
     property int itemWidth: Theme.scaleMetric(161)
-    property int itemHeight: Theme.scaleMetric(16)
+    property int itemHeight: Theme.iconSm
     property bool showIconSlot: true
-    property int iconSize: Theme.scaleMetric(16)
-    property int chevronSize: Theme.scaleMetric(16)
+    property int iconSize: Theme.iconSm
+    property int chevronSize: Theme.iconSm
     property string iconName: ""
     property url iconSource: ""
     property color iconPlaceholderColor: Theme.accentBlueMuted
@@ -224,15 +224,15 @@ AbstractButton {
                     height: control.iconSize
                     radius: width * 0.5
                     color: control.iconPlaceholderColor
-                    border.width: Theme.scaleMetric(1)
+                    border.width: control.iconSize * (1.0 / 16.0)
                     border.color: Theme.accentBlue
                     anchors.centerIn: parent
                     antialiasing: true
                 }
 
                 Rectangle {
-                    width: Theme.scaleMetric(4)
-                    height: Theme.scaleMetric(4)
+                    width: control.iconSize * 0.25
+                    height: control.iconSize * 0.25
                     radius: width * 0.5
                     color: Theme.accentBlue
                     anchors.centerIn: parent

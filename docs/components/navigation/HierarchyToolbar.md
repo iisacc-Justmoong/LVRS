@@ -55,8 +55,9 @@ Compatibility:
 
 Default layout follows the hierarchy header toolbar spec from Figma (`Whatson`, node `134:4111`):
 
-- Toolbar content area is treated as a `200 x 20` reference strip.
-- Each toolbar slot uses `20 x 20` (`slotSize = Theme.gap20`).
+- The desktop toolbar content area is treated as a `200 x 20` reference strip.
+- Each toolbar slot uses `Theme.gap20` (`20 x 20` on desktop, `25 x 25` on mobile).
+- Each stock icon uses `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile), leaving the scaled compact inset inside the slot.
 - Items are distributed left-to-right across available width (`justify-between` behavior).
 - Default padding is zero (`horizontalPadding = 0`, `verticalPadding = 0`).
 - Default background is transparent (`backgroundOpacity = 0`).

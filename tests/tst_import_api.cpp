@@ -368,6 +368,7 @@ private slots:
     void appshell_compat_loads();
     void application_window_platform_adaptive_layout_loads();
     void icon_name_mapping_loads();
+    void compact_icon_frame_contract_loads();
     void hierarchy_tree_model_api_loads();
     void hierarchy_string_array_model_loads();
     void hierarchy_direct_model_contract_loads();
@@ -941,11 +942,20 @@ LV.ApplicationWindow {
     visible: false
     scaffoldLayoutMode: "auto"
     scaffoldLayoutPlatform: "android-arm64"
-    navItems: ["Home", "Runs", "Settings"]
+    navItems: [
+        { label: "Home", symbol: "H" },
+        { label: "Runs", symbol: "R" },
+        { label: "Settings", symbol: "S" }
+    ]
     navigationEnabled: true
 
+    Component.onCompleted: LV.Theme.targetOverride = "android"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
     property bool contract:
-        mobileWindow.adaptiveMobileLayout
+        LV.Theme.mobileTarget
+        && mobileWindow.navigationIconSize === 23
+        && mobileWindow.adaptiveMobileLayout
         && !mobileWindow.adaptiveDesktopLayout
         && mobileWindow.adaptiveBottomNavigation
         && !mobileWindow.adaptiveRailNavigation
@@ -956,6 +966,7 @@ LV.ApplicationWindow {
     QScopedPointer<QObject> mobileRoot(createFromQml(mobileEngine, mobileQml));
     QVERIFY(mobileRoot);
     QTRY_VERIFY(mobileRoot->property("contract").toBool());
+    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 23);
 
     QQmlEngine desktopEngine;
     desktopEngine.addImportPath(importBase);
@@ -970,7 +981,11 @@ LV.ApplicationWindow {
     visible: false
     scaffoldLayoutMode: "auto"
     scaffoldLayoutPlatform: "osx"
-    navItems: ["Home", "Runs", "Settings"]
+    navItems: [
+        { label: "Home", symbol: "H" },
+        { label: "Runs", symbol: "R" },
+        { label: "Settings", symbol: "S" }
+    ]
     navigationEnabled: true
 
     property bool contract:
@@ -985,6 +1000,7 @@ LV.ApplicationWindow {
     QScopedPointer<QObject> desktopRoot(createFromQml(desktopEngine, desktopQml));
     QVERIFY(desktopRoot);
     QTRY_VERIFY(desktopRoot->property("contract").toBool());
+    QCOMPARE(desktopRoot->property("navigationIconSize").toInt(), 18);
 }
 
 void ImportApiTests::icon_name_mapping_loads()
@@ -1065,6 +1081,98 @@ Item {
     QVERIFY(root->property("byGroupOk").toBool());
     QVERIFY(root->property("byUrlOk").toBool());
     QVERIFY(root->property("menuByNameOk").toBool());
+}
+
+void ImportApiTests::compact_icon_frame_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property string themeTarget: "macos"
+    readonly property int expectedIconSize: LV.Theme.mobileTarget ? 23 : 18
+
+    onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
+    Component.onCompleted: LV.Theme.targetOverride = themeTarget
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.IconButton { id: iconButton; visible: false }
+    LV.IconMenuButton { id: iconMenuButton; visible: false }
+    LV.LabelMenuButton { id: labelMenuButton; visible: false }
+    LV.Stepper { id: stepper; visible: false }
+    LV.ComboBox { id: comboBox; visible: false }
+    LV.InputField { id: inputField; visible: false; search: true; text: "query" }
+    LV.CheckBox { id: checkBox; visible: false }
+    LV.RadioButton { id: radioButton; visible: false }
+    LV.ToggleSwitch { id: toggleSwitch; visible: false }
+    LV.ListToolbar { id: listToolbar; visible: false }
+    LV.MenuItem { id: menuItem; visible: false }
+    LV.HierarchyItem { id: hierarchyItem; visible: false }
+    LV.HierarchyList { id: hierarchyList; visible: false }
+    LV.IconButton { id: customIconButton; visible: false; iconSize: 14 }
+
+    property string compactIconDiagnostics:
+        "target=" + LV.Theme.effectiveTarget
+        + " iconSm=" + LV.Theme.iconSm
+        + " iconButton=" + iconButton.iconSize
+        + " iconMenu=" + iconMenuButton.iconSize + "/" + iconMenuButton.indicatorSize
+        + " labelMenu=" + labelMenuButton.indicatorSize
+        + " stepper=" + stepper.width + "x" + stepper.height
+        + " combo=" + comboBox.figmaIndicatorSize
+        + " input=" + inputField.searchIconSize + "/" + inputField.clearIconSize
+        + " check=" + checkBox.boxSize
+        + " radio=" + radioButton.indicatorSize
+        + " toggle=" + toggleSwitch.knobSize
+        + " listToolbar=" + listToolbar.iconSize
+        + " menu=" + menuItem.itemHeight + "/" + menuItem.iconSize + "/" + menuItem.chevronSize
+        + " hierarchy=" + hierarchyItem.iconSize + "/" + hierarchyItem.chevronSize
+        + " hierarchyList=" + hierarchyList.generatedIconSize + "/" + hierarchyList.generatedChevronSize
+        + " custom=" + customIconButton.iconSize
+
+    property bool compactIconContractReady:
+        LV.Theme.iconSm === expectedIconSize
+        && iconButton.iconSize === expectedIconSize
+        && iconMenuButton.iconSize === expectedIconSize
+        && iconMenuButton.indicatorSize === expectedIconSize
+        && labelMenuButton.indicatorSize === expectedIconSize
+        && stepper.width === expectedIconSize
+        && stepper.height === expectedIconSize
+        && comboBox.figmaIndicatorSize === expectedIconSize
+        && inputField.searchIconSize === expectedIconSize
+        && inputField.clearIconSize === expectedIconSize
+        && checkBox.boxSize === expectedIconSize
+        && radioButton.indicatorSize === expectedIconSize
+        && toggleSwitch.knobSize === expectedIconSize
+        && listToolbar.iconSize === expectedIconSize
+        && menuItem.itemHeight === expectedIconSize
+        && menuItem.iconSize === expectedIconSize
+        && menuItem.chevronSize === expectedIconSize
+        && hierarchyItem.iconSize === expectedIconSize
+        && hierarchyItem.chevronSize === expectedIconSize
+        && hierarchyList.generatedIconSize === expectedIconSize
+        && hierarchyList.generatedChevronSize === expectedIconSize
+        && customIconButton.iconSize === 14
+
+    property bool mobileCompactIconContractReady:
+        LV.Theme.mobileTarget
+        && LV.Theme.iconSm === 23
+        && compactIconContractReady
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("compactIconContractReady").toBool(),
+                 qPrintable(root->property("compactIconDiagnostics").toString()));
+    QVERIFY(root->setProperty("themeTarget", QStringLiteral("android")));
+    QTRY_VERIFY2(root->property("mobileCompactIconContractReady").toBool(),
+                 qPrintable(root->property("compactIconDiagnostics").toString()));
 }
 
 void ImportApiTests::hierarchy_tree_model_api_loads()
@@ -3124,8 +3232,8 @@ Item {
         && item.rowHeight === 20
         && item.itemWidth === 200
         && item.indentStep === 8
-        && item.iconSize === 16
-        && item.chevronSize === 16
+        && item.iconSize === 18
+        && item.chevronSize === 18
         && item.baseLeftPadding === 8
         && item.rowRightPadding === 8
         && item.leadingSpacing === 2
@@ -3204,9 +3312,9 @@ Item {
     const QPointF chevronPos = chevronItem->mapToItem(item, QPointF(0, 0));
 
     QVERIFY2(qAbs(iconPos.x() - 8.0) <= 0.5, "Icon x must match the 8px Figma inset.");
-    QVERIFY2(qAbs(labelPos.x() - 26.0) <= 0.5, "Label x must follow icon width + 2px gap.");
-    QVERIFY2(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
-    QVERIFY2(qAbs(labelItem->width() - 148.0) <= 0.5, "Label width must match the Figma baseline layout.");
+    QVERIFY2(qAbs(labelPos.x() - 28.0) <= 0.5, "Label x must follow icon width + 2px gap.");
+    QVERIFY2(qAbs(chevronPos.x() - 174.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
+    QVERIFY2(qAbs(labelItem->width() - 144.0) <= 0.5, "Label width must match the enlarged icon layout.");
     QVERIFY2(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
 }
 
@@ -3680,14 +3788,18 @@ Item {
     property bool figmaPaddingReady:
         labelButton.horizontalPadding === LV.Theme.gap8
         && labelButton.verticalPadding === LV.Theme.gap4
-        && iconButton.horizontalPadding === LV.Theme.gap2
-        && iconButton.verticalPadding === LV.Theme.gap2
+        && iconButton.horizontalPadding === LV.Theme.scaleMetric(1)
+        && iconButton.verticalPadding === LV.Theme.scaleMetric(1)
         && labelMenuButton.horizontalPadding === LV.Theme.gap8
-        && labelMenuButton.verticalPadding === LV.Theme.gap2
-        && iconMenuButton.horizontalPadding === LV.Theme.gap2
-        && iconMenuButton.verticalPadding === LV.Theme.gap2
+        && labelMenuButton.verticalPadding === LV.Theme.scaleMetric(1)
+        && iconMenuButton.horizontalPadding === LV.Theme.scaleMetric(1)
+        && iconMenuButton.verticalPadding === LV.Theme.scaleMetric(1)
         && labelMenuButton.spacing === LV.Theme.gap2
         && iconMenuButton.spacing === LV.Theme.gap4
+        && iconButton.iconSize === LV.Theme.iconSm
+        && iconMenuButton.iconSize === LV.Theme.iconSm
+        && labelMenuButton.indicatorSize === LV.Theme.iconSm
+        && iconMenuButton.indicatorSize === LV.Theme.iconSm
         && Math.abs(labelButton.implicitHeight - LV.Theme.gap20) < 0.01
         && Math.abs(iconButton.implicitHeight - LV.Theme.gap20) < 0.01
         && Math.abs(labelMenuButton.implicitHeight - LV.Theme.gap20) < 0.01
@@ -4004,6 +4116,16 @@ Item {
     readonly property real expectedUpDownY:
         Math.round(((primaryUpDown.height - primaryUpDown.iconHeight) * 0.5) * primaryUpDown.devicePixelRatio)
         / primaryUpDown.devicePixelRatio
+    readonly property real expectedUpX:
+        Math.round(((primaryUp.width - primaryUp.iconWidth) * 0.5) * primaryUp.devicePixelRatio)
+        / primaryUp.devicePixelRatio
+    readonly property real expectedUpY:
+        Math.round(((primaryUp.height - primaryUp.iconHeight) * 0.5) * primaryUp.devicePixelRatio)
+        / primaryUp.devicePixelRatio
+    readonly property real expectedChevronWidth: primaryUp.width * (10.0 / 16.0)
+    readonly property real expectedChevronHeight: primaryUp.height * (6.0 / 16.0)
+    readonly property real expectedUpDownWidth: primaryUpDown.width * (6.43604 / 16.0)
+    readonly property real expectedUpDownHeight: primaryUpDown.height * (11.1455 / 16.0)
 
     LV.Stepper { id: defaultStepper; visible: false }
     LV.Stepper { id: primaryUpDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
@@ -4028,26 +4150,26 @@ Item {
         && Math.abs(defaultStepper.implicitWidth - LV.Theme.iconSm) < 0.01
         && Math.abs(defaultStepper.implicitHeight - LV.Theme.iconSm) < 0.01
         && Math.abs(defaultStepper.cornerRadius - LV.Theme.radiusSm) < 0.01
-        && Math.abs(primaryUp.iconWidth - 10.0) < 0.01
-        && Math.abs(primaryUp.iconHeight - 6.0) < 0.01
-        && Math.abs(primaryDown.iconWidth - 10.0) < 0.01
-        && Math.abs(primaryDown.iconHeight - 6.0) < 0.01
-        && Math.abs(primaryUpDown.iconWidth - 6.436) < 0.05
-        && Math.abs(primaryUpDown.iconHeight - 11.146) < 0.05
-        && Math.abs(borderlessUpDown.iconWidth - 6.436) < 0.05
-        && Math.abs(borderlessUpDown.iconHeight - 11.146) < 0.05
-        && Math.abs(primaryUp.iconBounds.x - 3.0) < 0.05
-        && Math.abs(primaryUp.iconBounds.y - 5.0) < 0.05
-        && Math.abs(primaryUp.iconBounds.width - 10.0) < 0.05
-        && Math.abs(primaryUp.iconBounds.height - 6.0) < 0.05
-        && Math.abs(primaryDown.iconBounds.x - 3.0) < 0.05
-        && Math.abs(primaryDown.iconBounds.y - 5.0) < 0.05
-        && Math.abs(primaryDown.iconBounds.width - 10.0) < 0.05
-        && Math.abs(primaryDown.iconBounds.height - 6.0) < 0.05
+        && Math.abs(primaryUp.iconWidth - expectedChevronWidth) < 0.01
+        && Math.abs(primaryUp.iconHeight - expectedChevronHeight) < 0.01
+        && Math.abs(primaryDown.iconWidth - expectedChevronWidth) < 0.01
+        && Math.abs(primaryDown.iconHeight - expectedChevronHeight) < 0.01
+        && Math.abs(primaryUpDown.iconWidth - expectedUpDownWidth) < 0.01
+        && Math.abs(primaryUpDown.iconHeight - expectedUpDownHeight) < 0.01
+        && Math.abs(borderlessUpDown.iconWidth - expectedUpDownWidth) < 0.01
+        && Math.abs(borderlessUpDown.iconHeight - expectedUpDownHeight) < 0.01
+        && Math.abs(primaryUp.iconBounds.x - expectedUpX) < 0.06
+        && Math.abs(primaryUp.iconBounds.y - expectedUpY) < 0.06
+        && Math.abs(primaryUp.iconBounds.width - expectedChevronWidth) < 0.01
+        && Math.abs(primaryUp.iconBounds.height - expectedChevronHeight) < 0.01
+        && Math.abs(primaryDown.iconBounds.x - expectedUpX) < 0.06
+        && Math.abs(primaryDown.iconBounds.y - expectedUpY) < 0.06
+        && Math.abs(primaryDown.iconBounds.width - expectedChevronWidth) < 0.01
+        && Math.abs(primaryDown.iconBounds.height - expectedChevronHeight) < 0.01
         && Math.abs(primaryUpDown.iconBounds.x - expectedUpDownX) < 0.06
         && Math.abs(primaryUpDown.iconBounds.y - expectedUpDownY) < 0.06
-        && Math.abs(primaryUpDown.iconBounds.width - 6.436) < 0.06
-        && Math.abs(primaryUpDown.iconBounds.height - 11.146) < 0.06
+        && Math.abs(primaryUpDown.iconBounds.width - expectedUpDownWidth) < 0.01
+        && Math.abs(primaryUpDown.iconBounds.height - expectedUpDownHeight) < 0.01
         && primaryUp.backgroundColor === LV.Theme.primary
         && borderlessUp.backgroundColor === transparentColor
         && borderlessUp.backgroundColorHover === LV.Theme.surfaceAlt
@@ -4104,7 +4226,7 @@ Item {
         && Math.abs(defaultCombo.figmaComboRightPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboVerticalPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboCornerRadius - 5.0) < 0.01
-        && Math.abs(defaultCombo.figmaIndicatorSize - 16.0) < 0.01
+        && Math.abs(defaultCombo.figmaIndicatorSize - 18.0) < 0.01
         && Math.abs(defaultCombo.figmaLabelLineHeight - 12.0) < 0.01
         && defaultCombo.resolvedTone === LV.ComboBox.Primary
         && primaryUp.resolvedTone === LV.ComboBox.Primary
@@ -4120,12 +4242,12 @@ Item {
         && borderlessDown.resolvedArrow === LV.Stepper.Down
         && Math.abs(defaultCombo.labelBounds.x - 8.0) < 0.01
         && Math.abs(defaultCombo.labelBounds.y - 3.0) < 0.01
-        && Math.abs(defaultCombo.labelBounds.width - 72.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.width - 70.0) < 0.01
         && Math.abs(defaultCombo.labelBounds.height - 12.0) < 0.01
-        && Math.abs(defaultCombo.indicatorBounds.x - 80.0) < 0.01
-        && Math.abs(defaultCombo.indicatorBounds.y - 1.0) < 0.01
-        && Math.abs(defaultCombo.indicatorBounds.width - 16.0) < 0.01
-        && Math.abs(defaultCombo.indicatorBounds.height - 16.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.x - 78.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.y - 0.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.width - 18.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.height - 18.0) < 0.01
         && defaultCombo.backgroundColor === LV.Theme.panelBackground10
         && defaultCombo.backgroundColorHover === LV.Theme.panelBackground11
         && defaultCombo.backgroundColorPressed === LV.Theme.panelBackground12
@@ -4224,7 +4346,10 @@ Item {
         && inlineField.showClearButton
         && searchField.search
         && searchField.searchIconVisible
-        && Math.abs(searchField.searchIconSize - LV.Theme.scaleMetric(12)) < 0.01
+        && searchField.searchIconSize === LV.Theme.iconSm
+        && searchField.clearIconSize === LV.Theme.iconSm
+        && Math.abs(searchField.clearIconMarkLength - (LV.Theme.iconSm * (8.0 / 14.0))) < 0.01
+        && Math.abs(searchField.clearIconMarkThickness - (LV.Theme.iconSm * (1.4 / 14.0))) < 0.01
         && searchField.showClearButton
         && legacySearchField.mode === legacySearchField.searchMode
         && legacySearchField.search
@@ -4610,11 +4735,12 @@ Item {
         LV.Theme.mobileTarget
         && searchField.search
         && searchField.searchIconVisible
-        && Math.abs(searchField.searchIconSize - LV.Theme.scaleMetric(12)) < 0.01
-        && Math.abs(searchField.searchIconSize - 15.0) < 0.01
+        && searchField.searchIconSize === LV.Theme.iconSm
+        && searchField.clearIconSize === LV.Theme.iconSm
+        && Math.abs(searchField.searchIconSize - 23.0) < 0.01
         && searchField.searchIconSource == LV.Theme.iconPath("generalsearch")
         && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
-        && LV.Theme.iconSm === 20
+        && LV.Theme.iconSm === 23
 }
 )";
 
@@ -4696,8 +4822,9 @@ Item {
     readonly property var checkedDisabledLabel: labelOf(checkedDisabled)
 
     property bool figmaCheckBoxReady:
-        checkedEnabled.boxSize === 17
-        && Math.abs(checkedEnabled.boxRadius - 3.5) < 0.01
+        checkedEnabled.boxSize === LV.Theme.iconSm
+        && Math.abs(checkedEnabled.boxRadius - (checkedEnabled.boxSize * (3.5 / 17.0))) < 0.01
+        && Math.abs(checkedEnabled.checkMarkStrokeWidth - (checkedEnabled.boxSize * (2.0 / 17.0))) < 0.01
         && checkedEnabled.contentItem.spacing === LV.Theme.gap6
         && checkedEnabled.checkColor === LV.Theme.bodyColor
         && checkedEnabled.checkMarkColorDisabled === LV.Theme.disabledColor
@@ -4710,8 +4837,8 @@ Item {
         && uncheckedEnabledIndicator.color === LV.Theme.bodyColor
         && uncheckedDisabledIndicator.color === LV.Theme.panelBackground12
         && Math.abs(checkedEnabledIndicator.border.width - 0) < 0.01
-        && Math.abs(checkedDisabledIndicator.border.width - 0.5) < 0.01
-        && Math.abs(uncheckedEnabledIndicator.border.width - 0.5) < 0.01
+        && Math.abs(checkedDisabledIndicator.border.width - (checkedDisabled.boxSize * (0.5 / 17.0))) < 0.01
+        && Math.abs(uncheckedEnabledIndicator.border.width - (uncheckedEnabled.boxSize * (0.5 / 17.0))) < 0.01
         && Math.abs(uncheckedDisabledIndicator.border.width - 0) < 0.01
         && checkedDisabledIndicator.border.color === LV.Theme.panelBackground12
         && uncheckedEnabledIndicator.border.color === LV.Theme.bodyColor
@@ -5130,7 +5257,7 @@ Item {
         && collapsedSubmenu.keyVisible
         && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
         && collapsedSubmenu.effectiveShowChevron
-        && collapsedSubmenu.itemHeight === 16
+        && collapsedSubmenu.itemHeight === 18
         && collapsedSubmenu.leftPadding === 4
         && collapsedSubmenu.rightPadding === 4
         && collapsedSubmenu.topPadding === 0
@@ -6978,6 +7105,7 @@ Item {
         && listFooter.button1.iconName === "projectStructure"
         && listFooter.button2.type === "IconMenuButton"
         && listFooter.button3.enabled === false
+        && listFooter.stockButtonPadding === LV.Theme.scaleMetric(1)
         && listFooter.implicitHeight > 0
 }
 )";

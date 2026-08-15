@@ -15,6 +15,7 @@ AbstractButton {
     property string iconName: ""
     property string iconGlyph: ""
     property int iconSize: Theme.iconSm
+    readonly property int indicatorSize: Theme.iconSm
     readonly property string resolvedIconName: {
         const explicitIconName = control.iconName === undefined || control.iconName === null
             ? ""
@@ -38,7 +39,7 @@ AbstractButton {
         : 1.0
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
-    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale * control.iconHiDpiScale))
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(control.indicatorSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property string indicatorNameDefault: "generalchevronDown"
     readonly property string indicatorNameBorderless: "generalchevronDownBorderless"
     readonly property string indicatorNameAccent: "generalchevronDownAccent"
@@ -52,8 +53,8 @@ AbstractButton {
                 : control.indicatorNameDefault
     readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
-    horizontalPadding: Theme.gap2
-    verticalPadding: Theme.gap2
+    horizontalPadding: Theme.scaleMetric(1)
+    verticalPadding: Theme.scaleMetric(1)
     spacing: Theme.gap4
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
@@ -88,9 +89,20 @@ AbstractButton {
             text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.pixelSize: control.iconSize
+            fontSizeMode: Text.Fit
+            minimumPixelSize: 1
             font.weight: Font.Normal
             lineHeight: control.iconSize
             lineHeightMode: Text.FixedHeight
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            clip: true
+            Layout.preferredWidth: control.iconSize
+            Layout.preferredHeight: control.iconSize
+            Layout.minimumWidth: control.iconSize
+            Layout.minimumHeight: control.iconSize
+            Layout.maximumWidth: control.iconSize
+            Layout.maximumHeight: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -101,12 +113,12 @@ AbstractButton {
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: RenderQuality.mipmapEnabled
-            Layout.preferredWidth: Theme.iconSm
-            Layout.preferredHeight: Theme.iconSm
-            Layout.minimumWidth: Theme.iconSm
-            Layout.minimumHeight: Theme.iconSm
-            Layout.maximumWidth: Theme.iconSm
-            Layout.maximumHeight: Theme.iconSm
+            Layout.preferredWidth: control.indicatorSize
+            Layout.preferredHeight: control.indicatorSize
+            Layout.minimumWidth: control.indicatorSize
+            Layout.minimumHeight: control.indicatorSize
+            Layout.maximumWidth: control.indicatorSize
+            Layout.maximumHeight: control.indicatorSize
             Layout.alignment: Qt.AlignVCenter
         }
     }

@@ -115,10 +115,13 @@ Default app-root bootstrap profile in current implementation:
 Aliases to internal scaffold include:
 
 - navigation model: `navItems`, `navIndex`, `navigationEnabled`
+- navigation icon sizing: `navigationIconSize` (defaults to `Theme.iconSm`)
 - layout policy: `scaffoldLayoutMode`, `scaffoldLayoutPlatform`, `scaffoldForceDesktopOnLargeMobile`, `scaffoldMobileDesktopMinWidth`
 - navigation mode policy: `scaffoldPreferBottomNavigation`, `scaffoldBottomNavigationMaxItems`, `scaffoldNavRailMaxWidthRatio`, `scaffoldDrawerMarginSafety`
 - page stack: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `internalPageStackEnabled`
 - interactive transition bridge: `pageTransitionController`
+
+Stock adaptive-navigation delegates render `icon`, `iconName`, or `symbol` text glyphs in a square `navigationIconSize` frame. Its default follows `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile), so rail, drawer, and bottom-navigation icons follow the same compact icon contract while remaining explicitly overridable.
 
 Adaptive state outputs:
 

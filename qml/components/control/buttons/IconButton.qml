@@ -39,8 +39,8 @@ AbstractButton {
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
 
-    horizontalPadding: Theme.gap2
-    verticalPadding: Theme.gap2
+    horizontalPadding: Theme.scaleMetric(1)
+    verticalPadding: Theme.scaleMetric(1)
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
@@ -74,9 +74,20 @@ AbstractButton {
             text: control.iconGlyph
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             font.pixelSize: control.iconSize
+            fontSizeMode: Text.Fit
+            minimumPixelSize: 1
             font.weight: Font.Normal
             lineHeight: control.iconSize
             lineHeightMode: Text.FixedHeight
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            clip: true
+            Layout.preferredWidth: control.iconSize
+            Layout.preferredHeight: control.iconSize
+            Layout.minimumWidth: control.iconSize
+            Layout.minimumHeight: control.iconSize
+            Layout.maximumWidth: control.iconSize
+            Layout.maximumHeight: control.iconSize
             Layout.alignment: Qt.AlignVCenter
         }
 

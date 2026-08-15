@@ -20,6 +20,7 @@ Main icon:
 
 Indicator:
 
+- `indicatorSize` (readonly, `Theme.iconSm`)
 - tone/enable-aware indicator selection (`resolvedIndicatorName`)
 - rendered from `Theme.iconPath(...)`
 - indicator source uses supersampling-aware `sourceSize`
@@ -34,9 +35,10 @@ Indicator icon mapping:
 Layout:
 
 - default tone fallback: `Borderless`
-- fixed `figmaButtonHeight` (`Theme.gap20`)
-- `horizontalPadding: Theme.gap2`
-- `verticalPadding: Theme.gap2`
+- main and indicator icon frames: `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile)
+- fixed `figmaButtonHeight` (`Theme.gap20`: desktop `20`, mobile `25`)
+- `horizontalPadding: Theme.scaleMetric(1)`
+- `verticalPadding: Theme.scaleMetric(1)`
 - `spacing: Theme.gap4`
 
 Injected methods:

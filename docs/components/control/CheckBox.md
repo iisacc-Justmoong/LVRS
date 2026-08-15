@@ -20,8 +20,8 @@ State:
 Shape and metrics:
 
 - `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
-- `boxSize`, `boxRadius`
-- `checkMarkStrokeWidth`
+- `boxSize` (default `Theme.iconSm`: desktop `18 x 18`, mobile `23 x 23`)
+- `boxRadius`, `checkMarkStrokeWidth`, and border widths retain their former 17px-frame ratios as the indicator scales.
 
 Palette and border:
 
@@ -41,6 +41,7 @@ Resolved values:
 ## Behavior Contract
 
 - `checkable: true`, `tone: Borderless`, transparent background layers.
+- The checkbox/checkmark frame follows the shared compact icon size while the Canvas path uses relative coordinates for proportional scaling.
 - Checkmark is drawn by `Canvas`, uses a supersampled backing store (`RenderQuality` + HiDPI), rounds each raster axis up independently, and repaints on state/color/stroke changes.
 - `showInnerShadow` is disabled only when checked+enabled.
 

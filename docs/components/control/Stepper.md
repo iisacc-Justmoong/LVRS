@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/Stepper.qml`
 
-`Stepper` is a compact standalone directional control that follows the Figma stepper contract (`16x16`, radius `4`) with `Up`, `Down`, and `UpDown` arrow modes.
+`Stepper` is a compact standalone directional control with a square `Theme.iconSm` frame (`18 x 18` on desktop, `23 x 23` on mobile) and `Up`, `Down`, and `UpDown` arrow modes.
 
 ## Purpose
 
@@ -20,7 +20,7 @@ Location: `qml/components/control/buttons/Stepper.qml`
 Computed properties:
 
 - `iconWidth`, `iconHeight` (mode-dependent visual contract)
-- `iconBounds` (actual centered icon frame inside the `16 x 16` button)
+- `iconBounds` (actual centered icon artwork bounds inside the square button)
 - `resolvedIconColor` (enabled-aware arrow color)
 - `resolvedIconName` (maps `tone` + `arrow` to the shipped static SVG asset)
 
@@ -35,8 +35,8 @@ Injected methods:
 
 ## Visual Contract
 
-- Fixed frame: `16 x 16` (`Theme.iconSm`)
-- Corner radius: `Theme.radiusSm` (`4`)
+- Fixed frame: `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile)
+- Corner radius: `Theme.radiusSm` (`4` on desktop, `5` on mobile)
 - Primary tone:
   - background: `Theme.primary`
   - icon: `Theme.accentWhite`
@@ -61,7 +61,7 @@ LV.Stepper {
 
 - Resolves the exact shipped Figma export from `resources/iconset/Stepper*.svg` instead of rebuilding the chevrons procedurally at runtime.
 - Requests a supersampled `Image.sourceSize` from `RenderQuality.effectiveSupersampleScaleValue` and `Screen.devicePixelRatio`, so the static SVG stays crisp on HiDPI targets.
-- Preserves the public chevron geometry contract (`10 x 6` or `6.436 x 11.146`) through `iconWidth`, `iconHeight`, and `iconBounds`.
+- Preserves the SVG artwork ratios from the former 16px frame. At the desktop 18px baseline, the single chevron is `11.25 x 6.75` and the combined chevron is approximately `7.241 x 12.539` through `iconWidth`, `iconHeight`, and `iconBounds`.
 - Keeps the hover/press/disabled mouse pipeline local to the component, while the rendered artwork comes from the pre-extracted SVG resources.
 - Runs injected `method` and `methods` through the shared button method registry whenever `clicked()` is emitted.
 

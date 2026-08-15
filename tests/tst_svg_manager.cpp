@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include <QDir>
+#include <QImage>
 #include <QSignalSpy>
 #include <QTemporaryFile>
 #include <QUrl>
@@ -17,9 +18,44 @@ class SvgManagerTests : public QObject
     Q_OBJECT
 
 private slots:
+    void svg_manager_defaults_to_square_18_logical_pixels();
     void svg_manager_generates_png_and_clamps();
     void svg_manager_error_paths_and_cache_signals();
 };
+
+void SvgManagerTests::svg_manager_defaults_to_square_18_logical_pixels()
+{
+    SvgManager manager;
+    manager.setMaximumScale(1.0);
+    manager.setMinimumScale(1.0);
+    manager.setVectorFirst(false);
+
+    const QByteArray svg = QByteArrayLiteral(
+        "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'>"
+        "<rect x='0' y='0' width='16' height='8' fill='#ff453a'/></svg>");
+    const QString svgUrl = QStringLiteral("data:image/svg+xml;base64,") + QString::fromLatin1(svg.toBase64());
+    const QString rasterUrl = manager.icon(svgUrl);
+    QVERIFY(rasterUrl.startsWith(QStringLiteral("data:image/png;base64,")));
+
+    const qsizetype separator = rasterUrl.indexOf(QLatin1Char(','));
+    QVERIFY(separator > 0);
+    const QImage raster = QImage::fromData(QByteArray::fromBase64(rasterUrl.mid(separator + 1).toLatin1()));
+    QVERIFY(!raster.isNull());
+    QCOMPARE(raster.size(), QSize(18, 18));
+
+    QRect paintedBounds;
+    for (int y = 0; y < raster.height(); ++y) {
+        for (int x = 0; x < raster.width(); ++x) {
+            if (raster.pixelColor(x, y).alpha() > 0)
+                paintedBounds |= QRect(x, y, 1, 1);
+        }
+    }
+    QCOMPARE(paintedBounds.width(), 18);
+    QVERIFY(paintedBounds.height() >= 9);
+    QVERIFY(paintedBounds.height() <= 10);
+    QCOMPARE(raster.pixelColor(raster.width() / 2, 0).alpha(), 0);
+    QCOMPARE(raster.pixelColor(raster.width() / 2, raster.height() - 1).alpha(), 0);
+}
 
 void SvgManagerTests::svg_manager_generates_png_and_clamps()
 {

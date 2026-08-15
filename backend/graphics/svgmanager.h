@@ -29,7 +29,7 @@ class SvgManager : public QObject
 public:
     explicit SvgManager(QObject *parent = nullptr);
 
-    Q_INVOKABLE QString icon(const QString &svgUrl, int logicalSize = 16, qreal scale = 0.0);
+    Q_INVOKABLE QString icon(const QString &svgUrl, int logicalSize = 18, qreal scale = 0.0);
     Q_INVOKABLE qreal deviceScale() const;
     Q_INVOKABLE void clearCache();
     Q_INVOKABLE void ensureMinimumScale(qreal value);

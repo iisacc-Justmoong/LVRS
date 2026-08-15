@@ -141,6 +141,7 @@ Controls.ApplicationWindow {
     property alias navTitleVisible: scaffold.navTitleVisible
     property alias navWidth: scaffold.navWidth
     property alias navDrawerWidth: scaffold.navDrawerWidth
+    property alias navigationIconSize: scaffold.navigationIconSize
     property alias wideBreakpoint: scaffold.wideBreakpoint
     property alias scaffoldLayoutMode: scaffold.layoutMode
     property alias scaffoldLayoutPlatform: scaffold.layoutPlatform
@@ -500,6 +501,7 @@ Controls.ApplicationWindow {
             property bool navTitleVisible: true
             property int navWidth: windowRoot.backendNavWidth
             property int navDrawerWidth: windowRoot.backendNavDrawerWidth
+            property int navigationIconSize: Theme.iconSm
             property int wideBreakpoint: windowRoot.backendWideBreakpoint
             property string layoutMode: "auto" // auto, mobile, desktop
             property string layoutPlatform: windowRoot.canonicalPlatform
@@ -918,6 +920,20 @@ Controls.ApplicationWindow {
                             visible: control.itemIcon.length > 0
                             text: control.itemIcon
                             color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                            font.pixelSize: root.navigationIconSize
+                            fontSizeMode: Text.Fit
+                            minimumPixelSize: 1
+                            lineHeight: root.navigationIconSize
+                            lineHeightMode: Text.FixedHeight
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            clip: true
+                            Layout.preferredWidth: root.navigationIconSize
+                            Layout.preferredHeight: root.navigationIconSize
+                            Layout.minimumWidth: root.navigationIconSize
+                            Layout.minimumHeight: root.navigationIconSize
+                            Layout.maximumWidth: root.navigationIconSize
+                            Layout.maximumHeight: root.navigationIconSize
                         }
         
                         Label {
@@ -989,6 +1005,20 @@ Controls.ApplicationWindow {
                             visible: control.itemIcon.length > 0
                             text: control.itemIcon
                             color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                            font.pixelSize: root.navigationIconSize
+                            fontSizeMode: Text.Fit
+                            minimumPixelSize: 1
+                            lineHeight: root.navigationIconSize
+                            lineHeightMode: Text.FixedHeight
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            clip: true
+                            Layout.preferredWidth: root.navigationIconSize
+                            Layout.preferredHeight: root.navigationIconSize
+                            Layout.minimumWidth: root.navigationIconSize
+                            Layout.minimumHeight: root.navigationIconSize
+                            Layout.maximumWidth: root.navigationIconSize
+                            Layout.maximumHeight: root.navigationIconSize
                         }
         
                         Label {
@@ -1060,6 +1090,16 @@ Controls.ApplicationWindow {
                             visible: control.itemIcon.length > 0
                             text: control.itemIcon
                             color: control.highlighted ? Theme.textPrimary : Theme.textTertiary
+                            width: root.navigationIconSize
+                            height: root.navigationIconSize
+                            font.pixelSize: root.navigationIconSize
+                            fontSizeMode: Text.Fit
+                            minimumPixelSize: 1
+                            lineHeight: root.navigationIconSize
+                            lineHeightMode: Text.FixedHeight
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            clip: true
                         }
         
                         Label {

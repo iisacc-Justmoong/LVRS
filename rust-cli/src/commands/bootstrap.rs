@@ -5,6 +5,7 @@ use std::cmp::Ordering;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 const DESKTOP_MOBILE_PLATFORMS: &str = "macos;linux;windows;ios;android";
 const DESKTOP_MOBILE_WASM_PLATFORMS: &str = "macos;linux;windows;ios;android;wasm";
@@ -206,11 +207,14 @@ pub(crate) fn apply_auto_bootstrap_hints(
         }
     }
 
-    if selected_platforms.iter().any(|p| p == "ios")
-        && should_inject_var(cmake_args, "LVRS_BOOTSTRAP_IOS_ARCHITECTURES")
-    {
-        inject_cmake_var(cmake_args, "LVRS_BOOTSTRAP_IOS_ARCHITECTURES", "arm64");
-        injected.push("LVRS_BOOTSTRAP_IOS_ARCHITECTURES=arm64".to_string());
+    if selected_platforms.iter().any(|p| p == "ios") {
+        if let Some(warning) = detect_ios_bootstrap_toolchain_warning() {
+            warnings.push(warning);
+        }
+        if should_inject_var(cmake_args, "LVRS_BOOTSTRAP_IOS_ARCHITECTURES") {
+            inject_cmake_var(cmake_args, "LVRS_BOOTSTRAP_IOS_ARCHITECTURES", "arm64");
+            injected.push("LVRS_BOOTSTRAP_IOS_ARCHITECTURES=arm64".to_string());
+        }
     }
 
     if selected_platforms.iter().any(|p| p == "android") {
@@ -554,6 +558,93 @@ fn detect_emscripten_toolchain(emsdk_root: Option<&Path>) -> Option<PathBuf> {
     candidates.into_iter().find(|candidate| candidate.is_file())
 }
 
+fn detect_ios_bootstrap_toolchain_warning() -> Option<String> {
+    if install::detect_host_platform() != "macos" {
+        return Some("iOS bootstrap requires a macOS host with full Xcode.".to_string());
+    }
+
+    let xcodebuild_output = match Command::new("xcodebuild").arg("-version").output() {
+        Ok(output) => output,
+        Err(error) => {
+            return Some(format!("iOS bootstrap cannot run xcodebuild: {error}"));
+        }
+    };
+    let xcodebuild_text = command_output_text(&xcodebuild_output.stdout, &xcodebuild_output.stderr);
+    if !xcodebuild_output.status.success() {
+        return Some(format!(
+            "iOS bootstrap requires a selected full Xcode: {}",
+            nonempty_or_default(&xcodebuild_text, "xcodebuild -version failed")
+        ));
+    }
+    if !xcode_version_output_is_supported(&xcodebuild_text) {
+        return Some(
+            "iOS bootstrap requires xcodebuild to report a supported Xcode version.".to_string(),
+        );
+    }
+
+    let xcrun_output = match Command::new("xcrun")
+        .args(["--sdk", "iphoneos", "--show-sdk-path"])
+        .output()
+    {
+        Ok(output) => output,
+        Err(error) => {
+            return Some(format!("iOS bootstrap cannot run xcrun: {error}"));
+        }
+    };
+    let xcrun_text = command_output_text(&xcrun_output.stdout, &xcrun_output.stderr);
+    if !xcrun_output.status.success() {
+        return Some(format!(
+            "iOS bootstrap requires an iPhoneOS SDK: {}",
+            nonempty_or_default(&xcrun_text, "xcrun could not resolve the iphoneos SDK")
+        ));
+    }
+
+    let sdk_path = String::from_utf8_lossy(&xcrun_output.stdout)
+        .trim()
+        .to_string();
+    if !Path::new(&sdk_path).is_dir() {
+        return Some(format!(
+            "iOS bootstrap requires an existing iPhoneOS SDK path; xcrun returned '{}'.",
+            sdk_path
+        ));
+    }
+
+    None
+}
+
+fn command_output_text(stdout: &[u8], stderr: &[u8]) -> String {
+    let mut text = String::new();
+    text.push_str(String::from_utf8_lossy(stdout).trim());
+    if !stderr.is_empty() {
+        if !text.is_empty() {
+            text.push(' ');
+        }
+        text.push_str(String::from_utf8_lossy(stderr).trim());
+    }
+    text.trim().to_string()
+}
+
+fn nonempty_or_default<'a>(value: &'a str, fallback: &'a str) -> &'a str {
+    if value.trim().is_empty() {
+        fallback
+    } else {
+        value.trim()
+    }
+}
+
+fn xcode_version_output_is_supported(output: &str) -> bool {
+    output.lines().any(|line| {
+        let Some(version) = line.trim().strip_prefix("Xcode ") else {
+            return false;
+        };
+        version
+            .chars()
+            .next()
+            .map(|ch| ch.is_ascii_digit())
+            .unwrap_or(false)
+    })
+}
+
 fn resolve_home_dir() -> Result<PathBuf> {
     if let Ok(home) = env::var("HOME") {
         if !home.is_empty() {
@@ -598,5 +689,18 @@ mod tests {
             default_bootstrap_platforms_for_host("windows", true),
             "windows;android;wasm"
         );
+    }
+
+    #[test]
+    fn xcode_version_output_requires_full_xcode_version_line() {
+        assert!(xcode_version_output_is_supported(
+            "Xcode 16.4\nBuild version 16F6\n"
+        ));
+        assert!(!xcode_version_output_is_supported(
+            "CommandLineTools 16.4\nBuild version 16F6\n"
+        ));
+        assert!(!xcode_version_output_is_supported(
+            "xcode-select: error: tool 'xcodebuild' requires Xcode"
+        ));
     }
 }

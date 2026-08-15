@@ -35,10 +35,10 @@ Item {
     readonly property bool hovered: interactionArea.containsMouse && effectiveEnabled
     readonly property bool down: interactionArea.pressed && effectiveEnabled
     readonly property real figmaStepperSize: Theme.iconSm
-    readonly property real figmaChevronWidth: Theme.scaleRealMetric(10)
-    readonly property real figmaChevronHeight: Theme.scaleRealMetric(6)
-    readonly property real figmaUpDownChevronWidth: Theme.scaleRealMetric(6.43604)
-    readonly property real figmaUpDownChevronHeight: Theme.scaleRealMetric(11.1455)
+    readonly property real figmaChevronWidth: figmaStepperSize * (10.0 / 16.0)
+    readonly property real figmaChevronHeight: figmaStepperSize * (6.0 / 16.0)
+    readonly property real figmaUpDownChevronWidth: figmaStepperSize * (6.43604 / 16.0)
+    readonly property real figmaUpDownChevronHeight: figmaStepperSize * (11.1455 / 16.0)
     readonly property real iconWidth: control.arrow === Stepper.UpDown ? figmaUpDownChevronWidth : figmaChevronWidth
     readonly property real iconHeight: control.arrow === Stepper.UpDown ? figmaUpDownChevronHeight : figmaChevronHeight
     readonly property int iconSourceWidth: Math.max(1, Math.ceil(figmaStepperSize * iconRasterScale))

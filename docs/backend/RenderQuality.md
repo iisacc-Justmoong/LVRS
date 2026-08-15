@@ -99,6 +99,7 @@ If `tier=-1`, the automatically detected device tier is applied. Stock LVRS shel
 - major icon/image components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
 - snapshot-driven control icons (`Stepper`, `InputField` search icon) via supersampled `Image.sourceSize`
 - `Canvas`-based control icons (`CheckBox`, `ToggleSwitch`) via supersampled `canvasSize` with per-axis ceil rounding
+- `SvgManager.icon(...)` uses an `18 x 18` logical default when callers omit `logicalSize`; raster output remains square while SVG content keeps its aspect ratio.
 
 Applied behavior:
 

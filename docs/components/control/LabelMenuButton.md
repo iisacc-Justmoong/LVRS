@@ -19,6 +19,7 @@ Text and tone:
 
 Indicator:
 
+- `indicatorSize` (readonly, `Theme.iconSm`: desktop `18 x 18`, mobile `23 x 23`)
 - `resolvedIndicatorName` from tone/enabled state
 - rendered via `Theme.iconPath(...)`
 - supersampling-aware icon source size (`indicatorSourceSize`)
@@ -34,7 +35,7 @@ Layout:
 
 - fixed `figmaButtonHeight` (`Theme.gap20`)
 - `horizontalPadding: Theme.gap8`
-- `verticalPadding: Theme.gap2`
+- `verticalPadding: Theme.scaleMetric(1)`
 - `spacing: Theme.gap2`
 
 ## Usage

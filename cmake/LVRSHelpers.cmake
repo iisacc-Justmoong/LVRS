@@ -825,6 +825,79 @@ function(_lvrs_internal_report_missing_bootstrap_qt_kit bootstrap_kind platform)
     )
 endfunction()
 
+function(_lvrs_internal_report_missing_ios_bootstrap_toolchain bootstrap_kind reason)
+    if(reason STREQUAL "")
+        set(reason "unknown reason")
+    endif()
+    string(REPLACE "\n" " " reason "${reason}")
+    string(STRIP "${reason}" reason)
+    message(STATUS
+        "LVRS ${bootstrap_kind} bootstrap targets: skipping 'ios' "
+        "(Xcode/iPhoneOS SDK not ready: ${reason}). Select a full Xcode with "
+        "xcode-select or restrict LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS/LVRS_RUNTIME_PLATFORMS."
+    )
+endfunction()
+
+function(_lvrs_internal_ios_bootstrap_toolchain_ready out_var reason_var)
+    set(_lvrs_ready FALSE)
+    set(_lvrs_reason "")
+
+    if(NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        set(_lvrs_reason "host is not macOS")
+    else()
+        find_program(_lvrs_xcodebuild_program NAMES xcodebuild)
+        if(NOT _lvrs_xcodebuild_program)
+            set(_lvrs_reason "xcodebuild not found")
+        else()
+            execute_process(
+                COMMAND "${_lvrs_xcodebuild_program}" -version
+                RESULT_VARIABLE _lvrs_xcodebuild_result
+                OUTPUT_VARIABLE _lvrs_xcodebuild_stdout
+                ERROR_VARIABLE _lvrs_xcodebuild_stderr
+            )
+            set(_lvrs_xcodebuild_output "${_lvrs_xcodebuild_stdout}\n${_lvrs_xcodebuild_stderr}")
+            string(STRIP "${_lvrs_xcodebuild_output}" _lvrs_xcodebuild_output)
+
+            if(NOT _lvrs_xcodebuild_result EQUAL 0)
+                set(_lvrs_reason "${_lvrs_xcodebuild_output}")
+                if(_lvrs_reason STREQUAL "")
+                    set(_lvrs_reason "xcodebuild -version failed")
+                endif()
+            elseif(NOT _lvrs_xcodebuild_output MATCHES "(^|\n)Xcode [0-9][0-9.]*")
+                set(_lvrs_reason "xcodebuild did not report a supported Xcode version")
+            else()
+                find_program(_lvrs_xcrun_program NAMES xcrun)
+                if(NOT _lvrs_xcrun_program)
+                    set(_lvrs_reason "xcrun not found")
+                else()
+                    execute_process(
+                        COMMAND "${_lvrs_xcrun_program}" --sdk iphoneos --show-sdk-path
+                        RESULT_VARIABLE _lvrs_xcrun_result
+                        OUTPUT_VARIABLE _lvrs_iphoneos_sdk_path
+                        ERROR_VARIABLE _lvrs_xcrun_stderr
+                    )
+                    string(STRIP "${_lvrs_iphoneos_sdk_path}" _lvrs_iphoneos_sdk_path)
+                    string(STRIP "${_lvrs_xcrun_stderr}" _lvrs_xcrun_stderr)
+
+                    if(NOT _lvrs_xcrun_result EQUAL 0)
+                        set(_lvrs_reason "${_lvrs_xcrun_stderr}")
+                        if(_lvrs_reason STREQUAL "")
+                            set(_lvrs_reason "xcrun could not resolve the iphoneos SDK")
+                        endif()
+                    elseif(NOT IS_DIRECTORY "${_lvrs_iphoneos_sdk_path}")
+                        set(_lvrs_reason "iphoneos SDK path does not exist")
+                    else()
+                        set(_lvrs_ready TRUE)
+                    endif()
+                endif()
+            endif()
+        endif()
+    endif()
+
+    set(${out_var} "${_lvrs_ready}" PARENT_SCOPE)
+    set(${reason_var} "${_lvrs_reason}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_default_toolchain_for_qt_prefix qt_prefix out_var)
     if(qt_prefix STREQUAL "")
         set(${out_var} "" PARENT_SCOPE)
@@ -1335,6 +1408,19 @@ function(lvrs_create_framework_bootstrap_targets)
             _lvrs_internal_report_missing_bootstrap_qt_kit("framework" "${_lvrs_platform}")
             continue()
         endif()
+        if(_lvrs_platform STREQUAL "ios")
+            _lvrs_internal_ios_bootstrap_toolchain_ready(
+                _lvrs_ios_toolchain_ready
+                _lvrs_ios_toolchain_reason
+            )
+            if(NOT _lvrs_ios_toolchain_ready)
+                _lvrs_internal_report_missing_ios_bootstrap_toolchain(
+                    "framework"
+                    "${_lvrs_ios_toolchain_reason}"
+                )
+                continue()
+            endif()
+        endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)
 
@@ -1509,6 +1595,19 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
         if(_lvrs_qt_prefix STREQUAL "")
             _lvrs_internal_report_missing_bootstrap_qt_kit("app" "${_lvrs_platform}")
             continue()
+        endif()
+        if(_lvrs_platform STREQUAL "ios")
+            _lvrs_internal_ios_bootstrap_toolchain_ready(
+                _lvrs_ios_toolchain_ready
+                _lvrs_ios_toolchain_reason
+            )
+            if(NOT _lvrs_ios_toolchain_ready)
+                _lvrs_internal_report_missing_ios_bootstrap_toolchain(
+                    "app"
+                    "${_lvrs_ios_toolchain_reason}"
+                )
+                continue()
+            endif()
         endif()
         _lvrs_internal_bootstrap_toolchain_for_platform("${_lvrs_platform}" "${_lvrs_qt_prefix}" _lvrs_toolchain_file)
         _lvrs_internal_bootstrap_generator_for_platform("${_lvrs_platform}" _lvrs_generator)

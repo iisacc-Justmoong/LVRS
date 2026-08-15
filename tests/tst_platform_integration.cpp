@@ -394,9 +394,9 @@ Item {
         listControl.listWidth === 213
         && listControl.minimumListHeight === 279
         && menuItem.itemWidth === 201
-        && menuItem.itemHeight === 20
-        && menuItem.iconSize === 20
-        && checkBox.boxSize === 21
+        && menuItem.itemHeight === 23
+        && menuItem.iconSize === 23
+        && checkBox.boxSize === 23
 }
 )";
 

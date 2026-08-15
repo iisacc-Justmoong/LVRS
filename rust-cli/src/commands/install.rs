@@ -1394,22 +1394,41 @@ pub(crate) fn resolve_project_root(
     project_root_override: Option<PathBuf>,
     install_prefix_hint: Option<&Path>,
 ) -> Result<PathBuf> {
+    resolve_project_root_with_env_candidate(
+        project_root_override,
+        install_prefix_hint,
+        resolve_root_from_env(),
+    )
+}
+
+fn resolve_project_root_with_env_candidate(
+    project_root_override: Option<PathBuf>,
+    install_prefix_hint: Option<&Path>,
+    env_root_candidate: Option<PathBuf>,
+) -> Result<PathBuf> {
     if let Some(path) = project_root_override {
         return validate_project_root_candidate(path, "bootstrap override");
     }
 
-    if let Some(path) = resolve_root_from_env() {
-        return validate_project_root_candidate(path, "environment");
-    }
+    let env_root_error = if let Some(path) = env_root_candidate {
+        match validate_project_root_candidate(path, "environment") {
+            Ok(path) => return Ok(path),
+            Err(error) => Some(error),
+        }
+    } else {
+        None
+    };
 
     let cwd = env::current_dir().context("failed to read current working directory")?;
     if let Some(path) = find_project_root(&cwd) {
+        print_ignored_env_project_root_error(env_root_error.as_ref());
         return Ok(path);
     }
 
     if let Ok(executable) = env::current_exe() {
         if let Some(start) = executable.parent() {
             if let Some(path) = find_project_root(start) {
+                print_ignored_env_project_root_error(env_root_error.as_ref());
                 return Ok(path);
             }
         }
@@ -1417,18 +1436,29 @@ pub(crate) fn resolve_project_root(
 
     let manifest_hint = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
     if let Some(path) = find_project_root(&manifest_hint) {
+        print_ignored_env_project_root_error(env_root_error.as_ref());
         return Ok(path);
     }
 
     if let Some(path) = resolve_project_root_from_installed_source(install_prefix_hint)? {
+        print_ignored_env_project_root_error(env_root_error.as_ref());
         return Ok(path);
     }
 
+    if let Some(error) = env_root_error {
+        eprintln!("[LVRS] Ignored invalid project root environment value: {error}");
+    }
     bail!(
         "failed to locate LVRS repository root from {} (expected CMakeLists.txt, qml, backend). Set {} to repository root when launching outside the tree.",
         cwd.display(),
         ENV_LVRS_ROOT
     )
+}
+
+fn print_ignored_env_project_root_error(error: Option<&anyhow::Error>) {
+    if let Some(error) = error {
+        eprintln!("[LVRS] Ignoring invalid project root environment value: {error}");
+    }
 }
 
 fn resolve_project_root_from_installed_source(
@@ -1830,7 +1860,9 @@ fn install_source_snapshot(
             continue;
         }
 
-        if path.is_dir() {
+        if path.is_dir() && name == "rust-cli" {
+            copy_rust_cli_snapshot(&path, &source_install_dir.join(&name))?;
+        } else if path.is_dir() {
             run_cmake_copy_directory(&path, &source_install_dir.join(&name))?;
         } else {
             run_cmake_copy_file(&path, source_install_dir)?;
@@ -1989,6 +2021,34 @@ fn should_skip_snapshot_entry(name: &str) -> bool {
         || name == "build"
         || name.starts_with("build-")
         || name.starts_with("cmake-build-")
+}
+
+fn copy_rust_cli_snapshot(source: &Path, destination: &Path) -> Result<()> {
+    fs::create_dir_all(destination).with_context(|| {
+        format!(
+            "failed to create Rust CLI snapshot directory: {}",
+            destination.display()
+        )
+    })?;
+
+    for entry in fs::read_dir(source)
+        .with_context(|| format!("failed to read Rust CLI source: {}", source.display()))?
+    {
+        let entry = entry?;
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name == "target" {
+            continue;
+        }
+
+        if path.is_dir() {
+            run_cmake_copy_directory(&path, &destination.join(&name))?;
+        } else {
+            run_cmake_copy_file(&path, destination)?;
+        }
+    }
+
+    Ok(())
 }
 
 fn run_cmake_copy_directory(source: &Path, destination: &Path) -> Result<()> {
@@ -2271,7 +2331,28 @@ mod tests {
     use super::*;
     use std::env;
     use std::path::{Path, PathBuf};
+    use std::sync::Mutex;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    static CURRENT_DIR_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    struct CurrentDirGuard {
+        original: PathBuf,
+    }
+
+    impl CurrentDirGuard {
+        fn enter(path: &Path) -> Result<Self> {
+            let original = env::current_dir()?;
+            env::set_current_dir(path)?;
+            Ok(Self { original })
+        }
+    }
+
+    impl Drop for CurrentDirGuard {
+        fn drop(&mut self) {
+            let _ = env::set_current_dir(&self.original);
+        }
+    }
 
     fn temp_test_dir(label: &str) -> PathBuf {
         let nanos = SystemTime::now()
@@ -2409,6 +2490,27 @@ mod tests {
     }
 
     #[test]
+    fn resolve_project_root_falls_back_to_cwd_when_env_prefix_snapshot_is_missing() -> Result<()> {
+        let _guard = CURRENT_DIR_TEST_LOCK.lock().expect("current dir test lock");
+        let root = temp_test_dir("env-prefix-missing-snapshot");
+        let checkout = root.join("Workspace").join("LVRS");
+        let install_prefix = root.join("prefix");
+
+        create_project_root(&checkout)?;
+        fs::create_dir_all(&install_prefix)?;
+
+        {
+            let _cwd = CurrentDirGuard::enter(&checkout)?;
+            let resolved =
+                resolve_project_root_with_env_candidate(None, None, Some(install_prefix.clone()))?;
+            assert!(paths_refer_to_same_location(&resolved, &checkout));
+        }
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
     fn install_source_snapshot_keeps_in_place_snapshot_contents() -> Result<()> {
         let root = temp_test_dir("in-place-snapshot");
         create_project_root(&root)?;
@@ -2439,6 +2541,29 @@ mod tests {
             "fresh"
         );
         assert!(root.join(INSTALL_SOURCE_INFO_FILE).is_file());
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn install_source_snapshot_excludes_nested_build_artifacts() -> Result<()> {
+        let root = temp_test_dir("snapshot-build-artifacts");
+        let checkout = root.join("checkout");
+        let snapshot = root.join("snapshot");
+        create_project_root(&checkout)?;
+
+        let rust_source = checkout.join("rust-cli").join("src");
+        let rust_target = checkout.join("rust-cli").join("target").join("debug");
+        fs::create_dir_all(&rust_source)?;
+        fs::create_dir_all(&rust_target)?;
+        fs::write(rust_source.join("main.rs"), "fn main() {}\n")?;
+        fs::write(rust_target.join("stale-build-output"), "stale")?;
+
+        install_source_snapshot(&checkout, &snapshot, &root.join("build"), false)?;
+
+        assert!(snapshot.join("rust-cli/src/main.rs").is_file());
+        assert!(!snapshot.join("rust-cli/target").exists());
 
         remove_path(&root)?;
         Ok(())

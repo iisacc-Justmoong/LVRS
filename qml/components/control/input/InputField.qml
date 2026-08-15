@@ -29,10 +29,13 @@ AbstractInputBar {
         : 1.0
     readonly property real searchIconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property real searchIconRasterScale: Math.max(1.0, searchIconSupersampleScale * searchIconHiDpiScale)
-    readonly property int searchIconSize: Theme.scaleMetric(12)
+    readonly property int searchIconSize: Theme.iconSm
     readonly property url searchIconSource: Theme.iconPath("generalsearch")
     readonly property url renderedSearchIconSource: RenderQuality.resolveTextureSource(searchIconSource)
     readonly property int searchIconSourceSize: Math.max(1, Math.ceil(searchIconSize * searchIconRasterScale))
+    readonly property int clearIconSize: Theme.iconSm
+    readonly property real clearIconMarkLength: clearIconSize * (8.0 / 14.0)
+    readonly property real clearIconMarkThickness: clearIconSize * (1.4 / 14.0)
 
     readonly property int resolvedStyle: style === inlineStyle ? inlineStyle : filledStyle
     readonly property color frameFillColor: resolvedStyle === inlineStyle
@@ -93,8 +96,8 @@ AbstractInputBar {
 
     trailingInternalItems: Item {
         id: clearButton
-        width: control.showClearButton ? Theme.iconSm : 0
-        height: Theme.iconSm
+        width: control.showClearButton ? control.clearIconSize : 0
+        height: control.clearIconSize
         visible: width > 0
         readonly property bool hovered: clearInteractionArea.containsMouse && clearInteractionArea.enabled
         readonly property bool pressed: clearInteractionArea.pressed && clearInteractionArea.enabled
@@ -109,16 +112,16 @@ AbstractInputBar {
         Rectangle {
             id: clearIconBubble
             anchors.centerIn: parent
-            width: Theme.scaleMetric(14)
-            height: Theme.scaleMetric(14)
-            radius: Theme.scaleMetric(7)
+            width: control.clearIconSize
+            height: control.clearIconSize
+            radius: control.clearIconSize * 0.5
             color: clearButton.backgroundColor
             antialiasing: true
 
             Rectangle {
-                width: Theme.scaleMetric(8)
-                height: Theme.scaleRealMetric(1.4)
-                radius: Theme.scaleRealMetric(0.7)
+                width: control.clearIconMarkLength
+                height: control.clearIconMarkThickness
+                radius: control.clearIconMarkThickness * 0.5
                 color: control.clearIconForegroundColor
                 anchors.centerIn: parent
                 rotation: 45
@@ -126,9 +129,9 @@ AbstractInputBar {
             }
 
             Rectangle {
-                width: Theme.scaleMetric(8)
-                height: Theme.scaleRealMetric(1.4)
-                radius: Theme.scaleRealMetric(0.7)
+                width: control.clearIconMarkLength
+                height: control.clearIconMarkThickness
+                radius: control.clearIconMarkThickness * 0.5
                 color: control.clearIconForegroundColor
                 anchors.centerIn: parent
                 rotation: -45

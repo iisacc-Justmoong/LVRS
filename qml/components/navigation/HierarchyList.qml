@@ -35,8 +35,8 @@ Item {
     property int generatedIndentStep: Theme.scaleMetric(8)
     property int generatedRowHeight: Theme.scaleMetric(20)
     property int generatedItemWidth: Theme.scaleMetric(200)
-    property int generatedIconSize: Theme.scaleMetric(16)
-    property int generatedChevronSize: Theme.scaleMetric(16)
+    property int generatedIconSize: Theme.iconSm
+    property int generatedChevronSize: Theme.iconSm
     property Component itemDelegate: defaultItemDelegate
     property bool autoExpandAncestorsOnActivate: true
     readonly property bool editableSupported: hierarchyModel.revision >= 0

@@ -22,11 +22,12 @@ AbstractButton {
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
-    readonly property int indicatorSourceSize: Math.max(1, Math.round(Theme.iconSm * control.iconSupersampleScale * control.iconHiDpiScale))
+    readonly property int indicatorSize: Theme.iconSm
+    readonly property int indicatorSourceSize: Math.max(1, Math.round(control.indicatorSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
     horizontalPadding: Theme.gap8
-    verticalPadding: Theme.gap2
+    verticalPadding: Theme.scaleMetric(1)
     spacing: Theme.gap2
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
@@ -53,12 +54,12 @@ AbstractButton {
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: RenderQuality.mipmapEnabled
-            Layout.preferredWidth: Theme.iconSm
-            Layout.preferredHeight: Theme.iconSm
-            Layout.minimumWidth: Theme.iconSm
-            Layout.minimumHeight: Theme.iconSm
-            Layout.maximumWidth: Theme.iconSm
-            Layout.maximumHeight: Theme.iconSm
+            Layout.preferredWidth: control.indicatorSize
+            Layout.preferredHeight: control.indicatorSize
+            Layout.minimumWidth: control.indicatorSize
+            Layout.minimumHeight: control.indicatorSize
+            Layout.maximumWidth: control.indicatorSize
+            Layout.maximumHeight: control.indicatorSize
             Layout.alignment: Qt.AlignVCenter
         }
     }
