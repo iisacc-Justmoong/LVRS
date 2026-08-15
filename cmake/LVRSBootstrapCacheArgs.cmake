@@ -1,0 +1,8 @@
+macro(_lvrs_bootstrap_append_cache_arg cmd_list key value)
+    string(LENGTH "${value}" _lvrs_cache_value_length)
+    if(_lvrs_cache_value_length GREATER 0)
+        string(REPLACE ";" "\\;" _lvrs_cache_value "${value}")
+        list(APPEND ${cmd_list} "-D${key}=${_lvrs_cache_value}")
+    endif()
+    unset(_lvrs_cache_value_length)
+endmacro()

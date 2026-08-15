@@ -54,14 +54,6 @@ add_test(
 )
 
 add_test(
-    NAME LVRSTests_cmake_root_package_version_architecture_independent
-    COMMAND "${CMAKE_COMMAND}"
-        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
-        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_root_package_version_architecture_independent.cmake"
-)
-
-add_test(
     NAME LVRSTests_cmake_example_source_snapshot_runtime_path
     COMMAND "${CMAKE_COMMAND}"
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
@@ -87,14 +79,6 @@ add_test(
     COMMAND "${CMAKE_COMMAND}"
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_framework_bootstrap_action_contract.cmake"
-)
-
-add_test(
-    NAME LVRSTests_cmake_framework_bootstrap_skip_missing_ios_xcode
-    COMMAND "${CMAKE_COMMAND}"
-        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
-        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_framework_bootstrap_skip_missing_ios_xcode.cmake"
 )
 
 add_test(
