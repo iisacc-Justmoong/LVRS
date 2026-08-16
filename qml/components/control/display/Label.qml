@@ -15,6 +15,7 @@ Item {
     readonly property int disabled: 7
 
     property int style: description
+    property bool sizeToContentHeight: false
 
     readonly property color resolvedStyleColor: {
         if (style === title || style === title2 || style === header || style === header2)
@@ -122,6 +123,8 @@ Item {
     property alias verticalAlignment: textNode.verticalAlignment
     property alias lineHeight: textNode.lineHeight
     property alias lineHeightMode: textNode.lineHeightMode
+    readonly property alias contentHeight: textNode.contentHeight
+    readonly property alias lineCount: textNode.lineCount
     property alias maximumLineCount: textNode.maximumLineCount
     property alias minimumPixelSize: textNode.minimumPixelSize
     property alias minimumPointSize: textNode.minimumPointSize
@@ -137,7 +140,6 @@ Item {
     Text {
         id: textNode
         width: control.width > 0 ? control.width : implicitWidth
-        height: control.height > 0 ? control.height : implicitHeight
         color: control.resolvedStyleColor
         font.family: Theme.fontBody
         font.pixelSize: control.stylePixelSize
@@ -150,6 +152,14 @@ Item {
         renderType: RenderQuality.nativeTextRendering ? Text.NativeRendering : Text.QtRendering
     }
 
+    Binding {
+        target: textNode
+        property: "height"
+        when: !control.sizeToContentHeight
+        value: control.height > 0 ? control.height : textNode.implicitHeight
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
     onStyleChanged: {
         if (!Theme.isThemeTextStyleCompliant(stylePixelSize, styleWeight, styleName))
             Debug.warn("Label", "style-noncompliant", {
@@ -158,7 +168,6 @@ Item {
                 "styleName": styleName
             })
     }
-
 }
 
 // API usage (external):

@@ -3,7 +3,7 @@
 Location: `qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
-It now applies a built-in mobile `1.25x` token profile, so spacing, radius, control sizes, and typography values resolve to enlarged mobile numbers on iOS and Android without relying on root-layer composition scaling.
+It now applies a built-in mobile `1.25x` token profile, so spacing, radius, control sizes, and scalable typography values resolve to enlarged mobile numbers on iOS and Android without relying on root-layer composition scaling. Body typography remains a fixed `13px` size and line height across targets.
 
 ## Token Groups
 
@@ -24,7 +24,7 @@ Compact icon baseline:
 
 - `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.
 - When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `1.25x`.
-- This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and text pixel sizes / line heights.
+- This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and scalable text pixel sizes / line heights; `textBody` and `textBodyLineHeight` remain fixed at `13`.
 - `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `1.25x` sizing over scaled composition for the stock mobile path.
 
 Preview/test helpers:
@@ -44,18 +44,18 @@ Window base:
 - `window: "#141414"`
 
 Panel background scale (dark, low-saturation, 12 steps):
-- `panelBackground01: "#1B1B1C"`
-- `panelBackground02: "#1D1D1D"`
-- `panelBackground03: "#1F1F20"`
-- `panelBackground04: "#212223"`
-- `panelBackground05: "#242525"`
-- `panelBackground06: "#262728"`
-- `panelBackground07: "#292A2B"`
-- `panelBackground08: "#2C2E2F"`
-- `panelBackground09: "#303232"`
-- `panelBackground10: "#343536"`
-- `panelBackground11: "#373A3B"`
-- `panelBackground12: "#3C3E3F"`
+- `panelBackground01: "#0C0C0D"`
+- `panelBackground02: "#0E0E0E"`
+- `panelBackground03: "#151516"`
+- `panelBackground04: "#191919"`
+- `panelBackground05: "#1D1E1E"`
+- `panelBackground06: "#1F2021"`
+- `panelBackground07: "#242424"`
+- `panelBackground08: "#232424"`
+- `panelBackground09: "#262727"`
+- `panelBackground10: "#282828"`
+- `panelBackground11: "#2D2E2F"`
+- `panelBackground12: "#313233"`
 
 Derived surface aliases:
 - `windowAlt -> panelBackground03`

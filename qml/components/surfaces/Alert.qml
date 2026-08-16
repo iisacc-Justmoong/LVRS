@@ -25,13 +25,15 @@ Item {
     property int shapeStyle: shapeRoundRect
     property int cardCornerRadius: Theme.radiusLg
     property color backdropColor: Theme.overlayBackdrop
-    property color cardBackgroundColor: root.useVerticalActionLayout ? Theme.panelBackground07 : Theme.panelBackground08
+    property color cardBackgroundColor: Theme.panelBackground07
+    property url appIconSource: "qrc:/qt/qml/LVRS/resources/images/alertAppIcon.png"
+    property int appIconSize: Theme.scaleMetric(64)
     property color appIconBackgroundColor: "#C9D4DB"
     property color appIconFrameColor: "#E8F0F5"
     property color appIconInnerColor: "#D8E0E6"
-    readonly property int actionButtonVerticalPadding: Theme.gap8
-    readonly property int actionButtonHeight: Math.max(Theme.gap20,
-                                                       Theme.textBodyLineHeight + (actionButtonVerticalPadding * 2))
+    readonly property real actionButtonVerticalPadding: Theme.scaleRealMetric(4.5)
+    readonly property real actionButtonHeight: Theme.textBodyLineHeight
+                                               + (actionButtonVerticalPadding * 2)
 
     readonly property int preferredWidth: Theme.scaleMetric(328)
     readonly property int sidePadding: Theme.gap24
@@ -100,25 +102,47 @@ Item {
 
     Rectangle {
         id: alertCard
+        objectName: "alertCard"
         width: Math.min(root.maxWidth,
                         Math.max(root.minWidth,
                                  Math.min(root.preferredWidth,
                                           root.width - (root.sidePadding * 2))))
+        height: contentColumn.topPadding
+                + appIconSection.height
+                + textSection.implicitHeight
+                + actionSection.implicitHeight
+                + (contentColumn.spacing * 2)
         radius: root.resolvedCardCornerRadius
         color: root.cardBackgroundColor
         antialiasing: true
+        clip: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
         Column {
             id: contentColumn
+            objectName: "alertContentColumn"
             anchors.fill: parent
             spacing: Theme.gap8
             topPadding: Theme.scaleMetric(32)
 
             Item {
+                id: appIconSection
                 width: parent.width
-                height: Theme.scaleMetric(64)
+                height: root.appIconSize
+
+                Image {
+                    id: appIconImage
+                    objectName: "alertAppIcon"
+                    width: root.appIconSize
+                    height: root.appIconSize
+                    anchors.centerIn: parent
+                    source: root.appIconSource
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: RenderQuality.mipmapEnabled
+                    visible: root.appIconSource.toString().length > 0
+                }
 
                 Rectangle {
                     width: Theme.scaleMetric(48)
@@ -128,6 +152,7 @@ Item {
                     color: root.appIconBackgroundColor
                     border.width: Theme.scaleRealMetric(4)
                     border.color: root.appIconFrameColor
+                    visible: !appIconImage.visible
 
                     Rectangle {
                         anchors.fill: parent
@@ -140,8 +165,11 @@ Item {
             }
 
             Item {
+                id: textSection
                 width: parent.width
-                implicitHeight: textColumn.implicitHeight
+                implicitHeight: titleLineBox.implicitHeight
+                                + messageLineBox.implicitHeight
+                                + (titleLineBox.visible && messageLineBox.visible ? Theme.gap12 : 0)
 
                 Column {
                     id: textColumn
@@ -149,29 +177,56 @@ Item {
                     width: parent.width - (Theme.gap24 * 2)
                     spacing: Theme.gap12
 
-                    Label {
-                        style: title2
-                        text: root.title
+                    Item {
+                        id: titleLineBox
                         visible: root.title.length > 0
-                        color: Theme.textPrimary
-                        wrapMode: Text.WordWrap
                         width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
+                        implicitHeight: visible
+                            ? Math.max(1, titleLabel.lineCount) * titleLabel.styleLineHeight
+                            : 0
+                        height: implicitHeight
+
+                        Label {
+                            id: titleLabel
+                            objectName: "alertTitle"
+                            style: title2
+                            text: root.title
+                            color: Theme.bodyColor
+                            wrapMode: Text.WordWrap
+                            elide: Text.ElideNone
+                            sizeToContentHeight: true
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                        }
                     }
 
-                    Label {
-                        style: body
-                        text: root.message
+                    Item {
+                        id: messageLineBox
                         visible: root.message.length > 0
-                        color: Theme.textSecondary
-                        wrapMode: Text.WordWrap
                         width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
+                        implicitHeight: visible
+                            ? Math.max(1, messageLabel.lineCount) * messageLabel.styleLineHeight
+                            : 0
+                        height: implicitHeight
+
+                        Label {
+                            id: messageLabel
+                            objectName: "alertMessage"
+                            style: body
+                            text: root.message
+                            color: Theme.bodyColor
+                            wrapMode: Text.WordWrap
+                            elide: Text.ElideNone
+                            sizeToContentHeight: true
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                        }
                     }
                 }
             }
 
             Item {
+                id: actionSection
                 width: parent.width
                 readonly property real actionContentHeight: root.useVerticalActionLayout
                     ? verticalActions.implicitHeight
@@ -182,6 +237,7 @@ Item {
 
                 Column {
                     id: verticalActions
+                    objectName: "alertVerticalActions"
                     visible: root.useVerticalActionLayout
                     x: Theme.gap24
                     y: Theme.gap24
@@ -189,6 +245,7 @@ Item {
                     spacing: Theme.gap12
 
                     AlertButton {
+                        objectName: "alertPrimaryVertical"
                         visible: root.resolvedPrimaryText.length > 0
                         width: parent.width
                         text: root.resolvedPrimaryText
@@ -201,6 +258,7 @@ Item {
                     }
 
                     AlertButton {
+                        objectName: "alertSecondaryVertical"
                         visible: root.hasSecondaryAction
                         width: parent.width
                         text: root.resolvedSecondaryText
@@ -213,6 +271,7 @@ Item {
                     }
 
                     AlertButton {
+                        objectName: "alertTertiaryVertical"
                         visible: root.hasTertiaryAction
                         width: parent.width
                         text: root.resolvedTertiaryText
@@ -227,6 +286,7 @@ Item {
 
                 Row {
                     id: horizontalActions
+                    objectName: "alertHorizontalActions"
                     visible: !root.useVerticalActionLayout && root.hasSecondaryAction
                     x: Theme.gap24
                     y: Theme.gap24
@@ -235,6 +295,7 @@ Item {
                     readonly property real buttonWidth: (width - spacing) / 2
 
                     AlertButton {
+                        objectName: "alertPrimaryHorizontal"
                         width: horizontalActions.buttonWidth
                         text: root.resolvedPrimaryText
                         tone: AbstractButton.Primary
@@ -246,6 +307,7 @@ Item {
                     }
 
                     AlertButton {
+                        objectName: "alertSecondaryHorizontal"
                         width: horizontalActions.buttonWidth
                         visible: root.hasSecondaryAction
                         text: root.resolvedSecondaryText
@@ -260,6 +322,7 @@ Item {
 
                 AlertButton {
                     id: singleActionButton
+                    objectName: "alertPrimarySingle"
                     visible: !root.useVerticalActionLayout && !root.hasSecondaryAction && root.resolvedPrimaryText.length > 0
                     x: Theme.gap24
                     y: Theme.gap24

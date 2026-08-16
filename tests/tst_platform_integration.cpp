@@ -367,7 +367,7 @@ Item {
         && LV.Theme.gap8 === 10
         && LV.Theme.dialogMinWidth === 350
         && LV.Theme.textTitle === 33
-        && LV.Theme.textBody === 15
+        && LV.Theme.textBody === 13
         && LV.Theme.textCaption === 14
         && LV.Theme.scaleMetric(17) === 21
         && Math.abs(LV.Theme.scaleRealMetric(1.5) - 1.875) < 0.01
@@ -423,7 +423,7 @@ QtObject {
         && LV.Theme.metricScaleFactor === 1.0
         && LV.Theme.typographyScaleFactor === 1.0
         && LV.Theme.gap8 === 8
-        && LV.Theme.textBody === 12
+        && LV.Theme.textBody === 13
         && LV.Theme.textCaption === 11
 }
 )";

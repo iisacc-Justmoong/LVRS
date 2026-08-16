@@ -24,10 +24,11 @@ Location: `qml/components/control/display/Label.qml`
 ## Core API
 
 - `style`
+- `sizeToContentHeight` (default `false`; enables natural wrapped-content measurement)
 - `text`, `color`, `font`
 - `elide`, `wrapMode`
 - `horizontalAlignment`, `verticalAlignment`
-- `lineHeight`, `lineHeightMode`
+- `lineHeight`, `lineHeightMode`, read-only `contentHeight`, read-only `lineCount`
 - `maximumLineCount`, `fontSizeMode`
 - `textFormat`, `linkColor`
 

@@ -21,7 +21,7 @@ constexpr std::array<TextStyleToken, 7> kThemeTextTokens = {{
     {22, QFont::Bold, "Bold"},
     {17, QFont::DemiBold, "SemiBold"},
     {15, QFont::DemiBold, "SemiBold"},
-    {12, QFont::Medium, "Medium"},
+    {13, QFont::Medium, "Medium"},
     {12, QFont::DemiBold, "SemiBold"},
     {11, QFont::Normal, "Regular"}
 }};

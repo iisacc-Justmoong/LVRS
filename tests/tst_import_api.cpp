@@ -410,6 +410,7 @@ private slots:
     void radio_button_figma_contract_loads();
     void modal_empty_frame_contract_loads();
     void modal_content_action_contract_loads();
+    void alert_figma_variant_contract_loads();
     void alert_action_button_padding_scopes_to_alert();
     void menu_item_key_and_chevron_contract_loads();
     void menu_item_icon_slot_switch_contract_loads();
@@ -549,6 +550,9 @@ LV.ApplicationWindow {
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
         && contentLabel.color === LV.Theme.bodyColor
+        && contentLabel.contentHeight > 0
+        && contentLabel.lineCount === 1
+        && !contentLabel.sizeToContentHeight
         && contentLabel.renderType === Text.NativeRendering
     property bool figmaTextDesignReady:
         titleLabel.font.pixelSize === LV.Theme.textTitle
@@ -4227,7 +4231,7 @@ Item {
         && Math.abs(defaultCombo.figmaComboVerticalPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboCornerRadius - 5.0) < 0.01
         && Math.abs(defaultCombo.figmaIndicatorSize - 18.0) < 0.01
-        && Math.abs(defaultCombo.figmaLabelLineHeight - 12.0) < 0.01
+        && Math.abs(defaultCombo.figmaLabelLineHeight - 13.0) < 0.01
         && defaultCombo.resolvedTone === LV.ComboBox.Primary
         && primaryUp.resolvedTone === LV.ComboBox.Primary
         && primaryDown.resolvedTone === LV.ComboBox.Primary
@@ -4243,7 +4247,7 @@ Item {
         && Math.abs(defaultCombo.labelBounds.x - 8.0) < 0.01
         && Math.abs(defaultCombo.labelBounds.y - 3.0) < 0.01
         && Math.abs(defaultCombo.labelBounds.width - 70.0) < 0.01
-        && Math.abs(defaultCombo.labelBounds.height - 12.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.height - 13.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.x - 78.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.y - 0.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.width - 18.0) < 0.01
@@ -5035,6 +5039,186 @@ Item {
     QTRY_VERIFY(root->property("contractReady").toBool());
 }
 
+void ImportApiTests::alert_figma_variant_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 960
+    height: 720
+
+    property int expectedWidth: LV.Theme.scaleMetric(328)
+    property int expectedIconSize: LV.Theme.scaleMetric(64)
+    property int expectedTopPadding: LV.Theme.scaleMetric(32)
+    property int expectedSidePadding: LV.Theme.gap24
+    property int expectedSectionSpacing: LV.Theme.gap8
+    property int expectedActionSpacing: LV.Theme.gap12
+    property int expectedCardRadius: LV.Theme.radiusLg
+    property real expectedButtonVerticalPadding: LV.Theme.scaleRealMetric(4.5)
+    property real expectedButtonHeight: LV.Theme.textBodyLineHeight
+                                                + (expectedButtonVerticalPadding * 2)
+    property color expectedCardColor: LV.Theme.panelBackground07
+    property color expectedTextColor: LV.Theme.bodyColor
+
+    LV.Alert {
+        id: twoActionAlert
+        objectName: "twoActionAlert"
+        width: root.width
+        height: root.height
+        useOverlayLayer: false
+        open: true
+        buttonCount: 2
+        title: "Alert Dialog"
+        message: "It can have 2 or 3 actions depending on your needs."
+        primaryText: "TwoPrimary"
+        secondaryText: "TwoSecondary"
+    }
+
+    LV.Alert {
+        id: threeActionAlert
+        objectName: "threeActionAlert"
+        width: root.width
+        height: root.height
+        useOverlayLayer: false
+        open: true
+        buttonCount: 3
+        title: "Alert Dialog"
+        message: "It can have 2 or 3 actions depending on your needs."
+        primaryText: "ThreePrimary"
+        secondaryText: "ThreeSecondary"
+        tertiaryText: "ThreeTertiary"
+    }
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+
+    QObject *twoActionAlert = root->findChild<QObject *>(QStringLiteral("twoActionAlert"));
+    QObject *threeActionAlert = root->findChild<QObject *>(QStringLiteral("threeActionAlert"));
+    QVERIFY(twoActionAlert);
+    QVERIFY(threeActionAlert);
+
+    auto findItem = [](QObject *alert, const QString &objectName) -> QQuickItem * {
+        return qobject_cast<QQuickItem *>(
+            alert->findChild<QObject *>(objectName, Qt::FindChildrenRecursively));
+    };
+
+    QQuickItem *twoCard = findItem(twoActionAlert, QStringLiteral("alertCard"));
+    QQuickItem *threeCard = findItem(threeActionAlert, QStringLiteral("alertCard"));
+    QQuickItem *twoContent = findItem(twoActionAlert, QStringLiteral("alertContentColumn"));
+    QQuickItem *threeContent = findItem(threeActionAlert, QStringLiteral("alertContentColumn"));
+    QQuickItem *twoIcon = findItem(twoActionAlert, QStringLiteral("alertAppIcon"));
+    QQuickItem *threeIcon = findItem(threeActionAlert, QStringLiteral("alertAppIcon"));
+    QQuickItem *twoTitle = findItem(twoActionAlert, QStringLiteral("alertTitle"));
+    QQuickItem *threeTitle = findItem(threeActionAlert, QStringLiteral("alertTitle"));
+    QQuickItem *twoMessage = findItem(twoActionAlert, QStringLiteral("alertMessage"));
+    QQuickItem *threeMessage = findItem(threeActionAlert, QStringLiteral("alertMessage"));
+    QQuickItem *twoHorizontalActions = findItem(twoActionAlert, QStringLiteral("alertHorizontalActions"));
+    QQuickItem *twoVerticalActions = findItem(twoActionAlert, QStringLiteral("alertVerticalActions"));
+    QQuickItem *threeHorizontalActions = findItem(threeActionAlert, QStringLiteral("alertHorizontalActions"));
+    QQuickItem *threeVerticalActions = findItem(threeActionAlert, QStringLiteral("alertVerticalActions"));
+    QQuickItem *twoPrimary = findItem(twoActionAlert, QStringLiteral("alertPrimaryHorizontal"));
+    QQuickItem *twoSecondary = findItem(twoActionAlert, QStringLiteral("alertSecondaryHorizontal"));
+    QQuickItem *threePrimary = findItem(threeActionAlert, QStringLiteral("alertPrimaryVertical"));
+    QQuickItem *threeSecondary = findItem(threeActionAlert, QStringLiteral("alertSecondaryVertical"));
+    QQuickItem *threeTertiary = findItem(threeActionAlert, QStringLiteral("alertTertiaryVertical"));
+
+    QVERIFY(twoCard);
+    QVERIFY(threeCard);
+    QVERIFY(twoContent);
+    QVERIFY(threeContent);
+    QVERIFY(twoIcon);
+    QVERIFY(threeIcon);
+    QVERIFY(twoTitle);
+    QVERIFY(threeTitle);
+    QVERIFY(twoMessage);
+    QVERIFY(threeMessage);
+    QVERIFY(twoHorizontalActions);
+    QVERIFY(twoVerticalActions);
+    QVERIFY(threeHorizontalActions);
+    QVERIFY(threeVerticalActions);
+    QVERIFY(twoPrimary);
+    QVERIFY(twoSecondary);
+    QVERIFY(threePrimary);
+    QVERIFY(threeSecondary);
+    QVERIFY(threeTertiary);
+
+    const qreal expectedWidth = root->property("expectedWidth").toReal();
+    const qreal expectedIconSize = root->property("expectedIconSize").toReal();
+    const qreal expectedTopPadding = root->property("expectedTopPadding").toReal();
+    const qreal expectedSidePadding = root->property("expectedSidePadding").toReal();
+    const qreal expectedSectionSpacing = root->property("expectedSectionSpacing").toReal();
+    const qreal expectedActionSpacing = root->property("expectedActionSpacing").toReal();
+    const qreal expectedButtonVerticalPadding = root->property("expectedButtonVerticalPadding").toReal();
+    const qreal expectedButtonHeight = root->property("expectedButtonHeight").toReal();
+    const QColor expectedCardColor = root->property("expectedCardColor").value<QColor>();
+    const QColor expectedTextColor = root->property("expectedTextColor").value<QColor>();
+
+    for (QQuickItem *card : {twoCard, threeCard}) {
+        QVERIFY(qAbs(card->width() - expectedWidth) < 0.01);
+        QVERIFY(qAbs(card->property("radius").toReal()
+                     - root->property("expectedCardRadius").toReal()) < 0.01);
+        QCOMPARE(card->property("color").value<QColor>(), expectedCardColor);
+        QVERIFY(card->property("clip").toBool());
+    }
+
+    for (QQuickItem *content : {twoContent, threeContent}) {
+        QVERIFY(qAbs(content->property("topPadding").toReal() - expectedTopPadding) < 0.01);
+        QVERIFY(qAbs(content->property("spacing").toReal() - expectedSectionSpacing) < 0.01);
+    }
+
+    for (QQuickItem *icon : {twoIcon, threeIcon}) {
+        QVERIFY(qAbs(icon->width() - expectedIconSize) < 0.01);
+        QVERIFY(qAbs(icon->height() - expectedIconSize) < 0.01);
+        QVERIFY(icon->property("source").toUrl().toString().endsWith(
+            QStringLiteral("/resources/images/alertAppIcon.png")));
+        QTRY_COMPARE(icon->property("status").toInt(), 1);
+    }
+
+    for (QQuickItem *label : {twoTitle, threeTitle, twoMessage, threeMessage})
+        QCOMPARE(label->property("color").value<QColor>(), expectedTextColor);
+
+    QVERIFY(twoHorizontalActions->isVisible());
+    QVERIFY(!twoVerticalActions->isVisible());
+    QVERIFY(!threeHorizontalActions->isVisible());
+    QVERIFY(threeVerticalActions->isVisible());
+    QVERIFY(qAbs(twoHorizontalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
+    QVERIFY(qAbs(threeVerticalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
+    QVERIFY(qAbs(twoHorizontalActions->x() - expectedSidePadding) < 0.01);
+    QVERIFY(qAbs(threeVerticalActions->x() - expectedSidePadding) < 0.01);
+
+    const qreal expectedHorizontalButtonWidth = (expectedWidth - (expectedSidePadding * 2)
+                                                 - expectedActionSpacing) / 2;
+    for (QQuickItem *button : {twoPrimary, twoSecondary}) {
+        QVERIFY(qAbs(button->width() - expectedHorizontalButtonWidth) < 0.01);
+        QVERIFY(qAbs(button->height() - expectedButtonHeight) < 0.01);
+        QVERIFY(qAbs(button->property("verticalPadding").toReal()
+                     - expectedButtonVerticalPadding) < 0.01);
+    }
+
+    const qreal expectedVerticalButtonWidth = expectedWidth - (expectedSidePadding * 2);
+    for (QQuickItem *button : {threePrimary, threeSecondary, threeTertiary}) {
+        QVERIFY(qAbs(button->width() - expectedVerticalButtonWidth) < 0.01);
+        QVERIFY(qAbs(button->height() - expectedButtonHeight) < 0.01);
+        QVERIFY(qAbs(button->property("verticalPadding").toReal()
+                     - expectedButtonVerticalPadding) < 0.01);
+    }
+
+    QVERIFY(qAbs(twoCard->height() - twoContent->height()) < 0.01);
+    QVERIFY(qAbs(threeCard->height() - threeContent->height()) < 0.01);
+    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(22));
+    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(26));
+    QTRY_COMPARE(twoCard->height(), qreal(242));
+    QTRY_COMPARE(threeCard->height(), qreal(310));
+}
+
 void ImportApiTests::alert_action_button_padding_scopes_to_alert()
 {
     QQmlEngine engine;
@@ -5049,10 +5233,10 @@ Item {
     width: 960
     height: 720
 
-    property int expectedAlertVerticalPadding: LV.Theme.gap8
+    property real expectedAlertVerticalPadding: LV.Theme.scaleRealMetric(4.5)
     property int expectedDefaultVerticalPadding: LV.Theme.gap4
-    property int expectedAlertButtonHeight: Math.max(LV.Theme.gap20,
-                                                     LV.Theme.textBodyLineHeight + (LV.Theme.gap8 * 2))
+    property real expectedAlertButtonHeight: LV.Theme.textBodyLineHeight
+                                                + (expectedAlertVerticalPadding * 2)
     property int expectedDefaultButtonHeight: LV.Theme.gap20
 
     LV.Alert {
@@ -5121,14 +5305,14 @@ Item {
     QVERIFY(modalTertiary);
     QVERIFY(standaloneAlertButton);
 
-    const int expectedAlertVerticalPadding = root->property("expectedAlertVerticalPadding").toInt();
+    const double expectedAlertVerticalPadding = root->property("expectedAlertVerticalPadding").toDouble();
     const int expectedDefaultVerticalPadding = root->property("expectedDefaultVerticalPadding").toInt();
     const double expectedAlertButtonHeight = root->property("expectedAlertButtonHeight").toDouble();
     const double expectedDefaultButtonHeight = root->property("expectedDefaultButtonHeight").toDouble();
 
-    QCOMPARE(alertPrimary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
-    QCOMPARE(alertSecondary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
-    QCOMPARE(alertTertiary->property("verticalPadding").toInt(), expectedAlertVerticalPadding);
+    QVERIFY(qAbs(alertPrimary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
+    QVERIFY(qAbs(alertSecondary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
+    QVERIFY(qAbs(alertTertiary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
     QVERIFY(qAbs(alertPrimary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
     QVERIFY(qAbs(alertSecondary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
     QVERIFY(qAbs(alertTertiary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);

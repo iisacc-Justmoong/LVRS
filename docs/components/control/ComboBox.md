@@ -48,7 +48,7 @@ Injected methods:
 - label text defaults to `"Label"`, is rendered with body typography in white, and elides within the combo frame
 - trailing indicator is always `Stepper`, with tone mapped from combo tone
 - label area and indicator slot are positioned explicitly:
-  - label frame: `x=8`, `y=3`, `width=70`, `height=12`
+  - label frame: `x=8`, `y=3`, `width=70`, `height=13`
   - stepper frame: `x=78`, `y=0`, `size=18`
 
 ## Usage

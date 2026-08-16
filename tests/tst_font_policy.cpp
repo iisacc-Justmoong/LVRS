@@ -39,7 +39,7 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         {22, QFont::Bold, "Bold", QFont::Bold, "Bold", 28, 44},
         {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 21, 34},
         {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 19, 30},
-        {12, QFont::Medium, "Medium", QFont::Medium, "Medium", 15, 24},
+        {13, QFont::Medium, "Medium", QFont::Medium, "Medium", 16, 26},
         {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 15, 24},
         {11, QFont::Normal, "Regular", QFont::Normal, "Regular", 14, 22}
     };

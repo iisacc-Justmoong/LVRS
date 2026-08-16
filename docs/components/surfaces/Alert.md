@@ -30,7 +30,8 @@ Sizing and style:
 - `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
 - `cardCornerRadius`, `resolvedCardCornerRadius`
 - `backdropColor`, `cardBackgroundColor`
-- `appIconBackgroundColor`, `appIconFrameColor`, `appIconInnerColor`
+- `appIconSource`, `appIconSize`
+- `appIconBackgroundColor`, `appIconFrameColor`, `appIconInnerColor` (empty-source fallback)
 
 Resolved layout flags:
 
@@ -53,7 +54,12 @@ Signals:
   - tertiary text exists -> vertical layout
   - secondary text exists -> horizontal 2-button layout
   - otherwise -> single primary button
-- Alert action buttons override the shared `AlertButton` baseline only within `Alert`: top/bottom padding uses `Theme.gap8`, and the resolved button height expands with that padding so the body label line box is not clipped.
+- Both Figma variants use a `328px` preferred card width, `12px` radius, `32px` top padding, `64px` app icon, `8px` section spacing, and `24px` horizontal/action padding.
+- The 2-action variant uses two equal-width horizontal buttons with a `12px` gap; the 3-action variant stacks full-width buttons with the same gap.
+- Alert action buttons override the shared `AlertButton` baseline only within `Alert`: vertical padding is `4.5px`, producing a `22px` button at the desktop scale with the `13px` body line box.
+- The bundled default app icon is the exact raster asset exported from Figma nodes `106:281` and `106:282`; set `appIconSource: ""` to use the color-configurable fallback.
+- The card surface and both title/body text colors map to `Theme.panelBackground07` and `Theme.bodyColor`, respectively.
+- Alert title/body blocks normalize Qt glyph bounds to the Figma `22px`/`13px` line-box multiples, keeping the reference variants at `242px` and `310px` tall at desktop scale.
 
 ## Behavior Contract
 

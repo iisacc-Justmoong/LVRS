@@ -94,18 +94,18 @@ QtObject {
     readonly property color window: "#141414"
 
     // Panel background scale: saturation constrained to 1~3% (brighter steps are more saturated)
-    readonly property color panelBackground01: "#1B1B1C"
-    readonly property color panelBackground02: "#1D1D1D"
-    readonly property color panelBackground03: "#1F1F20"
-    readonly property color panelBackground04: "#212223"
-    readonly property color panelBackground05: "#242525"
-    readonly property color panelBackground06: "#262728"
-    readonly property color panelBackground07: "#292A2B"
-    readonly property color panelBackground08: "#2C2E2F"
-    readonly property color panelBackground09: "#303232"
-    readonly property color panelBackground10: "#343536"
-    readonly property color panelBackground11: "#373A3B"
-    readonly property color panelBackground12: "#3C3E3F"
+    readonly property color panelBackground01: "#0C0C0D"
+    readonly property color panelBackground02: "#0E0E0E"
+    readonly property color panelBackground03: "#151516"
+    readonly property color panelBackground04: "#191919"
+    readonly property color panelBackground05: "#1D1E1E"
+    readonly property color panelBackground06: "#1F2021"
+    readonly property color panelBackground07: "#242424"
+    readonly property color panelBackground08: "#232424"
+    readonly property color panelBackground09: "#262727"
+    readonly property color panelBackground10: "#282828"
+    readonly property color panelBackground11: "#2D2E2F"
+    readonly property color panelBackground12: "#313233"
 
     readonly property color windowAlt: panelBackground03
     readonly property color subSurface: panelBackground04
@@ -673,10 +673,10 @@ QtObject {
     readonly property string textHeader2StyleName: "SemiBold"
     readonly property int textHeader2LineHeight: scaleTextMetric(15)
     readonly property real textHeader2LetterSpacing: 0
-    readonly property int textBody: scaleTextMetric(12)
+    readonly property int textBody: 13
     readonly property int textBodyWeight: Font.Medium
     readonly property string textBodyStyleName: "Medium"
-    readonly property int textBodyLineHeight: scaleTextMetric(12)
+    readonly property int textBodyLineHeight: 13
     readonly property real textBodyLetterSpacing: 0
     readonly property int textDescription: scaleTextMetric(12)
     readonly property int textDescriptionWeight: Font.DemiBold
