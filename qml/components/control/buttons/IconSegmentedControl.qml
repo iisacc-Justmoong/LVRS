@@ -49,6 +49,7 @@ Item {
         const segments = collectSegmentButtons()
         for (let i = 0; i < segments.length; i++)
             applySegmentStyle(segments[i])
+        segmentRow.forceLayout()
     }
 
     function scheduleSyncSegmentStyles() {
@@ -102,6 +103,9 @@ Item {
     }
 
     onForceBorderlessToneChanged: scheduleSyncSegmentStyles()
+    onHorizontalPaddingChanged: scheduleSyncSegmentStyles()
+    onVerticalPaddingChanged: scheduleSyncSegmentStyles()
+    onSpacingChanged: scheduleSyncSegmentStyles()
 
     Connections {
         target: segmentRow

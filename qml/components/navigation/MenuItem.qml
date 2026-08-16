@@ -21,20 +21,20 @@ AbstractButton {
 
     property alias key: shortcutStore.text
     property alias shortcut: shortcutStore.text
-    property bool keyVisible: false
+    property bool keyVisible: true
     property string keyPlaceholder: ""
-    property bool showChevron: false
-    property bool hasChildItems: false
+    property bool showChevron: true
+    property bool hasChildItems: true
     readonly property bool effectiveShowChevron: showChevron && hasChildItems
     property bool expanded: false
     // Supports int enum or string: auto|right|left|up|down
     property var selectionDirection: "auto"
     property int itemWidth: Theme.scaleMetric(161)
-    property int itemHeight: Theme.iconSm
+    property int itemHeight: Theme.scaleMetric(24)
     property bool showIconSlot: true
     property int iconSize: Theme.iconSm
-    property int chevronSize: Theme.iconSm
-    property string iconName: ""
+    property int chevronSize: Theme.scaleMetric(16)
+    property string iconName: "procedure"
     property url iconSource: ""
     property color iconPlaceholderColor: Theme.accentBlueMuted
     property color chevronColor: Theme.descriptionColor
@@ -44,7 +44,7 @@ AbstractButton {
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale * control.iconHiDpiScale))
-    readonly property string chevronIconName: "generalchevronDown"
+    readonly property string chevronIconName: "generalchevronRight"
     readonly property url chevronIconSource: Theme.iconPath(control.chevronIconName)
 
     readonly property bool isSelected: state === selectedState
@@ -72,7 +72,13 @@ AbstractButton {
         return control.keyPlaceholder
     }
     // Measure text unconstrained so display elision does not collapse layout math.
-    readonly property int labelNaturalWidth: Math.max(0, Math.ceil(labelMetrics.advanceWidth))
+    // Retained as a compatibility hook; the current Pretendard Body contract
+    // matches the Figma metric without compensation.
+    readonly property int labelMetricCompensation: 0
+    readonly property int labelNaturalWidth: Math.max(
+                                                 0,
+                                                 Math.ceil(labelMetrics.advanceWidth)
+                                                 + labelMetricCompensation)
     readonly property int shortcutNaturalWidth: control.keyVisible && control.resolvedShortcutText.length > 0
         ? Math.max(0, Math.ceil(shortcutMetrics.advanceWidth))
         : 0
@@ -101,17 +107,17 @@ AbstractButton {
             : "transparent"
     readonly property real resolvedChevronRotation: {
         if (control.resolvedSelectionDirection === control.directionLeft)
-            return 90
-        if (control.resolvedSelectionDirection === control.directionUp)
             return 180
+        if (control.resolvedSelectionDirection === control.directionUp)
+            return -90
         if (control.resolvedSelectionDirection === control.directionDown)
-            return 0
-        return -90
+            return 90
+        return 0
     }
 
     tone: AbstractButton.Borderless
     horizontalPadding: Theme.gap4
-    verticalPadding: Theme.gapNone
+    verticalPadding: Theme.scaleMetric(3)
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
 
@@ -129,8 +135,8 @@ AbstractButton {
         id: labelMetrics
         font.family: Theme.fontBody
         font.pixelSize: Theme.textBody
-        font.weight: Font.Normal
-        font.styleName: "Regular"
+        font.weight: Theme.textBodyWeight
+        font.styleName: Theme.textBodyStyleName
         font.letterSpacing: Theme.textBodyLetterSpacing
         text: control.label
     }
@@ -138,10 +144,10 @@ AbstractButton {
     TextMetrics {
         id: shortcutMetrics
         font.family: Theme.fontBody
-        font.pixelSize: Theme.textDescription
-        font.weight: Theme.textDescriptionWeight
-        font.styleName: Theme.textDescriptionStyleName
-        font.letterSpacing: Theme.textDescriptionLetterSpacing
+        font.pixelSize: Theme.textBody
+        font.weight: Theme.textBodyWeight
+        font.styleName: Theme.textBodyStyleName
+        font.letterSpacing: Theme.textBodyLetterSpacing
         text: control.resolvedShortcutText
     }
 
@@ -203,6 +209,7 @@ AbstractButton {
 
             Image {
                 id: iconImage
+                objectName: "menuItem_iconImage"
                 visible: control.effectiveShowIconSlot && control.resolvedIconSource.toString().length > 0
                 anchors.centerIn: parent
                 width: control.iconSize
@@ -245,13 +252,11 @@ AbstractButton {
             id: labelNode
             objectName: "menuItem_labelNode"
             x: contentRoot.labelX
-            y: Math.round((contentRoot.height - height) * 0.5)
+            y: (contentRoot.height - height) * 0.5
             width: contentRoot.resolvedLabelWidth
-            height: implicitHeight
+            height: Theme.textBodyLineHeight
             style: body
             text: control.label
-            font.weight: Font.Normal
-            font.styleName: "Regular"
             color: control.isInactive ? Theme.titleHeaderColor
                                       : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
             elide: Text.ElideRight
@@ -273,19 +278,19 @@ AbstractButton {
             objectName: "menuItem_trailingGroup"
             visible: contentRoot.resolvedTrailingWidth > 0
             x: contentRoot.trailingX
-            y: Math.round((contentRoot.height - height) * 0.5)
+            y: (contentRoot.height - height) * 0.5
             width: contentRoot.resolvedTrailingWidth
             height: Math.max(shortcutLabel.implicitHeight, control.chevronSize)
 
             Label {
                 id: shortcutLabel
                 objectName: "menuItem_shortcutLabel"
-                style: description
+                style: body
                 visible: control.keyVisible && contentRoot.resolvedShortcutWidth > 0
                 x: 0
-                y: Math.round((parent.height - height) * 0.5)
+                y: (parent.height - height) * 0.5
                 width: contentRoot.resolvedShortcutWidth
-                height: implicitHeight
+                height: Theme.textBodyLineHeight
                 text: control.resolvedShortcutText
                 color: control.isInactive ? Theme.descriptionColor
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)

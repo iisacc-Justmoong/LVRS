@@ -2,7 +2,7 @@
 
 Location: `qml/components/navigation/List.qml`
 
-`List` is a compact navigation list that renders rows from a direct model or a legacy `items` array.
+`List` is the compact Figma `SmallList` surface. It renders `ListItem.Mini` rows from a direct model or a legacy `items` array and owns the measured `ListFooter`.
 
 ## Purpose
 
@@ -25,27 +25,39 @@ Role mapping:
 - `labelRole` (default `label`)
 - `textRole` (default `text`)
 - `titleRole` (default `title`)
+- `iconRole` (default `iconName`)
 - `enabledRole` (default `enabled`)
 - `selectedRole` (default `selected`)
 
 Layout and state:
 
-- `selectedIndex`, `interactive`
-- `listWidth`, `minimumListHeight`, `itemHeight`, `itemLabelLeftPadding`
+- `selectedIndex` (default `-1`), `interactive`
+- `listWidth` (`170` desktop), `minimumListHeight` (`140` desktop), `itemHeight` (`22` desktop), `itemLabelLeftPadding` (`4` desktop)
+- `defaultItemIconName` (default `nodesfolder`)
+- `expandToContent` (default `false`): when false, extra rows remain clipped in the measured fixed-height viewport
 - `backgroundColor`, `selectedRowColor`, `separatorColor`, `separatorOpacity`
-- `itemDelegate`: optional per-row component delegate. The default delegate renders the existing compact button row.
+- `itemDelegate`: optional per-row component delegate. The default delegate is `ListItem.Mini`.
 
 Toolbar/footer:
 
 - `toolbarVisible`, `toolbarIcon1`, `toolbarIcon2`, `toolbarIcon3`
 - `footerVisible`, `footerButton1`, `footerButton2`, `footerButton3`
-- Stock toolbar/footer buttons use `Theme.iconSm` icon frames (`18 x 18` desktop, `23 x 23` mobile) and a scaled `Theme.scaleMetric(1)` compact inset (`ListFooter.stockButtonPadding`).
+- Default footer slots are `addFile`, `generaldelete`, and a `settings` menu button.
+- Stock footer buttons use `Theme.iconSm` icon frames (`18 x 18` desktop, `36 x 36` mobile), `Theme.gap2` insets, and `ListFooter.stockMenuButtonSpacing` (`-2` desktop, `-4` mobile) between the settings icon and chevron.
 
 Signals:
 
 - `itemTriggered(index, item)`
 - `toolbarIconTriggered(index, source)`
 - `footerButtonTriggered(index, config)`
+
+## Figma Visual Contract
+
+- Sources: `203:5161` (`SmallList`), `209:9199` (`ListFooter`), and `241:9253` (`ListItem` component set).
+- Desktop `SmallList` is `170 x 140` with `Theme.panelBackground03`. Its item viewport is `170 x 114`; six `22px` rows occupy `132px`, so the final row is intentionally clipped above the `26px` footer.
+- The default row is the `Mini` variant: horizontal/vertical padding `4/2`, `nodesfolder` icon `18 x 18`, `1px` icon-label gap, and Body `13px Medium / 13px` text. Body remains fixed at `13px` on desktop and mobile.
+- `ListFooter` is `86 x 26`: outer padding `2`, button frames `22 x 22`, and slot widths `22`, `22`, and `38`. The exact existing `addFile`, `generaldelete`, `settings`, and `generalchevronDownBorderless` SVG assets are reused.
+- Mobile geometry follows the per-token `2x` policy: list `340 x 280`, Mini row `340 x 44`, Detail row `388 x 212`, and footer `172 x 52`; Body text stays `13px`.
 
 ## Behavior Contract
 
@@ -55,14 +67,21 @@ Signals:
   - object arrays,
   - QML `ListModel`/list-like objects with `count` and `get(index)`,
   - C++ `QAbstractItemModel` instances exposed to QML.
-- Direct model input is read through the C++ `ModelSource` type; QML no longer owns per-source count/index/role dispatch.
+- Direct model input is read through the C++ `ModelSource` type.
 - C++ item model changes (`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`) invalidate `ModelSource.revision` so `entryCount` and rows refresh.
-- Primitive rows render with `String(value)`.
-- Object/model rows render label text from `labelRole`, then `textRole`, then `titleRole`, then `display`, then `edit`.
+- Primitive rows render with `String(value)` and use `defaultItemIconName`; their label is never interpreted as an icon name.
+- Object/model rows resolve label text from `labelRole`, then `textRole`, then `titleRole`, then `display`, then `edit`.
 - `enabledRole` and `selectedRole` are optional. Missing `enabledRole` means enabled; missing `selectedRole` falls back to `selectedIndex`.
 - `itemTriggered` emits the resolved row entry returned by `entryAt(index)`.
-- Every rendered row instantiates `itemDelegate` and injects one `modelData` object. The descriptor includes `index`, `entry`, `label`, `enabled`, `selected`, and `trigger()`.
+- Every rendered row instantiates `itemDelegate` and injects one `modelData` object. The descriptor includes `index`, `entry`, `label`, `iconName`, `enabled`, `selected`, and `trigger()`.
 - Custom delegates should declare `property var modelData` and call `modelData.trigger()` when they want the list to emit the normalized `itemTriggered` signal.
+
+## ListItem Variants
+
+- `size: ListItem.Mini` is `170 x 22` on desktop and retains the existing `inputable`, `inputResult`, `inputEdited`, and `inputSubmitted` API.
+- `size: ListItem.Detail` is `194 x 106` on desktop. It uses `12px SemiBold / 12px` title and date text, `11px Regular / 11px` metadata, `12/8` horizontal/vertical padding, and `8px` section gaps.
+- Detail data is exposed through `detail`, `dateText`, `folderLabel1`, `folderLabel2`, `tagLabel1`, and `tagLabel2`; its icon names default to `bookmarksbookmark`, `folder@14x14`, and `vcscurrentBranch`.
+- `separatorVisible` defaults to `false` because neither Figma variant contains a separator. Legacy separator color/size properties remain available for explicit opt-in.
 
 ## Usage
 
@@ -71,16 +90,17 @@ import LVRS 1.0 as LV
 
 LV.List {
     model: [
-        { label: "Overview", selected: true },
+        { label: "Overview", iconName: "nodesfolder" },
         { label: "Settings", enabled: false }
     ]
 }
 ```
 
 ```qml
-LV.List {
-    model: backendModel
-    labelRole: "name"
+LV.ListItem {
+    size: LV.ListItem.Detail
+    detail: "Two-line note title"
+    dateText: "2026-08-16"
 }
 ```
 

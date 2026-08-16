@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/ComboBox.qml`
 
-`ComboBox` is a compact context-menu trigger row that follows the Figma contract (`97x18`) and uses `Stepper` as the trailing indicator.
+`ComboBox` is a compact context-menu trigger row that follows the Figma contract (`97x20`) and uses `Stepper` as the trailing indicator.
 
 ## Purpose
 
@@ -38,18 +38,21 @@ Injected methods:
 
 ## Visual Contract
 
-- fixed frame: `97 x 18`
+- desktop logical frame: `97 x 20`
+- mobile frame under the `2x` metric policy: `194 x 40`
 - container paddings: left `8`, right `1`, top/bottom `1`
 - radius: `Theme.radiusControl` (`5`)
 - container base/hover/pressed colors:
   - `Theme.panelBackground10`
   - `Theme.panelBackground11`
   - `Theme.panelBackground12`
-- label text defaults to `"Label"`, is rendered with body typography in white, and elides within the combo frame
+- label text defaults to `"Label"`, is rendered with fixed Body `13px / 13px` typography in white, and elides within the combo frame
 - trailing indicator is always `Stepper`, with tone mapped from combo tone
 - label area and indicator slot are positioned explicitly:
-  - label frame: `x=8`, `y=3`, `width=70`, `height=13`
-  - stepper frame: `x=78`, `y=0`, `size=18`
+  - label slot: `x=8`, `y=3.5`, `width=70`, `height=13`
+  - Figma's default `"Label"` text node occupies `x=8`, `y=3.5`, `width=33`, `height=13`; the wider production slot preserves elision for dynamic text
+  - stepper frame: `x=78`, `y=1`, `size=18`
+- source component set: Figma node `254:889`; all six `Tone × Arrow` variants share the same frame geometry
 
 ## Usage
 

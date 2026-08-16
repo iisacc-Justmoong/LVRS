@@ -7,7 +7,7 @@ Controls.Popup {
     id: control
 
     property var items: []
-    property int itemWidth: Theme.scaleMetric(161)
+    property int itemWidth: Theme.scaleMetric(145)
     property int itemSpacing: Theme.gap2
     property bool showIconSlot: true
     property int selectedIndex: -1
@@ -132,7 +132,10 @@ Controls.Popup {
     dim: false
     focus: true
     transformOrigin: Item.TopLeft
-    padding: Theme.gap8
+    leftPadding: Theme.gap8
+    rightPadding: Theme.gap8
+    topPadding: Theme.gap4
+    bottomPadding: Theme.gap4
     closePolicy: Controls.Popup.CloseOnEscape
         | Controls.Popup.CloseOnPressOutside
         | Controls.Popup.CloseOnPressOutsideParent

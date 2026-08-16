@@ -93,13 +93,13 @@ Default runtime-direct quality profile in current implementation:
 
 Default mobile sizing contract in current implementation:
 
-- `Theme` applies built-in `1.25x` metric and typography tokens on iOS and Android.
+- `Theme` applies built-in `2x` metric and scalable typography tokens on iOS and Android; Body size and line height remain fixed at `13px`.
 - `usePlatformSafeMargin` defaults to `true` on iOS and Android, and `safeMargin` defaults to a fixed `16` logical pixels on each side.
 - The render surface remains full-bleed on mobile; `ApplicationWindow` forces its automatic `contentItem` safe-area paddings back to `0` in the default mobile path.
 - The scaffold content is also full-bleed by default. `safeMargin` no longer constrains the internal content host automatically.
 - `layoutSafeAreaBounds` is now a helper rectangle only: it describes the fixed layout inset derived from `safeMargin`, but LVRS does not automatically place app content inside that box.
 - `mobileSystemSafeLeftInset/TopInset/RightInset/BottomInset` and `mobileSystemSafeAreaBounds` expose the real platform safe-area margins so downstream apps can decide which regions to reserve.
-- `mobileViewScale` remains `1.0`; the framework prefers token-level `1.25x` sizing over full-scene composition scaling in the default path.
+- `mobileViewScale` remains `1.0`; the framework prefers token-level `2x` sizing over full-scene composition scaling in the default path.
 
 Default app-root bootstrap profile in current implementation:
 
@@ -121,7 +121,7 @@ Aliases to internal scaffold include:
 - page stack: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `internalPageStackEnabled`
 - interactive transition bridge: `pageTransitionController`
 
-Stock adaptive-navigation delegates render `icon`, `iconName`, or `symbol` text glyphs in a square `navigationIconSize` frame. Its default follows `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile), so rail, drawer, and bottom-navigation icons follow the same compact icon contract while remaining explicitly overridable.
+Stock adaptive-navigation delegates render `icon`, `iconName`, or `symbol` text glyphs in a square `navigationIconSize` frame. Its default follows `Theme.iconSm` (`18 x 18` on desktop, `36 x 36` on mobile), so rail, drawer, and bottom-navigation icons follow the same compact icon contract while remaining explicitly overridable.
 
 Adaptive state outputs:
 

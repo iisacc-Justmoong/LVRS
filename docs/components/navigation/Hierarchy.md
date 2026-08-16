@@ -119,6 +119,8 @@ LV.Hierarchy {
 
 ## How It Works
 
+- The Figma panel baseline (`180:1012`) is `200x530` on desktop and `400x1060` under the mobile `2x` profile, using `Theme.panelBackground05`.
+- Its toolbar occupies the top `26px` (`52px` mobile). The list starts immediately below it and the sixteen-row reference content occupies `320px` (`640px` mobile), leaving the remaining panel height available to the scroll viewport.
 - Toolbar and list communicate through explicit signals and forwarded aliases.
 - `model`, `modelColumn`, and role aliases forward directly to the internal `HierarchyList`, so arrays, QML `ListModel`, and C++ `QAbstractItemModel` sources can be injected at the panel level.
 - `ensureListItemVisible` adjusts flickable viewport when list requests visibility.

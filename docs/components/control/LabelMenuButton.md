@@ -14,12 +14,12 @@ Location: `qml/components/control/buttons/LabelMenuButton.qml`
 Text and tone:
 
 - `text` (inherited)
-- `tone` (inherited, default fallback: `Borderless`)
+- `tone` (inherited, default: `Primary`, matching `Kind=accent`)
 - injected method API inherited from `AbstractButton`: `method`, `methods`, `invokeMethods(...)`
 
 Indicator:
 
-- `indicatorSize` (readonly, `Theme.iconSm`: desktop `18 x 18`, mobile `23 x 23`)
+- `indicatorSize` (readonly, `Theme.iconSm`: desktop `18 x 18`, mobile `36 x 36`)
 - `resolvedIndicatorName` from tone/enabled state
 - rendered via `Theme.iconPath(...)`
 - supersampling-aware icon source size (`indicatorSourceSize`)
@@ -33,10 +33,19 @@ Indicator icon mapping:
 
 Layout:
 
-- fixed `figmaButtonHeight` (`Theme.gap20`)
-- `horizontalPadding: Theme.gap8`
-- `verticalPadding: Theme.scaleMetric(1)`
-- `spacing: Theme.gap2`
+- fixed `figmaButtonHeight`: `22` desktop, `44` mobile
+- `horizontalPadding: Theme.gap8` (`8` desktop, `16` mobile)
+- `verticalPadding: Theme.gap2` (`2` desktop, `4` mobile)
+- measured text-chevron overlap: `spacing: -Theme.gap2` (`-2` desktop, `-4` mobile)
+
+## Figma Visual Contract
+
+- Source: `44:599`, `Type=LabelMenuButton`.
+- With text `Open`, the desktop frame is `64 x 22`: text `x=8, y=4.5, 32 x 13`, chevron `x=38, y=2, 18 x 18`.
+- Body typography remains fixed at `13px Medium / 13px` on desktop and mobile.
+- The corresponding mobile token composition is `96 x 44`.
+- Existing tone-specific `generalchevronDown*.svg` assets match the Figma vectors and are reused.
+- When an explicit width is narrower than the implicit frame, the label elides while the chevron remains inside the right inset.
 
 ## Usage
 
@@ -45,7 +54,6 @@ import LVRS 1.0 as LV
 
 LV.LabelMenuButton {
     text: "Options"
-    tone: LV.AbstractButton.Borderless
     method: function(eventData) {
         menu.open()
     }

@@ -12,9 +12,10 @@ Item {
     property string labelRole: "label"
     property string textRole: "text"
     property string titleRole: "title"
+    property string iconRole: "iconName"
     property string enabledRole: "enabled"
     property string selectedRole: "selected"
-    property int selectedIndex: 1
+    property int selectedIndex: -1
     property bool interactive: true
 
     // Optional top toolbar support for existing callers.
@@ -24,14 +25,16 @@ Item {
     property string toolbarIcon3: ""
 
     property bool footerVisible: true
-    property var footerButton1: ({ type: "icon", iconName: "projectStructure" })
-    property var footerButton2: ({ type: "icon", iconName: "delete" })
-    property var footerButton3: ({ type: "icon", iconName: "cwmPermissionView" })
+    property var footerButton1: ({ type: "icon", iconName: "addFile" })
+    property var footerButton2: ({ type: "icon", iconName: "generaldelete" })
+    property var footerButton3: ({ type: "menu", iconName: "settings" })
 
     property int listWidth: Theme.scaleMetric(170)
-    property int minimumListHeight: Theme.scaleMetric(223)
-    property int itemHeight: Theme.gap24
-    property int itemLabelLeftPadding: Theme.gap8
+    property int minimumListHeight: Theme.scaleMetric(140)
+    property int itemHeight: Theme.iconSm + (Theme.gap2 * 2)
+    property int itemLabelLeftPadding: Theme.gap4
+    property string defaultItemIconName: "nodesfolder"
+    property bool expandToContent: false
     property color backgroundColor: Theme.panelBackground03
     property color selectedRowColor: Theme.primary
     property color separatorColor: "#1A000000"
@@ -50,8 +53,9 @@ Item {
     Component {
         id: defaultItemDelegate
 
-        AbstractButton {
+        ListItem {
             id: rowButton
+            objectName: "list_defaultDelegate_" + index
             property var modelData: ({})
             property int index: modelData.index === undefined ? -1 : modelData.index
             readonly property var entry: modelData.entry
@@ -59,51 +63,20 @@ Item {
             readonly property bool rowEnabled: modelData.enabled === true
 
             width: parent ? parent.width : control.listWidth
-            height: control.itemHeight
-            implicitHeight: control.itemHeight
-            tone: AbstractButton.Borderless
+            size: ListItem.Mini
+            label: rowButton.modelData.label || ""
+            iconName: rowButton.modelData.iconName || control.defaultItemIconName
+            selected: rowSelected
             enabled: rowEnabled
-            horizontalPadding: Theme.gapNone
-            verticalPadding: Theme.gapNone
-            spacing: Theme.gapNone
-            cornerRadius: Theme.gapNone
-            backgroundColor: rowSelected ? control.selectedRowColor : "transparent"
-            backgroundColorHover: rowSelected ? control.selectedRowColor : "transparent"
-            backgroundColorPressed: rowSelected ? control.selectedRowColor : Theme.accentBlueMuted
-            backgroundColorDisabled: rowSelected ? control.selectedRowColor : "transparent"
-            textColor: Theme.bodyColor
-            textColorDisabled: Theme.disabledColor
-
-            contentItem: Item {
-                Label {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: control.itemLabelLeftPadding
-                    anchors.rightMargin: Theme.gap8
-                    anchors.verticalCenter: parent.verticalCenter
-                    style: body
-                    text: rowButton.modelData.label || ""
-                    color: rowButton.rowEnabled ? Theme.bodyColor : Theme.disabledColor
-                    font.pixelSize: Theme.scaleTextMetric(13)
-                    font.weight: Font.Normal
-                    font.styleName: "Regular"
-                    lineHeight: Theme.scaleTextMetric(16)
-                    lineHeightMode: Text.FixedHeight
-                    horizontalAlignment: Text.AlignLeft
-                    verticalAlignment: Text.AlignVCenter
-                    elide: Text.ElideRight
-                }
-
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: Theme.scaleMetric(1)
-                    color: control.separatorColor
-                    opacity: control.separatorOpacity
-                    visible: !rowButton.rowSelected
-                }
-            }
+            rowHorizontalPadding: control.itemLabelLeftPadding
+            rowVerticalPadding: Theme.gap2
+            miniItemWidth: control.listWidth
+            minItemWidth: control.listWidth
+            listBackgroundColor: "transparent"
+            selectedBackgroundColor: control.selectedRowColor
+            separatorColor: control.separatorColor
+            separatorOpacity: control.separatorOpacity
+            separatorVisible: false
 
             onClicked: control.triggerItem(index)
         }
@@ -136,6 +109,16 @@ Item {
         return listModelSource.boolValue(entry, enabledRole, true)
     }
 
+    function itemIconName(entry) {
+        const roles = [iconRole, "icon", "sourceIcon"]
+        for (let index = 0; index < roles.length; ++index) {
+            const value = roleValue(entry, roles[index], null)
+            if (value !== null && value !== undefined && String(value).length > 0)
+                return String(value)
+        }
+        return defaultItemIconName
+    }
+
     function itemSelected(entry, index) {
         const value = roleValue(entry, selectedRole, null)
         if (value !== null && value !== undefined)
@@ -158,6 +141,7 @@ Item {
                 "index": i,
                 "entry": entry,
                 "label": itemLabel(entry),
+                "iconName": itemIconName(entry),
                 "enabled": interactive && itemEnabled(entry),
                 "selected": itemSelected(entry, i),
                 "trigger": function() { control.triggerItem(i) }
@@ -177,15 +161,18 @@ Item {
     readonly property int contentHeight: {
         const toolbarHeight = toolbar.visible ? toolbar.implicitHeight : 0
         const footerHeight = footer.visible ? footer.implicitHeight : 0
-        return toolbarHeight + listItemsColumn.implicitHeight + footerHeight
+        return toolbarHeight + listItemsColumn.height + footerHeight
     }
 
     implicitWidth: control.listWidth
-    implicitHeight: Math.max(control.minimumListHeight, contentHeight)
+    implicitHeight: control.expandToContent
+        ? Math.max(control.minimumListHeight, contentHeight)
+        : control.minimumListHeight
 
     onSourceModelChanged: invalidateModel()
 
     Rectangle {
+        objectName: "list_background"
         anchors.fill: parent
         color: control.backgroundColor
     }
@@ -208,23 +195,31 @@ Item {
 
         Item {
             id: listItemsViewport
+            objectName: "list_itemsViewport"
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
 
-            Column {
+            Item {
                 id: listItemsColumn
+                objectName: "list_itemsColumn"
                 width: listItemsViewport.width
-                spacing: Theme.gapNone
+                height: control.entryCount * control.itemHeight
 
                 Repeater {
-                    model: control.itemDelegateItems
+                    model: control.entryCount
 
                     delegate: Item {
                         id: delegateRoot
-                        required property var modelData
+                        objectName: "list_delegateRoot_" + index
+                        required property int index
+                        readonly property var descriptor: index >= 0
+                            && index < control.itemDelegateItems.length
+                            ? control.itemDelegateItems[index]
+                            : ({})
                         property Item delegateItem: null
 
+                        y: index * control.itemHeight
                         width: listItemsColumn.width
                         height: delegateItem
                             ? Math.max(control.itemHeight, delegateItem.implicitHeight)
@@ -238,7 +233,7 @@ Item {
                             }
                             delegateItem = control.createDelegateItem(delegateRoot,
                                                                       control.itemDelegate,
-                                                                      modelData)
+                                                                      descriptor)
                             if (!delegateItem)
                                 return
                             delegateItem.width = Qt.binding(function() { return delegateRoot.width })
@@ -246,7 +241,7 @@ Item {
                         }
 
                         Component.onCompleted: rebuildDelegate()
-                        onModelDataChanged: rebuildDelegate()
+                        onDescriptorChanged: rebuildDelegate()
 
                         Connections {
                             target: control
@@ -261,6 +256,7 @@ Item {
 
         ListFooter {
             id: footer
+            objectName: "list_footer"
             visible: control.footerVisible
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
             interactive: control.interactive

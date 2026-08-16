@@ -12,9 +12,10 @@ Location: `qml/components/navigation/MenuDivider.qml`
 ## API
 
 - `axis`: `"horizontal"` or `"vertical"` (default: `"horizontal"`)
-- `dividerColor` (default: `Theme.contextMenuDivider` = `Theme.disabledColor`)
-- `thickness` (default: `0.2`)
+- `dividerColor` (default: `Theme.contextMenuDivider` = `Theme.panelBackground08`)
+- `thickness` (default: `1`)
 - `crossPadding` (default: `1`)
+- `linePadding` (default: `0`)
 - `lineLength` (default: `220`)
 
 Computed:
@@ -43,11 +44,12 @@ LV.MenuDivider {
 ## How It Works
 
 - `axis` is normalized case-insensitively.
-- Horizontal mode expands width and draws a full-width hairline rule.
-- Vertical mode expands height and draws a full-height hairline rule.
-- `crossPadding` applies on the cross axis so the line remains visually centered; the default horizontal divider therefore resolves to a `2.2px`-tall row with a centered `0.2px` rule before device scaling.
+- Horizontal mode resolves to `220 x 3` and draws a centered `220 x 1` rule at `x=0, y=1`.
+- Vertical mode applies the same padding contract with the axes exchanged.
+- `crossPadding` centers the rule on the cross axis. `linePadding` remains customizable but defaults to `0` because the current Figma divider spans its full assigned width.
+- Figma source: node `110:853` (`MenuDivider`). A divider stretched by `ContextMenu` uses the menu content width (`145px`).
 
 ## Practical Notes
 
 - Use only `axis` to choose orientation as the primary control.
-- Keep `thickness` at `0.2` for the current Figma parity unless a heavier separator is explicitly required.
+- Keep `thickness: 1`, `crossPadding: 1`, and `linePadding: 0` for Figma parity unless a different separator is explicitly required.

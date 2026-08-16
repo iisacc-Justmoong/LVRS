@@ -21,7 +21,7 @@ QtObject {
         : Platform.canonicalOs
     readonly property var effectiveRuntimeProfile: Platform.runtimeProfile(effectiveTarget)
     readonly property bool mobileTarget: effectiveRuntimeProfile.mobile === true
-    readonly property real metricScaleFactor: mobileTarget ? 1.25 : 1.0
+    readonly property real metricScaleFactor: mobileTarget ? 2.0 : 1.0
     readonly property real typographyScaleFactor: metricScaleFactor
 
     readonly property string fontBody: FontPolicy.resolveFamily(FontPolicy.preferredFamily)
@@ -586,8 +586,8 @@ QtObject {
 
     //ContextMenu
 
-    readonly property color contextMenuSurface: panelBackground06
-    readonly property color contextMenuDivider: disabledColor
+    readonly property color contextMenuSurface: panelBackground03
+    readonly property color contextMenuDivider: panelBackground08
     readonly property color contextMenuItemSelectedBackground: primary
     readonly property color contextMenuItemInactiveBackground: panelBackground08
 

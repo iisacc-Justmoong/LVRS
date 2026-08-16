@@ -5,13 +5,14 @@ import LVRS 1.0
 Item {
     id: control
 
-    property int horizontalPadding: Theme.gapNone
-    property int verticalPadding: Theme.gapNone
+    property int minimumToolbarWidth: Theme.scaleMetric(200)
+    property int horizontalPadding: Theme.gap8
+    property int verticalPadding: Theme.gap2
     property int spacing: Theme.gapNone
     property color backgroundColor: Theme.subSurface
     property real backgroundOpacity: 0.0
-    property int slotSize: Theme.gap20
-    property bool distributeSpacing: true
+    property int slotSize: Theme.controlHeightSm
+    property bool distributeSpacing: false
 
     // Array-first API:
     // [
@@ -602,9 +603,11 @@ Item {
             const distributed = distributeSpacing
                 ? 0
                 : Math.max(0, count - 1) * spacing
-            return (count * slotSize) + distributed + (horizontalPadding * 2)
+            const contentWidth = (count * slotSize) + distributed + (horizontalPadding * 2)
+            return Math.max(minimumToolbarWidth, contentWidth)
         }
-        return manualButtons.implicitWidth + (horizontalPadding * 2)
+        return Math.max(minimumToolbarWidth,
+                        manualButtons.implicitWidth + (horizontalPadding * 2))
     }
     implicitHeight: {
         const contentHeight = usingItemModel

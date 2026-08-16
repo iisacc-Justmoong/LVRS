@@ -357,26 +357,116 @@ import LVRS as LV
 
 Item {
     id: root
-    Component.onCompleted: LV.Theme.targetOverride = "android-arm64"
+    property Item listDelegateProbe: null
+
+    Component.onCompleted: {
+        LV.Theme.targetOverride = "android-arm64"
+        listDelegateProbe = listControl.createDelegateItem(root, listControl.itemDelegate, {
+            "index": 0,
+            "entry": "Fixed Body List",
+            "label": "Fixed Body List",
+            "enabled": true,
+            "selected": false,
+            "trigger": function() {}
+        })
+    }
 
     property bool tokenContract:
         LV.Theme.effectiveTarget === "android"
         && LV.Theme.mobileTarget
-        && LV.Theme.metricScaleFactor === 1.25
-        && LV.Theme.typographyScaleFactor === 1.25
-        && LV.Theme.gap8 === 10
-        && LV.Theme.dialogMinWidth === 350
-        && LV.Theme.textTitle === 33
+        && LV.Theme.metricScaleFactor === 2.0
+        && LV.Theme.typographyScaleFactor === 2.0
+        && LV.Theme.gap8 === 16
+        && LV.Theme.dialogMinWidth === 560
+        && LV.Theme.textTitle === 52
+        && LV.Theme.textTitle2 === 44
+        && LV.Theme.textHeader === 34
+        && LV.Theme.textHeader2 === 30
         && LV.Theme.textBody === 13
-        && LV.Theme.textCaption === 14
-        && LV.Theme.scaleMetric(17) === 21
-        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 1.875) < 0.01
-        && Math.abs(LV.Theme.scaleRealMetric(4) - 5.0) < 0.01
-        && LV.Theme.scaleTextMetric(13) === 16
+        && LV.Theme.textDescription === 24
+        && LV.Theme.textCaption === 22
+        && LV.Theme.scaleMetric(17) === 34
+        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 3.0) < 0.01
+        && Math.abs(LV.Theme.scaleRealMetric(4) - 8.0) < 0.01
+        && LV.Theme.scaleTextMetric(13) === 26
         && LV.Theme.isThemeTextStyleCompliant(LV.Theme.textBody, LV.Theme.textBodyWeight, LV.Theme.textBodyStyleName)
 
     LV.List {
         id: listControl
+        visible: false
+        footerVisible: false
+        items: ["Fixed Body List"]
+    }
+
+    LV.ListItem {
+        id: miniListItem
+        visible: false
+    }
+
+    LV.ListItem {
+        id: detailListItem
+        visible: false
+        size: LV.ListItem.Detail
+    }
+
+    LV.ListFooter {
+        id: listFooter
+        visible: false
+    }
+
+    LV.LabelButton {
+        id: figmaLabelButton
+        text: "Button"
+        visible: false
+    }
+
+    LV.IconButton {
+        id: figmaIconButton
+        visible: false
+    }
+
+    LV.LabelMenuButton {
+        id: figmaLabelMenuButton
+        text: "Open"
+        visible: false
+    }
+
+    LV.IconMenuButton {
+        id: figmaIconMenuButton
+        visible: false
+    }
+
+    LV.LabelSegmentedControl {
+        id: figmaLabelSegment
+        visible: false
+
+        LV.LabelButton { id: labelSegmentButton0; text: "Button" }
+        LV.LabelButton { id: labelSegmentButton1; text: "Button" }
+    }
+
+    LV.IconSegmentedControl {
+        id: figmaIconSegment
+        visible: false
+
+        LV.IconButton { id: iconSegmentButton0; iconName: "projectStructure" }
+        LV.IconButton { id: iconSegmentButton1; iconName: "projectStructure" }
+    }
+
+    LV.Label {
+        id: bodyLabel
+        visible: false
+        style: body
+        text: "Fixed Body Label"
+    }
+
+    LV.TextEditor {
+        id: textEditor
+        visible: false
+        filePath: ""
+    }
+
+    LV.CodeEditor {
+        id: codeEditor
         visible: false
     }
 
@@ -385,25 +475,266 @@ Item {
         visible: false
     }
 
+    LV.MenuDivider {
+        id: menuDivider
+        visible: false
+    }
+
+    LV.HierarchyToolbar {
+        id: hierarchyToolbar
+        visible: false
+        buttonItems: [
+            { id: "slot0", iconName: "projectStructure", selected: true },
+            { id: "slot1", iconName: "projectStructure" },
+            { id: "slot2", iconName: "projectStructure" },
+            { id: "slot3", iconName: "projectStructure" }
+        ]
+    }
+
+    LV.HierarchyItem {
+        id: hierarchyItem
+        visible: false
+    }
+
+    LV.HierarchyList {
+        id: hierarchyList
+        visible: false
+    }
+
+    LV.Hierarchy {
+        id: hierarchyPanel
+        visible: false
+    }
+
     LV.CheckBox {
         id: checkBox
         visible: false
     }
 
+    LV.Stepper {
+        id: stepper
+        visible: false
+        arrow: LV.Stepper.UpDown
+    }
+
+    LV.ComboBox {
+        id: comboBox
+        visible: false
+    }
+
+    readonly property int listDelegateBodyPixelSize: listDelegateProbe !== null
+        && listDelegateProbe.contentItem.children.length > 0
+        && listDelegateProbe.contentItem.children[0].children.length > 1
+        ? listDelegateProbe.contentItem.children[0].children[1].font.pixelSize
+        : -1
+
     property bool componentContract:
-        listControl.listWidth === 213
-        && listControl.minimumListHeight === 279
-        && menuItem.itemWidth === 201
-        && menuItem.itemHeight === 23
-        && menuItem.iconSize === 23
-        && checkBox.boxSize === 23
+        listControl.listWidth === 340
+        && listControl.minimumListHeight === 280
+        && listControl.itemHeight === 44
+        && listDelegateProbe !== null
+        && listDelegateProbe.contentItem.children.length > 0
+        && listDelegateBodyPixelSize === 13
+        && miniListItem.iconSize === 36
+        && miniListItem.rowHorizontalPadding === 8
+        && miniListItem.rowVerticalPadding === 4
+        && miniListItem.implicitWidth === 340
+        && miniListItem.implicitHeight === 44
+        && detailListItem.detailItemWidth === 388
+        && detailListItem.detailContentWidth === 340
+        && detailListItem.detailTopHeight === 48
+        && detailListItem.detailMiddleHeight === 24
+        && detailListItem.detailBottomHeight === 76
+        && detailListItem.implicitWidth === 388
+        && detailListItem.implicitHeight === 212
+        && listFooter.horizontalPadding === 4
+        && listFooter.verticalPadding === 4
+        && listFooter.stockButtonPadding === 4
+        && listFooter.stockButtonHeight === 44
+        && listFooter.stockMenuButtonSpacing === -4
+        && listFooter.implicitWidth === 172
+        && listFooter.implicitHeight === 52
+        && figmaLabelButton.tone === LV.AbstractButton.Primary
+        && figmaIconButton.tone === LV.AbstractButton.Primary
+        && figmaLabelMenuButton.tone === LV.AbstractButton.Primary
+        && figmaIconMenuButton.tone === LV.AbstractButton.Primary
+        && figmaLabelButton.figmaButtonHeight === 44
+        && figmaIconButton.figmaButtonHeight === 44
+        && figmaLabelMenuButton.figmaButtonHeight === 44
+        && figmaIconMenuButton.figmaButtonHeight === 44
+        && figmaLabelButton.horizontalPadding === 16
+        && Math.abs(figmaLabelButton.verticalPadding - 15.5) < 0.01
+        && figmaIconButton.horizontalPadding === 4
+        && figmaIconButton.verticalPadding === 4
+        && figmaLabelMenuButton.horizontalPadding === 16
+        && figmaLabelMenuButton.verticalPadding === 4
+        && figmaLabelMenuButton.spacing === -4
+        && figmaIconMenuButton.horizontalPadding === 4
+        && figmaIconMenuButton.verticalPadding === 4
+        && figmaIconMenuButton.spacing === -4
+        && figmaLabelButton.implicitWidth === 72
+        && figmaIconButton.implicitWidth === 44
+        && figmaLabelMenuButton.implicitWidth === 96
+        && figmaIconMenuButton.implicitWidth === 76
+        && figmaLabelButton.implicitHeight === 44
+        && figmaIconButton.implicitHeight === 44
+        && figmaLabelMenuButton.implicitHeight === 44
+        && figmaIconMenuButton.implicitHeight === 44
+        && figmaLabelSegment.segmentCount === 2
+        && figmaLabelSegment.horizontalPadding === 8
+        && Math.abs(figmaLabelSegment.verticalPadding - 7.0) < 0.01
+        && figmaLabelSegment.spacing === 4
+        && figmaLabelSegment.borderWidth === 4
+        && figmaLabelSegment.cornerRadius === 16
+        && figmaLabelSegment.implicitWidth === 164
+        && figmaLabelSegment.width === 164
+        && Math.abs(figmaLabelSegment.implicitHeight - 58.0) < 0.01
+        && Math.abs(figmaLabelSegment.height - 58.0) < 0.01
+        && labelSegmentButton0.width === 72
+        && labelSegmentButton0.height === 44
+        && labelSegmentButton1.x === 76
+        && figmaIconSegment.segmentCount === 2
+        && figmaIconSegment.horizontalPadding === 8
+        && figmaIconSegment.verticalPadding === 8
+        && figmaIconSegment.spacing === 4
+        && figmaIconSegment.borderWidth === 4
+        && figmaIconSegment.cornerRadius === 16
+        && figmaIconSegment.implicitWidth === 108
+        && figmaIconSegment.width === 108
+        && figmaIconSegment.implicitHeight === 60
+        && figmaIconSegment.height === 60
+        && iconSegmentButton0.width === 44
+        && iconSegmentButton0.height === 44
+        && iconSegmentButton1.x === 48
+        && bodyLabel.stylePixelSize === 13
+        && bodyLabel.styleLineHeight === 13
+        && bodyLabel.font.pixelSize === 13
+        && textEditor.fontPixelSize === 13
+        && textEditor.textLineHeight === 13
+        && codeEditor.fontPixelSize === 13
+        && codeEditor.textLineHeight === 13
+        && menuItem.itemWidth === 322
+        && menuItem.itemHeight === 48
+        && menuItem.iconSize === 36
+        && menuItem.chevronSize === 32
+        && menuItem.topPadding === 6
+        && menuItem.bottomPadding === 6
+        && menuDivider.lineLength === 440
+        && menuDivider.linePadding === 0
+        && Math.abs(menuDivider.thickness - 2.0) < 0.01
+        && Math.abs(menuDivider.implicitWidth - 440.0) < 0.01
+        && Math.abs(menuDivider.implicitHeight - 6.0) < 0.01
+        && hierarchyToolbar.minimumToolbarWidth === 400
+        && hierarchyToolbar.horizontalPadding === 16
+        && hierarchyToolbar.verticalPadding === 4
+        && hierarchyToolbar.slotSize === 44
+        && hierarchyToolbar.spacing === 0
+        && !hierarchyToolbar.distributeSpacing
+        && hierarchyToolbar.implicitWidth === 400
+        && hierarchyToolbar.implicitHeight === 52
+        && hierarchyItem.rowHeight === 40
+        && hierarchyItem.itemWidth === 400
+        && hierarchyItem.iconSize === 36
+        && hierarchyItem.chevronSize === 32
+        && hierarchyItem.baseLeftPadding === 16
+        && hierarchyItem.rowRightPadding === 16
+        && hierarchyItem.leadingSpacing === 4
+        && hierarchyItem.cornerRadius === 10
+        && hierarchyItem.implicitWidth === 400
+        && hierarchyItem.implicitHeight === 40
+        && hierarchyList.generatedIndentStep === 16
+        && hierarchyList.generatedRowHeight === 40
+        && hierarchyList.generatedItemWidth === 400
+        && hierarchyList.generatedIconSize === 36
+        && hierarchyList.generatedChevronSize === 32
+        && hierarchyPanel.minimumPanelWidth === 400
+        && hierarchyPanel.minimumPanelHeight === 1060
+        && hierarchyPanel.implicitWidth === 400
+        && hierarchyPanel.implicitHeight === 1060
+        && checkBox.boxSize === 36
+        && stepper.width === 36
+        && stepper.height === 36
+        && Math.abs(stepper.iconWidth - (36 * (6.43604 / 18.0))) < 0.01
+        && Math.abs(stepper.iconHeight - (36 * (11.1455 / 18.0))) < 0.01
+        && comboBox.width === 194
+        && comboBox.height === 40
+        && Math.abs(comboBox.labelBounds.x - 16.0) < 0.01
+        && Math.abs(comboBox.labelBounds.y - 13.5) < 0.01
+        && Math.abs(comboBox.indicatorBounds.x - 156.0) < 0.01
+        && Math.abs(comboBox.indicatorBounds.y - 2.0) < 0.01
+        && comboBox.indicatorBounds.width === 36
+        && comboBox.indicatorBounds.height === 36
+
+    property string componentDebug: JSON.stringify({
+        listWidth: listControl.listWidth,
+        listMinHeight: listControl.minimumListHeight,
+        listItemHeight: listControl.itemHeight,
+        bodyPixelSize: listDelegateBodyPixelSize,
+        miniPaddingX: miniListItem.rowHorizontalPadding,
+        miniPaddingY: miniListItem.rowVerticalPadding,
+        miniWidth: miniListItem.implicitWidth,
+        miniHeight: miniListItem.implicitHeight,
+        detailItemWidth: detailListItem.detailItemWidth,
+        detailContentWidth: detailListItem.detailContentWidth,
+        detailTopHeight: detailListItem.detailTopHeight,
+        detailMiddleHeight: detailListItem.detailMiddleHeight,
+        detailBottomHeight: detailListItem.detailBottomHeight,
+        detailWidth: detailListItem.implicitWidth,
+        detailHeight: detailListItem.implicitHeight,
+        footerPaddingX: listFooter.horizontalPadding,
+        footerStockPadding: listFooter.stockButtonPadding,
+        footerButtonHeight: listFooter.stockButtonHeight,
+        footerWidth: listFooter.implicitWidth,
+        footerHeight: listFooter.implicitHeight,
+        labelButton: [figmaLabelButton.implicitWidth, figmaLabelButton.implicitHeight,
+            figmaLabelButton.horizontalPadding, figmaLabelButton.verticalPadding,
+            figmaLabelButton.tone],
+        iconButton: [figmaIconButton.implicitWidth, figmaIconButton.implicitHeight,
+            figmaIconButton.horizontalPadding, figmaIconButton.verticalPadding,
+            figmaIconButton.tone],
+        labelMenuButton: [figmaLabelMenuButton.implicitWidth,
+            figmaLabelMenuButton.implicitHeight, figmaLabelMenuButton.spacing,
+            figmaLabelMenuButton.tone],
+        iconMenuButton: [figmaIconMenuButton.implicitWidth,
+            figmaIconMenuButton.implicitHeight, figmaIconMenuButton.spacing,
+            figmaIconMenuButton.tone],
+        labelSegment: [figmaLabelSegment.implicitWidth,
+            figmaLabelSegment.implicitHeight, figmaLabelSegment.horizontalPadding,
+            figmaLabelSegment.verticalPadding, figmaLabelSegment.spacing,
+            labelSegmentButton0.width, labelSegmentButton0.height,
+            labelSegmentButton0.implicitWidth, labelSegmentButton0.implicitHeight,
+            labelSegmentButton1.x],
+        iconSegment: [figmaIconSegment.implicitWidth,
+            figmaIconSegment.implicitHeight, figmaIconSegment.horizontalPadding,
+            figmaIconSegment.verticalPadding, figmaIconSegment.spacing,
+            iconSegmentButton0.width, iconSegmentButton0.height,
+            iconSegmentButton0.implicitWidth, iconSegmentButton0.implicitHeight,
+            iconSegmentButton1.x],
+        hierarchyToolbar: [hierarchyToolbar.minimumToolbarWidth,
+            hierarchyToolbar.horizontalPadding, hierarchyToolbar.verticalPadding,
+            hierarchyToolbar.slotSize, hierarchyToolbar.implicitWidth,
+            hierarchyToolbar.implicitHeight],
+        hierarchyItem: [hierarchyItem.rowHeight, hierarchyItem.itemWidth,
+            hierarchyItem.iconSize, hierarchyItem.chevronSize,
+            hierarchyItem.baseLeftPadding, hierarchyItem.rowRightPadding,
+            hierarchyItem.leadingSpacing, hierarchyItem.cornerRadius,
+            hierarchyItem.implicitWidth, hierarchyItem.implicitHeight],
+        hierarchyList: [hierarchyList.generatedIndentStep,
+            hierarchyList.generatedRowHeight, hierarchyList.generatedItemWidth,
+            hierarchyList.generatedIconSize, hierarchyList.generatedChevronSize],
+        hierarchyPanel: [hierarchyPanel.minimumPanelWidth,
+            hierarchyPanel.minimumPanelHeight, hierarchyPanel.implicitWidth,
+            hierarchyPanel.implicitHeight]
+    })
 }
 )";
 
         QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
         QVERIFY(root);
         QTRY_VERIFY(root->property("tokenContract").toBool());
-        QVERIFY(root->property("componentContract").toBool());
+        QCOMPARE(root->property("listDelegateBodyPixelSize").toInt(), 13);
+        QVERIFY2(root->property("componentContract").toBool(),
+                 qPrintable(root->property("componentDebug").toString()));
     }
 
     {

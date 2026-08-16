@@ -4,17 +4,20 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Borderless
-    readonly property int figmaButtonHeight: Theme.gap20
+    tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     horizontalPadding: Theme.gap8
-    verticalPadding: Theme.gap4
+    verticalPadding: Math.max(
+        0,
+        (control.figmaButtonHeight - Theme.textBodyLineHeight) / 2)
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight
-    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    implicitWidth: Math.ceil(contentItem.implicitWidth) + leftPadding + rightPadding
 
     contentItem: Label {
+        objectName: "labelButton_label"
         style: body
         text: control.text
         color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
@@ -27,4 +30,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }
+// LV.LabelButton { text: "Button" }

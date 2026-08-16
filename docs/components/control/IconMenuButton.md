@@ -34,12 +34,18 @@ Indicator icon mapping:
 
 Layout:
 
-- default tone fallback: `Borderless`
-- main and indicator icon frames: `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile)
-- fixed `figmaButtonHeight` (`Theme.gap20`: desktop `20`, mobile `25`)
-- `horizontalPadding: Theme.scaleMetric(1)`
-- `verticalPadding: Theme.scaleMetric(1)`
-- `spacing: Theme.gap4`
+- default tone: `Primary` (`Kind=accent`)
+- main and indicator icon frames: `Theme.iconSm` (`18 x 18` on desktop, `36 x 36` on mobile)
+- fixed frame: `38 x 22` desktop, `76 x 44` mobile
+- horizontal/vertical padding: `Theme.gap2` (`2` desktop, `4` mobile)
+- measured icon-indicator overlap: `spacing: -Theme.gap2` (`-2` desktop, `-4` mobile); the content layout consumes this public property so callers can override it without replacing the component
+
+## Figma Visual Contract
+
+- Source: `44:599`, `Type=IconMenuButton`.
+- Desktop main icon bounds are `x=2, y=2, 18 x 18`; chevron bounds are `x=18, y=2, 18 x 18`.
+- Existing `generalprojectStructure.svg` and tone-specific `generalchevronDown*.svg` assets match the exported Figma vectors and are reused.
+- All five tones preserve the same geometry.
 
 Injected methods:
 
@@ -58,7 +64,6 @@ Injected methods:
 import LVRS 1.0 as LV
 
 LV.IconMenuButton {
-    tone: LV.AbstractButton.Borderless
     iconName: "projectStructure"
     method: function(eventData) {
         menu.open()

@@ -5,8 +5,8 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Borderless
-    readonly property int figmaButtonHeight: Theme.gap20
+    tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     readonly property string fallbackIconName: "projectStructure"
     readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)
 
@@ -39,19 +39,22 @@ AbstractButton {
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
 
-    horizontalPadding: Theme.scaleMetric(1)
-    verticalPadding: Theme.scaleMetric(1)
+    horizontalPadding: Theme.gap2
+    verticalPadding: Theme.gap2
     spacing: Theme.gapNone
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight
-    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    implicitWidth: Math.ceil(Math.max(contentItem.implicitWidth, control.iconSize))
+        + leftPadding + rightPadding
 
     contentItem: RowLayout {
+        objectName: "iconButton_content"
         spacing: control.text.length > 0 ? Theme.gap4 : Theme.gapNone
         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
         Image {
+            objectName: "iconButton_icon"
             visible: control.iconGlyph.length === 0
             source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
             sourceSize.width: control.iconSourceSize
@@ -105,4 +108,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.IconButton { tone: LV.AbstractButton.Borderless; iconName: "add" }
+// LV.IconButton { iconName: "add" }

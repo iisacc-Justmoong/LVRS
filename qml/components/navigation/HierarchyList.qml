@@ -36,7 +36,7 @@ Item {
     property int generatedRowHeight: Theme.scaleMetric(20)
     property int generatedItemWidth: Theme.scaleMetric(200)
     property int generatedIconSize: Theme.iconSm
-    property int generatedChevronSize: Theme.iconSm
+    property int generatedChevronSize: Theme.scaleMetric(16)
     property Component itemDelegate: defaultItemDelegate
     property bool autoExpandAncestorsOnActivate: true
     readonly property bool editableSupported: hierarchyModel.revision >= 0
@@ -2432,8 +2432,16 @@ Item {
             scheduleNormalizeActiveItem()
     }
 
-    implicitWidth: usingTreeModel ? generatedColumn.implicitWidth : manualColumn.implicitWidth
-    implicitHeight: usingTreeModel ? generatedColumn.implicitHeight : manualColumn.implicitHeight
+    implicitWidth: usingTreeModel
+        ? Math.max(generatedItemWidth, generatedColumn.implicitWidth)
+        : manualColumn.implicitWidth
+    implicitHeight: usingTreeModel
+        ? Math.max(generatedColumn.implicitHeight,
+                   visibleItemCount > 0
+                       ? visibleItemCount * generatedRowHeight
+                           + Math.max(0, visibleItemCount - 1) * rowSpacing
+                       : 0)
+        : manualColumn.implicitHeight
 
     focus: false
     activeFocusOnTab: keyboardNavigationEnabled

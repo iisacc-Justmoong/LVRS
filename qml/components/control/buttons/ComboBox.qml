@@ -22,7 +22,7 @@ Item {
     signal canceled()
 
     readonly property int figmaComboWidth: Theme.scaleMetric(97)
-    readonly property int figmaComboHeight: Theme.scaleMetric(18)
+    readonly property int figmaComboHeight: Theme.scaleMetric(20)
     readonly property int figmaComboLeftPadding: Theme.gap8
     readonly property int figmaComboRightPadding: Theme.scaleMetric(1)
     readonly property int figmaComboVerticalPadding: Theme.scaleMetric(1)
@@ -47,10 +47,10 @@ Item {
             ? backgroundColorHover
             : backgroundColor
     readonly property real indicatorX: width - figmaComboRightPadding - figmaIndicatorSize
-    readonly property real indicatorY: Math.round((height - figmaIndicatorSize) * 0.5)
+    readonly property real indicatorY: (height - figmaIndicatorSize) * 0.5
     readonly property real labelX: figmaComboLeftPadding
     readonly property real labelAvailableWidth: Math.max(0, indicatorX - figmaComboLeftPadding)
-    readonly property real labelY: Math.round((height - figmaLabelLineHeight) * 0.5)
+    readonly property real labelY: (height - figmaLabelLineHeight) * 0.5
     readonly property rect indicatorBounds: Qt.rect(indicator.x, indicator.y, indicator.width, indicator.height)
     readonly property rect labelBounds: Qt.rect(label.x, label.y, label.width, label.height)
 

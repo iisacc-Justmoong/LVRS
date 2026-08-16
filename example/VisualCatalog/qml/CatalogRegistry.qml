@@ -213,8 +213,8 @@ QtObject {
                             docPath: "docs/components/control/LabelButton.md",
                             previewId: "button-family",
                             roleLabel: "Text action",
-                            summary: "Compact fixed-height text button for dense action rows and toolbar controls.",
-                            usage: "LV.LabelButton {\n    text: \"Save\"\n    tone: LV.AbstractButton.Borderless\n}",
+                            summary: "Figma 22px text button with fixed Body 13 typography and accent default tone.",
+                            usage: "LV.LabelButton {\n    text: \"Save\"\n}",
                             related: ["icon-button", "label-menu-button"]
                         }),
                         component({
@@ -224,8 +224,8 @@ QtObject {
                             docPath: "docs/components/control/IconButton.md",
                             previewId: "button-family",
                             roleLabel: "Icon action",
-                            summary: "Icon-first button variant with token, source URL, or glyph fallback input.",
-                            usage: "LV.IconButton {\n    iconName: \"add\"\n    tone: LV.AbstractButton.Borderless\n}",
+                            summary: "Figma 22px icon button with a measured 18px frame, 2px inset, and accent default tone.",
+                            usage: "LV.IconButton {\n    iconName: \"add\"\n}",
                             related: ["label-button", "icon-menu-button", "toolbar-button"]
                         }),
                         component({
@@ -235,8 +235,8 @@ QtObject {
                             docPath: "docs/components/control/LabelMenuButton.md",
                             previewId: "button-family",
                             roleLabel: "Menu trigger",
-                            summary: "Text-first menu trigger with a trailing chevron indicator aligned to LVRS menu affordances.",
-                            usage: "LV.LabelMenuButton {\n    text: \"Options\"\n    tone: LV.AbstractButton.Default\n}",
+                            summary: "Figma 22px text menu trigger with an 18px chevron and measured -2px overlap.",
+                            usage: "LV.LabelMenuButton {\n    text: \"Options\"\n}",
                             related: ["icon-menu-button", "context-menu"]
                         }),
                         component({
@@ -246,8 +246,8 @@ QtObject {
                             docPath: "docs/components/control/IconMenuButton.md",
                             previewId: "button-family",
                             roleLabel: "Icon menu trigger",
-                            summary: "Icon-centric menu button with tone-aware chevron rendering and deterministic indicator mapping.",
-                            usage: "LV.IconMenuButton {\n    iconName: \"projectStructure\"\n    tone: LV.AbstractButton.Borderless\n}",
+                            summary: "Figma 22px icon menu trigger with two 18px frames and measured -2px overlap.",
+                            usage: "LV.IconMenuButton {\n    iconName: \"projectStructure\"\n}",
                             related: ["label-menu-button", "context-menu"]
                         }),
                         component({
@@ -257,8 +257,8 @@ QtObject {
                             docPath: "docs/components/control/LabelSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Segment container",
-                            summary: "Segmented shell for text buttons that normalizes sibling tone and shared framing.",
-                            usage: "LV.LabelSegmentedControl {\n    LV.LabelButton { text: \"Week\" }\n    LV.LabelButton { text: \"Month\" }\n}",
+                            summary: "Figma 206:3827 segmented shell whose dimensions follow 56x22 label buttons.",
+                            usage: "LV.LabelSegmentedControl {\n    LV.LabelButton { text: \"Button\" }\n    LV.LabelButton { text: \"Button\" }\n}",
                             related: ["icon-segmented-control", "label-button"]
                         }),
                         component({
@@ -268,8 +268,8 @@ QtObject {
                             docPath: "docs/components/control/IconSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Icon segment container",
-                            summary: "Segmented shell for icon buttons with shared background, border, and spacing contract.",
-                            usage: "LV.IconSegmentedControl {\n    LV.IconButton { iconName: \"projectStructure\" }\n    LV.IconButton { iconName: \"add\" }\n}",
+                            summary: "Figma 206:3912 segmented shell whose dimensions follow 22x22 icon buttons.",
+                            usage: "LV.IconSegmentedControl {\n    LV.IconButton { iconName: \"projectStructure\" }\n    LV.IconButton { iconName: \"projectStructure\" }\n}",
                             related: ["label-segmented-control", "icon-button"]
                         }),
                         component({
@@ -636,8 +636,8 @@ QtObject {
                             location: "qml/components/navigation/ListItem.qml",
                             previewId: "list-navigation",
                             roleLabel: "List row",
-                            summary: "Borderless row delegate for flat lists with optional inline input overlay.",
-                            usage: "LV.ListItem {\n    label: \"Inspector row\"\n    inputable: true\n}",
+                            summary: "Figma Mini/Detail list row with exact icon, typography, metadata, and optional Mini inline input.",
+                            usage: "LV.ListItem {\n    size: LV.ListItem.Mini\n    label: \"Inspector row\"\n    inputable: true\n}",
                             related: ["list", "input-field"]
                         }),
                         component({

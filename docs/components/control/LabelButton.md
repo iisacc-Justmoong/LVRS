@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/LabelButton.qml`
 
-`LabelButton` is the text-only button variant built on `AbstractButton`.
+`LabelButton` is the text-only Figma Button variant built on `AbstractButton`.
 
 ## Purpose
 
@@ -13,12 +13,20 @@ Location: `qml/components/control/buttons/LabelButton.qml`
 
 Inherited from `AbstractButton` plus fixed layout contract:
 
-- default tone fallback: `Borderless`
+- default tone: `Primary` (`Kind=accent`)
 - injected method API: `method`, `methods`, `invokeMethods(...)`
-- fixed height: `Theme.gap20`
-- `horizontalPadding: Theme.gap8`
-- `verticalPadding: Theme.gap4`
+- fixed height: `Theme.iconSm + Theme.gap2 * 2` (`22` desktop, `44` mobile)
+- `horizontalPadding: Theme.gap8` (`8` desktop, `16` mobile)
+- vertical padding is derived from the fixed frame and Body line height (`4.5` desktop, `15.5` mobile)
 - `cornerRadius: Theme.radiusSm`
+
+## Figma Visual Contract
+
+- Source: `44:599`, `Type=LabelButton`.
+- With text `Button`, the desktop frame is `56 x 22`; the text bounds are `x=8, y=4.5, 40 x 13`.
+- Typography is Pretendard Body `13px Medium / 13px` and remains `13px` on mobile.
+- The corresponding mobile token composition is `72 x 44`.
+- All five tones preserve the same geometry.
 
 ## Usage
 
@@ -27,7 +35,6 @@ import LVRS 1.0 as LV
 
 LV.LabelButton {
     text: "Save"
-    tone: LV.AbstractButton.Borderless
     method: function(eventData) {
         save()
     }
@@ -37,7 +44,7 @@ LV.LabelButton {
 ## How It Works
 
 - Overrides `contentItem` with body-style label.
-- Keeps implicit width dynamic by label width + horizontal paddings.
+- Rounds the label width up to a whole logical pixel, then adds horizontal paddings.
 - Keeps implicit/explicit height locked to Figma-compatible compact contract.
 
 ## Practical Notes

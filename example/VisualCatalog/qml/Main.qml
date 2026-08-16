@@ -748,24 +748,40 @@ LV.ApplicationWindow {
                     text: "Selected: " + preview.selectionLabel
                 }
 
-                Flow {
-                    width: parent.width
-                    spacing: LV.Theme.gap8
+                GridLayout {
+                    columns: 5
+                    columnSpacing: LV.Theme.gap12
+                    rowSpacing: LV.Theme.gap8
 
-                    LV.LabelButton { text: "Label"; tone: LV.AbstractButton.Primary }
-                    LV.IconButton { iconName: "add"; tone: LV.AbstractButton.Primary }
-                    LV.LabelMenuButton { text: "Menu"; tone: LV.AbstractButton.Default }
-                    LV.IconMenuButton { iconName: "viewMoreSymbolicDefault"; tone: LV.AbstractButton.Borderless }
-                }
+                    LV.Label { style: caption; text: "Accent" }
+                    LV.LabelButton { text: "Button" }
+                    LV.IconButton { iconName: "projectStructure" }
+                    LV.LabelMenuButton { text: "Open" }
+                    LV.IconMenuButton { iconName: "projectStructure" }
 
-                Flow {
-                    width: parent.width
-                    spacing: LV.Theme.gap8
-
-                    LV.LabelButton { text: "Default"; tone: LV.AbstractButton.Default }
-                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
-                    LV.LabelMenuButton { text: "Options"; tone: LV.AbstractButton.Borderless }
+                    LV.Label { style: caption; text: "Default" }
+                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Default }
+                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Default }
+                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Default }
                     LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Default }
+
+                    LV.Label { style: caption; text: "Borderless" }
+                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }
+                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
+                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Borderless }
+                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
+
+                    LV.Label { style: caption; text: "Destructive" }
+                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Destructive }
+                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
+                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Destructive }
+                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
+
+                    LV.Label { style: caption; text: "Disabled" }
+                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Disabled }
+                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
+                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Disabled }
+                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
                 }
             }
         }
@@ -787,17 +803,15 @@ LV.ApplicationWindow {
                 LV.LabelSegmentedControl {
                     width: implicitWidth
 
-                    LV.LabelButton { text: "Day" }
-                    LV.LabelButton { text: "Week" }
-                    LV.LabelButton { text: "Month" }
+                    LV.LabelButton { text: "Button" }
+                    LV.LabelButton { text: "Button" }
                 }
 
                 LV.IconSegmentedControl {
                     width: implicitWidth
 
                     LV.IconButton { iconName: "projectStructure" }
-                    LV.IconButton { iconName: "add" }
-                    LV.IconButton { iconName: "viewMoreSymbolicDefault" }
+                    LV.IconButton { iconName: "projectStructure" }
                 }
             }
         }

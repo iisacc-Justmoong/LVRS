@@ -6,6 +6,7 @@
 #include <QAbstractTableModel>
 #include <QCoreApplication>
 #include <QDir>
+#include <QFont>
 #include <QGuiApplication>
 #include <QInputMethodEvent>
 #include <QQuickItem>
@@ -41,6 +42,19 @@ bool mouseAreaContainsScenePoint(QObject *root, const QPoint &scenePoint)
             return true;
     }
     return false;
+}
+
+QQuickItem *visualChildByObjectName(QQuickItem *root, const QString &objectName)
+{
+    if (!root)
+        return nullptr;
+    if (root->objectName() == objectName)
+        return root;
+    for (QQuickItem *child : root->childItems()) {
+        if (QQuickItem *match = visualChildByObjectName(child, objectName))
+            return match;
+    }
+    return nullptr;
 }
 
 class NativeListModel : public QAbstractListModel
@@ -384,6 +398,7 @@ private slots:
     void hierarchy_optional_footer_contract_loads();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
+    void hierarchy_figma_composition_contract_loads();
     void hierarchy_toolbar_manual_icon_button_contract_loads();
     void hierarchy_row_click_only_activates_not_toggles();
     void hierarchy_chevron_requires_children_loads();
@@ -395,7 +410,8 @@ private slots:
     void hierarchy_item_structure_api_contract_loads();
     void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
-    void button_default_tone_fallback_borderless_loads();
+    void button_default_tone_matches_figma_accent_loads();
+    void segmented_control_figma_contract_loads();
     void button_injected_methods_contract_loads();
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
@@ -428,7 +444,7 @@ private slots:
     void table_cpp_model_contract_loads();
     void table_undo_redo_contract_loads();
     void list_model_contract_loads();
-    void list_item_and_footer_figma_contract_loads();
+    void list_figma_contract_loads();
 };
 
 static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
@@ -958,7 +974,7 @@ LV.ApplicationWindow {
 
     property bool contract:
         LV.Theme.mobileTarget
-        && mobileWindow.navigationIconSize === 23
+        && mobileWindow.navigationIconSize === 36
         && mobileWindow.adaptiveMobileLayout
         && !mobileWindow.adaptiveDesktopLayout
         && mobileWindow.adaptiveBottomNavigation
@@ -970,7 +986,7 @@ LV.ApplicationWindow {
     QScopedPointer<QObject> mobileRoot(createFromQml(mobileEngine, mobileQml));
     QVERIFY(mobileRoot);
     QTRY_VERIFY(mobileRoot->property("contract").toBool());
-    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 23);
+    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 36);
 
     QQmlEngine desktopEngine;
     desktopEngine.addImportPath(importBase);
@@ -1100,7 +1116,10 @@ Item {
     id: root
 
     property string themeTarget: "macos"
-    readonly property int expectedIconSize: LV.Theme.mobileTarget ? 23 : 18
+    readonly property int expectedIconSize: LV.Theme.mobileTarget ? 36 : 18
+    readonly property int expectedMenuItemHeight: LV.Theme.mobileTarget ? 48 : 24
+    readonly property int expectedMenuChevronSize: LV.Theme.mobileTarget ? 32 : 16
+    readonly property int expectedHierarchyChevronSize: LV.Theme.mobileTarget ? 32 : 16
 
     onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
     Component.onCompleted: LV.Theme.targetOverride = themeTarget
@@ -1154,18 +1173,18 @@ Item {
         && radioButton.indicatorSize === expectedIconSize
         && toggleSwitch.knobSize === expectedIconSize
         && listToolbar.iconSize === expectedIconSize
-        && menuItem.itemHeight === expectedIconSize
+        && menuItem.itemHeight === expectedMenuItemHeight
         && menuItem.iconSize === expectedIconSize
-        && menuItem.chevronSize === expectedIconSize
+        && menuItem.chevronSize === expectedMenuChevronSize
         && hierarchyItem.iconSize === expectedIconSize
-        && hierarchyItem.chevronSize === expectedIconSize
+        && hierarchyItem.chevronSize === expectedHierarchyChevronSize
         && hierarchyList.generatedIconSize === expectedIconSize
-        && hierarchyList.generatedChevronSize === expectedIconSize
+        && hierarchyList.generatedChevronSize === expectedHierarchyChevronSize
         && customIconButton.iconSize === 14
 
     property bool mobileCompactIconContractReady:
         LV.Theme.mobileTarget
-        && LV.Theme.iconSm === 23
+        && LV.Theme.iconSm === 36
         && compactIconContractReady
 }
 )";
@@ -2760,17 +2779,13 @@ Item {
         { id: "slot0", iconName: "projectStructure", selected: true },
         { id: "slot1", iconName: "projectStructure" },
         { id: "slot2", iconName: "projectStructure" },
-        { id: "slot3", iconName: "projectStructure" },
-        { id: "slot4", iconName: "projectStructure" },
-        { id: "slot5", iconName: "projectStructure" },
-        { id: "slot6", iconName: "projectStructure" },
-        { id: "slot7", iconName: "projectStructure" }
+        { id: "slot3", iconName: "projectStructure" }
     ]
 
     LV.HierarchyToolbar {
         id: toolbar
         width: 200
-        height: 20
+        height: implicitHeight
         buttonItems: root.toolbarItems
     }
 
@@ -2782,44 +2797,43 @@ Item {
         const buttons = toolbar.collectButtons().slice().sort(function(leftButton, rightButton) {
             return leftButton.x - rightButton.x
         })
-        if (buttons.length !== 8) {
+        if (buttons.length !== 4) {
             root.layoutDiagnostics = "buttonCount=" + buttons.length
             return false
         }
 
-        const expectedX = [
-            0.0,
-            25.7142857143,
-            51.4285714286,
-            77.1428571429,
-            102.8571428571,
-            128.5714285714,
-            154.2857142857,
-            180.0
-        ]
+        const expectedX = [8.0, 30.0, 52.0, 74.0]
 
         for (let index = 0; index < expectedX.length; index++) {
             const button = buttons[index]
             if (!button || !button.visible)
                 return false
-            if (!approximatelyEqual(button.x, expectedX[index], 0.8)) {
+            const buttonPosition = button.mapToItem(toolbar, 0, 0)
+            if (!approximatelyEqual(buttonPosition.x, expectedX[index], 0.8)) {
                 root.layoutDiagnostics = "xMismatch index=" + index
-                    + " actual=" + button.x
+                    + " actual=" + buttonPosition.x
                     + " expected=" + expectedX[index]
                     + " spacing=" + toolbar.distributedSpacing
                 return false
             }
-            if (!approximatelyEqual(button.width, 20.0, 0.2)) {
+            if (!approximatelyEqual(button.width, 22.0, 0.2)) {
                 root.layoutDiagnostics = "widthMismatch index=" + index + " width=" + button.width
                 return false
             }
-            if (!approximatelyEqual(button.height, 20.0, 0.2)) {
+            if (!approximatelyEqual(button.height, 22.0, 0.2)) {
                 root.layoutDiagnostics = "heightMismatch index=" + index + " height=" + button.height
                 return false
             }
         }
-        const ready = toolbar.horizontalPadding === 0
-            && toolbar.verticalPadding === 0
+        const ready = toolbar.minimumToolbarWidth === 200
+            && toolbar.horizontalPadding === 8
+            && toolbar.verticalPadding === 2
+            && toolbar.slotSize === 22
+            && toolbar.spacing === 0
+            && !toolbar.distributeSpacing
+            && toolbar.implicitWidth === 200
+            && toolbar.implicitHeight === 26
+            && toolbar.height === 26
             && approximatelyEqual(toolbar.backgroundOpacity, 0.0, 0.001)
             && toolbar.activeButtonId === "slot0"
             && toolbar.activeIndex === 0
@@ -2850,6 +2864,117 @@ Item {
     QVERIFY(root);
     QTRY_VERIFY2(root->property("layoutContractReady").toBool(),
                  qPrintable(root->property("layoutDiagnostics").toString()));
+}
+
+void ImportApiTests::hierarchy_figma_composition_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 240
+    height: 560
+
+    property var rows: [
+        { key: "row-01", label: "Label", depth: 0, expanded: true },
+        { key: "row-02", label: "Value", depth: 0 },
+        { key: "row-03", label: "Description", depth: 0 },
+        { key: "row-04", label: "Description", depth: 0 },
+        { key: "row-05", label: "Description", depth: 0 },
+        { key: "row-06", label: "Description", depth: 0 },
+        { key: "row-07", label: "Description", depth: 0 },
+        { key: "row-08", label: "Description", depth: 0 },
+        { key: "row-09", label: "Description", depth: 0 },
+        { key: "row-10", label: "Description", depth: 0 },
+        { key: "row-11", label: "Description", depth: 0 },
+        { key: "row-12", label: "Description", depth: 0 },
+        { key: "row-13", label: "Description", depth: 0 },
+        { key: "row-14", label: "Description", depth: 0 },
+        { key: "row-15", label: "Description", depth: 0 },
+        { key: "row-16", label: "Description", depth: 0 }
+    ]
+
+    LV.HierarchyList {
+        id: list
+        objectName: "figmaHierarchyList"
+        width: 200
+        model: root.rows
+        opacity: 0
+    }
+
+    LV.Hierarchy {
+        id: hierarchy
+        objectName: "figmaHierarchy"
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+        toolbarItems: [
+            { id: "slot0", iconName: "projectStructure", selected: true },
+            { id: "slot1", iconName: "projectStructure" },
+            { id: "slot2", iconName: "projectStructure" },
+            { id: "slot3", iconName: "projectStructure" }
+        ]
+        model: root.rows
+    }
+
+    property bool contractReady:
+        list.itemCount === 16
+        && list.visibleItemCount === 16
+        && list.generatedIndentStep === 8
+        && list.generatedRowHeight === 20
+        && list.generatedItemWidth === 200
+        && list.generatedIconSize === 18
+        && list.generatedChevronSize === 16
+        && list.implicitWidth === 200
+        && list.implicitHeight === 320
+        && hierarchy.minimumPanelWidth === 200
+        && hierarchy.minimumPanelHeight === 530
+        && hierarchy.implicitWidth === 200
+        && hierarchy.implicitHeight === 530
+        && hierarchy.panelColor === LV.Theme.panelBackground05
+
+    property string contractDiagnostics: JSON.stringify({
+        listCount: list.itemCount,
+        listVisibleCount: list.visibleItemCount,
+        listIndent: list.generatedIndentStep,
+        listRowHeight: list.generatedRowHeight,
+        listItemWidth: list.generatedItemWidth,
+        listIconSize: list.generatedIconSize,
+        listChevronSize: list.generatedChevronSize,
+        listImplicitWidth: list.implicitWidth,
+        listImplicitHeight: list.implicitHeight,
+        panelMinimum: [hierarchy.minimumPanelWidth, hierarchy.minimumPanelHeight],
+        panelImplicit: [hierarchy.implicitWidth, hierarchy.implicitHeight],
+        panelColor: hierarchy.panelColor.toString(),
+        expectedPanelColor: LV.Theme.panelBackground05.toString()
+    })
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("contractReady").toBool(),
+                 qPrintable(root->property("contractDiagnostics").toString()));
+
+    auto *hierarchy = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaHierarchy")));
+    auto *viewport = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("hierarchyListViewportFlickable")));
+    QVERIFY(hierarchy);
+    QVERIFY(viewport);
+    const QPointF viewportPosition = viewport->mapToItem(hierarchy, QPointF(0.0, 0.0));
+    QVERIFY2(qAbs(viewportPosition.x()) <= 0.01, "Hierarchy list must align to the panel left edge.");
+    QVERIFY2(qAbs(viewportPosition.y() - 26.0) <= 0.01,
+             "Hierarchy list must begin immediately below the 26px toolbar.");
+    QVERIFY2(qAbs(viewport->width() - 200.0) <= 0.01,
+             "Hierarchy list viewport must preserve the 200px panel width.");
+    QVERIFY2(qAbs(viewport->property("contentHeight").toReal() - 320.0) <= 0.01,
+             "Sixteen 20px rows must produce the 320px Figma list content height.");
 }
 
 void ImportApiTests::hierarchy_toolbar_manual_icon_button_contract_loads()
@@ -3237,12 +3362,13 @@ Item {
         && item.itemWidth === 200
         && item.indentStep === 8
         && item.iconSize === 18
-        && item.chevronSize === 18
+        && item.chevronSize === 16
         && item.baseLeftPadding === 8
         && item.rowRightPadding === 8
         && item.leadingSpacing === 2
         && item.implicitWidth === 200
         && item.implicitHeight === 20
+        && item.cornerRadius === 5
         && item.cornerRadius === LV.Theme.radiusControl
         && item.computedLeftPadding === 8
         && item.effectiveShowChevron
@@ -3317,8 +3443,8 @@ Item {
 
     QVERIFY2(qAbs(iconPos.x() - 8.0) <= 0.5, "Icon x must match the 8px Figma inset.");
     QVERIFY2(qAbs(labelPos.x() - 28.0) <= 0.5, "Label x must follow icon width + 2px gap.");
-    QVERIFY2(qAbs(chevronPos.x() - 174.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
-    QVERIFY2(qAbs(labelItem->width() - 144.0) <= 0.5, "Label width must match the enlarged icon layout.");
+    QVERIFY2(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
+    QVERIFY2(qAbs(labelItem->width() - 146.0) <= 0.5, "Label width must match the 18px icon and 16px chevron layout.");
     QVERIFY2(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
 }
 
@@ -3768,10 +3894,49 @@ Item {
     property string expectedFallbackIcon: iconRoot + "generalprojectStructure.svg"
     property color transparentColor: "transparent"
 
-    LV.LabelButton { id: labelButton; text: "Button"; tone: LV.AbstractButton.Primary; visible: false }
-    LV.IconButton { id: iconButton; tone: LV.AbstractButton.Primary; visible: false }
-    LV.LabelMenuButton { id: labelMenuButton; text: "Open"; tone: LV.AbstractButton.Primary; visible: false }
-    LV.IconMenuButton { id: iconMenuButton; tone: LV.AbstractButton.Primary; visible: false }
+    LV.LabelButton {
+        id: labelButton
+        objectName: "figmaLabelButton"
+        text: "Button"
+        tone: LV.AbstractButton.Primary
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+    }
+    LV.IconButton {
+        id: iconButton
+        objectName: "figmaIconButton"
+        tone: LV.AbstractButton.Primary
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+    }
+    LV.LabelMenuButton {
+        id: labelMenuButton
+        objectName: "figmaLabelMenuButton"
+        text: "Open"
+        tone: LV.AbstractButton.Primary
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+    }
+    LV.IconMenuButton {
+        id: iconMenuButton
+        objectName: "figmaIconMenuButton"
+        tone: LV.AbstractButton.Primary
+        width: implicitWidth
+        height: implicitHeight
+        visible: false
+    }
+    LV.LabelMenuButton {
+        id: constrainedLabelMenuButton
+        objectName: "constrainedLabelMenuButton"
+        text: "Constrained"
+        tone: LV.AbstractButton.Default
+        width: 40
+        height: implicitHeight
+        visible: false
+    }
     LV.LabelButton { id: labelButtonDefault; text: "Button"; tone: LV.AbstractButton.Default; visible: false }
     LV.IconButton { id: iconButtonDefault; tone: LV.AbstractButton.Default; visible: false }
     LV.LabelMenuButton { id: labelMenuButtonDefault; text: "Open"; tone: LV.AbstractButton.Default; visible: false }
@@ -3791,50 +3956,58 @@ Item {
 
     property bool figmaPaddingReady:
         labelButton.horizontalPadding === LV.Theme.gap8
-        && labelButton.verticalPadding === LV.Theme.gap4
-        && iconButton.horizontalPadding === LV.Theme.scaleMetric(1)
-        && iconButton.verticalPadding === LV.Theme.scaleMetric(1)
+        && Math.abs(labelButton.verticalPadding - 4.5) < 0.01
+        && iconButton.horizontalPadding === LV.Theme.gap2
+        && iconButton.verticalPadding === LV.Theme.gap2
         && labelMenuButton.horizontalPadding === LV.Theme.gap8
-        && labelMenuButton.verticalPadding === LV.Theme.scaleMetric(1)
-        && iconMenuButton.horizontalPadding === LV.Theme.scaleMetric(1)
-        && iconMenuButton.verticalPadding === LV.Theme.scaleMetric(1)
-        && labelMenuButton.spacing === LV.Theme.gap2
-        && iconMenuButton.spacing === LV.Theme.gap4
+        && labelMenuButton.verticalPadding === LV.Theme.gap2
+        && iconMenuButton.horizontalPadding === LV.Theme.gap2
+        && iconMenuButton.verticalPadding === LV.Theme.gap2
+        && labelMenuButton.spacing === -LV.Theme.gap2
+        && iconMenuButton.spacing === -LV.Theme.gap2
         && iconButton.iconSize === LV.Theme.iconSm
         && iconMenuButton.iconSize === LV.Theme.iconSm
         && labelMenuButton.indicatorSize === LV.Theme.iconSm
         && iconMenuButton.indicatorSize === LV.Theme.iconSm
-        && Math.abs(labelButton.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButton.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButton.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButton.implicitHeight - LV.Theme.gap20) < 0.01
+        && labelButton.figmaButtonHeight === 22
+        && iconButton.figmaButtonHeight === 22
+        && labelMenuButton.figmaButtonHeight === 22
+        && iconMenuButton.figmaButtonHeight === 22
+        && Math.abs(labelButton.implicitHeight - 22) < 0.01
+        && Math.abs(iconButton.implicitHeight - 22) < 0.01
+        && Math.abs(labelMenuButton.implicitHeight - 22) < 0.01
+        && Math.abs(iconMenuButton.implicitHeight - 22) < 0.01
+        && Math.abs(labelButton.implicitWidth - 56) < 0.01
+        && Math.abs(iconButton.implicitWidth - 22) < 0.01
+        && Math.abs(labelMenuButton.implicitWidth - 64) < 0.01
+        && Math.abs(iconMenuButton.implicitWidth - 38) < 0.01
         && Math.abs(labelButton.implicitHeight - iconButton.implicitHeight) < 0.01
         && Math.abs(iconButton.implicitHeight - labelMenuButton.implicitHeight) < 0.01
         && Math.abs(labelMenuButton.implicitHeight - iconMenuButton.implicitHeight) < 0.01
-        && Math.abs(labelButton.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButton.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButton.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButton.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelButtonDefault.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButtonDefault.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButtonDefault.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButtonDefault.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelButtonBorderless.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButtonBorderless.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButtonBorderless.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButtonBorderless.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelButtonDestructive.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButtonDestructive.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButtonDestructive.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButtonDestructive.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButtonDisabled.implicitHeight - LV.Theme.gap20) < 0.01
-        && Math.abs(labelButtonDisabled.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconButtonDisabled.height - LV.Theme.gap20) < 0.01
-        && Math.abs(labelMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
-        && Math.abs(iconMenuButtonDisabled.height - LV.Theme.gap20) < 0.01
+        && Math.abs(labelButton.height - 22) < 0.01
+        && Math.abs(iconButton.height - 22) < 0.01
+        && Math.abs(labelMenuButton.height - 22) < 0.01
+        && Math.abs(iconMenuButton.height - 22) < 0.01
+        && Math.abs(labelButtonDefault.height - 22) < 0.01
+        && Math.abs(iconButtonDefault.height - 22) < 0.01
+        && Math.abs(labelMenuButtonDefault.height - 22) < 0.01
+        && Math.abs(iconMenuButtonDefault.height - 22) < 0.01
+        && Math.abs(labelButtonBorderless.height - 22) < 0.01
+        && Math.abs(iconButtonBorderless.height - 22) < 0.01
+        && Math.abs(labelMenuButtonBorderless.height - 22) < 0.01
+        && Math.abs(iconMenuButtonBorderless.height - 22) < 0.01
+        && Math.abs(labelButtonDestructive.height - 22) < 0.01
+        && Math.abs(iconButtonDestructive.height - 22) < 0.01
+        && Math.abs(labelMenuButtonDestructive.height - 22) < 0.01
+        && Math.abs(iconMenuButtonDestructive.height - 22) < 0.01
+        && Math.abs(labelButtonDisabled.implicitHeight - 22) < 0.01
+        && Math.abs(iconButtonDisabled.implicitHeight - 22) < 0.01
+        && Math.abs(labelMenuButtonDisabled.implicitHeight - 22) < 0.01
+        && Math.abs(iconMenuButtonDisabled.implicitHeight - 22) < 0.01
+        && Math.abs(labelButtonDisabled.height - 22) < 0.01
+        && Math.abs(iconButtonDisabled.height - 22) < 0.01
+        && Math.abs(labelMenuButtonDisabled.height - 22) < 0.01
+        && Math.abs(iconMenuButtonDisabled.height - 22) < 0.01
         && labelButtonDefault.backgroundColor === LV.Theme.panelBackground12
         && iconButtonDefault.backgroundColor === LV.Theme.panelBackground12
         && labelMenuButtonDefault.backgroundColor === LV.Theme.panelBackground12
@@ -3863,15 +4036,110 @@ Item {
         && iconMenuButtonBorderless.resolvedIndicatorName === "generalchevronDownBorderless"
         && iconMenuButtonDestructive.resolvedIndicatorName === "generalchevronDownAccent"
         && iconMenuButtonDisabled.resolvedIndicatorName === "generalchevronDownDisabled"
+
+    property string figmaPaddingDebug: JSON.stringify({
+        label: [labelButton.implicitWidth, labelButton.implicitHeight,
+            labelButton.horizontalPadding, labelButton.verticalPadding],
+        icon: [iconButton.implicitWidth, iconButton.implicitHeight,
+            iconButton.horizontalPadding, iconButton.verticalPadding],
+        labelMenu: [labelMenuButton.implicitWidth, labelMenuButton.implicitHeight,
+            labelMenuButton.horizontalPadding, labelMenuButton.verticalPadding,
+            labelMenuButton.spacing],
+        iconMenu: [iconMenuButton.implicitWidth, iconMenuButton.implicitHeight,
+            iconMenuButton.horizontalPadding, iconMenuButton.verticalPadding,
+            iconMenuButton.spacing]
+    })
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("figmaPaddingReady").toBool());
+    QTRY_VERIFY2(root->property("figmaPaddingReady").toBool(),
+                 qPrintable(root->property("figmaPaddingDebug").toString()));
+
+    const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
+        return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                      QSizeF(item->width(), item->height()));
+    };
+    const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    auto *labelButton = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaLabelButton")));
+    auto *iconButton = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaIconButton")));
+    auto *labelMenuButton = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaLabelMenuButton")));
+    auto *iconMenuButton = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaIconMenuButton")));
+    auto *constrainedLabelMenuButton = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("constrainedLabelMenuButton")));
+    QVERIFY(labelButton);
+    QVERIFY(iconButton);
+    QVERIFY(labelMenuButton);
+    QVERIFY(iconMenuButton);
+    QVERIFY(constrainedLabelMenuButton);
+
+    auto *labelText = qobject_cast<QQuickItem *>(
+        labelButton->findChild<QObject *>(QStringLiteral("labelButton_label")));
+    auto *iconImage = qobject_cast<QQuickItem *>(
+        iconButton->findChild<QObject *>(QStringLiteral("iconButton_icon")));
+    auto *labelMenuText = qobject_cast<QQuickItem *>(
+        labelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_label")));
+    auto *labelMenuIndicator = qobject_cast<QQuickItem *>(
+        labelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_indicator")));
+    auto *iconMenuImage = qobject_cast<QQuickItem *>(
+        iconMenuButton->findChild<QObject *>(QStringLiteral("iconMenuButton_icon")));
+    auto *iconMenuIndicator = qobject_cast<QQuickItem *>(
+        iconMenuButton->findChild<QObject *>(QStringLiteral("iconMenuButton_indicator")));
+    auto *constrainedLabel = qobject_cast<QQuickItem *>(
+        constrainedLabelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_label")));
+    auto *constrainedIndicator = qobject_cast<QQuickItem *>(
+        constrainedLabelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_indicator")));
+    QVERIFY(labelText);
+    QVERIFY(iconImage);
+    QVERIFY(labelMenuText);
+    QVERIFY(labelMenuIndicator);
+    QVERIFY(iconMenuImage);
+    QVERIFY(iconMenuIndicator);
+    QVERIFY(constrainedLabel);
+    QVERIFY(constrainedIndicator);
+
+    verifyBounds(boundsIn(labelText, labelButton), QRectF(8.0, 4.5, 40.0, 13.0));
+    verifyBounds(boundsIn(iconImage, iconButton), QRectF(2.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(labelMenuText, labelMenuButton), QRectF(8.0, 4.5, 32.0, 13.0));
+    verifyBounds(boundsIn(labelMenuIndicator, labelMenuButton), QRectF(38.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(iconMenuImage, iconMenuButton), QRectF(2.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(iconMenuIndicator, iconMenuButton), QRectF(18.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(constrainedLabel, constrainedLabelMenuButton),
+                 QRectF(8.0, 4.5, 8.0, 13.0));
+    verifyBounds(boundsIn(constrainedIndicator, constrainedLabelMenuButton),
+                 QRectF(14.0, 2.0, 18.0, 18.0));
+
+    const QFont labelFont = labelText->property("font").value<QFont>();
+    const QFont labelMenuFont = labelMenuText->property("font").value<QFont>();
+    QCOMPARE(labelFont.pixelSize(), 13);
+    QCOMPARE(labelFont.weight(), QFont::Medium);
+    QCOMPARE(labelFont.styleName(), QStringLiteral("Medium"));
+    QCOMPARE(labelMenuFont.pixelSize(), 13);
+    QCOMPARE(labelMenuFont.weight(), QFont::Medium);
+    QCOMPARE(labelMenuFont.styleName(), QStringLiteral("Medium"));
+    QTRY_COMPARE(iconImage->property("status").toInt(), 1);
+    QTRY_COMPARE(labelMenuIndicator->property("status").toInt(), 1);
+    QTRY_COMPARE(iconMenuImage->property("status").toInt(), 1);
+    QTRY_COMPARE(iconMenuIndicator->property("status").toInt(), 1);
 }
 
-void ImportApiTests::button_default_tone_fallback_borderless_loads()
+void ImportApiTests::button_default_tone_matches_figma_accent_loads()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -3881,30 +4149,159 @@ import QtQuick
 import LVRS as LV
 
 Item {
-    property color transparentColor: "transparent"
-
     LV.LabelButton { id: labelButton; text: "Button"; visible: false }
     LV.IconButton { id: iconButton; visible: false }
     LV.LabelMenuButton { id: labelMenuButton; text: "Open"; visible: false }
     LV.IconMenuButton { id: iconMenuButton; visible: false }
 
-    property bool defaultFallbackReady:
-        labelButton.tone === LV.AbstractButton.Borderless
-        && iconButton.tone === LV.AbstractButton.Borderless
-        && labelMenuButton.tone === LV.AbstractButton.Borderless
-        && iconMenuButton.tone === LV.AbstractButton.Borderless
-        && labelButton.backgroundColor === transparentColor
-        && iconButton.backgroundColor === transparentColor
-        && labelMenuButton.backgroundColor === transparentColor
-        && iconMenuButton.backgroundColor === transparentColor
-        && labelMenuButton.resolvedIndicatorName === "generalchevronDownBorderless"
-        && iconMenuButton.resolvedIndicatorName === "generalchevronDownBorderless"
+    property bool defaultToneReady:
+        labelButton.tone === LV.AbstractButton.Primary
+        && iconButton.tone === LV.AbstractButton.Primary
+        && labelMenuButton.tone === LV.AbstractButton.Primary
+        && iconMenuButton.tone === LV.AbstractButton.Primary
+        && labelButton.backgroundColor === LV.Theme.primary
+        && iconButton.backgroundColor === LV.Theme.primary
+        && labelMenuButton.backgroundColor === LV.Theme.primary
+        && iconMenuButton.backgroundColor === LV.Theme.primary
+        && labelMenuButton.resolvedIndicatorName === "generalchevronDownAccent"
+        && iconMenuButton.resolvedIndicatorName === "generalchevronDownAccent"
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("defaultFallbackReady").toBool());
+    QVERIFY(root->property("defaultToneReady").toBool());
+}
+
+void ImportApiTests::segmented_control_figma_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+
+    const auto verifyBounds = [](QQuickItem *item, QQuickItem *ancestor, const QRectF &expected) {
+        const QRectF actual(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                            QSizeF(item->width(), item->height()));
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    for (int count = 2; count <= 7; ++count) {
+        QString labelButtons;
+        QString iconButtons;
+        for (int index = 0; index < count; ++index) {
+            labelButtons += QStringLiteral(
+                "LV.LabelButton { objectName: \"labelSegmentButton_%1\"; text: \"Button\" }\n")
+                                .arg(index);
+            iconButtons += QStringLiteral(
+                "LV.IconButton { objectName: \"iconSegmentButton_%1\"; iconName: \"projectStructure\" }\n")
+                               .arg(index);
+        }
+
+        const int expectedLabelWidth = (count * 56) + ((count - 1) * 2) + 8;
+        const int expectedIconWidth = (count * 22) + ((count - 1) * 2) + 8;
+        const QByteArray qml = QStringLiteral(R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    property int borderlessTone: LV.AbstractButton.Borderless
+
+    LV.LabelSegmentedControl {
+        id: labelSegment
+        objectName: "figmaLabelSegment"
+        %4
+    }
+
+    LV.IconSegmentedControl {
+        id: iconSegment
+        objectName: "figmaIconSegment"
+        %5
+    }
+
+    property bool contractReady:
+        labelSegment.segmentCount === %1
+        && iconSegment.segmentCount === %1
+        && labelSegment.horizontalPadding === 4
+        && Math.abs(labelSegment.verticalPadding - 3.5) < 0.01
+        && iconSegment.horizontalPadding === 4
+        && iconSegment.verticalPadding === 4
+        && labelSegment.spacing === 2
+        && iconSegment.spacing === 2
+        && labelSegment.borderWidth === 2
+        && iconSegment.borderWidth === 2
+        && labelSegment.cornerRadius === 8
+        && iconSegment.cornerRadius === 8
+        && labelSegment.backgroundColor === LV.Theme.panelBackground08
+        && iconSegment.backgroundColor === LV.Theme.panelBackground08
+        && labelSegment.borderColor === LV.Theme.panelBackground12
+        && iconSegment.borderColor === LV.Theme.panelBackground12
+        && labelSegment.implicitWidth === %2
+        && labelSegment.width === %2
+        && labelSegment.implicitHeight === 29
+        && labelSegment.height === 29
+        && iconSegment.implicitWidth === %3
+        && iconSegment.width === %3
+        && iconSegment.implicitHeight === 30
+        && iconSegment.height === 30
+
+    property string contractDebug: JSON.stringify({
+        count: %1,
+        labelCount: labelSegment.segmentCount,
+        labelPadding: [labelSegment.horizontalPadding, labelSegment.verticalPadding],
+        labelSize: [labelSegment.width, labelSegment.height,
+            labelSegment.implicitWidth, labelSegment.implicitHeight],
+        iconCount: iconSegment.segmentCount,
+        iconPadding: [iconSegment.horizontalPadding, iconSegment.verticalPadding],
+        iconSize: [iconSegment.width, iconSegment.height,
+            iconSegment.implicitWidth, iconSegment.implicitHeight]
+    })
+}
+)")
+                                   .arg(count)
+                                   .arg(expectedLabelWidth)
+                                   .arg(expectedIconWidth)
+                                   .arg(labelButtons)
+                                   .arg(iconButtons)
+                                   .toUtf8();
+
+        QScopedPointer<QObject> root(createFromQml(engine, qml));
+        QVERIFY(root);
+        QTRY_VERIFY2(root->property("contractReady").toBool(),
+                     qPrintable(root->property("contractDebug").toString()));
+
+        auto *labelSegment = qobject_cast<QQuickItem *>(
+            root->findChild<QObject *>(QStringLiteral("figmaLabelSegment")));
+        auto *iconSegment = qobject_cast<QQuickItem *>(
+            root->findChild<QObject *>(QStringLiteral("figmaIconSegment")));
+        QVERIFY(labelSegment);
+        QVERIFY(iconSegment);
+        const int borderlessTone = root->property("borderlessTone").toInt();
+
+        for (int index = 0; index < count; ++index) {
+            auto *labelButton = qobject_cast<QQuickItem *>(
+                root->findChild<QObject *>(QStringLiteral("labelSegmentButton_%1").arg(index)));
+            auto *iconButton = qobject_cast<QQuickItem *>(
+                root->findChild<QObject *>(QStringLiteral("iconSegmentButton_%1").arg(index)));
+            QVERIFY(labelButton);
+            QVERIFY(iconButton);
+            QCOMPARE(labelButton->property("tone").toInt(), borderlessTone);
+            QCOMPARE(iconButton->property("tone").toInt(), borderlessTone);
+            verifyBounds(labelButton,
+                         labelSegment,
+                         QRectF(4.0 + (index * 58.0), 3.5, 56.0, 22.0));
+            verifyBounds(iconButton,
+                         iconSegment,
+                         QRectF(4.0 + (index * 24.0), 4.0, 22.0, 22.0));
+        }
+    }
 }
 
 void ImportApiTests::button_injected_methods_contract_loads()
@@ -4115,28 +4512,25 @@ import LVRS as LV
 Item {
     property color transparentColor: "transparent"
     readonly property real expectedUpDownX:
-        Math.round(((primaryUpDown.width - primaryUpDown.iconWidth) * 0.5) * primaryUpDown.devicePixelRatio)
-        / primaryUpDown.devicePixelRatio
+        (primaryUpDown.width - primaryUpDown.iconWidth) * 0.5
     readonly property real expectedUpDownY:
-        Math.round(((primaryUpDown.height - primaryUpDown.iconHeight) * 0.5) * primaryUpDown.devicePixelRatio)
-        / primaryUpDown.devicePixelRatio
+        (primaryUpDown.height - primaryUpDown.iconHeight) * 0.5
     readonly property real expectedUpX:
-        Math.round(((primaryUp.width - primaryUp.iconWidth) * 0.5) * primaryUp.devicePixelRatio)
-        / primaryUp.devicePixelRatio
+        (primaryUp.width - primaryUp.iconWidth) * 0.5
     readonly property real expectedUpY:
-        Math.round(((primaryUp.height - primaryUp.iconHeight) * 0.5) * primaryUp.devicePixelRatio)
-        / primaryUp.devicePixelRatio
-    readonly property real expectedChevronWidth: primaryUp.width * (10.0 / 16.0)
-    readonly property real expectedChevronHeight: primaryUp.height * (6.0 / 16.0)
-    readonly property real expectedUpDownWidth: primaryUpDown.width * (6.43604 / 16.0)
-    readonly property real expectedUpDownHeight: primaryUpDown.height * (11.1455 / 16.0)
+        (primaryUp.height - primaryUp.iconHeight) * 0.5
+    readonly property real expectedChevronWidth: primaryUp.width * (10.0 / 18.0)
+    readonly property real expectedChevronHeight: primaryUp.height * (6.0 / 18.0)
+    readonly property real expectedUpDownWidth: primaryUpDown.width * (6.43604 / 18.0)
+    readonly property real expectedUpDownHeight: primaryUpDown.height * (11.1455 / 18.0)
+    readonly property string iconRoot: "qrc:/qt/qml/LVRS/resources/iconset/"
 
     LV.Stepper { id: defaultStepper; visible: false }
-    LV.Stepper { id: primaryUpDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
-    LV.Stepper { id: primaryUp; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Up }
+    LV.Stepper { id: primaryUpDown; objectName: "primaryUpDown"; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.UpDown }
+    LV.Stepper { id: primaryUp; objectName: "primaryUp"; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Up }
     LV.Stepper { id: primaryDown; visible: false; tone: LV.AbstractButton.Primary; arrow: LV.Stepper.Down }
     LV.Stepper { id: borderlessUpDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.UpDown }
-    LV.Stepper { id: borderlessUp; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Up }
+    LV.Stepper { id: borderlessUp; objectName: "borderlessUp"; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Up }
     LV.Stepper { id: borderlessDown; visible: false; tone: LV.AbstractButton.Borderless; arrow: LV.Stepper.Down }
     property string stepperDebug:
         "default="
@@ -4178,10 +4572,25 @@ Item {
         && borderlessUp.backgroundColor === transparentColor
         && borderlessUp.backgroundColorHover === LV.Theme.surfaceAlt
         && borderlessUp.backgroundColorPressed === LV.Theme.accentBlueMuted
+        && primaryUp.renderedBackgroundColor === LV.Theme.primary
+        && borderlessUp.renderedBackgroundColor === transparentColor
         && primaryUp.resolvedIconName === "StepperUpPrimary"
         && primaryDown.resolvedIconName === "StepperDownPrimary"
         && borderlessUp.resolvedIconName === "StepperUpBorderless"
         && borderlessDown.resolvedIconName === "StepperDownBorderless"
+        && primaryUp.resolvedIconAssetName === "StepperChevron"
+        && primaryDown.resolvedIconAssetName === "StepperChevron"
+        && primaryUpDown.resolvedIconAssetName === "StepperUpDownChevron"
+        && primaryUp.iconSource == iconRoot + "StepperChevron.svg"
+        && primaryDown.iconSource == iconRoot + "StepperChevron.svg"
+        && primaryUpDown.iconSource == iconRoot + "StepperUpDownChevron.svg"
+        && primaryUp.iconRotation === 180
+        && primaryDown.iconRotation === 0
+        && primaryUpDown.iconRotation === 0
+        && primaryUp.iconSourceWidth === Math.ceil(expectedChevronWidth * primaryUp.iconRasterScale)
+        && primaryUp.iconSourceHeight === Math.ceil(expectedChevronHeight * primaryUp.iconRasterScale)
+        && primaryUpDown.iconSourceWidth === Math.ceil(expectedUpDownWidth * primaryUpDown.iconRasterScale)
+        && primaryUpDown.iconSourceHeight === Math.ceil(expectedUpDownHeight * primaryUpDown.iconRasterScale)
         && primaryUp.resolvedIconColor === LV.Theme.accentWhite
         && primaryDown.resolvedIconColor === LV.Theme.accentWhite
         && borderlessUp.resolvedIconColor === LV.Theme.accentWhite
@@ -4193,6 +4602,31 @@ Item {
     QVERIFY(root);
     const QString stepperDebug = root->property("stepperDebug").toString();
     QVERIFY2(root->property("stepperContractReady").toBool(), qPrintable(stepperDebug));
+
+    const auto verifyRenderedVariant = [&root](const QString &controlName,
+                                                qreal expectedRotation) {
+        QObject *control = root->findChild<QObject *>(controlName, Qt::FindChildrenRecursively);
+        QObject *background = root->findChild<QObject *>(controlName + QStringLiteral("_background"),
+                                                         Qt::FindChildrenRecursively);
+        QObject *icon = root->findChild<QObject *>(controlName + QStringLiteral("_iconSnapshot"),
+                                                   Qt::FindChildrenRecursively);
+        QVERIFY(control);
+        QVERIFY(background);
+        QVERIFY(icon);
+        QCOMPARE(background->property("color"), control->property("renderedBackgroundColor"));
+        QVERIFY(qAbs(background->property("radius").toReal() - control->property("cornerRadius").toReal()) < 0.01);
+        QCOMPARE(icon->property("source"), control->property("renderedIconSource"));
+        QCOMPARE(icon->property("status").toInt(), 1);
+        QVERIFY(qAbs(icon->property("x").toReal() - control->property("iconBounds").toRectF().x()) < 0.01);
+        QVERIFY(qAbs(icon->property("y").toReal() - control->property("iconBounds").toRectF().y()) < 0.01);
+        QVERIFY(qAbs(icon->property("width").toReal() - control->property("iconWidth").toReal()) < 0.01);
+        QVERIFY(qAbs(icon->property("height").toReal() - control->property("iconHeight").toReal()) < 0.01);
+        QVERIFY(qAbs(icon->property("rotation").toReal() - expectedRotation) < 0.01);
+    };
+
+    verifyRenderedVariant(QStringLiteral("primaryUpDown"), 0.0);
+    verifyRenderedVariant(QStringLiteral("primaryUp"), 180.0);
+    verifyRenderedVariant(QStringLiteral("borderlessUp"), 180.0);
 }
 
 void ImportApiTests::combo_box_figma_contract_loads()
@@ -4221,11 +4655,11 @@ Item {
         && defaultCombo.text === "Label"
         && customTextCombo.text === "Control"
         && Math.abs(defaultCombo.width - 97.0) < 0.01
-        && Math.abs(defaultCombo.height - 18.0) < 0.01
+        && Math.abs(defaultCombo.height - 20.0) < 0.01
         && Math.abs(defaultCombo.implicitWidth - 97.0) < 0.01
-        && Math.abs(defaultCombo.implicitHeight - 18.0) < 0.01
+        && Math.abs(defaultCombo.implicitHeight - 20.0) < 0.01
         && Math.abs(defaultCombo.figmaComboWidth - 97.0) < 0.01
-        && Math.abs(defaultCombo.figmaComboHeight - 18.0) < 0.01
+        && Math.abs(defaultCombo.figmaComboHeight - 20.0) < 0.01
         && Math.abs(defaultCombo.figmaComboLeftPadding - 8.0) < 0.01
         && Math.abs(defaultCombo.figmaComboRightPadding - 1.0) < 0.01
         && Math.abs(defaultCombo.figmaComboVerticalPadding - 1.0) < 0.01
@@ -4245,11 +4679,11 @@ Item {
         && borderlessUp.resolvedArrow === LV.Stepper.Up
         && borderlessDown.resolvedArrow === LV.Stepper.Down
         && Math.abs(defaultCombo.labelBounds.x - 8.0) < 0.01
-        && Math.abs(defaultCombo.labelBounds.y - 3.0) < 0.01
+        && Math.abs(defaultCombo.labelBounds.y - 3.5) < 0.01
         && Math.abs(defaultCombo.labelBounds.width - 70.0) < 0.01
         && Math.abs(defaultCombo.labelBounds.height - 13.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.x - 78.0) < 0.01
-        && Math.abs(defaultCombo.indicatorBounds.y - 0.0) < 0.01
+        && Math.abs(defaultCombo.indicatorBounds.y - 1.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.width - 18.0) < 0.01
         && Math.abs(defaultCombo.indicatorBounds.height - 18.0) < 0.01
         && defaultCombo.backgroundColor === LV.Theme.panelBackground10
@@ -4741,10 +5175,10 @@ Item {
         && searchField.searchIconVisible
         && searchField.searchIconSize === LV.Theme.iconSm
         && searchField.clearIconSize === LV.Theme.iconSm
-        && Math.abs(searchField.searchIconSize - 23.0) < 0.01
+        && Math.abs(searchField.searchIconSize - 36.0) < 0.01
         && searchField.searchIconSource == LV.Theme.iconPath("generalsearch")
         && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
-        && LV.Theme.iconSm === 23
+        && LV.Theme.iconSm === 36
 }
 )";
 
@@ -5345,6 +5779,25 @@ Item {
     }
 
     LV.MenuItem {
+        id: figmaItem
+        objectName: "figmaItem"
+        visible: false
+        width: 161
+    }
+
+    LV.MenuItem {
+        id: selectedItem
+        visible: false
+        state: selectedState
+    }
+
+    LV.MenuItem {
+        id: inactiveItem
+        visible: false
+        state: inactiveState
+    }
+
+    LV.MenuItem {
         id: collapsedSubmenu
         visible: false
         label: "Collapsed"
@@ -5435,17 +5888,39 @@ Item {
     }
 
     property bool menuItemContract:
-        !defaultItem.keyVisible
-        && defaultItem.resolvedShortcutText === ""
-        && !defaultItem.effectiveShowChevron
+        defaultItem.keyVisible
+        && defaultItem.resolvedShortcutText === "key"
+        && defaultItem.effectiveShowChevron
+        && figmaItem.label === "Label"
+        && figmaItem.key === "key"
+        && figmaItem.keyVisible
+        && figmaItem.resolvedIconName === "procedure"
+        && figmaItem.itemWidth === 161
+        && figmaItem.itemHeight === 24
+        && figmaItem.implicitWidth === 161
+        && figmaItem.implicitHeight === 24
+        && figmaItem.leftPadding === 4
+        && figmaItem.rightPadding === 4
+        && figmaItem.topPadding === 3
+        && figmaItem.bottomPadding === 3
+        && figmaItem.chevronSize === 16
+        && figmaItem.chevronIconName === "generalchevronRight"
+        && figmaItem.resolvedChevronRotation === 0
+        && figmaItem.cornerRadius === 4
+        && figmaItem.labelNaturalWidth === 33
+        && figmaItem.resolvedIconSource.toString() === LV.Theme.iconPath("procedure").toString()
+        && selectedItem.isSelected
+        && selectedItem.resolvedBackgroundColor === LV.Theme.primary
+        && inactiveItem.isInactive
+        && inactiveItem.resolvedBackgroundColor === LV.Theme.panelBackground08
         && collapsedSubmenu.keyVisible
         && collapsedSubmenu.resolvedShortcutText === "Cmd+K"
         && collapsedSubmenu.effectiveShowChevron
-        && collapsedSubmenu.itemHeight === 18
+        && collapsedSubmenu.itemHeight === 24
         && collapsedSubmenu.leftPadding === 4
         && collapsedSubmenu.rightPadding === 4
-        && collapsedSubmenu.topPadding === 0
-        && collapsedSubmenu.bottomPadding === 0
+        && collapsedSubmenu.topPadding === 3
+        && collapsedSubmenu.bottomPadding === 3
         && collapsedSubmenu.iconPlaceholderColor === LV.Theme.accentBlueMuted
         && collapsedSubmenu.resolvedSelectionDirection === collapsedSubmenu.directionRight
         && expandedSubmenu.resolvedSelectionDirection === expandedSubmenu.directionDown
@@ -5463,6 +5938,88 @@ Item {
     QVERIFY(root);
     QTRY_VERIFY(root->property("menuItemContract").toBool());
 
+    QObject *figmaItem = root->findChild<QObject *>(QStringLiteral("figmaItem"));
+    QVERIFY(figmaItem);
+
+    auto *figmaContentRow =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
+    auto *figmaIconSlot =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
+    auto *figmaIconImage =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_iconImage")));
+    auto *figmaLabelNode =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
+    auto *figmaTrailingGroup =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_trailingGroup")));
+    auto *figmaShortcutLabel =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_shortcutLabel")));
+    auto *figmaChevronIcon =
+        qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_chevronIcon")));
+
+    QVERIFY(figmaContentRow);
+    QVERIFY(figmaIconSlot);
+    QVERIFY(figmaIconImage);
+    QVERIFY(figmaLabelNode);
+    QVERIFY(figmaTrailingGroup);
+    QVERIFY(figmaShortcutLabel);
+    QVERIFY(figmaChevronIcon);
+
+    QVERIFY(qAbs(figmaContentRow->width() - 153.0) < 0.01);
+    QVERIFY(qAbs(figmaContentRow->height() - 18.0) < 0.01);
+    QVERIFY(qAbs(figmaIconSlot->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(figmaIconSlot->y() - 0.0) < 0.01);
+    QVERIFY(qAbs(figmaIconSlot->width() - 18.0) < 0.01);
+    QVERIFY(qAbs(figmaIconSlot->height() - 18.0) < 0.01);
+    QCOMPARE(figmaIconImage->property("status").toInt(), 1);
+    QVERIFY(qAbs(figmaLabelNode->x() - 26.0) < 0.01);
+    QVERIFY2(qAbs(figmaLabelNode->y() - 2.5) < 0.01,
+             qPrintable(QStringLiteral("Figma label y/height: %1/%2")
+                            .arg(figmaLabelNode->y())
+                            .arg(figmaLabelNode->height())));
+    QVERIFY2(qAbs(figmaLabelNode->width() - 33.0) < 0.01,
+             qPrintable(QStringLiteral("Figma label bounds: x=%1 y=%2 width=%3 height=%4")
+                            .arg(figmaLabelNode->x())
+                            .arg(figmaLabelNode->y())
+                            .arg(figmaLabelNode->width())
+                            .arg(figmaLabelNode->height())));
+    QVERIFY(qAbs(figmaLabelNode->height() - 13.0) < 0.01);
+    QCOMPARE(figmaLabelNode->property("style").toInt(), figmaLabelNode->property("body").toInt());
+    const QFont figmaLabelFont = figmaLabelNode->property("font").value<QFont>();
+    QCOMPARE(figmaLabelFont.pixelSize(), 13);
+    QCOMPARE(figmaLabelFont.weight(), QFont::Medium);
+    QCOMPARE(figmaLabelFont.styleName(), QStringLiteral("Medium"));
+    QVERIFY2(qAbs(figmaTrailingGroup->x() - 108.0) < 0.01,
+             qPrintable(QStringLiteral("Figma trailing bounds: x=%1 width=%2 shortcut=%3 natural=%4 content=%5")
+                            .arg(figmaTrailingGroup->x())
+                            .arg(figmaTrailingGroup->width())
+                            .arg(figmaShortcutLabel->width())
+                            .arg(figmaItem->property("shortcutNaturalWidth").toDouble())
+                            .arg(figmaContentRow->width())));
+    QVERIFY(qAbs(figmaTrailingGroup->y() - 1.0) < 0.01);
+    QVERIFY(qAbs(figmaTrailingGroup->width() - 45.0) < 0.01);
+    QVERIFY(qAbs(figmaTrailingGroup->height() - 16.0) < 0.01);
+    QVERIFY(qAbs(figmaShortcutLabel->x() - 0.0) < 0.01);
+    QVERIFY2(qAbs(figmaShortcutLabel->y() - 1.5) < 0.01,
+             qPrintable(QStringLiteral("Figma shortcut bounds: x=%1 y=%2 width=%3 height=%4")
+                            .arg(figmaShortcutLabel->x())
+                            .arg(figmaShortcutLabel->y())
+                            .arg(figmaShortcutLabel->width())
+                            .arg(figmaShortcutLabel->height())));
+    QVERIFY(qAbs(figmaShortcutLabel->width() - 21.0) < 0.01);
+    QVERIFY(qAbs(figmaShortcutLabel->height() - 13.0) < 0.01);
+    QCOMPARE(figmaShortcutLabel->property("style").toInt(), figmaShortcutLabel->property("body").toInt());
+    const QFont figmaShortcutFont = figmaShortcutLabel->property("font").value<QFont>();
+    QCOMPARE(figmaShortcutFont.pixelSize(), 13);
+    QCOMPARE(figmaShortcutFont.weight(), QFont::Medium);
+    QCOMPARE(figmaShortcutFont.styleName(), QStringLiteral("Medium"));
+    QCOMPARE(figmaChevronIcon->property("status").toInt(), 1);
+    QVERIFY(figmaChevronIcon->property("source").toUrl().toString().contains(
+        QStringLiteral("generalchevronRight")));
+    QVERIFY(qAbs(figmaChevronIcon->x() - 29.0) < 0.01);
+    QVERIFY(qAbs(figmaChevronIcon->y() - 0.0) < 0.01);
+    QVERIFY(qAbs(figmaChevronIcon->width() - 16.0) < 0.01);
+    QVERIFY(qAbs(figmaChevronIcon->height() - 16.0) < 0.01);
+
     QObject *constrainedItem = root->findChild<QObject *>(QStringLiteral("constrainedItem"));
     QVERIFY(constrainedItem);
 
@@ -5479,7 +6036,7 @@ Item {
     QVERIFY(trailingGroup);
     QVERIFY(shortcutLabel);
     QVERIFY(chevronIcon);
-    QCOMPARE(shortcutLabel->property("style").toInt(), shortcutLabel->property("description").toInt());
+    QCOMPARE(shortcutLabel->property("style").toInt(), shortcutLabel->property("body").toInt());
 
     const qreal contentWidth = contentRow->width();
     const qreal labelRight = labelNode->x() + labelNode->width();
@@ -5702,42 +6259,91 @@ Item {
         items: [
             {
                 label: "Label",
-                key: "Key",
+                key: "key",
                 keyVisible: true,
-                showChevron: false,
-                hasChildItems: false
+                iconName: "procedure",
+                showChevron: true,
+                hasChildItems: true
             },
-            { type: "divider" }
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { type: "divider" },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { type: "divider" },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true },
+            { label: "Label", key: "key", keyVisible: true, iconName: "procedure", showChevron: true, hasChildItems: true }
         ]
     }
 
     LV.MenuDivider {
         id: divider
+        objectName: "standaloneDivider"
         visible: false
     }
 
+    LV.MenuDivider {
+        id: composedDivider
+        objectName: "composedDivider"
+        visible: false
+        width: 145
+    }
+
     property bool visualContract:
-        menu.itemSpacing === LV.Theme.gap2
+        menu.itemWidth === 145
+        && menu.minimumItemWidth === 145
+        && menu.resolvedItemWidth === 145
+        && menu.itemSpacing === LV.Theme.gap2
         && menu.leftPadding === LV.Theme.gap8
         && menu.rightPadding === LV.Theme.gap8
-        && menu.topPadding === LV.Theme.gap8
-        && menu.bottomPadding === LV.Theme.gap8
+        && menu.topPadding === LV.Theme.gap4
+        && menu.bottomPadding === LV.Theme.gap4
         && menu.menuColor === LV.Theme.contextMenuSurface
-        && menu.menuColor === LV.Theme.panelBackground06
+        && menu.menuColor === LV.Theme.panelBackground03
         && menu.dividerColor === LV.Theme.contextMenuDivider
-        && menu.dividerColor === LV.Theme.disabledColor
+        && menu.dividerColor === LV.Theme.panelBackground08
         && menu.background !== null
         && menu.background.radius === LV.Theme.radiusMd
+        && Math.abs(menu.implicitWidth - 161.0) < 0.01
+        && Math.abs(menu.implicitHeight - 224.0) < 0.01
+        && Math.abs(menu.contentItem.width - 145.0) < 0.01
+        && Math.abs(menu.contentItem.implicitHeight - 216.0) < 0.01
         && divider.dividerColor === LV.Theme.contextMenuDivider
-        && divider.dividerColor === LV.Theme.disabledColor
-        && Math.abs(divider.thickness - LV.Theme.scaleRealMetric(0.2)) < 0.01
+        && divider.dividerColor === LV.Theme.panelBackground08
+        && divider.lineLength === 220
+        && divider.linePadding === 0
+        && Math.abs(divider.thickness - 1.0) < 0.01
+        && Math.abs(divider.implicitWidth - 220.0) < 0.01
+        && Math.abs(divider.implicitHeight - 3.0) < 0.01
         && Math.abs(divider.implicitHeight - ((divider.crossPadding * 2) + divider.thickness)) < 0.01
+        && Math.abs(composedDivider.implicitHeight - 3.0) < 0.01
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("visualContract").toBool());
+
+    QObject *standaloneDivider = root->findChild<QObject *>(QStringLiteral("standaloneDivider"));
+    QObject *composedDivider = root->findChild<QObject *>(QStringLiteral("composedDivider"));
+    QVERIFY(standaloneDivider);
+    QVERIFY(composedDivider);
+
+    auto *standaloneLine = qobject_cast<QQuickItem *>(
+        standaloneDivider->findChild<QObject *>(QStringLiteral("menuDivider_line")));
+    auto *composedLine = qobject_cast<QQuickItem *>(
+        composedDivider->findChild<QObject *>(QStringLiteral("menuDivider_line")));
+    QVERIFY(standaloneLine);
+    QVERIFY(composedLine);
+    QVERIFY(qAbs(standaloneLine->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(standaloneLine->y() - 1.0) < 0.01);
+    QVERIFY(qAbs(standaloneLine->width() - 220.0) < 0.01);
+    QVERIFY(qAbs(standaloneLine->height() - 1.0) < 0.01);
+    QVERIFY(qAbs(composedLine->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(composedLine->y() - 1.0) < 0.01);
+    QVERIFY(qAbs(composedLine->width() - 145.0) < 0.01);
+    QVERIFY(qAbs(composedLine->height() - 1.0) < 0.01);
 }
 
 void ImportApiTests::context_menu_icon_slot_switch_contract_loads()
@@ -7224,7 +7830,7 @@ Item {
     QTRY_COMPARE(root->property("nativeModelEntryCount").toInt(), 4);
 }
 
-void ImportApiTests::list_item_and_footer_figma_contract_loads()
+void ImportApiTests::list_figma_contract_loads()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -7235,6 +7841,8 @@ import LVRS as LV
 
 Item {
     id: root
+    width: 800
+    height: 600
 
     property bool listDefaultsCaptured: false
     property string listApplyResult: ""
@@ -7243,8 +7851,32 @@ Item {
     property string listEditedValue: ""
     property string listSubmittedValue: ""
 
+    LV.List {
+        id: smallList
+        objectName: "figmaSmallList"
+        width: implicitWidth
+        height: implicitHeight
+    }
+
     LV.ListItem {
-        id: listItem
+        id: miniItem
+        objectName: "figmaMiniItem"
+        x: 200
+        width: implicitWidth
+        height: implicitHeight
+    }
+
+    LV.ListItem {
+        id: detailItem
+        objectName: "figmaDetailItem"
+        x: 400
+        size: LV.ListItem.Detail
+        width: implicitWidth
+        height: implicitHeight
+    }
+
+    LV.ListItem {
+        id: editableItem
         label: "Label"
         visible: false
         onInputEdited: function(text) {
@@ -7259,44 +7891,274 @@ Item {
 
     LV.ListFooter {
         id: listFooter
-        visible: false
-        button1: ({ "type": "icon", "iconName": "projectStructure", "tone": LV.AbstractButton.Borderless })
-        button2: ({ "type": "IconMenuButton", "iconName": "projectStructure", "tone": LV.AbstractButton.Borderless })
-        button3: ({ "type": "menu", "iconName": "viewMoreSymbolicDefault", "enabled": false })
+        objectName: "figmaListFooter"
+        x: 200
+        y: 140
+        width: implicitWidth
+        height: implicitHeight
     }
 
     Component.onCompleted: {
-        listDefaultsCaptured = !listItem.inputable
-        listItem.inputable = true
-        listApplyResult = listItem.applyInputResult("Label 2")
-        listItem.inputEdited("Label 3")
-        listItem.inputSubmitted("Label 4")
+        listDefaultsCaptured = !editableItem.inputable
+        editableItem.inputable = true
+        listApplyResult = editableItem.applyInputResult("Label 2")
+        editableItem.inputEdited("Label 3")
+        editableItem.inputSubmitted("Label 4")
     }
 
     property bool contractReady:
         listDefaultsCaptured
         && listApplyResult === "Label 2"
-        && listItem.inputResult === "Label 2"
-        && listItem.label === "Label 2"
+        && editableItem.inputResult === "Label 2"
+        && editableItem.label === "Label 2"
         && listEditedCount === 1
         && listSubmittedCount === 1
         && listEditedValue === "Label 3"
         && listSubmittedValue === "Label 4"
-        && listItem.horizontalPadding === LV.Theme.gap4
-        && listItem.verticalPadding === LV.Theme.gap2
-        && Math.abs(listItem.separatorHeight - 1) < 0.01
-        && listItem.implicitWidth >= listItem.minItemWidth
-        && listFooter.button1.iconName === "projectStructure"
-        && listFooter.button2.type === "IconMenuButton"
-        && listFooter.button3.enabled === false
-        && listFooter.stockButtonPadding === LV.Theme.scaleMetric(1)
-        && listFooter.implicitHeight > 0
+        && smallList.listWidth === 170
+        && smallList.minimumListHeight === 140
+        && smallList.itemHeight === 22
+        && smallList.itemLabelLeftPadding === 4
+        && smallList.selectedIndex === -1
+        && smallList.defaultItemIconName === "nodesfolder"
+        && smallList.entryCount === 6
+        && smallList.contentHeight === 158
+        && smallList.implicitWidth === 170
+        && smallList.implicitHeight === 140
+        && smallList.backgroundColor === LV.Theme.panelBackground03
+        && smallList.footerButton1.iconName === "addFile"
+        && smallList.footerButton2.iconName === "generaldelete"
+        && smallList.footerButton3.type === "menu"
+        && smallList.footerButton3.iconName === "settings"
+        && miniItem.size === LV.ListItem.Mini
+        && miniItem.label === "Label"
+        && miniItem.iconName === "nodesfolder"
+        && miniItem.rowHorizontalPadding === 4
+        && miniItem.rowVerticalPadding === 2
+        && miniItem.iconSize === 18
+        && miniItem.implicitWidth === 170
+        && miniItem.implicitHeight === 22
+        && !miniItem.separatorVisible
+        && detailItem.size === LV.ListItem.Detail
+        && detailItem.detail === "asasdsadasasdsadasasd Maxinum lines: 2 lines"
+        && detailItem.dateText === "YYYY-MM-dd"
+        && detailItem.folderLabel1 === "Only"
+        && detailItem.folderLabel2 === "1 Line"
+        && detailItem.tagLabel1 === "Only"
+        && detailItem.tagLabel2 === "1 Line"
+        && detailItem.horizontalPadding === 12
+        && detailItem.verticalPadding === 8
+        && detailItem.implicitWidth === 194
+        && detailItem.implicitHeight === 106
+        && listFooter.button1.iconName === "addFile"
+        && listFooter.button2.iconName === "generaldelete"
+        && listFooter.button3.type === "menu"
+        && listFooter.button3.iconName === "settings"
+        && listFooter.horizontalPadding === 2
+        && listFooter.verticalPadding === 2
+        && listFooter.stockButtonPadding === 2
+        && listFooter.stockButtonHeight === 22
+        && listFooter.stockMenuButtonSpacing === -2
+        && listFooter.implicitWidth === 86
+        && listFooter.implicitHeight === 26
+
+    property string contractDebug: JSON.stringify({
+        listWidth: smallList.listWidth,
+        listMinHeight: smallList.minimumListHeight,
+        listItemHeight: smallList.itemHeight,
+        listPadding: smallList.itemLabelLeftPadding,
+        listSelectedIndex: smallList.selectedIndex,
+        delegateDescriptorCount: smallList.itemDelegateItems.length,
+        listContentHeight: smallList.contentHeight,
+        listImplicitWidth: smallList.implicitWidth,
+        listImplicitHeight: smallList.implicitHeight,
+        miniWidth: miniItem.implicitWidth,
+        miniHeight: miniItem.implicitHeight,
+        detailWidth: detailItem.implicitWidth,
+        detailHeight: detailItem.implicitHeight,
+        footerWidth: listFooter.implicitWidth,
+        footerHeight: listFooter.implicitHeight,
+        footerButtonHeight: listFooter.stockButtonHeight,
+        footerMenuSpacing: listFooter.stockMenuButtonSpacing,
+        editedLabel: editableItem.label,
+        editedResult: editableItem.inputResult
+    })
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("contractReady").toBool());
+    QTRY_VERIFY2(root->property("contractReady").toBool(),
+                 qPrintable(root->property("contractDebug").toString()));
+
+    auto *smallList = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaSmallList")));
+    QVERIFY(smallList);
+    auto *listViewport = qobject_cast<QQuickItem *>(
+        smallList->findChild<QObject *>(QStringLiteral("list_itemsViewport")));
+    auto *listColumn = qobject_cast<QQuickItem *>(
+        smallList->findChild<QObject *>(QStringLiteral("list_itemsColumn")));
+    auto *embeddedFooter = qobject_cast<QQuickItem *>(
+        smallList->findChild<QObject *>(QStringLiteral("list_footer")));
+    auto *firstDelegate = visualChildByObjectName(
+        listColumn,
+        QStringLiteral("list_delegateRoot_0"));
+    auto *sixthDelegate = visualChildByObjectName(
+        listColumn,
+        QStringLiteral("list_delegateRoot_5"));
+    QVERIFY(listViewport);
+    QVERIFY(listColumn);
+    QVERIFY(embeddedFooter);
+    QVERIFY(firstDelegate);
+    QVERIFY(sixthDelegate);
+    QVERIFY(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniIcon")));
+    QVERIFY(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniLabel")));
+    QVERIFY(qAbs(listViewport->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(listViewport->y() - 0.0) < 0.01);
+    QVERIFY(qAbs(listViewport->width() - 170.0) < 0.01);
+    QVERIFY(qAbs(listViewport->height() - 114.0) < 0.01);
+    QVERIFY(qAbs(listColumn->height() - 132.0) < 0.01);
+    QVERIFY(listViewport->clip());
+    QVERIFY(qAbs(firstDelegate->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(firstDelegate->y() - 0.0) < 0.01);
+    QVERIFY(qAbs(firstDelegate->width() - 170.0) < 0.01);
+    QVERIFY(qAbs(firstDelegate->height() - 22.0) < 0.01);
+    QVERIFY(qAbs(sixthDelegate->y() - 110.0) < 0.01);
+    QVERIFY(qAbs(embeddedFooter->x() - 0.0) < 0.01);
+    QVERIFY(qAbs(embeddedFooter->y() - 114.0) < 0.01);
+    QVERIFY(qAbs(embeddedFooter->width() - 86.0) < 0.01);
+    QVERIFY(qAbs(embeddedFooter->height() - 26.0) < 0.01);
+
+    const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
+        return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                      QSizeF(item->width(), item->height()));
+    };
+    const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    auto *miniItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaMiniItem")));
+    QVERIFY(miniItem);
+    auto *miniIcon = qobject_cast<QQuickItem *>(
+        miniItem->findChild<QObject *>(QStringLiteral("listItem_miniIcon")));
+    auto *miniLabel = qobject_cast<QQuickItem *>(
+        miniItem->findChild<QObject *>(QStringLiteral("listItem_miniLabel")));
+    QVERIFY(miniIcon);
+    QVERIFY(miniLabel);
+    QCOMPARE(miniIcon->property("status").toInt(), 1);
+    verifyBounds(boundsIn(miniIcon, miniItem), QRectF(4.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(miniLabel, miniItem), QRectF(23.0, 4.5, 33.0, 13.0));
+    const QFont miniFont = miniLabel->property("font").value<QFont>();
+    QCOMPARE(miniFont.pixelSize(), 13);
+    QCOMPARE(miniFont.weight(), QFont::Medium);
+    QCOMPARE(miniFont.styleName(), QStringLiteral("Medium"));
+
+    auto *detailItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaDetailItem")));
+    QVERIFY(detailItem);
+    const struct {
+        const char *name;
+        QRectF bounds;
+    } detailBounds[] = {
+        { "listItem_detailContent", QRectF(12.0, 8.0, 170.0, 90.0) },
+        { "listItem_detailTop", QRectF(12.0, 8.0, 170.0, 24.0) },
+        { "listItem_detailTitle", QRectF(12.0, 8.0, 142.0, 24.0) },
+        { "listItem_detailBookmark", QRectF(164.0, 8.0, 18.0, 18.0) },
+        { "listItem_detailMiddle", QRectF(12.0, 40.0, 170.0, 12.0) },
+        { "listItem_detailDate", QRectF(12.0, 40.0, 78.0, 12.0) },
+        { "listItem_detailBottom", QRectF(12.0, 60.0, 170.0, 38.0) },
+        { "listItem_detailFolders", QRectF(12.0, 60.0, 170.0, 18.0) },
+        { "listItem_detailTags", QRectF(12.0, 80.0, 170.0, 18.0) }
+    };
+    for (const auto &entry : detailBounds) {
+        auto *item = qobject_cast<QQuickItem *>(
+            detailItem->findChild<QObject *>(QString::fromLatin1(entry.name)));
+        QVERIFY2(item, entry.name);
+        verifyBounds(boundsIn(item, detailItem), entry.bounds);
+    }
+
+    auto *detailTitle = detailItem->findChild<QObject *>(QStringLiteral("listItem_detailTitle"));
+    auto *detailDate = detailItem->findChild<QObject *>(QStringLiteral("listItem_detailDate"));
+    auto *caption = qobject_cast<QQuickItem *>(
+        detailItem->findChild<QObject *>(QStringLiteral("listItem_folderLabel1")));
+    auto *detailBookmark = detailItem->findChild<QObject *>(QStringLiteral("listItem_detailBookmark"));
+    QVERIFY(detailTitle);
+    QVERIFY(detailDate);
+    QVERIFY(caption);
+    QVERIFY(detailBookmark);
+    QCOMPARE(detailBookmark->property("status").toInt(), 1);
+    const struct {
+        const char *name;
+        const char *assetName;
+    } metadataIcons[] = {
+        { "listItem_folderIcon1", "folder@14x14" },
+        { "listItem_folderIcon2", "folder@14x14" },
+        { "listItem_tagIcon1", "vcscurrentBranch" },
+        { "listItem_tagIcon2", "vcscurrentBranch" }
+    };
+    for (const auto &entry : metadataIcons) {
+        auto *icon = detailItem->findChild<QObject *>(QString::fromLatin1(entry.name));
+        QVERIFY2(icon, entry.name);
+        QCOMPARE(icon->property("status").toInt(), 1);
+        QVERIFY2(icon->property("source").toUrl().toString().contains(
+                     QString::fromLatin1(entry.assetName)),
+                 qPrintable(icon->property("source").toUrl().toString()));
+    }
+    verifyBounds(boundsIn(caption, detailItem), QRectF(38.0, 63.5, 23.0, 11.0));
+    const QFont detailTitleFont = detailTitle->property("font").value<QFont>();
+    const QFont detailDateFont = detailDate->property("font").value<QFont>();
+    const QFont captionFont = caption->property("font").value<QFont>();
+    QCOMPARE(detailTitleFont.pixelSize(), 12);
+    QCOMPARE(detailTitleFont.weight(), QFont::DemiBold);
+    QCOMPARE(detailTitleFont.styleName(), QStringLiteral("SemiBold"));
+    QCOMPARE(detailDateFont.pixelSize(), 12);
+    QCOMPARE(detailDateFont.weight(), QFont::DemiBold);
+    QCOMPARE(captionFont.pixelSize(), 11);
+    QCOMPARE(captionFont.weight(), QFont::Normal);
+    QCOMPARE(captionFont.styleName(), QStringLiteral("Regular"));
+
+    auto *footer = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaListFooter")));
+    QVERIFY(footer);
+    const QRectF slotBounds[] = {
+        QRectF(2.0, 2.0, 22.0, 22.0),
+        QRectF(24.0, 2.0, 22.0, 22.0),
+        QRectF(46.0, 2.0, 38.0, 22.0)
+    };
+    for (int index = 0; index < 3; ++index) {
+        auto *slot = visualChildByObjectName(
+            footer,
+            QStringLiteral("listFooter_slot_%1").arg(index));
+        auto *iconButton = visualChildByObjectName(
+            slot,
+            QStringLiteral("listFooter_iconButton_%1").arg(index));
+        auto *slotMenuButton = visualChildByObjectName(
+            slot,
+            QStringLiteral("listFooter_menuButton_%1").arg(index));
+        QVERIFY(slot);
+        QVERIFY(iconButton);
+        QVERIFY(slotMenuButton);
+        verifyBounds(boundsIn(slot, footer), slotBounds[index]);
+        QCOMPARE(iconButton->isVisible(), index < 2);
+        QCOMPARE(slotMenuButton->isVisible(), index == 2);
+    }
+    QObject *menuButton = visualChildByObjectName(
+        footer,
+        QStringLiteral("listFooter_menuButton_2"));
+    QVERIFY(menuButton);
+    QCOMPARE(menuButton->property("spacing").toInt(), -2);
+    QCOMPARE(menuButton->property("resolvedIconName").toString(), QStringLiteral("settings"));
+    QCOMPARE(menuButton->property("resolvedIndicatorName").toString(),
+             QStringLiteral("generalchevronDownBorderless"));
 }
 
 QTEST_MAIN(ImportApiTests)

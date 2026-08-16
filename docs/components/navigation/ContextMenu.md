@@ -35,8 +35,8 @@ Visual/layout:
 - `showIconSlot` (default `true`; forwarded to default `MenuItem` rows)
 - `itemDelegate`: optional component used for non-divider entries.
 - `dividerDelegate`: optional component used for divider entries.
-- `menuColor`, `menuOpacity`, `resolvedMenuColor` (default surface `Theme.panelBackground06`)
-- `dividerColor` (default `Theme.disabledColor`)
+- `menuColor`, `menuOpacity`, `resolvedMenuColor` (default surface `Theme.panelBackground03`)
+- `dividerColor` (default `Theme.panelBackground08`)
 - `edgeMargin` (viewport inset used by auto placement; default `Theme.gap4`)
 - `openHorizontalDirection`, `openVerticalDirection` (last resolved placement direction)
 
@@ -104,9 +104,13 @@ Icon slot visibility defaults to the menu-level `showIconSlot` value. Individual
 
 ## Visual Contract
 
-- Popup chrome uses `Theme.panelBackground06`, `Theme.radiusMd`, and `Theme.gap8` padding on all sides.
+- Figma source: node `110:857` (`Menu`), composed from nodes `107:498` and `110:853`.
+- Default desktop item width is `145`, producing a `161px` popup width with `8px` left/right padding. The mobile `2x` metric policy resolves these values to item width `290` and popup width `322`.
+- Popup chrome uses `Theme.panelBackground03`, `Theme.radiusMd`, `Theme.gap8` horizontal padding, and `Theme.gap4` vertical padding.
 - Rows are stacked with `Theme.gap2` between entries.
-- Divider rows inherit `Theme.disabledColor`, so the default menu matches the compact Figma context-menu frame without caller overrides.
+- Eight `24px` items plus two `3px` dividers resolve to the measured `161 x 224` Figma frame.
+- A divider stretched to the menu's `145px` content width renders a full-width `145 x 1` line.
+- Divider rows inherit `Theme.panelBackground08`, so the default menu matches the current compact Figma menu frame without caller overrides.
 
 ## Usage
 

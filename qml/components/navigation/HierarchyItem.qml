@@ -91,7 +91,7 @@ AbstractButton {
     property int rowHeight: Theme.scaleMetric(20)
     property int itemWidth: Theme.scaleMetric(200)
     property int iconSize: Theme.iconSm
-    property int chevronSize: Theme.iconSm
+    property int chevronSize: Theme.scaleMetric(16)
     property int baseLeftPadding: Theme.gap8
     property int rowRightPadding: Theme.gap8
     property int leadingSpacing: Theme.gap2

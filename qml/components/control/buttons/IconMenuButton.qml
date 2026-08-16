@@ -5,8 +5,8 @@ import LVRS 1.0
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Borderless
-    readonly property int figmaButtonHeight: Theme.gap20
+    tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     readonly property string fallbackIconName: "projectStructure"
     readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)
 
@@ -53,20 +53,25 @@ AbstractButton {
                 : control.indicatorNameDefault
     readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
-    horizontalPadding: Theme.scaleMetric(1)
-    verticalPadding: Theme.scaleMetric(1)
-    spacing: Theme.gap4
+    horizontalPadding: Theme.gap2
+    verticalPadding: Theme.gap2
+    spacing: -Theme.gap2
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight
-    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    implicitWidth: Math.ceil(Math.max(
+        contentItem.implicitWidth,
+        control.iconSize + control.spacing + control.indicatorSize))
+        + leftPadding + rightPadding
     clip: true
 
     contentItem: RowLayout {
-        spacing: Theme.gap4
+        objectName: "iconMenuButton_content"
+        spacing: control.spacing
         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
         Image {
+            objectName: "iconMenuButton_icon"
             visible: control.iconGlyph.length === 0
             source: RenderQuality.resolveTextureSource(control.resolvedIconSource)
             sourceSize.width: control.iconSourceSize
@@ -107,6 +112,7 @@ AbstractButton {
         }
 
         Image {
+            objectName: "iconMenuButton_indicator"
             source: RenderQuality.resolveTextureSource(control.renderedIndicatorSource)
             sourceSize.width: control.indicatorSourceSize
             sourceSize.height: control.indicatorSourceSize
@@ -127,4 +133,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.IconMenuButton { tone: LV.AbstractButton.Borderless; iconName: "viewMoreSymbolicDefault" }
+// LV.IconMenuButton { iconName: "viewMoreSymbolicDefault" }

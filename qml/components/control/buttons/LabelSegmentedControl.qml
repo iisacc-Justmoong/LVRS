@@ -9,7 +9,7 @@ Item {
 
     property int shapeStyle: shapeRoundRect
     property int horizontalPadding: Theme.gap4
-    property int verticalPadding: Theme.gap4
+    property real verticalPadding: Theme.scaleRealMetric(3.5)
     property int spacing: Theme.gap2
     property int borderWidth: Theme.scaleMetric(2)
     property int cornerRadius: Theme.radiusMd
@@ -49,6 +49,7 @@ Item {
         const segments = collectSegmentButtons()
         for (let i = 0; i < segments.length; i++)
             applySegmentStyle(segments[i])
+        segmentRow.forceLayout()
     }
 
     function scheduleSyncSegmentStyles() {
@@ -102,6 +103,9 @@ Item {
     }
 
     onForceBorderlessToneChanged: scheduleSyncSegmentStyles()
+    onHorizontalPaddingChanged: scheduleSyncSegmentStyles()
+    onVerticalPaddingChanged: scheduleSyncSegmentStyles()
+    onSpacingChanged: scheduleSyncSegmentStyles()
 
     Connections {
         target: segmentRow

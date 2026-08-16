@@ -22,15 +22,21 @@ Computed/icon resolution:
 
 - `resolvedIconName`
 - `resolvedIconSource`
-- `renderedIconSource`
 
 Layout:
 
-- default tone fallback: `Borderless`
-- default icon frame: `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile)
-- fixed height: `Theme.gap20` (`20` on desktop, `25` on mobile)
-- compact inset: `Theme.scaleMetric(1)` so the stock frame fits without clipping
+- default tone: `Primary` (`Kind=accent`)
+- default icon frame: `Theme.iconSm` (`18 x 18` on desktop, `36 x 36` on mobile)
+- fixed frame: `22 x 22` on desktop and `44 x 44` on mobile
+- compact inset: `Theme.gap2` (`2` desktop, `4` mobile)
 - `iconGlyph` uses the same square frame as SVG icons
+
+## Figma Visual Contract
+
+- Source: `44:599`, `Type=IconButton`.
+- The icon occupies `x=2, y=2, 18 x 18` inside the desktop `22 x 22` frame.
+- The fallback `generalprojectStructure.svg` matches Figma's `#CED0D6` folder and `#548AF7` modifier geometry and is reused without a replacement asset.
+- All five tones preserve the same geometry; the project-structure icon keeps its own colors.
 
 Injected methods:
 
@@ -51,7 +57,6 @@ Rendered source is resolved through `RenderQuality.resolveTextureSource(...)`; i
 import LVRS 1.0 as LV
 
 LV.IconButton {
-    tone: LV.AbstractButton.Borderless
     iconName: "add"
     method: function(eventData) {
         addItem()
@@ -71,7 +76,7 @@ LV.IconButton {
 }
 ```
 
-The explicit `14` above demonstrates the supported per-instance override; the stock default remains `Theme.iconSm` (`18` on desktop, `23` on mobile).
+The explicit `14` above demonstrates the supported per-instance override; the stock default remains `Theme.iconSm` (`18` on desktop, `36` on mobile).
 
 ## Troubleshooting
 

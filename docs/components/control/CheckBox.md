@@ -20,7 +20,7 @@ State:
 Shape and metrics:
 
 - `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
-- `boxSize` (default `Theme.iconSm`: desktop `18 x 18`, mobile `23 x 23`)
+- `boxSize` (default `Theme.iconSm`: desktop `18 x 18`, mobile `36 x 36`)
 - `boxRadius`, `checkMarkStrokeWidth`, and border widths retain their former 17px-frame ratios as the indicator scales.
 
 Palette and border:

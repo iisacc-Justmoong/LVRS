@@ -35,16 +35,16 @@ Item {
     readonly property bool hovered: interactionArea.containsMouse && effectiveEnabled
     readonly property bool down: interactionArea.pressed && effectiveEnabled
     readonly property real figmaStepperSize: Theme.iconSm
-    readonly property real figmaChevronWidth: figmaStepperSize * (10.0 / 16.0)
-    readonly property real figmaChevronHeight: figmaStepperSize * (6.0 / 16.0)
-    readonly property real figmaUpDownChevronWidth: figmaStepperSize * (6.43604 / 16.0)
-    readonly property real figmaUpDownChevronHeight: figmaStepperSize * (11.1455 / 16.0)
+    readonly property real figmaChevronWidth: figmaStepperSize * (10.0 / 18.0)
+    readonly property real figmaChevronHeight: figmaStepperSize * (6.0 / 18.0)
+    readonly property real figmaUpDownChevronWidth: figmaStepperSize * (6.43604 / 18.0)
+    readonly property real figmaUpDownChevronHeight: figmaStepperSize * (11.1455 / 18.0)
     readonly property real iconWidth: control.arrow === Stepper.UpDown ? figmaUpDownChevronWidth : figmaChevronWidth
     readonly property real iconHeight: control.arrow === Stepper.UpDown ? figmaUpDownChevronHeight : figmaChevronHeight
-    readonly property int iconSourceWidth: Math.max(1, Math.ceil(figmaStepperSize * iconRasterScale))
-    readonly property int iconSourceHeight: Math.max(1, Math.ceil(figmaStepperSize * iconRasterScale))
-    readonly property rect iconBounds: Qt.rect(control.snapToDevicePixel((control.width - control.iconWidth) * 0.5),
-                                               control.snapToDevicePixel((control.height - control.iconHeight) * 0.5),
+    readonly property int iconSourceWidth: Math.max(1, Math.ceil(iconWidth * iconRasterScale))
+    readonly property int iconSourceHeight: Math.max(1, Math.ceil(iconHeight * iconRasterScale))
+    readonly property rect iconBounds: Qt.rect((control.width - control.iconWidth) * 0.5,
+                                               (control.height - control.iconHeight) * 0.5,
                                                control.iconWidth,
                                                control.iconHeight)
     readonly property color backgroundColor: control.tone === AbstractButton.Borderless ? "transparent" : Theme.primary
@@ -62,11 +62,14 @@ Item {
             : control.hovered
                 ? control.backgroundColorHover
                 : control.backgroundColor
+    readonly property color renderedBackgroundColor: control.tone === AbstractButton.Borderless
+        ? control.resolvedBackgroundColor
+        : (!control.effectiveEnabled ? control.backgroundColorDisabled : control.backgroundColor)
     readonly property color resolvedIconColor: !control.effectiveEnabled
         ? control.textColorDisabled
         : Theme.accentWhite
     readonly property color primaryStateOverlayColor: !control.effectiveEnabled
-        ? Theme.overlayBackdrop
+        ? "transparent"
         : control.down
             ? Qt.rgba(0, 0, 0, 0.12)
             : control.hovered
@@ -81,7 +84,11 @@ Item {
             return "StepperDown" + tonePrefix
         return "StepperUpDown" + tonePrefix
     }
-    readonly property url iconSource: Theme.iconPath(control.resolvedIconName)
+    readonly property string resolvedIconAssetName: control.arrow === Stepper.UpDown
+        ? "StepperUpDownChevron"
+        : "StepperChevron"
+    readonly property real iconRotation: control.arrow === Stepper.Up ? 180 : 0
+    readonly property url iconSource: Theme.iconPath(control.resolvedIconAssetName)
     readonly property url renderedIconSource: RenderQuality.resolveTextureSource(control.iconSource)
 
     function snapToDevicePixel(value) {
@@ -121,20 +128,25 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        visible: control.tone === AbstractButton.Borderless
+        objectName: control.objectName.length > 0 ? control.objectName + "_background" : ""
         radius: control.cornerRadius
         antialiasing: true
-        color: control.resolvedBackgroundColor
+        color: control.renderedBackgroundColor
     }
 
     Image {
         id: iconImage
-        anchors.fill: parent
+        x: control.iconBounds.x
+        y: control.iconBounds.y
+        width: control.iconBounds.width
+        height: control.iconBounds.height
         objectName: control.objectName.length > 0 ? control.objectName + "_iconSnapshot" : ""
         source: control.renderedIconSource
         sourceSize.width: control.iconSourceWidth
         sourceSize.height: control.iconSourceHeight
         fillMode: Image.PreserveAspectFit
+        rotation: control.iconRotation
+        transformOrigin: Item.Center
         smooth: true
         mipmap: RenderQuality.mipmapEnabled
         cache: true

@@ -23,6 +23,7 @@ Model and state:
 
 Layout and appearance:
 
+- `minimumToolbarWidth`
 - `horizontalPadding`
 - `verticalPadding`
 - `spacing`
@@ -53,16 +54,18 @@ Compatibility:
 
 ## Figma Layout Baseline
 
-Default layout follows the hierarchy header toolbar spec from Figma (`Whatson`, node `134:4111`):
+Default layout follows `HierarchyToolbar` in Figma (`Layerd Visual Render System`, node `180:1011`):
 
-- The desktop toolbar content area is treated as a `200 x 20` reference strip.
-- Each toolbar slot uses `Theme.gap20` (`20 x 20` on desktop, `25 x 25` on mobile).
-- Each stock icon uses `Theme.iconSm` (`18 x 18` on desktop, `23 x 23` on mobile), leaving the scaled compact inset inside the slot.
-- Items are distributed left-to-right across available width (`justify-between` behavior).
-- Default padding is zero (`horizontalPadding = 0`, `verticalPadding = 0`).
+- The toolbar has a `200 x 26` desktop baseline and a `400 x 52` mobile `2x` baseline.
+- `minimumToolbarWidth` defaults to `200` on desktop and `400` on mobile.
+- Default padding is `8px` horizontal and `2px` vertical on desktop (`16px` and `4px` on mobile).
+- Each toolbar slot follows the inherited button frame: `22 x 22` on desktop and `44 x 44` on mobile.
+- Each stock icon uses `Theme.iconSm`: `18 x 18` on desktop and `36 x 36` on mobile.
+- Items are adjacent from the leading inset with no gap. The four reference slots begin at desktop x positions `8`, `30`, `52`, and `74`.
+- `distributeSpacing` defaults to `false`; set it to `true` only when a host intentionally needs distributed slots.
 - Default background is transparent (`backgroundOpacity = 0`).
 
-If fixed-gap behavior is needed, set `distributeSpacing: false` and control spacing via `spacing`.
+For a custom fixed gap, keep `distributeSpacing: false` and set `spacing` explicitly.
 
 ## Item Model Contract
 

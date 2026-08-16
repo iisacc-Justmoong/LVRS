@@ -1,12 +1,11 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 AbstractButton {
     id: control
 
-    tone: AbstractButton.Borderless
-    readonly property int figmaButtonHeight: Theme.gap20
+    tone: AbstractButton.Primary
+    readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     readonly property string indicatorNameDefault: "generalchevronDown"
     readonly property string indicatorNameBorderless: "generalchevronDownBorderless"
     readonly property string indicatorNameAccent: "generalchevronDownAccent"
@@ -27,40 +26,51 @@ AbstractButton {
     readonly property url renderedIndicatorSource: Theme.iconPath(control.resolvedIndicatorName)
 
     horizontalPadding: Theme.gap8
-    verticalPadding: Theme.scaleMetric(1)
-    spacing: Theme.gap2
+    verticalPadding: Theme.gap2
+    spacing: -Theme.gap2
     cornerRadius: Theme.radiusSm
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight
-    implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
+    implicitWidth: Math.ceil(contentItem.implicitWidth) + leftPadding + rightPadding
     clip: true
 
-    contentItem: RowLayout {
-        spacing: Theme.gap2
-        Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+    contentItem: Item {
+        id: contentRoot
+        objectName: "labelMenuButton_content"
+        readonly property int naturalLabelWidth: Math.ceil(labelItem.implicitWidth)
+        implicitWidth: naturalLabelWidth + control.spacing + indicatorImage.width
+        implicitHeight: control.indicatorSize
 
         Label {
+            id: labelItem
+            objectName: "labelMenuButton_label"
+            x: 0
+            y: (parent.height - height) / 2
+            width: Math.min(
+                contentRoot.naturalLabelWidth,
+                Math.max(0, parent.width - control.spacing - indicatorImage.width))
+            height: Theme.textBodyLineHeight
             style: body
             text: control.text
             color: control.effectiveEnabled ? control.textColor : control.textColorDisabled
             elide: Text.ElideRight
-            Layout.alignment: Qt.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
         }
 
         Image {
+            id: indicatorImage
+            objectName: "labelMenuButton_indicator"
+            x: labelItem.x + labelItem.width + control.spacing
+            y: 0
+            width: control.indicatorSize
+            height: control.indicatorSize
             source: RenderQuality.resolveTextureSource(control.renderedIndicatorSource)
             sourceSize.width: control.indicatorSourceSize
             sourceSize.height: control.indicatorSourceSize
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: RenderQuality.mipmapEnabled
-            Layout.preferredWidth: control.indicatorSize
-            Layout.preferredHeight: control.indicatorSize
-            Layout.minimumWidth: control.indicatorSize
-            Layout.minimumHeight: control.indicatorSize
-            Layout.maximumWidth: control.indicatorSize
-            Layout.maximumHeight: control.indicatorSize
-            Layout.alignment: Qt.AlignVCenter
         }
     }
 
@@ -68,4 +78,4 @@ AbstractButton {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Borderless }
+// LV.LabelMenuButton { text: "Open" }

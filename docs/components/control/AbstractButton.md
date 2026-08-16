@@ -4,6 +4,8 @@ Location: `qml/components/control/buttons/AbstractButton.qml`
 
 `AbstractButton` is the shared base for LVRS button-family components.
 
+The concrete button family follows Figma node `44:599`, which defines four types (`LabelButton`, `IconButton`, `LabelMenuButton`, `IconMenuButton`) across five kinds (`accent`, `default`, `borderless`, `destructive`, `disabled`).
+
 ## Purpose
 
 - Unify tone-based color policy (`Primary`, `Default`, `Borderless`, `Destructive`, `Disabled`).
@@ -38,6 +40,16 @@ Colors:
 - `textColor`, `textColorDisabled`
 - `backgroundColor`, `backgroundColorHover`, `backgroundColorPressed`, `backgroundColorDisabled`
 - tone-derived readonly colors: `toneTextColor`, `toneBackgroundColor*`
+
+Figma kind mapping:
+
+- `accent` -> `AbstractButton.Primary` / `Theme.primary`
+- `default` -> `AbstractButton.Default` / `Theme.panelBackground12`
+- `borderless` -> `AbstractButton.Borderless` / transparent background and `Theme.primary` text or indicator
+- `destructive` -> `AbstractButton.Destructive` / `Theme.danger`
+- `disabled` -> `AbstractButton.Disabled` / `Theme.panelBackground04` and `Theme.disabledColor`
+
+The four concrete Figma variants default to `Primary`, matching the component set's default `Kind=accent`. `AbstractButton` itself remains the neutral shared base and keeps its own `Default` tone.
 
 Layout:
 

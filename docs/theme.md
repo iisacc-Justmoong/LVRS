@@ -3,7 +3,7 @@
 Location: `qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
-It now applies a built-in mobile `1.25x` token profile, so spacing, radius, control sizes, and scalable typography values resolve to enlarged mobile numbers on iOS and Android without relying on root-layer composition scaling. Body typography remains a fixed `13px` size and line height across targets.
+It now applies a built-in mobile `2x` token profile, so spacing, radius, control sizes, and scalable typography values resolve to doubled mobile numbers on iOS and Android without relying on root-layer composition scaling. Body typography remains a fixed `13px` size and line height across targets.
 
 ## Token Groups
 
@@ -16,16 +16,18 @@ It now applies a built-in mobile `1.25x` token profile, so spacing, radius, cont
 Compact icon baseline:
 
 - `iconSm` resolves to `18 x 18` logical pixels on desktop.
-- The existing mobile token profile scales that baseline to `23 x 23` after rounding.
+- The mobile token profile doubles that baseline to `36 x 36`.
 - Stock action, menu, hierarchy, input, and selection-control icons consume this token unless a public size property is explicitly overridden.
 - Icon images keep a square logical frame and `Image.PreserveAspectFit`, so non-square SVG artwork scales proportionally without distortion.
 
-## Mobile `1.25x` Scaling
+## Mobile `2x` Scaling
 
 - `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.
-- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `1.25x`.
+- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `2x`.
 - This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and scalable text pixel sizes / line heights; `textBody` and `textBodyLineHeight` remain fixed at `13`.
-- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `1.25x` sizing over scaled composition for the stock mobile path.
+- `FontPolicy` treats the `13px` Medium Body token as non-scalable. In particular, `16px` and `26px` are not Body aliases, so they remain available to their own typography contracts without a Body-token collision.
+- `FontPolicy` accepts the desktop `1x` and mobile `2x` typography sizes; obsolete `1.25x`-only sizes are not treated as current Theme tokens.
+- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `2x` sizing over scaled composition for the stock mobile path.
 
 Preview/test helpers:
 
@@ -99,16 +101,16 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
 ## Related UI Defaults
 
 - Context menu colors:
-  - `contextMenuSurface`
-  - `contextMenuDivider`
+  - `contextMenuSurface: panelBackground03`
+  - `contextMenuDivider: panelBackground08`
   - `contextMenuItemSelectedBackground`
   - `contextMenuItemInactiveBackground`
 - Dialog sizing:
   - desktop: `dialogMinWidth: 280`, `dialogMaxWidth: 360`
-  - mobile: `dialogMinWidth: 350`, `dialogMaxWidth: 450`
+  - mobile: `dialogMinWidth: 560`, `dialogMaxWidth: 720`
 - Common radii:
   - desktop: `radiusSm: 4`, `radiusLg: 12`
-  - mobile: `radiusSm: 5`, `radiusLg: 15`
+  - mobile: `radiusSm: 8`, `radiusLg: 24`
 
 ## Usage
 
