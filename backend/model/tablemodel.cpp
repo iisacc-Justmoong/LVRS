@@ -5,6 +5,7 @@
 #include <QMetaObject>
 #include <QtMath>
 
+#include <algorithm>
 #include <utility>
 
 namespace {
@@ -385,6 +386,11 @@ bool TableModel::structureMutationAvailable() const
     return canMutateStructureInternal();
 }
 
+bool TableModel::sortingAvailable() const
+{
+    return canMutateStructureInternal();
+}
+
 bool TableModel::rowsModelBacked() const
 {
     return itemModelFromVariant(m_rowsSource) != nullptr;
@@ -627,6 +633,182 @@ bool TableModel::setCellValue(int rowIndex, int columnIndex, const QVariant &val
     cell.insert(QStringLiteral("text"), result.value(QStringLiteral("text")));
     if (!setCellObject(rowIndex, columnIndex, cell))
         return false;
+    emitRowsMutated();
+    return true;
+}
+
+QVariantList TableModel::rangeValues(int startRow,
+                                     int startColumn,
+                                     int endRow,
+                                     int endColumn) const
+{
+    if (startRow < 0 || startColumn < 0 || endRow < startRow || endColumn < startColumn)
+        return {};
+    if (endRow >= rowCount() || endColumn >= columnCount())
+        return {};
+
+    QVariantList values;
+    values.reserve(endRow - startRow + 1);
+    for (int row = startRow; row <= endRow; ++row) {
+        QVariantList rowValues;
+        rowValues.reserve(endColumn - startColumn + 1);
+        for (int column = startColumn; column <= endColumn; ++column) {
+            if (!isValidBodyCell(row, column))
+                return {};
+            rowValues.append(cellRawValue(row, column));
+        }
+        values.append(QVariant(rowValues));
+    }
+    return values;
+}
+
+bool TableModel::setRangeValues(int startRow,
+                                int startColumn,
+                                const QVariant &values)
+{
+    if (!canMutateStructureInternal() || startRow < 0 || startColumn < 0)
+        return false;
+
+    QVariantList inputRows = listFromVariant(values);
+    if (inputRows.isEmpty())
+        return false;
+    if (!isListLike(inputRows.constFirst()))
+        inputRows = QVariantList {inputRows};
+
+    struct PendingCell {
+        int row = -1;
+        int column = -1;
+        QVariantMap coerced;
+    };
+    QList<PendingCell> pending;
+    for (int rowOffset = 0; rowOffset < inputRows.size(); ++rowOffset) {
+        const QVariantList rowValues = listFromVariant(inputRows.at(rowOffset));
+        if (rowValues.isEmpty())
+            return false;
+        const int row = startRow + rowOffset;
+        for (int columnOffset = 0; columnOffset < rowValues.size(); ++columnOffset) {
+            const int column = startColumn + columnOffset;
+            if (!isValidBodyCell(row, column)
+                || isCoveredCell(row, column)
+                || cellRowSpan(row, column) > 1
+                || cellColumnSpan(row, column) > 1) {
+                return false;
+            }
+            const QVariantMap coerced = validateCellInput(row, column, rowValues.at(columnOffset));
+            if (!coerced.value(QStringLiteral("accepted")).toBool())
+                return false;
+            pending.append(PendingCell {row, column, coerced});
+        }
+    }
+    if (pending.isEmpty())
+        return false;
+
+    recordUndoSnapshot();
+    for (const PendingCell &entry : std::as_const(pending)) {
+        QVariantMap cell = normalizeCellObject(entry.row, entry.column);
+        if (cell.isEmpty())
+            return false;
+        cell.insert(QStringLiteral("value"), entry.coerced.value(QStringLiteral("value")));
+        cell.insert(QStringLiteral("text"), entry.coerced.value(QStringLiteral("text")));
+        if (!setCellObject(entry.row, entry.column, cell))
+            return false;
+    }
+    emitRowsMutated();
+    return true;
+}
+
+bool TableModel::sortRows(int columnIndex, int sortOrder)
+{
+    if (!sortingAvailable()
+        || columnIndex < 0
+        || columnIndex >= columnCount()
+        || (sortOrder != Qt::AscendingOrder && sortOrder != Qt::DescendingOrder)) {
+        return false;
+    }
+
+    recordUndoSnapshot();
+    if (!normalizeStructureForMutation())
+        return false;
+
+    const QString valueType = headerCellType(columnIndex);
+    const auto valueForRow = [columnIndex](const QVariant &rowEntry) {
+        const QVariantList cells = listFromVariant(rowEntry);
+        if (columnIndex < 0 || columnIndex >= cells.size())
+            return QVariant();
+        const QVariant cell = cells.at(columnIndex);
+        const QVariantMap map = mapFromVariant(cell);
+        if (map.isEmpty())
+            return cell;
+        return roleValue(cell,
+                         {QStringLiteral("value"),
+                          QStringLiteral("text"),
+                          QStringLiteral("label"),
+                          QStringLiteral("title")});
+    };
+    const auto compareValues = [valueType](const QVariant &left, const QVariant &right) {
+        const bool leftEmpty = !left.isValid() || left.isNull();
+        const bool rightEmpty = !right.isValid() || right.isNull();
+        if (leftEmpty || rightEmpty) {
+            if (leftEmpty == rightEmpty)
+                return 0;
+            return leftEmpty ? 1 : -1;
+        }
+
+        if (valueType == QStringLiteral("int") || valueType == QStringLiteral("float")) {
+            bool leftOk = false;
+            bool rightOk = false;
+            const double leftNumber = left.toDouble(&leftOk);
+            const double rightNumber = right.toDouble(&rightOk);
+            if (leftOk && rightOk) {
+                if (qFuzzyCompare(leftNumber + 1.0, rightNumber + 1.0))
+                    return 0;
+                return leftNumber < rightNumber ? -1 : 1;
+            }
+        } else if (valueType == QStringLiteral("bool")) {
+            const bool leftBool = left.toBool();
+            const bool rightBool = right.toBool();
+            if (leftBool == rightBool)
+                return 0;
+            return leftBool ? 1 : -1;
+        }
+        return QString::localeAwareCompare(left.toString(), right.toString());
+    };
+
+    QList<int> order;
+    order.reserve(m_rows.size());
+    for (int row = 0; row < m_rows.size(); ++row)
+        order.append(row);
+    std::stable_sort(order.begin(), order.end(), [&](int leftRow, int rightRow) {
+        const QVariant leftValue = valueForRow(m_rows.at(leftRow));
+        const QVariant rightValue = valueForRow(m_rows.at(rightRow));
+        const bool leftEmpty = !leftValue.isValid() || leftValue.isNull();
+        const bool rightEmpty = !rightValue.isValid() || rightValue.isNull();
+        if (leftEmpty != rightEmpty)
+            return !leftEmpty;
+        const int compared = compareValues(leftValue, rightValue);
+        return sortOrder == Qt::AscendingOrder ? compared < 0 : compared > 0;
+    });
+
+    const QVariantList sourceRows = m_rows;
+    const QVariantList sourceHeights = m_rowHeights.isEmpty()
+        ? QVariantList()
+        : normalizedRowHeights();
+    QVariantList sortedRows;
+    QVariantList sortedHeights;
+    sortedRows.reserve(order.size());
+    if (!sourceHeights.isEmpty())
+        sortedHeights.reserve(order.size());
+    for (const int sourceRow : std::as_const(order)) {
+        sortedRows.append(sourceRows.at(sourceRow));
+        if (!sourceHeights.isEmpty())
+            sortedHeights.append(sourceHeights.at(sourceRow));
+    }
+
+    m_rows = sortedRows;
+    if (!sourceHeights.isEmpty()) {
+        m_rowHeights = sortedHeights;
+        emit rowHeightsChanged();
+    }
     emitRowsMutated();
     return true;
 }

@@ -508,6 +508,34 @@ Item {
 
     LV.CheckBox {
         id: checkBox
+        text: "Label"
+        opacity: 0
+    }
+
+    LV.RadioButton {
+        id: radioButton
+        text: "Label"
+        checked: true
+        opacity: 0
+    }
+
+    LV.Table {
+        id: table
+        opacity: 0
+    }
+
+    LV.TableHeader {
+        id: tableHeader
+        visible: false
+    }
+
+    LV.TableRow {
+        id: tableRow
+        visible: false
+    }
+
+    LV.TableCellItem {
+        id: tableCell
         visible: false
     }
 
@@ -651,7 +679,53 @@ Item {
         && hierarchyPanel.minimumPanelHeight === 1060
         && hierarchyPanel.implicitWidth === 400
         && hierarchyPanel.implicitHeight === 1060
-        && checkBox.boxSize === 36
+        && checkBox.boxSize === 34
+        && Math.abs(checkBox.framePadding - 1.0) < 0.01
+        && Math.abs(checkBox.boxRadius - 7.0) < 0.01
+        && Math.abs(checkBox.boxBorderWidthUncheckedEnabled - 1.0) < 0.01
+        && checkBox.contentItem.spacing === 12
+        && checkBox.implicitWidth === 81
+        && checkBox.implicitHeight === 36
+        && checkBox.useFigmaCheckedAssets
+        && checkBox.checkedAssetSourceEnabled.toString() === LV.Theme.iconPath("checkboxCheckedEnabled").toString()
+        && checkBox.checkedAssetSourceDisabled.toString() === LV.Theme.iconPath("checkboxCheckedDisabled").toString()
+        && radioButton.indicatorSize === 36
+        && radioButton.dotSize === 16
+        && radioButton.indicatorRadius === 18
+        && radioButton.dotRadius === 8
+        && radioButton.contentItem.spacing === 16
+        && radioButton.implicitWidth === 85
+        && radioButton.implicitHeight === 36
+        && radioButton.contentItem.children[0].x === 0
+        && radioButton.contentItem.children[0].y === 0
+        && radioButton.contentItem.children[0].children[0].x === 10
+        && radioButton.contentItem.children[0].children[0].y === 10
+        && Math.abs(radioButton.contentItem.children[1].x - 52.0) < 0.01
+        && Math.abs(radioButton.contentItem.children[1].y - 11.5) < 0.01
+        && radioButton.contentItem.children[1].font.pixelSize === 13
+        && table.implicitWidth === 1056
+        && table.implicitHeight === 242
+        && table.rowHeight === 48
+        && table.borderWidth === 2
+        && String(table.backgroundColor) === "#1e1e1e"
+        && table.borderColor === LV.Theme.panelBackground10
+        && table.rowDividerColor === LV.Theme.panelBackground10
+        && !table.structureControlsVisible
+        && tableHeader.implicitWidth === 1434
+        && tableHeader.implicitHeight === 50
+        && tableHeader.rowHeight === 48
+        && tableHeader.separatorHeight === 2
+        && tableHeader.cellHorizontalPadding === 16
+        && tableRow.implicitWidth === 1434
+        && tableRow.implicitHeight === 48
+        && tableRow.cellWidth === 468
+        && tableRow.cellHeight === 48
+        && tableRow.contentSpacing === 16
+        && tableRow.dividerColor === LV.Theme.panelBackground10
+        && tableCell.implicitWidth === 468
+        && tableCell.implicitHeight === 48
+        && tableCell.resolvedContentSpacing === 16
+        && LV.Theme.textBody === 13
         && stepper.width === 36
         && stepper.height === 36
         && Math.abs(stepper.iconWidth - (36 * (6.43604 / 18.0))) < 0.01
@@ -724,7 +798,25 @@ Item {
             hierarchyList.generatedIconSize, hierarchyList.generatedChevronSize],
         hierarchyPanel: [hierarchyPanel.minimumPanelWidth,
             hierarchyPanel.minimumPanelHeight, hierarchyPanel.implicitWidth,
-            hierarchyPanel.implicitHeight]
+            hierarchyPanel.implicitHeight],
+        checkBox: [checkBox.boxSize, checkBox.framePadding, checkBox.boxRadius,
+            checkBox.boxBorderWidthUncheckedEnabled, checkBox.contentItem.spacing,
+            checkBox.implicitWidth, checkBox.implicitHeight],
+        radioButton: [radioButton.indicatorSize, radioButton.dotSize,
+            radioButton.indicatorRadius, radioButton.dotRadius,
+            radioButton.contentItem.spacing, radioButton.implicitWidth,
+            radioButton.implicitHeight],
+        table: [table.implicitWidth, table.implicitHeight, table.rowHeight,
+            table.borderWidth, table.structureControlsVisible,
+            table.resolvedRowCount, table.resolvedBodyHeight,
+            table.rowHeightAt(0), table.rowHeights, table.minRowHeight],
+        tableHeader: [tableHeader.implicitWidth, tableHeader.implicitHeight,
+            tableHeader.rowHeight, tableHeader.separatorHeight,
+            tableHeader.cellHorizontalPadding],
+        tableRow: [tableRow.implicitWidth, tableRow.implicitHeight,
+            tableRow.cellWidth, tableRow.cellHeight, tableRow.contentSpacing],
+        tableCell: [tableCell.implicitWidth, tableCell.implicitHeight,
+            tableCell.resolvedContentSpacing]
     })
 }
 )";

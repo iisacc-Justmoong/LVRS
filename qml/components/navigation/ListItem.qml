@@ -204,8 +204,8 @@ AbstractButton {
                         backgroundColorDisabled: "transparent"
                         placeholderText: ""
                         clearButtonVisible: false
-                        fieldMinHeight: Theme.scaleMetric(16)
-                        centeredTextHeight: Theme.scaleTextMetric(16)
+                        fieldMinHeight: Theme.textBodyLineHeight
+                        centeredTextHeight: Theme.textBodyLineHeight
                         insetHorizontal: 0
                         insetVertical: 0
                         sideSpacing: 0
@@ -224,8 +224,10 @@ AbstractButton {
                 }
 
                 onLoaded: {
-                    if (item)
+                    if (item) {
+                        item.objectName = control.objectName.length > 0 ? control.objectName + "_inputField" : ""
                         item.text = control.inputResult
+                    }
                 }
             }
         }

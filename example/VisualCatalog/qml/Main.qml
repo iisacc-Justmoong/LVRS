@@ -878,7 +878,8 @@ LV.ApplicationWindow {
 
                     LV.CheckBox { text: "Remember"; checked: true }
                     LV.RadioButton { text: "Choice A"; checked: true }
-                    LV.ToggleSwitch { text: "Enabled"; checked: true }
+                    LV.ToggleSwitch { checked: true }
+                    LV.ToggleSwitch { checked: false }
                 }
 
                 Flow {
@@ -981,25 +982,31 @@ LV.ApplicationWindow {
 
                         LV.Table {
                             id: table
-                            width: 448
-                            headerColumns: ["Name", "State", "Owner"]
-                            rows: [
-                                ["Renderer", "Active", "Core"],
-                                ["Input", "Idle", "UX"],
-                                ["Metrics", "Ready", "Tools"]
+                            width: 528
+                            columns: [
+                                { label: "Name", type: "string" },
+                                { label: "Count", type: "int" },
+                                { label: "Enabled", type: "bool" }
                             ]
+                            model: [
+                                [{ value: "Renderer" }, { value: 8 }, { value: true }],
+                                [{ value: "Input" }, { value: 5 }, { value: true }],
+                                [{ value: "Metrics" }, { value: 3 }, { value: false }],
+                                [{ value: "Tools" }, { value: 2 }, { value: true }]
+                            ]
+                            sortingEnabled: true
                         }
                     }
                 }
 
                 LV.TableHeader {
-                    width: parent.width
-                    columns: ["Column", "Column", "Column"]
+                    width: implicitWidth
+                    cellItems: [{ label: "Column" }, { label: "Column" }, { label: "Column" }]
                 }
 
                 LV.TableRow {
-                    width: parent.width
-                    cells: ["Text", "Text", "Text"]
+                    width: implicitWidth
+                    cellItems: ["Text", "Text", "Text"]
                 }
             }
         }
@@ -1011,23 +1018,63 @@ LV.ApplicationWindow {
         Item {
             id: preview
             property var catalogEntry: ({})
-            implicitHeight: inputColumn.implicitHeight
+            readonly property var inputStates: [
+                { kind: "default", enabled: true, text: "", search: false },
+                { kind: "disabled", enabled: false, text: "", search: false },
+                { kind: "cursor", enabled: true, text: "Placeholder", search: false },
+                { kind: "selected", enabled: true, text: "Placeholder", search: false },
+                { kind: "active", enabled: true, text: "Placeholder", search: false },
+                { kind: "search", enabled: true, text: "Placeholder", search: true }
+            ]
+            implicitHeight: inputStylesRow.implicitHeight
 
-            Column {
-                id: inputColumn
-                width: parent.width
-                spacing: root.catalogSectionGap
+            Row {
+                id: inputStylesRow
+                spacing: LV.Theme.gap8
 
-                LV.InputField {
-                    width: parent.width
-                    placeholderText: "Standard input"
-                    text: "LVRS"
-                }
+                Repeater {
+                    model: ["rounded", "cylinder", "inline"]
 
-                LV.InputField {
-                    width: parent.width
-                    placeholderText: "Search"
-                    search: true
+                    delegate: Column {
+                        id: styleColumn
+                        required property string modelData
+                        spacing: LV.Theme.gap4
+
+                        LV.Label {
+                            style: description
+                            text: styleColumn.modelData === "rounded"
+                                ? "Rounded"
+                                : styleColumn.modelData === "cylinder"
+                                    ? "Cylinder"
+                                    : "Inline"
+                        }
+
+                        Repeater {
+                            model: preview.inputStates
+
+                            delegate: LV.InputField {
+                                id: stateField
+                                required property var modelData
+                                style: styleColumn.modelData === "cylinder"
+                                    ? cylinderStyle
+                                    : styleColumn.modelData === "inline"
+                                        ? inlineStyle
+                                        : roundedStyle
+                                enabled: modelData.enabled
+                                placeholderText: "Placeholder"
+                                text: modelData.text
+                                search: modelData.search
+                                persistentSelection: modelData.kind === "selected"
+
+                                Component.onCompleted: {
+                                    if (modelData.kind === "selected")
+                                        selectAll()
+                                    if (modelData.kind === "cursor" || modelData.kind === "selected")
+                                        inputItem.cursorVisible = true
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

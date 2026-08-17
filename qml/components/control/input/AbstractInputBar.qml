@@ -79,8 +79,14 @@ FocusScope {
     property alias leadingInternalItems: leadingInternalSlot.data
     property alias trailingInternalItems: trailingInternalSlot.data
 
-    readonly property real leadingWidth: leadingHost.visible ? leadingContent.width : 0
-    readonly property real trailingWidth: trailingHost.visible ? trailingContent.width : 0
+    // Insets are an intrinsic geometry contract and must not collapse while an
+    // input or one of its ancestors is temporarily hidden.
+    readonly property real leadingWidth: leadingContent.width > 0 && leadingContent.height > 0
+        ? leadingContent.width
+        : 0
+    readonly property real trailingWidth: trailingContent.width > 0 && trailingContent.height > 0
+        ? trailingContent.width
+        : 0
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
     readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus

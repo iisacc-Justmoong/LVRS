@@ -10,7 +10,7 @@ Item {
     property int cellWidth: Theme.scaleMetric(234)
     property int cellHeight: Theme.scaleMetric(24)
     property int contentSpacing: Theme.gap8
-    property color dividerColor: Theme.panelBackground03
+    property color dividerColor: Theme.panelBackground10
     property color textColor: Theme.bodyColor
     property bool inputable: false
 
@@ -84,6 +84,9 @@ Item {
             delegate: TableCellItem {
                 required property int index
 
+                objectName: control.objectName.length > 0
+                    ? control.objectName + "_cell_" + index
+                    : ""
                 width: control.cellWidth
                 height: control.cellHeight
                 itemData: control.cellAt(index)

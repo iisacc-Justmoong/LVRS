@@ -2,12 +2,13 @@
 
 Location: `qml/components/control/display/Table.qml`
 
-`Table` composes `TableHeader` and positioned `TableCellItem` delegates for compact data display. Its table behavior is backed by C++ `TableModel`; QML remains the render and event adapter.
+`Table` composes `TableHeader` and positioned `TableCellItem` delegates into a compact spreadsheet surface. Its data, typing, range mutation, sorting, geometry, and undo behavior are backed by C++ `TableModel`; QML remains the render, selection, and event adapter.
 
 ## Purpose
 
 - Provide fixed-height, dense tabular display.
 - Accept array/list-model style inputs for headers and rows.
+- Expose cell/range selection, A1 references, typed rectangular writes, TSV exchange, and stable column sorting.
 - Support cell merge/split behavior through span metadata and table-level mutation methods.
 
 ## API
@@ -15,8 +16,13 @@ Location: `qml/components/control/display/Table.qml`
 Data:
 
 - `headerCellItems` (preferred)
+- `columns`: ergonomic alias of `headerCellItems`.
 - `headerColumns`
 - `rows`
+- `model`: ergonomic alias of `rows`.
+- `editable`: ergonomic alias of `inputable`.
+- `headerDelegate`: ergonomic alias of `headerCellDelegate`.
+- `delegate`: ergonomic alias of `cellDelegate`.
 - `headerCellDelegate`: optional component forwarded to `TableHeader.cellDelegate`.
 - `cellDelegate`: optional per-body-cell component delegate. The default delegate is `TableCellItem`.
 
@@ -30,7 +36,8 @@ Layout:
 - `resizeHandlesVisible` (default `true`)
 - `columnResizeHandleWidth`, `rowResizeHandleHeight`
 - `resizingColumnIndex`, `resizingRowIndex`
-- `resolvedColumnCount` (readonly)
+- `rowCount`, `headerCount`, `columnCount` (readonly public counts)
+- `resolvedRowCount`, `resolvedHeaderCount`, `resolvedColumnCount` (compatibility counts)
 - `rowsModelBacked` (readonly; true when `rows` is a C++ `QAbstractItemModel`)
 - `cellEditingAvailable` (readonly; true when a model-backed or array-backed cell edit path exists)
 - `visibleCellItems` (readonly flattened render model)
@@ -47,13 +54,25 @@ Visual:
 - `rowDividerColor`
 - `headerSeparatorColor`
 - `inputable` (default `false`; table-level editable default for body cells)
-- `structureControlsVisible` (default `true`)
+- `structureControlsVisible` (default `false`; opt in to row/column `+` controls)
 - `addRowControlsVisible` (default `true`)
 - `addColumnControlsVisible` (default `true`)
 - `deleteContextMenuEnabled` (default `true`)
 - `structureGutterWidth`, `structureGutterHeight`
 - `defaultHeaderText`, `defaultCellText`
 - `contextRowIndex`, `contextColumnIndex`
+
+Selection and sorting:
+
+- `selectionEnabled` (default `true`)
+- `selectionMode`: `Table.NoSelection`, `Table.SingleCellSelection`, or `Table.RangeSelection` (default)
+- `keyboardNavigationEnabled`, `selectOnContextClick`
+- `selectionColor`, `currentCellBorderColor`, `currentCellBorderWidth`
+- `currentRow`, `currentColumn`, `currentCell` (readonly)
+- `hasSelection`, `selectedRange`, `selectedCellCount` (readonly)
+- `sortingEnabled` (default `false`), `sortOnHeaderClick`
+- `sortingAvailable` (readonly; true for mutable array-backed rows)
+- `sortColumn`, `sortOrder`
 
 Signals:
 
@@ -68,6 +87,10 @@ Signals:
 - `columnDeleted(columnIndex)`
 - `columnResized(columnIndex, width)`
 - `rowResized(rowIndex, height)`
+- `cellActivated(rowIndex, columnIndex, cellData)`
+- `selectionChanged(range)`
+- `rangeValuesChanged(range)`
+- `rowsSorted(columnIndex, sortOrder)`
 
 Helper methods:
 
@@ -93,6 +116,17 @@ Helper methods:
 - `cellValueAccepted(rowIndex, columnIndex, value)`
 - `cellText(rowIndex, columnIndex)`
 - `setCellValue(rowIndex, columnIndex, value)`
+- `columnName(columnIndex)`, `columnIndexFromName(name)`
+- `cellReference(rowIndex, columnIndex)`, `cellCoordinates(reference)`
+- `selectCell(rowIndex, columnIndex, extendSelection)`
+- `selectRange(startRow, startColumn, endRow, endColumn)`
+- `selectRow(rowIndex)`, `selectColumn(columnIndex)`, `selectAll()`, `clearSelection()`
+- `moveCurrentCell(rowDelta, columnDelta, extendSelection)`, `isCellSelected(rowIndex, columnIndex)`
+- `selectedCellDescriptors()`, `rangeValues(...)`, `selectionValues()`
+- `setRangeValues(startRow, startColumn, values)`, `setSelectionValues(values)`
+- `valuesAsTsv(values)`, `selectionAsTsv()`, `parseTsv(text)`
+- `pasteTsv(startRow, startColumn, text)`, `pasteSelectionTsv(text)`
+- `sortByColumn(columnIndex, order)`, `sortAscending(columnIndex)`, `sortDescending(columnIndex)`, `toggleSortForColumn(columnIndex)`
 - `cellRowSpan(rowIndex, columnIndex)`
 - `cellColumnSpan(rowIndex, columnIndex)`
 - `isCoveredCell(rowIndex, columnIndex)`
@@ -118,15 +152,17 @@ Helper methods:
 import LVRS 1.0 as LV
 
 LV.Table {
-    headerCellItems: [
+    columns: [
         { label: "Name", type: "string" },
         { label: "State", type: "bool" },
         { label: "Score", type: "float" }
     ]
-    rows: [
+    model: [
         [{ text: "Renderer" }, { value: true }, { value: 0.98 }],
         [{ text: "Metrics" }, { value: false }, { value: 0.72 }]
     ]
+    editable: true
+    sortingEnabled: true
     columnWidths: [160, 80, 120]
     rowHeights: [28, 24]
 }
@@ -142,7 +178,7 @@ LV.Table {
 - Model-backed `setCellValue(...)` calls the source model's `setData(index, coercedValue, Qt::EditRole)`, then falls back to named `value`, `edit`, and `text` roles when present. QML does not replace `rows` with a snapshot after the edit.
 - Header entries define body column types. Objects may declare `type`, `valueType`, `cellType`, or `dataType`; primitive entries infer type from the primitive itself.
 - `TableModel.visibleCells()` already includes `x`, `y`, `width`, and `height`; covered cells are skipped and anchor cells receive merged width/height.
-- Each visible body cell instantiates `cellDelegate` and injects one `modelData` object. The descriptor includes `index`, `rowIndex`, `columnIndex`, `cellData`, `text`, `valueType`, `inputable`, `rowSpan`, `columnSpan`, `x`, `y`, `width`, and `height`.
+- Each visible body cell instantiates `cellDelegate` and injects one `modelData` object. The descriptor includes `index`, `rowIndex`, `columnIndex`, `address`, `cellData`, `text`, `valueType`, `inputable`, `selected`, `current`, `rowSpan`, `columnSpan`, `x`, `y`, `width`, and `height`.
 - Custom body-cell delegates should declare `property var modelData`; their root item is sized to the backend-computed cell rectangle.
 - `headerCellDelegate` uses the `TableHeader.cellDelegate` contract, so header and body rendering can be customized independently.
 - Editable behavior propagates `Table.inputable -> row inputable -> cell inputable -> TableCellItem.inputable` through `TableModel`.
@@ -153,6 +189,40 @@ LV.Table {
 - Structure controls reserve a right gutter for row add buttons and a bottom gutter for column add buttons when `rows` is mutable.
 - Resize handles sit on column right borders and row bottom borders when `resizeHandlesVisible` is enabled.
 - Table container clips content and enforces internal divider contract.
+
+## Spreadsheet API
+
+Rows and columns use zero-based indexes; A1 references use one-based row numbers. `cellReference(11, 26)` returns `AA12`, while `cellCoordinates("AA12")` returns `{ valid: true, rowIndex: 11, columnIndex: 26 }`.
+
+```qml
+LV.Table {
+    id: sheet
+    columns: [
+        { label: "Name", type: "string" },
+        { label: "Count", type: "int" },
+        { label: "Enabled", type: "bool" }
+    ]
+    model: [
+        [{ value: "Beta" }, { value: 2 }, { value: true }],
+        [{ value: "Alpha" }, { value: 10 }, { value: false }]
+    ]
+    editable: true
+    sortingEnabled: true
+
+    Component.onCompleted: {
+        sheet.selectRange(0, 0, 1, 1)
+        const clipboardText = sheet.selectionAsTsv() // "Beta\t2\nAlpha\t10"
+        sheet.pasteTsv(0, 0, "Gamma\t5\ttrue")
+        sheet.sortByColumn(1, Qt.DescendingOrder)
+    }
+}
+```
+
+`setRangeValues(...)` accepts either one row (`["Name", 3]`) or a two-dimensional matrix (`[["A", 1], ["B", 2]]`). It and `pasteTsv(...)` validate the entire rectangle before mutation. An invalid typed value, merged cell, ragged empty input row, or out-of-bounds target rejects the whole operation. A successful rectangular write or sort is one undo step, not one step per cell/row. TSV parsing supports tabs, CRLF/LF rows, quoted fields, embedded line breaks, and doubled quotes.
+
+Range writes, structural edits, and built-in sorting intentionally require mutable array-backed rows so the operation can be atomic and undoable. A `QAbstractItemModel` remains supported for rendering and single-cell `setCellValue(...)`; provide sorting or batch edits in the source/proxy model when using that backend.
+
+Keyboard selection follows spreadsheet conventions: arrows move the current cell, Shift+Arrow extends the range, Home/End moves to the first/last column, Ctrl/Command+A selects all cells, and Escape clears the selection.
 
 ## Typed Columns
 
@@ -318,6 +388,8 @@ Return display/edit values from `Qt::DisplayRole` and `Qt::EditRole`, mark edita
 Recorded operations:
 
 - `setCellValue(...)`
+- `setRangeValues(...)` and `pasteTsv(...)` as one atomic operation
+- `sortByColumn(...)`
 - `mergeCells(...)`
 - `splitCell(...)`
 - `insertRow(...)`, `deleteRow(...)`
@@ -380,3 +452,9 @@ LV.Table {
 ```
 
 Cell text fallback supports `label/text/title` object keys.
+
+## Figma Contract
+
+The default desktop surface follows nodes `203:3647`, `203:3648`, `203:3863`, and `203:4366`: `528 × 121` table, `25` header, four `24` body rows, `#1e1e1e` body, `panelBackground10` outer/separator lines, 12/12 Description headers, and fixed 13/13 Body cells. The standalone header is `717 × 25`, row `717 × 24`, and cell `234 × 24`. Mobile metrics use the project-wide `@2x` geometry scale (`1056 × 242`, 48px rows) while Body font size remains fixed at 13.
+
+The source Figma Table instance contains clipped/overlapped body dividers. `Table` intentionally keeps non-overlapping computed columns because column widths, selection coordinates, range writes, resizing, and external delegates require a coherent spreadsheet grid.

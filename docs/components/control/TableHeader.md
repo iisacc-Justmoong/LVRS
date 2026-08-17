@@ -22,6 +22,12 @@ Location: `qml/components/control/display/TableHeader.qml`
 - `separatorHeight`
 - `separatorColor`
 - `cellDelegate`: optional per-header-cell component delegate. The default delegate renders the existing text label.
+- `interactive` (default `false`)
+- `sortColumn` (default `-1`), `sortOrder`
+
+Signals:
+
+- `columnClicked(columnIndex, columnData)`
 
 Helper methods:
 
@@ -64,6 +70,7 @@ LV.TableHeader {
 - Optional per-column `contentSpacing`/`horizontalPadding` overrides are supported.
 - Repeater delegates use `columnWidths` when provided, otherwise `fallbackCellWidth`, otherwise equal auto widths.
 - Every rendered header cell instantiates `cellDelegate` and injects one `modelData` object. The descriptor includes `index`, `descriptor`, `cellData`, `text`, `valueType`, `x`, `width`, `height`, and `padding`.
+- `cellData` and `columnData` contain the original column entry. `sorted` and `sortOrder` allow a custom delegate to draw its own sort indicator.
 - Custom delegates should declare `property var modelData`; their root item is sized to the resolved header cell bounds.
 - Bottom separator is rendered as dedicated rectangle (`panelBackground10` default).
 
@@ -112,8 +119,12 @@ Component {
 }
 
 LV.TableHeader {
+    interactive: true
     cellItems: [{ label: "Name" }, { label: "Count", type: "int" }]
     cellDelegate: compactHeaderCell
+    onColumnClicked: function(columnIndex, columnData) {
+        console.log("sort", columnIndex, columnData.label)
+    }
 }
 ```
 
@@ -128,3 +139,7 @@ A. Current contract keeps uniform left-aligned header text. Per-column layout re
 - `columnType(index)` matches declared or inferred field type,
 - separator thickness/color comply with theme contract,
 - object-based column labels resolve via fallback keys.
+
+## Figma Contract
+
+Node `203:3647` is `717 × 25`: a `24` header row plus a `1` bottom separator. Three default columns are `239` wide, each label has `8` horizontal padding, and the text uses the 12/12 Description style. On mobile all geometry doubles (`1434 × 50`, `16` padding, `2` separator) while typography follows the Theme policy.

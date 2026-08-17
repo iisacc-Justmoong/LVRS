@@ -7,8 +7,10 @@ AbstractInputBar {
 
     readonly property int defaultMode: 0
     readonly property int searchMode: 1
-    readonly property int filledStyle: 0
+    readonly property int roundedStyle: 0
+    readonly property int filledStyle: roundedStyle
     readonly property int inlineStyle: 1
+    readonly property int cylinderStyle: 2
 
     property int mode: defaultMode
     property bool search: mode === searchMode
@@ -29,15 +31,19 @@ AbstractInputBar {
         : 1.0
     readonly property real searchIconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property real searchIconRasterScale: Math.max(1.0, searchIconSupersampleScale * searchIconHiDpiScale)
-    readonly property int searchIconSize: Theme.iconSm
-    readonly property url searchIconSource: Theme.iconPath("generalsearch")
+    readonly property int searchIconSize: Theme.scaleMetric(12)
+    readonly property url searchIconSource: Theme.iconPath("inputFieldSearch")
     readonly property url renderedSearchIconSource: RenderQuality.resolveTextureSource(searchIconSource)
     readonly property int searchIconSourceSize: Math.max(1, Math.ceil(searchIconSize * searchIconRasterScale))
-    readonly property int clearIconSize: Theme.iconSm
+    readonly property int clearIconSize: Theme.scaleMetric(12)
     readonly property real clearIconMarkLength: clearIconSize * (8.0 / 14.0)
     readonly property real clearIconMarkThickness: clearIconSize * (1.4 / 14.0)
 
-    readonly property int resolvedStyle: style === inlineStyle ? inlineStyle : filledStyle
+    readonly property int resolvedStyle: style === inlineStyle
+        ? inlineStyle
+        : style === cylinderStyle
+            ? cylinderStyle
+            : roundedStyle
     readonly property color frameFillColor: resolvedStyle === inlineStyle
         ? Theme.accentTransparent
         : Theme.panelBackground10
@@ -53,10 +59,12 @@ AbstractInputBar {
         && text.length > 0
 
     implicitWidth: Theme.inputWidthMd
-    fieldMinHeight: Theme.controlHeightSm
+    fieldMinHeight: Theme.scaleMetric(19)
     insetHorizontal: Theme.gap7
     insetVertical: Theme.gap3
     sideSpacing: Theme.gap2
+    centeredTextHeight: Theme.textBodyLineHeight
+    shapeStyle: resolvedStyle === roundedStyle ? shapeRoundRect : shapeCylinder
     cornerRadius: Theme.radiusControl
 
     textColor: Theme.titleHeaderColor
@@ -155,4 +163,4 @@ AbstractInputBar {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.InputField { placeholderText: "Search"; search: true; style: inlineStyle }
+// LV.InputField { placeholderText: "Search"; search: true; style: cylinderStyle }

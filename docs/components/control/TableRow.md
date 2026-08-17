@@ -59,6 +59,7 @@ LV.TableRow {
 - Cell inputability resolves by `entry.inputable` override first, then row-level `inputable`.
 - Row spacing is computed from available width and fixed cell width.
 - Spacing never goes negative (`Math.max(0, computed)`).
+- The default leading divider uses `panelBackground10` to match the measured row export.
 
 ## Practical Tip
 
@@ -72,7 +73,7 @@ import LVRS 1.0 as LV
 LV.TableRow {
     cellItems: [
         "Renderer",
-        { text: "Active", dividerColor: LV.Theme.panelBackground03 },
+        { text: "Active", dividerColor: LV.Theme.panelBackground10 },
         { title: "Core", textColor: LV.Theme.bodyColor }
     ]
 }
@@ -82,3 +83,7 @@ LV.TableRow {
 
 Q. Does `cells` still work?  
 A. Yes. `cells` is preserved for compatibility, but `cellItems` is the preferred API.
+
+## Figma Contract
+
+Node `203:3648` is `717 × 24`: three `234 × 24` cells separated by `7.5` spacing. Body text is fixed at 13/13. Mobile geometry doubles to `1434 × 48`, `468` cell width, and `16` content spacing; Body font remains 13.

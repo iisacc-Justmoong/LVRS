@@ -21,6 +21,8 @@ Location: `qml/components/control/display/TableCellItem.qml`
 - `clipContent`
 - `textStyle` (Label style enum value)
 - `inputable` (default `false`; toggles inline input overlay at text bounds)
+- `selected`, `current`
+- `selectionColor`, `currentBorderColor`, `currentBorderWidth`
 - `inputResult` (latest editable string value)
 - `valueType` (`string`, `int`, `float`, `bool`; used by injected validators)
 - `valueValidator` (optional function injected by parent table)
@@ -64,7 +66,8 @@ LV.TableCellItem {
 - `itemData.value` is also accepted when label/text/title keys are absent.
 - If object keys are missing, component-level fallback props are used.
 - Divider and text rendering stay dense (`24px` cell height, ellipsis text).
-- When `inputable` is enabled, `InputField` overlays the text area and keeps geometry aligned with the original label slot.
+- `selected` fills the cell selection layer; `current` draws the current-cell border. `Table` supplies both states automatically to its default delegate.
+- When `inputable` is enabled, `InputField` overlays the text area and keeps geometry aligned with the original label slot. Its embedded line box and native input remain fixed at Body `13 / 13` on desktop and mobile, avoiding the former clipped `16 / 32` line box.
 - `valueValidator` is a parent-injected API. It may return `true/false` or `{ accepted, text, value }`; rejected edits leave `inputResult` unchanged and emit `inputRejected`.
 
 ## Practical Tip
@@ -110,4 +113,8 @@ A. Resolution order is `label -> text -> title -> value`, then falls back to com
 
 - divider visibility matches design requirement,
 - text elision works under narrow widths,
-- color tokens match table design (`panelBackground03` divider, body text).
+- color tokens match table design (`panelBackground03` standalone divider, body text).
+
+## Figma Contract
+
+Node `203:3863` is `234 × 24`. The leading divider is `1 × 24`; the content line box is `(x: 9, y: 5.5, width: 225, height: 13)`, using fixed 13/13 Body typography. Mobile geometry doubles to `468 × 48` with `16` content spacing, but Body font size remains 13.

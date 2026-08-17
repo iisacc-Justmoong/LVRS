@@ -331,8 +331,8 @@ QtObject {
                             docPath: "docs/components/control/ToggleSwitch.md",
                             previewId: "selection-control",
                             roleLabel: "Binary switch",
-                            summary: "Switch control with animated knob transitions and explicit hover, pressed, and disabled track colors.",
-                            usage: "LV.ToggleSwitch {\n    text: \"Enabled\"\n    checked: true\n}",
+                            summary: "Figma-aligned 38 x 22 two-state switch with an 18px knob, 0/4/4 shadow, and 2x mobile metrics.",
+                            usage: "LV.ToggleSwitch {\n    checked: true\n}",
                             related: ["check-box", "radio-button"]
                         })
                     ]
@@ -372,8 +372,8 @@ QtObject {
                             docPath: "docs/components/control/Table.md",
                             previewId: "table-display",
                             roleLabel: "Composite table",
-                            summary: "Turnkey table composition that renders headers and rows from array data.",
-                            usage: "LV.Table {\n    headerColumns: [\"Name\", \"State\"]\n    rows: [[\"Renderer\", \"Active\"]]\n}",
+                            summary: "Spreadsheet surface with typed columns, range selection, TSV exchange, sorting, resizing, and atomic undo.",
+                            usage: "LV.Table {\n    columns: [{ label: \"Name\" }, { label: \"Count\", type: \"int\" }]\n    model: [[{ value: \"Renderer\" }, { value: 3 }]]\n    editable: true\n    sortingEnabled: true\n}",
                             related: ["table-header", "table-row", "table-cell-item"]
                         }),
                         component({
@@ -384,7 +384,7 @@ QtObject {
                             previewId: "table-display",
                             roleLabel: "Table primitive",
                             summary: "Standalone header strip used when composing tables manually for parity testing.",
-                            usage: "LV.TableHeader {\n    columns: [\"Column\", \"Column\"]\n}",
+                            usage: "LV.TableHeader {\n    cellItems: [{ label: \"Name\" }, { label: \"Count\", type: \"int\" }]\n    interactive: true\n}",
                             related: ["table", "table-row"]
                         }),
                         component({
@@ -395,7 +395,7 @@ QtObject {
                             previewId: "table-display",
                             roleLabel: "Table primitive",
                             summary: "Row primitive that renders an array of cell values in LVRS table rhythm.",
-                            usage: "LV.TableRow {\n    cells: [\"Renderer\", \"Active\"]\n}",
+                            usage: "LV.TableRow {\n    cellItems: [{ value: \"Renderer\" }, { value: \"Active\" }]\n}",
                             related: ["table", "table-cell-item"]
                         }),
                         component({
@@ -406,7 +406,7 @@ QtObject {
                             previewId: "table-display",
                             roleLabel: "Table cell",
                             summary: "Editable table cell primitive used by TableRow and manual table composition.",
-                            usage: "LV.TableCellItem {\n    text: \"Renderer\"\n}",
+                            usage: "LV.TableCellItem {\n    text: \"Renderer\"\n    selected: true\n}",
                             related: ["table", "table-row"]
                         })
                     ]
@@ -434,8 +434,8 @@ QtObject {
                             docPath: "docs/components/control/InputField.md",
                             previewId: "input-field",
                             roleLabel: "Single-line input",
-                            summary: "One-line input control with optional search affordance and integrated clear action.",
-                            usage: "LV.InputField {\n    search: true\n    placeholderText: \"Search\"\n}",
+                            summary: "Figma-aligned one-line input with Rounded, Cylinder, and Inline frames, fixed Body 13 typography, search, selection, and clear states.",
+                            usage: "LV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Search\"\n}",
                             related: ["abstract-input-bar", "text-editor"]
                         }),
                         component({

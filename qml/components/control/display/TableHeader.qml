@@ -16,7 +16,12 @@ Item {
     property real separatorHeight: Theme.strokeThin
     property color separatorColor: Theme.panelBackground10
     property Component cellDelegate: null
+    property bool interactive: false
+    property int sortColumn: -1
+    property int sortOrder: Qt.AscendingOrder
     readonly property Component resolvedCellDelegate: cellDelegate || defaultCellDelegate
+
+    signal columnClicked(int columnIndex, var columnData)
 
     Component {
         id: defaultCellDelegate
@@ -27,9 +32,15 @@ Item {
             readonly property var descriptor: modelData.descriptor || ({})
 
             Label {
+                objectName: control.objectName.length > 0
+                    ? control.objectName + "_cell_" + index + "_label"
+                    : ""
                 anchors.left: parent.left
                 anchors.leftMargin: descriptor.padding || 0
+                anchors.right: parent.right
+                anchors.rightMargin: descriptor.padding || 0
                 anchors.verticalCenter: parent.verticalCenter
+                height: styleLineHeight
                 style: description
                 text: descriptor.text || ""
                 color: control.textColor
@@ -104,13 +115,16 @@ Item {
             result.push({
                 "index": i,
                 "descriptor": descriptor,
-                "cellData": descriptor.cellData,
+                "cellData": descriptor.sourceData,
+                "columnData": descriptor.sourceData,
                 "text": descriptor.text,
                 "valueType": descriptor.valueType,
                 "x": descriptor.x,
                 "width": descriptor.width,
                 "height": control.rowHeight,
-                "padding": descriptor.padding
+                "padding": descriptor.padding,
+                "sorted": control.sortColumn === i,
+                "sortOrder": control.sortColumn === i ? control.sortOrder : Qt.AscendingOrder
             })
         }
         return result
@@ -143,6 +157,10 @@ Item {
                     required property var modelData
                     property Item delegateItem: null
 
+                    objectName: control.objectName.length > 0
+                        ? control.objectName + "_cell_" + modelData.index
+                        : ""
+
                     x: modelData.x
                     width: modelData.width
                     height: control.rowHeight
@@ -168,11 +186,18 @@ Item {
                             headerCell.rebuildDelegate()
                         }
                     }
+
+                    TapHandler {
+                        enabled: control.interactive
+                        acceptedButtons: Qt.LeftButton
+                        onTapped: control.columnClicked(modelData.index, modelData.columnData)
+                    }
                 }
             }
         }
 
         Rectangle {
+            objectName: control.objectName.length > 0 ? control.objectName + "_separator" : ""
             width: parent.width
             height: control.separatorHeight
             color: control.separatorColor
@@ -183,4 +208,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableHeader { cellItems: [{ label: "Name", type: "string" }, { label: "Count", type: "int" }] }
+// LV.TableHeader { interactive: true; cellItems: [{ label: "Name", type: "string" }, { label: "Count", type: "int" }] }

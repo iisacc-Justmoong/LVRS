@@ -9,7 +9,9 @@
 #include <QFont>
 #include <QGuiApplication>
 #include <QInputMethodEvent>
+#include <QImage>
 #include <QQuickItem>
+#include <QQuickItemGrabResult>
 #include <QQuickWindow>
 #include <QVector>
 #include <QtPlugin>
@@ -421,7 +423,7 @@ private slots:
     void input_field_ios_native_text_interaction_contract_loads();
     void input_field_native_event_input_contract_loads();
     void input_field_search_icon_mobile_scaling_contract_loads();
-    void toggle_switch_figma_color_contract_loads();
+    void toggle_switch_figma_contract_loads();
     void checkbox_figma_contract_loads();
     void radio_button_figma_contract_loads();
     void modal_empty_frame_contract_loads();
@@ -436,6 +438,8 @@ private slots:
     void context_menu_width_expansion_contract_loads();
     void context_menu_auto_placement_contract_loads();
     void model_component_delegate_contract_loads();
+    void table_figma_geometry_contract_loads();
+    void table_spreadsheet_api_contract_loads();
     void table_cell_item_contract_loads();
     void table_cell_merge_split_contract_loads();
     void table_structure_editing_contract_loads();
@@ -1114,9 +1118,14 @@ import LVRS as LV
 
 Item {
     id: root
+    width: 152
+    height: 62
 
     property string themeTarget: "macos"
     readonly property int expectedIconSize: LV.Theme.mobileTarget ? 36 : 18
+    readonly property int expectedInputIconSize: LV.Theme.mobileTarget ? 24 : 12
+    readonly property int expectedCheckBoxSize: LV.Theme.mobileTarget ? 34 : 17
+    readonly property int expectedRadioDotSize: LV.Theme.mobileTarget ? 16 : 8
     readonly property int expectedMenuItemHeight: LV.Theme.mobileTarget ? 48 : 24
     readonly property int expectedMenuChevronSize: LV.Theme.mobileTarget ? 32 : 16
     readonly property int expectedHierarchyChevronSize: LV.Theme.mobileTarget ? 32 : 16
@@ -1167,10 +1176,11 @@ Item {
         && stepper.width === expectedIconSize
         && stepper.height === expectedIconSize
         && comboBox.figmaIndicatorSize === expectedIconSize
-        && inputField.searchIconSize === expectedIconSize
-        && inputField.clearIconSize === expectedIconSize
-        && checkBox.boxSize === expectedIconSize
+        && inputField.searchIconSize === expectedInputIconSize
+        && inputField.clearIconSize === expectedInputIconSize
+        && checkBox.boxSize === expectedCheckBoxSize
         && radioButton.indicatorSize === expectedIconSize
+        && radioButton.dotSize === expectedRadioDotSize
         && toggleSwitch.knobSize === expectedIconSize
         && listToolbar.iconSize === expectedIconSize
         && menuItem.itemHeight === expectedMenuItemHeight
@@ -1185,6 +1195,8 @@ Item {
     property bool mobileCompactIconContractReady:
         LV.Theme.mobileTarget
         && LV.Theme.iconSm === 36
+        && inputField.searchIconSize === 24
+        && inputField.clearIconSize === 24
         && compactIconContractReady
 }
 )";
@@ -4707,15 +4719,36 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    id: root
+    width: 698
+    height: 84
+
+    property string themeTarget: "macos"
+    readonly property real expectedScale: LV.Theme.mobileTarget ? 2.0 : 1.0
+
+    onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
+    Component.onCompleted: LV.Theme.targetOverride = themeTarget
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
     LV.InputField {
         id: defaultField
+        objectName: "figmaInputRounded"
+        x: 20
+        y: 20
         visible: false
+        width: implicitWidth
+        height: implicitHeight
         placeholderText: "Placeholder"
     }
 
     LV.InputField {
         id: searchField
+        objectName: "figmaInputSearch"
+        x: 20
+        y: 45
         visible: false
+        width: implicitWidth
+        height: implicitHeight
         search: true
         placeholderText: "Search"
         text: "abc"
@@ -4724,6 +4757,8 @@ Item {
     LV.InputField {
         id: legacySearchField
         visible: false
+        width: implicitWidth
+        height: implicitHeight
         mode: searchMode
         placeholderText: "Legacy search"
     }
@@ -4746,7 +4781,12 @@ Item {
 
     LV.InputField {
         id: inlineField
+        objectName: "figmaInputInline"
+        x: 472
+        y: 20
         visible: false
+        width: implicitWidth
+        height: implicitHeight
         style: inlineStyle
         placeholderText: "Inline"
         text: "value"
@@ -4756,14 +4796,64 @@ Item {
         id: inlineDisabledField
         visible: false
         enabled: false
+        width: implicitWidth
+        height: implicitHeight
         style: inlineStyle
         placeholderText: "Inline disabled"
     }
 
+    LV.InputField {
+        id: cylinderField
+        objectName: "figmaInputCylinder"
+        x: 246
+        y: 20
+        visible: false
+        width: implicitWidth
+        height: implicitHeight
+        style: cylinderStyle
+        placeholderText: "Cylinder"
+    }
+
+    property string figmaInputFieldDiagnostics:
+        "target=" + LV.Theme.effectiveTarget
+        + " default=" + defaultField.implicitWidth + "x" + defaultField.implicitHeight
+        + "/" + defaultField.width + "x" + defaultField.height
+        + " field=" + defaultField.fieldMinHeight + "/" + defaultField.centeredTextHeight
+        + " text=" + defaultField.inputItem.width + "x" + defaultField.inputItem.height
+        + " font=" + defaultField.inputItem.font.pixelSize + "/" + defaultField.inputItem.font.weight
+        + " inset=" + defaultField.leftInset + "/" + defaultField.rightInset
+        + " y=" + defaultField.centeredTextY
+        + " style=" + defaultField.resolvedStyle + "/" + defaultField.shapeStyle
+        + " inline=" + inlineField.resolvedStyle + "/" + inlineField.shapeStyle
+        + " cylinder=" + cylinderField.resolvedStyle + "/" + cylinderField.shapeStyle
+        + "/" + cylinderField.resolvedCornerRadius
+        + " search=" + searchField.searchIconSize + "/" + searchField.clearIconSize
+        + "/" + searchField.leftInset + "/" + searchField.rightInset
+
     property bool figmaInputFieldReady:
-        defaultField.backgroundColor === LV.Theme.panelBackground10
+        defaultField.roundedStyle === defaultField.filledStyle
+        && defaultField.resolvedStyle === defaultField.roundedStyle
+        && defaultField.shapeStyle === defaultField.shapeRoundRect
+        && defaultField.backgroundColor === LV.Theme.panelBackground10
         && defaultField.backgroundColorFocused === LV.Theme.panelBackground10
         && defaultField.backgroundColorDisabled === LV.Theme.panelBackground10
+        && defaultField.implicitWidth === 206 * expectedScale
+        && defaultField.implicitHeight === 19 * expectedScale
+        && defaultField.width === 206 * expectedScale
+        && defaultField.height === 19 * expectedScale
+        && defaultField.fieldMinHeight === 19 * expectedScale
+        && defaultField.insetHorizontal === 7 * expectedScale
+        && defaultField.insetVertical === 3 * expectedScale
+        && defaultField.sideSpacing === 2 * expectedScale
+        && defaultField.cornerRadius === 5 * expectedScale
+        && defaultField.centeredTextHeight === 13
+        && defaultField.textLineBoxHeight === 13
+        && defaultField.inputItem.height === 13
+        && defaultField.inputItem.font.pixelSize === 13
+        && defaultField.inputItem.font.weight === Font.Medium
+        && defaultField.leftInset === 7 * expectedScale
+        && defaultField.rightInset === 7 * expectedScale
+        && defaultField.centeredTextY === (LV.Theme.mobileTarget ? 12 : 3)
         && defaultField.textColor === LV.Theme.titleHeaderColor
         && defaultField.textColorDisabled === LV.Theme.disabledColor
         && defaultField.placeholderColor === LV.Theme.titleHeaderColor
@@ -4774,6 +4864,10 @@ Item {
         && defaultField.clearIconBackgroundColorDisabled === LV.Theme.disabledColor
         && defaultField.clearIconForegroundColor === LV.Theme.panelBackground10
         && inlineField.style === inlineField.inlineStyle
+        && inlineField.resolvedStyle === inlineField.inlineStyle
+        && inlineField.shapeStyle === inlineField.shapeCylinder
+        && inlineField.implicitWidth === 206 * expectedScale
+        && inlineField.implicitHeight === 19 * expectedScale
         && inlineField.backgroundColor === LV.Theme.accentTransparent
         && inlineField.backgroundColorHover === LV.Theme.accentTransparent
         && inlineField.backgroundColorPressed === LV.Theme.accentTransparent
@@ -4782,12 +4876,22 @@ Item {
         && inlineDisabledField.backgroundColor === LV.Theme.accentTransparent
         && inlineDisabledField.backgroundColorDisabled === LV.Theme.accentTransparent
         && inlineField.showClearButton
+        && cylinderField.resolvedStyle === cylinderField.cylinderStyle
+        && cylinderField.shapeStyle === cylinderField.shapeCylinder
+        && Math.abs(cylinderField.resolvedCornerRadius - (19 * expectedScale / 2.0)) < 0.01
+        && cylinderField.backgroundColor === LV.Theme.panelBackground10
+        && cylinderField.implicitWidth === 206 * expectedScale
+        && cylinderField.implicitHeight === 19 * expectedScale
         && searchField.search
         && searchField.searchIconVisible
-        && searchField.searchIconSize === LV.Theme.iconSm
-        && searchField.clearIconSize === LV.Theme.iconSm
-        && Math.abs(searchField.clearIconMarkLength - (LV.Theme.iconSm * (8.0 / 14.0))) < 0.01
-        && Math.abs(searchField.clearIconMarkThickness - (LV.Theme.iconSm * (1.4 / 14.0))) < 0.01
+        && searchField.searchIconSize === 12 * expectedScale
+        && searchField.clearIconSize === 12 * expectedScale
+        && Math.abs(searchField.clearIconMarkLength - (12 * expectedScale * (8.0 / 14.0))) < 0.01
+        && Math.abs(searchField.clearIconMarkThickness - (12 * expectedScale * (1.4 / 14.0))) < 0.01
+        && searchField.leftInset === 21 * expectedScale
+        && searchField.rightInset === 21 * expectedScale
+        && searchField.implicitWidth === 206 * expectedScale
+        && searchField.implicitHeight === 19 * expectedScale
         && searchField.showClearButton
         && legacySearchField.mode === legacySearchField.searchMode
         && legacySearchField.search
@@ -4800,7 +4904,94 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("figmaInputFieldReady").toBool());
+    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
+                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
+    QVERIFY(root->setProperty("themeTarget", QStringLiteral("android")));
+    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
+                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
+
+    QVERIFY(root->setProperty("themeTarget", QStringLiteral("macos")));
+    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
+                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
+
+    auto *rootItem = qobject_cast<QQuickItem *>(root.data());
+    auto *roundedItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaInputRounded")));
+    auto *cylinderItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaInputCylinder")));
+    auto *inlineItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaInputInline")));
+    auto *searchItem = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaInputSearch")));
+    QVERIFY(rootItem);
+    QVERIFY(roundedItem);
+    QVERIFY(cylinderItem);
+    QVERIFY(inlineItem);
+    QVERIFY(searchItem);
+
+    roundedItem->setVisible(true);
+    cylinderItem->setVisible(true);
+    inlineItem->setVisible(true);
+    searchItem->setVisible(true);
+
+    QQuickWindow captureWindow;
+    captureWindow.setColor(Qt::transparent);
+    captureWindow.resize(698, 84);
+    rootItem->setParentItem(captureWindow.contentItem());
+    rootItem->setPosition(QPointF(0.0, 0.0));
+    rootItem->setSize(QSizeF(698.0, 84.0));
+    rootItem->setVisible(true);
+    captureWindow.show();
+    QCoreApplication::processEvents();
+
+    const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(698, 84));
+    QVERIFY(grabResult);
+    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    const QImage captured = grabResult->image().convertToFormat(QImage::Format_RGBA8888);
+    const qreal captureScale = static_cast<qreal>(captured.width()) / 698.0;
+    QVERIFY(captureScale >= 1.0);
+    QCOMPARE(captured.height(), qRound(84.0 * captureScale));
+
+    const auto logicalPixel = [&captured, captureScale](int x, int y) {
+        return captured.pixelColor(qRound(x * captureScale), qRound(y * captureScale));
+    };
+
+    const auto rgbMatches = [](const QColor &actual, const QColor &expected) {
+        return qAbs(actual.red() - expected.red()) <= 2
+            && qAbs(actual.green() - expected.green()) <= 2
+            && qAbs(actual.blue() - expected.blue()) <= 2
+            && actual.alpha() >= 253;
+    };
+    const QColor panel10(QStringLiteral("#282828"));
+    QVERIFY(rgbMatches(logicalPixel(150, 29), panel10));
+    QVERIFY(rgbMatches(logicalPixel(396, 29), panel10));
+    QVERIFY(rgbMatches(logicalPixel(225, 29), panel10));
+    QCOMPARE(logicalPixel(226, 29).alpha(), 0);
+    QCOMPARE(logicalPixel(622, 29).alpha(), 0);
+    QCOMPARE(logicalPixel(20, 20).alpha(), 0);
+    QCOMPARE(logicalPixel(246, 20).alpha(), 0);
+
+    int searchGlyphPixels = 0;
+    for (int y = 48; y < 60; ++y) {
+        for (int x = 27; x < 39; ++x) {
+            if (logicalPixel(x, y).lightness() > 100)
+                ++searchGlyphPixels;
+        }
+    }
+    QVERIFY(searchGlyphPixels > 8);
+
+    int clearGlyphPixels = 0;
+    for (int y = 48; y < 60; ++y) {
+        for (int x = 207; x < 219; ++x) {
+            if (logicalPixel(x, y).lightness() > 100)
+                ++clearGlyphPixels;
+        }
+    }
+    QVERIFY(clearGlyphPixels > 16);
+
+    const QString capturePath = qEnvironmentVariable("LVRS_INPUT_FIELD_CAPTURE_PATH");
+    if (!capturePath.isEmpty())
+        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
 }
 
 void ImportApiTests::progress_bar_range_contract_loads()
@@ -4949,13 +5140,6 @@ Item {
         checked: true
     }
 
-    LV.ToggleSwitch {
-        objectName: "toggleSwitch"
-        width: implicitWidth
-        height: implicitHeight
-        visible: false
-        checked: true
-    }
 }
 )";
 
@@ -5019,9 +5203,6 @@ Item {
     assertSupersampledCanvas(QStringLiteral("checkBox"),
                              QStringLiteral("checkBox_checkmarkCanvas"),
                              "checkmarkRasterScale");
-    assertSupersampledCanvas(QStringLiteral("toggleSwitch"),
-                             QStringLiteral("toggleSwitch_knobCanvas"),
-                             "knobRasterScale");
 }
 
 void ImportApiTests::input_field_ios_native_text_interaction_contract_loads()
@@ -5173,10 +5354,15 @@ Item {
         LV.Theme.mobileTarget
         && searchField.search
         && searchField.searchIconVisible
-        && searchField.searchIconSize === LV.Theme.iconSm
-        && searchField.clearIconSize === LV.Theme.iconSm
-        && Math.abs(searchField.searchIconSize - 36.0) < 0.01
-        && searchField.searchIconSource == LV.Theme.iconPath("generalsearch")
+        && searchField.implicitWidth === 412
+        && searchField.implicitHeight === 38
+        && searchField.width === 412
+        && searchField.height === 38
+        && searchField.centeredTextHeight === 13
+        && searchField.inputItem.font.pixelSize === 13
+        && searchField.searchIconSize === 24
+        && searchField.clearIconSize === 24
+        && searchField.searchIconSource == LV.Theme.iconPath("inputFieldSearch")
         && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
         && LV.Theme.iconSm === 36
 }
@@ -5187,7 +5373,7 @@ Item {
     QTRY_VERIFY(root->property("mobileSearchContractReady").toBool());
 }
 
-void ImportApiTests::toggle_switch_figma_color_contract_loads()
+void ImportApiTests::toggle_switch_figma_contract_loads()
 {
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
@@ -5197,32 +5383,219 @@ import QtQuick
 import LVRS as LV
 
 Item {
-    LV.ToggleSwitch { id: onSwitch; checked: true; enabled: true; visible: false }
-    LV.ToggleSwitch { id: offSwitch; checked: false; enabled: true; visible: false }
+    id: root
 
-    function trackOf(control) {
-        if (!control || !control.indicator || !control.indicator.children || control.indicator.children.length < 2)
-            return null
-        return control.indicator.children[1]
+    property string themeTarget: "macos"
+    readonly property real expectedScale: LV.Theme.mobileTarget ? 2.0 : 1.0
+
+    onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
+    Component.onCompleted: LV.Theme.targetOverride = themeTarget
+    Component.onDestruction: LV.Theme.targetOverride = ""
+
+    LV.ToggleSwitch {
+        id: onSwitch
+        objectName: "onSwitch"
+        checked: true
+        enabled: true
+        visible: true
+        x: 20
+        y: 22
+        width: implicitWidth
+        height: implicitHeight
+        transitionDuration: 0
     }
 
-    readonly property var onTrack: trackOf(onSwitch)
-    readonly property var offTrack: trackOf(offSwitch)
+    LV.ToggleSwitch {
+        id: offSwitch
+        objectName: "offSwitch"
+        checked: false
+        enabled: true
+        visible: true
+        x: 94
+        y: 22
+        width: implicitWidth
+        height: implicitHeight
+        transitionDuration: 0
+    }
 
-    property bool figmaToggleColorReady:
-        onSwitch.onColor === LV.Theme.accent
+    LV.ToggleSwitch {
+        id: labelSwitch
+        objectName: "labelSwitch"
+        checked: true
+        enabled: true
+        visible: false
+        text: "Label"
+        width: implicitWidth
+        height: implicitHeight
+        transitionDuration: 0
+    }
+
+    function descendant(item, expectedObjectName) {
+        if (!item)
+            return null
+        if (item.objectName === expectedObjectName)
+            return item
+        if (!item.children)
+            return null
+        for (let index = 0; index < item.children.length; ++index) {
+            const match = descendant(item.children[index], expectedObjectName)
+            if (match)
+                return match
+        }
+        return null
+    }
+
+    readonly property var onIndicator: descendant(onSwitch, "onSwitch_indicator")
+    readonly property var offIndicator: descendant(offSwitch, "offSwitch_indicator")
+    readonly property var onTrack: descendant(onSwitch, "onSwitch_track")
+    readonly property var offTrack: descendant(offSwitch, "offSwitch_track")
+    readonly property var onKnob: descendant(onSwitch, "onSwitch_knob")
+    readonly property var offKnob: descendant(offSwitch, "offSwitch_knob")
+
+    property bool figmaToggleContractReady:
+        typeof onSwitch.state === "boolean"
+        && onSwitch.state === onSwitch.checked
+        && typeof offSwitch.state === "boolean"
+        && offSwitch.state === offSwitch.checked
+        && onSwitch.onColor === LV.Theme.accent
         && onSwitch.offColor === LV.Theme.panelBackground12
-        && onSwitch.knobFillColor === LV.Theme.textPrimary
+        && onSwitch.knobFillColor === LV.Theme.titleHeaderColor
+        && onSwitch.trackShadowColor === LV.Theme.shadowStrong
+        && onSwitch.trackWidth === 38 * expectedScale
+        && onSwitch.trackHeight === 22 * expectedScale
+        && onSwitch.trackPadding === 2 * expectedScale
+        && onSwitch.knobSize === 18 * expectedScale
+        && onSwitch.trackCornerRadius === 20 * expectedScale
+        && onSwitch.knobCornerRadius === 9 * expectedScale
+        && onSwitch.trackShadowBlur === 4 * expectedScale
+        && onSwitch.trackShadowVerticalOffset === 4 * expectedScale
+        && onSwitch.knobXOff === 2 * expectedScale
+        && onSwitch.knobXOn === 18 * expectedScale
+        && offSwitch.implicitWidth === 38 * expectedScale
+        && offSwitch.implicitHeight === 22 * expectedScale
+        && onSwitch.implicitWidth === 38 * expectedScale
+        && onSwitch.implicitHeight === 22 * expectedScale
+        && labelSwitch.spacing === 8 * expectedScale
+        && labelSwitch.contentItem.stylePixelSize === 13
+        && labelSwitch.contentItem.styleLineHeight === 13
+        && onIndicator !== null
+        && offIndicator !== null
         && onTrack !== null
         && offTrack !== null
+        && onKnob !== null
+        && offKnob !== null
+        && onIndicator.width === 38 * expectedScale
+        && onIndicator.height === 22 * expectedScale
+        && offIndicator.width === 38 * expectedScale
+        && offIndicator.height === 22 * expectedScale
+        && onTrack.radius === 20 * expectedScale
+        && offTrack.radius === 20 * expectedScale
         && onTrack.color === LV.Theme.accent
         && offTrack.color === LV.Theme.panelBackground12
+        && onKnob.width === 18 * expectedScale
+        && onKnob.height === 18 * expectedScale
+        && offKnob.width === 18 * expectedScale
+        && offKnob.height === 18 * expectedScale
+        && onKnob.x === 18 * expectedScale
+        && offKnob.x === 2 * expectedScale
+
+    function verifyStateAliasRoundTrip() {
+        offSwitch.state = true
+        if (!offSwitch.checked)
+            return false
+        offSwitch.checked = false
+        return offSwitch.state === false
+    }
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("figmaToggleColorReady").toBool());
+    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+
+    QVariant stateAliasRoundTrip;
+    QVERIFY(QMetaObject::invokeMethod(root.data(),
+                                      "verifyStateAliasRoundTrip",
+                                      Q_RETURN_ARG(QVariant, stateAliasRoundTrip)));
+    QVERIFY(stateAliasRoundTrip.toBool());
+
+    QObject *desktopShadow = root->findChild<QObject *>(QStringLiteral("onSwitch_trackShadowEffect"),
+                                                         Qt::FindChildrenRecursively);
+    QVERIFY(desktopShadow);
+    QVERIFY(desktopShadow->property("shadowEnabled").toBool());
+    QCOMPARE(desktopShadow->property("blurMax").toInt(), 4);
+    QCOMPARE(desktopShadow->property("shadowBlur").toReal(), 1.0);
+    QCOMPARE(desktopShadow->property("shadowHorizontalOffset").toReal(), 0.0);
+    QCOMPARE(desktopShadow->property("shadowVerticalOffset").toReal(), 4.0);
+    QCOMPARE(desktopShadow->property("shadowColor").value<QColor>(), QColor(QStringLiteral("#40000000")));
+
+    root->setProperty("themeTarget", QStringLiteral("ios"));
+    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+
+    QObject *mobileShadow = root->findChild<QObject *>(QStringLiteral("onSwitch_trackShadowEffect"),
+                                                        Qt::FindChildrenRecursively);
+    QVERIFY(mobileShadow);
+    QCOMPARE(mobileShadow->property("blurMax").toInt(), 8);
+    QCOMPARE(mobileShadow->property("shadowVerticalOffset").toReal(), 8.0);
+
+    root->setProperty("themeTarget", QStringLiteral("macos"));
+    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+
+    auto *rootItem = qobject_cast<QQuickItem *>(root.data());
+    QVERIFY(rootItem);
+    QQuickWindow captureWindow;
+    captureWindow.setColor(Qt::transparent);
+    captureWindow.resize(152, 62);
+    rootItem->setParentItem(captureWindow.contentItem());
+    rootItem->setPosition(QPointF(0.0, 0.0));
+    rootItem->setSize(QSizeF(152.0, 62.0));
+    rootItem->setOpacity(1.0);
+    rootItem->setVisible(true);
+    captureWindow.show();
+    QCoreApplication::processEvents();
+    QTest::qWait(120);
+    QCoreApplication::processEvents();
+
+    const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(152, 62));
+    QVERIFY(grabResult);
+    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    const QImage captured = grabResult->image().convertToFormat(QImage::Format_RGBA8888);
+    const qreal captureScale = static_cast<qreal>(captured.width()) / 152.0;
+    QVERIFY(captureScale >= 1.0);
+    QCOMPARE(captured.height(), qRound(62.0 * captureScale));
+
+    const auto logicalPixel = [&captured, captureScale](int x, int y) {
+        return captured.pixelColor(qRound(x * captureScale), qRound(y * captureScale));
+    };
+
+    const QString capturePath = qEnvironmentVariable("LVRS_TOGGLE_CAPTURE_PATH");
+    if (!capturePath.isEmpty())
+        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+
+    const auto opaqueRgbMatches = [](const QColor &actual, const QColor &expected) {
+        return qAbs(actual.red() - expected.red()) <= 2
+            && qAbs(actual.green() - expected.green()) <= 2
+            && qAbs(actual.blue() - expected.blue()) <= 2
+            && actual.alpha() >= 253;
+    };
+    const QColor capturedOnTrack = logicalPixel(28, 33);
+    const QColor capturedOffTrack = logicalPixel(124, 33);
+    QVERIFY2(opaqueRgbMatches(capturedOnTrack, QColor(QStringLiteral("#0A84FF"))),
+             qPrintable(capturedOnTrack.name(QColor::HexArgb)));
+    QVERIFY2(opaqueRgbMatches(capturedOffTrack, QColor(QStringLiteral("#313233"))),
+             qPrintable(capturedOffTrack.name(QColor::HexArgb)));
+    const QColor capturedOnKnob = logicalPixel(47, 33);
+    const QColor capturedOffKnob = logicalPixel(105, 33);
+    QVERIFY2(capturedOnKnob.lightness() > 220,
+             qPrintable(capturedOnKnob.name(QColor::HexArgb)));
+    QVERIFY2(capturedOffKnob.lightness() > 200,
+             qPrintable(capturedOffKnob.name(QColor::HexArgb)));
+    int shadowOverflowAlpha = 0;
+    for (int logicalY = 45; logicalY <= 52; ++logicalY)
+        shadowOverflowAlpha = qMax(shadowOverflowAlpha, logicalPixel(39, logicalY).alpha());
+    if (QGuiApplication::platformName() != QStringLiteral("offscreen"))
+        QVERIFY(shadowOverflowAlpha > 0);
+
 }
 
 void ImportApiTests::checkbox_figma_contract_loads()
@@ -5235,10 +5608,52 @@ import QtQuick
 import LVRS as LV
 
 Item {
-    LV.CheckBox { id: checkedEnabled; text: "Label"; checked: true; enabled: true; visible: false }
-    LV.CheckBox { id: checkedDisabled; text: "Label"; checked: true; enabled: false; visible: false }
-    LV.CheckBox { id: uncheckedEnabled; text: "Label"; checked: false; enabled: true; visible: false }
-    LV.CheckBox { id: uncheckedDisabled; text: "Label"; checked: false; enabled: false; visible: false }
+    width: 120
+    height: 100
+
+    LV.CheckBox {
+        id: checkedEnabled
+        objectName: "checkedEnabled"
+        text: "Label"
+        checked: true
+        enabled: true
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.CheckBox {
+        id: checkedDisabled
+        objectName: "checkedDisabled"
+        y: 24
+        text: "Label"
+        checked: true
+        enabled: false
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.CheckBox {
+        id: uncheckedEnabled
+        objectName: "uncheckedEnabled"
+        y: 48
+        text: "Label"
+        checked: false
+        enabled: true
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.CheckBox {
+        id: uncheckedDisabled
+        objectName: "uncheckedDisabled"
+        y: 72
+        text: "Label"
+        checked: false
+        enabled: false
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
 
     function indicatorOf(control) {
         if (!control || !control.contentItem || control.contentItem.children.length < 1)
@@ -5260,10 +5675,24 @@ Item {
     readonly property var checkedDisabledLabel: labelOf(checkedDisabled)
 
     property bool figmaCheckBoxReady:
-        checkedEnabled.boxSize === LV.Theme.iconSm
+        checkedEnabled.boxSize === LV.Theme.scaleMetric(17)
+        && Math.abs(checkedEnabled.framePadding - LV.Theme.scaleRealMetric(0.5)) < 0.01
         && Math.abs(checkedEnabled.boxRadius - (checkedEnabled.boxSize * (3.5 / 17.0))) < 0.01
         && Math.abs(checkedEnabled.checkMarkStrokeWidth - (checkedEnabled.boxSize * (2.0 / 17.0))) < 0.01
         && checkedEnabled.contentItem.spacing === LV.Theme.gap6
+        && checkedEnabled.implicitWidth === 57
+        && checkedEnabled.implicitHeight === 18
+        && checkedEnabled.width === 57
+        && checkedEnabled.height === 18
+        && checkedEnabled.useFigmaCheckedAssets
+        && checkedEnabled.usingFigmaCheckedAsset
+        && checkedDisabled.usingFigmaCheckedAsset
+        && !uncheckedEnabled.usingFigmaCheckedAsset
+        && !uncheckedDisabled.usingFigmaCheckedAsset
+        && checkedEnabled.checkedAssetSourceEnabled.toString() === LV.Theme.iconPath("checkboxCheckedEnabled").toString()
+        && checkedEnabled.checkedAssetSourceDisabled.toString() === LV.Theme.iconPath("checkboxCheckedDisabled").toString()
+        && checkedEnabled.resolvedCheckedAssetSource.toString() === checkedEnabled.checkedAssetSourceEnabled.toString()
+        && checkedDisabled.resolvedCheckedAssetSource.toString() === checkedDisabled.checkedAssetSourceDisabled.toString()
         && checkedEnabled.checkColor === LV.Theme.bodyColor
         && checkedEnabled.checkMarkColorDisabled === LV.Theme.disabledColor
         && checkedEnabledIndicator !== null
@@ -5290,12 +5719,70 @@ Item {
         && checkedDisabledLabel.color === LV.Theme.disabledColor
         && checkedEnabledLabel.font.pixelSize === LV.Theme.textBody
         && checkedEnabledLabel.font.weight === LV.Theme.textBodyWeight
+        && checkedEnabledLabel.styleLineHeight === LV.Theme.textBodyLineHeight
+
+    property string figmaCheckBoxDiagnostics: JSON.stringify({
+        boxSize: checkedEnabled.boxSize,
+        framePadding: checkedEnabled.framePadding,
+        radius: checkedEnabled.boxRadius,
+        spacing: checkedEnabled.contentItem.spacing,
+        implicitSize: [checkedEnabled.implicitWidth, checkedEnabled.implicitHeight],
+        actualSize: [checkedEnabled.width, checkedEnabled.height],
+        indicator: checkedEnabledIndicator !== null
+            ? [checkedEnabledIndicator.x, checkedEnabledIndicator.y,
+                checkedEnabledIndicator.width, checkedEnabledIndicator.height]
+            : null,
+        label: checkedEnabledLabel !== null
+            ? [checkedEnabledLabel.x, checkedEnabledLabel.y,
+                checkedEnabledLabel.width, checkedEnabledLabel.height,
+                checkedEnabledLabel.implicitWidth, checkedEnabledLabel.implicitHeight]
+            : null,
+        enabledSource: checkedEnabled.checkedAssetSourceEnabled.toString(),
+        resolvedSource: checkedEnabled.resolvedCheckedAssetSource.toString()
+    })
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("figmaCheckBoxReady").toBool());
+    QTRY_VERIFY2(root->property("figmaCheckBoxReady").toBool(),
+                 qPrintable(root->property("figmaCheckBoxDiagnostics").toString()));
+
+    auto *checkedEnabled = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("checkedEnabled")));
+    auto *indicator = visualChildByObjectName(
+        checkedEnabled, QStringLiteral("checkedEnabled_indicator"));
+    auto *label = visualChildByObjectName(
+        checkedEnabled, QStringLiteral("checkedEnabled_label"));
+    auto *checkedAsset = visualChildByObjectName(
+        checkedEnabled, QStringLiteral("checkedEnabled_checkedAsset"));
+    QVERIFY(checkedEnabled);
+    QVERIFY(indicator);
+    QVERIFY(label);
+    QVERIFY(checkedAsset);
+
+    const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
+        return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                      QSizeF(item->width(), item->height()));
+    };
+    const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    verifyBounds(boundsIn(indicator, checkedEnabled), QRectF(0.5, 0.5, 17.0, 17.0));
+    verifyBounds(boundsIn(label, checkedEnabled), QRectF(23.5, 2.5, 33.0, 13.0));
+    verifyBounds(boundsIn(checkedAsset, checkedEnabled), QRectF(0.5, 0.5, 17.0, 17.0));
+    QTRY_COMPARE(checkedAsset->property("status").toInt(), 1);
+    QVERIFY(checkedAsset->property("source").toUrl().toString().endsWith(
+        QStringLiteral("checkboxCheckedEnabled.svg")));
 }
 
 void ImportApiTests::radio_button_figma_contract_loads()
@@ -5308,10 +5795,58 @@ import QtQuick
 import LVRS as LV
 
 Item {
-    LV.RadioButton { id: onEnabled; checked: true; enabled: true; visible: false }
-    LV.RadioButton { id: onDisabled; checked: true; enabled: false; visible: false }
-    LV.RadioButton { id: offEnabled; checked: false; enabled: true; visible: false }
-    LV.RadioButton { id: offDisabled; checked: false; enabled: false; visible: false }
+    width: 120
+    height: 130
+
+    LV.RadioButton {
+        id: onEnabled
+        objectName: "onEnabled"
+        checked: true
+        enabled: true
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.RadioButton {
+        id: onDisabled
+        objectName: "onDisabled"
+        y: 24
+        checked: true
+        enabled: false
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.RadioButton {
+        id: offEnabled
+        objectName: "offEnabled"
+        y: 48
+        checked: false
+        enabled: true
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.RadioButton {
+        id: offDisabled
+        objectName: "offDisabled"
+        y: 72
+        checked: false
+        enabled: false
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+    LV.RadioButton {
+        id: labeled
+        objectName: "labeled"
+        y: 96
+        text: "Label"
+        checked: true
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
 
     function indicatorOf(control) {
         if (!control || !control.contentItem || control.contentItem.children.length < 1)
@@ -5332,10 +5867,25 @@ Item {
     readonly property var offDisabledIndicator: indicatorOf(offDisabled)
     readonly property var onEnabledDot: dotOf(onEnabled)
     readonly property var onDisabledDot: dotOf(onDisabled)
+    readonly property var offEnabledDot: dotOf(offEnabled)
+    readonly property var offDisabledDot: dotOf(offDisabled)
+    readonly property var labeledIndicator: indicatorOf(labeled)
+    readonly property var labeledDot: dotOf(labeled)
+    readonly property var labeledLabel: labeled.contentItem.children.length > 1
+        ? labeled.contentItem.children[1]
+        : null
 
     property bool figmaRadioReady:
         onEnabled.indicatorSize === LV.Theme.controlIndicatorSize
         && onEnabled.dotSize === LV.Theme.gap8
+        && onEnabled.indicatorSize === 18
+        && onEnabled.dotSize === 8
+        && onEnabled.indicatorRadius === 9
+        && onEnabled.dotRadius === 4
+        && onEnabled.implicitWidth === 18
+        && onEnabled.implicitHeight === 18
+        && onEnabled.width === 18
+        && onEnabled.height === 18
         && onEnabled.onColor === LV.Theme.accent
         && onEnabled.offColor === LV.Theme.textPrimary
         && onEnabled.onColorDisabled === LV.Theme.panelBackground12
@@ -5348,18 +5898,92 @@ Item {
         && offDisabledIndicator !== null
         && onEnabledDot !== null
         && onDisabledDot !== null
+        && offEnabledDot !== null
+        && offDisabledDot !== null
         && onEnabledIndicator.color === LV.Theme.accent
         && onDisabledIndicator.color === LV.Theme.panelBackground12
         && offEnabledIndicator.color === LV.Theme.textPrimary
         && offDisabledIndicator.color === LV.Theme.panelBackground12
         && onEnabledDot.color === LV.Theme.textPrimary
         && onDisabledDot.color === LV.Theme.textSeptenary
+        && onEnabledDot.visible
+        && onDisabledDot.visible
+        && !offEnabledDot.visible
+        && !offDisabledDot.visible
+        && labeledIndicator !== null
+        && labeledDot !== null
+        && labeledLabel !== null
+        && labeled.contentItem.spacing === LV.Theme.gap8
+        && labeled.implicitWidth === 59
+        && labeled.implicitHeight === 18
+        && labeledLabel.stylePixelSize === 13
+        && labeledLabel.styleLineHeight === 13
+        && labeledLabel.font.pixelSize === 13
+
+    property string figmaRadioDiagnostics: JSON.stringify({
+        indicatorSize: onEnabled.indicatorSize,
+        dotSize: onEnabled.dotSize,
+        indicatorRadius: onEnabled.indicatorRadius,
+        dotRadius: onEnabled.dotRadius,
+        implicitSize: [onEnabled.implicitWidth, onEnabled.implicitHeight],
+        labeledImplicitSize: [labeled.implicitWidth, labeled.implicitHeight],
+        indicator: onEnabledIndicator !== null
+            ? [onEnabledIndicator.x, onEnabledIndicator.y,
+                onEnabledIndicator.width, onEnabledIndicator.height]
+            : null,
+        dot: onEnabledDot !== null
+            ? [onEnabledDot.x, onEnabledDot.y,
+                onEnabledDot.width, onEnabledDot.height]
+            : null,
+        label: labeledLabel !== null
+            ? [labeledLabel.x, labeledLabel.y,
+                labeledLabel.width, labeledLabel.height]
+            : null
+    })
 }
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QVERIFY(root->property("figmaRadioReady").toBool());
+    QTRY_VERIFY2(root->property("figmaRadioReady").toBool(),
+                 qPrintable(root->property("figmaRadioDiagnostics").toString()));
+
+    auto *onEnabled = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("onEnabled")));
+    auto *labeled = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("labeled")));
+    QVERIFY(onEnabled);
+    QVERIFY(labeled);
+
+    auto *indicator = visualChildByObjectName(
+        onEnabled, QStringLiteral("onEnabled_indicator"));
+    auto *dot = visualChildByObjectName(
+        onEnabled, QStringLiteral("onEnabled_dot"));
+    auto *label = visualChildByObjectName(
+        labeled, QStringLiteral("labeled_label"));
+    QVERIFY(indicator);
+    QVERIFY(dot);
+    QVERIFY(label);
+
+    const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
+        return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                      QSizeF(item->width(), item->height()));
+    };
+    const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    verifyBounds(boundsIn(indicator, onEnabled), QRectF(0.0, 0.0, 18.0, 18.0));
+    verifyBounds(boundsIn(dot, onEnabled), QRectF(5.0, 5.0, 8.0, 8.0));
+    verifyBounds(boundsIn(label, labeled), QRectF(26.0, 2.5, 33.0, 13.0));
 }
 
 void ImportApiTests::modal_empty_frame_contract_loads()
@@ -6767,6 +7391,470 @@ Item {
     QTRY_VERIFY(root->property("delegateContractReady").toBool());
 }
 
+void ImportApiTests::table_figma_geometry_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 1700
+    height: 360
+
+    LV.TableHeader {
+        id: header
+        objectName: "figmaHeader"
+        x: 0
+        y: 0
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+
+    LV.TableRow {
+        id: row
+        objectName: "figmaRow"
+        x: 0
+        y: 40
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+
+    LV.TableCellItem {
+        id: cell
+        objectName: "figmaCell"
+        x: 760
+        y: 0
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+
+    LV.Table {
+        id: table
+        objectName: "figmaTable"
+        x: 760
+        y: 40
+        width: implicitWidth
+        height: implicitHeight
+        opacity: 0
+    }
+
+    property bool figmaTableReady:
+        header.implicitWidth === 717
+        && header.implicitHeight === 25
+        && header.rowHeight === 24
+        && header.separatorHeight === 1
+        && header.cellHorizontalPadding === 8
+        && header.resolvedColumnCount === 3
+        && header.headerDescriptors[0].x === 0
+        && header.headerDescriptors[0].width === 239
+        && header.headerDescriptors[0].padding === 8
+        && header.headerDescriptors[1].x === 239
+        && header.headerDescriptors[2].x === 478
+        && header.textColor === LV.Theme.descriptionColor
+        && header.separatorColor === LV.Theme.panelBackground10
+        && row.implicitWidth === 717
+        && row.implicitHeight === 24
+        && row.cellWidth === 234
+        && row.cellHeight === 24
+        && Math.abs(row.resolvedSpacing - 7.5) < 0.01
+        && row.dividerColor === LV.Theme.panelBackground10
+        && cell.implicitWidth === 234
+        && cell.implicitHeight === 24
+        && cell.resolvedCellHeight === 24
+        && cell.resolvedContentSpacing === 8
+        && cell.resolvedDividerColor === LV.Theme.panelBackground03
+        && cell.resolvedTextColor === LV.Theme.bodyColor
+        && table.implicitWidth === 528
+        && table.implicitHeight === 121
+        && table.rowHeight === 24
+        && table.resolvedRowCount === 4
+        && table.resolvedColumnCount === 3
+        && String(table.backgroundColor) === "#1e1e1e"
+        && table.borderColor === LV.Theme.panelBackground10
+        && table.borderWidth === 1
+        && table.rowDividerColor === LV.Theme.panelBackground10
+        && table.headerSeparatorColor === LV.Theme.panelBackground10
+        && !table.structureControlsVisible
+
+    property string figmaTableDiagnostics: JSON.stringify({
+        header: [header.implicitWidth, header.implicitHeight, header.rowHeight,
+            header.separatorHeight, header.cellHorizontalPadding],
+        headerDescriptors: header.headerDescriptors,
+        row: [row.implicitWidth, row.implicitHeight, row.cellWidth,
+            row.cellHeight, row.resolvedSpacing],
+        cell: [cell.implicitWidth, cell.implicitHeight,
+            cell.resolvedCellHeight, cell.resolvedContentSpacing],
+        table: [table.implicitWidth, table.implicitHeight, table.rowHeight,
+            table.resolvedRowCount, table.resolvedColumnCount],
+        structureControlsVisible: table.structureControlsVisible,
+        colorsDetailed: [String(header.textColor), String(header.separatorColor),
+            String(row.dividerColor), String(cell.resolvedDividerColor),
+            String(cell.resolvedTextColor), String(table.backgroundColor),
+            String(table.borderColor), String(table.rowDividerColor),
+            String(table.headerSeparatorColor)],
+        widths: [table.borderWidth, table.rowHeight, table.resolvedRowCount,
+            table.resolvedColumnCount],
+        colors: [String(table.backgroundColor), String(table.borderColor),
+            String(table.rowDividerColor)]
+    })
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("figmaTableReady").toBool(),
+                 qPrintable(root->property("figmaTableDiagnostics").toString()));
+
+    auto *header = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaHeader")));
+    auto *cell = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaCell")));
+    auto *table = qobject_cast<QQuickItem *>(
+        root->findChild<QObject *>(QStringLiteral("figmaTable")));
+    QVERIFY(header);
+    QVERIFY(cell);
+    QVERIFY(table);
+
+    auto *headerLabel = visualChildByObjectName(
+        header, QStringLiteral("figmaHeader_cell_0_label"));
+    auto *headerSeparator = visualChildByObjectName(
+        header, QStringLiteral("figmaHeader_separator"));
+    auto *cellDivider = visualChildByObjectName(
+        cell, QStringLiteral("figmaCell_divider"));
+    auto *cellContent = visualChildByObjectName(
+        cell, QStringLiteral("figmaCell_content"));
+    auto *cellLabel = visualChildByObjectName(
+        cell, QStringLiteral("figmaCell_label"));
+    auto *tableFrame = visualChildByObjectName(
+        table, QStringLiteral("figmaTable_frame"));
+    QVERIFY(headerLabel);
+    QVERIFY(headerSeparator);
+    QVERIFY(cellDivider);
+    QVERIFY(cellContent);
+    QVERIFY(cellLabel);
+    QVERIFY(tableFrame);
+
+    const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
+        return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
+                      QSizeF(item->width(), item->height()));
+    };
+    const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
+        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+                     && qAbs(actual.y() - expected.y()) < 0.01
+                     && qAbs(actual.width() - expected.width()) < 0.01
+                     && qAbs(actual.height() - expected.height()) < 0.01,
+                 qPrintable(QStringLiteral("bounds actual=(%1,%2 %3x%4) expected=(%5,%6 %7x%8)")
+                                .arg(actual.x()).arg(actual.y())
+                                .arg(actual.width()).arg(actual.height())
+                                .arg(expected.x()).arg(expected.y())
+                                .arg(expected.width()).arg(expected.height())));
+    };
+
+    verifyBounds(boundsIn(headerLabel, header), QRectF(8.0, 6.0, 223.0, 12.0));
+    verifyBounds(boundsIn(headerSeparator, header), QRectF(0.0, 24.0, 717.0, 1.0));
+    verifyBounds(boundsIn(cellDivider, cell), QRectF(0.0, 0.0, 1.0, 24.0));
+    verifyBounds(boundsIn(cellContent, cell), QRectF(9.0, 5.5, 225.0, 13.0));
+    verifyBounds(boundsIn(cellLabel, cell), QRectF(9.0, 5.5, 225.0, 13.0));
+    verifyBounds(boundsIn(tableFrame, table), QRectF(0.0, 0.0, 528.0, 121.0));
+    QCOMPARE(headerLabel->property("stylePixelSize").toInt(), 12);
+    QCOMPARE(headerLabel->property("styleLineHeight").toInt(), 12);
+    QCOMPARE(cellLabel->property("stylePixelSize").toInt(), 13);
+    QCOMPARE(cellLabel->property("styleLineHeight").toInt(), 13);
+
+    QQuickWindow captureWindow;
+    captureWindow.setColor(Qt::transparent);
+    captureWindow.resize(528, 121);
+    table->setParentItem(captureWindow.contentItem());
+    table->setPosition(QPointF(0.0, 0.0));
+    table->setSize(QSizeF(528.0, 121.0));
+    table->setOpacity(1.0);
+    captureWindow.show();
+    QCoreApplication::processEvents();
+
+    const QSharedPointer<QQuickItemGrabResult> grabResult = table->grabToImage(QSize(528, 121));
+    QVERIFY(grabResult);
+    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    const QImage captured = grabResult->image().convertToFormat(QImage::Format_RGBA8888);
+    QCOMPARE(captured.size(), QSize(528, 121));
+
+    const auto colorMatches = [](const QColor &actual, const QColor &expected) {
+        return qAbs(actual.red() - expected.red()) <= 1
+            && qAbs(actual.green() - expected.green()) <= 1
+            && qAbs(actual.blue() - expected.blue()) <= 1
+            && qAbs(actual.alpha() - expected.alpha()) <= 1;
+    };
+    const QColor panel10(QStringLiteral("#282828"));
+    const QColor tableBackground(QStringLiteral("#1e1e1e"));
+    QVERIFY(colorMatches(captured.pixelColor(0, 0), panel10));
+    QVERIFY(colorMatches(captured.pixelColor(527, 120), panel10));
+    QVERIFY(colorMatches(captured.pixelColor(100, 24), panel10));
+    QVERIFY(colorMatches(captured.pixelColor(176, 30), panel10));
+    QVERIFY(colorMatches(captured.pixelColor(352, 30), panel10));
+    QVERIFY(colorMatches(captured.pixelColor(100, 30), tableBackground));
+
+    const QString capturePath = qEnvironmentVariable("LVRS_TABLE_CAPTURE_PATH");
+    if (!capturePath.isEmpty())
+        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+}
+
+void ImportApiTests::table_spreadsheet_api_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+
+    property int selectionSignalCount: 0
+    property int sortedSignalCount: 0
+    property bool aliasesReady: false
+    property bool addressReady: false
+    property bool selectionReady: false
+    property bool rangeReady: false
+    property bool pasteReady: false
+    property bool pasteUndoReady: false
+    property bool validationReady: false
+    property bool sortingReady: false
+    property bool sortUndoReady: false
+    property bool navigationReady: false
+    property bool tsvReady: false
+    property bool blankSortReady: false
+    property string rangeDiagnostics: ""
+
+    LV.Table {
+        id: sheet
+        visible: false
+        structureControlsVisible: false
+        editable: true
+        columns: [
+            { label: "Name", type: "string" },
+            { label: "Count", type: "int" },
+            { label: "Enabled", type: "bool" }
+        ]
+        model: [
+            [{ value: "Beta" }, { value: 2 }, { value: true }],
+            [{ value: "Alpha" }, { value: 10 }, { value: false }],
+            [{ value: "Gamma" }, { value: 5 }, { value: true }]
+        ]
+
+        onSelectionChanged: function(range) {
+            root.selectionSignalCount += 1
+        }
+        onRowsSorted: function(columnIndex, sortOrder) {
+            if (columnIndex === 1 && sortOrder === Qt.DescendingOrder)
+                root.sortedSignalCount += 1
+        }
+    }
+
+    LV.Table {
+        id: blankSheet
+        visible: false
+        columns: [
+            { label: "Name", type: "string" },
+            { label: "Count", type: "int" }
+        ]
+        model: [
+            [{ value: "Zed" }, { value: 2 }],
+            [{ value: "Blank" }, { value: null }],
+            [{ value: "Alpha" }, { value: 10 }]
+        ]
+    }
+
+    function runContract() {
+        aliasesReady = sheet.columns === sheet.headerCellItems
+            && sheet.model === sheet.rows
+            && sheet.editable === sheet.inputable
+            && sheet.rowCount === 3
+            && sheet.columnCount === 3
+            && sheet.headerCount === 3
+            && sheet.sortingAvailable
+
+        const aa12 = sheet.cellCoordinates("AA12")
+        const invalid = sheet.cellCoordinates("12AA")
+        addressReady = sheet.columnName(0) === "A"
+            && sheet.columnName(25) === "Z"
+            && sheet.columnName(26) === "AA"
+            && sheet.cellReference(0, 0) === "A1"
+            && sheet.cellReference(11, 26) === "AA12"
+            && aa12.valid
+            && aa12.rowIndex === 11
+            && aa12.columnIndex === 26
+            && !invalid.valid
+
+        const selectedCell = sheet.selectCell(1, 1)
+        selectionReady = selectedCell
+            && sheet.hasSelection
+            && sheet.currentRow === 1
+            && sheet.currentColumn === 1
+            && sheet.currentCell.address === "B2"
+            && sheet.selectedRange.startRow === 1
+            && sheet.selectedRange.startColumn === 1
+            && sheet.selectedCellCount === 1
+            && sheet.isCellSelected(1, 1)
+            && !sheet.isCellSelected(0, 0)
+
+        const selectedRange = sheet.selectRange(0, 0, 1, 1)
+        const rangeValues = sheet.selectionValues()
+        const descriptors = sheet.selectedCellDescriptors()
+        rangeDiagnostics = JSON.stringify({
+            selectedRange: sheet.selectedRange,
+            selectedCellCount: sheet.selectedCellCount,
+            rangeValues: rangeValues,
+            descriptors: descriptors,
+            tsv: sheet.selectionAsTsv()
+        })
+        rangeReady = selectedRange
+            && sheet.selectedCellCount === 4
+            && rangeValues.length === 2
+            && rangeValues[0][0] === "Beta"
+            && rangeValues[0][1] === 2
+            && rangeValues[1][0] === "Alpha"
+            && rangeValues[1][1] === 10
+            && descriptors.length === 4
+            && descriptors[0].address === "A1"
+            && descriptors[3].address === "B2"
+            && sheet.selectionAsTsv() === "Beta\t2\nAlpha\t10"
+
+        const quotedValues = [["A\tB", "C\"D"], ["E\nF", ""]]
+        const quotedTsv = sheet.valuesAsTsv(quotedValues)
+        const parsedQuoted = sheet.parseTsv(quotedTsv)
+        tsvReady = quotedTsv === "\"A\tB\"\t\"C\"\"D\"\n\"E\nF\"\t"
+            && sheet.valuesAsTsv(["One", 2]) === "One\t2"
+            && sheet.matrixDimensions(["One", 2]).rowCount === 1
+            && sheet.matrixDimensions(["One", 2]).columnCount === 2
+            && parsedQuoted.length === 2
+            && parsedQuoted[0].length === 2
+            && parsedQuoted[0][0] === "A\tB"
+            && parsedQuoted[0][1] === "C\"D"
+            && parsedQuoted[1][0] === "E\nF"
+            && parsedQuoted[1][1] === ""
+
+        const depthBeforePaste = sheet.undoDepth
+        pasteReady = sheet.pasteTsv(1, 0, "Delta\t7\ttrue\nEpsilon\t8\tfalse")
+            && sheet.undoDepth === depthBeforePaste + 1
+            && sheet.cellRawValue(1, 0) === "Delta"
+            && sheet.cellRawValue(1, 1) === 7
+            && sheet.cellRawValue(1, 2) === true
+            && sheet.cellRawValue(2, 0) === "Epsilon"
+            && sheet.cellRawValue(2, 1) === 8
+            && sheet.cellRawValue(2, 2) === false
+            && sheet.selectedRange.startRow === 1
+            && sheet.selectedRange.endRow === 2
+            && sheet.selectedRange.startColumn === 0
+            && sheet.selectedRange.endColumn === 2
+
+        pasteUndoReady = sheet.undo()
+            && sheet.cellRawValue(1, 0) === "Alpha"
+            && sheet.cellRawValue(2, 0) === "Gamma"
+            && sheet.redo()
+            && sheet.cellRawValue(1, 0) === "Delta"
+            && sheet.cellRawValue(2, 0) === "Epsilon"
+
+        const depthBeforeReject = sheet.undoDepth
+        validationReady = !sheet.setRangeValues(0, 1, [["not-an-int"]])
+            && sheet.cellRawValue(0, 1) === 2
+            && sheet.undoDepth === depthBeforeReject
+            && !sheet.pasteTsv(2, 2, "true\textra")
+
+        const depthBeforeSort = sheet.undoDepth
+        sortingReady = sheet.sortByColumn(1, Qt.DescendingOrder)
+            && sheet.sortColumn === 1
+            && sheet.sortOrder === Qt.DescendingOrder
+            && sheet.undoDepth === depthBeforeSort + 1
+            && sheet.cellRawValue(0, 0) === "Epsilon"
+            && sheet.cellRawValue(0, 1) === 8
+            && sheet.cellRawValue(1, 0) === "Delta"
+            && sheet.cellRawValue(2, 0) === "Beta"
+            && root.sortedSignalCount === 1
+
+        sortUndoReady = sheet.undo()
+            && sheet.cellRawValue(0, 0) === "Beta"
+            && sheet.cellRawValue(1, 0) === "Delta"
+            && sheet.cellRawValue(2, 0) === "Epsilon"
+
+        blankSortReady = blankSheet.sortDescending(1)
+            && blankSheet.cellRawValue(0, 0) === "Alpha"
+            && blankSheet.cellRawValue(1, 0) === "Zed"
+            && blankSheet.cellRawValue(2, 0) === "Blank"
+
+        sheet.selectColumn(2)
+        const columnSelectionReady = sheet.selectedCellCount === 3
+        sheet.selectRow(0)
+        const rowSelectionReady = sheet.selectedCellCount === 3
+        sheet.selectAll()
+        const allSelectionReady = sheet.selectedCellCount === 9
+        sheet.selectCell(0, 0)
+        navigationReady = sheet.moveCurrentCell(1, 1, false)
+            && sheet.currentCell.address === "B2"
+            && sheet.selectedCellCount === 1
+            && columnSelectionReady
+            && rowSelectionReady
+            && allSelectionReady
+
+        sheet.clearSelection()
+        navigationReady = navigationReady
+            && !sheet.hasSelection
+            && sheet.currentRow === -1
+            && sheet.currentColumn === -1
+            && root.selectionSignalCount >= 7
+    }
+
+    Component.onCompleted: Qt.callLater(runContract)
+
+    property bool spreadsheetContractReady:
+        aliasesReady
+        && addressReady
+        && selectionReady
+        && rangeReady
+        && pasteReady
+        && pasteUndoReady
+        && validationReady
+        && sortingReady
+        && sortUndoReady
+        && navigationReady
+        && tsvReady
+        && blankSortReady
+
+    property string spreadsheetDiagnostics: JSON.stringify({
+        aliasesReady: aliasesReady,
+        addressReady: addressReady,
+        selectionReady: selectionReady,
+        rangeReady: rangeReady,
+        pasteReady: pasteReady,
+        pasteUndoReady: pasteUndoReady,
+        validationReady: validationReady,
+        sortingReady: sortingReady,
+        sortUndoReady: sortUndoReady,
+        navigationReady: navigationReady,
+        tsvReady: tsvReady,
+        blankSortReady: blankSortReady,
+        counts: [sheet.rowCount, sheet.columnCount, sheet.headerCount],
+        current: [sheet.currentRow, sheet.currentColumn],
+        selectedRange: sheet.selectedRange,
+        rangeDiagnostics: rangeDiagnostics,
+        undoDepth: sheet.undoDepth,
+        rows: sheet.rows
+    })
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QTRY_VERIFY2(root->property("spreadsheetContractReady").toBool(),
+                 qPrintable(root->property("spreadsheetDiagnostics").toString()));
+}
+
 void ImportApiTests::table_cell_item_contract_loads()
 {
     QQmlEngine engine;
@@ -6798,6 +7886,7 @@ Item {
 
     LV.TableCellItem {
         id: singleCell
+        objectName: "singleCell"
         visible: false
         itemData: ({
             label: "Renderer",
@@ -6910,13 +7999,13 @@ Item {
         && row.cellText(0) === "Renderer"
         && row.cellText(1) === "Active"
         && row.cellText(2) === "Core"
-        && row.dividerColor === LV.Theme.panelBackground03
+        && row.dividerColor === LV.Theme.panelBackground10
         && rowEditedColumn === 1
         && rowEditedValue === "Active v2"
         && rowSubmittedColumn === 2
         && rowSubmittedValue === "Core v2"
         && table.resolvedHeaderCount === 3
-        && table.rowDividerColor === LV.Theme.panelBackground03
+        && table.rowDividerColor === LV.Theme.panelBackground10
         && table.headerSeparatorColor === LV.Theme.panelBackground10
         && table.rowInputable(({ inputable: true })) === true
         && table.rowInputable(({ })) === false
@@ -6932,6 +8021,17 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QVERIFY(root->property("tableCellContractReady").toBool());
+
+    QTRY_VERIFY(root->findChild<QObject *>(QStringLiteral("singleCell_inputField"),
+                                          Qt::FindChildrenRecursively));
+    QObject *cellInput = root->findChild<QObject *>(QStringLiteral("singleCell_inputField"),
+                                                    Qt::FindChildrenRecursively);
+    QCOMPARE(cellInput->property("fieldMinHeight").toInt(), 13);
+    QCOMPARE(cellInput->property("centeredTextHeight").toInt(), 13);
+    QObject *cellNativeInput = cellInput->property("inputItem").value<QObject *>();
+    QVERIFY(cellNativeInput);
+    QCOMPARE(cellNativeInput->property("height").toReal(), 13.0);
+    QCOMPARE(cellNativeInput->property("font").value<QFont>().pixelSize(), 13);
 }
 
 void ImportApiTests::table_cell_merge_split_contract_loads()
@@ -7098,6 +8198,7 @@ Item {
         visible: false
         width: 320
         height: 140
+        structureControlsVisible: true
         headerColumns: ["A", "B"]
         rows: [
             [{ text: "A1" }, { text: "B1" }],
@@ -7877,6 +8978,7 @@ Item {
 
     LV.ListItem {
         id: editableItem
+        objectName: "editableItem"
         label: "Label"
         visible: false
         onInputEdited: function(text) {
@@ -7990,6 +9092,17 @@ Item {
     QVERIFY(root);
     QTRY_VERIFY2(root->property("contractReady").toBool(),
                  qPrintable(root->property("contractDebug").toString()));
+
+    QTRY_VERIFY(root->findChild<QObject *>(QStringLiteral("editableItem_inputField"),
+                                          Qt::FindChildrenRecursively));
+    QObject *listInput = root->findChild<QObject *>(QStringLiteral("editableItem_inputField"),
+                                                    Qt::FindChildrenRecursively);
+    QCOMPARE(listInput->property("fieldMinHeight").toInt(), 13);
+    QCOMPARE(listInput->property("centeredTextHeight").toInt(), 13);
+    QObject *listNativeInput = listInput->property("inputItem").value<QObject *>();
+    QVERIFY(listNativeInput);
+    QCOMPARE(listNativeInput->property("height").toReal(), 13.0);
+    QCOMPARE(listNativeInput->property("font").value<QFont>().pixelSize(), 13);
 
     auto *smallList = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaSmallList")));

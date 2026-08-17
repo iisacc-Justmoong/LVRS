@@ -78,7 +78,7 @@ Signals:
 
 ## ListItem Variants
 
-- `size: ListItem.Mini` is `170 x 22` on desktop and retains the existing `inputable`, `inputResult`, `inputEdited`, and `inputSubmitted` API.
+- `size: ListItem.Mini` is `170 x 22` on desktop and retains the existing `inputable`, `inputResult`, `inputEdited`, and `inputSubmitted` API. The inline editor uses a fixed Body `13 / 13` line box on desktop and mobile while the row geometry follows `@2x` scaling.
 - `size: ListItem.Detail` is `194 x 106` on desktop. It uses `12px SemiBold / 12px` title and date text, `11px Regular / 11px` metadata, `12/8` horizontal/vertical padding, and `8px` section gaps.
 - Detail data is exposed through `detail`, `dateText`, `folderLabel1`, `folderLabel2`, `tagLabel1`, and `tagLabel2`; its icon names default to `bookmarksbookmark`, `folder@14x14`, and `vcscurrentBranch`.
 - `separatorVisible` defaults to `false` because neither Figma variant contains a separator. Legacy separator color/size properties remain available for explicit opt-in.

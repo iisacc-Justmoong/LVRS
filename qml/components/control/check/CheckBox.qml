@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 AbstractButton {
@@ -11,8 +10,18 @@ AbstractButton {
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
     property int shapeStyle: shapeRoundRect
-    property int boxSize: Theme.iconSm
+    property int boxSize: Theme.scaleMetric(17)
+    property real framePadding: Theme.scaleRealMetric(0.5)
     property real boxRadius: boxSize * (3.5 / 17.0)
+    property bool useFigmaCheckedAssets: true
+    property url checkedAssetSourceEnabled: Theme.iconPath("checkboxCheckedEnabled")
+    property url checkedAssetSourceDisabled: Theme.iconPath("checkboxCheckedDisabled")
+    readonly property url resolvedCheckedAssetSource: control.enabled
+        ? control.checkedAssetSourceEnabled
+        : control.checkedAssetSourceDisabled
+    readonly property bool usingFigmaCheckedAsset: control.checked
+        && control.useFigmaCheckedAssets
+        && control.shapeStyle === control.shapeRoundRect
     property color checkColor: Theme.bodyColor
     property color checkedColor: Theme.accent
     property color uncheckedColor: Theme.bodyColor
@@ -75,15 +84,27 @@ AbstractButton {
 
     background: Item { }
 
-    contentItem: RowLayout {
-        spacing: control.text.length > 0 ? Theme.gap6 : Theme.gapNone
-        Layout.alignment: Qt.AlignVCenter
+    contentItem: Item {
+        id: contentLayout
+
+        property real spacing: control.text.length > 0 ? Theme.gap6 : Theme.gapNone
+        readonly property real labelWidth: label.visible ? Math.ceil(label.implicitWidth) : 0
+
+        implicitWidth: control.framePadding
+            + control.boxSize
+            + (label.visible ? spacing + labelWidth : 0)
+            + control.framePadding
+        implicitHeight: control.boxSize + control.framePadding * 2
 
         Rectangle {
+            id: indicator
+            objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
+            x: control.framePadding
+            y: control.framePadding
+            width: control.boxSize
+            height: control.boxSize
             implicitWidth: control.boxSize
             implicitHeight: control.boxSize
-            Layout.preferredWidth: control.boxSize
-            Layout.preferredHeight: control.boxSize
             radius: control.resolvedBoxRadius
             color: control.checked ? control.resolvedCheckedFillColor : control.resolvedUncheckedFillColor
             border.width: control.resolvedBoxBorderWidth
@@ -112,10 +133,23 @@ AbstractButton {
                 clip: true
             }
 
+            Image {
+                id: checkedAsset
+                objectName: control.objectName.length > 0 ? control.objectName + "_checkedAsset" : ""
+                anchors.fill: parent
+                visible: control.usingFigmaCheckedAsset
+                source: RenderQuality.resolveTextureSource(control.resolvedCheckedAssetSource)
+                sourceSize.width: Math.max(1, Math.ceil(control.boxSize * control.checkmarkRasterScale))
+                sourceSize.height: Math.max(1, Math.ceil(control.boxSize * control.checkmarkRasterScale))
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: RenderQuality.mipmapEnabled
+            }
+
             Canvas {
                 id: checkmarkCanvas
                 anchors.fill: parent
-                visible: control.checked
+                visible: control.checked && !control.usingFigmaCheckedAsset
                 objectName: control.objectName.length > 0 ? control.objectName + "_checkmarkCanvas" : ""
                 antialiasing: true
                 canvasSize: Qt.size(Math.max(1, Math.ceil(width * control.checkmarkRasterScale)),
@@ -150,11 +184,17 @@ AbstractButton {
         }
 
         Label {
+            id: label
+            objectName: control.objectName.length > 0 ? control.objectName + "_label" : ""
+            x: indicator.x + indicator.width + contentLayout.spacing
+            y: (contentLayout.height - height) / 2
+            width: visible ? contentLayout.labelWidth : 0
+            height: Theme.textBodyLineHeight
             style: body
             text: control.text
             color: control.enabled ? Theme.bodyColor : Theme.disabledColor
             visible: control.text.length > 0
-            Layout.alignment: Qt.AlignVCenter
+            verticalAlignment: Text.AlignVCenter
         }
     }
 

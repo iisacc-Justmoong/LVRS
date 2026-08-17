@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQuick.Effects
 import LVRS 1.0
 
 Controls.Switch {
@@ -9,13 +10,15 @@ Controls.Switch {
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
 
+    property bool state: checked
     property int shapeStyle: shapeRoundRect
     property int trackWidth: Theme.toggleTrackWidth
     property int trackHeight: Theme.controlHeightSm
     property int trackPadding: Theme.gap2
     property int knobSize: Theme.controlIndicatorSize
     property int transitionDuration: Theme.toggleTransitionDuration
-    property real trackCornerRadius: trackHeight / 2
+    property real trackCornerRadius: Theme.scaleRealMetric(20)
+    property real knobCornerRadius: knobSize / 2
 
     property color onColor: Theme.accent
     property color offColor: Theme.panelBackground12
@@ -24,8 +27,14 @@ Controls.Switch {
     property color offColorHover: Qt.lighter(offColor, 1.08)
     property color offColorPressed: Qt.darker(offColor, 1.12)
     property color disabledTrackColor: Theme.surfaceAlt
+    property bool trackShadowEnabled: true
     property color trackShadowColor: Theme.shadowStrong
+    property real trackShadowOpacity: 1.0
+    property real trackShadowBlur: Theme.scaleRealMetric(4)
+    property real trackShadowHorizontalOffset: 0
+    property real trackShadowVerticalOffset: Theme.scaleRealMetric(4)
     property color knobFillColor: Theme.textPrimary
+    // Compatibility metrics retained for consumers of the previous Canvas-backed knob.
     readonly property real knobSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
@@ -40,6 +49,16 @@ Controls.Switch {
                             : (control.hovered ? control.onColorHover : control.onColor))
             : (control.down ? control.offColorPressed
                             : (control.hovered ? control.offColorHover : control.offColor))
+
+    onStateChanged: {
+        if (checked !== state)
+            checked = state
+    }
+
+    onCheckedChanged: {
+        if (state !== checked)
+            state = checked
+    }
 
     function resolvedTrackRadius(rectWidth, rectHeight) {
         if (shapeStyle === shapeCylinder)
@@ -58,31 +77,49 @@ Controls.Switch {
     implicitHeight: Math.max(indicator.implicitHeight, contentItem.implicitHeight)
 
     indicator: Item {
+        objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
         implicitWidth: control.trackWidth
         implicitHeight: control.trackHeight
 
-        Rectangle {
-            anchors.fill: parent
-            anchors.topMargin: 1
-            radius: control.resolvedTrackRadius(width, height)
-            color: control.trackShadowColor
-            opacity: 0.3
+        MultiEffect {
+            id: trackShadowEffectItem
+            objectName: control.objectName.length > 0 ? control.objectName + "_trackShadowEffect" : ""
+            anchors.fill: track
+            z: -1
+            source: track
+            visible: control.trackShadowEnabled
+            autoPaddingEnabled: true
+            blurMax: Math.max(1, Math.ceil(control.trackShadowBlur))
+            shadowEnabled: control.trackShadowEnabled
+            shadowOpacity: control.trackShadowOpacity
+            shadowBlur: control.trackShadowBlur > 0 ? 1.0 : 0.0
+            shadowHorizontalOffset: control.trackShadowHorizontalOffset
+            shadowVerticalOffset: control.trackShadowVerticalOffset
+            shadowColor: control.trackShadowColor
         }
 
         Rectangle {
             id: track
+            objectName: control.objectName.length > 0 ? control.objectName + "_track" : ""
             anchors.fill: parent
             radius: control.resolvedTrackRadius(width, height)
             color: control.resolvedTrackColor
             antialiasing: true
         }
 
-        Item {
+        Rectangle {
             id: knob
+            objectName: control.objectName.length > 0 ? control.objectName + "_knob" : ""
             width: control.knobSize
             height: control.knobSize
             y: (track.height - height) / 2
             x: control.checked ? control.knobXOn : control.knobXOff
+            radius: Math.max(0,
+                             Math.min(control.knobCornerRadius,
+                                      Math.min(width, height) * 0.5))
+            color: control.knobFillColor
+            opacity: control.enabled ? 1.0 : 0.55
+            antialiasing: true
 
             Behavior on x {
                 NumberAnimation {
@@ -90,45 +127,11 @@ Controls.Switch {
                     easing.type: Easing.OutCubic
                 }
             }
-
-            Canvas {
-                id: knobCanvas
-                anchors.fill: parent
-                opacity: control.enabled ? 1.0 : 0.55
-                objectName: control.objectName.length > 0 ? control.objectName + "_knobCanvas" : ""
-                antialiasing: true
-                canvasSize: Qt.size(Math.max(1, Math.ceil(width * control.knobRasterScale)),
-                                    Math.max(1, Math.ceil(height * control.knobRasterScale)))
-                readonly property real rasterScaleX: width > 0 ? canvasSize.width / width : 1.0
-                readonly property real rasterScaleY: height > 0 ? canvasSize.height / height : 1.0
-
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height)
-
-                    ctx.save()
-                    ctx.scale(knobCanvas.rasterScaleX, knobCanvas.rasterScaleY)
-                    const radius = Math.max(0, Math.min(width, height) * 0.5 - 0.75)
-                    ctx.beginPath()
-                    ctx.arc(width * 0.5, height * 0.5, radius, 0, Math.PI * 2, false)
-                    ctx.fillStyle = control.knobFillColor
-                    ctx.fill()
-                    ctx.restore()
-                }
-
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-                onCanvasSizeChanged: requestPaint()
-            }
         }
     }
 
-    onKnobFillColorChanged: knobCanvas.requestPaint()
-    onKnobRasterScaleChanged: knobCanvas.requestPaint()
-
-    Component.onCompleted: knobCanvas.requestPaint()
-
     contentItem: Label {
+        objectName: control.objectName.length > 0 ? control.objectName + "_label" : ""
         style: body
         text: control.text
         color: control.enabled ? Theme.textPrimary : Theme.textOctonary

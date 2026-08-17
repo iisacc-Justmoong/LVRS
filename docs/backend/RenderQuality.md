@@ -98,7 +98,7 @@ If `tier=-1`, the automatically detected device tier is applied. Stock LVRS shel
 - `qml/Window.qml`
 - major icon/image components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
 - snapshot-driven control icons (`Stepper`, `InputField` search icon) via supersampled `Image.sourceSize`
-- `Canvas`-based control icons (`CheckBox`, `ToggleSwitch`) via supersampled `canvasSize` with per-axis ceil rounding
+- `Canvas`-based control icons (`CheckBox`) via supersampled `canvasSize` with per-axis ceil rounding; `ToggleSwitch` uses a scene-graph vector knob instead of a raster canvas
 - `SvgManager.icon(...)` uses an `18 x 18` logical default when callers omit `logicalSize`; raster output remains square while SVG content keeps its aspect ratio.
 
 Applied behavior:

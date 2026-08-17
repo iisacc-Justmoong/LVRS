@@ -14,6 +14,11 @@ Item {
     property bool clipContent: true
     property int textStyle: body
     property bool inputable: false
+    property bool selected: false
+    property bool current: false
+    property color selectionColor: Theme.accentTint
+    property color currentBorderColor: Theme.accent
+    property real currentBorderWidth: Theme.strokeThin
     property string inputResult: control.resolvedText
     property string valueType: "string"
     property var valueValidator: null
@@ -148,7 +153,19 @@ Item {
     clip: resolvedClipContent
 
     Rectangle {
+        id: selectionNode
+        objectName: control.objectName.length > 0 ? control.objectName + "_selection" : ""
+        anchors.fill: parent
+        visible: control.selected || control.current
+        color: control.selected ? control.selectionColor : "transparent"
+        border.color: control.current ? control.currentBorderColor : "transparent"
+        border.width: control.current ? control.currentBorderWidth : 0
+        antialiasing: false
+    }
+
+    Rectangle {
         id: dividerNode
+        objectName: control.objectName.length > 0 ? control.objectName + "_divider" : ""
         visible: control.resolvedShowDivider
         width: Theme.strokeThin
         height: parent.height
@@ -159,14 +176,18 @@ Item {
     }
 
     Item {
+        id: contentNode
+        objectName: control.objectName.length > 0 ? control.objectName + "_content" : ""
         anchors.left: dividerNode.visible ? dividerNode.right : parent.left
         anchors.leftMargin: dividerNode.visible ? control.resolvedContentSpacing : 0
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: labelNode.implicitHeight
+        anchors.alignWhenCentered: false
+        height: labelNode.styleLineHeight
 
         Label {
             id: labelNode
+            objectName: control.objectName.length > 0 ? control.objectName + "_label" : ""
             anchors.fill: parent
             style: control.resolvedTextStyle
             text: control.inputResult
@@ -177,6 +198,7 @@ Item {
 
         Loader {
             id: overlayInputLoader
+            objectName: control.objectName.length > 0 ? control.objectName + "_editor" : ""
             anchors.fill: parent
             active: control.inputable
             visible: control.inputable
@@ -190,8 +212,8 @@ Item {
                     backgroundColorDisabled: "transparent"
                     placeholderText: ""
                     clearButtonVisible: false
-                    fieldMinHeight: Theme.scaleMetric(16)
-                    centeredTextHeight: Theme.scaleTextMetric(16)
+                    fieldMinHeight: Theme.textBodyLineHeight
+                    centeredTextHeight: Theme.textBodyLineHeight
                     insetHorizontal: 0
                     insetVertical: 0
                     sideSpacing: 0
@@ -219,8 +241,10 @@ Item {
             }
 
             onLoaded: {
-                if (item)
+                if (item) {
+                    item.objectName = control.objectName.length > 0 ? control.objectName + "_inputField" : ""
                     item.text = control.inputResult
+                }
             }
         }
     }
@@ -264,4 +288,4 @@ Item {
 
 // API usage (external):
 // import LVRS 1.0 as LV
-// LV.TableCellItem { itemData: ({ text: "Text" }); inputable: true; valueType: "string" }
+// LV.TableCellItem { itemData: ({ text: "Text" }); selected: true; inputable: true; valueType: "string" }

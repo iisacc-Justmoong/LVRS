@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import LVRS 1.0
 
 AbstractButton {
@@ -14,6 +13,8 @@ AbstractButton {
 
     property int indicatorSize: Theme.controlIndicatorSize
     property int dotSize: Theme.gap8
+    readonly property real indicatorRadius: indicatorSize / 2
+    readonly property real dotRadius: dotSize / 2
 
     property color onColor: Theme.accent
     property color offColor: Theme.textPrimary
@@ -22,16 +23,9 @@ AbstractButton {
     property color dotColor: Theme.textPrimary
     property color dotColorDisabled: Theme.textSeptenary
 
-    readonly property color indicatorColor: {
-        const baseColor = control.checked ? control.onColor : control.offColor
-        if (!control.enabled)
-            return control.checked ? control.onColorDisabled : control.offColorDisabled
-        if (control.down)
-            return Qt.darker(baseColor, 1.2)
-        if (control.hovered)
-            return Qt.darker(baseColor, 1.08)
-        return baseColor
-    }
+    readonly property color indicatorColor: control.checked
+        ? (control.enabled ? control.onColor : control.onColorDisabled)
+        : (control.enabled ? control.offColor : control.offColorDisabled)
     readonly property color indicatorDotColor: control.enabled ? control.dotColor : control.dotColorDisabled
 
     onStateChanged: {
@@ -68,23 +62,35 @@ AbstractButton {
 
     background: Item { }
 
-    contentItem: RowLayout {
-        spacing: control.text.length > 0 ? Theme.gap8 : Theme.gapNone
-        Layout.alignment: Qt.AlignVCenter
+    contentItem: Item {
+        id: contentLayout
+
+        property real spacing: control.text.length > 0 ? Theme.gap8 : Theme.gapNone
+        readonly property real labelWidth: label.visible ? Math.ceil(label.implicitWidth) : 0
+
+        implicitWidth: control.indicatorSize
+            + (label.visible ? spacing + labelWidth : 0)
+        implicitHeight: Math.max(control.indicatorSize, label.visible ? label.height : 0)
 
         Rectangle {
+            id: indicator
+            objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
+            x: 0
+            y: (contentLayout.height - height) / 2
+            width: control.indicatorSize
+            height: control.indicatorSize
             implicitWidth: control.indicatorSize
             implicitHeight: control.indicatorSize
-            Layout.preferredWidth: control.indicatorSize
-            Layout.preferredHeight: control.indicatorSize
-            radius: width / 2
+            radius: control.indicatorRadius
             color: control.indicatorColor
             antialiasing: true
 
             Rectangle {
+                id: dot
+                objectName: control.objectName.length > 0 ? control.objectName + "_dot" : ""
                 width: control.dotSize
                 height: control.dotSize
-                radius: width / 2
+                radius: control.dotRadius
                 color: control.indicatorDotColor
                 anchors.centerIn: parent
                 visible: control.checked
@@ -93,11 +99,17 @@ AbstractButton {
         }
 
         Label {
+            id: label
+            objectName: control.objectName.length > 0 ? control.objectName + "_label" : ""
+            x: indicator.x + indicator.width + contentLayout.spacing
+            y: (contentLayout.height - height) / 2
+            width: visible ? contentLayout.labelWidth : 0
+            height: Theme.textBodyLineHeight
             style: body
             text: control.text
             color: control.enabled ? Theme.textPrimary : Theme.textOctonary
             visible: control.text.length > 0
-            Layout.alignment: Qt.AlignVCenter
+            verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }
     }

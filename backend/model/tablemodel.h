@@ -40,6 +40,7 @@ class TableModel : public QObject
     Q_PROPERTY(bool rowsModelBacked READ rowsModelBacked NOTIFY rowsChanged)
     Q_PROPERTY(bool cellEditingAvailable READ cellEditingAvailable NOTIFY rowsChanged)
     Q_PROPERTY(bool structureMutationAvailable READ structureMutationAvailable NOTIFY rowsChanged)
+    Q_PROPERTY(bool sortingAvailable READ sortingAvailable NOTIFY rowsChanged)
     Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
     Q_PROPERTY(ModelUndoStack *undoStack READ undoStack CONSTANT)
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStackChanged)
@@ -100,6 +101,7 @@ public:
     bool rowsModelBacked() const;
     bool cellEditingAvailable() const;
     bool structureMutationAvailable() const;
+    bool sortingAvailable() const;
     int revision() const;
     ModelUndoStack *undoStack();
     bool canUndo() const;
@@ -123,6 +125,14 @@ public:
     Q_INVOKABLE bool cellValueAccepted(int rowIndex, int columnIndex, const QVariant &value) const;
     Q_INVOKABLE QString cellText(int rowIndex, int columnIndex) const;
     Q_INVOKABLE bool setCellValue(int rowIndex, int columnIndex, const QVariant &value);
+    Q_INVOKABLE QVariantList rangeValues(int startRow,
+                                         int startColumn,
+                                         int endRow,
+                                         int endColumn) const;
+    Q_INVOKABLE bool setRangeValues(int startRow,
+                                    int startColumn,
+                                    const QVariant &values);
+    Q_INVOKABLE bool sortRows(int columnIndex, int sortOrder);
     Q_INVOKABLE int cellRowSpan(int rowIndex, int columnIndex) const;
     Q_INVOKABLE int cellColumnSpan(int rowIndex, int columnIndex) const;
     Q_INVOKABLE QVariantMap mergeAnchorForCell(int rowIndex, int columnIndex) const;
