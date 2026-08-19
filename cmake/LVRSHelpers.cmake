@@ -1016,6 +1016,32 @@ function(_lvrs_internal_bootstrap_osx_sysroot_for_platform platform out_var)
     set(${out_var} "${_lvrs_sysroot}" PARENT_SCOPE)
 endfunction()
 
+function(_lvrs_internal_bootstrap_osx_deployment_target_for_platform platform out_var)
+    string(TOUPPER "${platform}" _lvrs_upper)
+    set(_lvrs_override_var "LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_${_lvrs_upper}")
+    set(_lvrs_deployment_target "")
+
+    if(DEFINED ${_lvrs_override_var} AND NOT "${${_lvrs_override_var}}" STREQUAL "")
+        set(_lvrs_deployment_target "${${_lvrs_override_var}}")
+    elseif(DEFINED ENV{${_lvrs_override_var}} AND NOT "$ENV{${_lvrs_override_var}}" STREQUAL "")
+        set(_lvrs_deployment_target "$ENV{${_lvrs_override_var}}")
+    elseif(DEFINED LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET
+           AND NOT LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET STREQUAL "")
+        set(_lvrs_deployment_target "${LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET}")
+    elseif(DEFINED ENV{LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET}
+           AND NOT "$ENV{LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
+        set(_lvrs_deployment_target "$ENV{LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET}")
+    elseif(platform STREQUAL "macos"
+           AND DEFINED CMAKE_OSX_DEPLOYMENT_TARGET
+           AND NOT CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL "")
+        # A host macOS target is safe to inherit only for the macOS child.
+        # iOS must opt in explicitly because its version scale is independent.
+        set(_lvrs_deployment_target "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+
+    set(${out_var} "${_lvrs_deployment_target}" PARENT_SCOPE)
+endfunction()
+
 function(_lvrs_internal_bootstrap_android_abi_for_platform platform out_var)
     if(NOT platform STREQUAL "android")
         set(${out_var} "" PARENT_SCOPE)
@@ -1388,6 +1414,10 @@ function(lvrs_create_framework_bootstrap_targets)
 
         _lvrs_internal_bootstrap_system_name_for_platform("${_lvrs_platform}" _lvrs_system_name)
         _lvrs_internal_bootstrap_osx_sysroot_for_platform("${_lvrs_platform}" _lvrs_osx_sysroot)
+        _lvrs_internal_bootstrap_osx_deployment_target_for_platform(
+            "${_lvrs_platform}"
+            _lvrs_osx_deployment_target
+        )
         if(_lvrs_platform STREQUAL "ios")
             set(_lvrs_ios_sysroot_overridden FALSE)
             if(DEFINED LVRS_BOOTSTRAP_OSX_SYSROOT_IOS AND NOT LVRS_BOOTSTRAP_OSX_SYSROOT_IOS STREQUAL "")
@@ -1471,6 +1501,7 @@ function(lvrs_create_framework_bootstrap_targets)
                 "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
                 "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
+                "-DLVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET=${_lvrs_osx_deployment_target}"
                 "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_platform_android_abi}"
                 "-DLVRS_BOOTSTRAP_ANDROID_SDK_ROOT=${_lvrs_platform_android_sdk_root}"
                 "-DLVRS_BOOTSTRAP_ANDROID_NDK=${_lvrs_platform_android_ndk}"
@@ -1590,6 +1621,10 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
 
         _lvrs_internal_bootstrap_system_name_for_platform("${_lvrs_platform}" _lvrs_system_name)
         _lvrs_internal_bootstrap_osx_sysroot_for_platform("${_lvrs_platform}" _lvrs_osx_sysroot)
+        _lvrs_internal_bootstrap_osx_deployment_target_for_platform(
+            "${_lvrs_platform}"
+            _lvrs_osx_deployment_target
+        )
         _lvrs_internal_bootstrap_android_abi_for_platform("${_lvrs_platform}" _lvrs_android_abi)
         _lvrs_internal_detect_qt_prefix_for_platform("${_lvrs_platform}" _lvrs_qt_prefix)
         if(_lvrs_qt_prefix STREQUAL "")
@@ -1802,6 +1837,7 @@ function(_lvrs_internal_create_platform_bootstrap_targets target)
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"
                 "-DLVRS_BOOTSTRAP_QT_HOST_PREFIX=${_lvrs_qt_host_prefix}"
                 "-DLVRS_BOOTSTRAP_OSX_SYSROOT=${_lvrs_osx_sysroot}"
+                "-DLVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET=${_lvrs_osx_deployment_target}"
                 "-DLVRS_BOOTSTRAP_ANDROID_ABI=${_lvrs_platform_android_abi}"
                 "-DLVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT=${_lvrs_platform_generate_ios_xcode_project}"
                 "-DLVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT=${_lvrs_platform_generate_android_studio_project}"

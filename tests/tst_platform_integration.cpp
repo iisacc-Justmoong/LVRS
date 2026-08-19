@@ -1,5 +1,7 @@
 #include <QtTest>
 
+#include <QCursor>
+#include <QMouseEvent>
 #include <QScopedPointer>
 #include <QQmlEngine>
 #include <QWindow>
@@ -23,6 +25,7 @@ private slots:
     void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
     void mobile_theme_scale_contract();
+    void native_window_interaction_resizes_manually_when_system_resize_is_unavailable();
     void native_window_interaction_validates_system_resize_edges();
     void native_window_style_mobile_coverage_flags();
 };
@@ -905,6 +908,83 @@ void PlatformIntegrationTests::native_window_interaction_validates_system_resize
     QWindow window;
     QVERIFY(!interaction.requestSystemResize(&window, 0));
     QVERIFY(!interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::RightEdge)));
+}
+
+void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_system_resize_is_unavailable()
+{
+#if defined(Q_OS_MACOS)
+    QWindow window;
+    window.setGeometry(100, 100, 480, 360);
+    window.setMinimumSize(QSize(360, 240));
+    window.show();
+    QTRY_VERIFY(window.isVisible());
+
+    const QRect initialGeometry = window.geometry();
+    const QPoint initialPointer(400, 300);
+    QCursor::setPos(QPoint(20, 20));
+
+    NativeWindowInteraction interaction;
+    QVERIFY(interaction.requestSystemResizeAt(&window,
+                                              int(Qt::RightEdge | Qt::BottomEdge),
+                                              initialPointer));
+
+    const QPoint resizePointer = initialPointer + QPoint(120, 90);
+    QMouseEvent resizeMove(QEvent::MouseMove,
+                           QPointF(window.width() - 1, window.height() - 1),
+                           QPointF(resizePointer),
+                           Qt::NoButton,
+                           Qt::LeftButton,
+                           Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &resizeMove);
+
+    QCOMPARE(window.geometry().topLeft(), initialGeometry.topLeft());
+    QCOMPARE(window.size(), initialGeometry.size() + QSize(120, 90));
+
+    QMouseEvent resizeRelease(QEvent::MouseButtonRelease,
+                              QPointF(window.width() - 1, window.height() - 1),
+                              QPointF(resizePointer),
+                              Qt::LeftButton,
+                              Qt::NoButton,
+                              Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &resizeRelease);
+
+    const QRect releasedGeometry = window.geometry();
+    QMouseEvent postReleaseMove(QEvent::MouseMove,
+                                QPointF(window.width() - 1, window.height() - 1),
+                                QPointF(resizePointer + QPoint(40, 30)),
+                                Qt::NoButton,
+                                Qt::LeftButton,
+                                Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &postReleaseMove);
+    QCOMPARE(window.geometry(), releasedGeometry);
+
+    window.setGeometry(initialGeometry);
+    QCursor::setPos(QPoint(400, 300));
+    const QPoint constrainedInitialPointer = QCursor::pos();
+    QVERIFY(interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::TopEdge)));
+
+    const QPoint constrainedPointer = constrainedInitialPointer + QPoint(200, 180);
+    QMouseEvent constrainedMove(QEvent::MouseMove,
+                                QPointF(0, 0),
+                                QPointF(constrainedPointer),
+                                Qt::NoButton,
+                                Qt::LeftButton,
+                                Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &constrainedMove);
+
+    QCOMPARE(window.geometry().topLeft(), initialGeometry.topLeft() + QPoint(120, 120));
+    QCOMPARE(window.size(), QSize(360, 240));
+
+    QMouseEvent constrainedRelease(QEvent::MouseButtonRelease,
+                                   QPointF(0, 0),
+                                   QPointF(constrainedPointer),
+                                   Qt::LeftButton,
+                                   Qt::NoButton,
+                                   Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &constrainedRelease);
+#else
+    QSKIP("The manual fallback is specific to the Cocoa platform gap.");
+#endif
 }
 
 QTEST_MAIN(PlatformIntegrationTests)

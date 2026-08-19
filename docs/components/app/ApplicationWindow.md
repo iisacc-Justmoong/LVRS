@@ -178,7 +178,7 @@ Signals:
 ## Behavior Notes
 
 - Adaptive layout transitions are guarded to avoid invalid one-step transitions and resize oscillation.
-- Solid desktop chrome uses the same system move and eight-region system resize layer as `LV.Window`. Set `windowDragHandleEnabled` or `windowResizeHandlesEnabled` to `false` when application-owned hit regions call the request methods directly; use `windowDragExclusionItems` to keep title-bar controls interactive.
+- Solid desktop chrome uses the same system move and eight-region native-first resize layer as `LV.Window`, including the min/max-constrained macOS fallback when Qt Cocoa rejects system resize. Set `windowDragHandleEnabled` or `windowResizeHandlesEnabled` to `false` when application-owned hit regions call the request methods directly; use `windowDragExclusionItems` to keep title-bar controls interactive.
 - `windowMoveAttempted(started)` and `windowResizeAttempted(edges, started)` report whether the platform accepted each pointer-initiated request.
 - Adaptive scaffold metrics now come from `Platform.runtimeProfile()` on a per-OS basis rather than being inferred from a coarse mobile/desktop family split.
 - `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling backend user-event mirroring does not force global listeners.

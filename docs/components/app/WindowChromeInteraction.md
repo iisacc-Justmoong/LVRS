@@ -21,7 +21,8 @@ Location: `qml/WindowChromeInteraction.qml`
 - The move handle is disabled for minimized and fullscreen windows.
 - Resize handles are enabled only for a visible, windowed target.
 - Corner handles sit above edge handles, and all resize handles sit above the move handle.
-- Failed system requests reject the `MouseArea` press so an item underneath can still process it.
+- A resize press maps its `MouseArea` position to global coordinates before requesting the operation. This keeps the macOS fallback anchored to the event that started it even when a remote, tablet, or synthesized input source has not synchronized `QCursor::pos()`.
+- A resize press stays accepted when either native resize or the macOS manual fallback starts. Requests rejected by both paths release the `MouseArea` press so an item underneath can still process it.
 - Exclusion coordinates are mapped across the target window item tree, so controls may live in scaled or nested content.
 
 ## Direct use

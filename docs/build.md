@@ -139,6 +139,8 @@ ctest --test-dir build --output-on-failure
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.
 - `LVRS_ENABLE_FRAMEWORK_BOOTSTRAP_TARGETS` (`ON`): generate `bootstrap_lvrs_*` framework multi-platform targets.
 - `LVRS_BOOTSTRAP_INSTALL_ROOT` (`<build>/lvrs-install`): install root used by `bootstrap_lvrs_*`.
+- `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET`: optional Apple deployment target forwarded to nested bootstrap configures. The macOS bootstrap otherwise inherits the parent `CMAKE_OSX_DEPLOYMENT_TARGET`; iOS does not inherit that host value.
+- `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>`: per-platform override, such as `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_MACOS` or `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_IOS`.
 
 ## Downstream CMake Integration
 
@@ -248,6 +250,7 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for Android deploy tooling lookup)
 - `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`
 - `LVRS_BOOTSTRAP_GENERATOR_<PLATFORM>`
+- `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET` / `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>` (Apple nested-configure deployment target; the per-platform value wins)
 - `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` (default `ON` for iOS bootstrap)
 - `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT` (default `ON` for Android bootstrap)
 - `LVRS_ANDROID_STUDIO_PROJECT_DIR` (default: `<platform-build>/android-studio`)
@@ -259,7 +262,7 @@ Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (propagate `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` into bootstrap reconfigure)
 - `LVRS_BOOTSTRAP_LVRS_ENABLE_IPO` (propagate `LVRS_ENABLE_IPO` into bootstrap reconfigure)
 
-Both application and framework bootstrap actions propagate the optimization controls to their nested platform configure. Bootstrap cache arguments preserve explicit false values such as `OFF`; only a genuinely empty value is omitted. This ensures that a caller can disable platform optimizations or IPO in every nested platform configure.
+Both application and framework bootstrap actions propagate the optimization controls and resolved Apple deployment target to their nested platform configure. The macOS child inherits a non-empty parent `CMAKE_OSX_DEPLOYMENT_TARGET`; iOS requires the generic or iOS-specific bootstrap override so a host macOS version is never applied accidentally. Bootstrap cache arguments preserve explicit false values such as `OFF`; only a genuinely empty value is omitted. This ensures that a caller can disable platform optimizations or IPO in every nested platform configure.
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
 When the host build consumes LVRS from an installed multi-platform prefix, bootstrap rewrites `LVRS_DIR` to the requested platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so iOS/Android/WASM toolchains do not depend on root-prefix package discovery.
 LVRS package config exports platform/toolchain hint variables for scripts:
@@ -298,6 +301,7 @@ Any platform without a discoverable Qt kit is skipped with a configure-time stat
 iOS framework bootstrap also requires a selected full Xcode with an iPhoneOS SDK; hosts using only Command Line Tools skip `bootstrap_lvrs_ios` instead of failing `bootstrap_lvrs_all`.
 Override per-platform install paths with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 For cross-host platforms, provide matching Qt kits/toolchains through `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`.
+For Apple compatibility, configure the parent with `CMAKE_OSX_DEPLOYMENT_TARGET` for macOS or set `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>` explicitly; the selected value is persisted in the nested platform cache and resulting Mach-O load commands.
 
 ## Rendering Backend Enforcement
 

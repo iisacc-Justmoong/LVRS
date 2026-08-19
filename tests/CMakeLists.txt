@@ -54,6 +54,13 @@ add_test(
 )
 
 add_test(
+    NAME LVRSTests_cmake_bootstrap_osx_deployment_target_resolution
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_bootstrap_osx_deployment_target_resolution.cmake"
+)
+
+add_test(
     NAME LVRSTests_cmake_example_source_snapshot_runtime_path
     COMMAND "${CMAKE_COMMAND}"
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"

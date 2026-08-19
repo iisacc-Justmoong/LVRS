@@ -150,7 +150,7 @@ State is handled through page-stack routing (internal `LV.PageRouter` or injecte
 Page-stack API on `LV.ApplicationWindow`: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
 `LV.ApplicationWindow` is now the standard downstream app root. It carries the bootstrap contract directly: platform-profile-driven runtime attach, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath` seeded from `initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`. `LV.ApplicationWindow` and `LV.Window` default `forcedDeviceTierPreset` to auto-detect mode (`-1`), and mobile display-coverage/fullscreen overrides follow `Platform.runtimeProfile(...)` so Android keeps the edge-to-edge bootstrap path while iOS uses maximized edge-to-edge coverage instead of a forced fullscreen transition. `LV.AppBootstrapWindow` remains only as a compatibility wrapper that presets `visible: true`.
-On desktop, the default solid chrome for `LV.Window` and `LV.ApplicationWindow` includes system-owned move plus edge/corner resize handling. Configure the built-in hit regions with `windowDragHandle*`, `windowDragExclusionItems`, and `windowResize*`, or disable those regions and call `requestWindowMove()` / `requestWindowResize(edges)` from application-owned chrome.
+On desktop, the default solid chrome for `LV.Window` and `LV.ApplicationWindow` includes system-owned move plus native-first edge/corner resize handling. Qt 6.8 Cocoa does not implement `QWindow::startSystemResize()`, so macOS transparently falls back to pointer-driven, min/max-constrained window geometry. Built-in resize handles forward the exact global press position, keeping remote, tablet, and synthesized input aligned with the fallback session. Configure the hit regions with `windowDragHandle*`, `windowDragExclusionItems`, and `windowResize*`, or disable those regions and call `requestWindowMove()` / `requestWindowResize(edges)` from application-owned chrome.
 Root content is now full-bleed by default on mobile: `LV.ApplicationWindow` and `LV.Window` no longer auto-place downstream content inside `safeMargin`. `LV.ApplicationWindow` also drives the native fullscreen/client-area coverage hints needed to reach the iOS status-bar and home-indicator regions, and on iOS it does so through `Window.Maximized + MaximizeUsingFullscreenGeometryHint` so the system status indicators can remain visible. Use `layoutSafeAreaBounds` as a helper rect or bind `LV.WindowSafeAreaObserver` when the app wants to reserve the actual iOS status-bar/notch/home-indicator insets explicitly.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
@@ -226,6 +226,7 @@ Any platform without a matching Qt kit is skipped with a configure-time status m
 iOS framework bootstrap also requires a selected full Xcode with an iPhoneOS SDK; Command Line Tools-only hosts skip the iOS target instead of failing the aggregate install.
 Per-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.
 Cross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.
+For Apple compatibility, configure the parent with `CMAKE_OSX_DEPLOYMENT_TARGET` for macOS or set `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>` explicitly. The macOS child inherits the parent target, while iOS requires an explicit generic or iOS-specific value so the host version is not applied to the mobile build.
 
 ## Rendering Backend Policy
 
@@ -247,7 +248,7 @@ Build-time optimization policy is controlled by:
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (default `ON`)
 - `LVRS_ENABLE_IPO` (default `ON`)
 
-Both application and framework bootstrap propagation preserve explicit `OFF` values for these options. Empty values alone are omitted from a nested platform configure.
+Both application and framework bootstrap propagation preserve explicit `OFF` values for these options and forward the resolved Apple deployment target. Empty values alone are omitted from a nested platform configure.
 
 When enabled, configure fails if:
 - The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` for Android).

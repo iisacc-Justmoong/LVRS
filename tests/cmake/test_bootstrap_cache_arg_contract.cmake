@@ -19,7 +19,30 @@ foreach(_lvrs_action IN ITEMS
     if(_lvrs_helper_include_index EQUAL -1)
         message(FATAL_ERROR "${_lvrs_action} must use LVRSBootstrapCacheArgs.cmake.")
     endif()
+
+    string(FIND
+        "${_lvrs_action_content}"
+        "_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd \"CMAKE_OSX_DEPLOYMENT_TARGET\" \"\${LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET}\")"
+        _lvrs_osx_deployment_target_index
+    )
+    if(_lvrs_osx_deployment_target_index EQUAL -1)
+        message(FATAL_ERROR
+            "${_lvrs_action} must propagate LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET.")
+    endif()
 endforeach()
+
+file(READ "${LVRS_SOURCE_DIR}/cmake/LVRSHelpers.cmake" _lvrs_helpers_content)
+string(REGEX MATCHALL
+    "-DLVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET=\\$\\{_lvrs_osx_deployment_target\\}"
+    _lvrs_osx_deployment_target_forwarding
+    "${_lvrs_helpers_content}"
+)
+list(LENGTH _lvrs_osx_deployment_target_forwarding _lvrs_osx_deployment_target_forwarding_count)
+if(NOT _lvrs_osx_deployment_target_forwarding_count EQUAL 2)
+    message(FATAL_ERROR
+        "Expected both framework and application bootstrap targets to forward the resolved "
+        "Apple deployment target, found ${_lvrs_osx_deployment_target_forwarding_count} occurrences.")
+endif()
 
 file(READ
     "${LVRS_SOURCE_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"

@@ -70,13 +70,15 @@ Item {
         return started
     }
 
-    function requestResize(edges) {
+    function requestResize(edges, globalPosition) {
         if (!interactionEnabled) {
             resizeAttempted(edges, false)
             return false
         }
 
-        const started = NativeWindowInteraction.requestSystemResize(targetWindow, edges)
+        const started = NativeWindowInteraction.requestSystemResizeAt(targetWindow,
+                                                                       edges,
+                                                                       globalPosition)
         resizeAttempted(edges, started)
         return started
     }
@@ -90,10 +92,11 @@ Item {
             mouse.accepted = false
     }
 
-    function handleResizePress(mouse, edges) {
+    function handleResizePress(mouse, edges, resizeHandle) {
         if (mouse.button !== Qt.LeftButton)
             return
-        if (!requestResize(edges))
+        const globalPosition = resizeHandle.mapToGlobal(mouse.x, mouse.y)
+        if (!requestResize(edges, globalPosition))
             mouse.accepted = false
     }
 
@@ -130,7 +133,7 @@ Item {
         cursorShape: Qt.SizeHorCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.LeftEdge)
+            root.handleResizePress(mouse, Qt.LeftEdge, leftResizeHandle)
         }
     }
 
@@ -150,7 +153,7 @@ Item {
         cursorShape: Qt.SizeVerCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.TopEdge)
+            root.handleResizePress(mouse, Qt.TopEdge, topResizeHandle)
         }
     }
 
@@ -170,7 +173,7 @@ Item {
         cursorShape: Qt.SizeHorCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.RightEdge)
+            root.handleResizePress(mouse, Qt.RightEdge, rightResizeHandle)
         }
     }
 
@@ -190,7 +193,7 @@ Item {
         cursorShape: Qt.SizeVerCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.BottomEdge)
+            root.handleResizePress(mouse, Qt.BottomEdge, bottomResizeHandle)
         }
     }
 
@@ -211,7 +214,9 @@ Item {
         cursorShape: Qt.SizeFDiagCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.LeftEdge | Qt.TopEdge)
+            root.handleResizePress(mouse,
+                                   Qt.LeftEdge | Qt.TopEdge,
+                                   topLeftResizeHandle)
         }
     }
 
@@ -232,7 +237,9 @@ Item {
         cursorShape: Qt.SizeBDiagCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.RightEdge | Qt.TopEdge)
+            root.handleResizePress(mouse,
+                                   Qt.RightEdge | Qt.TopEdge,
+                                   topRightResizeHandle)
         }
     }
 
@@ -253,7 +260,9 @@ Item {
         cursorShape: Qt.SizeBDiagCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.LeftEdge | Qt.BottomEdge)
+            root.handleResizePress(mouse,
+                                   Qt.LeftEdge | Qt.BottomEdge,
+                                   bottomLeftResizeHandle)
         }
     }
 
@@ -274,7 +283,9 @@ Item {
         cursorShape: Qt.SizeFDiagCursor
 
         onPressed: function (mouse) {
-            root.handleResizePress(mouse, Qt.RightEdge | Qt.BottomEdge)
+            root.handleResizePress(mouse,
+                                   Qt.RightEdge | Qt.BottomEdge,
+                                   bottomRightResizeHandle)
         }
     }
 }

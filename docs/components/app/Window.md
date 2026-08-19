@@ -2,7 +2,7 @@
 
 Location: `qml/Window.qml`
 
-`Window` is the lightweight LVRS top-level window. It provides platform and size-class metadata, render-quality wiring, native solid chrome, and system-owned move/resize interactions without the adaptive scaffold carried by `ApplicationWindow`.
+`Window` is the lightweight LVRS top-level window. It provides platform and size-class metadata, render-quality wiring, native solid chrome, and native-first move/resize interactions without the adaptive scaffold carried by `ApplicationWindow`.
 
 ## Core properties
 
@@ -54,7 +54,7 @@ The stock layer provides four edge and four corner hit regions. `windowResizeEdg
 - `windowMoveAttempted(started)`
 - `windowResizeAttempted(edges, started)`
 
-The request methods return whether the platform accepted the system operation. Resize accepts one edge or two adjacent edges only. The operating system remains responsible for snapping, tiling, minimum/maximum size constraints, and resize animations.
+The request methods return whether an interaction actually started. Resize accepts one edge or two adjacent edges only. Native platform resize remains preferred; on macOS, where Qt 6.8 Cocoa rejects `startSystemResize()`, LVRS tracks the pointer and applies constrained window geometry until release.
 
 ## Custom title-bar controls
 
@@ -109,5 +109,5 @@ Set `windowResizeHandlesEnabled: false` when the application supplies its own ed
 ## Notes
 
 - `minimumWidth/Height` continue to follow the LVRS desktop/mobile minimum properties. Applications can use the inherited `maximumWidth/Height` properties normally.
-- A fixed-size or platform-rejected operation returns `false`; LVRS does not synthesize geometry changes as a fallback.
+- A fixed-size or unsupported operation returns `false`. The macOS resize fallback honors inherited minimum and maximum dimensions but cannot provide compositor snapping or tiling.
 - `WindowChromeInteraction` contains the reusable pointer layer, while `NativeWindowInteraction` bridges requests to `QWindow` on Qt 6.5 and newer.
