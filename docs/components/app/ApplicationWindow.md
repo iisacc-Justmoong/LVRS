@@ -44,6 +44,15 @@ On completion, main flow is:
 - `windowColor`
 - `forceNativeDarkTitleBar`
 - `solidChrome`
+- system chrome interaction:
+  - `windowChromeInteractionsEnabled`
+  - `windowDragHandleEnabled`, `windowDragHandleHeight`
+  - `windowDragHandleTopMargin/LeftMargin/RightMargin`
+  - `windowDragExclusionItems`
+  - `windowResizeHandlesEnabled`, `windowResizeEdges`
+  - `windowResizeBorderThickness`, `windowResizeCornerSize`
+  - `windowChromeInteractionZ`
+  - read-only `windowChromeInteractionLayer`, `windowDragHandleItem`
 - profile-driven mobile policy helpers:
   - `runtimeEventsAutoAttachRecommended`
   - `mobileSystemWindowDelegationRecommended`
@@ -164,10 +173,13 @@ Signals:
 - `mobileCoverageTargetVisibilityForPlatform(platformName)` (maps iOS to `Window.Maximized` and other mobile coverage paths to `Window.FullScreen`)
 - `applyMobileDisplayCoverageOverride()` (applies or releases framework-managed edge-to-edge visibility, fullscreen-geometry, and expanded-client-area hints)
 - `requestWindowMove()`
+- `requestWindowResize(edges)`
 
 ## Behavior Notes
 
 - Adaptive layout transitions are guarded to avoid invalid one-step transitions and resize oscillation.
+- Solid desktop chrome uses the same system move and eight-region system resize layer as `LV.Window`. Set `windowDragHandleEnabled` or `windowResizeHandlesEnabled` to `false` when application-owned hit regions call the request methods directly; use `windowDragExclusionItems` to keep title-bar controls interactive.
+- `windowMoveAttempted(started)` and `windowResizeAttempted(edges, started)` report whether the platform accepted each pointer-initiated request.
 - Adaptive scaffold metrics now come from `Platform.runtimeProfile()` on a per-OS basis rather than being inferred from a coarse mobile/desktop family split.
 - `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling backend user-event mirroring does not force global listeners.
 - Runtime attach and backend hook are feature-flagged; both can be fully disabled for constrained hosts.

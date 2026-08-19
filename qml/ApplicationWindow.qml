@@ -121,9 +121,18 @@ Controls.ApplicationWindow {
     property bool autoAttachRuntimeEvents: runtimeEventsAutoAttachRecommended || globalEventListenersEnabled
     // Backend mirrored event cache is opt-in because duplicate buffering can add overhead.
     property bool autoHookBackendUserEvents: false
-    property bool windowDragHandleEnabled: isDesktopPlatform
+    property bool windowChromeInteractionsEnabled: solidChrome && isDesktopPlatform
+    property bool windowDragHandleEnabled: windowChromeInteractionsEnabled
     property int windowDragHandleHeight: Theme.scaleMetric(28)
     property int windowDragHandleTopMargin: 0
+    property int windowDragHandleLeftMargin: 0
+    property int windowDragHandleRightMargin: 0
+    property var windowDragExclusionItems: []
+    property bool windowResizeHandlesEnabled: windowChromeInteractionsEnabled
+    property int windowResizeEdges: Qt.LeftEdge | Qt.TopEdge | Qt.RightEdge | Qt.BottomEdge
+    property int windowResizeBorderThickness: Theme.scaleMetric(6)
+    property int windowResizeCornerSize: Theme.scaleMetric(12)
+    property real windowChromeInteractionZ: 10000
     property bool inactiveRenderDowngradeEnabled: false
     property int inactiveRenderMsaaSamples: 8
     property bool autoApplyDeviceTierPreset: false
@@ -167,6 +176,8 @@ Controls.ApplicationWindow {
     readonly property string adaptiveLayoutProfile: scaffold.layoutProfile
     readonly property string adaptiveNavigationMode: scaffold.navigationMode
     default property alias content: scaffold.content
+    readonly property alias windowChromeInteractionLayer: windowChromeInteraction
+    readonly property alias windowDragHandleItem: windowChromeInteraction.moveHandleItem
     readonly property bool adaptiveMobileLayout: scaffold.mobileLayout
     readonly property bool adaptiveDesktopLayout: scaffold.desktopLayout
     readonly property bool adaptiveRailNavigation: scaffold.navigationRailEnabled
@@ -195,6 +206,8 @@ Controls.ApplicationWindow {
     signal navActivated(int index, var item)
     signal globalPressedEvent(var eventData)
     signal globalContextEvent(var eventData)
+    signal windowMoveAttempted(bool started)
+    signal windowResizeAttempted(int edges, bool started)
     signal adaptiveLayoutStateChanged(string profile, string navigationMode)
     signal pageStackNavigated(string path, var params)
     signal pageStackNavigationFailed(string path)
@@ -426,9 +439,11 @@ Controls.ApplicationWindow {
     }
 
     function requestWindowMove() {
-        if (typeof windowRoot.startSystemMove === "function")
-            return !!windowRoot.startSystemMove()
-        return false
+        return windowChromeInteraction.requestMove()
+    }
+
+    function requestWindowResize(edges) {
+        return windowChromeInteraction.requestResize(edges)
     }
 
     function ensureRuntimeEventsAttached() {
@@ -1429,28 +1444,32 @@ Controls.ApplicationWindow {
         }
     }
 
-    Item {
-        id: windowDragHandle
-        visible: windowRoot.windowDragHandleEnabled && windowRoot.windowDragHandleHeight > 0
-        enabled: visible
-        z: 10000
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: windowRoot.windowDragHandleTopMargin
-        height: windowRoot.windowDragHandleHeight
+    WindowChromeInteraction {
+        id: windowChromeInteraction
 
-        MouseArea {
-            anchors.fill: parent
-            enabled: windowDragHandle.enabled
-            acceptedButtons: Qt.LeftButton
+        x: 0
+        y: 0
+        width: windowRoot.width
+        height: windowRoot.height
+        z: windowRoot.windowChromeInteractionZ
+        targetWindow: windowRoot
+        interactionEnabled: windowRoot.windowChromeInteractionsEnabled
+        moveHandleEnabled: windowRoot.windowDragHandleEnabled
+        moveHandleHeight: windowRoot.windowDragHandleHeight
+        moveHandleTopMargin: windowRoot.windowDragHandleTopMargin
+        moveHandleLeftMargin: windowRoot.windowDragHandleLeftMargin
+        moveHandleRightMargin: windowRoot.windowDragHandleRightMargin
+        moveExclusionItems: windowRoot.windowDragExclusionItems
+        resizeHandlesEnabled: windowRoot.windowResizeHandlesEnabled
+        resizeEdges: windowRoot.windowResizeEdges
+        resizeBorderThickness: windowRoot.windowResizeBorderThickness
+        resizeCornerSize: windowRoot.windowResizeCornerSize
 
-            onPressed: function(mouse) {
-                if (mouse.button !== Qt.LeftButton)
-                    return
-                if (!windowRoot.requestWindowMove())
-                    mouse.accepted = false
-            }
+        onMoveAttempted: function (started) {
+            windowRoot.windowMoveAttempted(started)
+        }
+        onResizeAttempted: function (edges, started) {
+            windowRoot.windowResizeAttempted(edges, started)
         }
     }
 
@@ -1482,4 +1501,4 @@ Controls.ApplicationWindow {
 
 // API usage (external):
 // import LVRS as LV
-// LV.ApplicationWindow { title: "App" }
+// LV.ApplicationWindow { title: "App"; windowDragExclusionItems: [menuButton] }

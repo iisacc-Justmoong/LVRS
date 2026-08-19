@@ -5,6 +5,7 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/runtime/runtimeevents.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/gestureevents.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platform/platforminfo.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowinteraction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/platform/windowsafeareaobserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderingmonitor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/vulkanbootstrap.cpp
@@ -49,6 +50,7 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/runtime/runtimeevents.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/gestureevents.h
     ${CMAKE_CURRENT_LIST_DIR}/platform/platforminfo.h
+    ${CMAKE_CURRENT_LIST_DIR}/platform/nativewindowinteraction.h
     ${CMAKE_CURRENT_LIST_DIR}/platform/windowsafeareaobserver.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/renderingmonitor.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/vulkanbootstrap.h

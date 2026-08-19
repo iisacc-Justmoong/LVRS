@@ -380,6 +380,7 @@ private slots:
     void application_window_initial_properties_seed_page_stack();
     void application_window_safe_margin_scopes_to_layout_not_render_surface();
     void versionless_import_window_loads();
+    void window_custom_chrome_interaction_contract_loads();
     void window_safe_margin_scopes_to_layout_not_render_surface();
     void appshell_compat_loads();
     void application_window_platform_adaptive_layout_loads();
@@ -566,6 +567,16 @@ LV.ApplicationWindow {
         && mobileSystemSafeAreaBounds.height >= 0
     property bool deviceTierPolicyReady: !autoApplyDeviceTierPreset
         && forcedDeviceTierPreset < 0
+    property bool chromeInteractionReady:
+        windowChromeInteractionsEnabled === (solidChrome && isDesktopPlatform)
+        && windowDragHandleEnabled === windowChromeInteractionsEnabled
+        && windowResizeHandlesEnabled === windowChromeInteractionsEnabled
+        && windowResizeBorderThickness > 0
+        && windowResizeCornerSize >= windowResizeBorderThickness
+        && windowChromeInteractionLayer !== null
+        && windowDragHandleItem !== null
+        && typeof requestWindowMove === "function"
+        && typeof requestWindowResize === "function"
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
@@ -637,6 +648,7 @@ LV.ApplicationWindow {
     QVERIFY(root->property("platformPolicyDefaultsReady").toBool());
     QVERIFY(root->property("mobileSystemSafeAreaApiReady").toBool());
     QVERIFY(root->property("deviceTierPolicyReady").toBool());
+    QVERIFY(root->property("chromeInteractionReady").toBool());
     QVERIFY(root->property("safeAreaObserverReady").toBool());
     QVERIFY(root->property("labelStyleApiReady").toBool());
     QVERIFY(root->property("figmaTextDesignReady").toBool());
@@ -715,6 +727,106 @@ LV.Window {
     QVERIFY(root->property("solidChrome").toBool());
     QVERIFY(root->property("windowApiReady").toBool());
     QVERIFY(root->property("contentApiReady").toBool());
+}
+
+void ImportApiTests::window_custom_chrome_interaction_contract_loads()
+{
+    QQmlEngine engine;
+    const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
+    engine.addImportPath(importBase);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.Window {
+    id: root
+    width: 360
+    height: 240
+    visible: true
+    windowChromeInteractionsEnabled: true
+    windowDragHandleHeight: 32
+    windowDragHandleTopMargin: 4
+    windowDragHandleLeftMargin: 10
+    windowDragHandleRightMargin: 12
+    windowResizeBorderThickness: 7
+    windowResizeCornerSize: 15
+    windowChromeInteractionZ: 12000
+
+    property int moveAttemptCount: 0
+    property int resizeAttemptCount: 0
+    property int lastResizeEdges: 0
+    property bool lastInteractionStarted: true
+    property bool chromeApiReady:
+        windowDragHandleEnabled
+        && windowResizeHandlesEnabled
+        && windowResizeEdges === (Qt.LeftEdge | Qt.TopEdge | Qt.RightEdge | Qt.BottomEdge)
+        && windowChromeInteractionLayer !== null
+        && windowDragHandleItem !== null
+        && typeof requestWindowMove === "function"
+        && typeof requestWindowResize === "function"
+
+    onWindowMoveAttempted: function(started) {
+        moveAttemptCount += 1
+        lastInteractionStarted = started
+    }
+    onWindowResizeAttempted: function(edges, started) {
+        resizeAttemptCount += 1
+        lastResizeEdges = edges
+        lastInteractionStarted = started
+    }
+
+    Item {
+        id: excludedDragItem
+        objectName: "excludedDragItem"
+        x: 100
+        y: 4
+        width: 50
+        height: 32
+    }
+
+    windowDragExclusionItems: [excludedDragItem]
+}
+)";
+
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QVERIFY(root->property("chromeApiReady").toBool());
+
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    QTRY_VERIFY(window->isVisible());
+
+    auto *interactionLayer = root->findChild<QQuickItem *>(QStringLiteral("windowChromeInteractionLayer"));
+    auto *dragHandle = root->findChild<QQuickItem *>(QStringLiteral("windowDragHandle"));
+    auto *leftResizeHandle = root->findChild<QQuickItem *>(QStringLiteral("windowResizeLeftHandle"));
+    auto *topLeftResizeHandle = root->findChild<QQuickItem *>(QStringLiteral("windowResizeTopLeftHandle"));
+    QVERIFY(interactionLayer);
+    QVERIFY(dragHandle);
+    QVERIFY(leftResizeHandle);
+    QVERIFY(topLeftResizeHandle);
+
+    QCOMPARE(interactionLayer->z(), 12000.0);
+    QCOMPARE(dragHandle->x(), 10.0);
+    QCOMPARE(dragHandle->y(), 4.0);
+    QCOMPARE(dragHandle->width(), 338.0);
+    QCOMPARE(dragHandle->height(), 32.0);
+    QCOMPARE(leftResizeHandle->width(), 7.0);
+    QCOMPARE(topLeftResizeHandle->width(), 15.0);
+    QCOMPARE(topLeftResizeHandle->height(), 15.0);
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(125, 20));
+    QCOMPARE(root->property("moveAttemptCount").toInt(), 0);
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(180, 20));
+    QTRY_COMPARE(root->property("moveAttemptCount").toInt(), 1);
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 120));
+    QTRY_COMPARE(root->property("resizeAttemptCount").toInt(), 1);
+    QCOMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge));
+
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 2));
+    QTRY_COMPARE(root->property("resizeAttemptCount").toInt(), 2);
+    QCOMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge | Qt::TopEdge));
 }
 
 void ImportApiTests::window_safe_margin_scopes_to_layout_not_render_surface()

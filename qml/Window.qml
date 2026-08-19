@@ -51,6 +51,18 @@ QtQuickWindow.Window {
     property color windowColor: Theme.window
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
+    property bool windowChromeInteractionsEnabled: solidChrome && isDesktopPlatform
+    property bool windowDragHandleEnabled: windowChromeInteractionsEnabled
+    property int windowDragHandleHeight: Theme.scaleMetric(28)
+    property int windowDragHandleTopMargin: 0
+    property int windowDragHandleLeftMargin: 0
+    property int windowDragHandleRightMargin: 0
+    property var windowDragExclusionItems: []
+    property bool windowResizeHandlesEnabled: windowChromeInteractionsEnabled
+    property int windowResizeEdges: Qt.LeftEdge | Qt.TopEdge | Qt.RightEdge | Qt.BottomEdge
+    property int windowResizeBorderThickness: Theme.scaleMetric(6)
+    property int windowResizeCornerSize: Theme.scaleMetric(12)
+    property real windowChromeInteractionZ: 10000
     property bool autoApplyRenderQuality: true
     property bool autoApplyDeviceTierPreset: false
     property int forcedDeviceTierPreset: -1
@@ -63,6 +75,11 @@ QtQuickWindow.Window {
         && RenderQuality.sceneSupersamplingActive
 
     default property alias content: scaledContentHost.data
+    readonly property alias windowChromeInteractionLayer: windowChromeInteraction
+    readonly property alias windowDragHandleItem: windowChromeInteraction.moveHandleItem
+
+    signal windowMoveAttempted(bool started)
+    signal windowResizeAttempted(int edges, bool started)
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
@@ -91,6 +108,14 @@ QtQuickWindow.Window {
         if (!NativeWindowStyle.titleBarColorSupported)
             return false
         return NativeWindowStyle.applyTitleBarColor(root, root.windowColor, root.forceNativeDarkTitleBar)
+    }
+
+    function requestWindowMove() {
+        return windowChromeInteraction.requestMove()
+    }
+
+    function requestWindowResize(edges) {
+        return windowChromeInteraction.requestResize(edges)
     }
 
     onVisibleChanged: {
@@ -154,6 +179,35 @@ QtQuickWindow.Window {
         }
     }
 
+    WindowChromeInteraction {
+        id: windowChromeInteraction
+
+        x: 0
+        y: 0
+        width: root.width
+        height: root.height
+        z: root.windowChromeInteractionZ
+        targetWindow: root
+        interactionEnabled: root.windowChromeInteractionsEnabled
+        moveHandleEnabled: root.windowDragHandleEnabled
+        moveHandleHeight: root.windowDragHandleHeight
+        moveHandleTopMargin: root.windowDragHandleTopMargin
+        moveHandleLeftMargin: root.windowDragHandleLeftMargin
+        moveHandleRightMargin: root.windowDragHandleRightMargin
+        moveExclusionItems: root.windowDragExclusionItems
+        resizeHandlesEnabled: root.windowResizeHandlesEnabled
+        resizeEdges: root.windowResizeEdges
+        resizeBorderThickness: root.windowResizeBorderThickness
+        resizeCornerSize: root.windowResizeCornerSize
+
+        onMoveAttempted: function (started) {
+            root.windowMoveAttempted(started)
+        }
+        onResizeAttempted: function (edges, started) {
+            root.windowResizeAttempted(edges, started)
+        }
+    }
+
     QtObject {
         Component.onCompleted: {
             FontPolicy.enforceApplicationFallback()
@@ -177,4 +231,4 @@ QtQuickWindow.Window {
 
 // API usage (external):
 // import LVRS as LV
-// LV.Window { title: "Settings"; visible: true }
+// LV.Window { title: "Settings"; visible: true; windowResizeHandlesEnabled: true }

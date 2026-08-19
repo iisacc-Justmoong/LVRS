@@ -3,6 +3,7 @@ set(LVRS_QML_FILES
     qml/AppShell.qml
     qml/ApplicationWindow.qml
     qml/Window.qml
+    qml/WindowChromeInteraction.qml
     qml/Theme.qml
 )
 

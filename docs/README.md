@@ -73,6 +73,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/backend/Platform.md`
 - `docs/backend/Debug.md`
 - `docs/backend/DebugOutput.md`
+- `docs/backend/NativeWindowInteraction.md`
 
 ## Backend Model Types
 
@@ -89,6 +90,8 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/app/AppBootstrapWindow.md`
 - `docs/components/app/ApplicationWindow.md`
 - `docs/components/app/AppShell.md`
+- `docs/components/app/Window.md`
+- `docs/components/app/WindowChromeInteraction.md`
 - `docs/components/app/WindowSafeAreaObserver.md`
 
 ## Control Components

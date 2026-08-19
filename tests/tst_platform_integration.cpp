@@ -5,6 +5,7 @@
 #include <QWindow>
 #include <QtPlugin>
 
+#include "backend/platform/nativewindowinteraction.h"
 #include "backend/platform/nativewindowstyle.h"
 #include "backend/platform/platforminfo.h"
 #include "test_utils.h"
@@ -22,6 +23,7 @@ private slots:
     void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
     void mobile_theme_scale_contract();
+    void native_window_interaction_validates_system_resize_edges();
     void native_window_style_mobile_coverage_flags();
 };
 
@@ -875,6 +877,34 @@ void PlatformIntegrationTests::native_window_style_mobile_coverage_flags()
     QVERIFY(!window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
 #endif
     QVERIFY(!window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
+}
+
+void PlatformIntegrationTests::native_window_interaction_validates_system_resize_edges()
+{
+    NativeWindowInteraction interaction;
+
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::LeftEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::TopEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::RightEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::BottomEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::RightEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::RightEdge | Qt::BottomEdge)));
+    QVERIFY(interaction.isValidResizeEdges(int(Qt::BottomEdge | Qt::LeftEdge)));
+
+    QVERIFY(!interaction.isValidResizeEdges(0));
+    QVERIFY(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::RightEdge)));
+    QVERIFY(!interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::BottomEdge)));
+    QVERIFY(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge | Qt::RightEdge)));
+    QVERIFY(!interaction.isValidResizeEdges(1 << 20));
+
+    QObject notAWindow;
+    QVERIFY(!interaction.requestSystemMove(&notAWindow));
+    QVERIFY(!interaction.requestSystemResize(&notAWindow, int(Qt::LeftEdge)));
+
+    QWindow window;
+    QVERIFY(!interaction.requestSystemResize(&window, 0));
+    QVERIFY(!interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::RightEdge)));
 }
 
 QTEST_MAIN(PlatformIntegrationTests)
