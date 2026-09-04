@@ -27,10 +27,10 @@ cd LVRS
 ```
 
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
-If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
+If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
 Direct `lvrs install` now also reuses the installed source metadata under `<prefix>/src/LVRS` when launched outside the repository tree. If the recorded checkout path became stale because an upper directory was renamed, the CLI relocates the project root by matching the preserved trailing path segments before falling back to the installed source snapshot itself.
-Source snapshots omit repository build directories and `rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.
-If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
+Source snapshots omit repository build directories (including hidden `.build.lvrs-stale-*` cleanup remnants), `rust-cli/build`, and legacy `rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.
+If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/SDK/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
 The install flow builds `bootstrap_lvrs_all`.
 By default, the bootstrap platform set follows the current host:
 - Linux: `linux`
@@ -42,9 +42,10 @@ On Linux hosts, `lvrs install` now runs a CMake preflight first: it verifies the
 If Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
 Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
-Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to move the install root.
+The checkout lives under `Workspace/SDK/LVRS`. The default install root is `~/.local/SDK/LVRS` for both CMake and the install CLI. Set `--prefix <path>`, `LVRS_INSTALL_PREFIX=<path>`, or an explicit `CMAKE_INSTALL_PREFIX` to move the install root.
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.
+The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.

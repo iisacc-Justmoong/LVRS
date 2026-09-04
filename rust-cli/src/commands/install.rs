@@ -229,6 +229,8 @@ fn run_internal(
         )?;
     }
 
+    let cli_binary = install_cli_binary(&env::current_exe()?, &install_prefix)?;
+
     if register_cmake_registry {
         register_cmake_package(&home_dir, &install_prefix, &package_config_dir)?;
     }
@@ -252,6 +254,7 @@ fn run_internal(
         platform_install_root.display()
     );
     println!("[LVRS] Env helper        : {}", env_file.display());
+    println!("[LVRS] CLI binary        : {}", cli_binary.display());
     println!("[LVRS] Downstream CMake  : find_package(LVRS CONFIG REQUIRED)");
 
     Ok(())
@@ -279,18 +282,26 @@ pub(crate) fn resolve_install_prefix(
     cli_prefix: Option<PathBuf>,
     home_dir: &Path,
 ) -> Result<PathBuf> {
+    resolve_install_prefix_with_env(cli_prefix, env::var(ENV_LVRS_INSTALL_PREFIX).ok(), home_dir)
+}
+
+fn resolve_install_prefix_with_env(
+    cli_prefix: Option<PathBuf>,
+    env_prefix: Option<String>,
+    home_dir: &Path,
+) -> Result<PathBuf> {
     if let Some(prefix) = cli_prefix {
         return normalize_user_path(prefix, home_dir);
     }
 
-    if let Ok(value) = env::var(ENV_LVRS_INSTALL_PREFIX) {
+    if let Some(value) = env_prefix {
         let trimmed = value.trim();
         if !trimmed.is_empty() {
             return normalize_user_path(PathBuf::from(trimmed), home_dir);
         }
     }
 
-    Ok(home_dir.join(".local").join("LVRS"))
+    Ok(home_dir.join(".local").join("SDK").join("LVRS"))
 }
 
 fn normalize_user_path(path: PathBuf, home_dir: &Path) -> Result<PathBuf> {
@@ -2019,6 +2030,9 @@ fn should_skip_snapshot_entry(name: &str) -> bool {
         || name == ".idea"
         || name == ".vscode"
         || name == "build"
+        || name == ".build"
+        || name.starts_with(".build-")
+        || name.starts_with(".build.")
         || name.starts_with("build-")
         || name.starts_with("cmake-build-")
 }
@@ -2037,7 +2051,7 @@ fn copy_rust_cli_snapshot(source: &Path, destination: &Path) -> Result<()> {
         let entry = entry?;
         let path = entry.path();
         let name = entry.file_name().to_string_lossy().to_string();
-        if name == "target" {
+        if name == "target" || should_skip_snapshot_entry(&name) {
             continue;
         }
 
@@ -2250,6 +2264,23 @@ fn register_cmake_package(
     Ok(())
 }
 
+fn install_cli_binary(source: &Path, install_prefix: &Path) -> Result<PathBuf> {
+    let binary_dir = install_prefix.join("bin");
+    let binary_path = binary_dir.join(format!("lvrs{}", env::consts::EXE_SUFFIX));
+    fs::create_dir_all(&binary_dir).with_context(|| {
+        format!(
+            "failed to create CLI install directory: {}",
+            binary_dir.display()
+        )
+    })?;
+    if !paths_refer_to_same_location(source, &binary_path) {
+        fs::copy(source, &binary_path)
+            .with_context(|| format!("failed to install LVRS CLI: {}", binary_path.display()))?;
+    }
+    set_executable_bit(&binary_path)?;
+    Ok(binary_path)
+}
+
 fn write_env_helper(
     env_file: &Path,
     platform_install_root: &Path,
@@ -2303,8 +2334,8 @@ fn render_env_helper_script(
 "#,
     );
     content.push_str(&format!(
-        "_lvrs_prepend_path CMAKE_PREFIX_PATH \"{}\"\n_lvrs_prepend_path QML2_IMPORT_PATH \"{}/lib/qt6/qml\"\nunset -f _lvrs_prepend_path\n",
-        install_prefix, qml_import_root
+        "_lvrs_prepend_path PATH \"{}/bin\"\n_lvrs_prepend_path CMAKE_PREFIX_PATH \"{}\"\n_lvrs_prepend_path QML2_IMPORT_PATH \"{}/lib/qt6/qml\"\nunset -f _lvrs_prepend_path\n",
+        install_prefix, install_prefix, qml_import_root
     ));
     content
 }
@@ -2335,6 +2366,43 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     static CURRENT_DIR_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn cli_install_copies_binary_and_supports_running_from_install_prefix() -> Result<()> {
+        let root = temp_test_dir("cli-install");
+        fs::create_dir_all(&root)?;
+        let source = root.join("cli-source");
+        fs::write(&source, "test CLI payload")?;
+        let prefix = root.join("prefix");
+        let installed = install_cli_binary(&source, &prefix)?;
+        assert_eq!(fs::read_to_string(&installed)?, "test CLI payload");
+        assert_eq!(install_cli_binary(&installed, &prefix)?, installed);
+        assert_eq!(fs::read_to_string(&installed)?, "test CLI payload");
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn install_prefix_uses_sdk_default_and_keeps_overrides() -> Result<()> {
+        let home = env::current_dir()?.join("test-home");
+        assert_eq!(
+            resolve_install_prefix_with_env(None, None, &home)?,
+            home.join(".local").join("SDK").join("LVRS")
+        );
+        assert_eq!(
+            resolve_install_prefix_with_env(None, Some("~/custom-env".into()), &home)?,
+            home.join("custom-env")
+        );
+        assert_eq!(
+            resolve_install_prefix_with_env(
+                Some(PathBuf::from("~/custom-cli")),
+                Some("~/custom-env".into()),
+                &home,
+            )?,
+            home.join("custom-cli")
+        );
+        Ok(())
+    }
 
     struct CurrentDirGuard {
         original: PathBuf,
@@ -2555,15 +2623,23 @@ mod tests {
 
         let rust_source = checkout.join("rust-cli").join("src");
         let rust_target = checkout.join("rust-cli").join("target").join("debug");
+        let rust_build = checkout.join("rust-cli").join("build").join("debug");
+        let stale_build = checkout.join(".build.lvrs-stale-test");
         fs::create_dir_all(&rust_source)?;
         fs::create_dir_all(&rust_target)?;
+        fs::create_dir_all(&rust_build)?;
+        fs::create_dir_all(&stale_build)?;
         fs::write(rust_source.join("main.rs"), "fn main() {}\n")?;
         fs::write(rust_target.join("stale-build-output"), "stale")?;
+        fs::write(rust_build.join("stale-build-output"), "stale")?;
+        fs::write(stale_build.join("CMakeCache.txt"), "stale")?;
 
         install_source_snapshot(&checkout, &snapshot, &root.join("build"), false)?;
 
         assert!(snapshot.join("rust-cli/src/main.rs").is_file());
         assert!(!snapshot.join("rust-cli/target").exists());
+        assert!(!snapshot.join("rust-cli/build").exists());
+        assert!(!snapshot.join(".build.lvrs-stale-test").exists());
 
         remove_path(&root)?;
         Ok(())
@@ -2640,6 +2716,7 @@ mod tests {
             "/tmp/lvrs/platforms/linux",
         );
         assert!(script.contains("export LVRS_PLATFORMS_ROOT=\"/tmp/lvrs/platforms\""));
+        assert!(script.contains("_lvrs_prepend_path PATH \"/tmp/lvrs/bin\""));
         assert!(script.contains("_lvrs_prepend_path CMAKE_PREFIX_PATH \"/tmp/lvrs\""));
         assert!(script.contains(
             "_lvrs_prepend_path QML2_IMPORT_PATH \"/tmp/lvrs/platforms/linux/lib/qt6/qml\""

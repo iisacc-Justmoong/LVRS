@@ -146,3 +146,10 @@ uifw_add_test(LVRSTests_hierarchy_interaction tst_hierarchy_interaction.cpp)
 uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
 uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
 uifw_add_test(LVRSTests_soak_runtime tst_soak_runtime.cpp LABELS "p4;quality;soak;long")
+
+add_test(
+    NAME LVRSTests_cmake_install_defaults
+    COMMAND "${CMAKE_COMMAND}"
+        "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_install_defaults.cmake"
+)

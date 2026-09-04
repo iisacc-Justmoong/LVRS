@@ -1,0 +1,15 @@
+# Keep an explicit CMake prefix (including CMAKE_INSTALL_PREFIX from the
+# environment) intact; only replace CMake's platform default.
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    if(DEFINED ENV{LVRS_INSTALL_PREFIX} AND NOT "$ENV{LVRS_INSTALL_PREFIX}" STREQUAL "")
+        set(_lvrs_default_prefix "$ENV{LVRS_INSTALL_PREFIX}")
+    elseif(DEFINED ENV{HOME} AND NOT "$ENV{HOME}" STREQUAL "")
+        set(_lvrs_default_prefix "$ENV{HOME}/.local/SDK/LVRS")
+    elseif(DEFINED ENV{USERPROFILE} AND NOT "$ENV{USERPROFILE}" STREQUAL "")
+        set(_lvrs_default_prefix "$ENV{USERPROFILE}/.local/SDK/LVRS")
+    else()
+        message(FATAL_ERROR "HOME or USERPROFILE is required for the default LVRS install prefix.")
+    endif()
+    set(CMAKE_INSTALL_PREFIX "${_lvrs_default_prefix}" CACHE PATH "LVRS install prefix" FORCE)
+    unset(_lvrs_default_prefix)
+endif()

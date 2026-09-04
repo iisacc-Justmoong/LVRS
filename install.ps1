@@ -256,7 +256,7 @@ function Invoke-DirectInstall {
         $prefix = $env:LVRS_INSTALL_PREFIX
     }
     if ([string]::IsNullOrWhiteSpace($prefix)) {
-        $prefix = Join-Path $homeDir ".local\LVRS"
+        $prefix = Join-Path $homeDir ".local\SDK\LVRS"
     }
     if (-not [System.IO.Path]::IsPathRooted($prefix)) {
         $prefix = Join-Path (Get-Location).Path $prefix
@@ -418,6 +418,9 @@ if (-not (Contains-Option -Values ([string[]]$installArgs) -Name "--without-test
 
 $cargo = Find-CommandPath -Name "cargo.exe"
 if ($null -ne $cargo -and (Test-Path -LiteralPath $ManifestPath)) {
+    if ([string]::IsNullOrWhiteSpace($env:CARGO_TARGET_DIR)) {
+        $env:CARGO_TARGET_DIR = Join-Path $ScriptDir "rust-cli\build"
+    }
     & $cargo run --manifest-path $ManifestPath --bin lvrs -- install @installArgs
     exit $LASTEXITCODE
 }

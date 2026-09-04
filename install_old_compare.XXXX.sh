@@ -12,7 +12,7 @@ Usage: ./install.sh [options]
 Builds and installs LVRS for selected runtime platforms via bootstrap_lvrs_all.
 
 Options:
-  --prefix <path>      Install prefix (default: ~/.local/LVRS)
+  --prefix <path>      Install prefix (default: ~/.local/SDK/LVRS)
   --build-dir <path>   Deprecated. Build directory is fixed to <repo>/build
   --build-type <type>  CMake build type (default: Release)
   --platforms <list>   Bootstrap platforms (comma/semicolon list; default: all runtime platforms)
@@ -395,7 +395,7 @@ else
     exit 1
 fi
 
-INSTALL_PREFIX="${HOME_DIR}/.local/LVRS"
+INSTALL_PREFIX="${HOME_DIR}/.local/SDK/LVRS"
 PLATFORM_INSTALL_ROOT="${INSTALL_PREFIX}/platforms"
 BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
 SOURCE_SNAPSHOT=1

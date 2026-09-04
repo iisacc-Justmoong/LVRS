@@ -27,6 +27,9 @@ endif()
 file(READ "${_lvrs_install_script}" _lvrs_install_script_content)
 
 foreach(_lvrs_required_snippet IN ITEMS
+    ".local\\SDK\\LVRS"
+    "CARGO_TARGET_DIR"
+    "rust-cli\\build"
     "Resolve-QtPrefix"
     "Resolve-CMakePath"
     "LVRS_BOOTSTRAP_QT_PREFIX_WINDOWS"

@@ -13,7 +13,7 @@ On Windows PowerShell:
 ```
 
 `install.sh` is now a thin wrapper around Rust CLI `lvrs install`.
-- If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install ...`.
+- If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
 - `install.ps1` is the Windows wrapper. It auto-detects a Qt 6 MinGW prefix,
@@ -23,7 +23,7 @@ On Windows PowerShell:
   to the equivalent direct CMake `bootstrap_lvrs_all` flow for the Windows
   framework package.
 - Direct `lvrs install` can recover the repository root from `<prefix>/src/LVRS/INSTALL_SOURCE_INFO.txt` when launched outside the checkout. If the stored absolute path went stale after an upper-directory rename, the CLI re-locates the root by matching trailing path segments and otherwise falls back to the installed source snapshot in place.
-- If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/LVRS`, direct CLI commands treat that value as the prefix and resolve the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
+- If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/SDK/LVRS`, direct CLI commands treat that value as the prefix and resolve the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
 
 The install flow builds `bootstrap_lvrs_all`.
 By default, the framework bootstrap platform set follows the current host:
@@ -36,8 +36,9 @@ On Linux hosts, the installer runs a dependency preflight before cleaning/buildi
 If those Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
 `lvrs doctor --fix` runs the same host-side dependency check/fix flow without starting an install. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` additionally validates the `main.cpp` bootstrap entry markers and reports any missing cross-platform Qt/Android/WASM auto-detect hints; it exits non-zero when the requested bootstrap target set is not ready.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
-Set `--prefix <path>` or `LVRS_INSTALL_PREFIX=<path>` to change the install root.
-The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring.
+The checkout root is `Workspace/SDK/LVRS`; the default install root is `~/.local/SDK/LVRS`. CMake uses the same default, while explicit `CMAKE_INSTALL_PREFIX`, `--prefix`, and `LVRS_INSTALL_PREFIX` overrides remain supported. Re-run `./install.sh` after moving the checkout: it recreates `build/` and records the new absolute source path in the installed snapshot.
+The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
+The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `rust-cli/build` and legacy `rust-cli/target` directories.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`; Linux builds additionally stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: repository launchers fall back to `build/example/.../bin`, while installed source snapshots receive refreshed desktop runtimes as sibling `*.real` files beside those launchers. If `--without-examples` is used, those snapshot runtime payloads are removed.
 
@@ -46,13 +47,13 @@ When host examples are enabled, the installer builds the `lvrs_host_examples_all
 Direct CLI invocation (without wrapper):
 
 ```bash
-cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- install
+cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install
 ```
 
 Main-entrypoint bootstrap profile:
 
 ```bash
-cargo run --manifest-path rust-cli/Cargo.toml --bin lvrs -- bootstrap
+cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- bootstrap
 ```
 
 `lvrs bootstrap` defaults to a host-matched target set unless `--platforms` is provided:
@@ -378,3 +379,20 @@ For release candidates, run a smoke test that verifies:
 - root QML loads successfully,
 - route navigation works for at least one static and one dynamic route,
 - input/runtime events are captured when interacting with the window.
+
+## Installed-package regression
+
+On macOS, `LIBRARY_PATH` can make the installed library directory implicit to CMake. LVRS then adds only its own omitted runtime search path to the imported target so `@rpath/libLVRS.dylib` still loads. Other package paths remain under CMake's normal RPATH handling.
+
+The installed consumer verifies this package contract and instantiates an LVRS QML component:
+
+```sh
+LIBRARY_PATH="$HOME/.local/SDK/LVRS/platforms/macos/lib" cmake \
+  -S tests/installed-consumer -B build/installed-consumer \
+  -DLVRS_DIR="$HOME/.local/SDK/LVRS" \
+  -DLVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH=ON
+cmake --build build/installed-consumer
+ctest --test-dir build/installed-consumer --output-on-failure
+```
+
+Use a fresh consumer build directory when changing `LIBRARY_PATH`, because compiler implicit directories are captured during the first configure.

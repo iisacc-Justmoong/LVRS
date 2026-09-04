@@ -36,7 +36,7 @@ pub enum Command {
 
 #[derive(Debug, Args)]
 pub struct InstallArgs {
-    /// Install prefix (default: ~/.local/LVRS)
+    /// Install prefix (default: ~/.local/SDK/LVRS)
     #[arg(long, value_name = "path")]
     pub prefix: Option<PathBuf>,
 
@@ -97,7 +97,7 @@ pub struct BootstrapArgs {
 
 #[derive(Debug, Args)]
 pub struct DoctorArgs {
-    /// Install prefix to inspect (default: ~/.local/LVRS)
+    /// Install prefix to inspect (default: ~/.local/SDK/LVRS)
     #[arg(long, value_name = "path")]
     pub prefix: Option<PathBuf>,
 

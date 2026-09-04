@@ -4,6 +4,10 @@ project(LVRS VERSION 1.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    include(cmake/LVRSInstallDefaults.cmake)
+endif()
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
