@@ -13,6 +13,7 @@ On Windows PowerShell:
 ```
 
 `install.sh` is now a thin wrapper around Rust CLI `lvrs install`.
+Local Qt version discovery uses `/Volumes/Storage/Qt`, including the macOS, iOS, Android, and WASM kits under `6.8.3`. `QT_VERSION_ROOT` and explicit platform Qt hints remain supported.
 - If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.

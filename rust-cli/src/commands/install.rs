@@ -124,7 +124,6 @@ fn run_internal(
     ensure_cmake_available()?;
     let linux_qt_auto_config = ensure_linux_host_prerequisites(
         host_platform,
-        &home_dir,
         &mut configure_args,
         &args.cmake_args,
         args.install_linux_deps,
@@ -328,7 +327,6 @@ fn expand_tilde_path(path: &Path, home_dir: &Path) -> PathBuf {
 
 pub(crate) fn ensure_linux_host_prerequisites(
     host_platform: &str,
-    home_dir: &Path,
     configure_args: &mut Vec<String>,
     user_cmake_args: &[String],
     install_linux_deps: bool,
@@ -388,7 +386,7 @@ pub(crate) fn ensure_linux_host_prerequisites(
         bail!("linux dependency preflight failed");
     }
 
-    let mut detected_qt_install = detect_linux_qt_install(home_dir);
+    let mut detected_qt_install = detect_linux_qt_install();
     if detected_qt_install.is_none() && install_linux_deps && !package_install_attempted {
         if let Some(plan) = package_install_plan.as_ref() {
             println!(
@@ -400,7 +398,7 @@ pub(crate) fn ensure_linux_host_prerequisites(
             if initial_preflight.success {
                 return Ok(None);
             }
-            detected_qt_install = detect_linux_qt_install(home_dir);
+            detected_qt_install = detect_linux_qt_install();
         }
     }
 
@@ -410,7 +408,7 @@ pub(crate) fn ensure_linux_host_prerequisites(
             "[LVRS] Required dependency: Qt 6.5+ development package with Quick, QuickControls2, Qml, Svg, Network, and Qt host tools."
         );
         eprintln!(
-            "[LVRS] Searched Qt hints: Qt6_DIR, LVRS_BOOTSTRAP_QT_PREFIX_LINUX, LVRS_BOOTSTRAP_QT_PREFIX, QT_LINUX_PREFIX, QT_HOST_PREFIX, QTDIR, CMAKE_PREFIX_PATH, qtpaths6/qmake6, ~/Qt, /opt/Qt, distro Qt locations."
+            "[LVRS] Searched Qt hints: Qt6_DIR, LVRS_BOOTSTRAP_QT_PREFIX_LINUX, LVRS_BOOTSTRAP_QT_PREFIX, QT_LINUX_PREFIX, QT_HOST_PREFIX, QTDIR, CMAKE_PREFIX_PATH, qtpaths6/qmake6, /Volumes/Storage/Qt, /opt/Qt, distro Qt locations."
         );
         eprintln!(
             "[LVRS] Preflight tail:\n{}",
@@ -975,7 +973,7 @@ fn inject_cmake_definition(args: &mut Vec<String>, key: &str, value: &Path) -> b
     true
 }
 
-fn detect_linux_qt_install(home_dir: &Path) -> Option<LinuxQtAutoConfig> {
+fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
     for env_name in [
         ENV_QT6_DIR,
         "LVRS_BOOTSTRAP_QT_PREFIX_LINUX",
@@ -1026,7 +1024,7 @@ fn detect_linux_qt_install(home_dir: &Path) -> Option<LinuxQtAutoConfig> {
         }
     }
 
-    for root in detect_qt_version_roots(Some(home_dir)) {
+    for root in detect_qt_version_roots() {
         for candidate in linux_qt_prefix_candidates(&root) {
             if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
                 return Some(LinuxQtAutoConfig {
@@ -1156,7 +1154,7 @@ fn qt_prefix_from_qt6_dir(qt6_dir: &Path) -> Option<PathBuf> {
     }
 }
 
-fn detect_qt_version_roots(home_dir: Option<&Path>) -> Vec<PathBuf> {
+fn detect_qt_version_roots() -> Vec<PathBuf> {
     let mut roots = Vec::new();
     if let Ok(value) = env::var("QT_VERSION_ROOT") {
         let candidate = PathBuf::from(value.trim());
@@ -1165,9 +1163,7 @@ fn detect_qt_version_roots(home_dir: Option<&Path>) -> Vec<PathBuf> {
         }
     }
 
-    if let Some(home) = home_dir {
-        push_latest_or_self(&mut roots, &home.join("Qt"));
-    }
+    push_latest_or_self(&mut roots, &PathBuf::from("/Volumes/Storage/Qt"));
 
     push_latest_or_self(&mut roots, &PathBuf::from("/opt/Qt"));
     push_latest_or_self(&mut roots, &PathBuf::from("/opt/qt"));

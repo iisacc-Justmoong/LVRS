@@ -19,7 +19,6 @@ pub fn run(args: DoctorArgs, verbose: u8) -> Result<()> {
     let mut host_configure_args = Vec::new();
     let host_qt = install::ensure_linux_host_prerequisites(
         host_platform,
-        &home_dir,
         &mut host_configure_args,
         &[],
         args.fix,

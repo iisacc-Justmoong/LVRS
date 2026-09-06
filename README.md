@@ -16,6 +16,7 @@ The framework target itself does not build an application executable; all runnab
 - Qt 6.5+
 - Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`
 - Qt `Test` module only when `LVRS_BUILD_TESTS=ON`
+- Local Qt kits are discovered under `/Volumes/Storage/Qt` (for example, `/Volumes/Storage/Qt/6.8.3/macos`). Explicit `QT_VERSION_ROOT`, platform Qt hints, and `Qt6_DIR` still take precedence.
 - `LVRS_ENFORCE_VULKAN` validates fixed backend Qt features where applicable (macOS/iOS: Metal, Android: Vulkan). Windows prefers D3D11 during bootstrap and falls back to OpenGL after runtime probing, while Linux/WASM use Qt default backend selection.
 
 ## Quick Install (Clone -> Install -> Use)

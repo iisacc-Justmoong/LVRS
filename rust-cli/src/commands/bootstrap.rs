@@ -187,7 +187,7 @@ pub(crate) fn apply_auto_bootstrap_hints(
     let mut warnings = Vec::new();
 
     let home_dir = resolve_home_dir().ok();
-    let qt_version_root = detect_qt_version_root(home_dir.as_deref());
+    let qt_version_root = detect_qt_version_root();
 
     for platform in selected_platforms {
         if let Some(cmake_var) = platform_to_qt_prefix_var(platform) {
@@ -380,7 +380,7 @@ fn is_qt_prefix_dir(path: &Path) -> bool {
             || path.join("bin").join("qmake").is_file())
 }
 
-fn detect_qt_version_root(home_dir: Option<&Path>) -> Option<PathBuf> {
+fn detect_qt_version_root() -> Option<PathBuf> {
     if let Ok(value) = env::var("QT_VERSION_ROOT") {
         let candidate = PathBuf::from(value.trim());
         if candidate.is_dir() {
@@ -388,8 +388,7 @@ fn detect_qt_version_root(home_dir: Option<&Path>) -> Option<PathBuf> {
         }
     }
 
-    let home = home_dir?;
-    let qt_home = home.join("Qt");
+    let qt_home = PathBuf::from("/Volumes/Storage/Qt");
     if !qt_home.is_dir() {
         return None;
     }
