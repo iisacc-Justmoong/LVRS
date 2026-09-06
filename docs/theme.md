@@ -66,10 +66,33 @@ Derived surface aliases:
 - `surfaceAlt -> panelBackground06`
 - `surfaceGhost -> panelBackground02`
 
+## Alert Glass
+
+The updated Figma Alert uses dedicated color tokens. Its typography continues to
+use the existing Title and Body tokens; these colors do not create text styles.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `alertGlassTint` | `#1D1F21`, 72% opacity | Translucent card tint |
+| `alertGlassEdge` | White, 20% opacity | Card edge |
+| `alertTitleColor` | `#F4F5F7` | Title and neutral actions |
+| `alertBodyColor` | `#D6D9DF` | Message |
+| `alertActionPrimary` | `#027DFF` | Primary button |
+| `alertActionBorder` | `#596168` | Secondary outline |
+| `alertDivider` | `#363B3F` | Content/action separator |
+| `alertIconSurface` | `#192840` | Icon frame fill |
+| `alertIconBorder` | `#244B7E` | Icon frame edge |
+
+Discard text uses the existing `danger` token (`#FF453A`). See
+[Alert](components/surfaces/Alert.md) for material capture, layout, and fallback
+behavior. The Alert's 500px preferred width is independent of the older shared
+dialog bounds below.
+
 ## Hex Format Rule
 
 - Opaque surface tokens use 6-digit hex.
-- Alpha-required tokens remain 8-digit hex (for example `overlayBackdrop`, text opacity tokens).
+- Alpha-required tokens use 8-digit hex (for example `overlayBackdrop`, text opacity
+  tokens), or `Qt.rgba` to express exact Figma opacity percentages for Alert glass.
 
 ## Icon Path Resolution
 

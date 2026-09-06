@@ -1710,6 +1710,7 @@ LV.ApplicationWindow {
             id: preview
             property var catalogEntry: ({})
             property bool alertOpen: false
+            property int alertButtonCount: 2
             implicitHeight: contentColumn.implicitHeight
 
             Column {
@@ -1732,21 +1733,37 @@ LV.ApplicationWindow {
                     }
 
                     LV.LabelButton {
-                        text: "Open Alert"
+                        text: "Open two-action alert"
                         tone: LV.AbstractButton.Default
-                        onClicked: preview.alertOpen = true
+                        onClicked: {
+                            preview.alertButtonCount = 2
+                            preview.alertOpen = true
+                        }
+                    }
+
+                    LV.LabelButton {
+                        text: "Open three-action alert"
+                        tone: LV.AbstractButton.Default
+                        onClicked: {
+                            preview.alertButtonCount = 3
+                            preview.alertOpen = true
+                        }
                     }
                 }
 
                 LV.Alert {
                     open: preview.alertOpen
-                    buttonCount: 2
-                    title: "Alert Example"
-                    message: "This preview uses the real Alert surface and AlertButton styling."
-                    primaryText: "Confirm"
-                    secondaryText: "Cancel"
+                    buttonCount: preview.alertButtonCount
+                    title: buttonCount === 3 ? "Save changes?" : "Apply changes?"
+                    message: buttonCount === 3
+                        ? "You have unsaved changes.\nSave them before closing?"
+                        : "Your new settings will be applied\nto this workspace."
+                    primaryText: buttonCount === 3 ? "Save changes" : "Apply changes"
+                    secondaryText: buttonCount === 3 ? "Discard changes" : "Cancel"
+                    tertiaryText: buttonCount === 3 ? "Cancel" : ""
                     onPrimaryClicked: preview.alertOpen = false
                     onSecondaryClicked: preview.alertOpen = false
+                    onTertiaryClicked: preview.alertOpen = false
                     onDismissed: preview.alertOpen = false
                 }
             }

@@ -729,7 +729,7 @@ QtObject {
                     docPath: "docs/components/surfaces/Alert.md",
                     previewId: "alert-surface",
                     roleLabel: "Overlay alert",
-                    summary: "Overlay dialog surface with explicit one, two, or three action layouts.",
+                    summary: "Frosted glass alert with rounded actions, existing Title/Body typography, and red Discard text.",
                     usage: "LV.Alert {\n    open: true\n    buttonCount: 2\n    title: \"Delete item?\"\n    primaryText: \"Delete\"\n}",
                     related: ["alert-button", "modal"]
                 }),

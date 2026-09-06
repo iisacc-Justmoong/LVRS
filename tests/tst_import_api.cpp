@@ -13,6 +13,7 @@
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickWindow>
+#include <QSGRendererInterface>
 #include <QVector>
 #include <QtPlugin>
 
@@ -431,6 +432,7 @@ private slots:
     void modal_content_action_contract_loads();
     void alert_figma_variant_contract_loads();
     void alert_action_button_padding_scopes_to_alert();
+    void alert_glass_overlay_and_input_contract();
     void menu_item_key_and_chevron_contract_loads();
     void menu_item_icon_slot_switch_contract_loads();
     void context_menu_item_action_contract_loads();
@@ -6211,6 +6213,8 @@ Item {
 
 void ImportApiTests::alert_figma_variant_contract_loads()
 {
+    QQuickWindow window;
+    window.resize(960, 720);
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
     engine.addImportPath(importBase);
@@ -6223,18 +6227,18 @@ Item {
     width: 960
     height: 720
 
-    property int expectedWidth: LV.Theme.scaleMetric(328)
+    property int expectedWidth: LV.Theme.scaleMetric(500)
     property int expectedIconSize: LV.Theme.scaleMetric(64)
-    property int expectedTopPadding: LV.Theme.scaleMetric(32)
+    property int expectedTopPadding: LV.Theme.scaleMetric(46)
     property int expectedSidePadding: LV.Theme.gap24
-    property int expectedSectionSpacing: LV.Theme.gap8
-    property int expectedActionSpacing: LV.Theme.gap12
-    property int expectedCardRadius: LV.Theme.radiusLg
-    property real expectedButtonVerticalPadding: LV.Theme.scaleRealMetric(4.5)
-    property real expectedButtonHeight: LV.Theme.textBodyLineHeight
-                                                + (expectedButtonVerticalPadding * 2)
-    property color expectedCardColor: LV.Theme.panelBackground07
-    property color expectedTextColor: LV.Theme.bodyColor
+    property int expectedSectionSpacing: LV.Theme.scaleMetric(28)
+    property int expectedActionSpacing: LV.Theme.gap14
+    property int expectedCardRadius: LV.Theme.scaleMetric(36)
+    property real expectedButtonVerticalPadding: 0
+    property real expectedButtonHeight: LV.Theme.scaleMetric(56)
+    property color expectedCardColor: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)
+    property color expectedTitleColor: "#F4F5F7"
+    property color expectedTextColor: "#D6D9DF"
 
     LV.Alert {
         id: twoActionAlert
@@ -6269,6 +6273,11 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
+
+    auto *host = qobject_cast<QQuickItem *>(root.data());
+    QVERIFY(host);
+    host->setParentItem(window.contentItem());
+    window.show();
 
     QObject *twoActionAlert = root->findChild<QObject *>(QStringLiteral("twoActionAlert"));
     QObject *threeActionAlert = root->findChild<QObject *>(QStringLiteral("threeActionAlert"));
@@ -6345,22 +6354,32 @@ Item {
     }
 
     for (QQuickItem *icon : {twoIcon, threeIcon}) {
-        QVERIFY(qAbs(icon->width() - expectedIconSize) < 0.01);
-        QVERIFY(qAbs(icon->height() - expectedIconSize) < 0.01);
-        QVERIFY(icon->property("source").toUrl().toString().endsWith(
-            QStringLiteral("/resources/images/alertAppIcon.png")));
+        const qreal size = icon == twoIcon ? expectedIconSize : 56;
+        QVERIFY(qAbs(icon->width() - size) < 0.01);
+        QVERIFY(qAbs(icon->height() - size) < 0.01);
+        QVERIFY(icon->property("source").toUrl().toString().endsWith(icon == twoIcon
+            ? QStringLiteral("/resources/images/alert-adjustments.svg")
+            : QStringLiteral("/resources/images/alert-file-text.svg")));
         QTRY_COMPARE(icon->property("status").toInt(), 1);
     }
 
-    for (QQuickItem *label : {twoTitle, threeTitle, twoMessage, threeMessage})
+    for (QQuickItem *label : {twoTitle, threeTitle}) {
+        QCOMPARE(label->property("color").value<QColor>(),
+                 root->property("expectedTitleColor").value<QColor>());
+        QCOMPARE(label->property("stylePixelSize").toInt(), 26);
+    }
+    for (QQuickItem *label : {twoMessage, threeMessage}) {
         QCOMPARE(label->property("color").value<QColor>(), expectedTextColor);
+        QCOMPARE(label->property("stylePixelSize").toInt(), 13);
+    }
 
     QVERIFY(twoHorizontalActions->isVisible());
     QVERIFY(!twoVerticalActions->isVisible());
     QVERIFY(!threeHorizontalActions->isVisible());
     QVERIFY(threeVerticalActions->isVisible());
     QVERIFY(qAbs(twoHorizontalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
-    QVERIFY(qAbs(threeVerticalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
+    QCOMPARE(threeVerticalActions->property("spacing").toReal(), qreal(12));
+    QVERIFY(twoSecondary->x() < twoPrimary->x());
     QVERIFY(qAbs(twoHorizontalActions->x() - expectedSidePadding) < 0.01);
     QVERIFY(qAbs(threeVerticalActions->x() - expectedSidePadding) < 0.01);
 
@@ -6369,6 +6388,7 @@ Item {
     for (QQuickItem *button : {twoPrimary, twoSecondary}) {
         QVERIFY(qAbs(button->width() - expectedHorizontalButtonWidth) < 0.01);
         QVERIFY(qAbs(button->height() - expectedButtonHeight) < 0.01);
+        QCOMPARE(button->property("cornerRadius").toReal(), qreal(16));
         QVERIFY(qAbs(button->property("verticalPadding").toReal()
                      - expectedButtonVerticalPadding) < 0.01);
     }
@@ -6376,17 +6396,38 @@ Item {
     const qreal expectedVerticalButtonWidth = expectedWidth - (expectedSidePadding * 2);
     for (QQuickItem *button : {threePrimary, threeSecondary, threeTertiary}) {
         QVERIFY(qAbs(button->width() - expectedVerticalButtonWidth) < 0.01);
-        QVERIFY(qAbs(button->height() - expectedButtonHeight) < 0.01);
+        const qreal expectedHeight = button == threeTertiary ? 44 : expectedButtonHeight;
+        QVERIFY(qAbs(button->height() - expectedHeight) < 0.01);
+        QCOMPARE(button->property("cornerRadius").toReal(), qreal(16));
         QVERIFY(qAbs(button->property("verticalPadding").toReal()
                      - expectedButtonVerticalPadding) < 0.01);
     }
 
-    QVERIFY(qAbs(twoCard->height() - twoContent->height()) < 0.01);
-    QVERIFY(qAbs(threeCard->height() - threeContent->height()) < 0.01);
-    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(22));
-    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(26));
-    QTRY_COMPARE(twoCard->height(), qreal(242));
-    QTRY_COMPARE(threeCard->height(), qreal(310));
+    QTRY_COMPARE(twoContent->height(), qreal(300));
+    QTRY_COMPARE(threeContent->height(), qreal(300));
+    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(34));
+    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(56));
+    QTRY_COMPARE(twoCard->height(), qreal(417));
+    QTRY_COMPARE(threeCard->height(), qreal(517));
+    QCOMPARE(threeSecondary->property("textColor").value<QColor>(), QColor("#ff453a"));
+    QCOMPARE(twoSecondary->property("textColor").value<QColor>(), QColor("#f4f5f7"));
+    QCOMPARE(threeTertiary->property("backgroundColor").value<QColor>(), QColor(Qt::transparent));
+
+    // Narrow hosts must remain contained even below the preferred minimum.
+    QVERIFY(root->setProperty("width", 448));
+    QTRY_COMPARE(twoCard->width(), qreal(400));
+    QVERIFY(root->setProperty("width", 240));
+    QTRY_VERIFY(twoCard->width() <= 192);
+    QVERIFY(root->setProperty("width", 960));
+    QTRY_COMPARE(twoCard->width(), qreal(500));
+
+    // Hidden icons release their frame and the adjacent gap; copy may grow.
+    QVERIFY(twoActionAlert->setProperty("showIcon", false));
+    QTRY_COMPARE(twoCard->height(), qreal(303));
+    QVERIFY(twoActionAlert->setProperty("showIcon", true));
+    QTRY_COMPARE(twoCard->height(), qreal(417));
+    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("First line\nSecond line\nThird line")));
+    QTRY_VERIFY(twoCard->height() > 417);
 }
 
 void ImportApiTests::alert_action_button_padding_scopes_to_alert()
@@ -6403,10 +6444,9 @@ Item {
     width: 960
     height: 720
 
-    property real expectedAlertVerticalPadding: LV.Theme.scaleRealMetric(4.5)
+    property real expectedAlertVerticalPadding: 0
     property int expectedDefaultVerticalPadding: LV.Theme.gap4
-    property real expectedAlertButtonHeight: LV.Theme.textBodyLineHeight
-                                                + (expectedAlertVerticalPadding * 2)
+    property real expectedAlertButtonHeight: LV.Theme.scaleMetric(56)
     property int expectedDefaultButtonHeight: LV.Theme.gap20
 
     LV.Alert {
@@ -6485,7 +6525,7 @@ Item {
     QVERIFY(qAbs(alertTertiary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
     QVERIFY(qAbs(alertPrimary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
     QVERIFY(qAbs(alertSecondary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
-    QVERIFY(qAbs(alertTertiary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+    QCOMPARE(alertTertiary->property("height").toDouble(), 44.0);
 
     QCOMPARE(modalPrimary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
     QCOMPARE(modalSecondary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
@@ -6496,6 +6536,157 @@ Item {
 
     QCOMPARE(standaloneAlertButton->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
     QVERIFY(qAbs(standaloneAlertButton->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+}
+
+void ImportApiTests::alert_glass_overlay_and_input_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Controls as Controls
+import LVRS as LV
+
+Controls.ApplicationWindow {
+    id: window
+    width: 620
+    height: 640
+    visible: true
+    property int backgroundClicks: 0
+    Rectangle {
+        anchors.fill: parent
+        color: "#478DE2"
+        Repeater {
+            model: 104
+            Rectangle {
+                required property int index
+                x: index * 6
+                width: 3
+                height: 640
+                color: "#F0D189"
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: window.backgroundClicks++
+        }
+    }
+    LV.Alert {
+        objectName: "glassAlert"
+        open: true
+        buttonCount: 3
+        title: "Save changes?"
+        message: "You have unsaved changes.\nSave them before closing?"
+        primaryText: "Save changes"
+        secondaryText: "Discard changes"
+        tertiaryText: "Cancel"
+    }
+}
+)";
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    auto *alert = root->findChild<QQuickItem *>("glassAlert");
+    QVERIFY(alert);
+    auto *card = alert->findChild<QQuickItem *>("alertCard");
+    auto *capture = alert->findChild<QQuickItem *>("alertGlassCapture");
+    auto *secondary = alert->findChild<QQuickItem *>("alertSecondaryVertical");
+    auto *primary = alert->findChild<QQuickItem *>("alertPrimaryVertical");
+    auto *tertiary = alert->findChild<QQuickItem *>("alertTertiaryVertical");
+    QVERIFY(card && capture && secondary && primary && tertiary);
+    QTRY_VERIFY(alert->property("glassActive").toBool());
+    QVERIFY(!capture->property("recursive").toBool());
+    QVERIFY(capture->property("live").toBool());
+    QCOMPARE(capture->property("sourceRect").toRectF().size(), card->size());
+    QCOMPARE(card->opacity(), 1.0);
+
+    auto grab = [window]() -> QImage {
+        QTest::qWait(120);
+        const auto result = window->contentItem()->grabToImage(window->size());
+        if (!result)
+            return {};
+        QElapsedTimer timer;
+        timer.start();
+        while (result->image().isNull() && timer.elapsed() < 5000)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+        return result->image().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
+    };
+    const QImage frosted = grab();
+    QVERIFY(!frosted.isNull());
+    QVERIFY(alert->setProperty("glassEnabled", false));
+    const QImage unblurred = grab();
+    QVERIFY(!unblurred.isNull());
+    const QString outputDir = qEnvironmentVariable("LVRS_ALERT_CAPTURE_DIR");
+    if (!outputDir.isEmpty()) {
+        QVERIFY(QDir().mkpath(outputDir));
+        QVERIFY(frosted.save(outputDir + "/alert-three-actions.png"));
+        QVERIFY(unblurred.save(outputDir + "/alert-without-blur.png"));
+    }
+    const QPoint cardTopLeft = scenePoint(card, QPointF(0, 0));
+    const QRect probe(cardTopLeft + QPoint(45, 25), QSize(65, 30));
+    auto variation = [&probe](const QImage &image) {
+        double sum = 0;
+        for (int y = probe.top(); y <= probe.bottom(); ++y) {
+            for (int x = probe.left(); x < probe.right(); ++x) {
+                sum += qAbs(qGray(image.pixel(x, y)) - qGray(image.pixel(x + 1, y)));
+            }
+        }
+        return sum;
+    };
+    QVERIFY2(variation(unblurred) > 1000, "The backdrop fixture must contain visible fine detail.");
+    qInfo() << "Backdrop detail: glass" << variation(frosted)
+            << "unblurred" << variation(unblurred);
+    if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
+        QCOMPARE(variation(frosted), variation(unblurred));
+        qInfo() << "Software renderer: tint fallback verified; native RHI is required for frost.";
+    } else {
+        QVERIFY2(variation(frosted) < variation(unblurred) * 0.35,
+                 "Glass must blur the actual window content, not merely add a translucent tint.");
+    }
+    int redTextPixels = 0;
+    const QPoint buttonOrigin = scenePoint(secondary, QPointF(0, 0));
+    for (int y = buttonOrigin.y(); y < buttonOrigin.y() + secondary->height(); ++y) {
+        for (int x = buttonOrigin.x(); x < buttonOrigin.x() + secondary->width(); ++x) {
+            const QColor pixel = frosted.pixelColor(x, y);
+            if (pixel.red() > 150 && pixel.red() > pixel.green() * 1.5 && pixel.blue() < 130)
+                ++redTextPixels;
+        }
+    }
+    QVERIFY2(redTextPixels > 20, "Discard text must remain sharp and red over the glass.");
+    QVERIFY(alert->setProperty("glassEnabled", true));
+
+    QSignalSpy primarySpy(alert, SIGNAL(primaryClicked()));
+    QSignalSpy secondarySpy(alert, SIGNAL(secondaryClicked()));
+    QSignalSpy tertiarySpy(alert, SIGNAL(tertiaryClicked()));
+    QSignalSpy dismissSpy(alert, SIGNAL(dismissed()));
+    for (QQuickItem *button : {primary, secondary, tertiary})
+        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+                         scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
+    QCOMPARE(primarySpy.count(), 1);
+    QCOMPARE(secondarySpy.count(), 1);
+    QCOMPARE(tertiarySpy.count(), 1);
+    QVERIFY(alert->property("open").toBool());
+    QVERIFY(alert->setProperty("secondaryEnabled", false));
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+                     scenePoint(secondary, QPointF(50, 20)));
+    QCOMPARE(secondarySpy.count(), 1);
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
+    QCOMPARE(root->property("backgroundClicks").toInt(), 0);
+    QCOMPARE(dismissSpy.count(), 0);
+    QVERIFY(alert->setProperty("dismissOnBackground", true));
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
+    QCOMPARE(dismissSpy.count(), 1);
+    QVERIFY(!alert->property("open").toBool());
+    QVERIFY(!capture->property("live").toBool());
+    QVERIFY(!capture->property("sourceItem").value<QQuickItem *>());
+
+    QVERIFY(alert->setProperty("open", true));
+    QTRY_VERIFY(alert->property("glassActive").toBool());
+    QVERIFY(alert->setProperty("useOverlayLayer", false));
+    QTRY_VERIFY(!alert->property("glassActive").toBool());
+    QVERIFY(alert->setProperty("useOverlayLayer", true));
+    QTRY_VERIFY(alert->property("glassActive").toBool());
 }
 
 void ImportApiTests::menu_item_key_and_chevron_contract_loads()

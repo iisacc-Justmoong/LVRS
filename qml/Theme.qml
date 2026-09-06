@@ -156,6 +156,16 @@ QtObject {
     readonly property color dangerOverlay: "#59FF453A"
     readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
+    // Alert / Material tokens from Figma 106:283. Typography stays on Title/Body.
+    readonly property color alertGlassTint: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)
+    readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)
+    readonly property color alertTitleColor: "#F4F5F7"
+    readonly property color alertBodyColor: "#D6D9DF"
+    readonly property color alertActionPrimary: "#027DFF"
+    readonly property color alertActionBorder: "#596168"
+    readonly property color alertDivider: "#363B3F"
+    readonly property color alertIconSurface: "#192840"
+    readonly property color alertIconBorder: "#244B7E"
     readonly property color strokeSoft: "#D0D7E2"
     // Accent palette (all fill/stroke colors found in resources/iconset)
     readonly property color accentTransparent: "transparent" // none
