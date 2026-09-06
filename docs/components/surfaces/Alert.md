@@ -8,8 +8,10 @@ updated on 2026-09-06.
 
 ## API
 
-- State/content: `open`, `title`, `message`, `buttonCount` (`0=auto`, `2`, `3`),
-  `primaryText`, `secondaryText`, `tertiaryText`.
+- State/content: `open`, `imageSource`, `title`, `description`,
+  `buttonCount` (`0=auto`, `2`, `3`).
+- Action arguments: `button1Text`, `button1Method`, `button2Text`, `button2Method`,
+  `button3Text`, `button3Method`.
 - Enabled states: `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`.
 - Behavior: `dismissOnBackground`, `useOverlayLayer`, `secondaryDestructive`.
 - Size/shape: `minWidth`, `maxWidth`, `preferredWidth`, `cardCornerRadius`,
@@ -22,7 +24,40 @@ updated on 2026-09-06.
 
 Existing action signals and auto-count behavior remain compatible: tertiary text
 selects three actions, secondary text selects two, and no secondary/tertiary text
-selects one. Actions emit signals; the caller controls closing.
+selects one. Actions run the supplied method and emit the existing signal; the
+caller controls closing.
+
+### Content and action arguments
+
+| Argument | Type | Existing property / action |
+| --- | --- | --- |
+| `imageSource` | URL | Alias of `appIconSource`; rendered in the central image frame |
+| `title` | string | Centered title |
+| `description` | string | Alias of `message`; centered description |
+| `button1Text` | string | Alias of `primaryText` |
+| `button1Method` | callable, default `null` | Primary action; `primaryClicked()` still fires |
+| `button2Text` | string | Alias of `secondaryText` |
+| `button2Method` | callable, default `null` | Secondary action; `secondaryClicked()` still fires |
+| `button3Text` | string | Alias of `tertiaryText` |
+| `button3Method` | callable, default `null` | Tertiary action; `tertiaryClicked()` still fires |
+
+Aliases share the same value with the existing properties, including updates
+after creation. Button numbers identify their action roles: button 1 is the
+primary action on the right in the two-button layout and at the top in the
+three-button layout. Button 2 is secondary; button 3 is the final/cancel action.
+Set `button3Text: ""` for two actions and also `button2Text: ""` for one action
+when `buttonCount` is automatic. Supplying a method does not change the count.
+
+Each method is passed directly to the existing `AlertButton.method` API. It
+accepts a JavaScript function or an object exposing `invoke(eventData)` or
+`trigger(eventData)`, using the shared `ButtonMethodRegistry`. `eventData.source`
+is the clicked button, `eventData.trigger` is `"clicked"`, and the enabled-state
+and tone fields follow [AbstractButton](../control/AbstractButton.md).
+Methods may omit the argument. Wrap an application method when it needs its
+own receiver, for example `function() { documentController.save() }`.
+Methods can be replaced or cleared with `null` after creation. An omitted method
+leaves the signal-only API available. Keep each operation in either its method
+or its signal handler to avoid running the same application operation twice.
 
 ## Figma layout and typography
 
@@ -83,7 +118,7 @@ graphics backend; software rendering retains the tint but cannot supply frost.
 
 Background input is consumed while open. A backdrop click dismisses only when
 `dismissOnBackground` is true; clicking blank card space never dismisses.
-Disabled actions do not emit click signals.
+Disabled actions do not invoke methods or emit click signals.
 
 ## Usage
 
@@ -91,24 +126,39 @@ Disabled actions do not emit click signals.
 import LVRS 1.0 as LV
 
 LV.Alert {
+    id: saveAlert
     open: true
     buttonCount: 3
+    imageSource: "qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg"
     title: "Save changes?"
-    message: "You have unsaved changes.\nSave them before closing?"
-    primaryText: "Save changes"
-    secondaryText: "Discard changes"
-    tertiaryText: "Cancel"
-    onPrimaryClicked: { /* save, then close */ }
-    onSecondaryClicked: { /* discard, then close */ }
+    description: "You have unsaved changes.\nSave them before closing?"
+    button1Text: "Save changes"
+    button1Method: function() {
+        documentController.save()
+        saveAlert.open = false
+    }
+    button2Text: "Discard changes"
+    button2Method: function() {
+        documentController.discard()
+        saveAlert.open = false
+    }
+    button3Text: "Cancel"
+    button3Method: function() { saveAlert.open = false }
 }
 ```
+
+`documentController` is supplied by the application. The image URL can point to
+a Qt resource, a local file, or a remote image supported by Qt Quick `Image`.
 
 ## Validation
 
 `LVRSTests_import_api` checks the Figma geometry, Title/Body tokens, action
 ordering, non-capsule corners, icon exports, width containment, icon visibility,
 long-copy growth, isolated button defaults, actual backdrop blur, red Discard
-pixels, click signals, modal input blocking, and capture lifecycle.
+pixels, click signals, modal input blocking, and capture lifecycle. It also
+checks content arguments and live aliases, image loading, all six rendered
+action positions across one/two/three-button layouts, function/command methods,
+method replacement, disabled actions, and compatibility with signal handlers.
 
 Run with a supported graphics backend:
 

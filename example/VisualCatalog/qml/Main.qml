@@ -1754,16 +1754,19 @@ LV.ApplicationWindow {
                 LV.Alert {
                     open: preview.alertOpen
                     buttonCount: preview.alertButtonCount
+                    imageSource: buttonCount === 3
+                        ? "qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg"
+                        : "qrc:/qt/qml/LVRS/resources/images/alert-adjustments.svg"
                     title: buttonCount === 3 ? "Save changes?" : "Apply changes?"
-                    message: buttonCount === 3
+                    description: buttonCount === 3
                         ? "You have unsaved changes.\nSave them before closing?"
                         : "Your new settings will be applied\nto this workspace."
-                    primaryText: buttonCount === 3 ? "Save changes" : "Apply changes"
-                    secondaryText: buttonCount === 3 ? "Discard changes" : "Cancel"
-                    tertiaryText: buttonCount === 3 ? "Cancel" : ""
-                    onPrimaryClicked: preview.alertOpen = false
-                    onSecondaryClicked: preview.alertOpen = false
-                    onTertiaryClicked: preview.alertOpen = false
+                    button1Text: buttonCount === 3 ? "Save changes" : "Apply changes"
+                    button2Text: buttonCount === 3 ? "Discard changes" : "Cancel"
+                    button3Text: buttonCount === 3 ? "Cancel" : ""
+                    button1Method: function() { preview.alertOpen = false }
+                    button2Method: function() { preview.alertOpen = false }
+                    button3Method: function() { preview.alertOpen = false }
                     onDismissed: preview.alertOpen = false
                 }
             }

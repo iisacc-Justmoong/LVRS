@@ -431,6 +431,9 @@ private slots:
     void modal_empty_frame_contract_loads();
     void modal_content_action_contract_loads();
     void alert_figma_variant_contract_loads();
+    void alert_content_arguments_contract_loads();
+    void alert_button_methods_are_invoked_data();
+    void alert_button_methods_are_invoked();
     void alert_action_button_padding_scopes_to_alert();
     void alert_glass_overlay_and_input_contract();
     void menu_item_key_and_chevron_contract_loads();
@@ -6428,6 +6431,186 @@ Item {
     QTRY_COMPARE(twoCard->height(), qreal(417));
     QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("First line\nSecond line\nThird line")));
     QTRY_VERIFY(twoCard->height() > 417);
+}
+
+void ImportApiTests::alert_content_arguments_contract_loads()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+LV.Alert {
+    width: 640
+    height: 720
+    open: true
+    useOverlayLayer: false
+    glassEnabled: false
+    imageSource: "qrc:/qt/qml/LVRS/resources/images/alert-adjustments.svg"
+    title: "Save this document?"
+    description: "The document contains unsaved changes."
+    button1Text: "Save"
+    button2Text: "Discard"
+    button3Text: "Cancel"
+}
+)";
+    QScopedPointer<QObject> alert(createFromQml(engine, qml));
+    QVERIFY(alert);
+    auto *image = alert->findChild<QQuickItem *>("alertAppIcon");
+    auto *title = alert->findChild<QQuickItem *>("alertTitle");
+    auto *description = alert->findChild<QQuickItem *>("alertMessage");
+    QVERIFY(image && title && description);
+    QCOMPARE(image->property("source").toUrl(), alert->property("imageSource").toUrl());
+    QTRY_COMPARE(image->property("status").toInt(), 1); // Image.Ready
+    QCOMPARE(title->property("text").toString(), QStringLiteral("Save this document?"));
+    QCOMPARE(description->property("text").toString(),
+             QStringLiteral("The document contains unsaved changes."));
+    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 3);
+
+    const QList<QByteArray> legacyTexts = {"primaryText", "secondaryText", "tertiaryText"};
+    const QStringList buttonNames = {"alertPrimaryVertical", "alertSecondaryVertical",
+                                     "alertTertiaryVertical"};
+    for (int index = 0; index < 3; ++index) {
+        const QByteArray textProperty = "button" + QByteArray::number(index + 1) + "Text";
+        auto *button = alert->findChild<QQuickItem *>(buttonNames.at(index));
+        QVERIFY(button);
+        QCOMPARE(button->property("text"), alert->property(textProperty.constData()));
+        QCOMPARE(alert->property(legacyTexts.at(index).constData()),
+                 alert->property(textProperty.constData()));
+        const QString updatedText = QStringLiteral("Updated action %1").arg(index + 1);
+        QVERIFY(alert->setProperty(textProperty.constData(), updatedText));
+        QCOMPARE(button->property("text").toString(), updatedText);
+    }
+
+    const QUrl replacementIcon("qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg");
+    QVERIFY(alert->setProperty("appIconSource", replacementIcon));
+    QCOMPARE(alert->property("imageSource").toUrl(), replacementIcon);
+    QCOMPARE(image->property("source").toUrl(), replacementIcon);
+    QTRY_COMPARE(image->property("status").toInt(), 1);
+    QVERIFY(alert->setProperty("message", QStringLiteral("Updated through the legacy API.")));
+    QCOMPARE(alert->property("description").toString(),
+             QStringLiteral("Updated through the legacy API."));
+    QCOMPARE(description->property("text"), alert->property("description"));
+    QVERIFY(alert->setProperty("description", QStringLiteral("Updated description.")));
+    QCOMPARE(alert->property("message"), alert->property("description"));
+    QCOMPARE(description->property("text"), alert->property("description"));
+    QVERIFY(alert->setProperty("button3Text", QString()));
+    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 2);
+    QVERIFY(alert->setProperty("secondaryText", QString()));
+    QCOMPARE(alert->property("button2Text").toString(), QString());
+    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 1);
+}
+
+void ImportApiTests::alert_button_methods_are_invoked_data()
+{
+    QTest::addColumn<int>("buttonCount");
+    QTest::addColumn<int>("buttonIndex");
+    QTest::addColumn<QString>("buttonName");
+    QTest::newRow("single-primary") << 1 << 1 << QStringLiteral("alertPrimarySingle");
+    QTest::newRow("horizontal-primary") << 2 << 1 << QStringLiteral("alertPrimaryHorizontal");
+    QTest::newRow("horizontal-secondary") << 2 << 2 << QStringLiteral("alertSecondaryHorizontal");
+    QTest::newRow("vertical-primary") << 3 << 1 << QStringLiteral("alertPrimaryVertical");
+    QTest::newRow("vertical-secondary") << 3 << 2 << QStringLiteral("alertSecondaryVertical");
+    QTest::newRow("vertical-tertiary") << 3 << 3 << QStringLiteral("alertTertiaryVertical");
+}
+
+void ImportApiTests::alert_button_methods_are_invoked()
+{
+    QFETCH(int, buttonCount);
+    QFETCH(int, buttonIndex);
+    QFETCH(QString, buttonName);
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    engine.rootContext()->setContextProperty("testButtonCount", buttonCount);
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Controls as Controls
+import LVRS as LV
+
+Controls.ApplicationWindow {
+    id: window
+    width: 640
+    height: 720
+    visible: true
+    property int methodCalls: 0
+    property int signalCalls: 0
+    property int replacementCalls: 0
+    property int lastIndex: 0
+    property var lastSource: null
+    property string lastTrigger: ""
+    property bool lastEnabled: false
+
+    function record(index, eventData) {
+        methodCalls++
+        lastIndex = index
+        lastSource = eventData.source
+        lastTrigger = eventData.trigger
+        lastEnabled = eventData.enabled && eventData.effectiveEnabled
+    }
+
+    function replaceMethod(index) {
+        alert["button" + index + "Method"] = function(eventData) {
+            window.replacementCalls++
+            window.record(index, eventData)
+        }
+    }
+
+    LV.Alert {
+        id: alert
+        objectName: "argumentAlert"
+        open: true
+        glassEnabled: false
+        buttonCount: testButtonCount === 1 ? 0 : testButtonCount
+        button1Text: "Save"
+        button2Text: testButtonCount >= 2 ? "Discard" : ""
+        button3Text: testButtonCount >= 3 ? "Cancel" : ""
+        button1Method: function(eventData) { window.record(1, eventData) }
+        button2Method: ({ invoke: function(eventData) { window.record(2, eventData) } })
+        button3Method: ({ trigger: function(eventData) { window.record(3, eventData) } })
+        onPrimaryClicked: window.signalCalls++
+        onSecondaryClicked: window.signalCalls++
+        onTertiaryClicked: window.signalCalls++
+    }
+}
+)";
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    auto *alert = root->findChild<QQuickItem *>("argumentAlert");
+    QVERIFY(window && alert);
+    auto *button = alert->findChild<QQuickItem *>(buttonName);
+    QVERIFY(button);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    QTRY_VERIFY(button->isVisible());
+    QCOMPARE(alert->property("resolvedButtonCount").toInt(), buttonCount);
+    auto clickButton = [&]() {
+        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+                         scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
+    };
+    clickButton();
+    QCOMPARE(root->property("methodCalls").toInt(), 1);
+    QCOMPARE(root->property("signalCalls").toInt(), 1);
+    QCOMPARE(root->property("lastIndex").toInt(), buttonIndex);
+    QCOMPARE(root->property("lastSource").value<QObject *>(), button);
+    QCOMPARE(root->property("lastTrigger").toString(), QStringLiteral("clicked"));
+    QVERIFY(root->property("lastEnabled").toBool());
+    QVERIFY(alert->property("open").toBool());
+
+    const QList<QByteArray> enabledProperties = {"primaryEnabled", "secondaryEnabled", "tertiaryEnabled"};
+    const QByteArray enabledProperty = enabledProperties.at(buttonIndex - 1);
+    QVERIFY(alert->setProperty(enabledProperty.constData(), false));
+    clickButton();
+    QCOMPARE(root->property("methodCalls").toInt(), 1);
+    QCOMPARE(root->property("signalCalls").toInt(), 1);
+
+    QVERIFY(alert->setProperty(enabledProperty.constData(), true));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "replaceMethod", Q_ARG(QVariant, buttonIndex)));
+    clickButton();
+    QCOMPARE(root->property("methodCalls").toInt(), 2);
+    QCOMPARE(root->property("replacementCalls").toInt(), 1);
+    QCOMPARE(root->property("signalCalls").toInt(), 2);
+    QCOMPARE(root->property("lastIndex").toInt(), buttonIndex);
 }
 
 void ImportApiTests::alert_action_button_padding_scopes_to_alert()

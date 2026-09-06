@@ -9,11 +9,19 @@ Item {
     property bool open: false
     property string title: "Alert Dialog"
     property string message: "It can have 2 or 3 actions depending on your needs."
+    property alias description: root.message
     // 0 = auto(legacy by text presence), 2 or 3 = explicit Figma variant selection.
     property int buttonCount: 0
     property string primaryText: "Button"
     property string secondaryText: "Button"
     property string tertiaryText: ""
+    // Numbered arguments keep the existing primary/secondary/tertiary roles.
+    property alias button1Text: root.primaryText
+    property alias button2Text: root.secondaryText
+    property alias button3Text: root.tertiaryText
+    property var button1Method: null
+    property var button2Method: null
+    property var button3Method: null
     property bool primaryEnabled: true
     property bool secondaryEnabled: true
     property bool tertiaryEnabled: true
@@ -51,6 +59,7 @@ Item {
     property url appIconSource: hasTertiaryAction
         ? "qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg"
         : "qrc:/qt/qml/LVRS/resources/images/alert-adjustments.svg"
+    property alias imageSource: root.appIconSource
     property int appIconSize: Theme.scaleMetric(hasTertiaryAction ? 56 : 64)
     property int iconFrameSize: Math.max(Theme.scaleMetric(86), appIconSize)
     property color appIconBackgroundColor: Theme.alertIconSurface
@@ -353,6 +362,7 @@ Item {
                         objectName: "alertPrimaryVertical"
                         width: parent.width
                         text: root.resolvedPrimaryText
+                        method: root.button1Method
                         tone: AbstractButton.Primary
                         dialogStyle: true
                         verticalPadding: root.actionButtonVerticalPadding
@@ -365,6 +375,7 @@ Item {
                         objectName: "alertSecondaryVertical"
                         width: parent.width
                         text: root.resolvedSecondaryText
+                        method: root.button2Method
                         dialogStyle: true
                         textColor: root.secondaryDestructive ? Theme.danger : Theme.alertTitleColor
                         verticalPadding: root.actionButtonVerticalPadding
@@ -377,6 +388,7 @@ Item {
                         objectName: "alertTertiaryVertical"
                         width: parent.width
                         text: root.resolvedTertiaryText
+                        method: root.button3Method
                         tone: AbstractButton.Borderless
                         dialogStyle: true
                         verticalPadding: root.actionButtonVerticalPadding
@@ -400,6 +412,7 @@ Item {
                         objectName: "alertSecondaryHorizontal"
                         width: horizontalActions.buttonWidth
                         text: root.resolvedSecondaryText
+                        method: root.button2Method
                         dialogStyle: true
                         textColor: root.secondaryDestructive ? Theme.danger : Theme.alertTitleColor
                         horizontalPadding: Theme.gap12
@@ -413,6 +426,7 @@ Item {
                         objectName: "alertPrimaryHorizontal"
                         width: horizontalActions.buttonWidth
                         text: root.resolvedPrimaryText
+                        method: root.button1Method
                         tone: AbstractButton.Primary
                         dialogStyle: true
                         horizontalPadding: Theme.gap12
@@ -431,6 +445,7 @@ Item {
                     y: actionSection.topPadding
                     width: Math.max(0, parent.width - root.sidePadding * 2)
                     text: root.resolvedPrimaryText
+                    method: root.button1Method
                     tone: AbstractButton.Primary
                     dialogStyle: true
                     verticalPadding: root.actionButtonVerticalPadding
@@ -454,11 +469,16 @@ Item {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.Alert {
+//     id: saveAlert
 //     open: true
 //     buttonCount: 3
+//     imageSource: "qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg"
 //     title: "Save changes?"
-//     message: "You have unsaved changes.\nSave them before closing?"
-//     primaryText: "Save changes"
-//     secondaryText: "Discard changes"
-//     tertiaryText: "Cancel"
+//     description: "You have unsaved changes.\nSave them before closing?"
+//     button1Text: "Save changes"
+//     button1Method: function() { documentController.save(); saveAlert.open = false }
+//     button2Text: "Discard changes"
+//     button2Method: function() { documentController.discard(); saveAlert.open = false }
+//     button3Text: "Cancel"
+//     button3Method: function() { saveAlert.open = false }
 // }

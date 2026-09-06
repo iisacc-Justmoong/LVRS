@@ -729,8 +729,8 @@ QtObject {
                     docPath: "docs/components/surfaces/Alert.md",
                     previewId: "alert-surface",
                     roleLabel: "Overlay alert",
-                    summary: "Frosted glass alert with rounded actions, existing Title/Body typography, and red Discard text.",
-                    usage: "LV.Alert {\n    open: true\n    buttonCount: 2\n    title: \"Delete item?\"\n    primaryText: \"Delete\"\n}",
+                    summary: "Frosted glass alert with a configurable image, title, description, and up to three callable actions.",
+                    usage: "LV.Alert {\n    id: alert\n    open: true\n    imageSource: \"qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg\"\n    title: \"Save changes?\"\n    description: \"You have unsaved changes.\"\n    button1Text: \"Save\"\n    button1Method: function() { documentController.save(); alert.open = false }\n    button2Text: \"Discard\"\n    button2Method: function() { documentController.discard(); alert.open = false }\n    button3Text: \"Cancel\"\n    button3Method: function() { alert.open = false }\n}",
                     related: ["alert-button", "modal"]
                 }),
                 component({
