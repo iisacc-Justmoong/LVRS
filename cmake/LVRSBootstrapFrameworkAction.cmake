@@ -396,6 +396,7 @@ if(NOT LVRS_BOOTSTRAP_SYSTEM_NAME STREQUAL "Unknown")
     _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_SYSTEM_NAME" "${LVRS_BOOTSTRAP_SYSTEM_NAME}")
 endif()
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_PREFIX_PATH" "${LVRS_BOOTSTRAP_PREFIX_PATH}")
+_lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "QT_HOST_PATH" "${LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
 _lvrs_bootstrap_append_cache_arg(_lvrs_configure_cmd "CMAKE_TOOLCHAIN_FILE" "${LVRS_BOOTSTRAP_TOOLCHAIN_FILE}")
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
     _lvrs_bootstrap_append_cache_arg(

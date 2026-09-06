@@ -1112,6 +1112,10 @@ function(_lvrs_internal_detect_qt_host_prefix out_var)
         set(_lvrs_qt_host_prefix "${LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
     elseif(DEFINED ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX} AND NOT "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}" STREQUAL "")
         set(_lvrs_qt_host_prefix "$ENV{LVRS_BOOTSTRAP_QT_HOST_PREFIX}")
+    elseif(DEFINED QT_HOST_PATH AND NOT QT_HOST_PATH STREQUAL "")
+        set(_lvrs_qt_host_prefix "${QT_HOST_PATH}")
+    elseif(DEFINED ENV{QT_HOST_PATH} AND NOT "$ENV{QT_HOST_PATH}" STREQUAL "")
+        set(_lvrs_qt_host_prefix "$ENV{QT_HOST_PATH}")
     elseif(DEFINED Qt6_DIR)
         _lvrs_internal_resolve_qt_prefix_candidate("${Qt6_DIR}" _lvrs_qt_host_prefix)
     endif()
@@ -1207,6 +1211,7 @@ endfunction()
 
 function(lvrs_create_framework_bootstrap_targets)
     _lvrs_internal_framework_bootstrap_platforms(_lvrs_runtime_platforms)
+    _lvrs_internal_detect_qt_host_prefix(_lvrs_qt_host_prefix)
 
     set(_lvrs_bootstrap_root "")
     if(DEFINED LVRS_BOOTSTRAP_ROOT_DIR AND NOT LVRS_BOOTSTRAP_ROOT_DIR STREQUAL "")
@@ -1497,6 +1502,7 @@ function(lvrs_create_framework_bootstrap_targets)
                 "-DLVRS_BOOTSTRAP_PLATFORM=${_lvrs_platform}"
                 "-DLVRS_BOOTSTRAP_SYSTEM_NAME=${_lvrs_system_name}"
                 "-DLVRS_BOOTSTRAP_PREFIX_PATH=${_lvrs_combined_prefix_path_escaped}"
+                "-DLVRS_BOOTSTRAP_QT_HOST_PREFIX=${_lvrs_qt_host_prefix}"
                 "-DLVRS_BOOTSTRAP_TOOLCHAIN_FILE=${_lvrs_toolchain_file}"
                 "-DLVRS_BOOTSTRAP_GENERATOR=${_lvrs_generator}"
                 "-DLVRS_BOOTSTRAP_BUILD_TYPE=${_lvrs_bootstrap_build_type}"

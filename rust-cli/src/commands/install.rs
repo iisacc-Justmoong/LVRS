@@ -17,7 +17,7 @@ const ENV_QT6_DIR: &str = "Qt6_DIR";
 const INSTALL_SOURCE_INFO_FILE: &str = "INSTALL_SOURCE_INFO.txt";
 
 #[derive(Debug, Clone)]
-pub(crate) struct LinuxQtAutoConfig {
+pub(crate) struct QtAutoConfig {
     pub(crate) prefix: PathBuf,
     pub(crate) qt6_dir: PathBuf,
     pub(crate) source: String,
@@ -122,6 +122,7 @@ fn run_internal(
     configure_args.extend(args.cmake_args.clone());
 
     ensure_cmake_available()?;
+    let macos_qt_auto_config = configure_macos_host_qt(host_platform, &mut configure_args)?;
     let linux_qt_auto_config = ensure_linux_host_prerequisites(
         host_platform,
         &mut configure_args,
@@ -144,9 +145,12 @@ fn run_internal(
     println!("[LVRS] Examples     : {}", flag_as_number(build_examples));
     println!("[LVRS] Tests        : {}", flag_as_number(build_tests));
     println!("[LVRS] Clean mode   : forced reinstall");
-    if let Some(config) = &linux_qt_auto_config {
-        println!("[LVRS] Linux Qt     : {}", config.prefix.display());
-        println!("[LVRS] Linux Qt6_DIR: {}", config.qt6_dir.display());
+    if let Some(config) = macos_qt_auto_config
+        .as_ref()
+        .or(linux_qt_auto_config.as_ref())
+    {
+        println!("[LVRS] Host Qt      : {}", config.prefix.display());
+        println!("[LVRS] Host Qt6_DIR : {}", config.qt6_dir.display());
         println!("[LVRS] Qt detect    : {}", config.source);
     }
     if args.clean {
@@ -155,6 +159,17 @@ fn run_internal(
 
     println!("[LVRS] Cleaning build directory...");
     clean_recreate_dir(&build_dir, "build")?;
+
+    let configure_status = run_command("cmake", &configure_args);
+    if !configure_status {
+        eprintln!("[LVRS] Configure failed.");
+        eprintln!(
+            "[LVRS] If Qt is not auto-detected, pass Qt6_DIR or LVRS_BOOTSTRAP_QT_PREFIX_{}, e.g.:",
+            host_platform.to_uppercase()
+        );
+        eprintln!("       Qt6_DIR=/path/to/Qt/lib/cmake/Qt6 lvrs install");
+        bail!("configure step failed");
+    }
 
     println!("[LVRS] Cleaning previous LVRS install artifacts...");
     for path in [
@@ -182,16 +197,6 @@ fn run_internal(
         install_prefix.join("bin").join("LVRS.dll"),
     ] {
         remove_path_with_stale_fallback(&binary_path, &binary_path.display().to_string())?;
-    }
-
-    let configure_status = run_command("cmake", &configure_args);
-    if !configure_status {
-        eprintln!("[LVRS] Configure failed.");
-        eprintln!(
-            "[LVRS] If Qt is not auto-detected, pass Qt6_DIR or LVRS_BOOTSTRAP_QT_PREFIX_LINUX, e.g.:"
-        );
-        eprintln!("       Qt6_DIR=/path/to/Qt/lib/cmake/Qt6 lvrs install");
-        bail!("configure step failed");
     }
 
     let build_status = run_command(
@@ -330,7 +335,7 @@ pub(crate) fn ensure_linux_host_prerequisites(
     configure_args: &mut Vec<String>,
     user_cmake_args: &[String],
     install_linux_deps: bool,
-) -> Result<Option<LinuxQtAutoConfig>> {
+) -> Result<Option<QtAutoConfig>> {
     if host_platform != "linux" {
         ensure_cmake_available()?;
         return Ok(None);
@@ -461,6 +466,103 @@ pub(crate) fn ensure_linux_host_prerequisites(
 
     qt_install.injected = injected;
     Ok(Some(qt_install))
+}
+
+fn configure_macos_host_qt(
+    host_platform: &str,
+    configure_args: &mut Vec<String>,
+) -> Result<Option<QtAutoConfig>> {
+    if host_platform != "macos"
+        || configure_args
+            .iter()
+            .any(|arg| cmake_definition_key(arg) == Some(ENV_QT6_DIR))
+    {
+        return Ok(None);
+    }
+
+    let Some(mut config) = detect_macos_qt_install(configure_args)? else {
+        return Ok(None);
+    };
+    for (key, value) in [
+        (ENV_QT6_DIR, &config.qt6_dir),
+        ("LVRS_BOOTSTRAP_QT_PREFIX_MACOS", &config.prefix),
+    ] {
+        if inject_cmake_definition(configure_args, key, value) {
+            config.injected.push(format!("-D{key}={}", value.display()));
+        }
+    }
+    Ok(Some(config))
+}
+
+fn cmake_definition_value<'a>(args: &'a [String], key: &str) -> Option<&'a str> {
+    args.iter().rev().find_map(|arg| {
+        (cmake_definition_key(arg) == Some(key))
+            .then(|| arg.split_once('=').map(|(_, value)| value))
+            .flatten()
+    })
+}
+
+fn detect_macos_qt_install(cmake_args: &[String]) -> Result<Option<QtAutoConfig>> {
+    let from_candidate = |candidate: &Path, source: String| {
+        resolve_qt_install_candidate(candidate).map(|(prefix, qt6_dir)| QtAutoConfig {
+            prefix,
+            qt6_dir,
+            source,
+            injected: Vec::new(),
+        })
+    };
+    for key in [
+        ENV_QT6_DIR,
+        "LVRS_BOOTSTRAP_QT_PREFIX_MACOS",
+        "LVRS_BOOTSTRAP_QT_PREFIX",
+        "QT_MACOS_PREFIX",
+        "QT_HOST_PREFIX",
+        "QTDIR",
+    ] {
+        let hint = cmake_definition_value(cmake_args, key)
+            .map(|value| (value.to_owned(), format!("cmake:{key}")))
+            .or_else(|| {
+                env::var(key)
+                    .ok()
+                    .map(|value| (value, format!("env:{key}")))
+            });
+        if let Some((value, source)) = hint.filter(|(value, _)| !value.trim().is_empty()) {
+            let config = from_candidate(Path::new(value.trim()), source).with_context(|| {
+                format!("[LVRS] {key} does not point to a Qt 6 installation: {value}")
+            })?;
+            return Ok(Some(config));
+        }
+    }
+
+    for (value, source) in [
+        (
+            cmake_definition_value(cmake_args, ENV_CMAKE_PREFIX_PATH).map(str::to_owned),
+            "cmake:CMAKE_PREFIX_PATH",
+        ),
+        (
+            env::var(ENV_CMAKE_PREFIX_PATH).ok(),
+            "env:CMAKE_PREFIX_PATH",
+        ),
+    ] {
+        if let Some(value) = value {
+            for candidate in split_search_paths(&value) {
+                if let Some(config) = from_candidate(&candidate, source.to_owned()) {
+                    return Ok(Some(config));
+                }
+            }
+        }
+    }
+
+    for root in detect_qt_version_roots() {
+        for candidate in [root.join("macos"), root] {
+            if let Some(config) =
+                from_candidate(&candidate, format!("search:{}", candidate.display()))
+            {
+                return Ok(Some(config));
+            }
+        }
+    }
+    Ok(None)
 }
 
 fn collect_missing_linux_host_tools() -> Vec<&'static str> {
@@ -973,7 +1075,7 @@ fn inject_cmake_definition(args: &mut Vec<String>, key: &str, value: &Path) -> b
     true
 }
 
-fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
+fn detect_linux_qt_install() -> Option<QtAutoConfig> {
     for env_name in [
         ENV_QT6_DIR,
         "LVRS_BOOTSTRAP_QT_PREFIX_LINUX",
@@ -985,7 +1087,7 @@ fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
         if let Ok(value) = env::var(env_name) {
             for candidate in split_search_paths(&value) {
                 if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
-                    return Some(LinuxQtAutoConfig {
+                    return Some(QtAutoConfig {
                         prefix,
                         qt6_dir,
                         source: format!("env:{env_name}"),
@@ -999,7 +1101,7 @@ fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
     if let Ok(value) = env::var(ENV_CMAKE_PREFIX_PATH) {
         for candidate in split_search_paths(&value) {
             if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
-                return Some(LinuxQtAutoConfig {
+                return Some(QtAutoConfig {
                     prefix,
                     qt6_dir,
                     source: format!("env:{ENV_CMAKE_PREFIX_PATH}"),
@@ -1013,7 +1115,7 @@ fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
         for query_key in ["QT_INSTALL_LIBS", "QT_INSTALL_PREFIX"] {
             if let Some(candidate) = query_qt_install_path(tool, query_key) {
                 if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
-                    return Some(LinuxQtAutoConfig {
+                    return Some(QtAutoConfig {
                         prefix,
                         qt6_dir,
                         source: format!("{tool} -query {query_key}"),
@@ -1027,7 +1129,7 @@ fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
     for root in detect_qt_version_roots() {
         for candidate in linux_qt_prefix_candidates(&root) {
             if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
-                return Some(LinuxQtAutoConfig {
+                return Some(QtAutoConfig {
                     prefix,
                     qt6_dir,
                     source: format!("search:{}", candidate.display()),
@@ -1048,7 +1150,7 @@ fn detect_linux_qt_install() -> Option<LinuxQtAutoConfig> {
         PathBuf::from("/usr/local/lib/qt6"),
     ] {
         if let Some((prefix, qt6_dir)) = resolve_qt_install_candidate(&candidate) {
-            return Some(LinuxQtAutoConfig {
+            return Some(QtAutoConfig {
                 prefix,
                 qt6_dir,
                 source: format!("search:{}", candidate.display()),

@@ -14,6 +14,8 @@ On Windows PowerShell:
 
 `install.sh` is now a thin wrapper around Rust CLI `lvrs install`.
 Local Qt version discovery uses `/Volumes/Storage/Qt`, including the macOS, iOS, Android, and WASM kits under `6.8.3`. `QT_VERSION_ROOT` and explicit platform Qt hints remain supported.
+On macOS, `lvrs install` resolves the host kit before the first CMake configure and supplies both `Qt6_DIR` and `LVRS_BOOTSTRAP_QT_PREFIX_MACOS`. Explicit Qt hints and valid Qt entries in `CMAKE_PREFIX_PATH` take precedence over default kits; stale search-path entries do not hide the relocated default installation. The previous installed framework is removed only after configuration succeeds, so a configuration failure preserves it.
+After updating CLI sources or moving Qt, run `./install.sh` from the checkout to build the current CLI and refresh the installed `lvrs` executable. Committing source changes alone does not replace an already installed CLI binary.
 - If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
@@ -39,7 +41,7 @@ If those Linux dependencies are missing and the distro package manager is recogn
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The checkout root is `Workspace/SDK/LVRS`; the default install root is `~/.local/SDK/LVRS`. CMake uses the same default, while explicit `CMAKE_INSTALL_PREFIX`, `--prefix`, and `LVRS_INSTALL_PREFIX` overrides remain supported. Re-run `./install.sh` after moving the checkout: it recreates `build/` and records the new absolute source path in the installed snapshot.
 The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
-The installer always performs a clean reinstall by removing the previous build directory and installed LVRS artifact paths before configuring. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `rust-cli/build` and legacy `rust-cli/target` directories.
+The installer always performs a clean reinstall: it removes the previous build directory before configuring, then removes installed LVRS artifacts only after configuration succeeds. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `rust-cli/build` and legacy `rust-cli/target` directories.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`; Linux builds additionally stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: repository launchers fall back to `build/example/.../bin`, while installed source snapshots receive refreshed desktop runtimes as sibling `*.real` files beside those launchers. If `--without-examples` is used, those snapshot runtime payloads are removed.
 
@@ -249,7 +251,7 @@ WASM bootstrap emits browser artifacts and writes `LVRSWasmArtifact.cmake` entry
 Any platform without a discoverable Qt kit is skipped with a configure-time status message, and its related `bootstrap_`, `launch_`, and `export_` targets are not generated.
 Toolchain/prefix overrides:
 - `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>`
-- `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for Android deploy tooling lookup)
+- `LVRS_BOOTSTRAP_QT_HOST_PREFIX` (host Qt prefix for cross-platform configuration and Android deploy tooling lookup)
 - `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>`
 - `LVRS_BOOTSTRAP_GENERATOR_<PLATFORM>`
 - `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET` / `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>` (Apple nested-configure deployment target; the per-platform value wins)
@@ -266,6 +268,8 @@ Toolchain/prefix overrides:
 
 Both application and framework bootstrap actions propagate the optimization controls and resolved Apple deployment target to their nested platform configure. The macOS child inherits a non-empty parent `CMAKE_OSX_DEPLOYMENT_TARGET`; iOS requires the generic or iOS-specific bootstrap override so a host macOS version is never applied accidentally. Bootstrap cache arguments preserve explicit false values such as `OFF`; only a genuinely empty value is omitted. This ensures that a caller can disable platform optimizations or IPO in every nested platform configure.
 `LVRS_DIR` and package-registry policy (`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`, `CMAKE_FIND_USE_PACKAGE_REGISTRY`) are propagated automatically from the host configure cache to per-platform bootstrap reconfigure.
+Both framework and application bootstrap actions pass the resolved host Qt prefix as `QT_HOST_PATH` to child configurations, so Android and WASM can find host tools after Qt moves. `LVRS_BOOTSTRAP_QT_HOST_PREFIX` takes precedence over `QT_HOST_PATH`; otherwise the host prefix is derived from `Qt6_DIR`.
+The installed CMake package includes `LVRSBootstrapCacheArgs.cmake` beside both bootstrap actions, allowing downstream projects to use these targets without the LVRS checkout.
 When the host build consumes LVRS from an installed multi-platform prefix, bootstrap rewrites `LVRS_DIR` to the requested platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so iOS/Android/WASM toolchains do not depend on root-prefix package discovery.
 LVRS package config exports platform/toolchain hint variables for scripts:
 - `LVRS_LAYOUT_VERSION`
