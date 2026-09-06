@@ -105,7 +105,7 @@ Icon slot visibility defaults to the menu-level `showIconSlot` value. Individual
 ## Visual Contract
 
 - Figma source: node `110:857` (`Menu`), composed from nodes `107:498` and `110:853`.
-- Default desktop item width is `145`, producing a `161px` popup width with `8px` left/right padding. The mobile `2x` metric policy resolves these values to item width `290` and popup width `322`.
+- Desktop and mobile use item width `145`, producing a `161px` popup width with `8px` left/right padding.
 - Popup chrome uses `Theme.panelBackground03`, `Theme.radiusMd`, `Theme.gap8` horizontal padding, and `Theme.gap4` vertical padding.
 - Rows are stacked with `Theme.gap2` between entries.
 - Eight `24px` items plus two `3px` dividers resolve to the measured `161 x 224` Figma frame.

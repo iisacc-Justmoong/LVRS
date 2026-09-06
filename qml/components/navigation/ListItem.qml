@@ -6,10 +6,26 @@ AbstractButton {
 
     enum ItemSize {
         Mini,
-        Detail
+        Detail,
+        Navigation,
+        Toggle,
+        Checkable,
+        Action,
+        ActionGroup,
+        Stepper,
+        Select,
+        InlineEdit,
+        DetailActions,
+        DetailQuantity,
+        DetailSettings,
+        Resource,
+        Media,
+        Task,
+        Form
     }
 
-    property int size: ListItem.Mini
+    property int type: ListItem.Mini
+    property alias size: control.type
 
     property string label: "Label"
     // Legacy field retained as the detail-variant title.
@@ -30,6 +46,191 @@ AbstractButton {
     property string folderIconName: "folder@14x14"
     property string tagIconName: "vcscurrentBranch"
 
+    property string description: "Supporting text"
+    property string value: "Value"
+    property string metadata1: "Metadata"
+    property string metadata2: "Status"
+    property string statusText: "Draft"
+    property string quantityLabel: "Quantity label"
+    property string optionLabel: "Apply to all"
+    property string modeLabel: "Mode label"
+    property string scopeLabel: "Scope label"
+    property string durationText: "03:42"
+    property string mediaDetail: "WAV · 48 kHz"
+    property string fieldLabel1: "Field 1 label"
+    property string fieldLabel2: "Field 2 label"
+    property string inputText1: "Value"
+    property string inputText2: "Value"
+    property string previewIconName: "nodesfolder"
+    property url previewSource: ""
+    property string trailingIconName: "generalchevronRight"
+
+    property real quantity: 1
+    property real minimumQuantity: 0
+    property real maximumQuantity: Number.POSITIVE_INFINITY
+    property real stepSize: 1
+    property int selectorIndex: 0
+    property int unitIndex: 0
+    property int segmentIndex: 0
+    property var primaryAction: ({})
+    property var secondaryAction: ({})
+    property var moreMenu: ({})
+    property var selector: ({})
+    property var unitSelector: ({})
+    property var stepper: ({})
+    property var input1: ({})
+    property var input2: ({})
+    property var segments: ["Original", "Edited"]
+    property bool toggleEnabled: true
+    property bool selectionEnabled: true
+
+    property bool showLeadingIcon: true
+    property bool showDescription: true
+    property bool showValue: true
+    property bool showTrailingIcon: true
+    property bool showBookmark: true
+    property bool showDate: true
+    property bool showFolders: true
+    property bool showTags: true
+    property bool showMetadata: true
+    property bool showPrimaryAction: true
+    property bool showSecondaryAction: true
+    property bool showMoreMenu: true
+    property bool showStepper: true
+    property bool showSelector: true
+    property bool showUnitSelector: true
+    property bool showToggle: true
+    property bool showSelection: true
+    property bool showSegments: true
+    property bool showInput1: true
+    property bool showInput2: true
+    property bool showPreview: true
+
+    // Components may declare `property var listItem` to receive the owning row.
+    property Component leadingComponent: null
+    property Component trailingComponent: null
+    property Component previewComponent: null
+    property Component footerComponent: null
+
+    property int navigationItemWidth: Theme.scaleMetric(280)
+    property int compositeItemWidth: Theme.scaleMetric(400)
+    property int standardItemHeight: Theme.scaleMetric(44)
+    property int contentSpacing: Theme.gap8
+    property int textSpacing: Theme.gap4
+    property int sectionSpacing: Theme.gap12
+    property int actionWidth: Theme.scaleMetric(72)
+    property int inputWidth: Theme.scaleMetric(140)
+    property int previewSize: Theme.scaleMetric(48)
+    readonly property var variantNames: ["Mini", "Detail", "Navigation", "Toggle", "Checkable", "Action", "ActionGroup", "Stepper", "Select", "InlineEdit", "DetailActions", "DetailQuantity", "DetailSettings", "Resource", "Media", "Task", "Form"]
+    readonly property string variantName: variantNames[type] || "Mini"
+    readonly property bool isModern: type >= ListItem.Navigation && type <= ListItem.Form
+    readonly property bool isCompound: type >= ListItem.DetailActions && type <= ListItem.Form
+    readonly property bool effectiveStepperEnabled: effectiveEnabled && showStepper && configValue(stepper, "enabled", true) && configValue(stepper, "tone", AbstractButton.Primary) !== AbstractButton.Disabled
+
+    checked: type === ListItem.Toggle || type === ListItem.DetailQuantity || type === ListItem.DetailSettings || type === ListItem.Form
+
+    signal edited(string field, var value)
+    signal actionTriggered(string action, var payload)
+
+    function typeValue(value) {
+        if (typeof value === "number")
+            return value >= 0 && value < variantNames.length ? Math.floor(value) : ListItem.Mini;
+        const index = variantNames.indexOf(String(value));
+        return index < 0 ? ListItem.Mini : index;
+    }
+
+    function configValue(config, name, fallback) {
+        return config && config[name] !== undefined && config[name] !== null ? config[name] : fallback;
+    }
+
+    function optionAt(options, index) {
+        if (!options || index < 0)
+            return null;
+        return typeof options.get === "function" ? options.get(index) : options[index];
+    }
+
+    function optionText(option, fallback) {
+        if (option === undefined || option === null)
+            return fallback;
+        if (typeof option !== "object")
+            return String(option);
+        return String(configValue(option, "text", configValue(option, "label", fallback)));
+    }
+
+    function editValue(field, value) {
+        if (!effectiveEnabled)
+            return false;
+        if (field === "quantity") {
+            const number = Number(value);
+            if (!Number.isFinite(number))
+                return false;
+            value = Math.max(minimumQuantity, Math.min(Math.max(minimumQuantity, maximumQuantity), number));
+        }
+        if (["checked", "quantity", "selectorIndex", "unitIndex", "segmentIndex", "inputText1", "inputText2"].indexOf(field) < 0 || control[field] === value)
+            return false;
+        control[field] = value;
+        edited(field, value);
+        return true;
+    }
+
+    function stepQuantity(direction) {
+        const arrow = configValue(stepper, "arrow", Stepper.UpDown);
+        if (!effectiveStepperEnabled || direction === 0 || (direction > 0 && arrow === Stepper.Down) || (direction < 0 && arrow === Stepper.Up))
+            return false;
+        return editValue("quantity", quantity + direction * Math.max(0, stepSize));
+    }
+
+    function actionText(action) {
+        if (action === "secondary") {
+            if (type === ListItem.DetailSettings)
+                return "Reset";
+            if (type === ListItem.Resource)
+                return "Reveal";
+            if (type === ListItem.Media)
+                return "Stop";
+            if (type === ListItem.Task)
+                return "Assign";
+            if (type === ListItem.Form)
+                return "Cancel";
+            return "Edit";
+        }
+        if (type === ListItem.InlineEdit || type === ListItem.Form)
+            return "Save";
+        if (type === ListItem.DetailQuantity || type === ListItem.DetailSettings)
+            return "Apply";
+        if (type === ListItem.Media)
+            return "Play";
+        if (type === ListItem.Task)
+            return "Done";
+        return "Open";
+    }
+
+    function triggerAction(action, payload) {
+        const config = action === "primary" ? primaryAction : action === "secondary" ? secondaryAction : moreMenu;
+        if (!effectiveEnabled || !configValue(config, "enabled", true) || configValue(config, "tone", AbstractButton.Default) === AbstractButton.Disabled)
+            return false;
+        const event = createMethodEvent(action);
+        event.action = action;
+        event.payload = payload;
+        event.values = {
+            inputText1: inputText1,
+            inputText2: inputText2,
+            checked: checked,
+            quantity: quantity,
+            selectorIndex: selectorIndex,
+            unitIndex: unitIndex,
+            segmentIndex: segmentIndex
+        };
+        const method = configValue(config, "method", configValue(config, "onTriggered", null));
+        if (method)
+            invokeMethod(method, event);
+        const methods = configValue(config, "methods", []);
+        for (let i = 0; i < methods.length; ++i)
+            invokeMethod(methods[i], event);
+        actionTriggered(action, payload === undefined ? event.values : payload);
+        return true;
+    }
+
     property int iconSize: Theme.iconSm
     property int rowHorizontalPadding: Theme.gap4
     property int rowVerticalPadding: Theme.gap2
@@ -45,87 +246,60 @@ AbstractButton {
     property int separatorHeight: Theme.scaleMetric(1)
     property int separatorTopSpacing: Theme.scaleMetric(1)
     property bool separatorVisible: false
-    property int minItemWidth: control.size === ListItem.Detail
-        ? control.detailItemWidth
-        : control.miniItemWidth
+    property int minItemWidth: control.size === ListItem.Detail ? control.detailItemWidth : control.isModern ? (control.type <= ListItem.Checkable ? control.navigationItemWidth : control.compositeItemWidth) : control.miniItemWidth
     property color listBackgroundColor: "transparent"
     property color selectedBackgroundColor: Theme.accentOverlay
     property color separatorColor: "#1A000000"
     property real separatorOpacity: 0.5
 
-    readonly property url resolvedIconSource: control.iconSource.toString().length > 0
-        ? control.iconSource
-        : Theme.iconPath(control.iconName)
-    readonly property real iconSupersampleScale: RenderQuality.enabled
-        ? RenderQuality.effectiveSupersampleScaleValue
-        : 1.0
-    readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0
-        ? Screen.devicePixelRatio
-        : 1.0
-    readonly property int iconSourceSize: Math.max(
-        1,
-        Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
-    readonly property int detailContentWidth: Math.max(
-        0,
-        control.detailItemWidth - (control.detailHorizontalPadding * 2))
-    readonly property int detailTopHeight: Math.max(
-        control.iconSize,
-        Theme.textDescriptionLineHeight * 2)
-    readonly property int detailMiddleHeight: Theme.textDescriptionLineHeight
-    readonly property int detailBottomHeight: (control.iconSize * 2) + control.metadataRowSpacing
-    readonly property int detailContentHeight: control.detailTopHeight
-        + control.detailSectionSpacing
-        + control.detailMiddleHeight
-        + control.detailSectionSpacing
-        + control.detailBottomHeight
+    readonly property url resolvedIconSource: control.iconSource.toString().length > 0 ? control.iconSource : Theme.iconPath(control.iconName)
+    readonly property real iconSupersampleScale: RenderQuality.enabled ? RenderQuality.effectiveSupersampleScaleValue : 1.0
+    readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
+    readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
+    readonly property int detailContentWidth: Math.max(0, control.detailItemWidth - (control.detailHorizontalPadding * 2))
+    readonly property int detailTopHeight: Math.max(control.iconSize, Theme.textDescriptionLineHeight * 2)
+    readonly property int detailMiddleHeight: showDate ? Theme.textDescriptionLineHeight : 0
+    readonly property int detailBottomHeight: (showFolders ? control.iconSize : 0) + (showTags ? control.iconSize : 0) + (showFolders && showTags ? control.metadataRowSpacing : 0)
+    readonly property int detailContentHeight: control.detailTopHeight + (detailMiddleHeight > 0 ? control.detailSectionSpacing + detailMiddleHeight : 0) + (detailBottomHeight > 0 ? control.detailSectionSpacing + detailBottomHeight : 0)
 
     signal inputEdited(string text)
     signal inputSubmitted(string text)
 
     function normalizedText(value) {
         if (value === undefined || value === null)
-            return ""
-        return String(value)
+            return "";
+        return String(value);
     }
 
     function applyInputResult(value) {
-        const normalized = normalizedText(value)
+        const normalized = normalizedText(value);
         if (control.label !== normalized)
-            control.label = normalized
+            control.label = normalized;
         if (control.inputResult !== normalized)
-            control.inputResult = normalized
-        return normalized
+            control.inputResult = normalized;
+        return normalized;
     }
 
     function resolvedAsset(name) {
-        const normalized = name === undefined || name === null ? "" : String(name).trim()
-        return normalized.length > 0 ? Theme.iconPath(normalized) : ""
+        const normalized = name === undefined || name === null ? "" : String(name).trim();
+        return normalized.length > 0 ? Theme.iconPath(normalized) : "";
     }
 
     tone: AbstractButton.Borderless
-    horizontalPadding: control.size === ListItem.Detail
-        ? control.detailHorizontalPadding
-        : control.rowHorizontalPadding
-    verticalPadding: control.size === ListItem.Detail
-        ? control.detailVerticalPadding
-        : control.rowVerticalPadding
+    horizontalPadding: control.size === ListItem.Detail || control.isModern ? control.detailHorizontalPadding : control.rowHorizontalPadding
+    verticalPadding: control.isCompound ? control.sectionSpacing : control.size === ListItem.Detail || control.isModern ? control.detailVerticalPadding : control.rowVerticalPadding
     spacing: Theme.gapNone
-    cornerRadius: Theme.gapNone
+    cornerRadius: control.isModern ? Theme.scaleMetric(6) : Theme.gapNone
+    clip: control.isModern
+    Accessible.name: control.label
+    Accessible.description: control.isModern ? control.description : control.detail
 
-    implicitHeight: contentRoot.implicitHeight + topPadding + bottomPadding
-    implicitWidth: Math.max(
-        control.minItemWidth,
-        contentRoot.implicitWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(control.isModern && !control.isCompound ? control.standardItemHeight : 0, contentRoot.implicitHeight + topPadding + bottomPadding)
+    implicitWidth: Math.max(control.minItemWidth, contentRoot.implicitWidth + leftPadding + rightPadding)
 
-    backgroundColor: control.selected
-        ? control.selectedBackgroundColor
-        : control.listBackgroundColor
-    backgroundColorHover: control.selected
-        ? control.selectedBackgroundColor
-        : control.listBackgroundColor
-    backgroundColorPressed: control.selected
-        ? control.selectedBackgroundColor
-        : Theme.accentBlueMuted
+    backgroundColor: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
+    backgroundColorHover: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
+    backgroundColorPressed: control.selected ? control.selectedBackgroundColor : Theme.accentBlueMuted
     backgroundColorDisabled: control.listBackgroundColor
     textColor: Theme.bodyColor
     textColorDisabled: Theme.disabledColor
@@ -135,16 +309,24 @@ AbstractButton {
         objectName: "listItem_content"
 
         readonly property int miniBaseHeight: control.iconSize
-        readonly property int miniSeparatorHeight: control.separatorVisible
-            ? control.separatorTopSpacing + control.separatorHeight
-            : 0
+        readonly property int miniSeparatorHeight: control.separatorVisible ? control.separatorTopSpacing + control.separatorHeight : 0
 
-        implicitWidth: control.size === ListItem.Detail
-            ? control.detailContentWidth
-            : miniIcon.width + control.miniItemSpacing + miniLabel.implicitWidth
-        implicitHeight: control.size === ListItem.Detail
-            ? control.detailContentHeight
-            : miniBaseHeight + miniSeparatorHeight
+        implicitWidth: control.isModern ? control.minItemWidth - control.leftPadding - control.rightPadding : control.size === ListItem.Detail ? control.detailContentWidth : miniIcon.width + control.miniItemSpacing + miniLabel.implicitWidth
+        implicitHeight: control.isModern ? modernLoader.implicitHeight : control.size === ListItem.Detail ? control.detailContentHeight : miniBaseHeight + miniSeparatorHeight
+
+        Loader {
+            id: modernLoader
+            active: control.isModern
+            visible: active
+            width: parent.width
+            height: implicitHeight
+            y: Math.max(0, (parent.height - height) / 2)
+            sourceComponent: Component {
+                ListItemComposite {
+                    listItem: control
+                }
+            }
+        }
 
         Item {
             id: miniContent
@@ -158,6 +340,7 @@ AbstractButton {
             Image {
                 id: miniIcon
                 objectName: "listItem_miniIcon"
+                visible: control.showLeadingIcon
                 x: 0
                 y: 0
                 width: control.iconSize
@@ -173,7 +356,7 @@ AbstractButton {
             Label {
                 id: miniLabel
                 objectName: "listItem_miniLabel"
-                x: control.iconSize + control.miniItemSpacing
+                x: control.showLeadingIcon ? control.iconSize + control.miniItemSpacing : 0
                 y: (parent.height - height) * 0.5
                 width: Math.min(Math.ceil(implicitWidth), Math.max(0, parent.width - x))
                 height: Theme.textBodyLineHeight
@@ -216,8 +399,8 @@ AbstractButton {
                         placeholderColorDisabled: Theme.disabledColor
 
                         onTextEdited: {
-                            const value = control.applyInputResult(text)
-                            control.inputEdited(value)
+                            const value = control.applyInputResult(text);
+                            control.inputEdited(value);
                         }
                         onAccepted: control.inputSubmitted(control.applyInputResult(text))
                     }
@@ -225,8 +408,8 @@ AbstractButton {
 
                 onLoaded: {
                     if (item) {
-                        item.objectName = control.objectName.length > 0 ? control.objectName + "_inputField" : ""
-                        item.text = control.inputResult
+                        item.objectName = control.objectName.length > 0 ? control.objectName + "_inputField" : "";
+                        item.text = control.inputResult;
                     }
                 }
             }
@@ -265,7 +448,7 @@ AbstractButton {
                     objectName: "listItem_detailTitle"
                     x: 0
                     y: 0
-                    width: Math.max(0, parent.width - control.detailTopSpacing - control.iconSize)
+                    width: Math.max(0, parent.width - (control.showBookmark ? control.detailTopSpacing + control.iconSize : 0))
                     height: parent.height
                     style: description
                     text: control.detail
@@ -280,12 +463,12 @@ AbstractButton {
                 Image {
                     id: detailBookmark
                     objectName: "listItem_detailBookmark"
+                    visible: control.showBookmark
                     x: parent.width - width
                     y: 0
                     width: control.iconSize
                     height: control.iconSize
-                    source: RenderQuality.resolveTextureSource(
-                        control.resolvedAsset(control.bookmarkIconName))
+                    source: RenderQuality.resolveTextureSource(control.resolvedAsset(control.bookmarkIconName))
                     sourceSize.width: control.iconSourceSize
                     sourceSize.height: control.iconSourceSize
                     fillMode: Image.PreserveAspectFit
@@ -297,8 +480,9 @@ AbstractButton {
             Item {
                 id: detailMiddle
                 objectName: "listItem_detailMiddle"
+                visible: control.showDate
                 x: 0
-                y: detailTop.y + detailTop.height + control.detailSectionSpacing
+                y: detailTop.y + detailTop.height + (control.showDate ? control.detailSectionSpacing : 0)
                 width: parent.width
                 height: control.detailMiddleHeight
 
@@ -307,27 +491,31 @@ AbstractButton {
                     objectName: "listItem_detailDate"
                     x: 0
                     y: 0
-                    width: Math.ceil(implicitWidth)
+                    width: Math.min(Math.ceil(implicitWidth), parent.width)
                     height: parent.height
                     style: description
                     text: control.dateText
                     color: control.effectiveEnabled ? Theme.captionColor : Theme.disabledColor
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
                 }
             }
 
             Item {
                 id: detailBottom
                 objectName: "listItem_detailBottom"
+                visible: control.showFolders || control.showTags
                 x: 0
-                y: detailMiddle.y + detailMiddle.height + control.detailSectionSpacing
+                y: detailTop.height + (control.showDate ? control.detailSectionSpacing + detailMiddle.height : 0) + (control.showFolders || control.showTags ? control.detailSectionSpacing : 0)
                 width: parent.width
                 height: control.detailBottomHeight
 
                 Item {
                     id: foldersRow
                     objectName: "listItem_detailFolders"
+                    visible: control.showFolders
+                    clip: true
                     x: 0
                     y: 0
                     width: parent.width
@@ -347,8 +535,7 @@ AbstractButton {
                             y: 0
                             width: control.iconSize
                             height: control.iconSize
-                            source: RenderQuality.resolveTextureSource(
-                                control.resolvedAsset(control.folderIconName))
+                            source: RenderQuality.resolveTextureSource(control.resolvedAsset(control.folderIconName))
                             sourceSize.width: control.iconSourceSize
                             sourceSize.height: control.iconSourceSize
                             fillMode: Image.PreserveAspectFit
@@ -383,8 +570,7 @@ AbstractButton {
                             y: 0
                             width: control.iconSize
                             height: control.iconSize
-                            source: RenderQuality.resolveTextureSource(
-                                control.resolvedAsset(control.folderIconName))
+                            source: RenderQuality.resolveTextureSource(control.resolvedAsset(control.folderIconName))
                             sourceSize.width: control.iconSourceSize
                             sourceSize.height: control.iconSourceSize
                             fillMode: Image.PreserveAspectFit
@@ -408,8 +594,10 @@ AbstractButton {
                 Item {
                     id: tagsRow
                     objectName: "listItem_detailTags"
+                    visible: control.showTags
+                    clip: true
                     x: 0
-                    y: foldersRow.y + foldersRow.height + control.metadataRowSpacing
+                    y: control.showFolders ? foldersRow.height + control.metadataRowSpacing : 0
                     width: parent.width
                     height: control.iconSize
 
@@ -427,8 +615,7 @@ AbstractButton {
                             y: 0
                             width: control.iconSize
                             height: control.iconSize
-                            source: RenderQuality.resolveTextureSource(
-                                control.resolvedAsset(control.tagIconName))
+                            source: RenderQuality.resolveTextureSource(control.resolvedAsset(control.tagIconName))
                             sourceSize.width: control.iconSourceSize
                             sourceSize.height: control.iconSourceSize
                             fillMode: Image.PreserveAspectFit
@@ -462,8 +649,7 @@ AbstractButton {
                             y: 0
                             width: control.iconSize
                             height: control.iconSize
-                            source: RenderQuality.resolveTextureSource(
-                                control.resolvedAsset(control.tagIconName))
+                            source: RenderQuality.resolveTextureSource(control.resolvedAsset(control.tagIconName))
                             sourceSize.width: control.iconSourceSize
                             sourceSize.height: control.iconSourceSize
                             fillMode: Image.PreserveAspectFit
@@ -488,22 +674,16 @@ AbstractButton {
     }
 
     onLabelChanged: {
-        const normalized = control.normalizedText(control.label)
+        const normalized = control.normalizedText(control.label);
         if (control.inputResult !== normalized)
-            control.inputResult = normalized
-        if (overlayInputLoader.status === Loader.Ready
-            && overlayInputLoader.item
-            && !overlayInputLoader.item.activeFocus
-            && overlayInputLoader.item.text !== normalized) {
-            overlayInputLoader.item.text = normalized
+            control.inputResult = normalized;
+        if (overlayInputLoader.status === Loader.Ready && overlayInputLoader.item && !overlayInputLoader.item.activeFocus && overlayInputLoader.item.text !== normalized) {
+            overlayInputLoader.item.text = normalized;
         }
     }
     onInputableChanged: {
-        if (control.inputable
-            && overlayInputLoader.status === Loader.Ready
-            && overlayInputLoader.item
-            && !overlayInputLoader.item.activeFocus) {
-            overlayInputLoader.item.text = control.inputResult
+        if (control.inputable && overlayInputLoader.status === Loader.Ready && overlayInputLoader.item && !overlayInputLoader.item.activeFocus) {
+            overlayInputLoader.item.text = control.inputResult;
         }
     }
 }

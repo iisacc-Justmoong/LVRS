@@ -27,8 +27,8 @@ measured on 2026-09-06. `LabelButton` and `IconButton` are its label and icon pr
 Figma's gap is preserved even when the variant has only one child. The label uses
 the existing fixed Body 13px Medium / 13px line box. The icon is 18 × 18.
 Radius uses `Theme.radiusMd`; gaps use `Theme.gap10`, `Theme.gap7`, and `Theme.gapNone`.
-On mobile, geometry tokens double while the Body line box remains 13px: label
-72 × 44, icon 44 × 44, radius 16, and label vertical padding 15.5.
+Mobile uses the same geometry and Body 13px line box: label 56 × 22, icon
+22 × 22, radius 8, and label vertical padding 4.5.
 Default, accent, borderless, destructive, and disabled variants share their size.
 
 ## Usage

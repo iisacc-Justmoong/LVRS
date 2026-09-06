@@ -16,6 +16,7 @@ Location: `qml/components/control/buttons/Stepper.qml`
   - `Stepper.UpDown`
   - `Stepper.Up`
   - `Stepper.Down`
+- `stepped(direction)` emits `1` for increment or `-1` for decrement after a pointer click. `UpDown` uses the upper/lower half; `Up` and `Down` always emit their displayed direction. Disabled controls emit neither `clicked` nor `stepped`.
 
 Computed properties:
 
@@ -50,7 +51,7 @@ Injected methods:
 - Arrow artwork at the desktop baseline:
   - `Up` / `Down`: `10 x 6`
   - `UpDown`: `6.43604 x 11.1455`
-- Mobile keeps the same proportions while the `Theme.iconSm` frame scales from `18` to `36`.
+- Desktop and mobile share the same proportions and `18 x 18` `Theme.iconSm` frame.
 
 ## Usage
 
@@ -63,6 +64,15 @@ LV.Stepper {
     method: function(eventData) { increment() }
 }
 ```
+
+```qml
+LV.Stepper {
+    arrow: LV.Stepper.UpDown
+    onStepped: function(direction) { quantity += direction }
+}
+```
+
+`ListItem` combines this event with range-clamped quantity state and keyboard Up/Down. Directional pointer behavior is covered by `LVRSTests_list_composites` in addition to the existing Stepper visual contracts.
 
 ## How It Works
 

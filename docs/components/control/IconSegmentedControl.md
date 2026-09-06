@@ -50,7 +50,7 @@ Behavior:
 | 6 | `150 x 30` |
 | 7 | `174 x 30` |
 
-The desktop width is `count * 22 + (count - 1) * 2 + 8`. With the mobile `2x` token policy, a two-segment control becomes `108 x 60` from two `44 x 44` buttons, `4` spacing, and `8` padding.
+Desktop and mobile use `count * 22 + (count - 1) * 2 + 8` width. A two-segment control is `54 x 30`, with two `22 x 22` buttons, `2` spacing, and `4` padding.
 
 ## Usage
 

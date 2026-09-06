@@ -19,7 +19,7 @@ Text and tone:
 
 Indicator:
 
-- `indicatorSize` (readonly, `Theme.iconSm`: desktop `18 x 18`, mobile `36 x 36`)
+- `indicatorSize` (readonly, `Theme.iconSm`: `18 x 18` on desktop and mobile)
 - `resolvedIndicatorName` from tone/enabled state
 - rendered via `Theme.iconPath(...)`
 - supersampling-aware icon source size (`indicatorSourceSize`)

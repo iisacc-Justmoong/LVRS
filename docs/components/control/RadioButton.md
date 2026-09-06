@@ -35,8 +35,8 @@ Visual:
 - The Figma component set (`44:630`) contains four `18 x 18` variants: On/Off crossed with Available True/False.
 - On states place an `8 x 8` dot at `(5, 5)` inside the `18 x 18` indicator. The outer and inner radii are `9` and `4` respectively.
 - The four-state palette is fixed to the Figma tokens: enabled On uses `Accent` with a `TitleHeader` dot, enabled Off uses `TitleHeader`, disabled On uses `PanelBackground12` with a `Caption` dot, and disabled Off uses `PanelBackground12`.
-- Under the mobile `2x` metric profile the indicator becomes `36 x 36`, the dot becomes `16 x 16` at `(10, 10)`, and the radii become `18` and `8`.
-- The optional QML label extension uses an `8px` desktop / `16px` mobile gap. Its Body font remains fixed at `13px/13px`, producing `59 x 18` desktop and `85 x 36` mobile bounds for the text `Label`.
+- Desktop and mobile share the `18 x 18` indicator, `8 x 8` dot at `(5, 5)`, and radii `9` and `4`.
+- The optional QML label extension uses an `8px` gap and Body `13px/13px`, producing `59 x 18` bounds for the text `Label` on desktop and mobile.
 - Indicator geometry is explicitly positioned so runtime target changes recompute its implicit size deterministically.
 - Component uses transparent background policy (`tone: Borderless`).
 

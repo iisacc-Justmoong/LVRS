@@ -86,4 +86,4 @@ A. Yes. `cells` is preserved for compatibility, but `cellItems` is the preferred
 
 ## Figma Contract
 
-Node `203:3648` is `717 × 24`: three `234 × 24` cells separated by `7.5` spacing. Body text is fixed at 13/13. Mobile geometry doubles to `1434 × 48`, `468` cell width, and `16` content spacing; Body font remains 13.
+Node `203:3648` is `717 × 24`: three `234 × 24` cells separated by `7.5` spacing. Body text is fixed at 13/13. Mobile uses the same `717 × 24` row, `234` cell width, and `8` content spacing; Body remains `13px`.

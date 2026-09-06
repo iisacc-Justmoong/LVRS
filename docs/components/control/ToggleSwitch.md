@@ -52,7 +52,7 @@ Figma compatibility:
 - Knob x-position animates between `2` (Off) and `18` (On) on desktop.
 - Knob fill is an antialiased scene-graph `Rectangle`, so its circle remains resolution-independent without a raster canvas. The previous read-only `knobSupersampleScale`, `knobHiDpiScale`, and `knobRasterScale` values remain available for source compatibility.
 - Track color resolves from `checked + hovered + down + enabled`.
-- Under the mobile `2x` metric profile the track becomes `76 x 44`, padding becomes `4`, the knob becomes `36 x 36`, authored radii become `40` and `18`, On/Off x positions become `36`/`4`, and shadow blur/vertical offset become `8`.
+- Desktop and mobile share the `38 x 22` track, `2` padding, `18 x 18` knob, radii `20` and `9`, On/Off x positions `18`/`2`, and shadow blur/vertical offset `4`.
 - Optional label spacing scales from `8px` to `16px`, while the Body font and line height remain fixed at `13px/13px`.
 
 ## Usage

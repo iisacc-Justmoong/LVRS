@@ -142,4 +142,4 @@ A. Current contract keeps uniform left-aligned header text. Per-column layout re
 
 ## Figma Contract
 
-Node `203:3647` is `717 × 25`: a `24` header row plus a `1` bottom separator. Three default columns are `239` wide, each label has `8` horizontal padding, and the text uses the 12/12 Description style. On mobile all geometry doubles (`1434 × 50`, `16` padding, `2` separator) while typography follows the Theme policy.
+Node `203:3647` is `717 × 25`: a `24` header row plus a `1` bottom separator. Three default columns are `239` wide, each label has `8` horizontal padding, and the text uses the 12/12 Description style. Mobile uses the same `717 × 25` geometry, `8` padding, `1` separator, and `12px` Description typography.

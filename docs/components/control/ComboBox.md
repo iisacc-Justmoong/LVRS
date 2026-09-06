@@ -39,7 +39,7 @@ Injected methods:
 ## Visual Contract
 
 - desktop logical frame: `97 x 20`
-- mobile frame under the `2x` metric policy: `194 x 40`
+- mobile frame matches desktop: `97 x 20`
 - container paddings: left `8`, right `1`, top/bottom `1`
 - radius: `Theme.radiusControl` (`5`)
 - container base/hover/pressed colors:

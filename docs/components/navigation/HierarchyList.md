@@ -24,7 +24,7 @@ Model and roles:
 Generated row defaults:
 
 - `generatedIndentStep` (default `8`), `generatedRowHeight` (default `20`), `generatedItemWidth` (default `200`)
-- `generatedIconSize` (default `Theme.iconSm`: desktop `18`, mobile `36`)
+- `generatedIconSize` (default `Theme.iconSm`: `18` on desktop and mobile)
 - `generatedChevronSize` (desktop `16`, mobile `32`)
 - `itemDelegate`: optional generated-row component delegate. The default delegate is `HierarchyItem`.
 
@@ -70,7 +70,7 @@ Primary methods:
 - Custom hierarchy delegates should use `HierarchyItem` directly or expose the same row contract, including `__isHierarchyItem`, because `HierarchyList` still manages activation, expansion, visibility, and editable drag state through live row items.
 - Child presence is inferred by indent/order and synchronized into each row `hasChildItems`.
 - Generated row defaults mirror `HierarchyItem` defaults unless explicitly overridden on the list.
-- The Figma list (`180:995`) is `200x320`: sixteen contiguous `200x20` rows with `rowSpacing = 0`. Under the mobile `2x` profile the same reference becomes `400x640` with sixteen `400x40` rows.
+- The Figma list (`180:995`) is `200x320`: sixteen `200x20` rows with `rowSpacing = 0` on desktop and mobile.
 - Generated rows read their trailing numeric counter from `countRole` (default `count`) and forward it to `HierarchyItem.count`.
 - Managed rows are enriched with item metadata on refresh: `parentItemKey`, `parentLabel`, `parentPathLabel`, `pathLabel`, `ancestorItemKeys`, `ancestorLabels`, `pathItemKeys`, `pathItemLabels`, `childCount`, `visibleChildCount`, `descendantCount`, `visibleDescendantCount`, `childItemKeys`, `childItemLabels`, `flatIndex`, `visibleIndex`, `siblingIndex`, `visibleSiblingIndex`, `siblingCount`, `visibleSiblingCount`.
 - Visibility is computed from ancestor expansion state and cached incrementally. Initial projection, model invalidation, role changes, delegate changes, and structural reorders use the full `HierarchyModel` projection; single-row expansion/collapse refreshes only the toggled row's descendant range, the affected visible-index tail, and visible descendant counts for its ancestors.

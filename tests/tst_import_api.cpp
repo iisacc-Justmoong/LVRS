@@ -1098,7 +1098,7 @@ LV.ApplicationWindow {
 
     property bool contract:
         LV.Theme.mobileTarget
-        && mobileWindow.navigationIconSize === 36
+        && mobileWindow.navigationIconSize === 18
         && mobileWindow.adaptiveMobileLayout
         && !mobileWindow.adaptiveDesktopLayout
         && mobileWindow.adaptiveBottomNavigation
@@ -1110,7 +1110,7 @@ LV.ApplicationWindow {
     QScopedPointer<QObject> mobileRoot(createFromQml(mobileEngine, mobileQml));
     QVERIFY(mobileRoot);
     QTRY_VERIFY(mobileRoot->property("contract").toBool());
-    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 36);
+    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 18);
 
     QQmlEngine desktopEngine;
     desktopEngine.addImportPath(importBase);
@@ -1242,13 +1242,13 @@ Item {
     height: 62
 
     property string themeTarget: "macos"
-    readonly property int expectedIconSize: LV.Theme.mobileTarget ? 36 : 18
-    readonly property int expectedInputIconSize: LV.Theme.mobileTarget ? 24 : 12
-    readonly property int expectedCheckBoxSize: LV.Theme.mobileTarget ? 34 : 17
-    readonly property int expectedRadioDotSize: LV.Theme.mobileTarget ? 16 : 8
-    readonly property int expectedMenuItemHeight: LV.Theme.mobileTarget ? 48 : 24
-    readonly property int expectedMenuChevronSize: LV.Theme.mobileTarget ? 32 : 16
-    readonly property int expectedHierarchyChevronSize: LV.Theme.mobileTarget ? 32 : 16
+    readonly property int expectedIconSize: 18
+    readonly property int expectedInputIconSize: 12
+    readonly property int expectedCheckBoxSize: 17
+    readonly property int expectedRadioDotSize: 8
+    readonly property int expectedMenuItemHeight: 24
+    readonly property int expectedMenuChevronSize: 16
+    readonly property int expectedHierarchyChevronSize: 16
 
     onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
     Component.onCompleted: LV.Theme.targetOverride = themeTarget
@@ -1314,9 +1314,9 @@ Item {
 
     property bool mobileCompactIconContractReady:
         LV.Theme.mobileTarget
-        && LV.Theme.iconSm === 36
-        && inputField.searchIconSize === 24
-        && inputField.clearIconSize === 24
+        && LV.Theme.iconSm === 18
+        && inputField.searchIconSize === 12
+        && inputField.clearIconSize === 12
         && compactIconContractReady
 }
 )";
@@ -4348,7 +4348,7 @@ Item {
     host->setParentItem(window.contentItem());
     window.show();
     QVERIFY(QTest::qWaitForWindowExposed(&window));
-    const int scale = mobile ? 2 : 1;
+    const int scale = 1;
     const QStringList families = {"pushLabel", "pushIcon", "dropdownLabel", "dropdownIcon"};
     int expectedCalls = 0;
     for (int tone = 0; tone < 5; ++tone) {
@@ -4976,7 +4976,7 @@ Item {
     height: 84
 
     property string themeTarget: "macos"
-    readonly property real expectedScale: LV.Theme.mobileTarget ? 2.0 : 1.0
+    readonly property real expectedScale: 1.0
 
     onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
     Component.onCompleted: LV.Theme.targetOverride = themeTarget
@@ -5108,7 +5108,7 @@ Item {
         && defaultField.inputItem.font.weight === Font.Medium
         && defaultField.leftInset === 7 * expectedScale
         && defaultField.rightInset === 7 * expectedScale
-        && defaultField.centeredTextY === (LV.Theme.mobileTarget ? 12 : 3)
+        && defaultField.centeredTextY === (3)
         && defaultField.textColor === LV.Theme.titleHeaderColor
         && defaultField.textColorDisabled === LV.Theme.disabledColor
         && defaultField.placeholderColor === LV.Theme.titleHeaderColor
@@ -5838,17 +5838,17 @@ Item {
         LV.Theme.mobileTarget
         && searchField.search
         && searchField.searchIconVisible
-        && searchField.implicitWidth === 412
-        && searchField.implicitHeight === 38
-        && searchField.width === 412
-        && searchField.height === 38
+        && searchField.implicitWidth === 206
+        && searchField.implicitHeight === 19
+        && searchField.width === 206
+        && searchField.height === 19
         && searchField.centeredTextHeight === 13
         && searchField.inputItem.font.pixelSize === 13
-        && searchField.searchIconSize === 24
-        && searchField.clearIconSize === 24
+        && searchField.searchIconSize === 12
+        && searchField.clearIconSize === 12
         && searchField.searchIconSource == LV.Theme.iconPath("inputFieldSearch")
         && searchField.searchIconSourceSize === Math.ceil(searchField.searchIconSize * searchField.searchIconRasterScale)
-        && LV.Theme.iconSm === 36
+        && LV.Theme.iconSm === 18
 }
 )";
 
@@ -5870,7 +5870,7 @@ Item {
     id: root
 
     property string themeTarget: "macos"
-    readonly property real expectedScale: LV.Theme.mobileTarget ? 2.0 : 1.0
+    readonly property real expectedScale: 1.0
 
     onThemeTargetChanged: LV.Theme.targetOverride = themeTarget
     Component.onCompleted: LV.Theme.targetOverride = themeTarget
@@ -6019,8 +6019,8 @@ Item {
     QObject *mobileShadow = root->findChild<QObject *>(QStringLiteral("onSwitch_trackShadowEffect"),
                                                         Qt::FindChildrenRecursively);
     QVERIFY(mobileShadow);
-    QCOMPARE(mobileShadow->property("blurMax").toInt(), 8);
-    QCOMPARE(mobileShadow->property("shadowVerticalOffset").toReal(), 8.0);
+    QCOMPARE(mobileShadow->property("blurMax").toInt(), 4);
+    QCOMPARE(mobileShadow->property("shadowVerticalOffset").toReal(), 4.0);
 
     root->setProperty("themeTarget", QStringLiteral("macos"));
     QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());

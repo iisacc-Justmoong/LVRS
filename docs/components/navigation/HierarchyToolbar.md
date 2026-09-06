@@ -56,7 +56,7 @@ Compatibility:
 
 Default layout follows `HierarchyToolbar` in Figma (`Layerd Visual Render System`, node `180:1011`):
 
-- The toolbar has a `200 x 26` desktop baseline and a `400 x 52` mobile `2x` baseline.
+- The toolbar has a `200 x 26` baseline on desktop and mobile.
 - `minimumToolbarWidth` defaults to `200` on desktop and `400` on mobile.
 - Default padding is `8px` horizontal and `2px` vertical on desktop (`16px` and `4px` on mobile).
 - Each toolbar slot follows the inherited button frame: `22 x 22` on desktop and `44 x 44` on mobile.

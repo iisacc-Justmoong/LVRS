@@ -8,7 +8,7 @@ Location: `qml/components/control/input/InputField.qml`
 
 - Provide stable one-line text entry in `Rounded`, `Cylinder`, and `Inline` styles.
 - Cover the Figma default, disabled, cursor-active, selected, active, and search states with native `TextInput` state.
-- Keep field geometry at `@2x` on mobile while Body typography stays fixed at `13px / 13px`.
+- Use the same field geometry and Body `13px / 13px` typography on desktop and mobile.
 - Include a measured search affordance and integrated clear action.
 
 ## Core API
@@ -58,7 +58,7 @@ Inherited text/input API from `AbstractInputBar` includes `text`, `placeholderTe
 
 Figma's active, selected, and search instances report `205px` while default and disabled report `206px`; that difference comes from variant-local auto-layout content. The runtime field deliberately stays `206px` so typing, selecting, searching, and showing the clear button never shift surrounding layout by one pixel.
 
-On mobile, the frame, general insets, radii, and icon frames scale to `@2x`. Body remains `13px / 13px`, and the clear button's right inset stays fixed at `8` logical pixels; the line box is vertically centered in the `38px` frame.
+On mobile, the frame, general insets, radii, and icon frames match desktop. Body remains `13px / 13px`, and the clear button's right inset remains `8` logical pixels; the line box is vertically centered in the `19px` frame.
 
 The clear-button inset is the explicit 2026-09-06 LVRS adjustment to the Figma reference. When the clear button is visible, its right edge remains exactly `8` logical pixels from the field's right edge, including when the width or `insetHorizontal` changes. `AbstractInputBar.insetRight` defaults to `insetHorizontal`; `InputField` binds it to `8` while showing the clear button. Both the trailing anchor and text reservation use that right inset, preserving the text-to-button gap and the left/search layout.
 
@@ -94,8 +94,8 @@ The disabled state removes blur, inner shadows, and the border.
 | Inside edge | 0.5 | None | None |
 
 The inside edge uses a vertical black 28% → white 1.5% → white 17% gradient
-at 0%, 50%, and 100%. Mobile scales effect distances with geometry; color alpha
-stays fixed. Inline keeps its fill when disabled but removes its inner shadows.
+at 0%, 50%, and 100%. Effect distances and color alpha use the same values on
+desktop and mobile. Inline keeps its fill when disabled but removes its inner shadows.
 The Figma paint stack is drawn from the concave gradient through reflection to tint,
 followed by inner lighting and the edge.
 

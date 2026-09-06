@@ -117,4 +117,4 @@ A. Resolution order is `label -> text -> title -> value`, then falls back to com
 
 ## Figma Contract
 
-Node `203:3863` is `234 × 24`. The leading divider is `1 × 24`; the content line box is `(x: 9, y: 5.5, width: 225, height: 13)`, using fixed 13/13 Body typography. Mobile geometry doubles to `468 × 48` with `16` content spacing, but Body font size remains 13.
+Node `203:3863` is `234 × 24`. The leading divider is `1 × 24`; the content line box is `(x: 9, y: 5.5, width: 225, height: 13)`, using fixed 13/13 Body typography. Mobile uses the same `234 × 24` geometry, `8` content spacing, and `13px` Body font.

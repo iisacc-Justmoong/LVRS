@@ -1587,6 +1587,7 @@ LV.ApplicationWindow {
         Item {
             id: preview
             property var catalogEntry: ({})
+            property string eventSummary: "Edit a value or trigger an action below."
             implicitHeight: contentColumn.implicitHeight
 
             Column {
@@ -1607,13 +1608,46 @@ LV.ApplicationWindow {
                 }
 
                 LV.List {
-                    width: 220
-                    height: 220
+                    width: Math.max(LV.Theme.scaleMetric(400), parent.width)
+                    expandToContent: true
+                    footerVisible: false
+                    itemSpacing: LV.Theme.gap8
                     items: [
-                        { label: "Overview" },
-                        { label: "Reports" },
-                        { label: "Settings" }
+                        { type: "Mini", label: "Mini · Project" },
+                        { type: "Detail", detail: "Detail · Project notes", dateText: "2026-09-06" },
+                        { type: "Navigation", label: "Navigation · Library", description: "Browse saved resources", value: "24" },
+                        { type: "Toggle", label: "Toggle · Sync", description: "Keep this device up to date", checked: true },
+                        { type: "Checkable", label: "Checkable · Include", description: "Include in export", checked: false, value: "Ready" },
+                        { type: "Action", label: "Action · Project", description: "Open the current project" },
+                        { type: "ActionGroup", label: "ActionGroup · Source", description: "Open, edit and more", moreMenu: {items: [{label: "Duplicate"}, {label: "Reveal"}]} },
+                        { type: "Stepper", label: "Stepper · Copies", quantity: 3, minimumQuantity: 1, maximumQuantity: 99 },
+                        { type: "Select", label: "Select · Format", selector: {items: ["PNG", "JPEG", "WebP"]} },
+                        { type: "InlineEdit", label: "InlineEdit · Name", inputText1: "Project-01" },
+                        { type: "DetailActions", label: "DetailActions · Brand guide", description: "Review shared colors, typography and logo rules.", metadata1: "Design system", metadata2: "v2.0", statusText: "In review", moreMenu: {items: ["Duplicate", "Archive"]} },
+                        { type: "DetailQuantity", label: "DetailQuantity · Export", description: "Format, size and units in one row", quantityLabel: "Size", quantity: 2, selector: {items: ["PNG", "JPEG"]}, unitSelector: {items: ["Scale", "Pixels"]} },
+                        { type: "DetailSettings", label: "DetailSettings · Sync", iconName: "generalsettings", modeLabel: "Mode", scopeLabel: "Source", selector: {items: ["Automatic", "Manual"]}, statusText: "Saved" },
+                        { type: "Resource", label: "Resource · Package", description: "Images, documents and settings", previewIconName: "nodespackage", metadata1: "128 MB", metadata2: "12 files", statusText: "Available" },
+                        { type: "Media", label: "Media · Ambient-01.wav", previewIconName: "audioClassification", durationText: "03:42", mediaDetail: "48k / 24bit", statusText: "Ready" },
+                        { type: "Task", label: "Task · Release checklist", description: "Review copy and resources before release.", selector: {items: ["High", "Normal", "Low"]}, quantityLabel: "Estimate", quantity: 4, metadata1: "Design", metadata2: "2 people" },
+                        { type: "Form", label: "Form · Resource properties", description: "Edit metadata", selector: {items: ["Image", "Audio", "Document"]}, fieldLabel1: "Display name", fieldLabel2: "Tags", inputText1: "Project Preview", inputText2: "hero, banner", statusText: "Enabled" }
                     ]
+                    onItemEdited: function(index, item, field, value) {
+                        const updated = items.slice()
+                        updated[index] = Object.assign({}, item)
+                        updated[index][field] = value
+                        items = updated
+                        preview.eventSummary = item.type + " · " + field + " = " + value
+                    }
+                    onItemActionTriggered: function(index, item, action, payload) {
+                        preview.eventSummary = item.type + " · " + action
+                    }
+                }
+
+                LV.Label {
+                    width: parent.width
+                    style: caption
+                    text: preview.eventSummary
+                    wrapMode: Text.Wrap
                 }
 
                 LV.ListFooter {

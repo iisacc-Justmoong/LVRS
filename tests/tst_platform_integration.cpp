@@ -352,11 +352,11 @@ LV.ApplicationWindow {
 
 void PlatformIntegrationTests::mobile_theme_scale_contract()
 {
-    {
+    for (const QByteArray &target : {QByteArray("android-arm64"), QByteArray("ios")}) {
         QQmlEngine engine;
         engine.addImportPath(TestUtils::qmlImportBase());
 
-        const QByteArray qml = R"(
+        QByteArray qml = R"(
 import QtQuick
 import LVRS as LV
 
@@ -365,7 +365,7 @@ Item {
     property Item listDelegateProbe: null
 
     Component.onCompleted: {
-        LV.Theme.targetOverride = "android-arm64"
+        LV.Theme.targetOverride = "@TARGET@"
         listDelegateProbe = listControl.createDelegateItem(root, listControl.itemDelegate, {
             "index": 0,
             "entry": "Fixed Body List",
@@ -377,23 +377,23 @@ Item {
     }
 
     property bool tokenContract:
-        LV.Theme.effectiveTarget === "android"
+        LV.Theme.effectiveTarget === LV.Platform.normalizeTarget("@TARGET@")
         && LV.Theme.mobileTarget
-        && LV.Theme.metricScaleFactor === 2.0
-        && LV.Theme.typographyScaleFactor === 2.0
-        && LV.Theme.gap8 === 16
-        && LV.Theme.dialogMinWidth === 560
-        && LV.Theme.textTitle === 52
-        && LV.Theme.textTitle2 === 44
-        && LV.Theme.textHeader === 34
-        && LV.Theme.textHeader2 === 30
+        && LV.Theme.metricScaleFactor === 1.0
+        && LV.Theme.typographyScaleFactor === 1.0
+        && LV.Theme.gap8 === 8
+        && LV.Theme.dialogMinWidth === 280
+        && LV.Theme.textTitle === 26
+        && LV.Theme.textTitle2 === 22
+        && LV.Theme.textHeader === 17
+        && LV.Theme.textHeader2 === 15
         && LV.Theme.textBody === 13
-        && LV.Theme.textDescription === 24
-        && LV.Theme.textCaption === 22
-        && LV.Theme.scaleMetric(17) === 34
-        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 3.0) < 0.01
-        && Math.abs(LV.Theme.scaleRealMetric(4) - 8.0) < 0.01
-        && LV.Theme.scaleTextMetric(13) === 26
+        && LV.Theme.textDescription === 12
+        && LV.Theme.textCaption === 11
+        && LV.Theme.scaleMetric(17) === 17
+        && Math.abs(LV.Theme.scaleRealMetric(1.5) - 1.5) < 0.01
+        && Math.abs(LV.Theme.scaleRealMetric(4) - 4.0) < 0.01
+        && LV.Theme.scaleTextMetric(13) === 13
         && LV.Theme.isThemeTextStyleCompliant(LV.Theme.textBody, LV.Theme.textBodyWeight, LV.Theme.textBodyStyleName)
 
     LV.List {
@@ -555,92 +555,102 @@ Item {
         visible: false
     }
 
-    readonly property int listDelegateBodyPixelSize: listDelegateProbe !== null
-        && listDelegateProbe.contentItem.children.length > 0
-        && listDelegateProbe.contentItem.children[0].children.length > 1
-        ? listDelegateProbe.contentItem.children[0].children[1].font.pixelSize
-        : -1
+    function findListLabel(item) {
+        if (!item)
+            return null
+        if (item.objectName === "listItem_miniLabel")
+            return item
+        for (let i = 0; i < item.children.length; ++i) {
+            const label = findListLabel(item.children[i])
+            if (label)
+                return label
+        }
+        return null
+    }
+    readonly property Item listDelegateBodyLabel: findListLabel(listDelegateProbe)
+    readonly property int listDelegateBodyPixelSize: listDelegateBodyLabel
+        ? listDelegateBodyLabel.font.pixelSize : -1
 
     property bool componentContract:
-        listControl.listWidth === 340
-        && listControl.minimumListHeight === 280
-        && listControl.itemHeight === 44
+        listControl.listWidth === 170
+        && listControl.minimumListHeight === 140
+        && listControl.itemHeight === 22
         && listDelegateProbe !== null
         && listDelegateProbe.contentItem.children.length > 0
         && listDelegateBodyPixelSize === 13
-        && miniListItem.iconSize === 36
-        && miniListItem.rowHorizontalPadding === 8
-        && miniListItem.rowVerticalPadding === 4
-        && miniListItem.implicitWidth === 340
-        && miniListItem.implicitHeight === 44
-        && detailListItem.detailItemWidth === 388
-        && detailListItem.detailContentWidth === 340
-        && detailListItem.detailTopHeight === 48
-        && detailListItem.detailMiddleHeight === 24
-        && detailListItem.detailBottomHeight === 76
-        && detailListItem.implicitWidth === 388
-        && detailListItem.implicitHeight === 212
-        && listFooter.horizontalPadding === 4
-        && listFooter.verticalPadding === 4
-        && listFooter.stockButtonPadding === 4
-        && listFooter.stockButtonHeight === 44
-        && listFooter.stockMenuButtonSpacing === -4
-        && listFooter.implicitWidth === 172
-        && listFooter.implicitHeight === 52
+        && miniListItem.iconSize === 18
+        && miniListItem.rowHorizontalPadding === 4
+        && miniListItem.rowVerticalPadding === 2
+        && miniListItem.implicitWidth === 170
+        && miniListItem.implicitHeight === 22
+        && detailListItem.detailItemWidth === 194
+        && detailListItem.detailContentWidth === 170
+        && detailListItem.detailTopHeight === 24
+        && detailListItem.detailMiddleHeight === 12
+        && detailListItem.detailBottomHeight === 38
+        && detailListItem.implicitWidth === 194
+        && detailListItem.implicitHeight === 106
+        && listFooter.horizontalPadding === 2
+        && listFooter.verticalPadding === 2
+        && listFooter.stockButtonPadding === 2
+        && listFooter.stockButtonHeight === 22
+        && listFooter.stockMenuButtonSpacing === -2
+        && listFooter.implicitWidth === 86
+        && listFooter.implicitHeight === 26
         && figmaLabelButton.tone === LV.AbstractButton.Primary
         && figmaIconButton.tone === LV.AbstractButton.Primary
         && figmaLabelMenuButton.tone === LV.AbstractButton.Primary
         && figmaIconMenuButton.tone === LV.AbstractButton.Primary
-        && figmaLabelButton.figmaButtonHeight === 44
-        && figmaIconButton.figmaButtonHeight === 44
-        && figmaLabelMenuButton.figmaButtonHeight === 44
-        && figmaIconMenuButton.figmaButtonHeight === 44
-        && figmaLabelButton.horizontalPadding === 16
-        && Math.abs(figmaLabelButton.verticalPadding - 15.5) < 0.01
-        && figmaIconButton.horizontalPadding === 4
-        && figmaIconButton.verticalPadding === 4
-        && figmaLabelMenuButton.horizontalPadding === 16
-        && figmaLabelMenuButton.verticalPadding === 4
+        && figmaLabelButton.figmaButtonHeight === 22
+        && figmaIconButton.figmaButtonHeight === 22
+        && figmaLabelMenuButton.figmaButtonHeight === 22
+        && figmaIconMenuButton.figmaButtonHeight === 22
+        && figmaLabelButton.horizontalPadding === 8
+        && Math.abs(figmaLabelButton.verticalPadding - 4.5) < 0.01
+        && figmaIconButton.horizontalPadding === 2
+        && figmaIconButton.verticalPadding === 2
+        && figmaLabelMenuButton.horizontalPadding === 8
+        && figmaLabelMenuButton.verticalPadding === 2
         && figmaLabelMenuButton.spacing === 0
-        && figmaLabelMenuButton.rightPadding === 4
-        && figmaIconMenuButton.horizontalPadding === 8
-        && figmaIconMenuButton.rightPadding === 4
-        && figmaIconMenuButton.verticalPadding === 4
-        && figmaIconMenuButton.spacing === -4
-        && figmaLabelButton.implicitWidth === 72
-        && figmaIconButton.implicitWidth === 44
-        && figmaLabelMenuButton.implicitWidth === 88
-        && figmaIconMenuButton.implicitWidth === 80
-        && figmaLabelButton.implicitHeight === 44
-        && figmaIconButton.implicitHeight === 44
-        && figmaLabelMenuButton.implicitHeight === 44
-        && figmaIconMenuButton.implicitHeight === 44
+        && figmaLabelMenuButton.rightPadding === 2
+        && figmaIconMenuButton.horizontalPadding === 4
+        && figmaIconMenuButton.rightPadding === 2
+        && figmaIconMenuButton.verticalPadding === 2
+        && figmaIconMenuButton.spacing === -2
+        && figmaLabelButton.implicitWidth === 56
+        && figmaIconButton.implicitWidth === 22
+        && figmaLabelMenuButton.implicitWidth === 60
+        && figmaIconMenuButton.implicitWidth === 40
+        && figmaLabelButton.implicitHeight === 22
+        && figmaIconButton.implicitHeight === 22
+        && figmaLabelMenuButton.implicitHeight === 22
+        && figmaIconMenuButton.implicitHeight === 22
         && figmaLabelSegment.segmentCount === 2
-        && figmaLabelSegment.horizontalPadding === 8
-        && Math.abs(figmaLabelSegment.verticalPadding - 7.0) < 0.01
-        && figmaLabelSegment.spacing === 4
-        && figmaLabelSegment.borderWidth === 4
-        && figmaLabelSegment.cornerRadius === 16
-        && figmaLabelSegment.implicitWidth === 164
-        && figmaLabelSegment.width === 164
-        && Math.abs(figmaLabelSegment.implicitHeight - 58.0) < 0.01
-        && Math.abs(figmaLabelSegment.height - 58.0) < 0.01
-        && labelSegmentButton0.width === 72
-        && labelSegmentButton0.height === 44
-        && labelSegmentButton1.x === 76
+        && figmaLabelSegment.horizontalPadding === 4
+        && Math.abs(figmaLabelSegment.verticalPadding - 3.5) < 0.01
+        && figmaLabelSegment.spacing === 2
+        && figmaLabelSegment.borderWidth === 2
+        && figmaLabelSegment.cornerRadius === 8
+        && figmaLabelSegment.implicitWidth === 122
+        && figmaLabelSegment.width === 122
+        && Math.abs(figmaLabelSegment.implicitHeight - 29.0) < 0.01
+        && Math.abs(figmaLabelSegment.height - 29.0) < 0.01
+        && labelSegmentButton0.width === 56
+        && labelSegmentButton0.height === 22
+        && labelSegmentButton1.x === 58
         && figmaIconSegment.segmentCount === 2
-        && figmaIconSegment.horizontalPadding === 8
-        && figmaIconSegment.verticalPadding === 8
-        && figmaIconSegment.spacing === 4
-        && figmaIconSegment.borderWidth === 4
-        && figmaIconSegment.cornerRadius === 16
-        && figmaIconSegment.implicitWidth === 108
-        && figmaIconSegment.width === 108
-        && figmaIconSegment.implicitHeight === 60
-        && figmaIconSegment.height === 60
-        && iconSegmentButton0.width === 44
-        && iconSegmentButton0.height === 44
-        && iconSegmentButton1.x === 48
+        && figmaIconSegment.horizontalPadding === 4
+        && figmaIconSegment.verticalPadding === 4
+        && figmaIconSegment.spacing === 2
+        && figmaIconSegment.borderWidth === 2
+        && figmaIconSegment.cornerRadius === 8
+        && figmaIconSegment.implicitWidth === 54
+        && figmaIconSegment.width === 54
+        && figmaIconSegment.implicitHeight === 30
+        && figmaIconSegment.height === 30
+        && iconSegmentButton0.width === 22
+        && iconSegmentButton0.height === 22
+        && iconSegmentButton1.x === 24
         && bodyLabel.stylePixelSize === 13
         && bodyLabel.styleLineHeight === 13
         && bodyLabel.font.pixelSize === 13
@@ -648,103 +658,104 @@ Item {
         && textEditor.textLineHeight === 13
         && codeEditor.fontPixelSize === 13
         && codeEditor.textLineHeight === 13
-        && menuItem.itemWidth === 322
-        && menuItem.itemHeight === 48
-        && menuItem.iconSize === 36
-        && menuItem.chevronSize === 32
-        && menuItem.topPadding === 6
-        && menuItem.bottomPadding === 6
-        && menuDivider.lineLength === 440
+        && menuItem.itemWidth === 161
+        && menuItem.itemHeight === 24
+        && menuItem.iconSize === 18
+        && menuItem.chevronSize === 16
+        && menuItem.topPadding === 3
+        && menuItem.bottomPadding === 3
+        && menuDivider.lineLength === 220
         && menuDivider.linePadding === 0
-        && Math.abs(menuDivider.thickness - 2.0) < 0.01
-        && Math.abs(menuDivider.implicitWidth - 440.0) < 0.01
-        && Math.abs(menuDivider.implicitHeight - 6.0) < 0.01
-        && hierarchyToolbar.minimumToolbarWidth === 400
-        && hierarchyToolbar.horizontalPadding === 16
-        && hierarchyToolbar.verticalPadding === 4
-        && hierarchyToolbar.slotSize === 44
+        && Math.abs(menuDivider.thickness - 1.0) < 0.01
+        && Math.abs(menuDivider.implicitWidth - 220.0) < 0.01
+        && Math.abs(menuDivider.implicitHeight - 3.0) < 0.01
+        && hierarchyToolbar.minimumToolbarWidth === 200
+        && hierarchyToolbar.horizontalPadding === 8
+        && hierarchyToolbar.verticalPadding === 2
+        && hierarchyToolbar.slotSize === 22
         && hierarchyToolbar.spacing === 0
         && !hierarchyToolbar.distributeSpacing
-        && hierarchyToolbar.implicitWidth === 400
-        && hierarchyToolbar.implicitHeight === 52
-        && hierarchyItem.rowHeight === 40
-        && hierarchyItem.itemWidth === 400
-        && hierarchyItem.iconSize === 36
-        && hierarchyItem.chevronSize === 32
-        && hierarchyItem.baseLeftPadding === 16
-        && hierarchyItem.rowRightPadding === 16
-        && hierarchyItem.leadingSpacing === 4
-        && hierarchyItem.cornerRadius === 10
-        && hierarchyItem.implicitWidth === 400
-        && hierarchyItem.implicitHeight === 40
-        && hierarchyList.generatedIndentStep === 16
-        && hierarchyList.generatedRowHeight === 40
-        && hierarchyList.generatedItemWidth === 400
-        && hierarchyList.generatedIconSize === 36
-        && hierarchyList.generatedChevronSize === 32
-        && hierarchyPanel.minimumPanelWidth === 400
-        && hierarchyPanel.minimumPanelHeight === 1060
-        && hierarchyPanel.implicitWidth === 400
-        && hierarchyPanel.implicitHeight === 1060
-        && checkBox.boxSize === 34
-        && Math.abs(checkBox.framePadding - 1.0) < 0.01
-        && Math.abs(checkBox.boxRadius - 7.0) < 0.01
-        && Math.abs(checkBox.boxBorderWidthUncheckedEnabled - 1.0) < 0.01
-        && checkBox.contentItem.spacing === 12
-        && checkBox.implicitWidth === 81
-        && checkBox.implicitHeight === 36
+        && hierarchyToolbar.implicitWidth === 200
+        && hierarchyToolbar.implicitHeight === 26
+        && hierarchyItem.rowHeight === 20
+        && hierarchyItem.itemWidth === 200
+        && hierarchyItem.iconSize === 18
+        && hierarchyItem.chevronSize === 16
+        && hierarchyItem.baseLeftPadding === 8
+        && hierarchyItem.rowRightPadding === 8
+        && hierarchyItem.leadingSpacing === 2
+        && hierarchyItem.cornerRadius === 5
+        && hierarchyItem.implicitWidth === 200
+        && hierarchyItem.implicitHeight === 20
+        && hierarchyList.generatedIndentStep === 8
+        && hierarchyList.generatedRowHeight === 20
+        && hierarchyList.generatedItemWidth === 200
+        && hierarchyList.generatedIconSize === 18
+        && hierarchyList.generatedChevronSize === 16
+        && hierarchyPanel.minimumPanelWidth === 200
+        && hierarchyPanel.minimumPanelHeight === 530
+        && hierarchyPanel.implicitWidth === 200
+        && hierarchyPanel.implicitHeight === 530
+        && checkBox.boxSize === 17
+        && Math.abs(checkBox.framePadding - 0.5) < 0.01
+        && Math.abs(checkBox.boxRadius - 3.5) < 0.01
+        && Math.abs(checkBox.boxBorderWidthUncheckedEnabled - 0.5) < 0.01
+        && checkBox.contentItem.spacing === 6
+        && checkBox.implicitWidth === 57
+        && checkBox.implicitHeight === 18
         && checkBox.useFigmaCheckedAssets
         && checkBox.checkedAssetSourceEnabled.toString() === LV.Theme.iconPath("checkboxCheckedEnabled").toString()
         && checkBox.checkedAssetSourceDisabled.toString() === LV.Theme.iconPath("checkboxCheckedDisabled").toString()
-        && radioButton.indicatorSize === 36
-        && radioButton.dotSize === 16
-        && radioButton.indicatorRadius === 18
-        && radioButton.dotRadius === 8
-        && radioButton.contentItem.spacing === 16
-        && radioButton.implicitWidth === 85
-        && radioButton.implicitHeight === 36
+        && radioButton.indicatorSize === 18
+        && radioButton.dotSize === 8
+        && radioButton.indicatorRadius === 9
+        && radioButton.dotRadius === 4
+        && radioButton.contentItem.spacing === 8
+        && radioButton.implicitWidth === 59
+        && radioButton.implicitHeight === 18
         && radioButton.contentItem.children[0].x === 0
         && radioButton.contentItem.children[0].y === 0
-        && radioButton.contentItem.children[0].children[0].x === 10
-        && radioButton.contentItem.children[0].children[0].y === 10
-        && Math.abs(radioButton.contentItem.children[1].x - 52.0) < 0.01
-        && Math.abs(radioButton.contentItem.children[1].y - 11.5) < 0.01
+        && radioButton.contentItem.children[0].children[0].x === 5
+        && radioButton.contentItem.children[0].children[0].y === 5
+        && Math.abs(radioButton.contentItem.children[1].x - 26.0) < 0.01
+        && Math.abs(radioButton.contentItem.children[1].y - 2.5) < 0.01
         && radioButton.contentItem.children[1].font.pixelSize === 13
-        && table.implicitWidth === 1056
-        && table.implicitHeight === 242
-        && table.rowHeight === 48
-        && table.borderWidth === 2
+        && table.implicitWidth === 528
+        && table.implicitHeight === 121
+        && table.rowHeight === 24
+        && table.borderWidth === 1
         && String(table.backgroundColor) === "#1e1e1e"
         && table.borderColor === LV.Theme.panelBackground10
         && table.rowDividerColor === LV.Theme.panelBackground10
         && !table.structureControlsVisible
-        && tableHeader.implicitWidth === 1434
-        && tableHeader.implicitHeight === 50
-        && tableHeader.rowHeight === 48
-        && tableHeader.separatorHeight === 2
-        && tableHeader.cellHorizontalPadding === 16
-        && tableRow.implicitWidth === 1434
-        && tableRow.implicitHeight === 48
-        && tableRow.cellWidth === 468
-        && tableRow.cellHeight === 48
-        && tableRow.contentSpacing === 16
+        && tableHeader.implicitWidth === 717
+        && tableHeader.implicitHeight === 25
+        && tableHeader.rowHeight === 24
+        && tableHeader.separatorHeight === 1
+        && tableHeader.cellHorizontalPadding === 8
+        && tableRow.implicitWidth === 717
+        && tableRow.implicitHeight === 24
+        && tableRow.cellWidth === 234
+        && tableRow.cellHeight === 24
+        && tableRow.contentSpacing === 8
         && tableRow.dividerColor === LV.Theme.panelBackground10
-        && tableCell.implicitWidth === 468
-        && tableCell.implicitHeight === 48
-        && tableCell.resolvedContentSpacing === 16
+        && tableCell.implicitWidth === 234
+        && tableCell.implicitHeight === 24
+        && tableCell.resolvedContentSpacing === 8
         && LV.Theme.textBody === 13
-        && stepper.width === 36
-        && stepper.height === 36
-        && Math.abs(stepper.iconWidth - (36 * (6.43604 / 18.0))) < 0.01
-        && Math.abs(stepper.iconHeight - (36 * (11.1455 / 18.0))) < 0.01
-        && comboBox.width === 194
-        && comboBox.height === 40
-        && Math.abs(comboBox.labelBounds.x - 16.0) < 0.01
-        && Math.abs(comboBox.labelBounds.y - 13.5) < 0.01
-        && Math.abs(comboBox.indicatorBounds.x - 156.0) < 0.01
-        && Math.abs(comboBox.indicatorBounds.y - 2.0) < 0.01
-        && comboBox.indicatorBounds.width === 36
-        && comboBox.indicatorBounds.height === 36
+        && stepper.width === 18
+        && stepper.height === 18
+        && Math.abs(stepper.iconWidth - (18 * (6.43604 / 18.0))) < 0.01
+        && Math.abs(stepper.iconHeight - (18 * (11.1455 / 18.0))) < 0.01
+        && comboBox.width === 97
+        && comboBox.height === 20
+        && Math.abs(comboBox.labelBounds.x - 8.0) < 0.01
+        && Math.abs(comboBox.labelBounds.y - 3.5) < 0.01
+        && Math.abs(comboBox.indicatorBounds.x - 78.0) < 0.01
+        && Math.abs(comboBox.indicatorBounds.y - 1.0) < 0.01
+        && comboBox.indicatorBounds.width === 18
+        && comboBox.indicatorBounds.height === 18
+
 
     property string componentDebug: JSON.stringify({
         listWidth: listControl.listWidth,
@@ -828,6 +839,7 @@ Item {
 }
 )";
 
+        qml.replace("@TARGET@", target);
         QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
         QVERIFY(root);
         QTRY_VERIFY(root->property("tokenContract").toBool());

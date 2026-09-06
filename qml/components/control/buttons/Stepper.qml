@@ -27,6 +27,8 @@ Item {
     readonly property bool usesPlatformSnapshotImage: true
 
     signal clicked()
+    // UpDown resolves the clicked half; single-arrow variants have one direction.
+    signal stepped(int direction)
     signal pressed()
     signal released()
     signal canceled()
@@ -172,7 +174,12 @@ Item {
         onPressed: control.pressed()
         onReleased: control.released()
         onCanceled: control.canceled()
-        onClicked: control.clicked()
+        onClicked: function(mouse) {
+            control.clicked()
+            control.stepped(control.arrow === Stepper.Up ? 1
+                : control.arrow === Stepper.Down ? -1
+                : mouse.y < height / 2 ? 1 : -1)
+        }
     }
 }
 

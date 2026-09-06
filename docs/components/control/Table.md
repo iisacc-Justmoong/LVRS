@@ -455,6 +455,6 @@ Cell text fallback supports `label/text/title` object keys.
 
 ## Figma Contract
 
-The default desktop surface follows nodes `203:3647`, `203:3648`, `203:3863`, and `203:4366`: `528 × 121` table, `25` header, four `24` body rows, `#1e1e1e` body, `panelBackground10` outer/separator lines, 12/12 Description headers, and fixed 13/13 Body cells. The standalone header is `717 × 25`, row `717 × 24`, and cell `234 × 24`. Mobile metrics use the project-wide `@2x` geometry scale (`1056 × 242`, 48px rows) while Body font size remains fixed at 13.
+The default desktop surface follows nodes `203:3647`, `203:3648`, `203:3863`, and `203:4366`: `528 × 121` table, `25` header, four `24` body rows, `#1e1e1e` body, `panelBackground10` outer/separator lines, 12/12 Description headers, and fixed 13/13 Body cells. The standalone header is `717 × 25`, row `717 × 24`, and cell `234 × 24`. Mobile uses the same `528 × 121` surface, `24px` rows, and `13px` Body font as desktop.
 
 The source Figma Table instance contains clipped/overlapped body dividers. `Table` intentionally keeps non-overlapping computed columns because column widths, selection coordinates, range writes, resizing, and external delegates require a coherent spreadsheet grid.

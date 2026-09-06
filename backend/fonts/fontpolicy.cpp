@@ -5,7 +5,6 @@
 #include <QFontInfo>
 #include <QGuiApplication>
 #include <QStringList>
-#include <QtMath>
 
 #include <array>
 
@@ -14,22 +13,16 @@ struct TextStyleToken {
     int pixelSize;
     int weight;
     const char *styleName;
-    bool scalable;
 };
 
 constexpr std::array<TextStyleToken, 7> kThemeTextTokens = {{
-    {26, QFont::Bold, "Bold", true},
-    {22, QFont::Bold, "Bold", true},
-    {17, QFont::DemiBold, "SemiBold", true},
-    {15, QFont::DemiBold, "SemiBold", true},
-    {13, QFont::Medium, "Medium", false},
-    {12, QFont::DemiBold, "SemiBold", true},
-    {11, QFont::Normal, "Regular", true}
-}};
-
-constexpr std::array<qreal, 2> kThemeTokenScaleFactors = {{
-    1.0,
-    2.0
+    {26, QFont::Bold, "Bold"},
+    {22, QFont::Bold, "Bold"},
+    {17, QFont::DemiBold, "SemiBold"},
+    {15, QFont::DemiBold, "SemiBold"},
+    {13, QFont::Medium, "Medium"},
+    {12, QFont::DemiBold, "SemiBold"},
+    {11, QFont::Normal, "Regular"}
 }};
 
 const QStringList kSubstitutionTargets = {
@@ -68,16 +61,7 @@ bool currentApplicationFontLooksLikePretendard()
 
 bool tokenMatchesPixelSize(const TextStyleToken &token, int pixelSize)
 {
-    if (token.pixelSize == pixelSize)
-        return true;
-    if (!token.scalable)
-        return false;
-
-    for (qreal scaleFactor : kThemeTokenScaleFactors) {
-        if (qRound(token.pixelSize * scaleFactor) == pixelSize)
-            return true;
-    }
-    return false;
+    return token.pixelSize == pixelSize;
 }
 }
 

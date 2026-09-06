@@ -102,13 +102,13 @@ Default runtime-direct quality profile in current implementation:
 
 Default mobile sizing contract in current implementation:
 
-- `Theme` applies built-in `2x` metric and scalable typography tokens on iOS and Android; Body size and line height remain fixed at `13px`.
+- `Theme` uses the same authored metric and typography values on desktop, iOS, and Android. Both token scale factors are `1.0`; Body size and line height remain `13px`.
 - `usePlatformSafeMargin` defaults to `true` on iOS and Android, and `safeMargin` defaults to a fixed `16` logical pixels on each side.
 - The render surface remains full-bleed on mobile; `ApplicationWindow` forces its automatic `contentItem` safe-area paddings back to `0` in the default mobile path.
 - The scaffold content is also full-bleed by default. `safeMargin` no longer constrains the internal content host automatically.
 - `layoutSafeAreaBounds` is now a helper rectangle only: it describes the fixed layout inset derived from `safeMargin`, but LVRS does not automatically place app content inside that box.
 - `mobileSystemSafeLeftInset/TopInset/RightInset/BottomInset` and `mobileSystemSafeAreaBounds` expose the real platform safe-area margins so downstream apps can decide which regions to reserve.
-- `mobileViewScale` remains `1.0`; the framework prefers token-level `2x` sizing over full-scene composition scaling in the default path.
+- `mobileViewScale` defaults to `1.0`; the default path adds no Theme or composition multiplier.
 
 Default app-root bootstrap profile in current implementation:
 
@@ -193,7 +193,7 @@ Signals:
 - `WindowSafeAreaObserver` is the low-level API for downstream apps that want direct access to the platform safe-area margins without routing through the root convenience properties.
 - Mobile safe-area fill keeps default layout bounds available as metadata only. Enable `mobileOversizedHeightEnabled` only when an app explicitly needs the older oversized-surface workaround.
 - The oversized remainder is treated as non-layout top/bottom margin fill and painted with `windowColor`.
-- Default mobile sizing now comes from the `Theme` mobile token profile, so downstream apps should override theme-aware component metrics before reaching for `mobileViewScale`.
+- Default mobile sizing uses the same Theme tokens as desktop. Downstream apps can override individual component metrics or explicitly opt into `mobileViewScale`.
 - `pageTransitionController` always follows the router that `activePageRouter` currently resolves to, so shell-level gesture drivers do not need to repeat router lookup.
 
 ## Usage

@@ -31,17 +31,15 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         const char *style;
         int fallbackWeight;
         const char *fallbackStyle;
-        int doubledPixelSize;
-        bool scalable;
     };
     const QList<Token> expected = {
-        {26, QFont::Bold, "Bold", QFont::Bold, "Bold", 52, true},
-        {22, QFont::Bold, "Bold", QFont::Bold, "Bold", 44, true},
-        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 34, true},
-        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 30, true},
-        {13, QFont::Medium, "Medium", QFont::Medium, "Medium", 26, false},
-        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold", 24, true},
-        {11, QFont::Normal, "Regular", QFont::Normal, "Regular", 22, true}
+        {26, QFont::Bold, "Bold", QFont::Bold, "Bold"},
+        {22, QFont::Bold, "Bold", QFont::Bold, "Bold"},
+        {17, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {15, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {13, QFont::Medium, "Medium", QFont::Medium, "Medium"},
+        {12, QFont::DemiBold, "SemiBold", QFont::DemiBold, "SemiBold"},
+        {11, QFont::Normal, "Regular", QFont::Normal, "Regular"}
     };
 
     for (const Token &token : expected) {
@@ -55,15 +53,6 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
                  qPrintable(QStringLiteral("base token pixelSize=%1 style=%2")
                                 .arg(token.pixelSize)
                                 .arg(QString::fromLatin1(token.style))));
-
-        if (token.scalable) {
-            QCOMPARE(policy.weightForTextSize(token.doubledPixelSize, token.fallbackWeight), token.weight);
-            QCOMPARE(policy.styleNameForTextSize(token.doubledPixelSize, QString::fromLatin1(token.fallbackStyle)),
-                     QString::fromLatin1(token.style));
-            QVERIFY(policy.isThemeTextStyleCompliant(token.doubledPixelSize,
-                                                     token.weight,
-                                                     QString::fromLatin1(token.style)));
-        }
     }
 
     const struct {
@@ -71,6 +60,11 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         int weight;
         const char *style;
     } legacyScaleTokens[] = {
+        {52, QFont::Bold, "Bold"},
+        {44, QFont::Bold, "Bold"},
+        {34, QFont::DemiBold, "SemiBold"},
+        {30, QFont::DemiBold, "SemiBold"},
+        {24, QFont::DemiBold, "SemiBold"},
         {33, QFont::Bold, "Bold"},
         {28, QFont::Bold, "Bold"},
         {21, QFont::DemiBold, "SemiBold"},
@@ -78,11 +72,19 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         {14, QFont::Normal, "Regular"}
     };
     for (const auto &token : legacyScaleTokens) {
+        QCOMPARE(policy.weightForTextSize(token.legacyPixelSize, QFont::Light), QFont::Light);
+        QCOMPARE(policy.styleNameForTextSize(token.legacyPixelSize, QStringLiteral("Fallback")),
+                 QStringLiteral("Fallback"));
         QVERIFY(!policy.isThemeTextStyleCompliant(
             token.legacyPixelSize,
             token.weight,
             QString::fromLatin1(token.style)));
     }
+
+    // 22px is Title2, not a doubled Caption alias.
+    QVERIFY(!policy.isThemeTextStyleCompliant(22, QFont::Normal, QStringLiteral("Regular")));
+    QCOMPARE(policy.weightForTextSize(22, QFont::Normal), QFont::Bold);
+    QCOMPARE(policy.styleNameForTextSize(22, QStringLiteral("Regular")), QStringLiteral("Bold"));
 
     QVERIFY(!policy.isThemeTextStyleCompliant(16, QFont::Medium, QStringLiteral("Medium")));
     QCOMPARE(policy.weightForTextSize(16, QFont::Light), QFont::Light);

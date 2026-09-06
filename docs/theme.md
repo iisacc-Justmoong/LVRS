@@ -3,7 +3,7 @@
 Location: `qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
-It now applies a built-in mobile `2x` token profile, so spacing, radius, control sizes, and scalable typography values resolve to doubled mobile numbers on iOS and Android without relying on root-layer composition scaling. Body typography remains a fixed `13px` size and line height across targets.
+All platforms use the same authored logical sizes for spacing, radius, control sizes, icons, typography, and line heights. iOS and Android add no automatic size multiplier. Body remains `13px / 13px`.
 
 ## Token Groups
 
@@ -15,19 +15,18 @@ It now applies a built-in mobile `2x` token profile, so spacing, radius, control
 
 Compact icon baseline:
 
-- `iconSm` resolves to `18 x 18` logical pixels on desktop.
-- The mobile token profile doubles that baseline to `36 x 36`.
+- `iconSm` resolves to `18 x 18` logical pixels on desktop and mobile.
 - Stock action, menu, hierarchy, input, and selection-control icons consume this token unless a public size property is explicitly overridden.
 - Icon images keep a square logical frame and `Image.PreserveAspectFit`, so non-square SVG artwork scales proportionally without distortion.
 
-## Mobile `2x` Scaling
+## Shared Desktop and Mobile Sizing
 
 - `Theme` resolves the current runtime target through `Platform.runtimeProfile()`.
-- When the effective target is mobile (`ios` or `android`), numeric UI tokens resolve at `2x`.
-- This includes spacing, radius, stroke widths, control sizes, dialog bounds, icon sizes, and scalable text pixel sizes / line heights; `textBody` and `textBodyLineHeight` remain fixed at `13`.
-- `FontPolicy` treats the `13px` Medium Body token as non-scalable. In particular, `16px` and `26px` are not Body aliases, so they remain available to their own typography contracts without a Body-token collision.
-- `FontPolicy` accepts the desktop `1x` and mobile `2x` typography sizes; obsolete `1.25x`-only sizes are not treated as current Theme tokens.
-- `ApplicationWindow.mobileViewScale` remains `1.0` by default; LVRS now prefers token-level `2x` sizing over scaled composition for the stock mobile path.
+- `metricScaleFactor` and `typographyScaleFactor` are always `1.0`, including when the effective target is `ios` or `android`.
+- `scaleMetric()` and `scaleTextMetric()` retain numeric conversion and rounding; `scaleRealMetric()` retains fractional values. None adds a platform multiplier.
+- Text sizes and matching line heights are Title `26`, Title2 `22`, Header `17`, Header2 `15`, Body `13`, Description `12`, and Caption `11` on every target.
+- `FontPolicy` recognizes only these authored sizes. Former `2x` and `1.25x` aliases are rejected; `22px` belongs to Bold Title2, and `26px` belongs to Bold Title, with no doubled Caption or Body aliases.
+- `ApplicationWindow.mobileViewScale` and `Window.mobileViewScale` default to `1.0`; explicitly configured composition scaling remains available. Device-pixel-ratio handling and render-quality sampling remain separate from Theme sizing.
 
 Preview/test helpers:
 
@@ -100,7 +99,7 @@ Figma TextField `114:179` uses these semantic fills derived from the existing
 | `inputFieldGlassTintInline` | 16% | Inline, including disabled |
 | `inputFieldGlassReflection` | 1.8% white | Shared material reflection |
 
-Effect distances scale with mobile geometry; these alphas stay fixed.
+Effect distances and color alphas use the same values on desktop and mobile.
 See [InputField](components/control/InputField.md#textfield-material) for the
 gradient, inset shadow, blur, capture source, and renderer fallback contracts.
 
@@ -145,11 +144,13 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
   - `contextMenuItemSelectedBackground`
   - `contextMenuItemInactiveBackground`
 - Dialog sizing:
-  - desktop: `dialogMinWidth: 280`, `dialogMaxWidth: 360`
-  - mobile: `dialogMinWidth: 560`, `dialogMaxWidth: 720`
+  - desktop and mobile: `dialogMinWidth: 280`, `dialogMaxWidth: 360`
 - Common radii:
-  - desktop: `radiusSm: 4`, `radiusLg: 12`
-  - mobile: `radiusSm: 8`, `radiusLg: 24`
+  - desktop and mobile: `radiusSm: 4`, `radiusLg: 12`
+
+## Validation
+
+`LVRSTests_platform_integration` checks the same authored component dimensions on Android and iOS. `LVRSTests_import_api` and `LVRSTests_list_composites` cover platform switching, controls, and all ListItem variants. `LVRSTests_font_policy` rejects obsolete scaled aliases. The installed consumer verifies shared sizes through `find_package(LVRS)` and the installed QML module.
 
 ## Usage
 

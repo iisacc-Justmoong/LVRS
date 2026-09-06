@@ -21,7 +21,8 @@ QtObject {
         : Platform.canonicalOs
     readonly property var effectiveRuntimeProfile: Platform.runtimeProfile(effectiveTarget)
     readonly property bool mobileTarget: effectiveRuntimeProfile.mobile === true
-    readonly property real metricScaleFactor: mobileTarget ? 2.0 : 1.0
+    // All targets share the authored logical sizes; mobile adds no token multiplier.
+    readonly property real metricScaleFactor: 1.0
     readonly property real typographyScaleFactor: metricScaleFactor
 
     readonly property string fontBody: FontPolicy.resolveFamily(FontPolicy.preferredFamily)

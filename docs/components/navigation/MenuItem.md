@@ -47,10 +47,10 @@ Layout and visuals:
 
 - Figma source: node `107:498` (`MenuItem` component set), with the default variant at node `107:495`.
 - The standalone defaults are the measured Figma instance: `label: "Label"`, `key: "key"`, `keyVisible: true`, `iconName: "procedure"`, and a visible right chevron. `ContextMenu` model delegates still supply their normalized entry values explicitly.
-- Desktop frame is `161 x 24`; the mobile `2x` metric policy resolves it to `322 x 48` while Body typography remains fixed at `13px`.
+- Desktop and mobile use the same `161 x 24` frame and `13px` Body typography.
 - `selected`/`inactive` states map to different background colors.
 - The icon frame is `18 x 18` on desktop and `36 x 36` on mobile. The chevron frame is `16 x 16` on desktop and `32 x 32` on mobile.
-- The row uses `4px` horizontal and `3px` vertical padding on desktop; the mobile `2x` policy resolves these values to `8px` and `6px`.
+- The row uses `4px` horizontal and `3px` vertical padding on desktop and mobile.
 - The Figma parity fixture uses `procedure.svg`: icon `x=4, y=3, 18 x 18`, label `x=30, y=5.5, 33 x 13`, shortcut `x=112, y=5.5, 21 x 13`, and `generalchevronRight.svg` at `x=141, y=4, 16 x 16`.
 - Label and shortcut both use the fixed Body contract: Pretendard Medium `13px`, `13px` line height, and zero letter spacing. `labelMetricCompensation` remains available for compatibility but resolves to `0`.
 - `implicitWidth` expands beyond `itemWidth` when icon/label/key/chevron content requires more space.

@@ -278,6 +278,10 @@ The event system now centers on a daemon-style flow:
 5. `ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.
 6. UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.
 
+## Shared Desktop and Mobile Sizing
+
+Mobile no longer doubles Theme sizes. iOS, Android, and desktop use the same spacing, controls, icons, font sizes, and line heights at `1x`. Body remains `13px`; Title remains `26px`; compact icons remain `18px`. Explicit component overrides and optional window composition scaling remain available. See [Theme](docs/theme.md) for the sizing and regression-test contract.
+
 ## Main Visual Catalog
 
 `example/VisualCatalog/qml/Main.qml` is a tab-oriented design-system console with dedicated pages for:

@@ -353,7 +353,7 @@ QtObject {
                             docPath: "docs/components/control/ToggleSwitch.md",
                             previewId: "selection-control",
                             roleLabel: "Binary switch",
-                            summary: "Figma-aligned 38 x 22 two-state switch with an 18px knob, 0/4/4 shadow, and 2x mobile metrics.",
+                            summary: "Figma-aligned 38 x 22 two-state switch with an 18px knob, 0/4/4 shadow, and shared desktop/mobile metrics.",
                             usage: "LV.ToggleSwitch {\n    checked: true\n}",
                             related: ["check-box", "radio-button"]
                         })
@@ -648,8 +648,8 @@ QtObject {
                             location: "qml/components/navigation/List.qml",
                             previewId: "list-navigation",
                             roleLabel: "Flat list panel",
-                            summary: "Flat list surface with optional toolbar and footer slots for inspector-style sidebars.",
-                            usage: "LV.List {\n    items: [{ label: \"Overview\" }, { label: \"Reports\" }]\n}",
+                            summary: "Mixed-height list with 17 row types, scrolling, model edit events and optional toolbar/footer slots.",
+                            usage: "LV.List {\n    expandToContent: true\n    items: [\n        { type: \"Navigation\", label: \"Library\", value: \"24\" },\n        { type: \"Form\", label: \"Metadata\", inputText1: \"Project\" }\n    ]\n    onItemEdited: function(index, item, field, value) {\n        console.log(index, field, value)\n    }\n}",
                             related: ["list-item", "list-toolbar", "list-footer"]
                         }),
                         component({
@@ -658,8 +658,8 @@ QtObject {
                             location: "qml/components/navigation/ListItem.qml",
                             previewId: "list-navigation",
                             roleLabel: "List row",
-                            summary: "Figma Mini/Detail list row with exact icon, typography, metadata, and optional Mini inline input.",
-                            usage: "LV.ListItem {\n    size: LV.ListItem.Mini\n    label: \"Inspector row\"\n    inputable: true\n}",
+                            summary: "17 Figma variants composing editable buttons, menus, steppers, selectors, inputs, metadata and previews.",
+                            usage: "LV.ListItem {\n    type: LV.ListItem.DetailQuantity\n    label: \"Export\"\n    quantity: 2\n    selector: ({ items: [\"PNG\", \"JPEG\"] })\n    unitSelector: ({ items: [\"Scale\", \"Pixels\"] })\n    primaryAction: ({ text: \"Export\", method: function(event) {\n        console.log(event.values.quantity)\n    } })\n}",
                             related: ["list", "input-field"]
                         }),
                         component({

@@ -31,8 +31,8 @@ The icon occupies 18 × 18 at (4, 2); its chevron starts at (20, 2).
 The latter sets the left inset to `Theme.gap8` or `Theme.gap4`. The gap remains
 overridable through `spacing`; radius uses `Theme.radiusMd`.
 
-On mobile, geometry tokens double and Body typography remains 13px: label
-88 × 44, icon 80 × 44, radius 16, and icon-chevron gap -4. With a narrower custom
+Mobile uses the same geometry and Body 13px typography: label 60 × 22, icon
+40 × 22, radius 8, and icon-chevron gap -2. With a narrower custom
 label-button width, text elides to preserve the chevron and its right inset.
 
 The current Figma set supplies accent, default, and borderless references. The
