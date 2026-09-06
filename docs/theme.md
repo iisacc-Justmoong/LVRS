@@ -88,11 +88,27 @@ Discard text uses the existing `danger` token (`#FF453A`). See
 behavior. The Alert's 500px preferred width is independent of the older shared
 dialog bounds below.
 
+## TextField Glass
+
+Figma TextField `114:179` uses these semantic fills derived from the existing
+`panelBackground10` RGB channels. Existing panel and Alert tokens are unchanged.
+
+| Token | Alpha | Use |
+| --- | --- | --- |
+| `inputFieldGlassTint` | 64% | Rounded / Cylinder |
+| `inputFieldGlassTintDisabled` | 36% | Disabled Rounded / Cylinder |
+| `inputFieldGlassTintInline` | 16% | Inline, including disabled |
+| `inputFieldGlassReflection` | 1.8% white | Shared material reflection |
+
+Effect distances scale with mobile geometry; these alphas stay fixed.
+See [InputField](components/control/InputField.md#textfield-material) for the
+gradient, inset shadow, blur, capture source, and renderer fallback contracts.
+
 ## Hex Format Rule
 
 - Opaque surface tokens use 6-digit hex.
 - Alpha-required tokens use 8-digit hex (for example `overlayBackdrop`, text opacity
-  tokens), or `Qt.rgba` to express exact Figma opacity percentages for Alert glass.
+  tokens), or `Qt.rgba` to express exact Figma opacity percentages for material fills.
 
 ## Icon Path Resolution
 

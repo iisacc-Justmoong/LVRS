@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import LVRS 1.0
 
@@ -49,6 +50,7 @@ FocusScope {
 
     property int fieldMinHeight: Theme.controlHeightMd
     property int insetHorizontal: Theme.gap12
+    property int insetRight: insetHorizontal
     property int insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
     property int centeredTextHeight: Theme.scaleTextMetric(16)
@@ -73,6 +75,11 @@ FocusScope {
     property color backgroundColorPressed: Theme.accentBlueMuted
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
+    // Decoration is replaceable without moving or capturing native input/affordances.
+    property Component backgroundComponent: Rectangle {
+        radius: control.resolvedCornerRadius
+        color: control.resolvedBackgroundColor
+    }
 
     property alias leadingItems: leadingCustomSlot.data
     property alias trailingItems: trailingCustomSlot.data
@@ -88,7 +95,7 @@ FocusScope {
         ? trailingContent.width
         : 0
     readonly property int leftInset: insetHorizontal + leadingWidth + (leadingWidth > 0 ? sideSpacing : 0)
-    readonly property int rightInset: insetHorizontal + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
+    readonly property int rightInset: insetRight + trailingWidth + (trailingWidth > 0 ? sideSpacing : 0)
     readonly property bool focused: activeFocus || inputField.activeFocus
     readonly property bool hovered: control.enabled && hoverHandler.hovered
     readonly property bool pressed: false
@@ -161,11 +168,14 @@ FocusScope {
     implicitWidth: Math.max(Theme.inputMinWidth, inputField.implicitWidth + leftInset + rightInset)
     activeFocusOnTab: true
 
-    Rectangle {
+    Item {
         id: backgroundRect
         anchors.fill: parent
-        radius: control.resolvedCornerRadius
-        color: control.resolvedBackgroundColor
+
+        Loader {
+            anchors.fill: parent
+            sourceComponent: control.backgroundComponent
+        }
 
         Item {
             id: leadingHost
@@ -200,7 +210,7 @@ FocusScope {
         Item {
             id: trailingHost
             anchors.right: parent.right
-            anchors.rightMargin: control.insetHorizontal
+            anchors.rightMargin: control.insetRight
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: trailingContent.width
             implicitHeight: trailingContent.height

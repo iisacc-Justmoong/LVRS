@@ -422,6 +422,7 @@ private slots:
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
     void input_field_figma_contract_loads();
+    void input_field_material_rendering_contract();
     void progress_bar_range_contract_loads();
     void control_icons_use_supersampled_raster_contract();
     void input_field_ios_native_text_interaction_contract_loads();
@@ -5085,9 +5086,12 @@ Item {
         defaultField.roundedStyle === defaultField.filledStyle
         && defaultField.resolvedStyle === defaultField.roundedStyle
         && defaultField.shapeStyle === defaultField.shapeRoundRect
-        && defaultField.backgroundColor === LV.Theme.panelBackground10
-        && defaultField.backgroundColorFocused === LV.Theme.panelBackground10
-        && defaultField.backgroundColorDisabled === LV.Theme.panelBackground10
+        && defaultField.backgroundColor === LV.Theme.inputFieldGlassTint
+        && defaultField.backgroundColorFocused === LV.Theme.inputFieldGlassTint
+        && defaultField.backgroundColorDisabled === LV.Theme.inputFieldGlassTintDisabled
+        && Math.abs(defaultField.backgroundColor.a - 0.64) < 0.005
+        && Math.abs(defaultField.backgroundColorDisabled.a - 0.36) < 0.005
+        && defaultField.glassBlurRadius === 8 * expectedScale
         && defaultField.implicitWidth === 206 * expectedScale
         && defaultField.implicitHeight === 19 * expectedScale
         && defaultField.width === 206 * expectedScale
@@ -5119,18 +5123,20 @@ Item {
         && inlineField.shapeStyle === inlineField.shapeCylinder
         && inlineField.implicitWidth === 206 * expectedScale
         && inlineField.implicitHeight === 19 * expectedScale
-        && inlineField.backgroundColor === LV.Theme.accentTransparent
-        && inlineField.backgroundColorHover === LV.Theme.accentTransparent
-        && inlineField.backgroundColorPressed === LV.Theme.accentTransparent
-        && inlineField.backgroundColorFocused === LV.Theme.accentTransparent
-        && inlineField.backgroundColorDisabled === LV.Theme.accentTransparent
-        && inlineDisabledField.backgroundColor === LV.Theme.accentTransparent
-        && inlineDisabledField.backgroundColorDisabled === LV.Theme.accentTransparent
+        && inlineField.backgroundColor === LV.Theme.inputFieldGlassTintInline
+        && inlineField.backgroundColorHover === inlineField.backgroundColor
+        && inlineField.backgroundColorPressed === inlineField.backgroundColor
+        && inlineField.backgroundColorFocused === inlineField.backgroundColor
+        && inlineField.backgroundColorDisabled === inlineField.backgroundColor
+        && inlineDisabledField.backgroundColor === inlineField.backgroundColor
+        && inlineDisabledField.backgroundColorDisabled === inlineField.backgroundColor
+        && Math.abs(inlineField.backgroundColor.a - 0.16) < 0.005
+        && inlineField.glassBlurRadius === 6 * expectedScale
         && inlineField.showClearButton
         && cylinderField.resolvedStyle === cylinderField.cylinderStyle
         && cylinderField.shapeStyle === cylinderField.shapeCylinder
         && Math.abs(cylinderField.resolvedCornerRadius - (19 * expectedScale / 2.0)) < 0.01
-        && cylinderField.backgroundColor === LV.Theme.panelBackground10
+        && cylinderField.backgroundColor === LV.Theme.inputFieldGlassTint
         && cylinderField.implicitWidth === 206 * expectedScale
         && cylinderField.implicitHeight === 19 * expectedScale
         && searchField.search
@@ -5140,7 +5146,7 @@ Item {
         && Math.abs(searchField.clearIconMarkLength - (12 * expectedScale * (8.0 / 14.0))) < 0.01
         && Math.abs(searchField.clearIconMarkThickness - (12 * expectedScale * (1.4 / 14.0))) < 0.01
         && searchField.leftInset === 21 * expectedScale
-        && searchField.rightInset === 21 * expectedScale
+        && searchField.rightInset === 8 + 14 * expectedScale
         && searchField.implicitWidth === 206 * expectedScale
         && searchField.implicitHeight === 19 * expectedScale
         && searchField.showClearButton
@@ -5155,16 +5161,6 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
-                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
-    QVERIFY(root->setProperty("themeTarget", QStringLiteral("android")));
-    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
-                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
-
-    QVERIFY(root->setProperty("themeTarget", QStringLiteral("macos")));
-    QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
-                 qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
-
     auto *rootItem = qobject_cast<QQuickItem *>(root.data());
     auto *roundedItem = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaInputRounded")));
@@ -5179,6 +5175,42 @@ Item {
     QVERIFY(cylinderItem);
     QVERIFY(inlineItem);
     QVERIFY(searchItem);
+
+    const auto verifyClearPadding = [](QQuickItem *field) {
+        auto *clear = field->findChild<QQuickItem *>(field->objectName() + "_clearButton");
+        QVERIFY(clear);
+        QTRY_VERIFY(field->property("showClearButton").toBool());
+        QTRY_VERIFY(qAbs(field->width() - clear->mapToItem(field, QPointF()).x()
+                         - clear->width() - 8.0) < 0.01);
+        auto *input = field->property("inputItem").value<QQuickItem *>();
+        QVERIFY(input);
+        QTRY_VERIFY(qAbs(clear->mapToItem(field, QPointF()).x() - input->x()
+                         - input->width() - field->property("sideSpacing").toReal()) < 0.01);
+    };
+    const QList<QQuickItem *> fields = {roundedItem, cylinderItem, inlineItem, searchItem};
+    for (const QString &target : {QStringLiteral("macos"), QStringLiteral("android"),
+                                  QStringLiteral("macos")}) {
+        QVERIFY(root->setProperty("themeTarget", target));
+        QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
+                     qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
+        for (QQuickItem *field : fields) {
+            const QString originalText = field->property("text").toString();
+            QVERIFY(field->setProperty("text", QStringLiteral("Filled value")));
+            verifyClearPadding(field);
+            QVERIFY(field->setProperty("text", originalText));
+        }
+    }
+
+    searchItem->setWidth(333);
+    QVERIFY(searchItem->setProperty("insetHorizontal", 19));
+    verifyClearPadding(searchItem);
+    QVERIFY(searchItem->setProperty("text", QString()));
+    QVERIFY(!searchItem->property("showClearButton").toBool());
+    QTRY_COMPARE(searchItem->property("rightInset").toInt(), 19);
+    QVERIFY(searchItem->setProperty("text", QStringLiteral("abc")));
+    verifyClearPadding(searchItem);
+    searchItem->setWidth(206);
+    QVERIFY(searchItem->setProperty("insetHorizontal", 7));
 
     roundedItem->setVisible(true);
     cylinderItem->setVisible(true);
@@ -5195,6 +5227,7 @@ Item {
     captureWindow.show();
     QCoreApplication::processEvents();
 
+    QTest::qWait(120);
     const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(698, 84));
     QVERIFY(grabResult);
     QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
@@ -5207,18 +5240,16 @@ Item {
         return captured.pixelColor(qRound(x * captureScale), qRound(y * captureScale));
     };
 
-    const auto rgbMatches = [](const QColor &actual, const QColor &expected) {
-        return qAbs(actual.red() - expected.red()) <= 2
-            && qAbs(actual.green() - expected.green()) <= 2
-            && qAbs(actual.blue() - expected.blue()) <= 2
-            && actual.alpha() >= 253;
-    };
-    const QColor panel10(QStringLiteral("#282828"));
-    QVERIFY(rgbMatches(logicalPixel(150, 29), panel10));
-    QVERIFY(rgbMatches(logicalPixel(396, 29), panel10));
-    QVERIFY(rgbMatches(logicalPixel(225, 29), panel10));
+    // The material stays translucent without a backdrop source. Inline is lighter.
+    const QColor roundedFill = logicalPixel(150, 29);
+    const QColor cylinderFill = logicalPixel(396, 29);
+    const QColor inlineFill = logicalPixel(622, 29);
+    qInfo() << "TextField material alpha:" << roundedFill.alphaF() << inlineFill.alphaF();
+    QVERIFY(roundedFill.alphaF() > 0.63 && roundedFill.alphaF() < 0.70);
+    QVERIFY(qAbs(roundedFill.alpha() - cylinderFill.alpha()) <= 2);
+    QVERIFY(inlineFill.alphaF() > 0.15 && inlineFill.alphaF() < 0.22);
+    QVERIFY(logicalPixel(225, 29).alpha() > 0);
     QCOMPARE(logicalPixel(226, 29).alpha(), 0);
-    QCOMPARE(logicalPixel(622, 29).alpha(), 0);
     QCOMPARE(logicalPixel(20, 20).alpha(), 0);
     QCOMPARE(logicalPixel(246, 20).alpha(), 0);
 
@@ -5233,7 +5264,7 @@ Item {
 
     int clearGlyphPixels = 0;
     for (int y = 48; y < 60; ++y) {
-        for (int x = 207; x < 219; ++x) {
+        for (int x = 206; x < 218; ++x) {
             if (logicalPixel(x, y).lightness() > 100)
                 ++clearGlyphPixels;
         }
@@ -5243,6 +5274,208 @@ Item {
     const QString capturePath = qEnvironmentVariable("LVRS_INPUT_FIELD_CAPTURE_PATH");
     if (!capturePath.isEmpty())
         QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+
+    auto *clear = searchItem->findChild<QQuickItem *>(QStringLiteral("figmaInputSearch_clearButton"));
+    QVERIFY(clear);
+    QTest::mouseClick(&captureWindow, Qt::LeftButton, Qt::NoModifier,
+                     scenePoint(clear, QPointF(clear->width() / 2, clear->height() / 2)));
+    QTRY_COMPARE(searchItem->property("text").toString(), QString());
+    QVERIFY(!searchItem->property("showClearButton").toBool());
+    QTRY_VERIFY(searchItem->property("focused").toBool());
+}
+
+void ImportApiTests::input_field_material_rendering_contract()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    const QByteArray qml = R"(
+import QtQuick
+import QtQuick.Controls as Controls
+import LVRS as LV
+
+Controls.ApplicationWindow {
+    id: window
+    width: 718
+    height: 294
+    visible: true
+    property bool detailedBackdrop: false
+    property real contentOffset: 0
+    property color stripeColor: "#f0d189"
+    Component.onCompleted: LV.Theme.targetOverride = "macos"
+    Component.onDestruction: LV.Theme.targetOverride = ""
+    background: Rectangle {
+        objectName: "materialBackdrop"
+        color: window.detailedBackdrop ? "#478de2" : "#1f1f1f"
+        Repeater {
+            model: window.detailedBackdrop ? 120 : 0
+            Rectangle {
+                required property int index
+                x: index * 6
+                width: 3
+                height: window.height
+                color: window.stripeColor
+            }
+        }
+    }
+    Item {
+        x: window.contentOffset
+        width: window.width
+        height: window.height
+        Repeater {
+            model: 18
+            LV.InputField {
+                required property int index
+                objectName: "materialField" + index
+                readonly property int stateIndex: index % 6
+                x: 20 + Math.floor(index / 6) * 230
+                y: 24 + stateIndex * 42
+                style: index < 6 ? roundedStyle : index < 12 ? cylinderStyle : inlineStyle
+                enabled: stateIndex !== 1
+                placeholderText: enabled ? "Placeholder" : "Disabled"
+                text: stateIndex >= 2 ? stateIndex === 3 ? "Selected text" : "Editable text" : ""
+                search: stateIndex === 5
+                persistentSelection: true
+                Component.onCompleted: {
+                    if (stateIndex === 3)
+                        selectAll()
+                }
+            }
+        }
+    }
+}
+)";
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    QList<QQuickItem *> fields;
+    for (int i = 0; i < 18; ++i) {
+        auto *field = visualChildByObjectName(window->contentItem(),
+                                             QStringLiteral("materialField%1").arg(i));
+        QVERIFY(field);
+        fields.append(field);
+        QCOMPARE(field->size(), QSizeF(206, 19));
+        QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
+    }
+    const auto grab = [window]() -> QImage {
+        QTest::qWait(120);
+        const auto result = window->contentItem()->grabToImage(window->size());
+        if (!result)
+            return {};
+        QElapsedTimer timer;
+        timer.start();
+        while (result->image().isNull() && timer.elapsed() < 5000)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+        return result->image().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
+    };
+    const QImage material = grab();
+    QVERIFY(!material.isNull());
+    const auto depth = [](const QImage &image, QQuickItem *field) {
+        const QPoint p = scenePoint(field, QPointF(150, 0));
+        return qGray(image.pixel(p + QPoint(0, 18))) - qGray(image.pixel(p + QPoint(0, 1)));
+    };
+    for (int column = 0; column < 3; ++column) {
+        QQuickItem *field = fields[column * 6];
+        QVERIFY2(depth(material, field) > (column == 2 ? 1 : 7),
+                 "The lower inner reflection must be brighter than the recessed top.");
+        QVERIFY(depth(material, field) > depth(material, fields[column * 6 + 1]));
+        const QPoint p = scenePoint(field, QPointF(150, 0));
+        QVERIFY2(qGray(material.pixel(p + QPoint(0, 18)))
+                     > qGray(material.pixel(p + QPoint(0, 9))) + (column == 2 ? 2 : 10),
+                 "The material must include the lower rim, including when supersampled.");
+        QCOMPARE(material.pixelColor(p + QPoint(0, -1)), QColor("#1f1f1f"));
+        QCOMPARE(material.pixelColor(p + QPoint(0, 19)), QColor("#1f1f1f"));
+    }
+
+    QVERIFY(root->setProperty("detailedBackdrop", true));
+    const QImage frosted = grab();
+    for (QQuickItem *field : fields)
+        QVERIFY(field->setProperty("glassEnabled", false));
+    const QImage unblurred = grab();
+    const QString captureDir = qEnvironmentVariable("LVRS_INPUT_MATERIAL_CAPTURE_DIR");
+    if (!captureDir.isEmpty()) {
+        QVERIFY(QDir().mkpath(captureDir));
+        QVERIFY(material.save(captureDir + "/textfield-material.png"));
+        QVERIFY(frosted.save(captureDir + "/textfield-frosted.png"));
+        QVERIFY(unblurred.save(captureDir + "/textfield-without-blur.png"));
+    }
+    const auto variation = [](const QImage &image, QQuickItem *field) {
+        const QPoint p = scenePoint(field, QPointF(95, 6));
+        double sum = 0;
+        for (int y = p.y(); y < p.y() + 7; ++y) {
+            for (int x = p.x(); x < p.x() + 75; ++x)
+                sum += qAbs(qGray(image.pixel(x, y)) - qGray(image.pixel(x + 1, y)));
+        }
+        return sum;
+    };
+    const bool software = window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software;
+    for (int column = 0; column < 3; ++column) {
+        auto *field = fields[column * 6];
+        const double sharpDetail = variation(unblurred, field);
+        const double frostedDetail = variation(frosted, field);
+        QVERIFY2(sharpDetail > 1000, "The fixture must show fine detail through the material.");
+        qInfo() << "TextField style" << column << "backdrop detail:"
+                << frostedDetail << "unblurred:" << sharpDetail;
+        if (software)
+            QCOMPARE(frostedDetail, sharpDetail);
+        else
+            // MultiEffect mixes blur levels (including some source detail at 6/8px).
+            // Require a substantial reduction without changing the Figma blur radii.
+            QVERIFY2(frostedDetail < sharpDetail * 0.60, "The actual backdrop must be blurred.");
+        QCOMPARE(variation(frosted, fields[column * 6 + 1]),
+                 variation(unblurred, fields[column * 6 + 1]));
+    }
+    for (QQuickItem *field : fields)
+        QVERIFY(field->setProperty("glassEnabled", true));
+
+    auto *field = fields.first();
+    auto *capture = visualChildByObjectName(field, QStringLiteral("inputFieldGlassCapture"));
+    QVERIFY(capture);
+    QVERIFY(!capture->property("recursive").toBool());
+    QVERIFY(!capture->property("hideSource").toBool());
+    const QRectF beforeMove = capture->property("sourceRect").toRectF();
+    QVERIFY(root->setProperty("contentOffset", 11));
+    QTRY_COMPARE(capture->property("sourceRect").toRectF().x(), beforeMove.x() + 11);
+    QCOMPARE(capture->property("sourceRect").toRectF().size(), beforeMove.size());
+    QVERIFY(root->setProperty("contentOffset", 0));
+
+    // A live sibling source updates, while capturing the field or an ancestor is rejected.
+    QVERIFY(root->setProperty("stripeColor", QColor("#e74a62")));
+    const QImage changedBackdrop = grab();
+    if (!software)
+        QVERIFY(changedBackdrop.pixelColor(170, 33) != frosted.pixelColor(170, 33));
+    for (QQuickItem *unsafeSource : {window->contentItem(), field,
+                                    field->property("inputItem").value<QQuickItem *>()}) {
+        QVERIFY(field->setProperty("backdropSource", QVariant::fromValue(unsafeSource)));
+        QTRY_VERIFY(!field->property("glassActive").toBool());
+        QVERIFY(!capture->property("sourceItem").value<QQuickItem *>());
+    }
+    auto *backdrop = root->findChild<QQuickItem *>("materialBackdrop");
+    QVERIFY(backdrop);
+    QVERIFY(field->setProperty("backdropSource", QVariant::fromValue(backdrop)));
+    QTRY_VERIFY(field->property("glassActive").toBool());
+    field->setVisible(false);
+    QVERIFY(!capture->property("live").toBool());
+    field->setVisible(true);
+    QTRY_VERIFY(capture->property("live").toBool());
+
+    // Repainting the material must preserve the public tint override and native input.
+    QVERIFY(root->setProperty("detailedBackdrop", false));
+    QVERIFY(field->setProperty("backgroundColor", QColor("#994433")));
+    const QImage customTint = grab();
+    QVERIFY(customTint.pixelColor(170, 33).red() > 130);
+    auto *searchField = fields[5];
+    auto *clear = visualChildByObjectName(searchField, QStringLiteral("materialField5_clearButton"));
+    QVERIFY(clear);
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+                     scenePoint(clear, QPointF(clear->width() / 2, clear->height() / 2)));
+    QTRY_COMPARE(searchField->property("text").toString(), QString());
+    QTRY_VERIFY(searchField->property("focused").toBool());
+    for (const Qt::Key key : {Qt::Key_T, Qt::Key_Y, Qt::Key_P, Qt::Key_E, Qt::Key_D})
+        QTest::keyClick(window, key);
+    QTRY_COMPARE(searchField->property("text").toString(), QStringLiteral("typed"));
+    QVERIFY(QMetaObject::invokeMethod(searchField, "selectAll"));
+    QCOMPARE(searchField->property("selectedText").toString(), QStringLiteral("typed"));
 }
 
 void ImportApiTests::progress_bar_range_contract_loads()

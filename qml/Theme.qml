@@ -166,6 +166,14 @@ QtObject {
     readonly property color alertDivider: "#363B3F"
     readonly property color alertIconSurface: "#192840"
     readonly property color alertIconBorder: "#244B7E"
+    // Material/TextField semantic fills, Figma 114:179.
+    readonly property color inputFieldGlassTint: Qt.rgba(panelBackground10.r, panelBackground10.g,
+                                                        panelBackground10.b, 0.64)
+    readonly property color inputFieldGlassTintDisabled: Qt.rgba(panelBackground10.r, panelBackground10.g,
+                                                                panelBackground10.b, 0.36)
+    readonly property color inputFieldGlassTintInline: Qt.rgba(panelBackground10.r, panelBackground10.g,
+                                                              panelBackground10.b, 0.16)
+    readonly property color inputFieldGlassReflection: Qt.rgba(1, 1, 1, 0.018)
     readonly property color strokeSoft: "#D0D7E2"
     // Accent palette (all fill/stroke colors found in resources/iconset)
     readonly property color accentTransparent: "transparent" // none
