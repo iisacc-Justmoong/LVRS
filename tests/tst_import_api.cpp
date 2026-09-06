@@ -414,6 +414,8 @@ private slots:
     void hierarchy_item_structure_api_contract_loads();
     void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
+    void button_family_components_contract_data();
+    void button_family_components_contract();
     void button_default_tone_matches_figma_accent_loads();
     void segmented_control_figma_contract_loads();
     void button_injected_methods_contract_loads();
@@ -4090,9 +4092,9 @@ Item {
         && iconButton.verticalPadding === LV.Theme.gap2
         && labelMenuButton.horizontalPadding === LV.Theme.gap8
         && labelMenuButton.verticalPadding === LV.Theme.gap2
-        && iconMenuButton.horizontalPadding === LV.Theme.gap2
+        && iconMenuButton.horizontalPadding === LV.Theme.gap4
         && iconMenuButton.verticalPadding === LV.Theme.gap2
-        && labelMenuButton.spacing === -LV.Theme.gap2
+        && labelMenuButton.spacing === LV.Theme.gapNone
         && iconMenuButton.spacing === -LV.Theme.gap2
         && iconButton.iconSize === LV.Theme.iconSm
         && iconMenuButton.iconSize === LV.Theme.iconSm
@@ -4108,8 +4110,8 @@ Item {
         && Math.abs(iconMenuButton.implicitHeight - 22) < 0.01
         && Math.abs(labelButton.implicitWidth - 56) < 0.01
         && Math.abs(iconButton.implicitWidth - 22) < 0.01
-        && Math.abs(labelMenuButton.implicitWidth - 64) < 0.01
-        && Math.abs(iconMenuButton.implicitWidth - 38) < 0.01
+        && Math.abs(labelMenuButton.implicitWidth - 60) < 0.01
+        && Math.abs(iconMenuButton.implicitWidth - 40) < 0.01
         && Math.abs(labelButton.implicitHeight - iconButton.implicitHeight) < 0.01
         && Math.abs(iconButton.implicitHeight - labelMenuButton.implicitHeight) < 0.01
         && Math.abs(labelMenuButton.implicitHeight - iconMenuButton.implicitHeight) < 0.01
@@ -4246,13 +4248,13 @@ Item {
     verifyBounds(boundsIn(labelText, labelButton), QRectF(8.0, 4.5, 40.0, 13.0));
     verifyBounds(boundsIn(iconImage, iconButton), QRectF(2.0, 2.0, 18.0, 18.0));
     verifyBounds(boundsIn(labelMenuText, labelMenuButton), QRectF(8.0, 4.5, 32.0, 13.0));
-    verifyBounds(boundsIn(labelMenuIndicator, labelMenuButton), QRectF(38.0, 2.0, 18.0, 18.0));
-    verifyBounds(boundsIn(iconMenuImage, iconMenuButton), QRectF(2.0, 2.0, 18.0, 18.0));
-    verifyBounds(boundsIn(iconMenuIndicator, iconMenuButton), QRectF(18.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(labelMenuIndicator, labelMenuButton), QRectF(40.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(iconMenuImage, iconMenuButton), QRectF(4.0, 2.0, 18.0, 18.0));
+    verifyBounds(boundsIn(iconMenuIndicator, iconMenuButton), QRectF(20.0, 2.0, 18.0, 18.0));
     verifyBounds(boundsIn(constrainedLabel, constrainedLabelMenuButton),
-                 QRectF(8.0, 4.5, 8.0, 13.0));
+                 QRectF(8.0, 4.5, 12.0, 13.0));
     verifyBounds(boundsIn(constrainedIndicator, constrainedLabelMenuButton),
-                 QRectF(14.0, 2.0, 18.0, 18.0));
+                 QRectF(20.0, 2.0, 18.0, 18.0));
 
     const QFont labelFont = labelText->property("font").value<QFont>();
     const QFont labelMenuFont = labelMenuText->property("font").value<QFont>();
@@ -4266,6 +4268,138 @@ Item {
     QTRY_COMPARE(labelMenuIndicator->property("status").toInt(), 1);
     QTRY_COMPARE(iconMenuImage->property("status").toInt(), 1);
     QTRY_COMPARE(iconMenuIndicator->property("status").toInt(), 1);
+}
+
+void ImportApiTests::button_family_components_contract_data()
+{
+    QTest::addColumn<bool>("mobile");
+    QTest::newRow("desktop") << false;
+    QTest::newRow("mobile") << true;
+}
+
+void ImportApiTests::button_family_components_contract()
+{
+    QFETCH(bool, mobile);
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    engine.rootContext()->setContextProperty("testMobile", mobile);
+    const QByteArray qml = R"(
+import QtQuick
+import LVRS as LV
+
+Item {
+    id: root
+    width: 640
+    height: 400
+    property int methodCalls: 0
+    property int signalCalls: 0
+    Component.onCompleted: LV.Theme.targetOverride = testMobile ? "ios" : "macos"
+    Rectangle { anchors.fill: parent; color: "#202020" }
+    Column {
+        x: 20
+        y: 20
+        spacing: 16
+        Repeater {
+            model: 5
+            Row {
+                id: row
+                required property int index
+                spacing: 20
+                LV.PushButton {
+                    objectName: "pushLabel" + row.index
+                    text: "Button"
+                    tone: row.index
+                    method: function(eventData) { root.methodCalls++ }
+                    onClicked: root.signalCalls++
+                }
+                LV.PushButton {
+                    objectName: "pushIcon" + row.index
+                    iconMode: true
+                    tone: row.index
+                    method: function(eventData) { root.methodCalls++ }
+                    onClicked: root.signalCalls++
+                }
+                LV.DropdownButton {
+                    objectName: "dropdownLabel" + row.index
+                    text: "Open"
+                    tone: row.index
+                    method: function(eventData) { root.methodCalls++ }
+                    onClicked: root.signalCalls++
+                }
+                LV.DropdownButton {
+                    objectName: "dropdownIcon" + row.index
+                    iconMode: true
+                    tone: row.index
+                    method: function(eventData) { root.methodCalls++ }
+                    onClicked: root.signalCalls++
+                }
+            }
+        }
+    }
+}
+)";
+    QScopedPointer<QObject> root(createFromQml(engine, qml));
+    QVERIFY(root);
+    QQuickWindow window;
+    window.resize(640, 400);
+    auto *host = qobject_cast<QQuickItem *>(root.data());
+    QVERIFY(host);
+    host->setParentItem(window.contentItem());
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    const int scale = mobile ? 2 : 1;
+    const QStringList families = {"pushLabel", "pushIcon", "dropdownLabel", "dropdownIcon"};
+    int expectedCalls = 0;
+    for (int tone = 0; tone < 5; ++tone) {
+        for (int kind = 0; kind < families.size(); ++kind) {
+            const QString buttonName = families.at(kind) + QString::number(tone);
+            auto *button = visualChildByObjectName(host, buttonName);
+            QVERIFY2(button, qPrintable(buttonName));
+            QTRY_COMPARE(button->height(), 22.0 * scale);
+            QCOMPARE(button->property("cornerRadius").toInt(), 8 * scale);
+            QCOMPARE(button->property("resolvedCornerRadius").toReal(), 8.0 * scale);
+            const QList<int> leftInsets = {8, 2, 8, 4};
+            const QList<int> rightInsets = {8, 2, 2, 2};
+            QCOMPARE(button->property("leftPadding").toReal(), qreal(leftInsets.at(kind) * scale));
+            QCOMPARE(button->property("rightPadding").toReal(), qreal(rightInsets.at(kind) * scale));
+            const qreal topInset = kind == 0 ? (22.0 * scale - 13) / 2 : 2.0 * scale;
+            QCOMPARE(button->property("topPadding").toReal(), topInset);
+            QCOMPARE(button->property("bottomPadding").toReal(), topInset);
+            const qreal gap = kind == 0 ? 10 * scale : kind == 1 ? (tone == 0 ? 0 : 7 * scale)
+                : kind == 2 ? 0 : -2 * scale;
+            QCOMPARE(button->property("spacing").toReal(), gap);
+            const QList<qreal> widths = {40.0 + 16 * scale, 22.0 * scale,
+                                         32.0 + 28 * scale, 40.0 * scale};
+            QCOMPARE(button->width(), widths.at(kind));
+            if (kind >= 2) {
+                auto *indicator = button->findChild<QQuickItem *>(kind == 2
+                    ? "labelMenuButton_indicator" : "iconMenuButton_indicator");
+                QVERIFY(indicator);
+                const QPointF position = indicator->mapToItem(button, QPointF());
+                QCOMPARE(position.x(), kind == 2 ? 32.0 + 8 * scale : 20.0 * scale);
+                QCOMPARE(position.y(), 2.0 * scale);
+                QCOMPARE(indicator->width(), 18.0 * scale);
+                QTRY_COMPARE(indicator->property("status").toInt(), 1);
+            }
+            QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier,
+                             scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
+            if (tone != 4)
+                ++expectedCalls;
+            QCOMPARE(root->property("methodCalls").toInt(), expectedCalls);
+            QCOMPARE(root->property("signalCalls").toInt(), expectedCalls);
+        }
+    }
+    const QString captureDir = qEnvironmentVariable("LVRS_BUTTON_CAPTURE_DIR");
+    if (!captureDir.isEmpty()) {
+        QVERIFY(QDir().mkpath(captureDir));
+        QSignalSpy frameSpy(&window, &QQuickWindow::frameSwapped);
+        window.update();
+        QTRY_VERIFY_WITH_TIMEOUT(frameSpy.count() > 0, 5000);
+        const auto capture = host->grabToImage(QSize(1280, 800));
+        QVERIFY(capture);
+        QTRY_VERIFY(!capture->image().isNull());
+        QVERIFY(capture->image().save(captureDir + (mobile ? "/buttons-mobile.png" : "/buttons-desktop.png")));
+    }
 }
 
 void ImportApiTests::button_default_tone_matches_figma_accent_loads()

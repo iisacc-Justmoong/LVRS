@@ -753,35 +753,41 @@ LV.ApplicationWindow {
                     columnSpacing: LV.Theme.gap12
                     rowSpacing: LV.Theme.gap8
 
+                    LV.Label { style: caption; text: "Kind" }
+                    LV.Label { style: caption; text: "Push label" }
+                    LV.Label { style: caption; text: "Push icon" }
+                    LV.Label { style: caption; text: "Dropdown label" }
+                    LV.Label { style: caption; text: "Dropdown icon" }
+
                     LV.Label { style: caption; text: "Accent" }
-                    LV.LabelButton { text: "Button" }
-                    LV.IconButton { iconName: "projectStructure" }
-                    LV.LabelMenuButton { text: "Open" }
-                    LV.IconMenuButton { iconName: "projectStructure" }
+                    LV.PushButton { text: "Button" }
+                    LV.PushButton { iconMode: true; iconName: "projectStructure" }
+                    LV.DropdownButton { text: "Open" }
+                    LV.DropdownButton { iconMode: true; iconName: "projectStructure" }
 
                     LV.Label { style: caption; text: "Default" }
-                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Default }
-                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Default }
-                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Default }
-                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Default }
+                    LV.PushButton { text: "Button"; tone: LV.AbstractButton.Default }
+                    LV.PushButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Default }
+                    LV.DropdownButton { text: "Open"; tone: LV.AbstractButton.Default }
+                    LV.DropdownButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Default }
 
                     LV.Label { style: caption; text: "Borderless" }
-                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Borderless }
-                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
-                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Borderless }
-                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
+                    LV.PushButton { text: "Button"; tone: LV.AbstractButton.Borderless }
+                    LV.PushButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
+                    LV.DropdownButton { text: "Open"; tone: LV.AbstractButton.Borderless }
+                    LV.DropdownButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Borderless }
 
                     LV.Label { style: caption; text: "Destructive" }
-                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Destructive }
-                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
-                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Destructive }
-                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
+                    LV.PushButton { text: "Button"; tone: LV.AbstractButton.Destructive }
+                    LV.PushButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
+                    LV.DropdownButton { text: "Open"; tone: LV.AbstractButton.Destructive }
+                    LV.DropdownButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Destructive }
 
                     LV.Label { style: caption; text: "Disabled" }
-                    LV.LabelButton { text: "Button"; tone: LV.AbstractButton.Disabled }
-                    LV.IconButton { iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
-                    LV.LabelMenuButton { text: "Open"; tone: LV.AbstractButton.Disabled }
-                    LV.IconMenuButton { iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
+                    LV.PushButton { text: "Button"; tone: LV.AbstractButton.Disabled }
+                    LV.PushButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
+                    LV.DropdownButton { text: "Open"; tone: LV.AbstractButton.Disabled }
+                    LV.DropdownButton { iconMode: true; iconName: "projectStructure"; tone: LV.AbstractButton.Disabled }
                 }
             }
         }

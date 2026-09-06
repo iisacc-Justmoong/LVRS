@@ -49,7 +49,7 @@ Figma kind mapping:
 - `destructive` -> `AbstractButton.Destructive` / `Theme.danger`
 - `disabled` -> `AbstractButton.Disabled` / `Theme.panelBackground04` and `Theme.disabledColor`
 
-The four concrete Figma variants default to `Primary`, matching the component set's default `Kind=accent`. `AbstractButton` itself remains the neutral shared base and keeps its own `Default` tone.
+The `PushButton` and `DropdownButton` families and their four named presets default to `Primary`, matching the component set's default `Kind=accent`. `AbstractButton` itself remains the neutral shared base and keeps its own `Default` tone.
 
 Layout:
 
@@ -82,3 +82,11 @@ LV.AbstractButton {
     ]
 }
 ```
+
+## Button families
+
+`PushButton` and `DropdownButton` are independent children of `AbstractButton`.
+The former owns plain label/icon actions; the latter owns label/icon menu triggers
+with a trailing chevron. Their compact 8px radius and measured padding/gaps are
+scoped to those families, so `AlertButton`, `Stepper`, and other direct
+`AbstractButton` consumers retain their own contracts.

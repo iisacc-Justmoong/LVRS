@@ -207,6 +207,28 @@ QtObject {
                             related: ["label-button", "icon-button", "alert-button"]
                         }),
                         component({
+                            key: "push-button",
+                            label: "PushButton",
+                            location: "qml/components/control/buttons/PushButton.qml",
+                            docPath: "docs/components/control/PushButton.md",
+                            previewId: "button-family",
+                            roleLabel: "Push action",
+                            summary: "Separate push-button family with label or icon content and an 8px corner radius.",
+                            usage: "LV.PushButton {\n    text: \"Save\"\n    method: function(eventData) { save() }\n}",
+                            related: ["dropdown-button", "label-button", "icon-button"]
+                        }),
+                        component({
+                            key: "dropdown-button",
+                            label: "DropdownButton",
+                            location: "qml/components/control/buttons/DropdownButton.qml",
+                            docPath: "docs/components/control/DropdownButton.md",
+                            previewId: "button-family",
+                            roleLabel: "Dropdown action",
+                            summary: "Separate dropdown-button family with asymmetric padding and a trailing chevron.",
+                            usage: "LV.DropdownButton {\n    text: \"Open\"\n    method: function(eventData) { menu.open() }\n}",
+                            related: ["push-button", "label-menu-button", "icon-menu-button"]
+                        }),
+                        component({
                             key: "label-button",
                             label: "LabelButton",
                             location: "qml/components/control/buttons/LabelButton.qml",
@@ -235,7 +257,7 @@ QtObject {
                             docPath: "docs/components/control/LabelMenuButton.md",
                             previewId: "button-family",
                             roleLabel: "Menu trigger",
-                            summary: "Figma 22px text menu trigger with an 18px chevron and measured -2px overlap.",
+                            summary: "DropdownButton label preset with 8px left padding, 2px right padding, and no label-chevron gap.",
                             usage: "LV.LabelMenuButton {\n    text: \"Options\"\n}",
                             related: ["icon-menu-button", "context-menu"]
                         }),

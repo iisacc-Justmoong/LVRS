@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/LabelButton.qml`
 
-`LabelButton` is the text-only Figma Button variant built on `AbstractButton`.
+`LabelButton` is the text-only [PushButton](PushButton.md) preset.
 
 ## Purpose
 
@@ -11,14 +11,15 @@ Location: `qml/components/control/buttons/LabelButton.qml`
 
 ## API
 
-Inherited from `AbstractButton` plus fixed layout contract:
+Inherited from `PushButton` plus its label-mode defaults:
 
 - default tone: `Primary` (`Kind=accent`)
 - injected method API: `method`, `methods`, `invokeMethods(...)`
 - fixed height: `Theme.iconSm + Theme.gap2 * 2` (`22` desktop, `44` mobile)
 - `horizontalPadding: Theme.gap8` (`8` desktop, `16` mobile)
 - vertical padding is derived from the fixed frame and Body line height (`4.5` desktop, `15.5` mobile)
-- `cornerRadius: Theme.radiusSm`
+- `cornerRadius: Theme.radiusMd` (`8` desktop, `16` mobile)
+- `spacing: Theme.gap10` (`10` desktop; a single label does not consume a gap)
 
 ## Figma Visual Contract
 
@@ -43,7 +44,7 @@ LV.LabelButton {
 
 ## How It Works
 
-- Overrides `contentItem` with body-style label.
+- Uses the `PushButton` label content with `iconMode: false`.
 - Rounds the label width up to a whole logical pixel, then adds horizontal paddings.
 - Keeps implicit/explicit height locked to Figma-compatible compact contract.
 

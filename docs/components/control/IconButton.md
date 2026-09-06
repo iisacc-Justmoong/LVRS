@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/IconButton.qml`
 
-`IconButton` is an icon-first button variant with optional glyph/text.
+`IconButton` is the `iconMode: true` preset of [PushButton](PushButton.md), with optional glyph/text.
 
 ## Purpose
 
@@ -29,6 +29,8 @@ Layout:
 - default icon frame: `Theme.iconSm` (`18 x 18` on desktop, `36 x 36` on mobile)
 - fixed frame: `22 x 22` on desktop and `44 x 44` on mobile
 - compact inset: `Theme.gap2` (`2` desktop, `4` mobile)
+- `cornerRadius: Theme.radiusMd` (`8` desktop, `16` mobile)
+- `spacing`: `0` for accent, `Theme.gap7` for the other Figma tones
 - `iconGlyph` uses the same square frame as SVG icons
 
 ## Figma Visual Contract

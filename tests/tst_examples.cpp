@@ -105,7 +105,7 @@ void ExampleSmokeTests::visual_catalog_example_loads()
     QVERIFY(obj);
     QTRY_VERIFY(obj->property("catalogViewportReady").toBool());
     QVERIFY(obj->property("catalogSafeAreaEntryReady").toBool());
-    QCOMPARE(obj->property("catalogComponentCount").toInt(), 54);
+    QCOMPARE(obj->property("catalogComponentCount").toInt(), 56);
 }
 
 QTEST_MAIN(ExampleSmokeTests)

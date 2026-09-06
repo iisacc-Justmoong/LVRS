@@ -2,7 +2,7 @@
 
 Location: `qml/components/control/buttons/IconMenuButton.qml`
 
-`IconMenuButton` is an icon-first menu trigger with a trailing chevron indicator.
+`IconMenuButton` is the `iconMode: true` preset of [DropdownButton](DropdownButton.md), with a trailing chevron.
 
 ## Purpose
 
@@ -36,16 +36,17 @@ Layout:
 
 - default tone: `Primary` (`Kind=accent`)
 - main and indicator icon frames: `Theme.iconSm` (`18 x 18` on desktop, `36 x 36` on mobile)
-- fixed frame: `38 x 22` desktop, `76 x 44` mobile
-- horizontal/vertical padding: `Theme.gap2` (`2` desktop, `4` mobile)
+- fixed frame: `40 x 22` desktop, `80 x 44` mobile
+- left inset: `Theme.gap4`; right, top, bottom: `Theme.gap2` (`4 / 2 / 2 / 2` desktop)
+- `cornerRadius: Theme.radiusMd` (`8` desktop, `16` mobile)
 - measured icon-indicator overlap: `spacing: -Theme.gap2` (`-2` desktop, `-4` mobile); the content layout consumes this public property so callers can override it without replacing the component
 
 ## Figma Visual Contract
 
-- Source: `44:599`, `Type=IconMenuButton`.
-- Desktop main icon bounds are `x=2, y=2, 18 x 18`; chevron bounds are `x=18, y=2, 18 x 18`.
+- Source: `700:337`, `Type=IconMenuButton`.
+- Desktop main icon bounds are `x=4, y=2, 18 x 18`; chevron bounds are `x=20, y=2, 18 x 18`.
 - Existing `generalprojectStructure.svg` and tone-specific `generalchevronDown*.svg` assets match the exported Figma vectors and are reused.
-- All five tones preserve the same geometry.
+- The current Figma set has accent, default, and borderless variants; inherited destructive/disabled states retain the same geometry.
 
 Injected methods:
 

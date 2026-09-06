@@ -343,7 +343,7 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
         QTRY_VERIFY(root->property("catalogViewportReady").toBool());
         QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-        QCOMPARE(root->property("catalogComponentCount").toInt(), 54);
+        QCOMPARE(root->property("catalogComponentCount").toInt(), 56);
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
         QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("catalog-overview"));
         QVERIFY(root->property("activeEntry").isValid());
@@ -601,14 +601,16 @@ Item {
         && figmaIconButton.verticalPadding === 4
         && figmaLabelMenuButton.horizontalPadding === 16
         && figmaLabelMenuButton.verticalPadding === 4
-        && figmaLabelMenuButton.spacing === -4
-        && figmaIconMenuButton.horizontalPadding === 4
+        && figmaLabelMenuButton.spacing === 0
+        && figmaLabelMenuButton.rightPadding === 4
+        && figmaIconMenuButton.horizontalPadding === 8
+        && figmaIconMenuButton.rightPadding === 4
         && figmaIconMenuButton.verticalPadding === 4
         && figmaIconMenuButton.spacing === -4
         && figmaLabelButton.implicitWidth === 72
         && figmaIconButton.implicitWidth === 44
-        && figmaLabelMenuButton.implicitWidth === 96
-        && figmaIconMenuButton.implicitWidth === 76
+        && figmaLabelMenuButton.implicitWidth === 88
+        && figmaIconMenuButton.implicitWidth === 80
         && figmaLabelButton.implicitHeight === 44
         && figmaIconButton.implicitHeight === 44
         && figmaLabelMenuButton.implicitHeight === 44
