@@ -5,6 +5,10 @@
 #include <QScreen>
 #include <QWindow>
 #include <QtGui/private/qwindow_p.h>
+#ifdef Q_OS_ANDROID
+#include <QCoreApplication>
+#include <QJniObject>
+#endif
 
 namespace {
 
@@ -21,6 +25,36 @@ SafeAreaSnapshot querySafeAreaSnapshot(QWindow *window)
     SafeAreaSnapshot snapshot;
     if (!window)
         return snapshot;
+
+#ifdef Q_OS_ANDROID
+    // Qt 6.8's Android QPA returns empty safeAreaMargins, including when Android
+    // 15 enforces edge-to-edge windows. Read the actual WindowInsets instead.
+    if (QNativeInterface::QAndroidApplication::isActivityContext()) {
+        const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        const auto nativeWindow = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        const auto decor = nativeWindow.callObjectMethod("getDecorView", "()Landroid/view/View;");
+        const auto insets = decor.callObjectMethod("getRootWindowInsets", "()Landroid/view/WindowInsets;");
+        if (insets.isValid()) {
+            const qreal scale = qMax(qreal(1), window->devicePixelRatio());
+            if (QJniObject::getStaticField<jint>("android/os/Build$VERSION", "SDK_INT") >= 30) {
+                const int bars = QJniObject::callStaticMethod<jint>("android/view/WindowInsets$Type", "systemBars");
+                const int cutout = QJniObject::callStaticMethod<jint>("android/view/WindowInsets$Type", "displayCutout");
+                const auto margins = insets.callObjectMethod("getInsets", "(I)Landroid/graphics/Insets;", bars | cutout);
+                snapshot.left = margins.getField<jint>("left") / scale;
+                snapshot.top = margins.getField<jint>("top") / scale;
+                snapshot.right = margins.getField<jint>("right") / scale;
+                snapshot.bottom = margins.getField<jint>("bottom") / scale;
+            } else {
+                snapshot.left = insets.callMethod<jint>("getSystemWindowInsetLeft") / scale;
+                snapshot.top = insets.callMethod<jint>("getSystemWindowInsetTop") / scale;
+                snapshot.right = insets.callMethod<jint>("getSystemWindowInsetRight") / scale;
+                snapshot.bottom = insets.callMethod<jint>("getSystemWindowInsetBottom") / scale;
+            }
+            snapshot.resolved = true;
+            return snapshot;
+        }
+    }
+#endif
 
     auto *windowPrivate = QWindowPrivate::get(window);
     if (!windowPrivate || !windowPrivate->platformWindow)
@@ -101,6 +135,7 @@ bool WindowSafeAreaObserver::eventFilter(QObject *watched, QEvent *event)
         case QEvent::WindowStateChange:
         case QEvent::OrientationChange:
         case QEvent::ScreenChangeInternal:
+        case QEvent::FocusIn:
             refresh();
             break;
         default:

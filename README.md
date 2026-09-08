@@ -313,3 +313,7 @@ Key references:
 - `docs/components/navigation/ContextMenu.md`
 - `docs/components/navigation/Hierarchy.md`
 - `docs/components/control/InputMethodGuard.md`
+
+### Android 시스템 안전 영역
+
+Qt 6.8 Android의 기본 QPA 안전 여백이 0인 경우에도 `WindowSafeAreaObserver`가 Android WindowInsets의 시스템 막대와 display cutout을 읽고 Qt 논리 좌표로 변환한다. 앱은 기존 `ApplicationWindow.mobileSystemSafe*Inset` 속성을 그대로 사용한다. 회전·창 크기·포커스 변경 시 여백을 갱신한다. 데스크톱과 iOS는 기존 QPA 여백 경로를 유지한다. `PlatformIntegrationTests::safe_area_tracks_window_lifetime`은 창 연결·회전 크기·연결 해제를 검사하고, Society Android 에뮬레이터의 하단 Files 버튼과 실제 파일 앱 진입이 기기 통합 검사이다.

@@ -10,6 +10,7 @@
 #include "backend/platform/nativewindowinteraction.h"
 #include "backend/platform/nativewindowstyle.h"
 #include "backend/platform/platforminfo.h"
+#include "backend/platform/windowsafeareaobserver.h"
 #include "test_utils.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -21,6 +22,7 @@ class PlatformIntegrationTests : public QObject
     Q_OBJECT
 
 private slots:
+    void safe_area_tracks_window_lifetime();
     void platform_flags_consistency();
     void platform_runtime_profiles_are_exposed();
     void application_window_and_main_metrics_are_exposed();
@@ -29,6 +31,27 @@ private slots:
     void native_window_interaction_validates_system_resize_edges();
     void native_window_style_mobile_coverage_flags();
 };
+
+void PlatformIntegrationTests::safe_area_tracks_window_lifetime()
+{
+    WindowSafeAreaObserver observer;
+    QVERIFY(!observer.resolved());
+    QWindow window;
+    window.resize(400, 700);
+    observer.setWindow(&window);
+    window.show();
+    QTRY_VERIFY(observer.resolved());
+    QVERIFY(observer.leftInset() >= 0 && observer.topInset() >= 0);
+    QVERIFY(observer.rightInset() >= 0 && observer.bottomInset() >= 0);
+    QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
+    window.resize(700, 400);
+    QCoreApplication::processEvents();
+    QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
+    observer.setWindow(nullptr);
+    QVERIFY(!observer.resolved());
+    QCOMPARE(observer.topInset(), 0);
+    QCOMPARE(observer.bottomInset(), 0);
+}
 
 void PlatformIntegrationTests::platform_flags_consistency()
 {
