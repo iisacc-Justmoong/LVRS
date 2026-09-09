@@ -400,6 +400,7 @@ private slots:
     void hierarchy_mobile_reactivation_reemits_active_signal();
     void hierarchy_mobile_scroll_physics_contract_loads();
     void hierarchy_optional_footer_contract_loads();
+    void hierarchy_toolbar_empty_state_does_not_reschedule();
     void hierarchy_toolbar_item_model_contract_loads();
     void hierarchy_toolbar_figma_layout_contract_loads();
     void hierarchy_figma_composition_contract_loads();
@@ -2787,6 +2788,26 @@ Item {
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     QTRY_VERIFY(root->property("footerContractReady").toBool());
+}
+
+void ImportApiTests::hierarchy_toolbar_empty_state_does_not_reschedule()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    QScopedPointer<QObject> toolbar(createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+LV.HierarchyToolbar {}
+)"));
+    QVERIFY(toolbar);
+    QSignalSpy idChanges(toolbar.data(), SIGNAL(activeButtonIdChanged()));
+    QVERIFY(idChanges.isValid());
+    for (int i = 0; i < 8; ++i)
+        QVERIFY(QMetaObject::invokeMethod(toolbar.data(), "normalizeActiveButton"));
+    QCOMPARE(toolbar->property("activeButtonId").toInt(), -1);
+    QCOMPARE(idChanges.count(), 0);
+    QTest::qWait(30);
+    QVERIFY(!toolbar->property("_normalizeScheduled").toBool());
 }
 
 void ImportApiTests::hierarchy_toolbar_item_model_contract_loads()

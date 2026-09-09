@@ -135,3 +135,12 @@ LV.HierarchyToolbar {
 
 If `buttonItems` object entries omit both `iconName` and `iconSource`, the slot renders with fallback icon behavior from `IconButton`.
 Always provide explicit icon names for predictable visuals.
+
+## Empty and stable selection
+
+An empty toolbar settles at `activeButton: null`, `activeButtonId: -1`, and
+`activeIndex: -1`. Normalizing an unchanged selection does not emit another ID
+change or schedule another event-loop pass. In Qt QML, reassigning a numeric
+`var` may notify even when the value is equal; guard that assignment to keep
+empty hierarchy panels responsive. The `hierarchy_toolbar_empty_state_does_not_reschedule`
+case in `LVRSTests_import_api` checks both notifications and the settled queue.

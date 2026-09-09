@@ -540,8 +540,12 @@ Item {
     function normalizeActiveButton() {
         const buttons = collectButtons()
         if (buttons.length === 0) {
-            activeButton = null
-            activeButtonId = -1
+            if (activeButton !== null)
+                activeButton = null
+            // Reassigning a var can notify even when its numeric value is unchanged.
+            // This notification schedules normalization again, so leave stable IDs alone.
+            if (activeButtonId !== -1)
+                activeButtonId = -1
             activeIndex = -1
             return
         }
@@ -563,9 +567,12 @@ Item {
         if (!targetButton || indexOfButtonInList(buttons, targetButton) === -1 || !targetButton.enabled)
             targetButton = firstEnabledButtonInList(buttons)
 
-        activeButton = targetButton
+        if (activeButton !== targetButton)
+            activeButton = targetButton
         activeIndex = targetButton ? indexOfButtonInList(buttons, targetButton) : -1
-        activeButtonId = targetButton ? buttonResolvedId(targetButton, activeIndex) : -1
+        const targetId = targetButton ? buttonResolvedId(targetButton, activeIndex) : -1
+        if (activeButtonId !== targetId)
+            activeButtonId = targetId
         applyManualButtonToneState(buttons)
     }
 
