@@ -326,8 +326,8 @@ function(lvrs_apply_platform_build_optimizations target)
 
     if(MSVC)
         target_compile_options("${target}" PRIVATE
-            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/Gy>"
-            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:/Gw>"
+            "$<$<AND:$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>>:/Gy>"
+            "$<$<AND:$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>>:/Gw>"
         )
 
         if(_lvrs_supports_link_options AND _lvrs_target_platform STREQUAL "windows")
@@ -338,8 +338,8 @@ function(lvrs_apply_platform_build_optimizations target)
         endif()
     else()
         target_compile_options("${target}" PRIVATE
-            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-ffunction-sections>"
-            "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-fdata-sections>"
+            "$<$<AND:$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>>:-ffunction-sections>"
+            "$<$<AND:$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>,$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>>:-fdata-sections>"
         )
 
         if(_lvrs_supports_link_options)
@@ -347,12 +347,12 @@ function(lvrs_apply_platform_build_optimizations target)
                OR _lvrs_target_platform STREQUAL "android"
                OR _lvrs_target_platform STREQUAL "wasm")
                 target_link_options("${target}" PRIVATE
-                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-Wl,--gc-sections>"
+                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:LINKER:--gc-sections>"
                 )
             elseif(_lvrs_target_platform STREQUAL "macos"
                    OR _lvrs_target_platform STREQUAL "ios")
                 target_link_options("${target}" PRIVATE
-                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:-Wl,-dead_strip>"
+                    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:LINKER:-dead_strip>"
                 )
             endif()
         endif()

@@ -138,6 +138,10 @@ ctest --test-dir build --output-on-failure
 - `LVRS_INSTALL_QML_MODULE` (`ON`): install QML module artifacts (`qmldir`, qmltypes, plugin, QML files) under `<prefix>/lib/qt6/qml/LVRS`.
 - `LVRS_ENFORCE_VULKAN` (`ON`): fail CMake configure when fixed graphics backend Qt feature requirements are missing for platforms that require feature-gated backends.
 - `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (`ON`): apply platform-specific release/relwithdebinfo/minsizerel compile+link optimization flags.
+  Section compilation flags apply only to C, C++, Objective-C and Objective-C++.
+  Linker options use CMake's language-aware `LINKER:` translation, allowing Swift
+  targets to use the same helper. On macOS, `LVRSTests_cmake_swift_release_optimizations`
+  builds and runs a Release Swift consumer linked to a C++ static library.
 - `LVRS_ENABLE_IPO` (`ON`): enable interprocedural optimization (LTO) for release-like configs when toolchain support is available.
 - `LVRS_SANITIZER` (`none`): sanitizer instrumentation (`none`, `address`, `thread`, `undefined`).
 - `LVRS_FORCE_X86_QT_TOOLS` (`OFF`): run Qt host tools through Rosetta when required.

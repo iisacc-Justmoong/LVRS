@@ -45,6 +45,16 @@ function(uifw_add_test test_name test_source)
     endif()
 endfunction()
 
+if(APPLE AND NOT CMAKE_CROSSCOMPILING)
+    add_test(
+        NAME LVRSTests_cmake_swift_release_optimizations
+        COMMAND "${CMAKE_COMMAND}"
+            "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+            "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_swift_release_optimizations.cmake"
+    )
+endif()
+
 add_test(
     NAME LVRSTests_cmake_bootstrap_lvrs_dir_resolution
     COMMAND "${CMAKE_COMMAND}"
