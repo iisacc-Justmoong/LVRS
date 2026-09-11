@@ -14,6 +14,10 @@ Item {
     property string message: ""
     property alias desc: root.description
 
+    // The host owns presentation; supplied views own their input and signals.
+    property Component contentComponent: null
+    readonly property alias contentItem: contentLoader.item
+
     property string iconName: ""
     property url iconSource: ""
     property bool showIcon: true
@@ -273,6 +277,16 @@ Item {
                         lineHeightMode: Text.FixedHeight
                     }
                 }
+            }
+
+            Loader {
+                id: contentLoader
+                objectName: "modalContentLoader"
+                sourceComponent: root.contentComponent
+                active: root.open && root.contentComponent !== null
+                visible: active && item !== null
+                width: parent.width
+                height: item ? item.implicitHeight : 0
             }
 
             Item {

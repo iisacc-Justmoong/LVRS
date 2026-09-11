@@ -51,7 +51,7 @@ FocusScope {
     property int fieldMinHeight: Theme.controlHeightMd
     property int insetHorizontal: Theme.gap12
     property int insetRight: insetHorizontal
-    property int insetVertical: Theme.gap8
+    property real insetVertical: Theme.gap8
     property int sideSpacing: Theme.gap8
     property int centeredTextHeight: Theme.scaleTextMetric(16)
     property bool preferNativeGestures: Theme.mobileTarget
@@ -100,8 +100,8 @@ FocusScope {
     readonly property bool hovered: control.enabled && hoverHandler.hovered
     readonly property bool pressed: false
     readonly property int textLineBoxHeight: Math.max(1, centeredTextHeight)
-    readonly property int centeredTextY: Math.max(0, Math.floor((height - textLineBoxHeight) / 2))
-    readonly property int contentBoxHeight: textLineBoxHeight + insetVertical * 2
+    readonly property real centeredTextY: Math.max(0, (height - textLineBoxHeight) / 2)
+    readonly property real contentBoxHeight: textLineBoxHeight + insetVertical * 2
     readonly property color resolvedBackgroundColor: !control.enabled
         ? control.backgroundColorDisabled
         : control.pressed

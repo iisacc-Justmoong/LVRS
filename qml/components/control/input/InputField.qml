@@ -82,11 +82,11 @@ AbstractInputBar {
         && text.length > 0
 
     implicitWidth: Theme.inputWidthMd
-    fieldMinHeight: Theme.scaleMetric(19)
+    fieldMinHeight: Theme.controlHeightSm
     insetHorizontal: Theme.gap7
     // Keep the clear affordance 8 logical pixels from the edge on every target.
     insetRight: showClearButton ? 8 : insetHorizontal
-    insetVertical: Theme.gap3
+    insetVertical: Math.max(0, (fieldMinHeight - centeredTextHeight) / 2)
     sideSpacing: Theme.gap2
     centeredTextHeight: Theme.textBodyLineHeight
     shapeStyle: resolvedStyle === roundedStyle ? shapeRoundRect : shapeCylinder
@@ -94,7 +94,7 @@ AbstractInputBar {
 
     textColor: Theme.titleHeaderColor
     textColorDisabled: Theme.disabledColor
-    placeholderColor: Theme.titleHeaderColor
+    placeholderColor: Theme.disabledColor
     placeholderColorDisabled: Theme.disabledColor
     placeholderOpacity: 1.0
 

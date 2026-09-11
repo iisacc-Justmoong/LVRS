@@ -424,6 +424,8 @@ qt_add_qml_module(LVRSCore
     VERSION 1.0
     RESOURCE_PREFIX "/qt/qml"
     OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/LVRS"
+    # Native color-picker items inherit Qt Quick types and expose QColor values.
+    DEPENDENCIES QtQuick
     SOURCES
         ${LVRS_BACKEND_SOURCES}
         ${LVRS_BACKEND_HEADERS}

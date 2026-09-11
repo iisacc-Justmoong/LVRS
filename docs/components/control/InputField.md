@@ -26,6 +26,13 @@ Style:
 - `filledStyle` (compatibility alias of `roundedStyle`)
 - `style`, `resolvedStyle` (readonly)
 
+Geometry and placeholder:
+
+- `fieldMinHeight`: defaults to `Theme.controlHeightSm` (`22` logical pixels).
+- `insetVertical`: fractional padding, default `(fieldMinHeight - centeredTextHeight) / 2`, clamped to zero.
+- `centeredTextHeight`: Body `13`; the inherited `centeredTextY` preserves half-pixel positions.
+- `placeholderColor`, `placeholderColorDisabled`: both default to the Disabled token, `Theme.disabledColor`.
+
 Material:
 
 - `glassEnabled` (default `true`), `glassBlurRadius` (desktop `8`, Inline `6`)
@@ -43,22 +50,28 @@ Search/clear visuals:
 
 Inherited text/input API from `AbstractInputBar` includes `text`, `placeholderText`, `readOnly`, `validator`, `maximumLength`, `inputMethodHints`, `echoMode`, `renderType`, `inputItem`, selection/cursor aliases, `accepted(text)`, and `textEdited(text)`.
 
-## Figma Geometry Contract
+## Geometry Contract
+
+The 2026-09-10 LVRS adjustment uses a `22px` field height and the Disabled token for placeholders across all three styles and all interaction states. This updates the original Figma reference's `19px` frame.
 
 | Metric | Desktop | Mobile |
 | --- | ---: | ---: |
-| Stable field frame | `206 × 19` | `412 × 38` |
-| Left inset; right inset without clear button | `7` | `14` |
+| Stable field frame | `206 × 22` | `206 × 22` |
+| Left inset; right inset without clear button | `7` | `7` |
 | Clear button right inset | `8` | `8` |
-| Vertical spacing token | `3` | `6` |
-| Search/clear frame | `12 × 12` | `24 × 24` |
-| Rounded radius | `5` | `10` |
-| Search/text/clear gap | `2` | `4` |
+| Text/placeholder top and bottom inset | `4.5` | `4.5` |
+| Search/clear top and bottom inset | `5` | `5` |
+| Search/clear frame | `12 × 12` | `12 × 12` |
+| Rounded radius | `5` | `5` |
+| Cylinder / Inline radius | `11` | `11` |
+| Search/text/clear gap | `2` | `2` |
 | Body font and line box | `13 / 13` | `13 / 13` |
 
 Figma's active, selected, and search instances report `205px` while default and disabled report `206px`; that difference comes from variant-local auto-layout content. The runtime field deliberately stays `206px` so typing, selecting, searching, and showing the clear button never shift surrounding layout by one pixel.
 
-On mobile, the frame, general insets, radii, and icon frames match desktop. Body remains `13px / 13px`, and the clear button's right inset remains `8` logical pixels; the line box is vertically centered in the `19px` frame.
+On mobile, the frame, insets, radii, and icon frames match desktop. Body remains `13px / 13px`, centered at `y = 4.5` in the `22px` frame. Search and clear icons are centered at `y = 5`. `AbstractInputBar.insetVertical`, `centeredTextY`, and `contentBoxHeight` use real values so odd line heights remain exactly centered in even field heights.
+
+Explicit `fieldMinHeight`, `height`, and inset overrides remain available. Increasing `fieldMinHeight` to `30`, for example, produces `8.5px` text padding. Embedded TableCellItem and legacy Mini ListItem editors keep their explicit line-box and zero-inset overrides; standard InlineEdit and Form input slots follow the `22px` default.
 
 The clear-button inset is the explicit 2026-09-06 LVRS adjustment to the Figma reference. When the clear button is visible, its right edge remains exactly `8` logical pixels from the field's right edge, including when the width or `insetHorizontal` changes. `AbstractInputBar.insetRight` defaults to `insetHorizontal`; `InputField` binds it to `8` while showing the clear button. Both the trailing anchor and text reservation use that right inset, preserving the text-to-button gap and the left/search layout.
 
@@ -68,13 +81,14 @@ The clear-button inset is the explicit 2026-09-06 LVRS adjustment to the Figma r
 - `style: cylinderStyle` uses the same material with a half-height radius.
 - `style: inlineStyle` uses a lighter translucent material and shallower inset lighting with the same insets and affordances.
 - Disabled text uses `Theme.disabledColor`; default/active text uses `Theme.titleHeaderColor`.
+- Empty-field placeholders use `Theme.disabledColor` in enabled and disabled states. Entered text retains its own text-color contract.
 - Selection uses `Theme.accent` and selected text remains `Theme.titleHeaderColor`.
 - Search uses the component-specific `inputFieldSearch.svg`, measured from the Figma `12 × 12` vector instead of stretching the generic `16 × 16` icon.
 - Clear is visible only when `clearButtonVisible && enabled && !readOnly && text.length > 0`; clicking it empties the field and restores input focus.
 - Leading and trailing intrinsic widths remain part of the inset contract even while the field or an ancestor is hidden, preventing delayed geometry shifts when a view becomes visible.
 - On iOS targets, the underlying `TextInput` still uses `NativeRendering` and retains platform-native keyboard, IME, selection, and pointer behavior.
 
-`LVRSTests_import_api::input_field_figma_contract_loads` checks the actual clear-button bounds across all three styles and search mode on desktop/mobile, custom field width and horizontal inset, text visibility changes, and click-to-clear with focus restoration.
+`LVRSTests_import_api::input_field_figma_contract_loads` checks `22px` frames, `4.5px` text centering, and `5px` icon centering across all three styles and search mode under macOS, iOS, and Android theme settings. It also checks custom field height/width/insets and click-to-clear with focus restoration. `input_field_material_rendering_contract` verifies actual placeholder color, visibility, and line-box alignment for all 18 style/state combinations alongside native typing, selection, and material rendering. Mobile theme checks run on the host and do not constitute device testing.
 
 ## TextField Material
 

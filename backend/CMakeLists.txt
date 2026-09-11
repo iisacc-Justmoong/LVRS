@@ -34,6 +34,8 @@ set(LVRS_BACKEND_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/graphics/colorpickermodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/graphics/colorpickersurface.cpp
     ${CMAKE_CURRENT_LIST_DIR}/text/textdocumentmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchycodec.cpp
@@ -80,6 +82,8 @@ set(LVRS_BACKEND_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/state/viewmodelregistry.h
     ${CMAKE_CURRENT_LIST_DIR}/runtime/debuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/graphics/svgmanager.h
+    ${CMAKE_CURRENT_LIST_DIR}/graphics/colorpickermodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/graphics/colorpickersurface.h
     ${CMAKE_CURRENT_LIST_DIR}/text/textdocumentmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/text/textmarkup.h
     ${CMAKE_CURRENT_LIST_DIR}/hierarchy/hierarchynode.h

@@ -3,8 +3,9 @@
 Location: `qml/components/surfaces/Alert.qml`
 
 `Alert` is a glass overlay with one, two, or three actions. The visual contract
-comes from [Figma Alert 106:283](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=106-283),
-updated on 2026-09-06.
+comes from [Figma Alert / Redesign 658:225](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=658-225),
+containing variants `106:282` and `106:281`. Text sizing was reconciled with
+the current auto-height and Title/Body styles on 2026-09-11.
 
 ## API
 
@@ -61,7 +62,8 @@ or its signal handler to avoid running the same application operation twice.
 
 ## Figma layout and typography
 
-At desktop scale, the two/three-action references are 500 × 417 / 500 × 517.
+With the reference one-line title and two-line description, the two/three-action
+dialogs are 500 × 379 / 500 × 479 logical pixels on desktop and mobile.
 The card shrinks to the available host width, including hosts narrower than
 `minWidth`. It defaults to a 36px rounded rectangle. The existing opt-in
 `shapeCylinder` remains available for compatibility; it is not used by default.
@@ -74,8 +76,20 @@ an empty URL retains the configurable fallback.
 
 Typography uses the existing `Label.title` (26px Bold) and `Label.body`
 (13px Medium) tokens and the framework's bundled Pretendard fonts. No new text
-style is introduced. The measured Figma title/message boxes reserve at least
-34px/56px with a 14px gap and centered text. Extra lines grow these boxes.
+style is introduced. Title and message height follow their rendered line count
+at 26px and 13px per line, with a 14px gap and centered text. Both text nodes
+in Figma use auto height. Empty text releases its line box and adjacent gap;
+when both strings are empty, the whole copy section and icon-to-copy gap collapse.
+Wrapping or adding explicit newlines grows the dialog, and shortening text
+shrinks it again.
+
+The Figma snapshot retrieved on 2026-09-11 reports 34px/56px text bounds and
+417px/517px card bounds despite the current 26px/13px line-height styles.
+The implementation follows those styles and auto-height behavior instead of
+preserving snapshot bounds as minimum heights. This removes 38px of unused
+height for the reference copy; a one-line title and one-line description use
+366px/466px. The width, icon frame, section padding, action geometry, and material
+remain the values specified by the design.
 
 - Two actions: secondary/cancel on the left, primary on the right; 14px gap,
   24px sides, 28px above and 32px below the buttons.
@@ -154,7 +168,8 @@ a Qt resource, a local file, or a remote image supported by Qt Quick `Image`.
 
 `LVRSTests_import_api` checks the Figma geometry, Title/Body tokens, action
 ordering, non-capsule corners, icon exports, width containment, icon visibility,
-long-copy growth, isolated button defaults, actual backdrop blur, red Discard
+copy-driven growth and shrinkage, empty-copy collapse, responsive wrapping,
+isolated button defaults, actual backdrop blur, red Discard
 pixels, click signals, modal input blocking, and capture lifecycle. It also
 checks content arguments and live aliases, image loading, all six rendered
 action positions across one/two/three-button layouts, function/command methods,

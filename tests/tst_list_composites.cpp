@@ -63,7 +63,7 @@ void ListCompositeTests::figma_variants_data()
     const int widths[] = {170, 194, 280, 280, 280, 400, 400, 400, 400, 400,
                           400, 400, 400, 400, 400, 400, 400};
     const int heights[] = {22, 106, 44, 44, 44, 44, 44, 44, 44, 44,
-                           120, 118, 159, 129, 113, 135, 148};
+                           120, 118, 159, 129, 113, 135, 154};
     for (int index = 0; index < 17; ++index) {
         QTest::newRow(names[index]) << index << widths[index] << heights[index] << false;
         QTest::newRow((QByteArray(names[index]) + "-mobile").constData())
@@ -347,6 +347,19 @@ void ListCompositeTests::figma_variants()
         QVERIFY(label);
         QCOMPARE(label->property("font").value<QFont>().pixelSize(), 13);
     }
+    if (type == 9 || type == 16) {
+        const int inputCount = type == 16 ? 2 : 1;
+        for (int index = 1; index <= inputCount; ++index) {
+            auto *input = visibleItem(root, QStringLiteral("listItem_input%1").arg(index));
+            QVERIFY(input);
+            QCOMPARE(input->height(), 22.0);
+            auto *nativeInput = input->property("inputItem").value<QQuickItem *>();
+            QVERIFY(nativeInput);
+            QCOMPARE(nativeInput->y(), 4.5);
+            const QPointF bottom = input->mapToItem(root, QPointF(input->width(), input->height()));
+            QVERIFY(bottom.x() <= root->width() && bottom.y() <= root->height());
+        }
+    }
 }
 
 void ListCompositeTests::mixed_list_uses_each_rows_height()
@@ -371,9 +384,9 @@ LV.List {
 }
 )"));
     QVERIFY(object);
-    QTRY_COMPARE(object->property("contentHeight").toInt(), 327);
-    QTRY_COMPARE(object->property("implicitHeight").toInt(), 327);
-    const int heights[] = {22, 148, 44, 113};
+    QTRY_COMPARE(object->property("contentHeight").toInt(), 333);
+    QTRY_COMPARE(object->property("implicitHeight").toInt(), 333);
+    const int heights[] = {22, 154, 44, 113};
     int top = 0;
     for (int i = 0; i < 4; ++i) {
         auto *row = visibleItem(object.data(), QStringLiteral("list_delegateRoot_%1").arg(i));

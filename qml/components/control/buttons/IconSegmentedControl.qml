@@ -12,7 +12,7 @@ Item {
     property int verticalPadding: Theme.gap4
     property int spacing: Theme.gap2
     property int borderWidth: Theme.scaleMetric(2)
-    property int cornerRadius: Theme.radiusMd
+    property int cornerRadius: Theme.radiusLg
     property color backgroundColor: Theme.panelBackground08
     property color borderColor: Theme.panelBackground12
     property bool forceBorderlessTone: true

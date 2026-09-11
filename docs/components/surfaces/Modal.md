@@ -36,6 +36,8 @@ Content:
 - `description`, `message`, `desc` (alias of `description`)
 - `iconName`, `iconSource`, `showIcon`
 - `iconSize`, `iconCornerRadius`
+- `contentComponent`: optional `Component` loaded between the header and actions while open.
+- `contentItem`: read-only loaded item, or `null` while closed.
 - resolved: `resolvedIconSource`, `resolvedDescription`
 
 Actions:
@@ -66,6 +68,8 @@ Signals:
 - Backdrop click outside frame calls `cancel()` when `dismissOnBackground == true`.
 - Backdrop click inside frame does not cancel.
 - When open, component can reparent to `Controls.Overlay.overlay` if available.
+- A supplied content view receives the frame's content width and contributes its `implicitHeight`. Closing unloads it; reopening creates a fresh instance. The default icon/text/action layout is unchanged when no component is supplied.
+- For a view with its own actions, set `showIcon: false` and `primaryText: ""`. See [ColorPicker](../control/ColorPicker.md) for a complete host example.
 - `buttonCount` is clamped to a maximum of 3.
 - In auto mode (`buttonCount=0`), tertiary text enables 3 actions, secondary text enables 2, otherwise primary only.
 

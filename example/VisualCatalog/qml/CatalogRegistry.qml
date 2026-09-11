@@ -279,7 +279,7 @@ QtObject {
                             docPath: "docs/components/control/LabelSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Segment container",
-                            summary: "Figma 206:3827 segmented shell whose dimensions follow 56x22 label buttons.",
+                            summary: "Figma 206:3827 segmented shell with a 12px outer radius and 56x22 label buttons with 8px corners.",
                             usage: "LV.LabelSegmentedControl {\n    LV.LabelButton { text: \"Button\" }\n    LV.LabelButton { text: \"Button\" }\n}",
                             related: ["icon-segmented-control", "label-button"]
                         }),
@@ -290,7 +290,7 @@ QtObject {
                             docPath: "docs/components/control/IconSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Icon segment container",
-                            summary: "Figma 206:3912 segmented shell whose dimensions follow 22x22 icon buttons.",
+                            summary: "Figma 206:3912 segmented shell with a 12px outer radius and 22x22 icon buttons with 8px corners.",
                             usage: "LV.IconSegmentedControl {\n    LV.IconButton { iconName: \"projectStructure\" }\n    LV.IconButton { iconName: \"projectStructure\" }\n}",
                             related: ["label-segmented-control", "icon-button"]
                         }),
@@ -437,8 +437,30 @@ QtObject {
                     key: "control-input",
                     label: "Input",
                     iconGlyph: "I",
-                    summary: "Text entry foundations and editor components with deterministic LVRS behavior.",
+                    summary: "Text and value input components with deterministic LVRS behavior.",
                     items: [
+                        component({
+                            key: "slider",
+                            label: "Slider",
+                            location: "qml/components/control/input/Slider.qml",
+                            docPath: "docs/components/control/Slider.md",
+                            previewId: "slider-gallery",
+                            roleLabel: "Value input",
+                            summary: "Seven Figma types, four sizes, native pointer/touch/keyboard input, centered fills, endpoint labels, and segmented stops.",
+                            usage: "LV.Slider {\n    type: LV.Slider.CenterBiasedTicks\n    size: LV.Slider.Regular\n    from: -1\n    to: 1\n    value: 0\n    Accessible.name: \"Exposure\"\n    onMoved: model.exposure = value\n}",
+                            related: ["progress-bar", "stepper", "input-field"]
+                        }),
+                        component({
+                            key: "color-picker",
+                            label: "ColorPicker",
+                            location: "qml/components/control/input/ColorPicker.qml",
+                            docPath: "docs/components/control/ColorPicker.md",
+                            previewId: "color-picker-gallery",
+                            roleLabel: "Color input view",
+                            summary: "Six content-only color editors with HSV, RGB, CMYK, Hex, alpha and recent colors. Pass the view to a host through Component.",
+                            usage: "Component {\n    id: colorView\n    LV.ColorPicker {\n        type: LV.ColorPicker.SaturationBrightness\n        currentColor: document.color\n        onColorEdited: color => document.color = color\n    }\n}\nLV.Modal {\n    contentComponent: colorView\n    showIcon: false\n    primaryText: \"\"\n}",
+                            related: ["slider", "input-field", "modal"]
+                        }),
                         component({
                             key: "abstract-input-bar",
                             label: "AbstractInputBar",
@@ -456,7 +478,7 @@ QtObject {
                             docPath: "docs/components/control/InputField.md",
                             previewId: "input-field",
                             roleLabel: "Single-line input",
-                            summary: "Figma-aligned one-line input with Rounded, Cylinder, and Inline frames, fixed Body 13 typography, search, selection, and clear states.",
+                            summary: "22px one-line input with centered Body 13 typography, Disabled-token placeholders, and Rounded, Cylinder, and Inline frames.",
                             usage: "LV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Search\"\n}",
                             related: ["abstract-input-bar", "text-editor"]
                         }),
@@ -743,6 +765,17 @@ QtObject {
                     summary: "Reusable card surface with title, subtitle, separator, and flexible content slot.",
                     usage: "LV.AppCard {\n    title: \"System health\"\n    subtitle: \"Last 15 minutes\"\n    LV.Label { text: \"No incidents\" }\n}",
                     related: ["label", "alert"]
+                }),
+                component({
+                    key: "card",
+                    label: "Card",
+                    location: "qml/components/surfaces/Card.qml",
+                    docPath: "docs/components/surfaces/Card.md",
+                    previewId: "card-gallery",
+                    roleLabel: "File and resource cards",
+                    summary: "Eight Figma designs: full-image File, FilePreview, Folder, Project, Device, Model, Member, and Link, with independent selection and actions.",
+                    usage: "LV.Card {\n    type: LV.Card.File\n    size: LV.Card.Large\n    detail: LV.Card.Detailed\n    previewSource: imageUrl\n    title: \"Coastal house.png\"\n    metadata: \"PNG · 1536 × 1024\"\n    details: \"A quiet view of the sea.\"\n    showMenu: true\n    onMenuRequested: fileMenu.open()\n}",
+                    related: ["app-card", "label", "progress-bar", "push-button"]
                 }),
                 component({
                     key: "alert",

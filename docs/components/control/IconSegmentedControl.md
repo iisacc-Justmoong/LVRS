@@ -14,7 +14,7 @@ Location: `qml/components/control/buttons/IconSegmentedControl.qml`
 Container style:
 
 - `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
-- `cornerRadius`, `resolvedCornerRadius`
+- `cornerRadius` (default `Theme.radiusLg`, `12`), `resolvedCornerRadius`
 - `horizontalPadding`, `verticalPadding`, `spacing`
 - `borderWidth`, `borderColor`
 - `backgroundColor`
@@ -36,9 +36,9 @@ Behavior:
 
 ## Figma Visual Contract
 
-- Source: `206:3912` (`IconSegementedControl`).
+- Source: [Figma `206:3912` (`IconSegementedControl`)](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=206-3912), verified 2026-09-10.
 - Each segment is the `44:599` borderless `IconButton`: `22 x 22` with an `18 x 18` icon and `2` inset.
-- Container: horizontal/vertical padding `4`, spacing `2`, border `2`, radius `8`.
+- Container: horizontal/vertical padding `4`, spacing `2`, border `2`, radius `12` (`Theme.radiusLg`). Child buttons retain radius `8` (`Theme.radiusMd`).
 - Surface: `Theme.panelBackground08`; border: `Theme.panelBackground12`.
 
 | Count | Desktop size |
@@ -51,6 +51,10 @@ Behavior:
 | 7 | `174 x 30` |
 
 Desktop and mobile use `count * 22 + (count - 1) * 2 + 8` width. A two-segment control is `54 x 30`, with two `22 x 22` buttons, `2` spacing, and `4` padding.
+
+## Verification
+
+`LVRSTests_import_api::segmented_control_figma_contract_loads` checks all six counts under desktop and mobile theme settings, including container/button radii, bounds, tone, padding, spacing, and colors. Set `LVRS_SEGMENT_CAPTURE_DIR` when running it with a native Qt platform to save rendered reference images. The mobile row checks the shared theme contract on the host; it is not a device run.
 
 ## Usage
 

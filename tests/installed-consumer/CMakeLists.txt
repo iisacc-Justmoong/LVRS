@@ -3,6 +3,8 @@ project(LVRSInstalledConsumer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 option(LVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH
     "Verify Darwin RPATH propagation when LIBRARY_PATH makes LVRS implicit" OFF)
+set(LVRS_CONSUMER_SOURCE_DIR "" CACHE PATH
+    "Optional checkout whose QML must match the installed library resources")
 find_package(LVRS CONFIG REQUIRED)
 get_target_property(_lvrs_library LVRS::LVRS IMPORTED_LOCATION_RELEASE)
 if(NOT _lvrs_library)
@@ -25,7 +27,20 @@ if(LVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH)
 endif()
 add_executable(lvrs_installed_consumer main.cpp)
 target_link_libraries(lvrs_installed_consumer PRIVATE LVRS::LVRS)
+if(LVRS_CONSUMER_SOURCE_DIR)
+    target_compile_definitions(lvrs_installed_consumer PRIVATE
+        LVRS_CONSUMER_SOURCE_DIR="${LVRS_CONSUMER_SOURCE_DIR}")
+endif()
 enable_testing()
 add_test(NAME installed_lvrs_qml_consumer COMMAND lvrs_installed_consumer)
+set(_lvrs_consumer_env
+    "QT_QPA_PLATFORM=offscreen"
+    "QML_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}"
+    "QML2_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}")
+if(APPLE)
+    list(APPEND _lvrs_consumer_env "DYLD_LIBRARY_PATH=${_lvrs_library_directory}")
+elseif(UNIX)
+    list(APPEND _lvrs_consumer_env "LD_LIBRARY_PATH=${_lvrs_library_directory}")
+endif()
 set_tests_properties(installed_lvrs_qml_consumer PROPERTIES
-    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QML2_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}")
+    ENVIRONMENT "${_lvrs_consumer_env}")

@@ -19,6 +19,8 @@ cargo run -- doctor
 
 On macOS, `install` discovers the host Qt kit under `/Volumes/Storage/Qt` or an explicit `QT_VERSION_ROOT`, supplies the initial CMake package path, and keeps explicit Qt/CMake prefix overrides. A failed configure leaves the previous framework installation intact. Run the checkout's `./install.sh` after changing CLI sources to rebuild and replace the installed executable.
 
+Inside a checkout, an inherited `LVRS_ROOT`/`LVRS_PROJECT_ROOT` installation prefix is only a fallback: the current checkout takes priority over `<prefix>/src/LVRS`, including snapshots whose metadata refers to themselves. Setting either variable to an explicit source directory still overrides the current directory. The printed `Project root` identifies the source actually built. Installation completion does not imply that CTest or a device runtime was exercised; verify those separately.
+
 ## Development
 
 ```bash

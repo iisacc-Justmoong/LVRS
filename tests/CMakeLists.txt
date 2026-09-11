@@ -32,7 +32,20 @@ function(uifw_add_test test_name test_source)
         )
     endif()
     add_test(NAME ${test_name} COMMAND ${test_name})
-    set(_uifw_test_env "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic")
+    # Test the library and QML produced by this build even after sourcing an
+    # installed SDK's env.sh. An inherited loader path can otherwise silently
+    # replace LVRSCore (including its embedded QML) with an older installation.
+    set(_uifw_test_env
+        "QT_QPA_PLATFORM=offscreen"
+        "QT_QUICK_CONTROLS_STYLE=Basic"
+        "QML_IMPORT_PATH=${CMAKE_BINARY_DIR}"
+        "QML2_IMPORT_PATH=${CMAKE_BINARY_DIR}"
+    )
+    if(APPLE)
+        list(APPEND _uifw_test_env "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:LVRSCore>")
+    elseif(UNIX)
+        list(APPEND _uifw_test_env "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:LVRSCore>")
+    endif()
     if(UIFW_TEST_LABELS)
         set_tests_properties(${test_name} PROPERTIES
             ENVIRONMENT "${_uifw_test_env}"
@@ -138,6 +151,9 @@ uifw_add_test(LVRSTests_examples tst_examples.cpp)
 uifw_add_test(LVRSTests_debug tst_debug.cpp)
 uifw_add_test(LVRSTests_import_api tst_import_api.cpp)
 uifw_add_test(LVRSTests_list_composites tst_list_composites.cpp)
+uifw_add_test(LVRSTests_card tst_card.cpp)
+uifw_add_test(LVRSTests_slider tst_slider.cpp)
+uifw_add_test(LVRSTests_colorpicker tst_colorpicker.cpp)
 uifw_add_test(LVRSTests_runtimeevents tst_runtimeevents.cpp)
 uifw_add_test(LVRSTests_backend_io tst_backend_io.cpp)
 uifw_add_test(LVRSTests_app_state tst_app_state.cpp)

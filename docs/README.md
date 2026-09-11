@@ -113,6 +113,8 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/control/RadioButton.md`
 - `docs/components/control/ToggleSwitch.md`
 - `docs/components/control/InputField.md`
+- `docs/components/control/Slider.md`
+- `docs/components/control/ColorPicker.md`
 - `docs/components/control/TextEditor.md`
 - `docs/components/control/CodeEditor.md`
 - `docs/components/control/ProgressBar.md`
@@ -142,6 +144,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Surface Components
 
 - `docs/components/surfaces/AppCard.md`
+- `docs/components/surfaces/Card.md`
 - `docs/components/surfaces/Alert.md`
 
 ## Policies

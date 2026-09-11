@@ -1519,6 +1519,16 @@ fn resolve_project_root_with_env_candidate(
         return validate_project_root_candidate(path, "bootstrap override");
     }
 
+    let cwd = env::current_dir().context("failed to read current working directory")?;
+    let cwd_root = find_project_root(&cwd);
+    // An SDK environment can name the installation prefix, not a source override.
+    // A command inside a checkout must not reinstall that prefix's old snapshot.
+    if let (Some(candidate), Some(checkout)) = (&env_root_candidate, &cwd_root) {
+        if !has_sentinels(candidate) && candidate.join("src").join("LVRS").is_dir() {
+            return Ok(checkout.clone());
+        }
+    }
+
     let env_root_error = if let Some(path) = env_root_candidate {
         match validate_project_root_candidate(path, "environment") {
             Ok(path) => return Ok(path),
@@ -1528,8 +1538,7 @@ fn resolve_project_root_with_env_candidate(
         None
     };
 
-    let cwd = env::current_dir().context("failed to read current working directory")?;
-    if let Some(path) = find_project_root(&cwd) {
+    if let Some(path) = cwd_root {
         print_ignored_env_project_root_error(env_root_error.as_ref());
         return Ok(path);
     }
@@ -2670,6 +2679,42 @@ mod tests {
             let resolved =
                 resolve_project_root_with_env_candidate(None, None, Some(install_prefix.clone()))?;
             assert!(paths_refer_to_same_location(&resolved, &checkout));
+        }
+
+        remove_path(&root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn resolve_project_root_prefers_checkout_over_env_install_snapshot() -> Result<()> {
+        let _guard = CURRENT_DIR_TEST_LOCK.lock().expect("current dir test lock");
+        let root = temp_test_dir("env-prefix-stale-snapshot");
+        let checkout = root.join("Workspace").join("LVRS");
+        let install_prefix = root.join("prefix");
+        let snapshot = install_prefix.join("src").join("LVRS");
+        create_project_root(&checkout)?;
+        create_project_root(&snapshot)?;
+        fs::write(
+            snapshot.join(INSTALL_SOURCE_INFO_FILE),
+            format!("project_root={}\n", snapshot.display()),
+        )?;
+
+        {
+            let _cwd = CurrentDirGuard::enter(&checkout.join("qml"))?;
+            let resolved = resolve_project_root_with_env_candidate(
+                None,
+                Some(&install_prefix),
+                Some(install_prefix.clone()),
+            )?;
+            assert!(paths_refer_to_same_location(&resolved, &checkout));
+
+            // An explicit source checkout remains an intentional override.
+            let explicit = resolve_project_root_with_env_candidate(
+                None,
+                Some(&install_prefix),
+                Some(snapshot.clone()),
+            )?;
+            assert!(paths_refer_to_same_location(&explicit, &snapshot));
         }
 
         remove_path(&root)?;

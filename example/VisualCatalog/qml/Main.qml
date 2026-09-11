@@ -152,6 +152,8 @@ LV.ApplicationWindow {
             return tableDisplayPreview
         case "input-field":
             return inputFieldPreview
+        case "slider-gallery":
+            return sliderGalleryPreview
         case "text-editor":
             return textEditorPreview
         case "code-editor":
@@ -170,6 +172,10 @@ LV.ApplicationWindow {
             return menuNavigationPreview
         case "app-card-surface":
             return appCardSurfacePreview
+        case "card-gallery":
+            return cardGalleryPreview
+        case "color-picker-gallery":
+            return colorPickerGalleryPreview
         case "alert-surface":
             return alertSurfacePreview
         case "modal-surface":
@@ -1741,6 +1747,21 @@ LV.ApplicationWindow {
                 }
             }
         }
+    }
+
+    Component {
+        id: cardGalleryPreview
+        CardGallery { }
+    }
+
+    Component {
+        id: sliderGalleryPreview
+        SliderGallery { }
+    }
+
+    Component {
+        id: colorPickerGalleryPreview
+        ColorPickerGallery { }
     }
 
     Component {

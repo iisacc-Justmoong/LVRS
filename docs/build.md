@@ -393,15 +393,20 @@ For release candidates, run a smoke test that verifies:
 
 On macOS, `LIBRARY_PATH` can make the installed library directory implicit to CMake. LVRS then adds only its own omitted runtime search path to the imported target so `@rpath/libLVRS.dylib` still loads. Other package paths remain under CMake's normal RPATH handling.
 
-The installed consumer verifies this package contract and instantiates an LVRS QML component:
+Source CTest runs select the build-tree LVRS library and QML imports instead of inheriting an installed SDK's loader overrides. `embedded_qml_matches_source` compares every embedded module QML file with the current checkout, so a stale library is reported explicitly. When invoking a test executable directly on macOS, set `DYLD_LIBRARY_PATH="$PWD/build"` as well.
+
+The installed consumer verifies the package contract, 22px InputField height with 4.5px text placement, 12px segmented-control radii, 154px Form height, stable empty HierarchyToolbar notifications, and all eight `LV.Card` types with their internal resource imports. Embedded-source comparisons also resolve module-root resource aliases used by the Card family. Target overrides cover authored macOS/iOS/Android metrics on the host; they do not constitute device execution. Supply `LVRS_CONSUMER_SOURCE_DIR` to additionally compare all embedded QML resource hashes with the checkout:
 
 ```sh
 LIBRARY_PATH="$HOME/.local/SDK/LVRS/platforms/macos/lib" cmake \
   -S tests/installed-consumer -B build/installed-consumer \
   -DLVRS_DIR="$HOME/.local/SDK/LVRS" \
+  -DLVRS_CONSUMER_SOURCE_DIR="$PWD" \
   -DLVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH=ON
 cmake --build build/installed-consumer
 ctest --test-dir build/installed-consumer --output-on-failure
 ```
 
 Use a fresh consumer build directory when changing `LIBRARY_PATH`, because compiler implicit directories are captured during the first configure.
+
+When running `lvrs install` inside the checkout, an inherited `LVRS_ROOT` installation prefix must not select its old source snapshot. An explicit source-directory override is still honored. Check the printed `Project root`, installer exit status, and the installed consumer independently of source CTest results.

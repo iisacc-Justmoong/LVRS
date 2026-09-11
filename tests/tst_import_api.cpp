@@ -5,7 +5,10 @@
 #include <QAbstractListModel>
 #include <QAbstractTableModel>
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
+#include <QDirIterator>
+#include <QFile>
 #include <QFont>
 #include <QGuiApplication>
 #include <QInputMethodEvent>
@@ -374,6 +377,7 @@ class ImportApiTests : public QObject
     Q_OBJECT
 
 private slots:
+    void embedded_qml_matches_source();
     void app_bootstrap_window_loads();
     void versionless_import_application_window_loads();
     void application_window_mobile_coverage_visibility_contract_loads();
@@ -418,6 +422,7 @@ private slots:
     void button_family_components_contract_data();
     void button_family_components_contract();
     void button_default_tone_matches_figma_accent_loads();
+    void segmented_control_figma_contract_loads_data();
     void segmented_control_figma_contract_loads();
     void button_injected_methods_contract_loads();
     void stepper_figma_contract_loads();
@@ -472,6 +477,33 @@ static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
             qWarning() << err;
     }
     return obj;
+}
+
+void ImportApiTests::embedded_qml_matches_source()
+{
+    const QDir sourceRoot(QStringLiteral(LVRS_TEST_SOURCE_DIR "/.."));
+    QDirIterator files(sourceRoot.filePath(QStringLiteral("qml")),
+                       {QStringLiteral("*.qml")}, QDir::Files, QDirIterator::Subdirectories);
+    int checked = 0;
+    while (files.hasNext()) {
+        QFile source(files.next());
+        const QString relativePath = sourceRoot.relativeFilePath(source.fileName());
+        QFile embedded(QStringLiteral(":/qt/qml/LVRS/") + relativePath);
+        if (!embedded.exists())
+            embedded.setFileName(QStringLiteral(":/qt/qml/LVRS/") + QFileInfo(source.fileName()).fileName());
+        QVERIFY2(source.open(QIODevice::ReadOnly), qPrintable(source.fileName()));
+        QVERIFY2(embedded.open(QIODevice::ReadOnly), qPrintable(embedded.fileName()));
+        const auto sourceHash = QCryptographicHash::hash(source.readAll(), QCryptographicHash::Sha256);
+        const auto embeddedHash = QCryptographicHash::hash(embedded.readAll(), QCryptographicHash::Sha256);
+        QVERIFY2(embeddedHash == sourceHash,
+                 qPrintable(QStringLiteral("Loaded LVRS QML differs from current source: %1; "
+                                           "source=%2 loaded=%3. Check the library loader path.")
+                                .arg(relativePath, QString::fromLatin1(sourceHash.toHex()),
+                                     QString::fromLatin1(embeddedHash.toHex()))));
+        ++checked;
+    }
+    QVERIFY(checked > 0);
+    qInfo() << "Verified embedded QML against" << checked << "current source files";
 }
 
 void ImportApiTests::app_bootstrap_window_loads()
@@ -4458,11 +4490,20 @@ Item {
     QVERIFY(root->property("defaultToneReady").toBool());
 }
 
+void ImportApiTests::segmented_control_figma_contract_loads_data()
+{
+    QTest::addColumn<bool>("mobile");
+    QTest::newRow("desktop") << false;
+    QTest::newRow("mobile") << true;
+}
+
 void ImportApiTests::segmented_control_figma_contract_loads()
 {
+    QFETCH(bool, mobile);
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
     engine.addImportPath(importBase);
+    engine.rootContext()->setContextProperty("testMobile", mobile);
 
     const auto verifyBounds = [](QQuickItem *item, QQuickItem *ancestor, const QRectF &expected) {
         const QRectF actual(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
@@ -4497,17 +4538,26 @@ import QtQuick
 import LVRS as LV
 
 Item {
+    width: 460
+    height: 120
     property int borderlessTone: LV.AbstractButton.Borderless
+    Component.onCompleted: LV.Theme.targetOverride = testMobile ? "ios" : "macos"
+
+    Rectangle { anchors.fill: parent; color: "#1f1f1f" }
 
     LV.LabelSegmentedControl {
         id: labelSegment
         objectName: "figmaLabelSegment"
+        x: 20
+        y: 20
         %4
     }
 
     LV.IconSegmentedControl {
         id: iconSegment
         objectName: "figmaIconSegment"
+        x: 20
+        y: 70
         %5
     }
 
@@ -4522,8 +4572,10 @@ Item {
         && iconSegment.spacing === 2
         && labelSegment.borderWidth === 2
         && iconSegment.borderWidth === 2
-        && labelSegment.cornerRadius === 8
-        && iconSegment.cornerRadius === 8
+        && labelSegment.cornerRadius === 12
+        && iconSegment.cornerRadius === 12
+        && labelSegment.resolvedCornerRadius === 12
+        && iconSegment.resolvedCornerRadius === 12
         && labelSegment.backgroundColor === LV.Theme.panelBackground08
         && iconSegment.backgroundColor === LV.Theme.panelBackground08
         && labelSegment.borderColor === LV.Theme.panelBackground12
@@ -4540,10 +4592,12 @@ Item {
     property string contractDebug: JSON.stringify({
         count: %1,
         labelCount: labelSegment.segmentCount,
+        labelRadius: labelSegment.resolvedCornerRadius,
         labelPadding: [labelSegment.horizontalPadding, labelSegment.verticalPadding],
         labelSize: [labelSegment.width, labelSegment.height,
             labelSegment.implicitWidth, labelSegment.implicitHeight],
         iconCount: iconSegment.segmentCount,
+        iconRadius: iconSegment.resolvedCornerRadius,
         iconPadding: [iconSegment.horizontalPadding, iconSegment.verticalPadding],
         iconSize: [iconSegment.width, iconSegment.height,
             iconSegment.implicitWidth, iconSegment.implicitHeight]
@@ -4579,12 +4633,36 @@ Item {
             QVERIFY(iconButton);
             QCOMPARE(labelButton->property("tone").toInt(), borderlessTone);
             QCOMPARE(iconButton->property("tone").toInt(), borderlessTone);
+            QCOMPARE(labelButton->property("resolvedCornerRadius").toReal(), 8.0);
+            QCOMPARE(iconButton->property("resolvedCornerRadius").toReal(), 8.0);
             verifyBounds(labelButton,
                          labelSegment,
                          QRectF(4.0 + (index * 58.0), 3.5, 56.0, 22.0));
             verifyBounds(iconButton,
                          iconSegment,
                          QRectF(4.0 + (index * 24.0), 4.0, 22.0, 22.0));
+        }
+
+        const QString captureDir = qEnvironmentVariable("LVRS_SEGMENT_CAPTURE_DIR");
+        if (!captureDir.isEmpty()) {
+            QVERIFY(QDir().mkpath(captureDir));
+            QQuickWindow window;
+            window.resize(460, 120);
+            auto *host = qobject_cast<QQuickItem *>(root.data());
+            QVERIFY(host);
+            host->setParentItem(window.contentItem());
+            window.show();
+            QVERIFY(QTest::qWaitForWindowExposed(&window));
+            QSignalSpy frameSpy(&window, &QQuickWindow::frameSwapped);
+            window.update();
+            QTRY_VERIFY_WITH_TIMEOUT(frameSpy.count() > 0, 5000);
+            const auto capture = host->grabToImage(QSize(920, 240));
+            QVERIFY(capture);
+            QTRY_VERIFY(!capture->image().isNull());
+            const QString fileName = QStringLiteral("/segments-%1-%2.png")
+                .arg(mobile ? "mobile" : "desktop").arg(count);
+            QVERIFY(capture->image().save(captureDir + fileName));
+            host->setParentItem(nullptr);
         }
     }
 }
@@ -5114,12 +5192,12 @@ Item {
         && Math.abs(defaultField.backgroundColorDisabled.a - 0.36) < 0.005
         && defaultField.glassBlurRadius === 8 * expectedScale
         && defaultField.implicitWidth === 206 * expectedScale
-        && defaultField.implicitHeight === 19 * expectedScale
+        && defaultField.implicitHeight === 22 * expectedScale
         && defaultField.width === 206 * expectedScale
-        && defaultField.height === 19 * expectedScale
-        && defaultField.fieldMinHeight === 19 * expectedScale
+        && defaultField.height === 22 * expectedScale
+        && defaultField.fieldMinHeight === 22 * expectedScale
         && defaultField.insetHorizontal === 7 * expectedScale
-        && defaultField.insetVertical === 3 * expectedScale
+        && defaultField.insetVertical === 4.5 * expectedScale
         && defaultField.sideSpacing === 2 * expectedScale
         && defaultField.cornerRadius === 5 * expectedScale
         && defaultField.centeredTextHeight === 13
@@ -5129,10 +5207,10 @@ Item {
         && defaultField.inputItem.font.weight === Font.Medium
         && defaultField.leftInset === 7 * expectedScale
         && defaultField.rightInset === 7 * expectedScale
-        && defaultField.centeredTextY === (3)
+        && defaultField.centeredTextY === 4.5
         && defaultField.textColor === LV.Theme.titleHeaderColor
         && defaultField.textColorDisabled === LV.Theme.disabledColor
-        && defaultField.placeholderColor === LV.Theme.titleHeaderColor
+        && defaultField.placeholderColor === LV.Theme.disabledColor
         && defaultField.placeholderColorDisabled === LV.Theme.disabledColor
         && Math.abs(defaultField.placeholderOpacity - 1.0) < 0.001
         && defaultField.searchIconColor === LV.Theme.accentGrayLight
@@ -5143,7 +5221,7 @@ Item {
         && inlineField.resolvedStyle === inlineField.inlineStyle
         && inlineField.shapeStyle === inlineField.shapeCylinder
         && inlineField.implicitWidth === 206 * expectedScale
-        && inlineField.implicitHeight === 19 * expectedScale
+        && inlineField.implicitHeight === 22 * expectedScale
         && inlineField.backgroundColor === LV.Theme.inputFieldGlassTintInline
         && inlineField.backgroundColorHover === inlineField.backgroundColor
         && inlineField.backgroundColorPressed === inlineField.backgroundColor
@@ -5156,10 +5234,10 @@ Item {
         && inlineField.showClearButton
         && cylinderField.resolvedStyle === cylinderField.cylinderStyle
         && cylinderField.shapeStyle === cylinderField.shapeCylinder
-        && Math.abs(cylinderField.resolvedCornerRadius - (19 * expectedScale / 2.0)) < 0.01
+        && Math.abs(cylinderField.resolvedCornerRadius - (22 * expectedScale / 2.0)) < 0.01
         && cylinderField.backgroundColor === LV.Theme.inputFieldGlassTint
         && cylinderField.implicitWidth === 206 * expectedScale
-        && cylinderField.implicitHeight === 19 * expectedScale
+        && cylinderField.implicitHeight === 22 * expectedScale
         && searchField.search
         && searchField.searchIconVisible
         && searchField.searchIconSize === 12 * expectedScale
@@ -5169,13 +5247,17 @@ Item {
         && searchField.leftInset === 21 * expectedScale
         && searchField.rightInset === 8 + 14 * expectedScale
         && searchField.implicitWidth === 206 * expectedScale
-        && searchField.implicitHeight === 19 * expectedScale
+        && searchField.implicitHeight === 22 * expectedScale
         && searchField.showClearButton
         && legacySearchField.mode === legacySearchField.searchMode
         && legacySearchField.search
         && legacySearchField.searchIconVisible
         && passwordField.echoMode === TextInput.Password
+        && passwordField.height === 22
         && readOnlyField.readOnly
+        && readOnlyField.height === 22
+        && inlineDisabledField.height === 22
+        && inlineDisabledField.placeholderColor === LV.Theme.disabledColor
         && !readOnlyField.showClearButton
 }
 )";
@@ -5203,24 +5285,43 @@ Item {
         QTRY_VERIFY(field->property("showClearButton").toBool());
         QTRY_VERIFY(qAbs(field->width() - clear->mapToItem(field, QPointF()).x()
                          - clear->width() - 8.0) < 0.01);
+        QTRY_COMPARE(clear->mapToItem(field, QPointF()).y() + clear->height() / 2,
+                     field->height() / 2);
         auto *input = field->property("inputItem").value<QQuickItem *>();
         QVERIFY(input);
         QTRY_VERIFY(qAbs(clear->mapToItem(field, QPointF()).x() - input->x()
                          - input->width() - field->property("sideSpacing").toReal()) < 0.01);
     };
     const QList<QQuickItem *> fields = {roundedItem, cylinderItem, inlineItem, searchItem};
-    for (const QString &target : {QStringLiteral("macos"), QStringLiteral("android"),
+    for (const QString &target : {QStringLiteral("macos"), QStringLiteral("ios"), QStringLiteral("android"),
                                   QStringLiteral("macos")}) {
         QVERIFY(root->setProperty("themeTarget", target));
         QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
                      qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
         for (QQuickItem *field : fields) {
+            auto *input = field->property("inputItem").value<QQuickItem *>();
+            QVERIFY(input);
+            QCOMPARE(field->height(), 22.0);
+            QCOMPARE(input->y(), 4.5);
+            QCOMPARE(input->height(), 13.0);
             const QString originalText = field->property("text").toString();
             QVERIFY(field->setProperty("text", QStringLiteral("Filled value")));
             verifyClearPadding(field);
             QVERIFY(field->setProperty("text", originalText));
         }
+        auto *searchIcon = searchItem->findChild<QQuickItem *>(QStringLiteral("figmaInputSearch_searchIconImage"));
+        QVERIFY(searchIcon);
+        QCOMPARE(searchIcon->mapToItem(searchItem, QPointF()).y(), 5.0);
+        QCOMPARE(searchIcon->height(), 12.0);
     }
+
+    // Fractional padding follows an explicit minimum height without clipping the line box.
+    QVERIFY(roundedItem->setProperty("fieldMinHeight", 30));
+    QTRY_COMPARE(roundedItem->height(), 30.0);
+    QCOMPARE(roundedItem->property("insetVertical").toReal(), 8.5);
+    QCOMPARE(roundedItem->property("inputItem").value<QQuickItem *>()->y(), 8.5);
+    QVERIFY(roundedItem->setProperty("fieldMinHeight", 22));
+    QTRY_COMPARE(roundedItem->height(), 22.0);
 
     searchItem->setWidth(333);
     QVERIFY(searchItem->setProperty("insetHorizontal", 19));
@@ -5275,7 +5376,7 @@ Item {
     QCOMPARE(logicalPixel(246, 20).alpha(), 0);
 
     int searchGlyphPixels = 0;
-    for (int y = 48; y < 60; ++y) {
+    for (int y = 50; y < 62; ++y) {
         for (int x = 27; x < 39; ++x) {
             if (logicalPixel(x, y).lightness() > 100)
                 ++searchGlyphPixels;
@@ -5284,7 +5385,7 @@ Item {
     QVERIFY(searchGlyphPixels > 8);
 
     int clearGlyphPixels = 0;
-    for (int y = 48; y < 60; ++y) {
+    for (int y = 50; y < 62; ++y) {
         for (int x = 206; x < 218; ++x) {
             if (logicalPixel(x, y).lightness() > 100)
                 ++clearGlyphPixels;
@@ -5322,6 +5423,7 @@ Controls.ApplicationWindow {
     property bool detailedBackdrop: false
     property real contentOffset: 0
     property color stripeColor: "#f0d189"
+    readonly property color expectedPlaceholderColor: LV.Theme.disabledColor
     Component.onCompleted: LV.Theme.targetOverride = "macos"
     Component.onDestruction: LV.Theme.targetOverride = ""
     background: Rectangle {
@@ -5375,7 +5477,24 @@ Controls.ApplicationWindow {
                                              QStringLiteral("materialField%1").arg(i));
         QVERIFY(field);
         fields.append(field);
-        QCOMPARE(field->size(), QSizeF(206, 19));
+        QCOMPARE(field->size(), QSizeF(206, 22));
+        auto *input = field->property("inputItem").value<QQuickItem *>();
+        QVERIFY(input);
+        QCOMPARE(input->y(), 4.5);
+        QCOMPARE(input->height(), 13.0);
+        QQuickItem *placeholder = nullptr;
+        for (auto *candidate : field->findChildren<QQuickItem *>()) {
+            if (candidate->property("text").toString() == field->property("placeholderText").toString()) {
+                placeholder = candidate;
+                break;
+            }
+        }
+        QVERIFY(placeholder);
+        QCOMPARE(placeholder->y(), input->y());
+        QCOMPARE(placeholder->height(), input->height());
+        QCOMPARE(placeholder->property("color").value<QColor>(),
+                 root->property("expectedPlaceholderColor").value<QColor>());
+        QCOMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
         QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
     }
     const auto grab = [window]() -> QImage {
@@ -5393,7 +5512,8 @@ Controls.ApplicationWindow {
     QVERIFY(!material.isNull());
     const auto depth = [](const QImage &image, QQuickItem *field) {
         const QPoint p = scenePoint(field, QPointF(150, 0));
-        return qGray(image.pixel(p + QPoint(0, 18))) - qGray(image.pixel(p + QPoint(0, 1)));
+        return qGray(image.pixel(p + QPoint(0, qRound(field->height()) - 1)))
+            - qGray(image.pixel(p + QPoint(0, 1)));
     };
     for (int column = 0; column < 3; ++column) {
         QQuickItem *field = fields[column * 6];
@@ -5401,11 +5521,11 @@ Controls.ApplicationWindow {
                  "The lower inner reflection must be brighter than the recessed top.");
         QVERIFY(depth(material, field) > depth(material, fields[column * 6 + 1]));
         const QPoint p = scenePoint(field, QPointF(150, 0));
-        QVERIFY2(qGray(material.pixel(p + QPoint(0, 18)))
-                     > qGray(material.pixel(p + QPoint(0, 9))) + (column == 2 ? 2 : 10),
+        QVERIFY2(qGray(material.pixel(p + QPoint(0, qRound(field->height()) - 1)))
+                     > qGray(material.pixel(p + QPoint(0, qRound(field->height() / 2)))) + (column == 2 ? 2 : 10),
                  "The material must include the lower rim, including when supersampled.");
         QCOMPARE(material.pixelColor(p + QPoint(0, -1)), QColor("#1f1f1f"));
-        QCOMPARE(material.pixelColor(p + QPoint(0, 19)), QColor("#1f1f1f"));
+        QCOMPARE(material.pixelColor(p + QPoint(0, qRound(field->height()))), QColor("#1f1f1f"));
     }
 
     QVERIFY(root->setProperty("detailedBackdrop", true));
@@ -5860,9 +5980,9 @@ Item {
         && searchField.search
         && searchField.searchIconVisible
         && searchField.implicitWidth === 206
-        && searchField.implicitHeight === 19
+        && searchField.implicitHeight === 22
         && searchField.width === 206
-        && searchField.height === 19
+        && searchField.height === 22
         && searchField.centeredTextHeight === 13
         && searchField.inputItem.font.pixelSize === 13
         && searchField.searchIconSize === 12
@@ -6639,8 +6759,8 @@ Item {
         useOverlayLayer: false
         open: true
         buttonCount: 2
-        title: "Alert Dialog"
-        message: "It can have 2 or 3 actions depending on your needs."
+        title: "Apply changes?"
+        message: "Your new settings will be applied\nto this workspace."
         primaryText: "TwoPrimary"
         secondaryText: "TwoSecondary"
     }
@@ -6653,8 +6773,8 @@ Item {
         useOverlayLayer: false
         open: true
         buttonCount: 3
-        title: "Alert Dialog"
-        message: "It can have 2 or 3 actions depending on your needs."
+        title: "Save changes?"
+        message: "You have unsaved changes.\nSave them before closing?"
         primaryText: "ThreePrimary"
         secondaryText: "ThreeSecondary"
         tertiaryText: "ThreeTertiary"
@@ -6758,10 +6878,14 @@ Item {
         QCOMPARE(label->property("color").value<QColor>(),
                  root->property("expectedTitleColor").value<QColor>());
         QCOMPARE(label->property("stylePixelSize").toInt(), 26);
+        QCOMPARE(label->property("font").value<QFont>().pixelSize(), 26);
+        QCOMPARE(label->property("lineHeight").toReal(), qreal(26));
     }
     for (QQuickItem *label : {twoMessage, threeMessage}) {
         QCOMPARE(label->property("color").value<QColor>(), expectedTextColor);
         QCOMPARE(label->property("stylePixelSize").toInt(), 13);
+        QCOMPARE(label->property("font").value<QFont>().pixelSize(), 13);
+        QCOMPARE(label->property("lineHeight").toReal(), qreal(13));
     }
 
     QVERIFY(twoHorizontalActions->isVisible());
@@ -6794,12 +6918,14 @@ Item {
                      - expectedButtonVerticalPadding) < 0.01);
     }
 
-    QTRY_COMPARE(twoContent->height(), qreal(300));
-    QTRY_COMPARE(threeContent->height(), qreal(300));
-    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(34));
-    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(56));
-    QTRY_COMPARE(twoCard->height(), qreal(417));
-    QTRY_COMPARE(threeCard->height(), qreal(517));
+    // Figma 658:225 uses auto-height text with 26px Title / 13px Body lines.
+    // The old cached 34px/56px text bounds must not become minimum heights.
+    QTRY_COMPARE(twoContent->height(), qreal(262));
+    QTRY_COMPARE(threeContent->height(), qreal(262));
+    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(26));
+    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(26));
+    QTRY_COMPARE(twoCard->height(), qreal(379));
+    QTRY_COMPARE(threeCard->height(), qreal(479));
     QCOMPARE(threeSecondary->property("textColor").value<QColor>(), QColor("#ff453a"));
     QCOMPARE(twoSecondary->property("textColor").value<QColor>(), QColor("#f4f5f7"));
     QCOMPARE(threeTertiary->property("backgroundColor").value<QColor>(), QColor(Qt::transparent));
@@ -6814,11 +6940,31 @@ Item {
 
     // Hidden icons release their frame and the adjacent gap; copy may grow.
     QVERIFY(twoActionAlert->setProperty("showIcon", false));
-    QTRY_COMPARE(twoCard->height(), qreal(303));
+    QTRY_COMPARE(twoCard->height(), qreal(265));
     QVERIFY(twoActionAlert->setProperty("showIcon", true));
-    QTRY_COMPARE(twoCard->height(), qreal(417));
+    QTRY_COMPARE(twoCard->height(), qreal(379));
     QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("First line\nSecond line\nThird line")));
-    QTRY_VERIFY(twoCard->height() > 417);
+    QTRY_COMPARE(twoCard->height(), qreal(431));
+
+    // Changing copy must release both obsolete line height and empty-section gaps.
+    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
+    QVERIFY(twoActionAlert->setProperty("message", QStringLiteral("Ready to apply.")));
+    QTRY_COMPARE(twoCard->height(), qreal(366));
+    QVERIFY(twoActionAlert->setProperty("message", QString()));
+    QTRY_COMPARE(twoCard->height(), qreal(339));
+    QVERIFY(twoActionAlert->setProperty("title", QString()));
+    QTRY_COMPARE(twoCard->height(), qreal(285));
+    QVERIFY(twoActionAlert->setProperty("message", QStringLiteral("First line\nSecond line")));
+    QTRY_COMPARE(twoCard->height(), qreal(339));
+    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
+    QTRY_COMPARE(twoCard->height(), qreal(379));
+
+    // Wrapping remains responsive, and restoring the host releases extra lines.
+    QVERIFY(root->setProperty("width", 240));
+    QTRY_VERIFY(twoTitle->property("lineCount").toInt() > 1);
+    QTRY_VERIFY(twoCard->height() > 379);
+    QVERIFY(root->setProperty("width", 960));
+    QTRY_COMPARE(twoCard->height(), qreal(379));
 }
 
 void ImportApiTests::alert_content_arguments_contract_loads()

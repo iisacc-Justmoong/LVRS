@@ -26,9 +26,11 @@ Set `type` to a `ListItem` enum value. The legacy `size` property aliases `type`
 | Resource | 400 × 129 | Preview, description, metadata, menu and actions |
 | Media | 400 × 113 | Preview, duration, source segments and playback actions |
 | Task | 400 × 135 | Checkbox, priority, description, metadata, estimate and actions |
-| Form | 400 × 148 | Selector, two labeled inputs, switch, status and actions |
+| Form | 400 × 154 | Selector, two labeled inputs, switch, status and actions |
 
 The measured sizes above apply to default content and visible slots on desktop and mobile. Compound height follows content and optional slots. Standard rows have a 44px minimum height. Theme geometry and all typography retain their authored values on both targets; Body remains 13px.
+
+The 2026-09-10 InputField adjustment gives InlineEdit and Form inputs a `22px` height with a centered `13px` line box. Form grows from `148px` to `154px` because it contains two input rows; mixed lists propagate the resulting row positions and total content height automatically.
 
 Widths can be assigned by a parent layout. Default actions reserve 72px, selectors 97px, inputs 140px, and previews 48px. Labels and values elide inside their allocated space. These presets are designed for their listed widths; larger custom controls require a wider row or a custom delegate.
 

@@ -101,6 +101,8 @@ Run tests:
 ctest --test-dir build --output-on-failure
 ```
 
+CTest selects this build's library and QML paths even when the shell has loaded an installed LVRS `env.sh`. The import test also compares embedded QML hashes with the current checkout. Installed packages are checked separately with the [installed consumer](docs/build.md#installed-package-regression).
+
 ## Use in Any Qt Quick Project
 
 Install LVRS once:
@@ -298,6 +300,10 @@ Mobile no longer doubles Theme sizes. iOS, Android, and desktop use the same spa
 - Scaffold
 
 The runtime console section exposes daemon health, event sequence, pointer target, pressed keys/buttons, and recent route/render events.
+
+Control → Input → Slider contains seven interactive `LV.Slider` types and the complete 112-variant Figma matrix. The component supports Mini/Small/Regular/Large, centered and capsule fills, endpoint labels/icons, ticks, segmented snapping, and native pointer/touch/keyboard input. See [Slider API](docs/components/control/Slider.md).
+
+Control → Input → ColorPicker contains six embeddable color editing views, including the hue wheel, two color planes, grayscale, RGB and CMYK. Pass an `LV.ColorPicker` through `Component` to `LV.Modal.contentComponent` or another content host. The host owns presentation and dismissal. See [ColorPicker API](docs/components/control/ColorPicker.md).
 
 ## Documentation
 

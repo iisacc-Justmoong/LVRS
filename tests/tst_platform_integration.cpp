@@ -366,7 +366,7 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
         QTRY_VERIFY(root->property("catalogViewportReady").toBool());
         QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-        QCOMPARE(root->property("catalogComponentCount").toInt(), 56);
+        QCOMPARE(root->property("catalogComponentCount").toInt(), 59);
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
         QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("catalog-overview"));
         QVERIFY(root->property("activeEntry").isValid());
@@ -653,7 +653,7 @@ Item {
         && Math.abs(figmaLabelSegment.verticalPadding - 3.5) < 0.01
         && figmaLabelSegment.spacing === 2
         && figmaLabelSegment.borderWidth === 2
-        && figmaLabelSegment.cornerRadius === 8
+        && figmaLabelSegment.cornerRadius === 12
         && figmaLabelSegment.implicitWidth === 122
         && figmaLabelSegment.width === 122
         && Math.abs(figmaLabelSegment.implicitHeight - 29.0) < 0.01
@@ -666,7 +666,7 @@ Item {
         && figmaIconSegment.verticalPadding === 4
         && figmaIconSegment.spacing === 2
         && figmaIconSegment.borderWidth === 2
-        && figmaIconSegment.cornerRadius === 8
+        && figmaIconSegment.cornerRadius === 12
         && figmaIconSegment.implicitWidth === 54
         && figmaIconSegment.width === 54
         && figmaIconSegment.implicitHeight === 30

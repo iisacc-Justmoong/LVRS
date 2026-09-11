@@ -9,5 +9,12 @@ lvrs_add_example_app(
         main.cpp
     QML_FILES
         qml/CatalogRegistry.qml
+        qml/CardGallery.qml
+        qml/SliderGallery.qml
+        qml/ColorPickerGallery.qml
         qml/Main.qml
+    RESOURCES
+        assets/cards/architecture.png
+        assets/cards/landscape.png
+        assets/cards/document.png
 )

@@ -279,6 +279,7 @@ Item {
 
                 Column {
                     id: textSection
+                    visible: root.title.length > 0 || root.message.length > 0
                     width: Math.max(0, parent.width - root.sidePadding * 2)
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: Theme.gap14
@@ -287,9 +288,9 @@ Item {
                         id: titleLineBox
                         visible: root.title.length > 0
                         width: parent.width
-                        // Preserve the Figma line boxes, using existing Title typography.
-                        height: visible ? Math.max(Theme.scaleMetric(34),
-                                                   titleLabel.lineCount * titleLabel.styleLineHeight) : 0
+                        // Figma auto-height follows the current Title/Body line metrics.
+                        // Snapshot bounds (34/56px) must not become minimum text heights.
+                        height: visible ? titleLabel.lineCount * titleLabel.styleLineHeight : 0
 
                         Label {
                             id: titleLabel
@@ -309,8 +310,7 @@ Item {
                         id: messageLineBox
                         visible: root.message.length > 0
                         width: parent.width
-                        height: visible ? Math.max(Theme.scaleMetric(56),
-                                                   messageLabel.lineCount * messageLabel.styleLineHeight) : 0
+                        height: visible ? messageLabel.lineCount * messageLabel.styleLineHeight : 0
 
                         Label {
                             id: messageLabel
