@@ -17,7 +17,7 @@ LV.ApplicationWindow {
     autoHookBackendUserEvents: false
     globalEventListenersEnabled: true
     navigationEnabled: false
-    title: "LVRS Visual Catalog"
+    title: "LVRS Component Studio"
     subtitle: activeEntry ? activeEntry.label : "Catalog Overview"
 
     readonly property bool catalogCompactLayout: width < 1260
@@ -72,7 +72,19 @@ LV.ApplicationWindow {
         id: catalogRegistry
     }
 
-    property string activeEntryKey: catalogRegistry.overview.key
+    property string searchQuery: ""
+    readonly property var filteredCatalogRows: catalogRegistry.filteredHierarchy(searchQuery)
+    readonly property var activeMotionGuide: catalogRegistry.motionGuide(activeEntryKey)
+    readonly property var catalogEntries: catalogRegistry.allComponents()
+    readonly property bool previewReady: previewLoader.status === Loader.Ready
+    readonly property string previewError: previewLoader.status === Loader.Error ? "Preview could not be loaded" : ""
+
+    function resetPreview() {
+        previewLoader.active = false
+        Qt.callLater(function() { previewLoader.active = true })
+    }
+
+    property string activeEntryKey: "motion"
     readonly property var activeEntry: catalogRegistry.entryByKey(activeEntryKey)
     readonly property var activeBreadcrumb: catalogRegistry.breadcrumb(activeEntryKey)
     readonly property int catalogComponentCount: catalogRegistry.componentCount
@@ -112,6 +124,8 @@ LV.ApplicationWindow {
             return false
         activeEntryKey = record.key
         Qt.callLater(function() {
+            if (root.activeEntryKey !== record.key)
+                return
             if (catalogHierarchy && catalogHierarchy.activeListItemKey !== record.key)
                 catalogHierarchy.activateListItemByKey(record.key)
         })
@@ -133,7 +147,8 @@ LV.ApplicationWindow {
         case "app-header":
             return appHeaderPreview
         case "stack-layout":
-            return stackLayoutPreview
+        case "motion-lab":
+            return motionLabPreview
         case "abstract-button":
             return abstractButtonPreview
         case "button-family":
@@ -144,10 +159,12 @@ LV.ApplicationWindow {
             return selectorControlPreview
         case "selection-control":
             return selectionControlPreview
+        case "toggle-switch":
+            return toggleSwitchPreview
         case "label-display":
-            return labelDisplayPreview
+            return motionLabPreview
         case "progress-display":
-            return progressDisplayPreview
+            return motionLabPreview
         case "table-display":
             return tableDisplayPreview
         case "input-field":
@@ -180,6 +197,14 @@ LV.ApplicationWindow {
             return alertSurfacePreview
         case "modal-surface":
             return modalSurfacePreview
+        case "sheet-gallery":
+            return sheetGalleryPreview
+        case "tooltip-gallery":
+            return tooltipGalleryPreview
+        case "material-gallery":
+            return materialGalleryPreview
+        case "figma-parity":
+            return figmaParityPreview
         default:
             return placeholderPreview
         }
@@ -197,8 +222,13 @@ LV.ApplicationWindow {
     }
 
     onActiveEntryChanged: {
-        if (previewLoader.item && previewLoader.item.catalogEntry !== undefined)
-            previewLoader.item.catalogEntry = activeEntry
+        if (detailScroll && detailScroll.contentItem)
+            detailScroll.contentItem.contentY = 0
+        Qt.callLater(function() {
+            root.resetPreview()
+            if (catalogHierarchy && catalogHierarchy.activeListItemKey !== root.activeEntryKey)
+                catalogHierarchy.activateListItemByKey(root.activeEntryKey)
+        })
     }
 
     Timer {
@@ -206,6 +236,16 @@ LV.ApplicationWindow {
         running: true
         repeat: true
         onTriggered: root.syncRuntimeState()
+    }
+
+    Component {
+        id: motionLabPreview
+        MotionLab {}
+    }
+
+    Component {
+        id: figmaParityPreview
+        FigmaParityGallery {}
     }
 
     Component {
@@ -241,7 +281,7 @@ LV.ApplicationWindow {
                             radius: LV.Theme.radiusMd
                             color: LV.Theme.surfaceAlt
                             border.width: 1
-                            border.color: LV.Theme.contextMenuDivider
+                            border.color: LV.Theme.menuDivider
 
                             Column {
                                 anchors.fill: parent
@@ -356,7 +396,7 @@ LV.ApplicationWindow {
                     radius: LV.Theme.radiusMd
                     color: LV.Theme.surfaceAlt
                     border.width: 1
-                    border.color: LV.Theme.contextMenuDivider
+                    border.color: LV.Theme.menuDivider
 
                     Column {
                         id: shellColumn
@@ -379,6 +419,34 @@ LV.ApplicationWindow {
                             LV.LabelButton {
                                 text: "Refresh"
                                 tone: LV.AbstractButton.Default
+                            }
+                        }
+
+                        LV.Label {
+                            style: description
+                            text: "App accent"
+                            color: LV.Theme.textSecondary
+                        }
+
+                        Flow {
+                            width: parent.width
+                            spacing: LV.Theme.gap8
+
+                            Repeater {
+                                model: [
+                                    { key: "blue", label: "LVRS blue", color: LV.Theme.defaultPrimary },
+                                    { key: "purple", label: "Purple", color: "#A571E6" },
+                                    { key: "orange", label: "Orange", color: "#FF9F45" }
+                                ]
+
+                                delegate: LV.LabelButton {
+                                    required property var modelData
+                                    objectName: "catalogPrimaryColor_" + modelData.key
+                                    text: modelData.label
+                                    tone: Qt.colorEqual(root.primaryColor, modelData.color)
+                                        ? LV.AbstractButton.Primary : LV.AbstractButton.Default
+                                    onClicked: root.primaryColor = modelData.color
+                                }
                             }
                         }
 
@@ -443,7 +511,7 @@ LV.ApplicationWindow {
                 radius: LV.Theme.radiusMd
                 color: LV.Theme.surfaceAlt
                 border.width: 1
-                border.color: LV.Theme.contextMenuDivider
+                border.color: LV.Theme.menuDivider
 
                 Column {
                     id: windowColumn
@@ -475,7 +543,7 @@ LV.ApplicationWindow {
                         radius: LV.Theme.radiusMd
                         color: LV.Theme.windowAlt
                         border.width: 1
-                        border.color: LV.Theme.contextMenuDivider
+                        border.color: LV.Theme.menuDivider
 
                         Column {
                             anchors.fill: parent
@@ -556,7 +624,7 @@ LV.ApplicationWindow {
                             radius: LV.Theme.radiusMd
                             color: LV.Theme.surfaceAlt
                             border.width: 1
-                            border.color: LV.Theme.contextMenuDivider
+                            border.color: LV.Theme.menuDivider
 
                             Column {
                                 anchors.fill: parent
@@ -674,7 +742,7 @@ LV.ApplicationWindow {
                         radius: LV.Theme.radiusMd
                         color: LV.Theme.surfaceAlt
                         border.width: 1
-                        border.color: LV.Theme.contextMenuDivider
+                        border.color: LV.Theme.menuDivider
 
                         LV.ZStack {
                             anchors.fill: parent
@@ -815,15 +883,15 @@ LV.ApplicationWindow {
                 LV.LabelSegmentedControl {
                     width: implicitWidth
 
-                    LV.LabelButton { text: "Button" }
-                    LV.LabelButton { text: "Button" }
+                    LV.LabelButton { text: "Original"; checkable: true; autoExclusive: true; checked: true }
+                    LV.LabelButton { text: "Edited"; checkable: true; autoExclusive: true }
                 }
 
                 LV.IconSegmentedControl {
                     width: implicitWidth
 
-                    LV.IconButton { iconName: "projectStructure" }
-                    LV.IconButton { iconName: "projectStructure" }
+                    LV.IconButton { iconName: "projectStructure"; checkable: true; autoExclusive: true; checked: true }
+                    LV.IconButton { iconName: "generaladd"; checkable: true; autoExclusive: true }
                 }
             }
         }
@@ -907,6 +975,59 @@ LV.ApplicationWindow {
     }
 
     Component {
+        id: toggleSwitchPreview
+
+        Column {
+            property var catalogEntry: ({})
+            spacing: LV.Theme.gap16
+
+            LV.Label {
+                width: parent.width
+                style: body
+                text: "Hold to press. Tap, drag, or press Space to feel the rebound."
+                wrapMode: Text.WordWrap
+            }
+
+            Flow {
+                width: parent.width
+                spacing: LV.Theme.gap24
+
+                Column {
+                    spacing: LV.Theme.gap8
+                    LV.Label { style: body; text: "Sync automatically" }
+                    LV.ToggleSwitch { objectName: "catalogToggleOn"; checked: true }
+                }
+                Column {
+                    spacing: LV.Theme.gap8
+                    LV.Label { style: body; text: "Notifications" }
+                    LV.ToggleSwitch { objectName: "catalogToggleOff" }
+                }
+            }
+
+            Flow {
+                width: parent.width
+                spacing: LV.Theme.gap24
+
+                Column {
+                    spacing: LV.Theme.gap8
+                    LV.Label { style: body; text: "Slow rebound" }
+                    LV.ToggleSwitch { objectName: "catalogToggleSlow"; transitionDuration: 640 }
+                }
+                Column {
+                    spacing: LV.Theme.gap8
+                    LV.Label { style: body; text: "No animation" }
+                    LV.ToggleSwitch { objectName: "catalogToggleImmediate"; transitionDuration: 0 }
+                }
+                Column {
+                    spacing: LV.Theme.gap8
+                    LV.Label { style: disabled; text: "Unavailable" }
+                    LV.ToggleSwitch { enabled: false; checked: true }
+                }
+            }
+        }
+    }
+
+    Component {
         id: labelDisplayPreview
 
         Item {
@@ -980,7 +1101,7 @@ LV.ApplicationWindow {
                     radius: LV.Theme.radiusMd
                     color: LV.Theme.surfaceAlt
                     border.width: 1
-                    border.color: LV.Theme.contextMenuDivider
+                    border.color: LV.Theme.menuDivider
 
                     Flickable {
                         anchors.fill: parent
@@ -1162,7 +1283,7 @@ LV.ApplicationWindow {
                     radius: LV.Theme.radiusMd
                     color: LV.Theme.surfaceAlt
                     border.width: 1
-                    border.color: LV.Theme.contextMenuDivider
+                    border.color: LV.Theme.menuDivider
 
                     LV.Label {
                         anchors.centerIn: parent
@@ -1228,7 +1349,7 @@ LV.ApplicationWindow {
                     radius: LV.Theme.radiusMd
                     color: LV.Theme.surfaceAlt
                     border.width: 1
-                    border.color: LV.Theme.contextMenuDivider
+                    border.color: LV.Theme.menuDivider
 
                     Flickable {
                         id: guardFlickable
@@ -1310,7 +1431,7 @@ LV.ApplicationWindow {
                     radius: LV.Theme.radiusMd
                     color: LV.Theme.surfaceAlt
                     border.width: 1
-                    border.color: LV.Theme.contextMenuDivider
+                    border.color: LV.Theme.menuDivider
 
                     LV.PageRouter {
                         id: previewRouter
@@ -1765,6 +1886,21 @@ LV.ApplicationWindow {
     }
 
     Component {
+        id: sheetGalleryPreview
+        SheetGallery { }
+    }
+
+    Component {
+        id: tooltipGalleryPreview
+        TooltipGallery { }
+    }
+
+    Component {
+        id: materialGalleryPreview
+        MaterialGallery { }
+    }
+
+    Component {
         id: alertSurfacePreview
 
         Item {
@@ -1898,60 +2034,26 @@ LV.ApplicationWindow {
             anchors.margins: root.catalogOuterMargin
             spacing: root.catalogSectionGap
 
-            LV.AppCard {
+            RowLayout {
                 Layout.fillWidth: true
-                implicitHeight: root.catalogCompactLayout ? 158 : 126
-
+                Layout.preferredHeight: 64
+                spacing: LV.Theme.gap16
                 Column {
-                    anchors.fill: parent
-                    anchors.margins: root.catalogContentInset
-                    spacing: LV.Theme.gap6
-
-                    LV.Label {
-                        style: title2
-                        color: LV.Theme.textPrimary
-                        text: "Visual Documentation Browser"
-                    }
-
-                    LV.Label {
-                        width: parent.width
-                        style: description
-                        color: LV.Theme.textSecondary
-                        wrapMode: Text.WordWrap
-                        text: "The left hierarchy is the primary index. Section entries summarize domains, and component entries open dedicated reference pages with live LVRS previews."
-                    }
-
-                    Flow {
-                        width: parent.width
-                        spacing: LV.Theme.gap8
-
-                        Repeater {
-                            model: [
-                                { label: root.catalogComponentCount + " public types" },
-                                { label: root.catalogDocumentCount + " catalog entries" },
-                                { label: "health " + root.metricsSummary },
-                                { label: root.activeEntry ? root.activeEntry.roleLabel : "Overview" }
-                            ]
-
-                            delegate: Rectangle {
-                                required property var modelData
-                                radius: LV.Theme.radiusSm
-                                color: LV.Theme.surfaceAlt
-                                border.width: 1
-                                border.color: LV.Theme.contextMenuDivider
-                                implicitWidth: chipLabel.implicitWidth + LV.Theme.gap12
-                                implicitHeight: chipLabel.implicitHeight + LV.Theme.gap6
-
-                                LV.Label {
-                                    id: chipLabel
-                                    anchors.centerIn: parent
-                                    style: caption
-                                    color: LV.Theme.textPrimary
-                                    text: modelData.label
-                                }
-                            }
-                        }
-                    }
+                    spacing: LV.Theme.gap4
+                    LV.Label { style: title2; text: "LVRS / Component Studio" }
+                    LV.Label { style: caption; color: LV.Theme.descriptionColor; text: root.catalogComponentCount + " types · live interaction reference" }
+                }
+                Item { Layout.fillWidth: true }
+                LV.Label { style: caption; text: "Motion speed" }
+                LV.LabelSegmentedControl {
+                    LV.LabelButton { text: "1×"; checked: LV.Motion.speed === 1; checkable: false; onClicked: LV.Motion.speed = 1 }
+                    LV.LabelButton { text: "0.5×"; checked: LV.Motion.speed === 0.5; checkable: false; onClicked: LV.Motion.speed = 0.5 }
+                    LV.LabelButton { text: "0.25×"; checked: LV.Motion.speed === 0.25; checkable: false; onClicked: LV.Motion.speed = 0.25 }
+                }
+                LV.CheckBox {
+                    objectName: "catalogReducedMotion"
+                    text: "Reduce motion"; checked: LV.Motion.reducedMotion
+                    onToggled: LV.Motion.reducedMotion = checked
                 }
             }
 
@@ -1967,29 +2069,20 @@ LV.ApplicationWindow {
                     Layout.fillHeight: true
                     spacing: root.catalogSectionGap
 
-                    LV.AppCard {
+                    LV.InputField {
+                        objectName: "catalogSearch"
                         Layout.fillWidth: true
-                        implicitHeight: 124
-
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: root.catalogContentInset
-                            spacing: LV.Theme.gap4
-
-                            LV.Label {
-                                style: header2
-                                color: LV.Theme.textPrimary
-                                text: "Component Index"
-                            }
-
-                            LV.Label {
-                                width: parent.width
-                                style: description
-                                color: LV.Theme.textSecondary
-                                wrapMode: Text.WordWrap
-                                text: "Use O for overview, + to expand, and - to collapse the full tree."
-                            }
-                        }
+                        placeholderText: "Search components…"
+                        text: root.searchQuery
+                        onTextChanged: root.searchQuery = text
+                    }
+                    LV.Label {
+                        Layout.fillWidth: true
+                        style: caption; color: LV.Theme.descriptionColor
+                        text: root.searchQuery.length > 0
+                            ? root.filteredCatalogRows.length + " matching types"
+                            : "Browse a component to inspect and interact"
+                        wrapMode: Text.WordWrap
                     }
 
                     LV.Hierarchy {
@@ -1997,7 +2090,7 @@ LV.ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         minimumPanelWidth: root.sidebarWidth
-                        model: catalogRegistry.hierarchyModel
+                        model: root.filteredCatalogRows
                         footerVisible: false
 
                         onListItemActivated: function(item) {
@@ -2032,23 +2125,22 @@ LV.ApplicationWindow {
                 }
 
                 ScrollView {
+                    id: detailScroll
+                    contentWidth: availableWidth
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
 
                     ColumnLayout {
-                        width: Math.max(parent.width, 720)
+                        width: detailScroll.availableWidth
                         spacing: root.catalogSectionGap
 
                         LV.AppCard {
                             Layout.fillWidth: true
-                            implicitHeight: heroColumn.implicitHeight + root.catalogContentInset * 2
 
                             Column {
                                 id: heroColumn
-                                x: root.catalogContentInset
-                                y: root.catalogContentInset
-                                width: parent.width - root.catalogContentInset * 2
+                                width: parent.width
                                 spacing: LV.Theme.gap6
 
                                 LV.Label {
@@ -2081,17 +2173,23 @@ LV.ApplicationWindow {
 
                         LV.AppCard {
                             Layout.fillWidth: true
-                            title: "Live Preview"
-                            subtitle: root.activeEntry ? root.activeEntry.label : ""
-                            implicitHeight: Math.max(root.catalogCompactLayout ? 320 : 360, (previewLoader.item && previewLoader.item.implicitHeight ? previewLoader.item.implicitHeight : 0) + root.catalogCardInset * 2)
+                            title: "Live playground"
+                            subtitle: "Use the real controls below. Reset to restore initial values."
+                            implicitHeight: Math.max(root.catalogCompactLayout ? 220 : 240, (previewLoader.item && previewLoader.item.implicitHeight ? previewLoader.item.implicitHeight : 0) + 150)
 
-                            Item {
-                                anchors.fill: parent
-                                anchors.margins: root.catalogCardInset
-
+                            Column {
+                                width: parent.width
+                                spacing: LV.Theme.gap16
+                                Row {
+                                    spacing: LV.Theme.gap8
+                                    LV.LabelButton { text: "Reset preview"; onClicked: root.resetPreview() }
+                                    LV.Label { style: caption; text: root.previewReady ? "Ready · " + root.activeEntry.label : root.previewError; color: LV.Theme.descriptionColor }
+                                }
                                 Loader {
                                     id: previewLoader
-                                    anchors.fill: parent
+                                    objectName: "catalogPreviewLoader"
+                                    width: parent.width
+                                    height: item && item.implicitHeight ? item.implicitHeight : 280
                                     sourceComponent: root.previewComponentFor(root.activeEntry ? root.activeEntry.previewId : "")
                                     onLoaded: {
                                         if (item && item.catalogEntry !== undefined)
@@ -2101,12 +2199,19 @@ LV.ApplicationWindow {
                             }
                         }
 
+                        MotionInspector {
+                            objectName: "catalogMotionInspector"
+                            Layout.fillWidth: true
+                            entry: root.activeEntry || ({})
+                            guide: root.activeMotionGuide || ({})
+                        }
+
                         LV.AppCard {
                             Layout.fillWidth: true
                             visible: root.activeEntry && root.activeEntry.usage.length > 0
                             title: "Usage"
                             subtitle: "Canonical QML snippet"
-                            implicitHeight: codePreview.editorHeight + root.catalogCardInset * 2
+                            implicitHeight: codePreview.editorHeight + 116
 
                             LV.CodeEditor {
                                 id: codePreview
@@ -2125,7 +2230,7 @@ LV.ApplicationWindow {
                             Layout.fillWidth: true
                             title: "Structure"
                             subtitle: "Source, related types, and branch contents"
-                            implicitHeight: structureColumn.implicitHeight + root.catalogCardInset * 2
+                            implicitHeight: structureColumn.implicitHeight + 120
 
                             Column {
                                 id: structureColumn
@@ -2236,7 +2341,7 @@ LV.ApplicationWindow {
                         visible: root.activeEntry && root.activeEntry.notes.length > 0
                         title: "Notes"
                         subtitle: "Behavior and positioning guidance"
-                        implicitHeight: notesColumn.implicitHeight + root.catalogCardInset * 2
+                        implicitHeight: notesColumn.implicitHeight + 120
 
                         Column {
                             id: notesColumn

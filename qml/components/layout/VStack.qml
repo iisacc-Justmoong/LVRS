@@ -4,6 +4,7 @@ import LVRS 1.0
 
 Item {
     id: root
+    property bool motionEnabled: true
 
     // SwiftUI-like API: spacing == -1 uses defaultSpacing; alignment is horizontal only.
     property int spacing: -1
@@ -23,6 +24,7 @@ Item {
         id: contentColumn
         anchors.fill: parent
         spacing: root.spacing < 0 ? root.defaultSpacing : root.spacing
+        SpringBehavior on spacing { motionEnabled: root.motionEnabled }
     }
 
     onAlignmentChanged: updateAlignment()

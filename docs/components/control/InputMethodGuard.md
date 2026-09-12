@@ -61,3 +61,7 @@ A. No. Keep `guardEnabled` false for read-only controls.
 - verify composing text is committed on focus loss when enabled,
 - verify no duplicate commit side effects in normal typing path,
 - verify guard is disabled for non-editable controls.
+
+## Shared motion
+
+The guard coordinates input-method state while the LVRS input supplies the focus ring. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

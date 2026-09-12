@@ -289,3 +289,7 @@ After edits:
 - `GestureEvents`: high-level gesture source used by gesture triggers.
 - `Backend`: optional backend-first input state source.
 - `ApplicationWindow`: installs root-level global listeners for app-wide behavior.
+
+## Shared motion
+
+The listener forwards events; the real control underneath supplies visible motion. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

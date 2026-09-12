@@ -170,3 +170,7 @@ LV.InputField {
     text: "Editable value"
 }
 ```
+
+## Shared motion
+
+The focus outline rebounds; inherited accessories use their own button feedback. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

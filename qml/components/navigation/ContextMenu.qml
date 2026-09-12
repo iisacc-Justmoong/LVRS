@@ -7,17 +7,29 @@ Controls.Popup {
     id: control
 
     property var items: []
-    property int itemWidth: Theme.scaleMetric(145)
+    property bool compactItems: true
+    property int itemWidth: Theme.scaleMetric(141)
     property int itemSpacing: Theme.gap2
     property bool showIconSlot: true
     property int selectedIndex: -1
     property bool autoCloseOnTrigger: true
     property bool dismissOnGlobalPress: true
     property bool dismissOnGlobalContextRequest: true
-    property color menuColor: Theme.contextMenuSurface
+    property color menuColor: backdropBackground && backdropBackground.color !== undefined
+        ? backdropBackground.color : Theme.contextMenuSurface
+    property color primaryColor: Theme.primary
+    property Item backdropSource: Controls.ApplicationWindow.window
+        && Controls.ApplicationWindow.window.materialBackdropSource !== undefined
+        ? Controls.ApplicationWindow.window.materialBackdropSource
+        : Controls.ApplicationWindow.contentItem
+    property Item backdropBackground: Controls.ApplicationWindow.window
+        ? Controls.ApplicationWindow.window.background : null
     property color dividerColor: Theme.contextMenuDivider
-    property real menuOpacity: 1.0
+    property real menuOpacity: Theme.contextMenuOpacity
+    property real menuBlurRadius: Theme.contextMenuBlur
+    property real menuAccentStrength: Theme.contextMenuAccentStrength
     property int edgeMargin: Theme.gap4
+    property bool motionEnabled: true
     property bool enableOpenBounce: true
     property bool autoTuneByBackend: true
     property int openBounceDuration: 170
@@ -55,10 +67,10 @@ Controls.Popup {
             return 0.88
         return 1.0
     }
-    readonly property bool resolvedOpenBounceEnabled: enableOpenBounce
+    readonly property bool resolvedOpenBounceEnabled: motionEnabled && Motion.animated && enableOpenBounce
         && (!autoTuneByBackend || backendTransitionReady)
-    readonly property int resolvedOpenBounceDuration: Math.max(0, Math.round(openBounceDuration * backendTransitionSpeedFactor))
-    readonly property int resolvedOpenSettleDuration: Math.max(0, Math.round(openSettleDuration * backendTransitionSpeedFactor))
+    readonly property int resolvedOpenBounceDuration: Motion.duration(openBounceDuration * backendTransitionSpeedFactor)
+    readonly property int resolvedOpenSettleDuration: Motion.duration(openSettleDuration * backendTransitionSpeedFactor)
     readonly property int resolvedOpenReboundDuration: resolvedOpenBounceDuration + resolvedOpenSettleDuration
     readonly property real resolvedOpenStartScale: Math.max(0.01, autoTuneByBackend && backendRuntimeProfile.mobile === true
         ? (openStartScale + 0.04)
@@ -68,7 +80,7 @@ Controls.Popup {
         : openOvershootScale)
     readonly property real resolvedOpenBackOvershoot: Math.max(0.15, Math.min(0.95, (resolvedOpenOvershootScale - 1.0) * 8.0))
     readonly property color resolvedMenuColor:
-        Qt.rgba(menuColor.r, menuColor.g, menuColor.b, Math.max(0.0, Math.min(menuOpacity, 1.0)))
+        Qt.rgba(menuColor.r, menuColor.g, menuColor.b, menuColor.a * Math.max(0.0, Math.min(menuOpacity, 1.0)))
     property real requestedPopupWidth: 0
     property bool synchronizingResolvedWidth: false
     readonly property int minimumItemWidth: Math.max(0, Math.round(Number(itemWidth) || 0))
@@ -94,7 +106,8 @@ Controls.Popup {
     Component {
         id: defaultItemDelegate
 
-        MenuItem {
+        ContextMenuItem {
+            compact: control.compactItems
             property var modelData: ({})
             property int index: modelData.index === undefined ? -1 : modelData.index
             property var entry: modelData.entry
@@ -120,7 +133,8 @@ Controls.Popup {
     Component {
         id: defaultDividerDelegate
 
-        MenuDivider {
+        ContextMenuDivider {
+            linePadding: control.compactItems ? Theme.gap4 : Theme.gapNone
             property var modelData: ({})
             property int index: modelData.index === undefined ? -1 : modelData.index
             width: parent ? parent.width : control.resolvedItemWidth
@@ -129,13 +143,14 @@ Controls.Popup {
     }
 
     modal: true
+    popupType: Controls.Popup.Item
     dim: false
     focus: true
     transformOrigin: Item.TopLeft
     leftPadding: Theme.gap8
     rightPadding: Theme.gap8
-    topPadding: Theme.gap4
-    bottomPadding: Theme.gap4
+    topPadding: Theme.gap8
+    bottomPadding: Theme.gap8
     closePolicy: Controls.Popup.CloseOnEscape
         | Controls.Popup.CloseOnPressOutside
         | Controls.Popup.CloseOnPressOutsideParent
@@ -180,7 +195,7 @@ Controls.Popup {
                 to: 1.0
                 duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenReboundDuration : 0
                 easing.type: Easing.OutBack
-                easing.overshoot: control.resolvedOpenBackOvershoot
+                easing.overshoot: Motion.overshoot
             }
 
             NumberAnimation {
@@ -200,6 +215,13 @@ Controls.Popup {
                 duration: control.resolvedOpenBounceEnabled ? control.resolvedOpenReboundDuration : 0
                 easing.type: Easing.OutQuart
             }
+        }
+    }
+
+    exit: Transition {
+        NumberAnimation {
+            property: "opacity"; to: 0
+            duration: control.motionEnabled ? Motion.duration(Motion.exitDuration) : 0
         }
     }
 
@@ -764,10 +786,23 @@ Controls.Popup {
         }
     }
 
-    background: Rectangle {
-        radius: Theme.radiusMd
-        color: control.resolvedMenuColor
-        antialiasing: true
+    background: WindowMaterial {
+        objectName: "contextMenuMaterial"
+        density: MaterialSurface.Glass25
+        radius: Theme.materialPanelRadius
+        primaryColor: control.primaryColor
+        color: control.menuColor
+        // Replace the covered app pixels with their blurred composite. Otherwise
+        // alpha in the window capture leaks the original sharp text back through.
+        backdropBaseColor: Theme.materialTint
+        tintOpacity: control.menuOpacity
+        blurRadius: control.menuBlurRadius
+        // The captured window already contains its eight accent gradients.
+        // A small coating avoids stacking another saturated palette on top.
+        intenseOpacity: Theme.materialIntenseOpacity * Math.max(0, Math.min(1, control.menuAccentStrength))
+        faintOpacity: Theme.materialFaintOpacity * Math.max(0, Math.min(1, control.menuAccentStrength))
+        backdropSource: control.backdropSource
+        backdropBackground: control.backdropBackground
     }
 
     Item {
@@ -797,6 +832,7 @@ Controls.Popup {
 
                     MenuItem {
                         id: probeMenuItem
+                        compact: control.compactItems
                         visible: !probeDelegate.divider
                         itemWidth: control.minimumItemWidth
                         state: control.itemState(probeDelegate.entry, probeDelegate.index, probeMenuItem)

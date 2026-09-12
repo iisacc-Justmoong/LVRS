@@ -68,3 +68,7 @@ LV.IconSegmentedControl {
     LV.IconButton { iconName: "projectStructure" }
 }
 ```
+
+## Shared motion
+
+The chosen icon button receives the same rebound and keyboard focus feedback as label segments. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

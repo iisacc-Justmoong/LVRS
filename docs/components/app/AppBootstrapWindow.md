@@ -46,3 +46,7 @@ LV.AppBootstrapWindow {
 - Keep `AppBootstrapWindow` only when an existing codebase benefits from the legacy type name or wants `visible: true` preconfigured in the QML root.
 - The inherited render path is the same runtime-direct `RenderQuality` policy as `ApplicationWindow`; automatic device-tier presets stay opt-in.
 - On desktop targets the inherited default profile still auto-attaches `RuntimeEvents`; on iOS/Android it stays off unless the app opts in.
+
+## Shared motion
+
+The compatibility root inherits ApplicationWindow's drawer and page motion. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

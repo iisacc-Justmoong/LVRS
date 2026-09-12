@@ -2168,7 +2168,8 @@ Item {
 
     function scheduleRebuildChunk(revision) {
         Qt.callLater(function() {
-            control.buildGeneratedItemChunk(revision)
+            if (control)
+                control.buildGeneratedItemChunk(revision)
         })
     }
 

@@ -3,10 +3,12 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
+    SpringBehavior on opacity { motionEnabled: control.motionEnabled; duration: Motion.hoverDuration; easingType: Easing.OutCubic }
 
     // axis: "horizontal" | "vertical"
     property string axis: "horizontal"
-    property color dividerColor: Theme.contextMenuDivider
+    property color dividerColor: Theme.menuDivider
     property real thickness: Theme.scaleMetric(1)
     property int crossPadding: Theme.scaleMetric(1)
     property int linePadding: Theme.gapNone

@@ -87,3 +87,7 @@ A. Yes. `cells` is preserved for compatibility, but `cellItems` is the preferred
 ## Figma Contract
 
 Node `203:3648` is `717 × 24`: three `234 × 24` cells separated by `7.5` spacing. Body text is fixed at 13/13. Mobile uses the same `717 × 24` row, `234` cell width, and `8` content spacing; Body remains `13px`.
+
+## Shared motion
+
+Each cell handles its own focus and state animation; the row preserves column geometry. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

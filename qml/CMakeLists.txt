@@ -5,9 +5,11 @@ set(LVRS_QML_FILES
     qml/Window.qml
     qml/WindowChromeInteraction.qml
     qml/Theme.qml
+    qml/Motion.qml
 )
 
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(qml/Motion.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
 list(APPEND LVRS_QML_FILES ${LVRS_COMPONENT_QML_FILES})
@@ -16,6 +18,7 @@ file(GLOB LVRS_FONT_RESOURCE_FILES
     CONFIGURE_DEPENDS
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_LIST_DIR}/../resources/font/*.ttf"
+    "${CMAKE_CURRENT_LIST_DIR}/../resources/font/*-OFL.txt"
 )
 list(SORT LVRS_FONT_RESOURCE_FILES)
 

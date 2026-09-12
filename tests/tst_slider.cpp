@@ -75,7 +75,7 @@ void SliderTests::ranges_resize_and_state_cycles()
 {
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
-    QScopedPointer<QObject> object(TestUtils::createFromQml(engine, "import LVRS as LV\nLV.Slider {}"));
+    QScopedPointer<QObject> object(TestUtils::createFromQml(engine, "import LVRS as LV\nLV.Slider { motionEnabled: false }"));
     QVERIFY(object);
     auto *slider = qobject_cast<QQuickItem *>(object.data());
     auto *fill = slider->findChild<QQuickItem *>("slider_fill");
@@ -222,7 +222,7 @@ void SliderTests::right_to_left_and_descending_ranges()
     QScopedPointer<QObject> object(TestUtils::createFromQml(engine, R"(
 import QtQuick
 import LVRS as LV
-LV.Slider { width: 480; from: 10; to: -10; value: 5; LayoutMirroring.enabled: true }
+LV.Slider { motionEnabled: false; width: 480; from: 10; to: -10; value: 5; LayoutMirroring.enabled: true }
 )"));
     QVERIFY(object);
     auto *slider = qobject_cast<QQuickItem *>(object.data());

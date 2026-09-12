@@ -3,6 +3,31 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
+    readonly property InteractionMotion contentMotion: InteractionMotion {
+        objectName: "interactionMotion"
+        target: label
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.enabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+    readonly property InteractionMotion visualMotion0: InteractionMotion {
+        target: comboBackground
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.enabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+
+    readonly property InteractionMotion visualMotion1: InteractionMotion {
+        target: indicator
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.enabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+
 
     enum Tone {
         Primary,
@@ -86,6 +111,7 @@ Item {
     }
 
     Rectangle {
+        id: comboBackground
         anchors.fill: parent
         radius: control.figmaComboCornerRadius
         color: control.resolvedBackgroundColor

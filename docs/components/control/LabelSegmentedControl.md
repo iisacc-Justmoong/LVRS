@@ -67,3 +67,7 @@ LV.LabelSegmentedControl {
     LV.LabelButton { text: "B" }
 }
 ```
+
+## Shared motion
+
+Child buttons respond individually; the row also animates explicit spacing changes. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

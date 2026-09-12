@@ -61,21 +61,24 @@ Item {
             || normalized === "iconmenubutton"
     }
 
+    function buttonInset(config, side) {
+        const fallback = side === "leftPadding" && isMenuType(config)
+            ? Theme.gap4 : stockButtonPadding
+        return configValue(config, side, configValue(config, "horizontalPadding", fallback))
+    }
+
     function stockButtonWidth(config) {
         if (!configValue(config, "visible", true))
             return 0
         const iconSize = configValue(config, "iconSize", Theme.iconSm)
-        const horizontalInset = configValue(
-            config,
-            "horizontalPadding",
-            control.stockButtonPadding)
+        const horizontalInsets = buttonInset(config, "leftPadding") + buttonInset(config, "rightPadding")
         if (!isMenuType(config))
-            return iconSize + (horizontalInset * 2)
+            return iconSize + horizontalInsets
         const contentSpacing = configValue(
             config,
             "spacing",
             control.stockMenuButtonSpacing)
-        return (iconSize * 2) + contentSpacing + (horizontalInset * 2)
+        return (iconSize * 2) + contentSpacing + horizontalInsets
     }
 
     function stockButtonHeightFor(config) {
@@ -120,6 +123,8 @@ Item {
         button.horizontalPadding = Qt.binding(function() {
             return control.configValue(config, "horizontalPadding", control.stockButtonPadding)
         })
+        button.leftPadding = Qt.binding(function() { return control.buttonInset(config, "leftPadding") })
+        button.rightPadding = Qt.binding(function() { return control.buttonInset(config, "rightPadding") })
         button.verticalPadding = Qt.binding(function() {
             return control.configValue(config, "verticalPadding", control.stockButtonPadding)
         })
@@ -130,12 +135,14 @@ Item {
                 control.isMenuType(config) ? control.stockMenuButtonSpacing : Theme.gapNone)
         })
         button.cornerRadius = Qt.binding(function() {
-            return control.configValue(config, "cornerRadius", Theme.radiusSm)
+            return control.configValue(config, "cornerRadius", Theme.radiusMd)
         })
         button.backgroundColor = configValue(config, "backgroundColor", "transparent")
         button.backgroundColorDisabled = configValue(config, "backgroundColorDisabled", "transparent")
         button.backgroundColorHover = configValue(config, "backgroundColorHover", Theme.surfaceAlt)
-        button.backgroundColorPressed = configValue(config, "backgroundColorPressed", Theme.accentBlueMuted)
+        button.backgroundColorPressed = Qt.binding(function() {
+            return control.configValue(config, "backgroundColorPressed", Theme.accentMuted)
+        })
     }
 
     function dispatchClicked(index) {

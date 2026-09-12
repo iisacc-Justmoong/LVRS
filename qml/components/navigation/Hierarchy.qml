@@ -146,8 +146,9 @@ Rectangle {
         rebound: Transition {
             NumberAnimation {
                 properties: "x,y"
-                duration: control.listReboundDuration
-                easing.type: Easing.OutCubic
+                duration: Motion.duration(control.listReboundDuration)
+                easing.type: Easing.OutBack
+                easing.overshoot: Motion.overshoot
             }
         }
 

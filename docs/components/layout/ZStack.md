@@ -65,3 +65,7 @@ A. Keep explicit anchors on child before stack auto-management applies, or use d
 - child alignment follows `alignmentName` token expectations,
 - externally anchored children remain unaffected when intended,
 - dynamic child insertion preserves expected stacking order.
+
+## Shared motion
+
+Layer opacity dissolves while alignment continues to be managed by anchors. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

@@ -2,8 +2,10 @@ import QtQuick
 
 Item {
     id: root
+    property bool motionEnabled: true
 
     // SwiftUI-like API: alignment defaults to center.
+    SpringBehavior on opacity { motionEnabled: root.motionEnabled; duration: Motion.hoverDuration; easingType: Easing.OutCubic }
     property int alignment: Qt.AlignCenter
     property bool __isZStack: true
     // alignmentName supports SwiftUI-style names:

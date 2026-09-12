@@ -13,6 +13,8 @@ AbstractButton {
     readonly property int directionDown: 3
 
     property int state: defaultState
+    // The two authored menu families share input/model behavior, not typography.
+    property bool compact: false
     property string label: "Label"
     QtObject {
         id: shortcutStore
@@ -29,14 +31,14 @@ AbstractButton {
     property bool expanded: false
     // Supports int enum or string: auto|right|left|up|down
     property var selectionDirection: "auto"
-    property int itemWidth: Theme.scaleMetric(161)
-    property int itemHeight: Theme.scaleMetric(24)
+    property int itemWidth: Theme.scaleMetric(compact ? 141 : 161)
+    property int itemHeight: Theme.scaleMetric(compact ? 18 : 24)
     property bool showIconSlot: true
     property int iconSize: Theme.iconSm
     property int chevronSize: Theme.scaleMetric(16)
     property string iconName: "procedure"
     property url iconSource: ""
-    property color iconPlaceholderColor: Theme.accentBlueMuted
+    property color iconPlaceholderColor: Theme.accentMuted
     property color chevronColor: Theme.descriptionColor
     readonly property real iconSupersampleScale: RenderQuality.enabled
         ? RenderQuality.effectiveSupersampleScaleValue
@@ -117,14 +119,14 @@ AbstractButton {
 
     tone: AbstractButton.Borderless
     horizontalPadding: Theme.gap4
-    verticalPadding: Theme.scaleMetric(3)
+    verticalPadding: compact ? Theme.gapNone : Theme.scaleMetric(3)
     spacing: Theme.gapNone
-    cornerRadius: Theme.radiusSm
+    cornerRadius: compact ? 0 : Theme.radiusSm
 
     implicitWidth: Math.max(itemWidth, contentItem.implicitWidth + leftPadding + rightPadding)
     implicitHeight: itemHeight
 
-    textColor: Theme.titleHeaderColor
+    textColor: compact ? Theme.textTokenBase : Theme.titleHeaderColor
     textColorDisabled: Theme.disabledColor
     backgroundColor: resolvedBackgroundColor
     backgroundColorHover: resolvedBackgroundColor
@@ -133,10 +135,10 @@ AbstractButton {
 
     TextMetrics {
         id: labelMetrics
-        font.family: Theme.fontBody
-        font.pixelSize: Theme.textBody
-        font.weight: Theme.textBodyWeight
-        font.styleName: Theme.textBodyStyleName
+        font.family: control.compact ? "Inter" : Theme.fontBody
+        font.pixelSize: control.compact ? Theme.scaleTextMetric(12) : Theme.textBody
+        font.weight: control.compact ? Font.Normal : Theme.textBodyWeight
+        font.styleName: control.compact ? "Regular" : Theme.textBodyStyleName
         font.letterSpacing: Theme.textBodyLetterSpacing
         text: control.label
     }
@@ -144,9 +146,9 @@ AbstractButton {
     TextMetrics {
         id: shortcutMetrics
         font.family: Theme.fontBody
-        font.pixelSize: Theme.textBody
-        font.weight: Theme.textBodyWeight
-        font.styleName: Theme.textBodyStyleName
+        font.pixelSize: control.compact ? Theme.textDescription : Theme.textBody
+        font.weight: control.compact ? Theme.textDescriptionWeight : Theme.textBodyWeight
+        font.styleName: control.compact ? Theme.textDescriptionStyleName : Theme.textBodyStyleName
         font.letterSpacing: Theme.textBodyLetterSpacing
         text: control.resolvedShortcutText
     }
@@ -232,7 +234,7 @@ AbstractButton {
                     radius: width * 0.5
                     color: control.iconPlaceholderColor
                     border.width: control.iconSize * (1.0 / 16.0)
-                    border.color: Theme.accentBlue
+                    border.color: Theme.accentDetail
                     anchors.centerIn: parent
                     antialiasing: true
                 }
@@ -241,7 +243,7 @@ AbstractButton {
                     width: control.iconSize * 0.25
                     height: control.iconSize * 0.25
                     radius: width * 0.5
-                    color: Theme.accentBlue
+                    color: Theme.accentDetail
                     anchors.centerIn: parent
                     antialiasing: true
                 }
@@ -254,13 +256,13 @@ AbstractButton {
             x: contentRoot.labelX
             y: (contentRoot.height - height) * 0.5
             width: contentRoot.resolvedLabelWidth
-            height: Theme.textBodyLineHeight
+            height: control.compact ? Theme.scaleRealMetric(15) : Theme.textBodyLineHeight
             style: body
+            font: labelMetrics.font
             text: control.label
-            color: control.isInactive ? Theme.titleHeaderColor
-                                      : (control.effectiveEnabled ? Theme.titleHeaderColor : Theme.disabledColor)
+            color: control.isInactive || control.effectiveEnabled ? control.textColor : control.textColorDisabled
             elide: Text.ElideRight
-            lineHeight: Theme.textBodyLineHeight
+            lineHeight: height
             lineHeightMode: Text.FixedHeight
         }
 
@@ -286,16 +288,17 @@ AbstractButton {
                 id: shortcutLabel
                 objectName: "menuItem_shortcutLabel"
                 style: body
+                font: shortcutMetrics.font
                 visible: control.keyVisible && contentRoot.resolvedShortcutWidth > 0
                 x: 0
                 y: (parent.height - height) * 0.5
                 width: contentRoot.resolvedShortcutWidth
-                height: Theme.textBodyLineHeight
+                height: control.compact ? Theme.textDescriptionLineHeight : Theme.textBodyLineHeight
                 text: control.resolvedShortcutText
                 color: control.isInactive ? Theme.descriptionColor
                                           : (control.effectiveEnabled ? Theme.descriptionColor : Theme.disabledColor)
                 elide: Text.ElideRight
-                lineHeight: Theme.textBodyLineHeight
+                lineHeight: height
                 lineHeightMode: Text.FixedHeight
             }
 
@@ -314,6 +317,7 @@ AbstractButton {
                 smooth: true
                 mipmap: RenderQuality.mipmapEnabled
                 rotation: control.resolvedChevronRotation
+                SpringBehavior on rotation { motionEnabled: control.motionEnabled }
                 transformOrigin: Item.Center
                 opacity: control.isInactive ? 1.0 : (control.effectiveEnabled ? 1.0 : 0.45)
             }

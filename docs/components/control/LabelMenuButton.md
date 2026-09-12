@@ -61,3 +61,7 @@ LV.LabelMenuButton {
     }
 }
 ```
+
+## Shared motion
+
+The trigger rebounds without delaying its clicked or injected method callback. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

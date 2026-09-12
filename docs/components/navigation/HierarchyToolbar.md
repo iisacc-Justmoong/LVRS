@@ -144,3 +144,7 @@ change or schedule another event-loop pass. In Qt QML, reassigning a numeric
 `var` may notify even when the value is equal; guard that assignment to keep
 empty hierarchy panels responsive. The `hierarchy_toolbar_empty_state_does_not_reschedule`
 case in `LVRSTests_import_api` checks both notifications and the settled queue.
+
+## Shared motion
+
+Each ToolbarButton responds locally without resizing or shifting the toolbar. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

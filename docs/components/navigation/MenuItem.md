@@ -81,3 +81,9 @@ LV.MenuItem {
     state: selectedState
 }
 ```
+
+## Shared motion
+
+The fill blends, the row rebounds and disclosure rotation follows expansion. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+
+`compact` defaults false. ContextMenuItem selects the actual compact Figma family: 18px row, radius 0, Inter Regular 12 label and Pretendard SemiBold 12 shortcut. The regular default remains 24px with Pretendard Medium 13. Width measurement uses the same font as the rendered label and shortcut.

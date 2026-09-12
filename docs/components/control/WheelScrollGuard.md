@@ -61,3 +61,7 @@ A. Verify target exposes valid `contentHeight`, `height`, and currently has scro
 - pointer-inside detection maps correctly under nested transforms,
 - delta conversion behaves consistently across mouse and touchpad,
 - bounded scrolling prevents overshoot past content limits.
+
+## Shared motion
+
+Wheel routing is synchronous; no animation delays the event or changes its recipient. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

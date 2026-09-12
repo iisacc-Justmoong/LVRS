@@ -1,0 +1,261 @@
+{
+  "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
+  "capturedOn": "2026-09-12",
+  "tokens": [
+    {
+      "id": "VariableID:44:458",
+      "name": "TitleHeader",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.8999999761581421
+      }
+    },
+    {
+      "id": "VariableID:44:459",
+      "name": "Body",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.800000011920929
+      }
+    },
+    {
+      "id": "VariableID:44:460",
+      "name": "Description",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.6000000238418579
+      }
+    },
+    {
+      "id": "VariableID:44:461",
+      "name": "Caption",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.5
+      }
+    },
+    {
+      "id": "VariableID:44:462",
+      "name": "Disabled",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.30000001192092896
+      }
+    },
+    {
+      "id": "VariableID:44:463",
+      "name": "accent",
+      "value": {
+        "r": 0.03921568766236305,
+        "g": 0.5176470875740051,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:464",
+      "name": "success",
+      "value": {
+        "r": 0.19607843458652496,
+        "g": 0.843137264251709,
+        "b": 0.29411765933036804,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:465",
+      "name": "warning",
+      "value": {
+        "r": 1,
+        "g": 0.8392156958580017,
+        "b": 0.03921568766236305,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:466",
+      "name": "danger",
+      "value": {
+        "r": 1,
+        "g": 0.2705882489681244,
+        "b": 0.22745098173618317,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:467",
+      "name": "panelBackground01",
+      "value": {
+        "r": 0.04892867058515549,
+        "g": 0.04892867058515549,
+        "b": 0.05038686841726303,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:468",
+      "name": "panelBackground02",
+      "value": {
+        "r": 0.05507083609700203,
+        "g": 0.05517596751451492,
+        "b": 0.05570162087678909,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:469",
+      "name": "panelBackground03",
+      "value": {
+        "r": 0.08394163101911545,
+        "g": 0.08394163101911545,
+        "b": 0.08631309866905212,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:470",
+      "name": "panelBackground04",
+      "value": {
+        "r": 0.09516431391239166,
+        "g": 0.09655113518238068,
+        "b": 0.09793794900178909,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9618",
+      "name": "panelBackground05",
+      "value": {
+        "r": 0.11397916078567505,
+        "g": 0.11664287745952606,
+        "b": 0.11664287745952606,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9620",
+      "name": "panelBackground06",
+      "value": {
+        "r": 0.12302529811859131,
+        "g": 0.12528030574321747,
+        "b": 0.12753531336784363,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9621",
+      "name": "panelBackground07",
+      "value": {
+        "r": 0.1411764770746231,
+        "g": 0.1411764770746231,
+        "b": 0.1411764770746231,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9622",
+      "name": "panelBackground08",
+      "value": {
+        "r": 0.13709451258182526,
+        "g": 0.14029954373836517,
+        "b": 0.14190204441547394,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9623",
+      "name": "panelBackground09",
+      "value": {
+        "r": 0.14820532500743866,
+        "g": 0.15256911516189575,
+        "b": 0.15256911516189575,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9624",
+      "name": "panelBackground10",
+      "value": {
+        "r": 0.1555851548910141,
+        "g": 0.15707255899906158,
+        "b": 0.15855994820594788,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9625",
+      "name": "panelBackground11",
+      "value": {
+        "r": 0.17537428438663483,
+        "g": 0.1819191724061966,
+        "b": 0.18410080671310425,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9626",
+      "name": "panelBackground12",
+      "value": {
+        "r": 0.19355684518814087,
+        "g": 0.1978072077035904,
+        "b": 0.19993239641189575,
+        "a": 1
+      }
+    }
+  ],
+  "geometry": [
+    {
+      "type": "HelpButton",
+      "node": "44:819",
+      "width": 21,
+      "height": 21,
+      "radius": 100
+    },
+    {
+      "type": "ColorPickerButton",
+      "node": "892:2",
+      "width": 28,
+      "height": 28,
+      "radius": 4
+    },
+    {
+      "type": "ContextMenuItem",
+      "node": "331:9282",
+      "width": 141,
+      "height": 18,
+      "radius": 0
+    },
+    {
+      "type": "ContextMenuDivider",
+      "node": "331:9283",
+      "width": 145,
+      "height": 3
+    },
+    {
+      "type": "ListFooter",
+      "node": "209:9199",
+      "width": 88,
+      "height": 26
+    }
+  ],
+  "iconAliases": {
+    "nodesTest": "nodestest",
+    "wechat": "weChat",
+    " volume": "volume"
+  },
+  "assets": {
+    "iconset/weChat.svg": "28d67918d5c25e4b8a311ae57b194a7f632dac02224491453ffabadea5b0a86e",
+    "iconset/nodestest.svg": "3d8b7b87b7836e804e855e13f4000a9a075c6a46e65b5007d9fe9543f93c0cd7",
+    "images/color-picker-hue-ring.png": "75e39c9111d53f25e87fb1bd44eb7048074721bcb22a2d337d4e11927c94c427"
+  }
+}

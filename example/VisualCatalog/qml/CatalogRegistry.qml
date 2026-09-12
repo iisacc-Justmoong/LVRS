@@ -1,4 +1,5 @@
 import QtQuick
+import "CatalogMotion.js" as CatalogMotion
 
 QtObject {
     id: registry
@@ -45,7 +46,7 @@ QtObject {
         previewId: "overview",
         roleLabel: "Overview",
         iconGlyph: "O",
-        summary: "LVRS public QML types are organized into a left-side hierarchy so the catalog can be used as a navigable visual reference instead of a tabbed demo.",
+        summary: "Browse every shipped QML component and supporting type. Each page pairs a live playground with a specific interaction recipe, motion response, usage and source reference.",
         notes: [
             "Use the sidebar to browse by shell, layout, control, navigation, and surface domains.",
             "Each leaf page pairs a live preview with source path, usage snippet, and related types.",
@@ -54,6 +55,26 @@ QtObject {
     })
 
     readonly property var sections: [
+        section({
+            key: "motion-and-support", label: "Motion & supporting types", iconGlyph: "M",
+            summary: "Shared motion primitives and the supporting types used inside LVRS controls.",
+            items: [
+                component({"key": "motion", "label": "Motion", "location": "qml/Motion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Shared timing, speed and reduced-motion policy for the complete LVRS component family.", "usage": "Component.onCompleted: {\n    LV.Motion.speed = 1\n    LV.Motion.reducedMotion = false\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "theme", "label": "Theme", "location": "qml/Theme.qml", "docPath": "docs/motion.md", "previewId": "application-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Label { text: \"Shared accent\"; color: LV.Theme.primary }", "related": ["motion", "abstract-button"]}),
+                component({"key": "window-chrome-interaction", "label": "WindowChromeInteraction", "location": "qml/WindowChromeInteraction.qml", "docPath": "docs/motion.md", "previewId": "window-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.WindowChromeInteraction {\n    anchors.fill: parent\n    targetWindow: toolWindow\n    moveHandleHeight: 28\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "button-method-registry", "label": "ButtonMethodRegistry", "location": "qml/components/control/buttons/ButtonMethodRegistry.qml", "docPath": "docs/motion.md", "previewId": "abstract-button", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.LabelButton {\n    text: \"Action\"\n    method: function(event) { console.log(event.trigger) }\n}\n// AbstractButton owns its method registry.", "related": ["motion", "abstract-button"]}),
+                component({"key": "focus-ring", "label": "FocusRing", "location": "qml/components/control/util/FocusRing.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Noninteractive visual outline for keyboard and text-entry focus.", "usage": "LV.FocusRing { anchors.fill: parent; active: field.activeFocus }", "related": ["motion", "abstract-button"]}),
+                component({"key": "interaction-motion", "label": "InteractionMotion", "location": "qml/components/control/util/InteractionMotion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Bounded squash and rebound transform for pointer, keyboard and touch feedback.", "usage": "transform: LV.InteractionMotion {\n    target: tile\n    pressed: pointer.pressed\n    hovered: pointer.containsMouse\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "spring-behavior", "label": "SpringBehavior", "location": "qml/components/control/util/SpringBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable interruptible elastic Behavior for a numeric presentation property.", "usage": "rotation: expanded ? 8 : 0\nLV.SpringBehavior on rotation { duration: LV.Motion.releaseDuration }", "related": ["motion", "abstract-button"]}),
+                component({"key": "state-color-behavior", "label": "StateColorBehavior", "location": "qml/components/control/util/StateColorBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable short color transition for rendered state changes.", "usage": "color: selected ? LV.Theme.primary : LV.Theme.surfaceAlt\nLV.StateColorBehavior on color {}", "related": ["motion", "abstract-button"]}),
+                component({"key": "list-item-composite", "label": "ListItemComposite", "location": "qml/components/navigation/ListItemComposite.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Task\n    label: \"Publish release\"\n}\n// ListItem owns the composite renderer.", "related": ["motion", "abstract-button"]}),
+                component({"key": "list-item-selector", "label": "ListItemSelector", "location": "qml/components/navigation/ListItemSelector.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Select\n    selector: ({ items: [\"Draft\", \"Published\"] })\n}\n// The row owns selector state and its popup.", "related": ["motion", "abstract-button"]}),
+                component({"key": "page-router-transition-driver", "label": "PageRouterTransitionDriver", "location": "qml/components/navigation/PageRouterTransitionDriver.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageRouter {\n    id: router\n    interactiveTransitionSettleDuration: 360\n}\n// The router creates and owns its transition driver.", "related": ["motion", "abstract-button"]}),
+                component({"key": "page-transition-controller", "label": "PageTransitionController", "location": "qml/components/navigation/PageTransitionController.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageTransitionController {\n    router: pageRouter\n}\n// begin(), update(), finish() expose the router gesture contract.", "related": ["motion", "abstract-button"]}),
+                component({"key": "card-image-content", "label": "CardImageContent", "location": "qml/components/surfaces/CardImageContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.File\n    title: \"Image.png\"\n    previewSource: imageUrl\n}\n// Card owns its private image renderer.", "related": ["motion", "abstract-button"]}),
+                component({"key": "card-information-content", "label": "CardInformationContent", "location": "qml/components/surfaces/CardInformationContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.Project\n    title: \"Studio\"\n    progress: 0.6\n}\n// Card owns its private information renderer.", "related": ["motion", "abstract-button"]})
+            ]
+        }),
         section({
             key: "application",
             label: "Application",
@@ -82,8 +103,8 @@ QtObject {
                     docPath: "docs/components/app/ApplicationWindow.md",
                     previewId: "application-shell",
                     roleLabel: "Bootstrap root",
-                    summary: "Adaptive LVRS root shell that combines window policy, bootstrap defaults, navigation scaffold, runtime wiring, and page-stack hosting.",
-                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
+                    summary: "Adaptive LVRS root shell with an app primary color, window policy, bootstrap defaults, navigation scaffold, runtime wiring, and page-stack hosting.",
+                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    primaryColor: \"#A571E6\"\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
                     related: ["app-shell", "page-router", "navigator", "window-safe-area-observer"]
                 }),
                 component({
@@ -195,6 +216,8 @@ QtObject {
                     iconGlyph: "B",
                     summary: "Action buttons, menu triggers, segmented containers, and compact selectors.",
                     items: [
+                        component({"key": "help-button", "label": "HelpButton", "location": "qml/components/control/buttons/HelpButton.qml", "docPath": "docs/components/control/HelpButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Circular help trigger with the Figma question-mark text and 21px footprint.", "usage": "LV.HelpButton { onClicked: showHelp() }", "related": ["abstract-button", "motion"]}),
+                        component({"key": "color-picker-button", "label": "ColorPickerButton", "location": "qml/components/control/buttons/ColorPickerButton.qml", "docPath": "docs/components/control/ColorPickerButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Color trigger in three sizes, with the exported hue ring and current-color well.", "usage": "LV.ColorPickerButton { currentColor: \"#7A5AF8\"; buttonSize: LV.ColorPickerButton.Medium }", "related": ["abstract-button", "motion"]}),
                         component({
                             key: "abstract-button",
                             label: "AbstractButton",
@@ -351,10 +374,10 @@ QtObject {
                             label: "ToggleSwitch",
                             location: "qml/components/control/check/ToggleSwitch.qml",
                             docPath: "docs/components/control/ToggleSwitch.md",
-                            previewId: "selection-control",
+                            previewId: "toggle-switch",
                             roleLabel: "Binary switch",
-                            summary: "Figma-aligned 38 x 22 two-state switch with an 18px knob, 0/4/4 shadow, and shared desktop/mobile metrics.",
-                            usage: "LV.ToggleSwitch {\n    checked: true\n}",
+                            summary: "A compact switch whose knob squashes on press, stretches in motion, and rebounds into place. Shared desktop/mobile geometry.",
+                            usage: "LV.ToggleSwitch {\n    checked: true\n    transitionDuration: 320\n}",
                             related: ["check-box", "radio-button"]
                         })
                     ]
@@ -698,6 +721,7 @@ QtObject {
                             key: "list-footer",
                             label: "ListFooter",
                             location: "qml/components/navigation/ListFooter.qml",
+                            docPath: "docs/components/navigation/ListFooter.md",
                             previewId: "list-navigation",
                             roleLabel: "List footer",
                             summary: "Footer strip with up to three configurable icon or menu slots.",
@@ -712,6 +736,9 @@ QtObject {
                     iconGlyph: "M",
                     summary: "Context menu surface and row primitives for item menus and submenu affordances.",
                     items: [
+                        component({"key": "context-menu-item", "label": "ContextMenuItem", "location": "qml/components/navigation/ContextMenuItem.qml", "docPath": "docs/components/navigation/ContextMenuItem.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Compact 18px row with Inter Regular 12 and Pretendard SemiBold 12 shortcut.", "usage": "LV.ContextMenuItem { label: \"Label\"; key: \"Key\" }", "related": ["context-menu", "motion"]}),
+                        component({"key": "context-menu-divider", "label": "ContextMenuDivider", "location": "qml/components/navigation/ContextMenuDivider.qml", "docPath": "docs/components/navigation/ContextMenuDivider.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "145 by 3px separator with a 4px inset and 30% white line.", "usage": "LV.ContextMenuDivider {}", "related": ["context-menu", "motion"]}),
+                        component({"key": "menu", "label": "Menu", "location": "qml/components/navigation/Menu.qml", "docPath": "docs/components/navigation/Menu.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Regular menu surface with 24px rows, 4px vertical padding and the 12% / 64px frosted window material.", "usage": "LV.Menu { items: [{ label: \"Open\", key: \"⌘O\" }] }", "related": ["context-menu", "motion"]}),
                         component({
                             key: "context-menu",
                             label: "ContextMenu",
@@ -755,6 +782,42 @@ QtObject {
             iconGlyph: "F",
             summary: "Cards and overlays that frame content, alerts, and modal dialogs.",
             items: [
+                component({
+                    key: "window-material", label: "WindowMaterial",
+                    location: "qml/components/surfaces/WindowMaterial.qml",
+                    docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
+                    roleLabel: "Application background",
+                    summary: "Uniform #0B0B0B fill at 50% without gradients. ApplicationWindow retains its native frosted backdrop.",
+                    usage: "LV.ApplicationWindow { primaryColor: \"#A571E6\" }",
+                    related: ["panel-material", "popover", "tooltip"]
+                }),
+                component({
+                    key: "panel-material", label: "PanelMaterial",
+                    location: "qml/components/surfaces/PanelMaterial.qml",
+                    docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
+                    roleLabel: "Transient surface",
+                    summary: "Glass 25 combines a subtle app-accent radial gradient with a 25% neutral tint and 16px backdrop blur.",
+                    usage: "LV.PanelMaterial { anchors.fill: parent; backdropSource: siblingContent }",
+                    related: ["window-material", "popover", "tooltip"]
+                }),
+                component({
+                    key: "material-surface", label: "MaterialSurface",
+                    location: "qml/components/surfaces/MaterialSurface.qml",
+                    docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
+                    roleLabel: "Shared material renderer",
+                    summary: "Configurable density, Primary color, safe backdrop capture and an optional custom silhouette.",
+                    usage: "LV.MaterialSurface { density: LV.MaterialSurface.Glass25 }",
+                    related: ["window-material", "panel-material"]
+                }),
+                component({
+                    key: "popover", label: "Popover",
+                    location: "qml/components/surfaces/Popover.qml",
+                    docPath: "docs/components/surfaces/Popover.md", previewId: "material-gallery",
+                    roleLabel: "Transient content popup",
+                    summary: "Composable Popup with Glass 25, app-accent inheritance and outside-click / Escape dismissal.",
+                    usage: "LV.Popover { width: 300; height: 180; contentItem: SettingsView {} }",
+                    related: ["panel-material", "tooltip", "context-menu"]
+                }),
                 component({
                     key: "app-card",
                     label: "AppCard",
@@ -807,7 +870,29 @@ QtObject {
                     roleLabel: "Modal dialog",
                     summary: "Apple-style centered modal with icon, title, description, and up to three actions.",
                     usage: "LV.Modal {\n    open: true\n    title: \"Continue?\"\n    description: \"Confirm the action.\"\n    primaryText: \"Continue\"\n}",
-                    related: ["alert", "alert-button"]
+                    related: ["alert", "alert-button", "sheet"]
+                }),
+                component({
+                    key: "sheet",
+                    label: "Sheet",
+                    location: "qml/components/surfaces/Sheet.qml",
+                    docPath: "docs/components/surfaces/Sheet.md",
+                    previewId: "sheet-gallery",
+                    roleLabel: "Adaptive content sheet",
+                    summary: "Mobile bottom sheet and desktop modal with device-radius input, reusable Component or inline content, and fixed-header scrolling.",
+                    usage: "LV.Sheet {\n    id: sheet\n    title: \"Export image\"\n    cornerRadius: deviceCornerRadius\n    contentComponent: exportView\n}\n// Open with sheet.open(), close with sheet.close().",
+                    related: ["modal", "color-picker", "label-button", "tooltip"]
+                }),
+                component({
+                    key: "tooltip",
+                    label: "Tooltip",
+                    location: "qml/components/surfaces/Tooltip.qml",
+                    docPath: "docs/components/surfaces/Tooltip.md",
+                    previewId: "tooltip-gallery",
+                    roleLabel: "Anchored content bubble",
+                    summary: "A speech bubble accepting any Component or inline view. Its tail tracks the origin while the body chooses available space inside the display.",
+                    usage: "LV.Tooltip {\n    target: helpButton\n    contentComponent: helpView\n}\n// Manual origin: tooltip.openAt(canvas, Qt.point(x, y), previewView)",
+                    related: ["sheet", "label", "label-button"]
                 })
             ]
         })
@@ -816,6 +901,28 @@ QtObject {
     readonly property int componentCount: countComponents([overview].concat(sections))
     readonly property int totalEntryCount: countEntries([overview].concat(sections))
     readonly property var hierarchyModel: buildHierarchy([overview].concat(sections))
+
+    function motionGuide(key) { return CatalogMotion.guide(key) }
+
+    function allComponents() {
+        const result = []
+        function visit(records) {
+            for (let i = 0; i < records.length; i++) {
+                if (records[i].kind === "component") result.push(records[i])
+                visit(childRecords(records[i]))
+            }
+        }
+        visit(sections)
+        return result
+    }
+
+    function filteredHierarchy(query) {
+        const term = String(query || "").trim().toLowerCase()
+        if (!term.length) return hierarchyModel
+        return allComponents().filter(function(record) {
+            return (record.label + " " + record.summary + " " + record.location).toLowerCase().indexOf(term) >= 0
+        }).map(function(record) { return buildHierarchyNode(record, 0) })
+    }
 
     function childRecords(record) {
         const children = []

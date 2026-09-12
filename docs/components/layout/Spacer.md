@@ -53,3 +53,7 @@ A. Yes, but expansion behavior is undefined unless parent exposes compatible lay
 - verify axis inference (`horizontal`/`vertical`) on runtime parent type,
 - verify `minLength` is reflected in layout minimum size,
 - verify no unexpected anchor conflicts in overlay contexts.
+
+## Shared motion
+
+The minimum length settles elastically along the stack axis; it has no clickable surface. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

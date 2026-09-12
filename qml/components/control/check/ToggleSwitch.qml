@@ -5,6 +5,7 @@ import LVRS 1.0
 
 Controls.Switch {
     id: control
+    property bool motionEnabled: true
 
     text: ""
     readonly property int shapeRoundRect: 0
@@ -67,8 +68,8 @@ Controls.Switch {
     }
 
     spacing: text.length > 0 ? Theme.gap8 : Theme.gapNone
-    leftPadding: 0
-    rightPadding: 0
+    leftPadding: text.length > 0 && !mirrored ? trackWidth + spacing : 0
+    rightPadding: text.length > 0 && mirrored ? trackWidth + spacing : 0
     topPadding: 0
     bottomPadding: 0
 
@@ -77,6 +78,8 @@ Controls.Switch {
     implicitHeight: Math.max(indicator.implicitHeight, contentItem.implicitHeight)
 
     indicator: Item {
+        x: control.mirrored ? control.width - width : 0
+        y: (control.height - height) / 2
         objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
         implicitWidth: control.trackWidth
         implicitHeight: control.trackHeight
@@ -100,6 +103,7 @@ Controls.Switch {
 
         Rectangle {
             id: track
+            StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
             objectName: control.objectName.length > 0 ? control.objectName + "_track" : ""
             anchors.fill: parent
             radius: control.resolvedTrackRadius(width, height)
@@ -110,10 +114,19 @@ Controls.Switch {
         Rectangle {
             id: knob
             objectName: control.objectName.length > 0 ? control.objectName + "_knob" : ""
+            readonly property bool motionEnabled: control.motionEnabled && Motion.animated && control.enabled && control.transitionDuration > 0
+            property real pressProgress: motionEnabled && control.down ? 1.0 : 0.0
+            readonly property real travelProgress: control.knobXOn > control.knobXOff
+                ? (x - control.knobXOff) / (control.knobXOn - control.knobXOff)
+                : 0.0
+            readonly property real travelStretch: motionEnabled
+                ? Math.sin(Math.PI * Math.max(0.0, Math.min(1.0, travelProgress)))
+                : 0.0
+
             width: control.knobSize
             height: control.knobSize
             y: (track.height - height) / 2
-            x: control.checked ? control.knobXOn : control.knobXOff
+            x: control.knobXOff + control.visualPosition * (control.knobXOn - control.knobXOff)
             radius: Math.max(0,
                              Math.min(control.knobCornerRadius,
                                       Math.min(width, height) * 0.5))
@@ -121,12 +134,25 @@ Controls.Switch {
             opacity: control.enabled ? 1.0 : 0.55
             antialiasing: true
 
-            Behavior on x {
-                NumberAnimation {
-                    duration: control.transitionDuration
-                    easing.type: Easing.OutCubic
-                }
+            // Deform around the center without changing the authored layout or hit target.
+            transform: Scale {
+                origin.x: knob.width / 2
+                origin.y: knob.height / 2
+                xScale: 1.0 + 0.12 * knob.pressProgress + 0.12 * knob.travelStretch
+                yScale: 1.0 - 0.12 * knob.pressProgress - 0.08 * knob.travelStretch
             }
+
+            SpringBehavior on pressProgress {
+                motionEnabled: knob.motionEnabled
+                duration: targetValue > 0.5 ? control.transitionDuration / 4 : control.transitionDuration
+                easingType: targetValue > 0.5 ? Easing.OutCubic : Easing.OutBack
+            }
+            SpringBehavior on x {
+                // Native drag mapping stays direct; release settles to the endpoint.
+                motionEnabled: knob.motionEnabled && !control.down
+                duration: control.transitionDuration
+            }
+
         }
     }
 
@@ -145,3 +171,4 @@ Controls.Switch {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.ToggleSwitch { checked: true }
+// LV.ToggleSwitch { transitionDuration: 0 } // Immediate feedback.

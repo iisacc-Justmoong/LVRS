@@ -45,3 +45,7 @@ LV.AppCard {
     LV.Label { text: "No incidents" }
 }
 ```
+
+## Shared motion
+
+The card color blends while each child owns its interaction; this container has no implicit click action. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

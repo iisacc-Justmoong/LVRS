@@ -35,7 +35,7 @@ Item {
     property int columnResizeHandleWidth: Theme.gap6
     property int rowResizeHandleHeight: Theme.gap6
     property color resizeHandleColor: "transparent"
-    property color resizeHandleHoverColor: Theme.accentBlueMuted
+    property color resizeHandleHoverColor: Theme.accentMuted
     readonly property int resizingColumnIndex: tableModel.resizingColumnIndex
     readonly property int resizingRowIndex: tableModel.resizingRowIndex
     property color backgroundColor: "#1e1e1e"

@@ -37,6 +37,7 @@ AbstractButton {
     backgroundColorDisabled: Theme.panelBackground09
 
     background: Rectangle {
+        StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
         radius: control.resolvedCornerRadius
         antialiasing: true
         color: !control.effectiveEnabled ? control.backgroundColorDisabled

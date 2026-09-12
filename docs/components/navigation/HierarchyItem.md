@@ -224,3 +224,7 @@ LV.HierarchyItem {
     }
 }
 ```
+
+## Shared motion
+
+The row compresses subtly and its chevron rotates into the new expanded direction. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

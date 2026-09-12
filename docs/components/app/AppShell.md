@@ -57,3 +57,7 @@ If project policy deprecates `AppShell`, keep a compatibility window with:
 1. codemod-assisted type rename,
 2. release-note mapping table,
 3. temporary lint rule warning on new `AppShell` usage.
+
+## Shared motion
+
+This compatibility wrapper delegates window and navigation feedback to ApplicationWindow. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

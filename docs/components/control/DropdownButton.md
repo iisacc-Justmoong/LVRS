@@ -54,3 +54,7 @@ LV.DropdownButton { iconMode: true; iconName: "projectStructure" }
 `menu` belongs to the consuming application. Existing `LabelMenuButton` and
 `IconMenuButton` imports inherit the updated geometry automatically.
 See [PushButton validation](PushButton.md#validation) for shared verification.
+
+## Shared motion
+
+The complete trigger rebounds as one surface; any ContextMenu animates independently. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

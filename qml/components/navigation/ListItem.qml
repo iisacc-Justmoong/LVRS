@@ -299,7 +299,7 @@ AbstractButton {
 
     backgroundColor: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
     backgroundColorHover: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
-    backgroundColorPressed: control.selected ? control.selectedBackgroundColor : Theme.accentBlueMuted
+    backgroundColorPressed: control.selected ? control.selectedBackgroundColor : Theme.accentMuted
     backgroundColorDisabled: control.listBackgroundColor
     textColor: Theme.bodyColor
     textColorDisabled: Theme.disabledColor

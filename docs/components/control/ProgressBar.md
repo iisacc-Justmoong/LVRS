@@ -115,3 +115,7 @@ LV.ProgressBar {
 ```
 
 This fills the segment from 50% to 75% of the track. If `currentValue` is lower than `startValue`, the component still renders the segment between the two values.
+
+## Shared motion
+
+The displayed fill settles elastically; the numeric progress remains current and the rendered fill stays inside its track. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

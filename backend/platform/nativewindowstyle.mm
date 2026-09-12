@@ -1,17 +1,67 @@
 #include "backend/platform/nativewindowstyle.h"
 
 #include <QGuiApplication>
+#include <QQuickWindow>
+#include <QSurfaceFormat>
 #include <QWindow>
 
 #import <AppKit/AppKit.h>
 
+// The effect is a sibling below Qt's render view, never above its controls.
+// Returning nil keeps window movement, resize handles and input owned by Qt.
+@interface LVRSWindowBackdropView : NSVisualEffectView
+@property(strong) NSColor *originalBackgroundColor;
+@property BOOL originalOpaque;
+@end
+
+@implementation LVRSWindowBackdropView
+- (NSView *)hitTest:(NSPoint)point
+{
+    Q_UNUSED(point);
+    return nil;
+}
+#if !__has_feature(objc_arc)
+- (void)dealloc
+{
+    [_originalBackgroundColor release];
+    [super dealloc];
+}
+#endif
+@end
+
 namespace {
+void enableWindowAlphaBuffers()
+{
+    // Qt requires this before the first Quick window. It also permits toggling
+    // the native material without destroying an existing render surface.
+    QQuickWindow::setDefaultAlphaBuffer(true);
+}
+Q_COREAPP_STARTUP_FUNCTION(enableWindowAlphaBuffers)
+
+LVRSWindowBackdropView *backdropForView(NSView *view)
+{
+    for (NSView *sibling in view.superview.subviews) {
+        if ([sibling isKindOfClass:[LVRSWindowBackdropView class]])
+            return static_cast<LVRSWindowBackdropView *>(sibling);
+    }
+    return nil;
+}
+
 NSColor *toNativeColor(const QColor &color)
 {
     return [NSColor colorWithSRGBRed:color.redF()
                                green:color.greenF()
                                 blue:color.blueF()
                                alpha:color.alphaF()];
+}
+
+void applyNativeBackground(NSView *view, const QColor &color)
+{
+    LVRSWindowBackdropView *backdrop = backdropForView(view);
+    if (backdrop)
+        backdrop.originalBackgroundColor = toNativeColor(color);
+    view.window.backgroundColor = backdrop ? NSColor.clearColor : toNativeColor(color);
+    view.window.opaque = !backdrop && color.alphaF() >= 1.0;
 }
 }
 
@@ -27,6 +77,56 @@ bool NativeWindowStyle::titleBarColorSupported() const
 
 bool NativeWindowStyle::solidChromeSupported() const
 {
+    return true;
+}
+
+bool NativeWindowStyle::backgroundBlurSupported() const
+{
+    return qGuiApp && QGuiApplication::platformName() == QStringLiteral("cocoa");
+}
+
+bool NativeWindowStyle::applyBackgroundBlur(QObject *windowObject, bool enabled)
+{
+    auto *window = qobject_cast<QWindow *>(windowObject);
+    if (!window || !backgroundBlurSupported())
+        return false;
+    if (!window->handle()) {
+        QSurfaceFormat format = window->format();
+        format.setAlphaBufferSize(8);
+        window->setFormat(format);
+        window->create();
+    }
+    NSView *view = reinterpret_cast<NSView *>(window->winId());
+    if (!view || !view.window || !view.superview)
+        return false;
+    LVRSWindowBackdropView *backdrop = backdropForView(view);
+    if (!enabled) {
+        if (backdrop) {
+            view.window.backgroundColor = backdrop.originalBackgroundColor;
+            view.window.opaque = backdrop.originalOpaque;
+            [backdrop removeFromSuperview];
+        }
+        return true;
+    }
+    if (!backdrop) {
+        backdrop = [[LVRSWindowBackdropView alloc] initWithFrame:view.frame];
+        backdrop.identifier = @"LVRSWindowBackdrop";
+        backdrop.originalBackgroundColor = view.window.backgroundColor;
+        backdrop.originalOpaque = view.window.opaque;
+        backdrop.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+        [view.superview addSubview:backdrop positioned:NSWindowBelow relativeTo:view];
+#if !__has_feature(objc_arc)
+        [backdrop release];
+#endif
+    }
+    backdrop.frame = view.frame;
+    // AppKit's thick, frosted window material uses the WindowServer backdrop.
+    // Its kernel is system controlled; no private blur-radius API is used.
+    backdrop.material = NSVisualEffectMaterialUnderWindowBackground;
+    backdrop.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+    backdrop.state = NSVisualEffectStateActive;
+    view.window.backgroundColor = NSColor.clearColor;
+    view.window.opaque = NO;
     return true;
 }
 
@@ -57,7 +157,7 @@ bool NativeWindowStyle::applyTitleBarColor(QObject *windowObject, const QColor &
         return false;
 
     const bool isDark = darkAppearance;
-    [nativeWindow setBackgroundColor:toNativeColor(color)];
+    applyNativeBackground(view, color);
     [nativeWindow setTitlebarAppearsTransparent:YES];
 
     if (@available(macOS 11.0, *)) {
@@ -99,8 +199,7 @@ bool NativeWindowStyle::applySolidChrome(QObject *windowObject, const QColor &co
         return false;
 
     const bool isDark = darkAppearance;
-    [nativeWindow setBackgroundColor:toNativeColor(color)];
-    [nativeWindow setOpaque:YES];
+    applyNativeBackground(view, color);
     [nativeWindow setTitlebarAppearsTransparent:YES];
     [nativeWindow setTitleVisibility:NSWindowTitleHidden];
     [nativeWindow setMovableByWindowBackground:YES];

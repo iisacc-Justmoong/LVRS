@@ -3,6 +3,7 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
 
     // Style constants for API usage: LV.Label { style: body }
     readonly property int title: 0
@@ -14,6 +15,7 @@ Item {
     readonly property int caption: 6
     readonly property int disabled: 7
 
+    SpringBehavior on opacity { motionEnabled: control.motionEnabled; duration: Motion.hoverDuration; easingType: Easing.OutCubic }
     property int style: description
     property bool sizeToContentHeight: false
 

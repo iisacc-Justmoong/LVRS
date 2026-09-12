@@ -3,8 +3,10 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    property bool motionEnabled: true
 
     // SwiftUI-like API: minLength applies along the stack axis.
+    SpringBehavior on minLength { motionEnabled: root.motionEnabled }
     property int minLength: 0
     // Used by VStack/HStack to force axis without relying on parent meta info.
     property string stackAxis: ""

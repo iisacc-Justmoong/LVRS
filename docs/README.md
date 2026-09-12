@@ -145,6 +145,8 @@ This structure is intentional so the same question can be answered consistently 
 
 - `docs/components/surfaces/AppCard.md`
 - `docs/components/surfaces/Card.md`
+- `docs/components/surfaces/Sheet.md`
+- `docs/components/surfaces/Tooltip.md`
 - `docs/components/surfaces/Alert.md`
 
 ## Policies
@@ -201,3 +203,14 @@ To prevent broken links in static-site builds:
 - Use workspace-relative links (`docs/...`) consistently.
 - Keep file names in `PascalCase`/stable casing as they map to URLs in case-sensitive hosts.
 - When moving pages, add redirect rules in the site generator configuration.
+
+## Standard Materials
+
+- [WindowMaterial, PanelMaterial and MaterialSurface](components/surfaces/Materials.md)
+- [Popover](components/surfaces/Popover.md)
+
+## Interaction and motion
+
+See [the motion system](motion.md) for shared elastic feedback, accessibility controls, component coverage and VisualCatalog verification.
+
+[Figma parity audit](figma-parity.md) · [HelpButton](components/control/HelpButton.md) · [ColorPickerButton](components/control/ColorPickerButton.md) · [Menu](components/navigation/Menu.md) · [ContextMenuItem](components/navigation/ContextMenuItem.md) · [ContextMenuDivider](components/navigation/ContextMenuDivider.md) · [ListFooter](components/navigation/ListFooter.md).

@@ -71,3 +71,7 @@ A. Yes, inherited layout properties are overridable, but visual parity with butt
 - tone contrast is acceptable in enabled/disabled states,
 - text remains short enough to avoid heavy elision in compact layouts,
 - sibling button heights match for row consistency.
+
+## Shared motion
+
+The label remains centered as the visual transform compresses and returns. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

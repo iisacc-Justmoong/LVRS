@@ -71,3 +71,7 @@ LV.IconMenuButton {
     }
 }
 ```
+
+## Shared motion
+
+Both symbols share the parent button's motion and one activation event. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

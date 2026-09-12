@@ -16,6 +16,9 @@ set(LVRS_NAVIGATION_QML_FILES
     qml/components/navigation/ListFooter.qml
     qml/components/navigation/ListToolbar.qml
     qml/components/navigation/ContextMenu.qml
+    qml/components/navigation/ContextMenuItem.qml
+    qml/components/navigation/ContextMenuDivider.qml
+    qml/components/navigation/Menu.qml
     qml/components/navigation/MenuItem.qml
     qml/components/navigation/MenuDivider.qml
 )

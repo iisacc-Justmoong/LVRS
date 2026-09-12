@@ -255,3 +255,7 @@ LV.TextEditor {
     onSyncFinished: console.log("Synchronized", path)
 }
 ```
+
+## Shared motion
+
+Only the focus outline animates; cursor, text selection, IME and scrolling remain native. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

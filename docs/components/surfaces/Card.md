@@ -132,3 +132,7 @@ The existing installed-consumer test also instantiates all eight types and check
 their dimensions, including the internal QML resource aliases. For native Metal
 render validation on macOS, run `build/tests/LVRSTests_card` with
 `QT_QPA_PLATFORM=cocoa`, `QSG_RHI_BACKEND=metal`, and `DYLD_LIBRARY_PATH="$PWD/build"`.
+
+## Shared motion
+
+Card deformation is capped in pixels, selection fill blends, and nested actions remain independent. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

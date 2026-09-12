@@ -50,3 +50,7 @@ LV.RadioButton {
     checked: true
 }
 ```
+
+## Shared motion
+
+The inner dot grows into place with the common overshoot while the checked fill blends. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

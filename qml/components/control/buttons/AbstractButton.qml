@@ -5,6 +5,36 @@ import LVRS 1.0
 Controls.AbstractButton {
     id: control
 
+    property bool motionEnabled: true
+    property real motionStrength: 1.0
+    property bool showFocusRing: true
+    readonly property InteractionMotion contentMotion: InteractionMotion {
+        objectName: "interactionMotion"
+        target: control.contentItem
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.effectiveEnabled
+        strength: control.motionStrength
+        pressed: control.down
+        hovered: control.hovered
+        focused: control.visualFocus
+    }
+    readonly property InteractionMotion surfaceMotion: InteractionMotion {
+        target: control.background
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.effectiveEnabled
+        strength: control.motionStrength
+        pressed: control.down
+        hovered: control.hovered
+        focused: control.visualFocus
+    }
+
+    FocusRing {
+        anchors.fill: parent
+        active: control.showFocusRing && control.effectiveEnabled && control.visualFocus
+        motionEnabled: control.motionEnabled
+        radius: control.resolvedCornerRadius
+    }
+
     enum ButtonTone {
         Primary,
         Default,
@@ -53,8 +83,8 @@ Controls.AbstractButton {
         if (tone === AbstractButton.Destructive)
             return Qt.darker(Theme.danger, 1.2)
         if (tone === AbstractButton.Borderless)
-            return Theme.accentBlueMuted
-        return Theme.accentBlueMuted
+            return Theme.accentMuted
+        return Theme.accentMuted
     }
     horizontalPadding: Theme.gap14
     verticalPadding: Theme.gap10
@@ -124,13 +154,16 @@ Controls.AbstractButton {
     }
 
     background: Rectangle {
+        StateColorBehavior on color { motionEnabled: control.motionEnabled && control.effectiveEnabled }
         radius: control.resolvedCornerRadius
         antialiasing: true
         color: !control.effectiveEnabled
             ? control.backgroundColorDisabled
             : control.down
                 ? control.backgroundColorPressed
-                : control.hovered
+                : control.checked
+                    ? Theme.accentMuted
+                    : control.hovered
                     ? control.backgroundColorHover
                     : control.backgroundColor
     }

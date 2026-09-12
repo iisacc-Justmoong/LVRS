@@ -110,3 +110,7 @@ function driveEdgePan(progress, velocityX) {
 ## Failure Pattern
 
 Calling `back()` without depth guard in single-entry stacks produces no-op and can hide navigation bugs in upstream flow design.
+
+## Shared motion
+
+Navigator forwards to the active PageRouter, which owns the visible page transition. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

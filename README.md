@@ -307,6 +307,10 @@ Control → Input → ColorPicker contains six embeddable color editing views, i
 
 ## Documentation
 
+Surfaces → Sheet presents reusable content as a mobile bottom sheet or centered desktop modal. `LV.Sheet.cornerRadius` accepts the device's measured corner radius in logical pixels; physical-pixel measurements must first be divided by the matching display DPR. The catalog includes share, export, folder selection with fixed actions, and inline-frame examples. See [Sheet API](docs/components/surfaces/Sheet.md).
+
+Surfaces → Tooltip presents a Component or inline view in a speech bubble. Its tail stays at a target-local point while the body flips, shifts, and constrains itself to the available display area. Hover, keyboard focus, held touch, delay/timeout, and manual origins are supported. See [Tooltip API](docs/components/surfaces/Tooltip.md).
+
 Start at:
 - `docs/README.md`
 
@@ -323,3 +327,15 @@ Key references:
 ### Android 시스템 안전 영역
 
 Qt 6.8 Android의 기본 QPA 안전 여백이 0인 경우에도 `WindowSafeAreaObserver`가 Android WindowInsets의 시스템 막대와 display cutout을 읽고 Qt 논리 좌표로 변환한다. 앱은 기존 `ApplicationWindow.mobileSystemSafe*Inset` 속성을 그대로 사용한다. 회전·창 크기·포커스 변경 시 여백을 갱신한다. 데스크톱과 iOS는 기존 QPA 여백 경로를 유지한다. `PlatformIntegrationTests::safe_area_tracks_window_lifetime`은 창 연결·회전 크기·연결 해제를 검사하고, Society Android 에뮬레이터의 하단 Files 버튼과 실제 파일 앱 진입이 기기 통합 검사이다.
+
+### Standard window and popup materials
+
+`ApplicationWindow` and `WindowMaterial` use a uniform near-black fill (#0B0B0B) at 50% opacity without gradients, retaining 64px diffusion and native macOS backdrop blur. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).
+
+## Interaction and motion
+
+See [the motion system](docs/motion.md) for shared elastic feedback, accessibility controls, component coverage and VisualCatalog verification.
+
+The [Figma parity audit](docs/figma-parity.md) records the current component inventory, exact color tokens and corrected compact/regular menu contracts.
+
+ContextMenu and Menu now share a lighter frosted WindowMaterial coating. See the [menu material contract](docs/components/navigation/ContextMenu.md#window-derived-frosted-menu) for tint, blur and accent overrides.

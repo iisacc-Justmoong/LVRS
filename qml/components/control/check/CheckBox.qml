@@ -13,7 +13,8 @@ AbstractButton {
     property int boxSize: Theme.scaleMetric(17)
     property real framePadding: Theme.scaleRealMetric(0.5)
     property real boxRadius: boxSize * (3.5 / 17.0)
-    property bool useFigmaCheckedAssets: true
+    // The stock checked image includes a blue fill. Custom colors use the drawn mark.
+    property bool useFigmaCheckedAssets: Qt.colorEqual(checkedColor, Theme.defaultPrimary)
     property url checkedAssetSourceEnabled: Theme.iconPath("checkboxCheckedEnabled")
     property url checkedAssetSourceDisabled: Theme.iconPath("checkboxCheckedDisabled")
     readonly property url resolvedCheckedAssetSource: control.enabled
@@ -98,6 +99,7 @@ AbstractButton {
 
         Rectangle {
             id: indicator
+            StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
             objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
             x: control.framePadding
             y: control.framePadding
@@ -135,6 +137,8 @@ AbstractButton {
 
             Image {
                 id: checkedAsset
+                scale: control.checked ? 1 : 0.55
+                SpringBehavior on scale { motionEnabled: control.motionEnabled && control.enabled }
                 objectName: control.objectName.length > 0 ? control.objectName + "_checkedAsset" : ""
                 anchors.fill: parent
                 visible: control.usingFigmaCheckedAsset
@@ -148,6 +152,8 @@ AbstractButton {
 
             Canvas {
                 id: checkmarkCanvas
+                scale: control.checked ? 1 : 0.55
+                SpringBehavior on scale { motionEnabled: control.motionEnabled && control.enabled }
                 anchors.fill: parent
                 visible: control.checked && !control.usingFigmaCheckedAsset
                 objectName: control.objectName.length > 0 ? control.objectName + "_checkmarkCanvas" : ""
@@ -199,6 +205,7 @@ AbstractButton {
     }
 
     onCheckedChanged: checkmarkCanvas.requestPaint()
+    onUsingFigmaCheckedAssetChanged: checkmarkCanvas.requestPaint()
     onEnabledChanged: checkmarkCanvas.requestPaint()
     onCheckColorChanged: checkmarkCanvas.requestPaint()
     onCheckMarkColorDisabledChanged: checkmarkCanvas.requestPaint()

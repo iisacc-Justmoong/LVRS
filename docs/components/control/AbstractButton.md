@@ -90,3 +90,9 @@ The former owns plain label/icon actions; the latter owns label/icon menu trigge
 with a trailing chevron. Their compact 8px radius and measured padding/gaps are
 scoped to those families, so `AlertButton`, `Stepper`, and other direct
 `AbstractButton` consumers retain their own contracts.
+
+## Shared motion
+
+Press deformation is shared by every button subclass, with a focus ring for Tab navigation. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+
+`showFocusRing` defaults to true. Components with a Figma-authored focus border may set it false and render that border, while retaining keyboard focus and shared motion (ColorPickerButton does this).

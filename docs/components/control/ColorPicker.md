@@ -100,3 +100,7 @@ The hue ring is the exported Figma asset. Interactive triangles and planes use Q
 The QML module declares `DEPENDENCIES QtQuick` so compiler/lint tooling can resolve native item inheritance and QColor properties, as required by [Qt's module dependency contract](https://doc.qt.io/qt-6/qt-add-qml-module.html).
 
 Validation: `LVRSTests_colorpicker` covers conversion, edits, geometry, host lifecycle, bindings, input and rendering. `LVRSTests_examples` checks the registered gallery. Run `ctest --test-dir build --output-on-failure`; set `LVRS_COLORPICKER_CAPTURE_DIR` when running the focused test directly to save reference captures.
+
+## Shared motion
+
+Slider thumbs, input focus and action buttons share LVRS motion. Color sampling remains immediate. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

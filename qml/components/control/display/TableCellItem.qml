@@ -3,6 +3,7 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
 
     property var itemData: null
     property string text: "Text"
@@ -158,6 +159,8 @@ Item {
         anchors.fill: parent
         visible: control.selected || control.current
         color: control.selected ? control.selectionColor : "transparent"
+        StateColorBehavior on color { motionEnabled: control.motionEnabled }
+        StateColorBehavior on border.color { motionEnabled: control.motionEnabled }
         border.color: control.current ? control.currentBorderColor : "transparent"
         border.width: control.current ? control.currentBorderWidth : 0
         antialiasing: false

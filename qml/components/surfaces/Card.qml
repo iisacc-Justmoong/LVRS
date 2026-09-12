@@ -115,6 +115,7 @@ AbstractButton {
     Accessible.description: [description, details, metadata, statusText].filter(value => value.length > 0).join(". ")
 
     background: Rectangle {
+        StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
         color: control.surfaceColor
         radius: control.resolvedCornerRadius
         antialiasing: true

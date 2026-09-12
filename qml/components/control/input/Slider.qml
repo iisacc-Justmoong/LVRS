@@ -5,6 +5,11 @@ import LVRS 1.0
 
 T.Slider {
     id: control
+    property bool motionEnabled: true
+    property real displayedPosition: visualPosition
+    SpringBehavior on displayedPosition {
+        motionEnabled: control.motionEnabled && control.enabled && !control.pressed
+    }
 
     enum SliderType { Default, CenterBiased, Ticks, CenterBiasedTicks, Filled, MinMaxLabels, Segmented }
     enum SliderSize { Mini, Small, Regular, Large }
@@ -294,7 +299,7 @@ T.Slider {
         implicitHeight: control.controlHeight
         width: Math.min(implicitWidth, control.availableWidth)
         height: control.height
-        x: control.leftPadding + control.visualPosition * control.rangeWidth
+        x: control.leftPadding + Math.max(0, Math.min(1, control.displayedPosition)) * control.rangeWidth
         y: 0
 
         Rectangle {
@@ -310,7 +315,16 @@ T.Slider {
             antialiasing: true
         }
         Material {
+            id: thumbVisual
             objectName: "slider_thumb"
+            transform: InteractionMotion {
+                target: thumbVisual
+                pressed: control.pressed
+                hovered: control.hovered
+                focused: control.activeFocus
+                motionEnabled: control.motionEnabled
+                strength: 1.8
+            }
             anchors.centerIn: parent
             width: control.thumbDiameter + inset * 2
             height: width

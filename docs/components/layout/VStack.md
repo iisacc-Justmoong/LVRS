@@ -66,3 +66,7 @@ A. Ensure child is inside stack-managed layout tree and not in a separately anch
 - alignment token resolves to expected horizontal placement,
 - spacing fallback works when `spacing == -1`,
 - stack axis propagation enables spacer expansion.
+
+## Shared motion
+
+The ColumnLayout spacing settles with the common rebound; child sizes remain layout-owned. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

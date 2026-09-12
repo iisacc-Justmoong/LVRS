@@ -6,6 +6,13 @@ Item {
     id: root
 
     property bool open: false
+    property bool motionEnabled: true
+    property real revealProgress: open ? 1 : 0
+    SpringBehavior on revealProgress {
+        motionEnabled: root.motionEnabled
+        duration: root.open ? Motion.surfaceDuration : Motion.exitDuration
+        easingType: root.open ? Easing.OutBack : Easing.InCubic
+    }
     property bool dismissOnBackground: true
     property bool useOverlayLayer: true
 
@@ -91,7 +98,7 @@ Item {
     signal secondaryClicked()
     signal tertiaryClicked()
 
-    visible: open
+    visible: open || revealProgress > 0.001
     enabled: open
     anchors.fill: parent
     z: 1000
@@ -173,7 +180,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: root.backdropColor
-        visible: root.open
+        opacity: Math.max(0, Math.min(1, root.revealProgress))
+        visible: root.visible
 
         MouseArea {
             anchors.fill: parent
@@ -186,6 +194,8 @@ Item {
 
     Rectangle {
         id: modalFrame
+        scale: 0.92 + 0.08 * root.revealProgress
+        opacity: Math.max(0, Math.min(1, root.revealProgress))
         width: Math.min(root.maxWidth,
                         Math.max(root.minWidth,
                                  Math.min(root.preferredWidth,

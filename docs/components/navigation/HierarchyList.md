@@ -136,3 +136,7 @@ LV.HierarchyList {
     itemDelegate: customTreeRow
 }
 ```
+
+## Shared motion
+
+Row state and disclosure motion are local; drag geometry and model changes remain direct. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

@@ -30,6 +30,8 @@ QtObject {
     readonly property string iconSetBasePath: "qrc:/qt/qml/LVRS/resources/iconset/"
     readonly property var iconNameAliases: ({
         "add": "generaladd",
+        "nodestest": "nodestest",
+        "wechat": "weChat",
         "projectstructure": "generalprojectStructure",
         "viewmoresymbolicdefault": "generalmoreHorizontal",
         "viewmoresymbolicborderless": "generalmoreHorizontal",
@@ -95,18 +97,18 @@ QtObject {
     readonly property color window: "#141414"
 
     // Panel background scale: saturation constrained to 1~3% (brighter steps are more saturated)
-    readonly property color panelBackground01: "#0C0C0D"
-    readonly property color panelBackground02: "#0E0E0E"
-    readonly property color panelBackground03: "#151516"
-    readonly property color panelBackground04: "#191919"
-    readonly property color panelBackground05: "#1D1E1E"
-    readonly property color panelBackground06: "#1F2021"
-    readonly property color panelBackground07: "#242424"
-    readonly property color panelBackground08: "#232424"
-    readonly property color panelBackground09: "#262727"
-    readonly property color panelBackground10: "#282828"
-    readonly property color panelBackground11: "#2D2E2F"
-    readonly property color panelBackground12: "#313233"
+    readonly property color panelBackground01: Qt.rgba(0.04892867058515549, 0.04892867058515549, 0.05038686841726303, 1)
+    readonly property color panelBackground02: Qt.rgba(0.05507083609700203, 0.05517596751451492, 0.05570162087678909, 1)
+    readonly property color panelBackground03: Qt.rgba(0.08394163101911545, 0.08394163101911545, 0.08631309866905212, 1)
+    readonly property color panelBackground04: Qt.rgba(0.09516431391239166, 0.09655113518238068, 0.09793794900178909, 1)
+    readonly property color panelBackground05: Qt.rgba(0.11397916078567505, 0.11664287745952606, 0.11664287745952606, 1)
+    readonly property color panelBackground06: Qt.rgba(0.12302529811859131, 0.12528030574321747, 0.12753531336784363, 1)
+    readonly property color panelBackground07: Qt.rgba(0.1411764770746231, 0.1411764770746231, 0.1411764770746231, 1)
+    readonly property color panelBackground08: Qt.rgba(0.13709451258182526, 0.14029954373836517, 0.14190204441547394, 1)
+    readonly property color panelBackground09: Qt.rgba(0.14820532500743866, 0.15256911516189575, 0.15256911516189575, 1)
+    readonly property color panelBackground10: Qt.rgba(0.1555851548910141, 0.15707255899906158, 0.15855994820594788, 1)
+    readonly property color panelBackground11: Qt.rgba(0.17537428438663483, 0.1819191724061966, 0.18410080671310425, 1)
+    readonly property color panelBackground12: Qt.rgba(0.19355684518814087, 0.1978072077035904, 0.19993239641189575, 1)
 
     readonly property color windowAlt: panelBackground03
     readonly property color subSurface: panelBackground04
@@ -123,11 +125,11 @@ QtObject {
     readonly property real textTokenCaptionOpacity: 0.5
     readonly property real textTokenDisabledOpacity: 0.3
 
-    readonly property color textTokenTitleHeader: "#E5FFFFFF"
-    readonly property color textTokenBody: "#CCFFFFFF"
-    readonly property color textTokenDescription: "#99FFFFFF"
-    readonly property color textTokenCaption: "#80FFFFFF"
-    readonly property color textTokenDisabled: "#4DFFFFFF"
+    readonly property color textTokenTitleHeader: Qt.rgba(1, 1, 1, textTokenTitleHeaderOpacity)
+    readonly property color textTokenBody: Qt.rgba(1, 1, 1, textTokenBodyOpacity)
+    readonly property color textTokenDescription: Qt.rgba(1, 1, 1, textTokenDescriptionOpacity)
+    readonly property color textTokenCaption: Qt.rgba(1, 1, 1, textTokenCaptionOpacity)
+    readonly property color textTokenDisabled: Qt.rgba(1, 1, 1, textTokenDisabledOpacity)
 
     readonly property color titleHeaderColor: textTokenTitleHeader
     readonly property color bodyColor: textTokenBody
@@ -143,30 +145,58 @@ QtObject {
 
     //Primary
 
-    readonly property color primary: "#0a84ff"
+    readonly property color defaultPrimary: "#0a84ff"
+    // Shared by all windows in this QML engine; configured by the app root.
+    property color primaryColor: defaultPrimary
+    readonly property color primary: primaryColor
     readonly property color accent: primary
+    readonly property bool usingDefaultPrimary: Qt.colorEqual(primary, defaultPrimary)
+    readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted
+        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
+    readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
     readonly property color danger: "#ff453a"
     readonly property color surface: "#38383c"
     readonly property color darkGrey10: "#b4b8bf"
-    readonly property color accentTint: "#1F0A84FF"
+    readonly property color accentTint: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (31 / 255))
     readonly property color dangerTint: "#1FFF453A"
-    readonly property color primaryOverlay: "#400A84FF"
+    readonly property color primaryOverlay: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (64 / 255))
     readonly property color accentOverlay: primaryOverlay
     readonly property color dangerOverlay: "#59FF453A"
     readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
+    // Standard Material/Window and Material/Panel, Figma 944:31 and 944:28.
+    // Primary radial opacity is halved from the original 80% / 22% design.
+    readonly property color materialTint: "#141414"
+    readonly property color materialWindowFill: "#0B0B0B"
+    readonly property real applicationWindowOpacity: 0.50
+    readonly property real materialDenseOpacity: 0.75
+    readonly property real materialGlassOpacity: 0.25
+    readonly property real materialDenseBlur: scaleRealMetric(64)
+    readonly property real materialGlassBlur: scaleRealMetric(16)
+    // Menus reuse the window's backdrop with a lighter, more diffused coating.
+    readonly property real contextMenuOpacity: 0.12
+    readonly property real contextMenuBlur: materialDenseBlur
+    readonly property real contextMenuAccentStrength: 0.08
+    readonly property real materialIntenseOpacity: 0.40
+    readonly property real materialFaintOpacity: 0.11
+    readonly property real materialPanelRadius: scaleRealMetric(12)
+    readonly property real materialWindowRadius: scaleRealMetric(16)
+    readonly property color materialDenseEdge: Qt.rgba(1, 1, 1, 0.12)
+    readonly property color materialGlassEdge: Qt.rgba(1, 1, 1, 0.22)
     // Alert / Material tokens from Figma 106:283. Typography stays on Title/Body.
     readonly property color alertGlassTint: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)
     readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)
     readonly property color alertTitleColor: "#F4F5F7"
     readonly property color alertBodyColor: "#D6D9DF"
-    readonly property color alertActionPrimary: "#027DFF"
+    readonly property color alertActionPrimary: usingDefaultPrimary ? "#027DFF" : primary
     readonly property color alertActionBorder: "#596168"
     readonly property color alertDivider: "#363B3F"
-    readonly property color alertIconSurface: "#192840"
-    readonly property color alertIconBorder: "#244B7E"
+    readonly property color alertIconSurface: usingDefaultPrimary ? "#192840"
+        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.16))
+    readonly property color alertIconBorder: usingDefaultPrimary ? "#244B7E"
+        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.36))
     // Material/TextField semantic fills, Figma 114:179.
     readonly property color inputFieldGlassTint: Qt.rgba(panelBackground10.r, panelBackground10.g,
                                                         panelBackground10.b, 0.64)
@@ -605,8 +635,9 @@ QtObject {
 
     //ContextMenu
 
-    readonly property color contextMenuSurface: panelBackground03
-    readonly property color contextMenuDivider: panelBackground08
+    readonly property color contextMenuSurface: materialTint
+    readonly property color menuDivider: panelBackground08
+    readonly property color contextMenuDivider: disabledColor
     readonly property color contextMenuItemSelectedBackground: primary
     readonly property color contextMenuItemInactiveBackground: panelBackground08
 
@@ -654,7 +685,7 @@ QtObject {
     readonly property int iconSm: scaleMetric(18)
     readonly property int controlIndicatorSize: iconSm
     readonly property int toggleTrackWidth: scaleMetric(38)
-    readonly property int toggleTransitionDuration: scaleMetric(140)
+    readonly property int toggleTransitionDuration: 320
     readonly property int headerMinHeight: scaleMetric(56)
     readonly property int headerExtraHeight: scaleMetric(32)
     readonly property int scaffoldBlobPrimarySize: scaleMetric(520)

@@ -86,3 +86,7 @@ LV.Stepper {
 
 - Use `Stepper.UpDown` for generic spinner affordance.
 - Use `Stepper.Up`/`Stepper.Down` when separate controls are required.
+
+## Shared motion
+
+Each press rebounds; stepped delivers +1 or -1 according to the actual click half. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

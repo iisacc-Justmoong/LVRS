@@ -57,3 +57,7 @@ LV.Link {
     text: "Reports"
 }
 ```
+
+## Shared motion
+
+The link rebounds at activation and its router handles the destination transition. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

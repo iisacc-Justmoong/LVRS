@@ -621,7 +621,7 @@ LV.ApplicationWindow {
     property bool labelStyleApiReady: contentLabel.style === contentLabel.body
         && contentLabel.font.pixelSize === LV.Theme.textBody
         && contentLabel.font.weight === LV.Theme.textBodyWeight
-        && contentLabel.color === LV.Theme.bodyColor
+        && contentLabel.color.toString() === LV.Theme.bodyColor.toString()
         && contentLabel.contentHeight > 0
         && contentLabel.lineCount === 1
         && !contentLabel.sizeToContentHeight
@@ -629,28 +629,28 @@ LV.ApplicationWindow {
     property bool figmaTextDesignReady:
         titleLabel.font.pixelSize === LV.Theme.textTitle
         && titleLabel.font.weight === LV.Theme.textTitleWeight
-        && titleLabel.color === LV.Theme.titleHeaderColor
+        && titleLabel.color.toString() === LV.Theme.titleHeaderColor.toString()
         && title2Label.font.pixelSize === LV.Theme.textTitle2
         && title2Label.font.weight === LV.Theme.textTitle2Weight
-        && title2Label.color === LV.Theme.titleHeaderColor
+        && title2Label.color.toString() === LV.Theme.titleHeaderColor.toString()
         && headerLabel.font.pixelSize === LV.Theme.textHeader
         && headerLabel.font.weight === LV.Theme.textHeaderWeight
-        && headerLabel.color === LV.Theme.titleHeaderColor
+        && headerLabel.color.toString() === LV.Theme.titleHeaderColor.toString()
         && header2Label.font.pixelSize === LV.Theme.textHeader2
         && header2Label.font.weight === LV.Theme.textHeader2Weight
-        && header2Label.color === LV.Theme.titleHeaderColor
+        && header2Label.color.toString() === LV.Theme.titleHeaderColor.toString()
         && bodyLabel.font.pixelSize === LV.Theme.textBody
         && bodyLabel.font.weight === LV.Theme.textBodyWeight
-        && bodyLabel.color === LV.Theme.bodyColor
+        && bodyLabel.color.toString() === LV.Theme.bodyColor.toString()
         && descriptionLabel.font.pixelSize === LV.Theme.textDescription
         && descriptionLabel.font.weight === LV.Theme.textDescriptionWeight
-        && descriptionLabel.color === LV.Theme.descriptionColor
+        && descriptionLabel.color.toString() === LV.Theme.descriptionColor.toString()
         && captionLabel.font.pixelSize === LV.Theme.textCaption
         && captionLabel.font.weight === LV.Theme.textCaptionWeight
-        && captionLabel.color === LV.Theme.captionColor
+        && captionLabel.color.toString() === LV.Theme.captionColor.toString()
         && disabledLabel.font.pixelSize === LV.Theme.textDisabled
         && disabledLabel.font.weight === LV.Theme.textDisabledWeight
-        && disabledLabel.color === LV.Theme.disabledColor
+        && disabledLabel.color.toString() === LV.Theme.disabledColor.toString()
 
     LV.Label {
         id: contentLabel
@@ -5492,8 +5492,8 @@ Controls.ApplicationWindow {
         QVERIFY(placeholder);
         QCOMPARE(placeholder->y(), input->y());
         QCOMPARE(placeholder->height(), input->height());
-        QCOMPARE(placeholder->property("color").value<QColor>(),
-                 root->property("expectedPlaceholderColor").value<QColor>());
+        QCOMPARE(placeholder->property("color").value<QColor>().rgba(),
+                 root->property("expectedPlaceholderColor").value<QColor>().rgba());
         QCOMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
         QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
     }
@@ -6324,24 +6324,24 @@ Item {
         && checkedDisabledIndicator !== null
         && uncheckedEnabledIndicator !== null
         && uncheckedDisabledIndicator !== null
-        && checkedEnabledIndicator.color === LV.Theme.accent
-        && checkedDisabledIndicator.color === LV.Theme.panelBackground12
-        && uncheckedEnabledIndicator.color === LV.Theme.bodyColor
-        && uncheckedDisabledIndicator.color === LV.Theme.panelBackground12
+        && checkedEnabledIndicator.color.toString() === LV.Theme.accent.toString()
+        && checkedDisabledIndicator.color.toString() === LV.Theme.panelBackground12.toString()
+        && uncheckedEnabledIndicator.color.toString() === LV.Theme.bodyColor.toString()
+        && uncheckedDisabledIndicator.color.toString() === LV.Theme.panelBackground12.toString()
         && Math.abs(checkedEnabledIndicator.border.width - 0) < 0.01
         && Math.abs(checkedDisabledIndicator.border.width - (checkedDisabled.boxSize * (0.5 / 17.0))) < 0.01
         && Math.abs(uncheckedEnabledIndicator.border.width - (uncheckedEnabled.boxSize * (0.5 / 17.0))) < 0.01
         && Math.abs(uncheckedDisabledIndicator.border.width - 0) < 0.01
-        && checkedDisabledIndicator.border.color === LV.Theme.panelBackground12
-        && uncheckedEnabledIndicator.border.color === LV.Theme.bodyColor
+        && checkedDisabledIndicator.border.color.toString() === LV.Theme.panelBackground12.toString()
+        && uncheckedEnabledIndicator.border.color.toString() === LV.Theme.bodyColor.toString()
         && checkedEnabled.showInnerShadow === false
         && checkedDisabled.showInnerShadow === true
         && uncheckedEnabled.showInnerShadow === true
         && uncheckedDisabled.showInnerShadow === true
         && checkedEnabledLabel !== null
         && checkedDisabledLabel !== null
-        && checkedEnabledLabel.color === LV.Theme.bodyColor
-        && checkedDisabledLabel.color === LV.Theme.disabledColor
+        && checkedEnabledLabel.color.toString() === LV.Theme.bodyColor.toString()
+        && checkedDisabledLabel.color.toString() === LV.Theme.disabledColor.toString()
         && checkedEnabledLabel.font.pixelSize === LV.Theme.textBody
         && checkedEnabledLabel.font.weight === LV.Theme.textBodyWeight
         && checkedEnabledLabel.styleLineHeight === LV.Theme.textBodyLineHeight
@@ -7531,6 +7531,7 @@ Item {
         selectionDirection: "auto"
     }
 
+    property string menuItemDiagnostics: JSON.stringify({labelWidth: figmaItem.labelNaturalWidth, row: [figmaItem.implicitWidth, figmaItem.implicitHeight], selected: selectedItem.resolvedBackgroundColor === LV.Theme.primary, inactive: inactiveItem.resolvedBackgroundColor === LV.Theme.panelBackground08, iconColor: collapsedSubmenu.iconPlaceholderColor === LV.Theme.accentBlueMuted})
     property bool menuItemContract:
         defaultItem.keyVisible
         && defaultItem.resolvedShortcutText === "key"
@@ -7580,7 +7581,7 @@ Item {
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
-    QTRY_VERIFY(root->property("menuItemContract").toBool());
+    QTRY_VERIFY2(root->property("menuItemContract").toBool(), qPrintable(root->property("menuItemDiagnostics").toString()));
 
     QObject *figmaItem = root->findChild<QObject *>(QStringLiteral("figmaItem"));
     QVERIFY(figmaItem);
@@ -7897,7 +7898,7 @@ import LVRS as LV
 Item {
     id: root
 
-    LV.ContextMenu {
+    LV.Menu {
         id: menu
         visible: false
         items: [
@@ -7944,16 +7945,19 @@ Item {
         && menu.topPadding === LV.Theme.gap4
         && menu.bottomPadding === LV.Theme.gap4
         && menu.menuColor === LV.Theme.contextMenuSurface
-        && menu.menuColor === LV.Theme.panelBackground03
-        && menu.dividerColor === LV.Theme.contextMenuDivider
+        && menu.menuColor === LV.Theme.materialTint
+        && menu.menuOpacity === LV.Theme.contextMenuOpacity
+        && menu.dividerColor === LV.Theme.menuDivider
         && menu.dividerColor === LV.Theme.panelBackground08
         && menu.background !== null
-        && menu.background.radius === LV.Theme.radiusMd
+        && menu.background.radius === LV.Theme.materialPanelRadius
+        && menu.background.tintOpacity === 0.12
+        && menu.background.blurRadius === LV.Theme.contextMenuBlur
         && Math.abs(menu.implicitWidth - 161.0) < 0.01
         && Math.abs(menu.implicitHeight - 224.0) < 0.01
         && Math.abs(menu.contentItem.width - 145.0) < 0.01
         && Math.abs(menu.contentItem.implicitHeight - 216.0) < 0.01
-        && divider.dividerColor === LV.Theme.contextMenuDivider
+        && divider.dividerColor === LV.Theme.menuDivider
         && divider.dividerColor === LV.Theme.panelBackground08
         && divider.lineLength === 220
         && divider.linePadding === 0
@@ -10081,7 +10085,7 @@ Item {
         && listFooter.stockButtonPadding === 2
         && listFooter.stockButtonHeight === 22
         && listFooter.stockMenuButtonSpacing === -2
-        && listFooter.implicitWidth === 86
+        && listFooter.implicitWidth === 88
         && listFooter.implicitHeight === 26
 
     property string contractDebug: JSON.stringify({
@@ -10159,7 +10163,7 @@ Item {
     QVERIFY(qAbs(sixthDelegate->y() - 110.0) < 0.01);
     QVERIFY(qAbs(embeddedFooter->x() - 0.0) < 0.01);
     QVERIFY(qAbs(embeddedFooter->y() - 114.0) < 0.01);
-    QVERIFY(qAbs(embeddedFooter->width() - 86.0) < 0.01);
+    QVERIFY(qAbs(embeddedFooter->width() - 88.0) < 0.01);
     QVERIFY(qAbs(embeddedFooter->height() - 26.0) < 0.01);
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
@@ -10265,7 +10269,7 @@ Item {
     const QRectF slotBounds[] = {
         QRectF(2.0, 2.0, 22.0, 22.0),
         QRectF(24.0, 2.0, 22.0, 22.0),
-        QRectF(46.0, 2.0, 38.0, 22.0)
+        QRectF(46.0, 2.0, 40.0, 22.0)
     };
     for (int index = 0; index < 3; ++index) {
         auto *slot = visualChildByObjectName(

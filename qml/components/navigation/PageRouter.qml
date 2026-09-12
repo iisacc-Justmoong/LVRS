@@ -4,6 +4,7 @@ import LVRS 1.0
 
 Item {
     id: root
+    property bool motionEnabled: true
 
     property var routes: []
     property string initialPath: "/"
@@ -22,7 +23,7 @@ Item {
     property int retainInactivePageCount: 0
     property int routeResolveCacheCapacity: 256
     property bool interactiveTransitionsEnabled: true
-    property int interactiveTransitionSettleDuration: 0
+    property int interactiveTransitionSettleDuration: motionEnabled ? Motion.duration(Motion.releaseDuration) : 0
     property real interactiveTransitionCommitProgress: 0.42
     property real interactiveTransitionVelocityThreshold: 960
     property real interactiveTransitionOutgoingParallaxFactor: 0.25
@@ -508,6 +509,19 @@ Item {
 
     StackView {
         id: stackView
+        // Page scale is independent of the x coordinate owned by live gestures.
+        pushEnter: Transition {
+            NumberAnimation { property: "scale"; from: 0.97; to: 1; duration: root.motionEnabled ? Motion.duration(Motion.surfaceDuration) : 0; easing.type: Easing.OutBack; easing.overshoot: Motion.overshoot }
+        }
+        pushExit: Transition {}
+        popEnter: Transition {
+            NumberAnimation { property: "scale"; from: 0.97; to: 1; duration: root.motionEnabled ? Motion.duration(Motion.surfaceDuration) : 0; easing.type: Easing.OutBack; easing.overshoot: Motion.overshoot }
+        }
+        popExit: Transition {
+            NumberAnimation { property: "scale"; from: 1; to: 0.97; duration: root.motionEnabled ? Motion.duration(Motion.exitDuration) : 0; easing.type: Easing.InCubic }
+        }
+        replaceEnter: pushEnter
+        replaceExit: pushExit
         anchors.fill: parent
         clip: true
         focus: true

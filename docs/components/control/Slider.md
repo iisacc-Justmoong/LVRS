@@ -105,3 +105,7 @@ cmake -S . -B build
 cmake --build build
 ctest --test-dir build -R 'LVRSTests_(slider|examples|import_api)' --output-on-failure
 ```
+
+## Shared motion
+
+Pointer tracking is direct. The thumb deforms on hold; discrete position changes settle with rebound. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

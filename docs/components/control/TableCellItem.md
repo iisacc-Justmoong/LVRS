@@ -118,3 +118,7 @@ A. Resolution order is `label -> text -> title -> value`, then falls back to com
 ## Figma Contract
 
 Node `203:3863` is `234 × 24`. The leading divider is `1 × 24`; the content line box is `(x: 9, y: 5.5, width: 225, height: 13)`, using fixed 13/13 Body typography. Mobile uses the same `234 × 24` geometry, `8` content spacing, and `13px` Body font.
+
+## Shared motion
+
+The selection fill dissolves and the editor shows elastic focus feedback. Validation is immediate. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

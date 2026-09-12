@@ -3,6 +3,11 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
+    property real displayedProgress: fillProgress
+    property real displayedStart: fillStart
+    SpringBehavior on displayedProgress { motionEnabled: control.motionEnabled }
+    SpringBehavior on displayedStart { motionEnabled: control.motionEnabled }
 
     // Size constants for API usage: LV.ProgressBar { size: regular }
     readonly property int large: 0
@@ -81,9 +86,9 @@ Item {
 
     Rectangle {
         id: fill
-        x: track.width * control.fillStart
+        x: track.width * Math.max(0, Math.min(1, control.displayedStart))
         y: 0
-        width: track.width * control.fillProgress
+        width: Math.max(0, Math.min(track.width - x, track.width * control.displayedProgress))
         height: track.height
         radius: control.resolvedRadius(width, height)
         color: control.fillColor

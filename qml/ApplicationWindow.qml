@@ -30,6 +30,8 @@ Controls.ApplicationWindow {
     readonly property bool mobileFullscreenGeometryHintRecommended: backendRuntimeProfile.mobileFullscreenGeometryHintRecommended === true
     readonly property Item overlayLayer: Controls.Overlay.overlay
     readonly property Item nativeWindowContentRoot: windowRoot.contentItem ? windowRoot.contentItem.parent : null
+    // Capture app content without the sibling popup overlay (avoids feedback).
+    readonly property Item materialBackdropSource: supersampleHost
 
     readonly property int compact: 0
     readonly property int medium: 1
@@ -112,7 +114,14 @@ Controls.ApplicationWindow {
                                                          supersampleHost.y + layoutSafeAreaHost.y,
                                                          layoutSafeAreaHost.width,
                                                          layoutSafeAreaHost.height)
-    property color windowColor: Theme.window
+    // Unconfigured auxiliary windows follow the current app theme.
+    property color primaryColor: Theme.primaryColor
+    property color windowColor: Theme.materialWindowFill
+    property real windowBackgroundOpacity: Theme.applicationWindowOpacity
+    property bool backgroundBlurEnabled: isDesktopPlatform && NativeWindowStyle.backgroundBlurSupported
+    readonly property bool backgroundBlurSupported: NativeWindowStyle.backgroundBlurSupported
+    readonly property bool backgroundBlurActive: _nativeBackgroundBlurActive
+    property bool _nativeBackgroundBlurActive: false
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
     // Global listeners remain opt-in. Stock platform profiles keep the runtime daemon
@@ -214,16 +223,27 @@ Controls.ApplicationWindow {
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
-    color: windowRoot.windowColor
-    palette.window: windowRoot.windowColor
-    palette.base: windowRoot.windowColor
+    color: windowRoot.backgroundBlurEnabled && windowRoot.backgroundBlurSupported ? "transparent" : windowRoot.windowColor
+    palette: Palette {
+        window: windowRoot.windowColor
+        base: windowRoot.windowColor
+        highlight: Theme.primary
+        link: Theme.primary
+    }
 
-    background: Rectangle {
+    background: WindowMaterial {
+        objectName: "applicationWindowMaterial"
         x: 0
         y: 0
         width: windowRoot.width
         height: windowRoot.height
         color: windowRoot.windowColor
+        primaryColor: windowRoot.primaryColor
+        tintOpacity: windowRoot.windowBackgroundOpacity
+        // Native window clipping/chrome owns the outer edge.
+        radius: 0
+        borderWidth: 0
+        shadowOpacity: 0
     }
 
     Binding {
@@ -378,6 +398,8 @@ Controls.ApplicationWindow {
     }
 
     function applyNativeWindowStyle() {
+        windowRoot._nativeBackgroundBlurActive = NativeWindowStyle.applyBackgroundBlur(windowRoot, windowRoot.backgroundBlurEnabled)
+            && windowRoot.backgroundBlurEnabled
         if (windowRoot.solidChrome && NativeWindowStyle.solidChromeSupported)
             return NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
         if (!NativeWindowStyle.titleBarColorSupported)
@@ -462,8 +484,13 @@ Controls.ApplicationWindow {
     onMobileFullscreenVisibilityOverrideChanged: applyMobileDisplayCoverageOverride()
     onMobileFullscreenGeometryHintOverrideChanged: applyMobileDisplayCoverageOverride()
     onWindowColorChanged: applyNativeWindowStyle()
+    onPrimaryColorChanged: {
+        if (!Qt.colorEqual(Theme.primaryColor, primaryColor))
+            Theme.primaryColor = primaryColor
+    }
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
     onSolidChromeChanged: applyNativeWindowStyle()
+    onBackgroundBlurEnabledChanged: applyNativeWindowStyle()
     onInactiveRenderDowngradeEnabledChanged: {
         RenderQuality.inactiveRenderDowngradeEnabled = inactiveRenderDowngradeEnabled
         RenderQuality.applyWindow(windowRoot)
@@ -1265,15 +1292,16 @@ Controls.ApplicationWindow {
                         property: "x"
                         from: -navDrawer.width
                         to: 0
-                        duration: root.animatedTransitions ? root.drawerEnterDuration : 0
-                        easing.type: Easing.OutCubic
+                        duration: root.animatedTransitions ? Motion.duration(Motion.surfaceDuration) : 0
+                        easing.type: Easing.OutBack
+                        easing.overshoot: Motion.overshoot
                     }
                 }
                 exit: Transition {
                     NumberAnimation {
                         property: "x"
                         to: -navDrawer.width
-                        duration: root.animatedTransitions ? root.drawerExitDuration : 0
+                        duration: root.animatedTransitions ? Motion.duration(root.drawerExitDuration) : 0
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -1501,4 +1529,4 @@ Controls.ApplicationWindow {
 
 // API usage (external):
 // import LVRS as LV
-// LV.ApplicationWindow { title: "App"; windowDragExclusionItems: [menuButton] }
+// LV.ApplicationWindow { title: "App"; primaryColor: "#A571E6"; windowDragExclusionItems: [menuButton] }

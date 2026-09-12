@@ -12,15 +12,18 @@ class NativeWindowStyle : public QObject
 
     Q_PROPERTY(bool titleBarColorSupported READ titleBarColorSupported CONSTANT)
     Q_PROPERTY(bool solidChromeSupported READ solidChromeSupported CONSTANT)
+    Q_PROPERTY(bool backgroundBlurSupported READ backgroundBlurSupported CONSTANT)
 
 public:
     explicit NativeWindowStyle(QObject *parent = nullptr);
 
     bool titleBarColorSupported() const;
     bool solidChromeSupported() const;
+    bool backgroundBlurSupported() const;
 
     Q_INVOKABLE bool applyTitleBarColor(QObject *window, const QColor &color, bool darkAppearance = true);
     Q_INVOKABLE bool applySolidChrome(QObject *window, const QColor &color, bool darkAppearance = true);
+    Q_INVOKABLE bool applyBackgroundBlur(QObject *window, bool enabled = true);
     Q_INVOKABLE bool applyMobileCoverageFlags(QObject *window,
                                               bool expandedClientArea = true,
                                               bool fullscreenGeometryHint = true);

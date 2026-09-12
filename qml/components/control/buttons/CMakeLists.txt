@@ -1,6 +1,8 @@
 set(LVRS_CONTROL_BUTTON_QML_FILES
     qml/components/control/buttons/AbstractButton.qml
     qml/components/control/buttons/PushButton.qml
+    qml/components/control/buttons/HelpButton.qml
+    qml/components/control/buttons/ColorPickerButton.qml
     qml/components/control/buttons/DropdownButton.qml
     qml/components/control/buttons/ButtonMethodRegistry.qml
     qml/components/control/buttons/LabelMenuButton.qml

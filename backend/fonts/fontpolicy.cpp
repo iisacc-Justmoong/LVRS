@@ -36,7 +36,8 @@ const QStringList kSubstitutionTargets = {
     QStringLiteral("sans-serif")
 };
 
-const char *const kBundledPretendardFontResources[] = {
+const char *const kBundledFontResources[] = {
+    ":/qt/qml/LVRS/resources/font/Inter-Regular.ttf",
     ":/qt/qml/LVRS/resources/font/Pretendard-Regular.ttf",
     ":/qt/qml/LVRS/resources/font/Pretendard-Medium.ttf",
     ":/qt/qml/LVRS/resources/font/Pretendard-SemiBold.ttf",
@@ -120,7 +121,7 @@ void FontPolicy::loadBundledFonts()
         return;
     loaded = true;
 
-    for (const char *fontResource : kBundledPretendardFontResources)
+    for (const char *fontResource : kBundledFontResources)
         QFontDatabase::addApplicationFont(QString::fromLatin1(fontResource));
 }
 

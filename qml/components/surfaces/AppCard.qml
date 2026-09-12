@@ -5,6 +5,8 @@ import LVRS 1.0
 
 Rectangle {
     id: root
+    property bool motionEnabled: true
+    StateColorBehavior on color { motionEnabled: root.motionEnabled }
 
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
@@ -12,6 +14,7 @@ Rectangle {
     property int cornerRadius: Theme.radiusLg
     property string title: ""
     property string subtitle: ""
+    readonly property bool hasHeader: title.length > 0 || subtitle.length > 0
     readonly property int cardPadding: Theme.gap18
     readonly property int sectionSpacing: Theme.gap10
     readonly property real contentImplicitWidth: {
@@ -38,10 +41,7 @@ Rectangle {
                        cardPadding * 2 + Math.max(headerBlock.implicitWidth, contentImplicitWidth)
                    )
     implicitHeight: cardPadding * 2
-                    + headerBlock.implicitHeight
-                    + sectionSpacing
-                    + separator.height
-                    + sectionSpacing
+                    + (hasHeader ? headerBlock.implicitHeight + sectionSpacing * 2 + separator.height : 0)
                     + Math.max(1, contentSlot.childrenRect.height)
     clip: true
 
@@ -55,6 +55,7 @@ Rectangle {
 
         ColumnLayout {
             id: headerBlock
+            visible: root.hasHeader
             spacing: Theme.gap4
             Layout.fillWidth: true
             Layout.fillHeight: false
@@ -80,6 +81,7 @@ Rectangle {
 
         Rectangle {
             id: separator
+            visible: root.hasHeader
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.preferredHeight: Theme.strokeThin

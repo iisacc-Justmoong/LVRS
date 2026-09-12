@@ -88,3 +88,7 @@ LV.Modal {
     secondaryText: "Later"
 }
 ```
+
+## Shared motion
+
+The frame and backdrop enter together; the closing frame remains visible while fading. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

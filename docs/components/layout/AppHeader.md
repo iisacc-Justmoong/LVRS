@@ -73,3 +73,7 @@ LV.AppHeader {
 
 - Compact mode adjusts internal spacing values instead of switching a separate style preset.
 - Action slot is a default property alias, so child controls can be declared directly inside the component.
+
+## Shared motion
+
+Each header action compresses then rebounds through the AbstractButton foundation. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

@@ -4,6 +4,12 @@ import LVRS 1.0
 
 FocusScope {
     id: control
+    property bool motionEnabled: true
+    FocusRing {
+        anchors.fill: parent
+        active: control.enabled && control.activeFocus
+        motionEnabled: control.motionEnabled
+    }
 
     // Expose the underlying TextInput for full platform-native property access.
     readonly property alias inputItem: inputField
@@ -72,7 +78,7 @@ FocusScope {
     property color selectedTextColor: Theme.textPrimary
     property color backgroundColor: Theme.subSurface
     property color backgroundColorHover: Theme.surfaceAlt
-    property color backgroundColorPressed: Theme.accentBlueMuted
+    property color backgroundColorPressed: Theme.accentMuted
     property color backgroundColorFocused: backgroundColor
     property color backgroundColorDisabled: backgroundColor
     // Decoration is replaceable without moving or capturing native input/affordances.

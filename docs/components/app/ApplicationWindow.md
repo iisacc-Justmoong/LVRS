@@ -11,6 +11,41 @@ Location: `qml/ApplicationWindow.qml`
 - Bridge backend-driven render policy (`RenderQuality`) into root layer behavior.
 - Optionally auto-start runtime listeners and backend user-event mirror.
 - Provide a page-stack host (`PageRouter`) and adaptive navigation delegates.
+- Apply an app's primary accent to the shared LVRS theme.
+
+## App Primary Color
+
+Set `primaryColor` on the app root to brand primary buttons, selection highlights,
+sliders, checked controls, links, navigation, and Alert actions:
+
+```qml
+import LVRS 1.0 as LV
+
+LV.ApplicationWindow {
+    id: app
+    visible: true
+    primaryColor: "#A571E6"
+
+    LV.LabelButton { text: "Continue" }
+}
+```
+
+The initial fallback is LVRS blue, `Theme.defaultPrimary` (`#0A84FF`). The input
+also accepts a QML color binding or a `primaryColor` entry in
+`QQmlApplicationEngine::setInitialProperties()`. Changing `app.primaryColor`
+at runtime updates existing controls and controls created later. Assign
+`LV.Theme.defaultPrimary` to restore blue.
+
+Theme colors are shared by windows in the same QML engine. Set the color on the
+main app root; auxiliary windows that omit `primaryColor` inherit the current
+theme without resetting it. Multiple explicit inputs update that same theme;
+they do not establish independent window palettes. Separate QML engines retain
+separate themes. `AppBootstrapWindow` and `AppShell` inherit the input too.
+
+Explicit control color overrides remain in effect. Status colors (`danger`,
+`warning`, `success`), neutral surfaces, and named icon palette colors keep their
+existing meanings. The window's Qt Quick Controls `palette.highlight` and
+`palette.link` also follow the shared primary color.
 
 ## Startup Sequence
 
@@ -41,7 +76,11 @@ On completion, main flow is:
 
 ### Window and platform overrides
 
+- `primaryColor` (app accent; initially `Theme.defaultPrimary`, `#0A84FF`)
 - `windowColor`
+- `windowBackgroundOpacity` (default 0.50; background fill only)
+- `backgroundBlurEnabled` (default on when the native backend supports it)
+- read-only `backgroundBlurSupported`, `backgroundBlurActive`
 - `forceNativeDarkTitleBar`
 - `solidChrome`
 - system chrome interaction:
@@ -218,3 +257,13 @@ LV.ApplicationWindow {
     }
 }
 ```
+
+## Default background material
+
+The standard `background` is WindowMaterial with a uniform near-black fill (#0B0B0B) at 50% opacity and no gradients. On macOS an active native frosted backdrop also blurs other windows and the desktop behind this window. Window/foreground opacity remains 1; `windowBackgroundOpacity` controls only the background fill. `windowColor` defaults to Theme.materialWindowFill (#0B0B0B), independently of primaryColor, and remains explicitly overridable. Buttons and selection keep their app accent. The 64px material blur remains available for captured backdrops. The background remains full-bleed, with outer border/corner/elevation delegated to native window chrome. Consumers can override `background` normally. See [Materials](../surfaces/Materials.md).
+
+## Shared motion
+
+The drawer enters with a bounded rebound; navigation controls use the shared press response. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+
+`materialBackdropSource` exposes the app content/supersampling host without the sibling popup overlay. ContextMenu captures this item together with the window background, so content behind a menu is blurred without capturing the menu itself. This preserves capture safety during motion and resizing.

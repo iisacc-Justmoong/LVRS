@@ -1,4 +1,8 @@
 set(LVRS_SURFACE_QML_FILES
+    qml/components/surfaces/MaterialSurface.qml
+    qml/components/surfaces/PanelMaterial.qml
+    qml/components/surfaces/WindowMaterial.qml
+    qml/components/surfaces/Popover.qml
     qml/components/surfaces/AppCard.qml
     qml/components/surfaces/Card.qml
     qml/components/surfaces/CardImageContent.qml
@@ -6,6 +10,8 @@ set(LVRS_SURFACE_QML_FILES
     qml/components/surfaces/Alert.qml
     qml/components/surfaces/AlertButton.qml
     qml/components/surfaces/Modal.qml
+    qml/components/surfaces/Sheet.qml
+    qml/components/surfaces/Tooltip.qml
 )
 
 set_source_files_properties(

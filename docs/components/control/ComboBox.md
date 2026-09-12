@@ -74,3 +74,7 @@ LV.ComboBox {
 - On `clicked()`, injected `method` and `methods` run in order as part of signal dispatch.
 - The component does not rely on `RowLayout` for the indicator slot, so the stepper cannot stretch or collapse when used inside other layout containers.
 - When paired with `ContextMenu`, popup sizing remains independent from the fixed `ComboBox` frame; the menu may expand beyond the trigger width when content or explicit popup width requires it, and a narrow trigger-width binding no longer clamps the popup below its implicit content width.
+
+## Shared motion
+
+The compact composite transforms as one unit; the clicked signal remains immediate. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

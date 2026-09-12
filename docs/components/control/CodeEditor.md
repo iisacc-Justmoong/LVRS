@@ -59,3 +59,7 @@ LV.CodeEditor {
     text: "int main() { return 0; }"
 }
 ```
+
+## Shared motion
+
+The editor frame receives the same focus treatment; syntax and text updates are immediate. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

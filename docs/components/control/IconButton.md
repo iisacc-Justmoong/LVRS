@@ -107,3 +107,7 @@ LV.IconButton {
 
 - Keep icon names semantically stable and avoid opaque one-off names.
 - Prefer design-token icon size values for consistency with neighboring controls.
+
+## Shared motion
+
+The icon uses the same press rhythm as text buttons while its authored frame stays fixed. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

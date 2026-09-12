@@ -1,4 +1,5 @@
 import QtQuick
+import LVRS 1.0
 
 QtObject {
     id: root
@@ -84,6 +85,8 @@ QtObject {
     }
 
     function settleDuration() {
+        if (!Motion.animated || (router && !router.motionEnabled))
+            return 0
         var value = router ? Number(router.interactiveTransitionSettleDuration) : 0
         return isFinite(value) ? Math.max(0, Math.round(value)) : 0
     }

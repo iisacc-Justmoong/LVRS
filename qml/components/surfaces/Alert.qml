@@ -7,6 +7,13 @@ Item {
     id: root
 
     property bool open: false
+    property bool motionEnabled: true
+    property real revealProgress: open ? 1 : 0
+    SpringBehavior on revealProgress {
+        motionEnabled: root.motionEnabled
+        duration: root.open ? Motion.surfaceDuration : Motion.exitDuration
+        easingType: root.open ? Easing.OutBack : Easing.InCubic
+    }
     property string title: "Alert Dialog"
     property string message: "It can have 2 or 3 actions depending on your needs."
     property alias description: root.message
@@ -95,7 +102,7 @@ Item {
     signal tertiaryClicked()
     signal dismissed()
 
-    visible: open
+    visible: open || revealProgress > 0.001
     enabled: open
     anchors.fill: parent
     z: 1000
@@ -123,6 +130,7 @@ Item {
         objectName: "alertBackdrop"
         anchors.fill: parent
         color: root.backdropColor
+        opacity: Math.max(0, Math.min(1, root.revealProgress))
 
         MouseArea {
             anchors.fill: parent
@@ -157,7 +165,7 @@ Item {
         blurMax: Math.min(64, Theme.scaleMetric(32))
         blur: 1
         autoPaddingEnabled: true
-        visible: root.open
+        visible: root.visible
     }
 
     ShaderEffectSource {
@@ -204,6 +212,8 @@ Item {
 
     Rectangle {
         id: alertCard
+        scale: 0.92 + 0.08 * root.revealProgress
+        opacity: Math.max(0, Math.min(1, root.revealProgress))
         objectName: "alertCard"
         width: Math.max(0, Math.min(root.width - root.sidePadding * 2,
                                    root.maxWidth,

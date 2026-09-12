@@ -3,6 +3,7 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
 
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
@@ -100,6 +101,7 @@ Item {
         anchors.topMargin: control.verticalPadding
         anchors.bottomMargin: control.verticalPadding
         spacing: control.spacing
+        SpringBehavior on spacing { motionEnabled: control.motionEnabled }
     }
 
     onForceBorderlessToneChanged: scheduleSyncSegmentStyles()

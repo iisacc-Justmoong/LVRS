@@ -105,7 +105,24 @@ void ExampleSmokeTests::visual_catalog_example_loads()
     QVERIFY(obj);
     QTRY_VERIFY(obj->property("catalogViewportReady").toBool());
     QVERIFY(obj->property("catalogSafeAreaEntryReady").toBool());
-    QCOMPARE(obj->property("catalogComponentCount").toInt(), 59);
+    QCOMPARE(obj->property("catalogComponentCount").toInt(), 84);
+    QVERIFY(QMetaObject::invokeMethod(obj.data(), "activateCatalogEntry",
+                                     Q_ARG(QVariant, QStringLiteral("sheet"))));
+    QTRY_COMPARE(obj->property("activeEntryKey").toString(), QStringLiteral("sheet"));
+    QVERIFY(QMetaObject::invokeMethod(obj.data(), "activateCatalogEntry",
+                                     Q_ARG(QVariant, QStringLiteral("toggle-switch"))));
+    QTRY_VERIFY(obj->findChild<QObject *>(QStringLiteral("catalogToggleOn")));
+    QObject *slow = obj->findChild<QObject *>(QStringLiteral("catalogToggleSlow"));
+    QObject *immediate = obj->findChild<QObject *>(QStringLiteral("catalogToggleImmediate"));
+    QVERIFY(slow && immediate);
+    QCOMPARE(slow->property("transitionDuration").toInt(), 640);
+    QCOMPARE(immediate->property("transitionDuration").toInt(), 0);
+    QVERIFY(QMetaObject::invokeMethod(obj.data(), "activateCatalogEntry",
+                                     Q_ARG(QVariant, QStringLiteral("tooltip"))));
+    QTRY_VERIFY(obj->findChild<QObject *>(QStringLiteral("galleryTooltip")));
+    QVERIFY(QMetaObject::invokeMethod(obj.data(), "activateCatalogEntry",
+                                     Q_ARG(QVariant, QStringLiteral("window-material"))));
+    QTRY_VERIFY(obj->findChild<QObject *>(QStringLiteral("galleryMaterialPopover")));
 }
 
 QTEST_MAIN(ExampleSmokeTests)

@@ -102,9 +102,9 @@ AbstractButton {
     property color rowBackgroundColorIdle: "transparent"
     property color rowBackgroundColorHover: Theme.surfaceGhost
     property color rowBackgroundColorPressed: Theme.surfaceAlt
-    property color rowBackgroundColorActive: Theme.accentBlueMuted
+    property color rowBackgroundColorActive: Theme.accentMuted
     property color rowBackgroundColorInactive: Theme.panelBackground12
-    property color rowBackgroundColorDrag: Theme.accentBlueMuted
+    property color rowBackgroundColorDrag: Theme.accentMuted
     property bool _rowVisibleInternal: true
     readonly property bool rowVisible: _rowVisibleInternal
 
@@ -584,6 +584,7 @@ AbstractButton {
     backgroundColorDisabled: resolvedRowBackgroundColor
 
     background: Rectangle {
+        StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
         radius: control.resolvedCornerRadius
         antialiasing: true
         color: !control.effectiveEnabled

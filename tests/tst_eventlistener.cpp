@@ -277,7 +277,7 @@ LV.ApplicationWindow {
     QCoreApplication::sendEvent(window, &outsidePress);
 
     QTRY_VERIFY(!object->property("menuOpened").toBool());
-    QVERIFY(object->property("closeCount").toInt() >= 1);
+    QTRY_VERIFY(object->property("closeCount").toInt() >= 1);
 }
 
 void EventListenerTests::gesture_triggers_receive_touch_and_swipe()

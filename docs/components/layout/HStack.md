@@ -67,3 +67,7 @@ A. Contract allows any integer, but negative spacing causes overlap and should b
 - alignment token resolves to expected vertical placement,
 - spacing contract is consistent across responsive breakpoints,
 - mixed explicit/auto child alignment behaves as intended.
+
+## Shared motion
+
+The RowLayout spacing settles with the same timing as vertical stacks. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

@@ -155,3 +155,7 @@ function focusNodeByKey(key) {
 
 Using non-unique keys for sibling nodes breaks programmatic activation and expansion tracking.
 Assign stable unique identifiers for each logical node.
+
+## Shared motion
+
+Rows rebound, disclosure arrows rotate, and overscrolled content returns with shared timing. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

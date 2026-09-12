@@ -13,7 +13,40 @@ All platforms use the same authored logical sizes for spacing, radius, control s
 - Accent palette: iconset-derived color token set (`accentPaletteTokens`).
 - Metrics: spacing, radius, control size, dialog size, and interaction timings.
 
-Compact icon baseline:
+## App Accent
+
+Set `ApplicationWindow.primaryColor` on the app root, for example
+`primaryColor: "#A571E6"` for purple. It writes `Theme.primaryColor`; the existing
+read-only `primary` and `accent` tokens expose the current value. The initial
+fallback, `defaultPrimary`, remains `#0A84FF`. Changes propagate to existing
+controls and newly loaded content. Unconfigured auxiliary windows inherit the
+same theme. This scope is one QML engine, shared by its windows; assign the
+primary color in the main root. See [ApplicationWindow](components/app/ApplicationWindow.md#app-primary-color).
+
+| Token | Default blue | Custom primary |
+| --- | --- | --- |
+| `primary`, `accent` | `#0A84FF` | Supplied color |
+| `accentTint` | `#1F0A84FF` | Primary RGB, alpha multiplied by `31/255` |
+| `primaryOverlay`, `accentOverlay` | `#400A84FF` | Primary RGB, alpha multiplied by `64/255` |
+| `accentMuted` | `#25324D` | Primary at 25% over `panelBackground07` |
+| `accentDetail` | `#548AF7` | Primary color |
+| `alertActionPrimary` | `#027DFF` | Primary color |
+| `alertIconSurface` | `#192840` | Primary at 16% over `panelBackground07` |
+| `alertIconBorder` | `#244B7E` | Primary at 36% over `panelBackground07` |
+
+Custom primary alpha also multiplies the tint strength of the opaque muted and
+Alert icon surfaces. The blue fallback preserves the existing authored colors.
+Semantic pressed/selected states consume `accentMuted`/`accentDetail`; the named
+icon palette (`accentBlue`, `accentBlueMuted`, and `accentPaletteTokens`) stays
+fixed. Status colors and explicit per-control overrides also stay fixed.
+CheckBox automatically uses its drawn checkmark with a custom checked color so
+the stock blue image cannot cover the supplied accent.
+
+## Interaction Timing
+
+`toggleTransitionDuration` is `320ms` on every target. ToggleSwitch uses it for the knob's travel and rebound, with press feedback taking one quarter of that duration. Override the control's `transitionDuration` to change the pace or use `0` for immediate feedback.
+
+## Compact Icons
 
 - `iconSm` resolves to `18 x 18` logical pixels on desktop and mobile.
 - Stock action, menu, hierarchy, input, and selection-control icons consume this token unless a public size property is explicitly overridden.
@@ -70,7 +103,7 @@ Derived surface aliases:
 The updated Figma Alert uses dedicated color tokens. Its typography continues to
 use the existing Title and Body tokens; these colors do not create text styles.
 
-| Token | Value | Use |
+| Token | Default value | Use |
 | --- | --- | --- |
 | `alertGlassTint` | `#1D1F21`, 72% opacity | Translucent card tint |
 | `alertGlassEdge` | White, 20% opacity | Card edge |
@@ -85,7 +118,8 @@ use the existing Title and Body tokens; these colors do not create text styles.
 Discard text uses the existing `danger` token (`#FF453A`). See
 [Alert](components/surfaces/Alert.md) for material capture, layout, and fallback
 behavior. The Alert's 500px preferred width is independent of the older shared
-dialog bounds below.
+dialog bounds below. Primary actions and icon frame colors follow a custom app
+accent as described above.
 
 ## TextField Glass
 
@@ -125,7 +159,7 @@ Rules:
 
 There are two layers:
 
-- Stable semantic accent properties (`accentBlue`, `accentRed`, `accentGreen`, etc.).
+- Stable named icon colors (`accentBlue`, `accentRed`, `accentGreen`, etc.).
 - Extracted palette list: `accentPaletteTokens`.
 
 `accentPaletteTokens` item schema:
@@ -139,7 +173,7 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
 ## Related UI Defaults
 
 - Context menu colors:
-  - `contextMenuSurface: panelBackground03`
+  - `contextMenuSurface: materialTint` (`#141414`; ContextMenu applies 25% tint)
   - `contextMenuDivider: panelBackground08`
   - `contextMenuItemSelectedBackground`
   - `contextMenuItemInactiveBackground`
@@ -149,6 +183,11 @@ The extracted palette is generated from `resources/iconset/*.svg` fill/stroke co
   - desktop and mobile: `radiusSm: 4`, `radiusLg: 12`
 
 ## Validation
+
+`LVRSTests_primary_color` covers the blue fallback, declarative and initial-property
+inputs, QML palette bindings, runtime changes, inherited window colors, engine isolation, explicit
+control overrides, derived selection colors, and rendered button/CheckBox pixels.
+Run it with `ctest --test-dir build -R primary_color --output-on-failure`.
 
 `LVRSTests_platform_integration` checks the same authored component dimensions on Android and iOS. `LVRSTests_import_api` and `LVRSTests_list_composites` cover platform switching, controls, and all ListItem variants. `LVRSTests_font_policy` rejects obsolete scaled aliases. The installed consumer verifies shared sizes through `find_package(LVRS)` and the installed QML module.
 
@@ -188,3 +227,11 @@ If tokens are synchronized with external design tools:
 - keep canonical token names stable,
 - treat rename as a breaking change,
 - stage deprecations by keeping old alias tokens for at least one release cycle.
+
+## Standard material tokens
+
+`applicationWindowOpacity` is 0.50 for both ApplicationWindow and standalone WindowMaterial. Their fill uses `materialWindowFill` (#0B0B0B) across the entire surface, independently of Primary and without radial gradients; explicit windowColor/material color overrides remain supported. The standalone `materialDenseOpacity` / `materialGlassOpacity` are 0.75 / 0.25; `materialDenseBlur` / `materialGlassBlur` are 64 / 16 logical pixels. `materialIntenseOpacity` / `materialFaintOpacity` are 0.40 / 0.11. `materialTint` is #141414. `materialPanelRadius` / `materialWindowRadius` are 12 / 16 logical pixels; `materialDenseEdge` / `materialGlassEdge` use white at 12% / 22%. Material accents inherit `Theme.primary`; the default Window fill remains near black.
+
+Figma panel RGB values and white text alpha values are stored without 8-bit rounding. `panelBackground04` renders as #181919. `menuDivider` is panelBackground08; `contextMenuDivider` is 30% white. Icon names nodesTest and wechat normalize to their case-sensitive resource filenames. See [audit](figma-parity.md).
+
+Menu material tokens: `contextMenuOpacity = 0.12`, `contextMenuBlur = materialDenseBlur` (64px), `contextMenuAccentStrength = 0.08`. These are the current user-requested glass treatment; the original Figma Material Dense/Glass values are retained for their other consumers.

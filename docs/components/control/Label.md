@@ -80,3 +80,7 @@ Use semantic `style` constants instead of hard-coded font metrics for maintainab
 
 Q. Should text style be configured by custom font overrides or style constants?  
 A. Prefer style constants first, then apply minimal overrides only when unavoidable.
+
+## Shared motion
+
+Opacity transitions smoothly. Text values, accessibility content and measurement update synchronously. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

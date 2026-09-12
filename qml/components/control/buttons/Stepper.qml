@@ -3,6 +3,31 @@ import LVRS 1.0
 
 Item {
     id: control
+    property bool motionEnabled: true
+    readonly property InteractionMotion contentMotion: InteractionMotion {
+        objectName: "interactionMotion"
+        target: iconImage
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.effectiveEnabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+    readonly property InteractionMotion visualMotion0: InteractionMotion {
+        target: stepperBackground
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.enabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+
+    readonly property InteractionMotion visualMotion1: InteractionMotion {
+        target: stepperOverlay
+        autoAttach: true
+        motionEnabled: control.motionEnabled && control.enabled
+        pressed: interactionArea.pressed
+        hovered: interactionArea.containsMouse
+    }
+
 
     enum StepperArrow {
         UpDown,
@@ -54,7 +79,7 @@ Item {
         ? Theme.surfaceAlt
         : Qt.darker(Theme.primary, 1.12)
     readonly property color backgroundColorPressed: control.tone === AbstractButton.Borderless
-        ? Theme.accentBlueMuted
+        ? Theme.accentMuted
         : Qt.darker(Theme.primary, 1.2)
     readonly property color backgroundColorDisabled: Theme.panelBackground04
     readonly property color resolvedBackgroundColor: !control.effectiveEnabled
@@ -129,6 +154,7 @@ Item {
     }
 
     Rectangle {
+        id: stepperBackground
         anchors.fill: parent
         objectName: control.objectName.length > 0 ? control.objectName + "_background" : ""
         radius: control.cornerRadius
@@ -156,6 +182,7 @@ Item {
     }
 
     Rectangle {
+        id: stepperOverlay
         anchors.fill: parent
         visible: control.tone !== AbstractButton.Borderless && control.primaryStateOverlayColor.a > 0
         radius: control.cornerRadius

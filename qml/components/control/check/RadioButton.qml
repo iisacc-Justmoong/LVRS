@@ -74,6 +74,7 @@ AbstractButton {
 
         Rectangle {
             id: indicator
+            StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
             objectName: control.objectName.length > 0 ? control.objectName + "_indicator" : ""
             x: 0
             y: (contentLayout.height - height) / 2
@@ -87,6 +88,8 @@ AbstractButton {
 
             Rectangle {
                 id: dot
+                scale: control.checked ? 1 : 0
+                SpringBehavior on scale { motionEnabled: control.motionEnabled && control.enabled }
                 objectName: control.objectName.length > 0 ? control.objectName + "_dot" : ""
                 width: control.dotSize
                 height: control.dotSize

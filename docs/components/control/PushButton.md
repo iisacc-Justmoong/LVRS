@@ -56,3 +56,7 @@ checks the existing preset names against the same updated geometry.
 Set `LVRS_BUTTON_CAPTURE_DIR` to a directory under `build/` to save the rendered
 desktop and mobile matrices. Run `ctest --test-dir build --output-on-failure`
 after `cmake --build build` with the build-tree LVRS library in the runtime path.
+
+## Shared motion
+
+The label and icon share one compact compression and elastic release. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

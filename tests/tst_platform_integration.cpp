@@ -366,9 +366,9 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
         QTRY_VERIFY(root->property("catalogViewportReady").toBool());
         QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-        QCOMPARE(root->property("catalogComponentCount").toInt(), 59);
+        QCOMPARE(root->property("catalogComponentCount").toInt(), 84);
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
-        QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("catalog-overview"));
+        QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("motion"));
         QVERIFY(root->property("activeEntry").isValid());
     }
 }
@@ -618,7 +618,7 @@ Item {
         && listFooter.stockButtonPadding === 2
         && listFooter.stockButtonHeight === 22
         && listFooter.stockMenuButtonSpacing === -2
-        && listFooter.implicitWidth === 86
+        && listFooter.implicitWidth === 88
         && listFooter.implicitHeight === 26
         && figmaLabelButton.tone === LV.AbstractButton.Primary
         && figmaIconButton.tone === LV.AbstractButton.Primary

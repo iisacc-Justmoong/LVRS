@@ -201,3 +201,7 @@ library being validated. Other platforms should use their native RHI backend.
 Set `LVRS_ALERT_CAPTURE_DIR` to a folder under `build/` when running
 `alert_glass_overlay_and_input_contract` to save rendered reference images.
 Icon notices are bundled in `resources/images/alert-icons-LICENSE.txt`.
+
+## Shared motion
+
+The centered card grows from 92% with rebound while the backdrop fades. The exit remains visible until settled. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

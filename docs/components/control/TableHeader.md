@@ -143,3 +143,7 @@ A. Current contract keeps uniform left-aligned header text. Per-column layout re
 ## Figma Contract
 
 Node `203:3647` is `717 × 25`: a `24` header row plus a `1` bottom separator. Three default columns are `239` wide, each label has `8` horizontal padding, and the text uses the 12/12 Description style. Mobile uses the same `717 × 25` geometry, `8` padding, `1` separator, and `12px` Description typography.
+
+## Shared motion
+
+Header cells inherit text-entry focus and selection feedback from their delegates. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

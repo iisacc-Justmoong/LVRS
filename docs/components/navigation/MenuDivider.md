@@ -53,3 +53,9 @@ LV.MenuDivider {
 
 - Use only `axis` to choose orientation as the primary control.
 - Keep `thickness: 1`, `crossPadding: 1`, and `linePadding: 0` for Figma parity unless a different separator is explicitly required.
+
+## Shared motion
+
+A divider participates in surface presentation and supports smooth opacity changes; it has no action. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+
+The regular divider consumes `Theme.menuDivider` (panelBackground08). ContextMenuDivider separately uses 30% white with a 4px inset.

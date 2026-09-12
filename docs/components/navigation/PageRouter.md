@@ -134,3 +134,7 @@ if (!router.interactiveTransitionActive)
 router.updateInteractiveTransition(progress, { velocityX: velocityX })
 router.finishInteractiveTransition()
 ```
+
+## Shared motion
+
+New pages settle from a modest scale change. Interactive gestures track directly and settle on release. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

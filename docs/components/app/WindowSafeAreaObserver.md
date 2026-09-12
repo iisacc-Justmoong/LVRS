@@ -55,3 +55,7 @@ LV.ApplicationWindow {
 - This matters because LVRS intentionally keeps root content full-bleed on mobile; the app decides when to honor system insets.
 - Before the platform window exists, `resolved` stays `false` and the inset values stay `0`.
 - On platforms that do not report safe-area margins, the observer still resolves successfully after attach, but all inset values remain `0`.
+
+## Shared motion
+
+The observer reports native geometry synchronously so the surrounding window can lay out correctly. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
