@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QObject>
+#include <QRectF>
 #include <QtQml/qqml.h>
 
 class NativeWindowStyle : public QObject
@@ -24,6 +25,7 @@ public:
     Q_INVOKABLE bool applyTitleBarColor(QObject *window, const QColor &color, bool darkAppearance = true);
     Q_INVOKABLE bool applySolidChrome(QObject *window, const QColor &color, bool darkAppearance = true);
     Q_INVOKABLE bool applyBackgroundBlur(QObject *window, bool enabled = true);
+    Q_INVOKABLE QRectF layoutTitleBar(QObject *window, qreal height, qreal leftMargin = 12);
     Q_INVOKABLE bool applyMobileCoverageFlags(QObject *window,
                                               bool expandedClientArea = true,
                                               bool fullscreenGeometryHint = true);

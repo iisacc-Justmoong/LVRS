@@ -20,7 +20,7 @@ Item {
         spacing: 24
         LV.Label {
             style: header
-            text: "File · full preview with bottom caption"
+            text: "File · Small 140 × 160 / Medium 210 × 240 / Large 360 × 280"
         }
         Flow {
             width: parent.width

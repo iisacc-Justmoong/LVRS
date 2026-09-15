@@ -27,7 +27,7 @@ LV.Card {
 
 | `type` | Figma node | Default logical size | Content |
 |---|---|---|---|
-| `Card.File` | [852:997](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=852-997) | Medium 256 × 320 | Image fills the card; caption stays at its bottom |
+| `Card.File` | [852:997](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=852-997) | Medium 210 × 240 | Image fills the card; caption stays at its bottom |
 | `Card.FilePreview` | [852:993](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=852-993) | 480 × 320 | Unadorned image preview |
 | `Card.Folder` | [786:414](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=786-414) | 256 × 280 | Icon rows, summary and action |
 | `Card.Project` | [786:566](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=786-566) | 256 × 280 | Milestone progress, rows and participants |
@@ -36,8 +36,10 @@ LV.Card {
 | `Card.Member` | [786:966](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=786-966) | 256 × 280 | Member role, projects, team and location |
 | `Card.Link` | [786:1084](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=786-1084) | 256 × 280 | Domain preview, title, description and visit action |
 
-File supports `Card.Small` (192 × 192), `Card.Medium` (256 × 320), and
-`Card.Large` (480 × 280), each with `Card.Brief` or `Card.Detailed`. All seven
+File supports `Card.Small` (140 × 160), `Card.Medium` (210 × 240), and
+`Card.Large` (360 × 280), each with `Card.Brief` or `Card.Detailed`. These dimensions
+were measured from all 18 variants of Figma node `852:997` on 2026-09-13;
+the component descriptions still contain the previous sizes. All seven
 card types have default, hover and selected visuals. The current Theme uses
 the same logical sizes on desktop and mobile. Explicit width/height overrides
 remain responsive. Information cards grow in implicit height when more rows
@@ -116,8 +118,11 @@ aliases so compiled, filesystem and installed imports resolve the same URLs.
 
 `LVRSTests_card` uses Qt Test with real QML creation, pointer/keyboard events and
 Qt Quick image captures. It covers the Figma size/state matrix on desktop and
-mobile Theme targets, resizing and truncation, custom previews, progress clamps,
+mobile Theme targets, full-size previews and bottom-caption/scrim geometry at
+the revised File sizes, resizing and truncation, custom previews, progress clamps,
 failed-image recovery, independent nested actions and rounded Fill rendering.
+Pixel captures account for the window's device pixel ratio, so Retina captures
+verify the same logical File dimensions and caption scrim as 1× displays.
 
 ```sh
 cmake -S . -B build -DLVRS_BUILD_TESTS=ON -DLVRS_BUILD_EXAMPLES=ON

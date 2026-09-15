@@ -30,6 +30,14 @@ bool NativeWindowStyle::applyBackgroundBlur(QObject *window, bool enabled)
     return false;
 }
 
+QRectF NativeWindowStyle::layoutTitleBar(QObject *window, qreal height, qreal leftMargin)
+{
+    Q_UNUSED(window);
+    Q_UNUSED(height);
+    Q_UNUSED(leftMargin);
+    return {};
+}
+
 bool NativeWindowStyle::applyTitleBarColor(QObject *window, const QColor &color, bool darkAppearance)
 {
     Q_UNUSED(window);

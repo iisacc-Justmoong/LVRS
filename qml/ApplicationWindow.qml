@@ -124,6 +124,12 @@ Controls.ApplicationWindow {
     property bool _nativeBackgroundBlurActive: false
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
+    // Opt into one native title-bar row; zero preserves AppKit's default layout.
+    property real nativeTitleBarHeight: 0
+    property real nativeTitleBarLeftMargin: Theme.gap12
+    readonly property rect nativeTitleBarControlsRect: visibility === Window.FullScreen
+        ? Qt.rect(0, 0, 0, 0) : _nativeTitleBarControlsRect
+    property rect _nativeTitleBarControlsRect: Qt.rect(0, 0, 0, 0)
     // Global listeners remain opt-in. Stock platform profiles keep the runtime daemon
     // disabled unless a consumer explicitly enables global listeners or overrides it.
     property bool globalEventListenersEnabled: false
@@ -400,8 +406,13 @@ Controls.ApplicationWindow {
     function applyNativeWindowStyle() {
         windowRoot._nativeBackgroundBlurActive = NativeWindowStyle.applyBackgroundBlur(windowRoot, windowRoot.backgroundBlurEnabled)
             && windowRoot.backgroundBlurEnabled
-        if (windowRoot.solidChrome && NativeWindowStyle.solidChromeSupported)
-            return NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
+        if (windowRoot.solidChrome && NativeWindowStyle.solidChromeSupported) {
+            const applied = NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
+            windowRoot._nativeTitleBarControlsRect = NativeWindowStyle.layoutTitleBar(windowRoot,
+                windowRoot.nativeTitleBarHeight, windowRoot.nativeTitleBarLeftMargin)
+            return applied
+        }
+        windowRoot._nativeTitleBarControlsRect = NativeWindowStyle.layoutTitleBar(windowRoot, 0)
         if (!NativeWindowStyle.titleBarColorSupported)
             return false
         return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
@@ -476,8 +487,10 @@ Controls.ApplicationWindow {
     onVisibleChanged: {
         applyMobileDisplayCoverageOverride()
         RenderQuality.applyWindow(windowRoot)
-        if (visible)
+        if (visible) {
             applyNativeWindowStyle()
+            Qt.callLater(windowRoot.applyNativeWindowStyle)
+        }
     }
     onFullWindowAreaOnMobileEnabledChanged: applyMobileDisplayCoverageOverride()
     onMobileDisplayCoverageOverrideEnabledChanged: applyMobileDisplayCoverageOverride()
@@ -490,6 +503,8 @@ Controls.ApplicationWindow {
     }
     onForceNativeDarkTitleBarChanged: applyNativeWindowStyle()
     onSolidChromeChanged: applyNativeWindowStyle()
+    onNativeTitleBarHeightChanged: applyNativeWindowStyle()
+    onNativeTitleBarLeftMarginChanged: applyNativeWindowStyle()
     onBackgroundBlurEnabledChanged: applyNativeWindowStyle()
     onInactiveRenderDowngradeEnabledChanged: {
         RenderQuality.inactiveRenderDowngradeEnabled = inactiveRenderDowngradeEnabled

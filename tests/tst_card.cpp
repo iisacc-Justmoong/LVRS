@@ -32,7 +32,7 @@ void CardTests::figma_contract_data()
             for (int size = 0; size < (type == 0 ? 3 : 1); ++size) {
                 for (int detail = 0; detail < (type == 0 ? 2 : 1); ++detail) {
                     for (int state = 1; state <= (type == 1 ? 1 : 3); ++state) {
-                        const QSize fileSizes[] = {{192, 192}, {256, 320}, {480, 280}};
+                        const QSize fileSizes[] = {{140, 160}, {210, 240}, {360, 280}};
                         const QSize dimensions = type == 0 ? fileSizes[size]
                             : type == 1 ? QSize(480, 320) : QSize(256, 280);
                         const QByteArray name = QString("%1-%2-%3-%4-%5")
@@ -70,6 +70,7 @@ LV.Card {
     QVERIFY(card);
     QTRY_COMPARE(card->implicitWidth(), dimensions.width());
     QTRY_COMPARE(card->implicitHeight(), dimensions.height());
+    QTRY_COMPARE(card->size(), QSizeF(dimensions));
     QCOMPARE(card->property("effectiveSelected").toBool(), type != 1 && displayState == 3);
     QCOMPARE(card->property("borderWidth").toReal(), type == 1 ? 0.0 : displayState == 3 ? 2.0 : 1.0);
     if (type == 0) {
@@ -79,6 +80,15 @@ LV.Card {
         const int detailedHeights[] = {75, 99, 81};
         QTRY_COMPARE(caption->height(), detail ? detailedHeights[size] : briefHeights[size]);
         QCOMPARE(caption->x(), (size == 0 ? 12 : 18) + (displayState == 3 ? 2.0 : 1.0));
+        QTRY_COMPARE(caption->width(), card->width() - 2 * caption->x());
+        QTRY_COMPARE(caption->y() + caption->height(), card->height() - caption->x());
+        auto *preview = card->findChild<QQuickItem *>("card_previewImage");
+        auto *scrim = card->findChild<QQuickItem *>("card_scrim");
+        QVERIFY(preview && scrim);
+        QTRY_COMPARE(preview->size(), QSizeF(dimensions));
+        const int briefScrimHeights[] = {113, 121, 121};
+        const int detailedScrimHeights[] = {151, 181, 163};
+        QTRY_COMPARE(scrim->height(), detail ? detailedScrimHeights[size] : briefScrimHeights[size]);
         auto *title = card->findChild<QQuickItem *>("card_filename");
         QVERIFY(title);
         QCOMPARE(title->property("font").value<QFont>().pixelSize(), size == 0 ? 13 : 15);
@@ -211,22 +221,28 @@ LV.Card { size: LV.Card.Small; previewSource: "file:///nonexistent-lvrs-card.png
     QCOMPARE(image->property("fillMode").toInt(), 2); // PreserveAspectCrop
     qInfo() << "Decoded preview" << image->property("sourceSize") << image->implicitWidth() << image->implicitHeight();
     QTest::qWait(100);
-    const auto capture = card->grabToImage(QSize(192, 192));
+    const auto capture = card->grabToImage(card->size().toSize());
     QVERIFY(capture);
     QSignalSpy ready(capture.data(), &QQuickItemGrabResult::ready);
     QTRY_VERIFY_WITH_TIMEOUT(!ready.isEmpty(), 5000);
     const QImage pixels = capture->image();
     QVERIFY(!pixels.isNull());
+    const qreal pixelScale = window.devicePixelRatio();
+    QCOMPARE(card->size(), QSizeF(140, 160));
+    QCOMPARE(pixels.size(), QSize(140, 160) * pixelScale);
     const QString captureDir = qEnvironmentVariable("LVRS_CARD_CAPTURE_DIR");
     if (!captureDir.isEmpty()) {
         QVERIFY(QDir().mkpath(captureDir));
         QVERIFY(pixels.save(captureDir + "/file-small.png"));
     }
+    const int centerX = pixels.width() / 2;
+    const int photoY = qRound(30 * pixelScale);
+    const int scrimY = pixels.height() - qRound(12 * pixelScale);
     qInfo() << "Card graphics API" << window.rendererInterface()->graphicsApi()
-            << "preview pixel" << pixels.pixelColor(96, 30);
+            << "preview pixel" << pixels.pixelColor(centerX, photoY);
     QVERIFY(pixels.pixelColor(0, 0).alpha() < 20); // Rounded corner really clips.
-    QVERIFY(pixels.pixelColor(96, 30).lightness() > 45); // Photo, not a blank rectangle.
-    QVERIFY(pixels.pixelColor(96, 180).lightness() < pixels.pixelColor(96, 30).lightness());
+    QVERIFY(pixels.pixelColor(centerX, photoY).lightness() > 45); // Photo, not a blank rectangle.
+    QVERIFY(pixels.pixelColor(centerX, scrimY).lightness() < pixels.pixelColor(centerX, photoY).lightness());
 }
 
 void CardTests::catalog_renders_all_designs()

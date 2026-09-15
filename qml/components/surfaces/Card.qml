@@ -109,8 +109,8 @@ AbstractButton {
     verticalPadding: 0
     spacing: 0
     clip: true
-    implicitWidth: Theme.scaleMetric(previewOnly ? 480 : type === Card.File ? size === Card.Small ? 192 : size === Card.Large ? 480 : 256 : 256)
-    implicitHeight: previewOnly ? Theme.scaleMetric(320) : type === Card.File ? Theme.scaleMetric(size === Card.Small ? 192 : size === Card.Large ? 280 : 320) : Math.max(Theme.scaleMetric(280), bodyLoader.item ? (bodyLoader.item as Item).implicitHeight : 0)
+    implicitWidth: Theme.scaleMetric(previewOnly ? 480 : type === Card.File ? size === Card.Small ? 140 : size === Card.Large ? 360 : 210 : 256)
+    implicitHeight: previewOnly ? Theme.scaleMetric(320) : type === Card.File ? Theme.scaleMetric(size === Card.Small ? 160 : size === Card.Large ? 280 : 240) : Math.max(Theme.scaleMetric(280), bodyLoader.item ? (bodyLoader.item as Item).implicitHeight : 0)
     Accessible.name: title
     Accessible.description: [description, details, metadata, statusText].filter(value => value.length > 0).join(". ")
 

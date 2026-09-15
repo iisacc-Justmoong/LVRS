@@ -82,6 +82,9 @@ On completion, main flow is:
 - `backgroundBlurEnabled` (default on when the native backend supports it)
 - read-only `backgroundBlurSupported`, `backgroundBlurActive`
 - `forceNativeDarkTitleBar`
+- `nativeTitleBarHeight`: opt-in macOS title-bar row height in logical pixels; `0` preserves the native default.
+- `nativeTitleBarLeftMargin`: native button group leading margin, default `Theme.gap12`.
+- `nativeTitleBarControlsRect` (read-only): actual native button bounds in window content coordinates; empty when disabled, unsupported or fullscreen.
 - `solidChrome`
 - system chrome interaction:
   - `windowChromeInteractionsEnabled`
@@ -218,6 +221,7 @@ Signals:
 
 - Adaptive layout transitions are guarded to avoid invalid one-step transitions and resize oscillation.
 - Solid desktop chrome uses the same system move and eight-region native-first resize layer as `LV.Window`, including the min/max-constrained macOS fallback when Qt Cocoa rejects system resize. Set `windowDragHandleEnabled` or `windowResizeHandlesEnabled` to `false` when application-owned hit regions call the request methods directly; use `windowDragExclusionItems` to keep title-bar controls interactive.
+- A unified toolbar can set `nativeTitleBarHeight: 56` and start its content at y=0. Reserve `nativeTitleBarControlsRect.x + nativeTitleBarControlsRect.width` before the toolbar controls, then add the application's usual spacing. Set `windowDragHandleHeight` to the same row height and exclude the interactive toolbar items. LVRS retains AppKit's actual buttons and their native spacing, updates their geometry on resize/reopen, and restores system layout during fullscreen. Unsupported platforms return an empty control rectangle. `LVRSTests_nativewindowblur::unified_titlebar_controls` verifies the native button centers, hit regions, reset, resize, fullscreen round trip and native-window recreation with Cocoa.
 - `windowMoveAttempted(started)` and `windowResizeAttempted(edges, started)` report whether the platform accepted each pointer-initiated request.
 - Adaptive scaffold metrics now come from `Platform.runtimeProfile()` on a per-OS basis rather than being inferred from a coarse mobile/desktop family split.
 - `globalEventListenersEnabled` and `autoHookBackendUserEvents` are independent; enabling backend user-event mirroring does not force global listeners.

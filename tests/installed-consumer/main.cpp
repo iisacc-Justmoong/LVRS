@@ -119,8 +119,8 @@ LV.VStack {
     function checkCards() {
         for (let i = 0; i < 8; ++i) {
             const card = cards.itemAt(i)
-            if (!card || card.type !== i || card.implicitWidth !== (i === 1 ? 480 : 256)
-                || card.implicitHeight !== (i < 2 ? 320 : 280))
+            if (!card || card.type !== i || card.implicitWidth !== (i === 0 ? 210 : i === 1 ? 480 : 256)
+                || card.implicitHeight !== (i === 0 ? 240 : i === 1 ? 320 : 280))
                 return false
         }
         return true

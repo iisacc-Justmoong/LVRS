@@ -4,6 +4,11 @@ Subsequent user-directed revisions: WindowMaterial and ApplicationWindow now use
 
 Source of truth: [Layerd Visual Render System](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System). The audit reads the current components and bound variables. It does not change Figma.
 
+Card revision (2026-09-13): File node `852:997` now measures Small 140 × 160,
+Medium 210 × 240, and Large 360 × 280 across all 18 variants. The current
+[Card contract](components/surfaces/Card.md) supersedes the historical File
+dimensions in the inventory below.
+
 The [family inventory](figma-family-inventory.json) records the root geometry, paints and effects of 65 component families and their variants. The audit also reads the 21 Color variables, Material/Alert/Card/ListItem/Slider/ColorPicker/Sheet variables, all 2,349 Iconset component names, and the relevant child-node typography and spacing. This is a structural and targeted visual audit, not a pixel comparison of every icon or every application screen.
 
 ## Corrections
