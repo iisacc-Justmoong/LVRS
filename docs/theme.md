@@ -235,3 +235,7 @@ If tokens are synchronized with external design tools:
 Figma panel RGB values and white text alpha values are stored without 8-bit rounding. `panelBackground04` renders as #181919. `menuDivider` is panelBackground08; `contextMenuDivider` is 30% white. Icon names nodesTest and wechat normalize to their case-sensitive resource filenames. See [audit](figma-parity.md).
 
 Menu material tokens: `contextMenuOpacity = 0.12`, `contextMenuBlur = materialDenseBlur` (64px), `contextMenuAccentStrength = 0.08`. These are the current user-requested glass treatment; the original Figma Material Dense/Glass values are retained for their other consumers.
+
+## Mobile tab typography and colors
+
+`FontPolicy.systemFamily` reports `QFontDatabase::systemFont(GeneralFont)` without changing the application Pretendard policy. MobileTab uses it for the iOS presentation. Android uses available Roboto with the established fallback policy. `mobileTabAndroidSurface`, `mobileTabAndroidIndicator`, `mobileTabAndroidSelectedText`, `mobileTabAndroidText` and `mobileTabAndroidBadge` retain the Figma Material 3 Blue dark colors. See [Tabs](components/navigation/Tabs.md).

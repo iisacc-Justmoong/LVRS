@@ -14,6 +14,7 @@ lvrs_add_example_app(
         qml/MotionLab.qml
         qml/CardGallery.qml
         qml/SliderGallery.qml
+        qml/TabsGallery.qml
         qml/ColorPickerGallery.qml
         qml/SheetGallery.qml
         qml/TooltipGallery.qml

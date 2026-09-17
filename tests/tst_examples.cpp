@@ -105,7 +105,7 @@ void ExampleSmokeTests::visual_catalog_example_loads()
     QVERIFY(obj);
     QTRY_VERIFY(obj->property("catalogViewportReady").toBool());
     QVERIFY(obj->property("catalogSafeAreaEntryReady").toBool());
-    QCOMPARE(obj->property("catalogComponentCount").toInt(), 84);
+    QCOMPARE(obj->property("catalogComponentCount").toInt(), 88);
     QVERIFY(QMetaObject::invokeMethod(obj.data(), "activateCatalogEntry",
                                      Q_ARG(QVariant, QStringLiteral("sheet"))));
     QTRY_COMPARE(obj->property("activeEntryKey").toString(), QStringLiteral("sheet"));

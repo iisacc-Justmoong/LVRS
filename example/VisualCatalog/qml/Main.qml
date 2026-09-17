@@ -171,6 +171,8 @@ LV.ApplicationWindow {
             return inputFieldPreview
         case "slider-gallery":
             return sliderGalleryPreview
+        case "tabs-gallery":
+            return tabsGalleryPreview
         case "text-editor":
             return textEditorPreview
         case "code-editor":
@@ -1878,6 +1880,11 @@ LV.ApplicationWindow {
     Component {
         id: sliderGalleryPreview
         SliderGallery { }
+    }
+
+    Component {
+        id: tabsGalleryPreview
+        TabsGallery { }
     }
 
     Component {

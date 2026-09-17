@@ -137,6 +137,13 @@ QtObject {
     readonly property color captionColor: textTokenCaption
     readonly property color disabledColor: textTokenDisabled
 
+    // Figma Tabs / Material 3 Blue dark navigation tokens.
+    readonly property color mobileTabAndroidSurface: "#1e1f25"
+    readonly property color mobileTabAndroidIndicator: "#404659"
+    readonly property color mobileTabAndroidSelectedText: "#c0c6dc"
+    readonly property color mobileTabAndroidText: "#c5c6d0"
+    readonly property color mobileTabAndroidBadge: "#f2b8b5"
+
     readonly property color textPrimary: titleHeaderColor
     readonly property color textSecondary: bodyColor
     readonly property color textTertiary: descriptionColor

@@ -56,6 +56,16 @@ QtObject {
 
     readonly property var sections: [
         section({
+            key: "tabs", label: "Tabs", iconGlyph: "T",
+            summary: "Desktop content tabs and platform-shaped mobile destination bars.",
+            items: [
+                component({key: "tab", label: "Tab", location: "qml/components/navigation/Tab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Underline and Surface content tabs with six visual states.", usage: "LV.Tab { text: \"Overview\"; selected: true }", related: ["tab-bar", "mobile-tab"]}),
+                component({key: "tab-bar", label: "TabBar", location: "qml/components/navigation/TabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Content, equal and scrollable width policies.", usage: "LV.TabBar { model: [{text: \"Overview\"}, {text: \"Activity\"}] }", related: ["tab", "mobile-tab-bar"]}),
+                component({key: "mobile-tab", label: "MobileTab", location: "qml/components/navigation/MobileTab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "iOS and Android icon, label, selection and badge states.", usage: "LV.MobileTab { text: \"Home\"; iconName: \"home\"; selected: true }", related: ["mobile-tab-bar", "tab"]}),
+                component({key: "mobile-tab-bar", label: "MobileTabBar", location: "qml/components/navigation/MobileTabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Floating iOS and Material 3 Android bottom tab-bar layouts.", usage: "LV.MobileTabBar { model: [{text: \"Home\", iconName: \"home\"}, {text: \"Library\", iconName: \"nodesfolder\"}, {text: \"Settings\", iconName: \"generalsettings\"}] }", related: ["mobile-tab", "tab-bar"]})
+            ]
+        }),
+        section({
             key: "motion-and-support", label: "Motion & supporting types", iconGlyph: "M",
             summary: "Shared motion primitives and the supporting types used inside LVRS controls.",
             items: [

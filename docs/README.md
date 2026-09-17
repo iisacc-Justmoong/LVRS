@@ -128,6 +128,7 @@ This structure is intentional so the same question can be answered consistently 
 
 ## Navigation Components
 
+- `docs/components/navigation/Tabs.md`
 - `docs/components/navigation/Navigator.md`
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/PageTransitionController.md`

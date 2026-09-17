@@ -1,6 +1,8 @@
 #include <QtTest>
 
 #include <QFont>
+#include <QFontDatabase>
+#include <QFontInfo>
 #include <QtPlugin>
 
 #include "backend/fonts/fontpolicy.h"
@@ -22,6 +24,8 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
 {
     FontPolicy policy;
     QVERIFY(!policy.preferredFamily().isEmpty());
+    QCOMPARE(policy.systemFamily(), QFontInfo(QFontDatabase::systemFont(QFontDatabase::GeneralFont)).family());
+    QVERIFY(!policy.systemFamily().isEmpty());
     QVERIFY(!policy.effectiveFamily().isEmpty());
     QCOMPARE(policy.resolveFamily(QString()), policy.effectiveFamily());
 

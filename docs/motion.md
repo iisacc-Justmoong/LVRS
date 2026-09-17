@@ -67,7 +67,7 @@ Use a monotonic easing (OutCubic) for opacity and bounded data geometry where ov
 
 ## VisualCatalog verification
 
-The Component Studio indexes every shipped QML file plus WindowSafeAreaObserver (84 entries). Search matches type, summary and source path. Each entry has an explicit recipe in `CatalogMotion.js`, a real consumer playground, a response description, inspection guidance and a usage/source reference. Internal renderers are marked as supporting types. Shared family previews show composition and variants.
+The Component Studio indexes every shipped QML file plus WindowSafeAreaObserver (88 entries). Search matches type, summary and source path. Each entry has an explicit recipe in `CatalogMotion.js`, a real consumer playground, a response description, inspection guidance and a usage/source reference. Internal renderers are marked as supporting types. Shared family previews show composition and variants.
 
 Use the global 1× / 0.5× / 0.25× controls to inspect timing, Reduce motion for the immediate state, and Reset preview to recreate demo state. The Motion playground demonstrates action counts, selection, focus, value changes, layout spacing and passive opacity without changing production component APIs.
 

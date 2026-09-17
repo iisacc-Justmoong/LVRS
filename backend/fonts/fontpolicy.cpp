@@ -76,6 +76,11 @@ FontPolicy::FontPolicy(QObject *parent)
     refresh();
 }
 
+QString FontPolicy::systemFamily() const
+{
+    return QFontInfo(QFontDatabase::systemFont(QFontDatabase::GeneralFont)).family();
+}
+
 QString FontPolicy::preferredFamily() const
 {
     return m_preferredFamily;

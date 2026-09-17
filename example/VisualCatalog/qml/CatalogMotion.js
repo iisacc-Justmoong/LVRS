@@ -3,6 +3,10 @@
 // Every shipped QML type has an explicit interaction recipe. Nonvisual types
 // document the visible consumer rather than pretending to own a hit target.
 var recipes = {
+    "tab": ["navigation", "Press a tab or focus it with Tab and activate it with Enter or Space.", "The selected underline or surface persists independently of pointer hover and press feedback."],
+    "tab-bar": ["navigation", "Move focus with arrow keys, activate a destination and resize the scrollable bar.", "Only the selected tab is highlighted; keyboard focus is revealed inside the clipped horizontal viewport."],
+    "mobile-tab": ["navigation", "Tap the icon and label, then compare selected, focused and disabled states.", "The platform-shaped selected capsule and badge remain aligned while the shared press motion rebounds."],
+    "mobile-tab-bar": ["navigation", "Change destinations, compare iOS and Android, and expand the minimized capsule.", "Selection survives layout and presentation changes, while the bottom safe area stays outside the hit targets."],
     "menu": ["surface", "Open Menu, choose an action, then reopen and dismiss with Escape.", "The 24px row menu enters with the shared surface rebound and retains its closing layer until the fade ends."],
     "context-menu-divider": ["display", "Compare the compact divider with the regular divider and open their menu surfaces.", "The separator follows surface motion and opacity without intercepting pointer or keyboard input."],
     "context-menu-item": ["action", "Press the compact row, then open ContextMenu and choose a modeled entry.", "The compact row shares button feedback and immediate activation while its 18px layout stays fixed."],

@@ -11,6 +11,7 @@ class FontPolicy : public QObject
     QML_SINGLETON
 
     Q_PROPERTY(QString preferredFamily READ preferredFamily CONSTANT)
+    Q_PROPERTY(QString systemFamily READ systemFamily CONSTANT)
     Q_PROPERTY(QString effectiveFamily READ effectiveFamily NOTIFY effectiveFamilyChanged)
     Q_PROPERTY(bool pretendardAvailable READ pretendardAvailable NOTIFY effectiveFamilyChanged)
     Q_PROPERTY(QString lastWarning READ lastWarning NOTIFY lastWarningChanged)
@@ -19,6 +20,7 @@ public:
     explicit FontPolicy(QObject *parent = nullptr);
 
     QString preferredFamily() const;
+    QString systemFamily() const;
     QString effectiveFamily() const;
     bool pretendardAvailable() const;
     QString lastWarning() const;

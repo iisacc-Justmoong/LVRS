@@ -1,4 +1,8 @@
 set(LVRS_NAVIGATION_QML_FILES
+    qml/components/navigation/Tab.qml
+    qml/components/navigation/TabBar.qml
+    qml/components/navigation/MobileTab.qml
+    qml/components/navigation/MobileTabBar.qml
     qml/components/navigation/Navigator.qml
     qml/components/navigation/PageRouter.qml
     qml/components/navigation/PageRouterTransitionDriver.qml

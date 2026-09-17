@@ -48,16 +48,20 @@ shows the same app-root input for consumers.
 
 ## Standard materials
 
-WindowMaterial, PanelMaterial, MaterialSurface and Popover share the interactive Material gallery. Its accent controls update the app theme, and its actions open a ContextMenu, Tooltip and Popover above the same window. The catalog contains 84 type entries. The host ApplicationWindow and standalone WindowMaterial show a uniform #0B0B0B fill at 50% without gradients, retaining native macOS frosted blur. The PanelMaterial preview keeps its Glass 25 radial treatment. Changing the accent updates controls and panel accents while the Window fill remains near black.
+WindowMaterial, PanelMaterial, MaterialSurface and Popover share the interactive Material gallery. Its accent controls update the app theme, and its actions open a ContextMenu, Tooltip and Popover above the same window. The catalog contains 88 type entries. The host ApplicationWindow and standalone WindowMaterial show a uniform #0B0B0B fill at 50% without gradients, retaining native macOS frosted blur. The PanelMaterial preview keeps its Glass 25 radial treatment. Changing the accent updates controls and panel accents while the Window fill remains near black.
 
 ## Component Studio
 
-The window now combines a compact motion toolbar, searchable hierarchy and a responsive detail page. Each of the 84 indexed types has a live playground and a specific interaction recipe: Try it, Response, Look for and Behavior contract. Source, usage and related types remain available below the motion inspector. Supporting nonvisual types link to the real consumer that displays their behavior.
+The window now combines a compact motion toolbar, searchable hierarchy and a responsive detail page. Each of the 88 indexed types has a live playground and a specific interaction recipe: Try it, Response, Look for and Behavior contract. Source, usage and related types remain available below the motion inspector. Supporting nonvisual types link to the real consumer that displays their behavior.
 
 Use 1×, 0.5× and 0.25× to change the whole engine's playback speed. Reduce motion makes states immediate. Reset preview recreates the selected example without resetting global motion preferences. The Motion playground includes buttons, selection, focus, sliders, progress, layout spacing and passive-layer opacity.
 
 `CatalogMotion.js` owns the explicit recipes; `MotionInspector.qml` renders them; `MotionLab.qml` demonstrates the common rhythm. `LVRSTests_catalog` checks QML inventory coverage, every preview, search and reset. See [motion policy](../../docs/motion.md).
 
-Figma parity adds five detailed entries (84 entries total): HelpButton, ColorPickerButton, ContextMenuItem, ContextMenuDivider and Menu. Their live gallery compares authored sizes, compact/regular menu typography, focus, disabled state and shared elastic motion. See [audit](../../docs/figma-parity.md).
+Figma parity adds five detailed entries (88 entries total): HelpButton, ColorPickerButton, ContextMenuItem, ContextMenuDivider and Menu. Their live gallery compares authored sizes, compact/regular menu typography, focus, disabled state and shared elastic motion. See [audit](../../docs/figma-parity.md).
 
 The material gallery now previews the user-directed menu coating: WindowMaterial, 12% tint, 64px blur, and 8% additional accent strength. Native A/B captures compare this with the earlier saturated menu treatment.
+
+## Tabs
+
+The Tabs gallery adds Tab, TabBar, MobileTab and MobileTabBar. It demonstrates the desktop states and width policies, floating iOS presentations and 3/4/5-destination Android bars. The controls share selection, keyboard, touch and reduced-motion behavior. See [Tabs API](../../docs/components/navigation/Tabs.md).
