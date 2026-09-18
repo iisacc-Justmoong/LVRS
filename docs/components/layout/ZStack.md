@@ -1,6 +1,6 @@
 # ZStack
 
-Location: `qml/components/layout/ZStack.qml`
+Location: `src/qml/components/layout/ZStack.qml`
 
 `ZStack` is a SwiftUI-style overlay stack that aligns children in two-dimensional anchor space.
 

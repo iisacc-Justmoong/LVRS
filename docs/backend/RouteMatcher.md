@@ -1,6 +1,6 @@
 # RouteMatcher
 
-Location: `backend/navigation/routematcher.h` / `backend/navigation/routematcher.cpp`
+Location: `src/backend/navigation/routematcher.h` / `src/backend/navigation/routematcher.cpp`
 
 `RouteMatcher` is a QML singleton that moves `PageRouter` path normalization/matching hot paths into C++.
 

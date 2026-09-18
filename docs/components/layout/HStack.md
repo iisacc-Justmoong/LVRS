@@ -1,6 +1,6 @@
 # HStack
 
-Location: `qml/components/layout/HStack.qml`
+Location: `src/qml/components/layout/HStack.qml`
 
 `HStack` is a SwiftUI-style horizontal stack implemented with `RowLayout`.
 

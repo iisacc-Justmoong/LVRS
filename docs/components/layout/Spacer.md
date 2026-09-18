@@ -1,6 +1,6 @@
 # Spacer
 
-Location: `qml/components/layout/Spacer.qml`
+Location: `src/qml/components/layout/Spacer.qml`
 
 `Spacer` is an axis-aware flexible filler for `HStack`, `VStack`, and `ZStack` contexts.
 

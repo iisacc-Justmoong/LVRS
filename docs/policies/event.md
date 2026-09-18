@@ -8,7 +8,7 @@ Cross-component interaction logic should use `EventListener` trigger semantics r
 
 Reason:
 - central payload shape,
-- consistent backend/runtime fallback,
+- consistent src/backend/runtime fallback,
 - shared dedup behavior.
 
 ## Rule 2: Use runtime/gesture triggers for cross-surface behavior
@@ -23,7 +23,7 @@ For overlay dismissal, global context menu control, app-level interaction hooks,
 
 These triggers are resilient to nested local event boundaries and share the framework-managed payload contract.
 
-## Rule 3: Incident payload is default; backend/input enrichment is opt-in
+## Rule 3: Incident payload is default; src/backend/input enrichment is opt-in
 
 `EventListener` must stay incident-centric by default.
 Enable `includeInputState` / `preferBackendState` only when the callback truly requires coherent input snapshots.

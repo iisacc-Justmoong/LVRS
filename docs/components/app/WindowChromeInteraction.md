@@ -1,6 +1,6 @@
 # WindowChromeInteraction
 
-Location: `qml/WindowChromeInteraction.qml`
+Location: `src/qml/WindowChromeInteraction.qml`
 
 `WindowChromeInteraction` is the reusable pointer layer behind `LV.Window` and `LV.ApplicationWindow`. Most applications should configure the properties exposed by those root types instead of instantiating this component directly.
 

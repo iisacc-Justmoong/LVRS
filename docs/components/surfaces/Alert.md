@@ -1,9 +1,9 @@
 # Alert
 
-Location: `qml/components/surfaces/Alert.qml`
+Location: `src/qml/components/surfaces/Alert.qml`
 
 `Alert` is a glass overlay with one, two, or three actions. The visual contract
-comes from [Figma Alert / Redesign 658:225](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=658-225),
+comes from [Figma Alert 658:229](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=658-229),
 containing variants `106:282` and `106:281`. Text sizing was reconciled with
 the current auto-height and Title/Body styles on 2026-09-11.
 
@@ -68,6 +68,13 @@ The card shrinks to the available host width, including hosts narrower than
 `minWidth`. It defaults to a 36px rounded rectangle. The existing opt-in
 `shapeCylinder` remains available for compatibility; it is not used by default.
 
+These are logical pixels. A Retina window with device pixel ratio 2 captures
+the 500px card as 1000 physical pixels and the 56px button as 112 physical
+pixels; no additional UI scale should be applied. A 390px host produces a
+342px card, retaining 24px margins on each side. The Society notice without an
+icon, with one action and one line each of title/message, is 500 × 252 logical
+pixels. Its existing geometry was verified against the design on 2026-09-18.
+
 The content has 46px top and 36px bottom padding. An 86px icon frame with a 28px
 corner radius precedes the copy by 28px. The exact Figma SVG exports are bundled:
 64px adjustments for two actions, 56px file-text for three. `showIcon: false`
@@ -107,7 +114,10 @@ remain the values specified by the design.
 
 Alert uses the Figma color tokens under `Theme.alert*`: #1D1F21 at 72% opacity,
 a 20% white edge, #F4F5F7 titles/actions, #D6D9DF descriptions, #027DFF primary
-buttons, #596168 outlines, #363B3F dividers, and the blue icon frame.
+buttons, #596168 outlines, #363B3F dividers, and the blue icon frame in the
+default theme. A custom `ApplicationWindow.primaryColor` overrides the action
+color and tints the icon frame. Society intentionally uses its green `#57965C`
+primary; matching the Figma layout does not replace that application color.
 
 The source window is captured with Qt's
 [ShaderEffectSource](https://doc.qt.io/qt-6/qml-qtquick-shadereffectsource.html)
@@ -117,8 +127,10 @@ The rounded mask, 28px frost, translucent tint, and 32px soft shadow are separat
 from the sharp content. These are existing Qt Quick effects already used by
 LVRS, so no additional package dependency is introduced.
 
-`ApplicationWindow.contentItem` is discovered automatically when the Alert
-moves to `Controls.Overlay`. A custom/plain window can set `backdropSource`
+The LVRS window's `materialBackdropSource` is discovered automatically when
+the Alert moves to `Controls.Overlay`. This uses the same content-only capture
+path as other LVRS materials. Plain Qt ApplicationWindows fall back to
+`ApplicationWindow.contentItem`. A custom/plain window can set `backdropSource`
 to a sibling background item. Ancestors containing the Alert are rejected to
 prevent recursive captures. When a safe source is unavailable, or glass is
 disabled, the translucent tint still renders. Closing disconnects the capture
@@ -174,6 +186,11 @@ pixels, click signals, modal input blocking, and capture lifecycle. It also
 checks content arguments and live aliases, image loading, all six rendered
 action positions across one/two/three-button layouts, function/command methods,
 method replacement, disabled actions, and compatibility with signal handlers.
+The material/input test runs against both Qt and LVRS ApplicationWindows.
+Native RHI checks sample `QQuickWindow::grabWindow()` so blur assertions cover
+the presented window, not just an intermediate item render.
+`LVRSTests_primary_color` verifies live app accent updates, including Society's
+green, across Alert actions/icon frames and ordinary controls.
 
 Run with a supported graphics backend:
 

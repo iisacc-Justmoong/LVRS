@@ -1,6 +1,6 @@
 # Theme
 
-Location: `qml/Theme.qml`
+Location: `src/qml/Theme.qml`
 
 `Theme` is the global design-token singleton for LVRS QML components.
 All platforms use the same authored logical sizes for spacing, radius, control sizes, icons, typography, and line heights. iOS and Android add no automatic size multiplier. Body remains `13px / 13px`.
@@ -36,6 +36,8 @@ primary color in the main root. See [ApplicationWindow](components/app/Applicati
 
 Custom primary alpha also multiplies the tint strength of the opaque muted and
 Alert icon surfaces. The blue fallback preserves the existing authored colors.
+Figma's blue is the default theme, not a fixed color for branded applications:
+Society's `#57965C` primary also applies to its Alert actions and icon accents.
 Semantic pressed/selected states consume `accentMuted`/`accentDetail`; the named
 icon palette (`accentBlue`, `accentBlueMuted`, and `accentPaletteTokens`) stays
 fixed. Status colors and explicit per-control overrides also stay fixed.

@@ -444,6 +444,7 @@ private slots:
     void alert_button_methods_are_invoked_data();
     void alert_button_methods_are_invoked();
     void alert_action_button_padding_scopes_to_alert();
+    void alert_glass_overlay_and_input_contract_data();
     void alert_glass_overlay_and_input_contract();
     void menu_item_key_and_chevron_contract_loads();
     void menu_item_icon_slot_switch_contract_loads();
@@ -481,7 +482,7 @@ static QObject *createFromQml(QQmlEngine &engine, const QByteArray &qml)
 
 void ImportApiTests::embedded_qml_matches_source()
 {
-    const QDir sourceRoot(QStringLiteral(LVRS_TEST_SOURCE_DIR "/.."));
+    const QDir sourceRoot(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../src"));
     QDirIterator files(sourceRoot.filePath(QStringLiteral("qml")),
                        {QStringLiteral("*.qml")}, QDir::Files, QDirIterator::Subdirectories);
     int checked = 0;
@@ -7255,11 +7256,19 @@ Item {
     QVERIFY(qAbs(standaloneAlertButton->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
 }
 
+void ImportApiTests::alert_glass_overlay_and_input_contract_data()
+{
+    QTest::addColumn<bool>("frameworkWindow");
+    QTest::newRow("qt-window") << false;
+    QTest::newRow("lvrs-window") << true;
+}
+
 void ImportApiTests::alert_glass_overlay_and_input_contract()
 {
+    QFETCH(bool, frameworkWindow);
     QQmlEngine engine;
     engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
-    const QByteArray qml = R"(
+    QByteArray qml = R"(
 import QtQuick
 import QtQuick.Controls as Controls
 import LVRS as LV
@@ -7300,6 +7309,13 @@ Controls.ApplicationWindow {
     }
 }
 )";
+    if (frameworkWindow) {
+        qml.replace("Controls.ApplicationWindow {", R"(LV.ApplicationWindow {
+    desktopMinWidth: 0; desktopMinHeight: 0
+    navigationEnabled: false; useInternalPageStack: false
+    windowChromeInteractionsEnabled: false; windowDragHandleEnabled: false
+)");
+    }
     QScopedPointer<QObject> root(createFromQml(engine, qml));
     QVERIFY(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
@@ -7315,11 +7331,15 @@ Controls.ApplicationWindow {
     QTRY_VERIFY(alert->property("glassActive").toBool());
     QVERIFY(!capture->property("recursive").toBool());
     QVERIFY(capture->property("live").toBool());
+    QTRY_COMPARE(card->width(), 500.0);
+    QTRY_COMPARE(primary->height(), 56.0);
     QCOMPARE(capture->property("sourceRect").toRectF().size(), card->size());
     QCOMPARE(card->opacity(), 1.0);
 
     auto grab = [window]() -> QImage {
         QTest::qWait(120);
+        if (window->rendererInterface()->graphicsApi() != QSGRendererInterface::Software)
+            return window->grabWindow().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
         const auto result = window->contentItem()->grabToImage(window->size());
         if (!result)
             return {};
@@ -7337,8 +7357,9 @@ Controls.ApplicationWindow {
     const QString outputDir = qEnvironmentVariable("LVRS_ALERT_CAPTURE_DIR");
     if (!outputDir.isEmpty()) {
         QVERIFY(QDir().mkpath(outputDir));
-        QVERIFY(frosted.save(outputDir + "/alert-three-actions.png"));
-        QVERIFY(unblurred.save(outputDir + "/alert-without-blur.png"));
+        const auto prefix = outputDir + '/' + QString::fromLatin1(QTest::currentDataTag());
+        QVERIFY(frosted.save(prefix + "-alert-three-actions.png"));
+        QVERIFY(unblurred.save(prefix + "-alert-without-blur.png"));
     }
     const QPoint cardTopLeft = scenePoint(card, QPointF(0, 0));
     const QRect probe(cardTopLeft + QPoint(45, 25), QSize(65, 30));
@@ -7361,6 +7382,9 @@ Controls.ApplicationWindow {
         QVERIFY2(variation(frosted) < variation(unblurred) * 0.35,
                  "Glass must blur the actual window content, not merely add a translucent tint.");
     }
+    if (frameworkWindow)
+        QCOMPARE(alert->property("resolvedBackdropSource").value<QQuickItem *>(),
+                 window->property("materialBackdropSource").value<QQuickItem *>());
     int redTextPixels = 0;
     const QPoint buttonOrigin = scenePoint(secondary, QPointF(0, 0));
     for (int y = buttonOrigin.y(); y < buttonOrigin.y() + secondary->height(); ++y) {

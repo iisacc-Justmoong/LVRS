@@ -1,6 +1,6 @@
 # GestureEvents
 
-Location: `backend/runtime/gestureevents.h` / `backend/runtime/gestureevents.cpp`
+Location: `src/backend/runtime/gestureevents.h` / `src/backend/runtime/gestureevents.cpp`
 
 `GestureEvents` is the LVRS high-level gesture recognition singleton.  
 It sits above `RuntimeEvents` and turns raw touch / native gesture runtime records into QML-friendly gesture events.

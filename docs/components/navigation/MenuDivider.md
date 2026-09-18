@@ -1,6 +1,6 @@
 # MenuDivider
 
-Location: `qml/components/navigation/MenuDivider.qml`
+Location: `src/qml/components/navigation/MenuDivider.qml`
 
 `MenuDivider` is a one-axis separator line used between menu groups.
 

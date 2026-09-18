@@ -1,6 +1,6 @@
 # ContextMenu
 
-Location: `qml/components/navigation/ContextMenu.qml`
+Location: `src/qml/components/navigation/ContextMenu.qml`
 
 `ContextMenu` is a popup menu with runtime-tuned open animation and global outside-dismiss bridging.
 

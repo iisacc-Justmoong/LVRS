@@ -41,11 +41,11 @@ void CatalogTests::every_qml_type_has_a_recipe_and_live_preview()
     QVERIFY(root);
     const auto keys = evaluate(engine, root.data(),
         "catalogEntries.map(function(entry) { return entry.key }).join('|')").toString().split('|');
-    QCOMPARE(keys.size(), 88);
+    QCOMPARE(keys.size(), 90);
     const QString paths = evaluate(engine, root.data(),
         "catalogEntries.map(function(entry) { return entry.location }).join('|')").toString();
     const QDir source(QStringLiteral(LVRS_TEST_SOURCE_DIR "/.."));
-    QDirIterator files(source.filePath("qml"), {"*.qml"}, QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator files(source.filePath("src/qml"), {"*.qml"}, QDir::Files, QDirIterator::Subdirectories);
     while (files.hasNext()) {
         const QString path = source.relativeFilePath(files.next());
         QVERIFY2(paths.split('|').contains(path), qPrintable("Missing catalog type: " + path));

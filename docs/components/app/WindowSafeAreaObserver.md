@@ -1,6 +1,6 @@
 # WindowSafeAreaObserver
 
-Location: `backend/platform/windowsafeareaobserver.h`
+Location: `src/backend/platform/windowsafeareaobserver.h`
 
 `WindowSafeAreaObserver` exposes the platform window safe-area insets for a bound `QWindow`/`QQuickWindow`.
 
@@ -17,6 +17,7 @@ Location: `backend/platform/windowsafeareaobserver.h`
 - `topInset`
 - `rightInset`
 - `bottomInset`
+- `bottomCornerRadius`: Android 12+ window-relative lower-corner radius, converted to Qt logical pixels. Returns `-1` when unavailable, `0` when the platform reports square corners. Refreshes with window geometry and resets to `-1` on detach. `resolved` describes insets, not corner-radius availability.
 - `resolved`: `true` once the observer has a platform window and the current safe-area margins were queried.
 - `refresh()`: force a re-query.
 

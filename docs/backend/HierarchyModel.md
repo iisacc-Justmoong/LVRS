@@ -1,6 +1,6 @@
 # HierarchyModel
 
-Location: `backend/model/hierarchymodel.h`, `backend/model/hierarchymodel.cpp`
+Location: `src/backend/model/hierarchymodel.h`, `src/backend/model/hierarchymodel.cpp`
 
 `HierarchyModel` is the C++ projection layer used by `HierarchyList`.
 

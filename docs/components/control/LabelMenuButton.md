@@ -1,6 +1,6 @@
 # LabelMenuButton
 
-Location: `qml/components/control/buttons/LabelMenuButton.qml`
+Location: `src/qml/components/control/buttons/LabelMenuButton.qml`
 
 `LabelMenuButton` is a label preset of [DropdownButton](DropdownButton.md).
 

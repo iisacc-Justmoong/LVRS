@@ -1,6 +1,6 @@
 # InputField
 
-Location: `qml/components/control/input/InputField.qml`
+Location: `src/qml/components/control/input/InputField.qml`
 
 `InputField` is LVRS's public single-line `TextInput` wrapper. It implements the Figma `TextField` component at node `114:179` without replacing Qt's native editing, IME, selection, clipboard, or accessibility behavior.
 

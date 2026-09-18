@@ -8,6 +8,8 @@
 
 ## API
 
+LVRS 고유 스타일과 선택적 독립 검색·왼쪽 축소·점착 이동이 필요한 경우 새 [MobileNavigationBar / MobileNavigationTab](MobileNavigationBar.md)을 사용한다.
+
 | 타입 | 주요 속성 |
 | --- | --- |
 | Tab | `text`, `selected`, `tabStyle`(Underline/Surface), `displayState`, `iconName`/`iconSource`, `showIcon`, `badge`, `showBadge` |

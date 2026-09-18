@@ -59,30 +59,32 @@ QtObject {
             key: "tabs", label: "Tabs", iconGlyph: "T",
             summary: "Desktop content tabs and platform-shaped mobile destination bars.",
             items: [
-                component({key: "tab", label: "Tab", location: "qml/components/navigation/Tab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Underline and Surface content tabs with six visual states.", usage: "LV.Tab { text: \"Overview\"; selected: true }", related: ["tab-bar", "mobile-tab"]}),
-                component({key: "tab-bar", label: "TabBar", location: "qml/components/navigation/TabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Content, equal and scrollable width policies.", usage: "LV.TabBar { model: [{text: \"Overview\"}, {text: \"Activity\"}] }", related: ["tab", "mobile-tab-bar"]}),
-                component({key: "mobile-tab", label: "MobileTab", location: "qml/components/navigation/MobileTab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "iOS and Android icon, label, selection and badge states.", usage: "LV.MobileTab { text: \"Home\"; iconName: \"home\"; selected: true }", related: ["mobile-tab-bar", "tab"]}),
-                component({key: "mobile-tab-bar", label: "MobileTabBar", location: "qml/components/navigation/MobileTabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Floating iOS and Material 3 Android bottom tab-bar layouts.", usage: "LV.MobileTabBar { model: [{text: \"Home\", iconName: \"home\"}, {text: \"Library\", iconName: \"nodesfolder\"}, {text: \"Settings\", iconName: \"generalsettings\"}] }", related: ["mobile-tab", "tab-bar"]})
+                component({key: "mobile-navigation-tab", label: "MobileNavigationTab", location: "src/qml/components/navigation/MobileNavigationTab.qml", docPath: "docs/components/navigation/MobileNavigationBar.md", previewId: "tabs-gallery", summary: "LVRS icon-first mobile destination with optional text.", usage: "LV.MobileNavigationTab { iconName: \"home-1\"; text: \"Home\" }", related: ["mobile-navigation-bar", "mobile-tab"]}),
+                component({key: "mobile-navigation-bar", label: "MobileNavigationBar", location: "src/qml/components/navigation/MobileNavigationBar.qml", docPath: "docs/components/navigation/MobileNavigationBar.md", previewId: "tabs-gallery", summary: "Device radii, optional independent Search, left-aligned tabs and elastic selection.", usage: "LV.MobileNavigationBar { model: [{iconName: \"home-1\", accessibleName: \"Home\"}]; search: ({}); onSearchRequested: searchPanel.open() }", related: ["mobile-navigation-tab", "mobile-tab-bar"]}),
+                component({key: "tab", label: "Tab", location: "src/qml/components/navigation/Tab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Underline and Surface content tabs with six visual states.", usage: "LV.Tab { text: \"Overview\"; selected: true }", related: ["tab-bar", "mobile-tab"]}),
+                component({key: "tab-bar", label: "TabBar", location: "src/qml/components/navigation/TabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Content, equal and scrollable width policies.", usage: "LV.TabBar { model: [{text: \"Overview\"}, {text: \"Activity\"}] }", related: ["tab", "mobile-tab-bar"]}),
+                component({key: "mobile-tab", label: "MobileTab", location: "src/qml/components/navigation/MobileTab.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "iOS and Android icon, label, selection and badge states.", usage: "LV.MobileTab { text: \"Home\"; iconName: \"home\"; selected: true }", related: ["mobile-tab-bar", "tab"]}),
+                component({key: "mobile-tab-bar", label: "MobileTabBar", location: "src/qml/components/navigation/MobileTabBar.qml", docPath: "docs/components/navigation/Tabs.md", previewId: "tabs-gallery", summary: "Floating iOS and Material 3 Android bottom tab-bar layouts.", usage: "LV.MobileTabBar { model: [{text: \"Home\", iconName: \"home\"}, {text: \"Library\", iconName: \"nodesfolder\"}, {text: \"Settings\", iconName: \"generalsettings\"}] }", related: ["mobile-tab", "tab-bar"]})
             ]
         }),
         section({
             key: "motion-and-support", label: "Motion & supporting types", iconGlyph: "M",
             summary: "Shared motion primitives and the supporting types used inside LVRS controls.",
             items: [
-                component({"key": "motion", "label": "Motion", "location": "qml/Motion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Shared timing, speed and reduced-motion policy for the complete LVRS component family.", "usage": "Component.onCompleted: {\n    LV.Motion.speed = 1\n    LV.Motion.reducedMotion = false\n}", "related": ["motion", "abstract-button"]}),
-                component({"key": "theme", "label": "Theme", "location": "qml/Theme.qml", "docPath": "docs/motion.md", "previewId": "application-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Label { text: \"Shared accent\"; color: LV.Theme.primary }", "related": ["motion", "abstract-button"]}),
-                component({"key": "window-chrome-interaction", "label": "WindowChromeInteraction", "location": "qml/WindowChromeInteraction.qml", "docPath": "docs/motion.md", "previewId": "window-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.WindowChromeInteraction {\n    anchors.fill: parent\n    targetWindow: toolWindow\n    moveHandleHeight: 28\n}", "related": ["motion", "abstract-button"]}),
-                component({"key": "button-method-registry", "label": "ButtonMethodRegistry", "location": "qml/components/control/buttons/ButtonMethodRegistry.qml", "docPath": "docs/motion.md", "previewId": "abstract-button", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.LabelButton {\n    text: \"Action\"\n    method: function(event) { console.log(event.trigger) }\n}\n// AbstractButton owns its method registry.", "related": ["motion", "abstract-button"]}),
-                component({"key": "focus-ring", "label": "FocusRing", "location": "qml/components/control/util/FocusRing.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Noninteractive visual outline for keyboard and text-entry focus.", "usage": "LV.FocusRing { anchors.fill: parent; active: field.activeFocus }", "related": ["motion", "abstract-button"]}),
-                component({"key": "interaction-motion", "label": "InteractionMotion", "location": "qml/components/control/util/InteractionMotion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Bounded squash and rebound transform for pointer, keyboard and touch feedback.", "usage": "transform: LV.InteractionMotion {\n    target: tile\n    pressed: pointer.pressed\n    hovered: pointer.containsMouse\n}", "related": ["motion", "abstract-button"]}),
-                component({"key": "spring-behavior", "label": "SpringBehavior", "location": "qml/components/control/util/SpringBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable interruptible elastic Behavior for a numeric presentation property.", "usage": "rotation: expanded ? 8 : 0\nLV.SpringBehavior on rotation { duration: LV.Motion.releaseDuration }", "related": ["motion", "abstract-button"]}),
-                component({"key": "state-color-behavior", "label": "StateColorBehavior", "location": "qml/components/control/util/StateColorBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable short color transition for rendered state changes.", "usage": "color: selected ? LV.Theme.primary : LV.Theme.surfaceAlt\nLV.StateColorBehavior on color {}", "related": ["motion", "abstract-button"]}),
-                component({"key": "list-item-composite", "label": "ListItemComposite", "location": "qml/components/navigation/ListItemComposite.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Task\n    label: \"Publish release\"\n}\n// ListItem owns the composite renderer.", "related": ["motion", "abstract-button"]}),
-                component({"key": "list-item-selector", "label": "ListItemSelector", "location": "qml/components/navigation/ListItemSelector.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Select\n    selector: ({ items: [\"Draft\", \"Published\"] })\n}\n// The row owns selector state and its popup.", "related": ["motion", "abstract-button"]}),
-                component({"key": "page-router-transition-driver", "label": "PageRouterTransitionDriver", "location": "qml/components/navigation/PageRouterTransitionDriver.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageRouter {\n    id: router\n    interactiveTransitionSettleDuration: 360\n}\n// The router creates and owns its transition driver.", "related": ["motion", "abstract-button"]}),
-                component({"key": "page-transition-controller", "label": "PageTransitionController", "location": "qml/components/navigation/PageTransitionController.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageTransitionController {\n    router: pageRouter\n}\n// begin(), update(), finish() expose the router gesture contract.", "related": ["motion", "abstract-button"]}),
-                component({"key": "card-image-content", "label": "CardImageContent", "location": "qml/components/surfaces/CardImageContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.File\n    title: \"Image.png\"\n    previewSource: imageUrl\n}\n// Card owns its private image renderer.", "related": ["motion", "abstract-button"]}),
-                component({"key": "card-information-content", "label": "CardInformationContent", "location": "qml/components/surfaces/CardInformationContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.Project\n    title: \"Studio\"\n    progress: 0.6\n}\n// Card owns its private information renderer.", "related": ["motion", "abstract-button"]})
+                component({"key": "motion", "label": "Motion", "location": "src/qml/Motion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Shared timing, speed and reduced-motion policy for the complete LVRS component family.", "usage": "Component.onCompleted: {\n    LV.Motion.speed = 1\n    LV.Motion.reducedMotion = false\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "theme", "label": "Theme", "location": "src/qml/Theme.qml", "docPath": "docs/motion.md", "previewId": "application-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Label { text: \"Shared accent\"; color: LV.Theme.primary }", "related": ["motion", "abstract-button"]}),
+                component({"key": "window-chrome-interaction", "label": "WindowChromeInteraction", "location": "src/qml/WindowChromeInteraction.qml", "docPath": "docs/motion.md", "previewId": "window-shell", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.WindowChromeInteraction {\n    anchors.fill: parent\n    targetWindow: toolWindow\n    moveHandleHeight: 28\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "button-method-registry", "label": "ButtonMethodRegistry", "location": "src/qml/components/control/buttons/ButtonMethodRegistry.qml", "docPath": "docs/motion.md", "previewId": "abstract-button", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.LabelButton {\n    text: \"Action\"\n    method: function(event) { console.log(event.trigger) }\n}\n// AbstractButton owns its method registry.", "related": ["motion", "abstract-button"]}),
+                component({"key": "focus-ring", "label": "FocusRing", "location": "src/qml/components/control/util/FocusRing.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Noninteractive visual outline for keyboard and text-entry focus.", "usage": "LV.FocusRing { anchors.fill: parent; active: field.activeFocus }", "related": ["motion", "abstract-button"]}),
+                component({"key": "interaction-motion", "label": "InteractionMotion", "location": "src/qml/components/control/util/InteractionMotion.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Bounded squash and rebound transform for pointer, keyboard and touch feedback.", "usage": "transform: LV.InteractionMotion {\n    target: tile\n    pressed: pointer.pressed\n    hovered: pointer.containsMouse\n}", "related": ["motion", "abstract-button"]}),
+                component({"key": "spring-behavior", "label": "SpringBehavior", "location": "src/qml/components/control/util/SpringBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable interruptible elastic Behavior for a numeric presentation property.", "usage": "rotation: expanded ? 8 : 0\nLV.SpringBehavior on rotation { duration: LV.Motion.releaseDuration }", "related": ["motion", "abstract-button"]}),
+                component({"key": "state-color-behavior", "label": "StateColorBehavior", "location": "src/qml/components/control/util/StateColorBehavior.qml", "docPath": "docs/motion.md", "previewId": "motion-lab", "roleLabel": "Motion primitive", "summary": "Reusable short color transition for rendered state changes.", "usage": "color: selected ? LV.Theme.primary : LV.Theme.surfaceAlt\nLV.StateColorBehavior on color {}", "related": ["motion", "abstract-button"]}),
+                component({"key": "list-item-composite", "label": "ListItemComposite", "location": "src/qml/components/navigation/ListItemComposite.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Task\n    label: \"Publish release\"\n}\n// ListItem owns the composite renderer.", "related": ["motion", "abstract-button"]}),
+                component({"key": "list-item-selector", "label": "ListItemSelector", "location": "src/qml/components/navigation/ListItemSelector.qml", "docPath": "docs/motion.md", "previewId": "list-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.ListItem {\n    type: LV.ListItem.Select\n    selector: ({ items: [\"Draft\", \"Published\"] })\n}\n// The row owns selector state and its popup.", "related": ["motion", "abstract-button"]}),
+                component({"key": "page-router-transition-driver", "label": "PageRouterTransitionDriver", "location": "src/qml/components/navigation/PageRouterTransitionDriver.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageRouter {\n    id: router\n    interactiveTransitionSettleDuration: 360\n}\n// The router creates and owns its transition driver.", "related": ["motion", "abstract-button"]}),
+                component({"key": "page-transition-controller", "label": "PageTransitionController", "location": "src/qml/components/navigation/PageTransitionController.qml", "docPath": "docs/motion.md", "previewId": "router-navigation", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.PageTransitionController {\n    router: pageRouter\n}\n// begin(), update(), finish() expose the router gesture contract.", "related": ["motion", "abstract-button"]}),
+                component({"key": "card-image-content", "label": "CardImageContent", "location": "src/qml/components/surfaces/CardImageContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.File\n    title: \"Image.png\"\n    previewSource: imageUrl\n}\n// Card owns its private image renderer.", "related": ["motion", "abstract-button"]}),
+                component({"key": "card-information-content", "label": "CardInformationContent", "location": "src/qml/components/surfaces/CardInformationContent.qml", "docPath": "docs/motion.md", "previewId": "card-gallery", "roleLabel": "Supporting type", "summary": "Supporting LVRS type. Inspect its live consumer and interaction contract below.", "usage": "LV.Card {\n    type: LV.Card.Project\n    title: \"Studio\"\n    progress: 0.6\n}\n// Card owns its private information renderer.", "related": ["motion", "abstract-button"]})
             ]
         }),
         section({
@@ -98,7 +100,7 @@ QtObject {
                 component({
                     key: "app-bootstrap-window",
                     label: "AppBootstrapWindow",
-                    location: "qml/AppBootstrapWindow.qml",
+                    location: "src/qml/AppBootstrapWindow.qml",
                     docPath: "docs/components/app/AppBootstrapWindow.md",
                     previewId: "application-shell",
                     roleLabel: "Compatibility root",
@@ -109,7 +111,7 @@ QtObject {
                 component({
                     key: "application-window",
                     label: "ApplicationWindow",
-                    location: "qml/ApplicationWindow.qml",
+                    location: "src/qml/ApplicationWindow.qml",
                     docPath: "docs/components/app/ApplicationWindow.md",
                     previewId: "application-shell",
                     roleLabel: "Bootstrap root",
@@ -120,7 +122,7 @@ QtObject {
                 component({
                     key: "app-shell",
                     label: "AppShell",
-                    location: "qml/AppShell.qml",
+                    location: "src/qml/AppShell.qml",
                     docPath: "docs/components/app/AppShell.md",
                     previewId: "application-shell",
                     roleLabel: "Compatibility wrapper",
@@ -131,7 +133,7 @@ QtObject {
                 component({
                     key: "window",
                     label: "Window",
-                    location: "qml/Window.qml",
+                    location: "src/qml/Window.qml",
                     previewId: "window-shell",
                     roleLabel: "Lightweight window",
                     summary: "Lower-level LVRS window wrapper for cases that need render-quality and platform policy without the application scaffold.",
@@ -141,7 +143,7 @@ QtObject {
                 component({
                     key: "window-safe-area-observer",
                     label: "WindowSafeAreaObserver",
-                    location: "backend/platform/windowsafeareaobserver.h",
+                    location: "src/backend/platform/windowsafeareaobserver.h",
                     docPath: "docs/components/app/WindowSafeAreaObserver.md",
                     previewId: "safe-area-observer",
                     roleLabel: "Safe-area observer",
@@ -160,7 +162,7 @@ QtObject {
                 component({
                     key: "app-header",
                     label: "AppHeader",
-                    location: "qml/components/layout/AppHeader.qml",
+                    location: "src/qml/components/layout/AppHeader.qml",
                     docPath: "docs/components/layout/AppHeader.md",
                     previewId: "app-header",
                     roleLabel: "Header surface",
@@ -171,7 +173,7 @@ QtObject {
                 component({
                     key: "v-stack",
                     label: "VStack",
-                    location: "qml/components/layout/VStack.qml",
+                    location: "src/qml/components/layout/VStack.qml",
                     docPath: "docs/components/layout/VStack.md",
                     previewId: "stack-layout",
                     roleLabel: "Vertical layout",
@@ -182,7 +184,7 @@ QtObject {
                 component({
                     key: "h-stack",
                     label: "HStack",
-                    location: "qml/components/layout/HStack.qml",
+                    location: "src/qml/components/layout/HStack.qml",
                     docPath: "docs/components/layout/HStack.md",
                     previewId: "stack-layout",
                     roleLabel: "Horizontal layout",
@@ -193,7 +195,7 @@ QtObject {
                 component({
                     key: "z-stack",
                     label: "ZStack",
-                    location: "qml/components/layout/ZStack.qml",
+                    location: "src/qml/components/layout/ZStack.qml",
                     docPath: "docs/components/layout/ZStack.md",
                     previewId: "stack-layout",
                     roleLabel: "Layered layout",
@@ -204,7 +206,7 @@ QtObject {
                 component({
                     key: "spacer",
                     label: "Spacer",
-                    location: "qml/components/layout/Spacer.qml",
+                    location: "src/qml/components/layout/Spacer.qml",
                     docPath: "docs/components/layout/Spacer.md",
                     previewId: "stack-layout",
                     roleLabel: "Flexible spacer",
@@ -226,12 +228,12 @@ QtObject {
                     iconGlyph: "B",
                     summary: "Action buttons, menu triggers, segmented containers, and compact selectors.",
                     items: [
-                        component({"key": "help-button", "label": "HelpButton", "location": "qml/components/control/buttons/HelpButton.qml", "docPath": "docs/components/control/HelpButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Circular help trigger with the Figma question-mark text and 21px footprint.", "usage": "LV.HelpButton { onClicked: showHelp() }", "related": ["abstract-button", "motion"]}),
-                        component({"key": "color-picker-button", "label": "ColorPickerButton", "location": "qml/components/control/buttons/ColorPickerButton.qml", "docPath": "docs/components/control/ColorPickerButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Color trigger in three sizes, with the exported hue ring and current-color well.", "usage": "LV.ColorPickerButton { currentColor: \"#7A5AF8\"; buttonSize: LV.ColorPickerButton.Medium }", "related": ["abstract-button", "motion"]}),
+                        component({"key": "help-button", "label": "HelpButton", "location": "src/qml/components/control/buttons/HelpButton.qml", "docPath": "docs/components/control/HelpButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Circular help trigger with the Figma question-mark text and 21px footprint.", "usage": "LV.HelpButton { onClicked: showHelp() }", "related": ["abstract-button", "motion"]}),
+                        component({"key": "color-picker-button", "label": "ColorPickerButton", "location": "src/qml/components/control/buttons/ColorPickerButton.qml", "docPath": "docs/components/control/ColorPickerButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Color trigger in three sizes, with the exported hue ring and current-color well.", "usage": "LV.ColorPickerButton { currentColor: \"#7A5AF8\"; buttonSize: LV.ColorPickerButton.Medium }", "related": ["abstract-button", "motion"]}),
                         component({
                             key: "abstract-button",
                             label: "AbstractButton",
-                            location: "qml/components/control/buttons/AbstractButton.qml",
+                            location: "src/qml/components/control/buttons/AbstractButton.qml",
                             docPath: "docs/components/control/AbstractButton.md",
                             previewId: "abstract-button",
                             roleLabel: "Button base",
@@ -242,7 +244,7 @@ QtObject {
                         component({
                             key: "push-button",
                             label: "PushButton",
-                            location: "qml/components/control/buttons/PushButton.qml",
+                            location: "src/qml/components/control/buttons/PushButton.qml",
                             docPath: "docs/components/control/PushButton.md",
                             previewId: "button-family",
                             roleLabel: "Push action",
@@ -253,7 +255,7 @@ QtObject {
                         component({
                             key: "dropdown-button",
                             label: "DropdownButton",
-                            location: "qml/components/control/buttons/DropdownButton.qml",
+                            location: "src/qml/components/control/buttons/DropdownButton.qml",
                             docPath: "docs/components/control/DropdownButton.md",
                             previewId: "button-family",
                             roleLabel: "Dropdown action",
@@ -264,7 +266,7 @@ QtObject {
                         component({
                             key: "label-button",
                             label: "LabelButton",
-                            location: "qml/components/control/buttons/LabelButton.qml",
+                            location: "src/qml/components/control/buttons/LabelButton.qml",
                             docPath: "docs/components/control/LabelButton.md",
                             previewId: "button-family",
                             roleLabel: "Text action",
@@ -275,7 +277,7 @@ QtObject {
                         component({
                             key: "icon-button",
                             label: "IconButton",
-                            location: "qml/components/control/buttons/IconButton.qml",
+                            location: "src/qml/components/control/buttons/IconButton.qml",
                             docPath: "docs/components/control/IconButton.md",
                             previewId: "button-family",
                             roleLabel: "Icon action",
@@ -286,7 +288,7 @@ QtObject {
                         component({
                             key: "label-menu-button",
                             label: "LabelMenuButton",
-                            location: "qml/components/control/buttons/LabelMenuButton.qml",
+                            location: "src/qml/components/control/buttons/LabelMenuButton.qml",
                             docPath: "docs/components/control/LabelMenuButton.md",
                             previewId: "button-family",
                             roleLabel: "Menu trigger",
@@ -297,7 +299,7 @@ QtObject {
                         component({
                             key: "icon-menu-button",
                             label: "IconMenuButton",
-                            location: "qml/components/control/buttons/IconMenuButton.qml",
+                            location: "src/qml/components/control/buttons/IconMenuButton.qml",
                             docPath: "docs/components/control/IconMenuButton.md",
                             previewId: "button-family",
                             roleLabel: "Icon menu trigger",
@@ -308,7 +310,7 @@ QtObject {
                         component({
                             key: "label-segmented-control",
                             label: "LabelSegmentedControl",
-                            location: "qml/components/control/buttons/LabelSegmentedControl.qml",
+                            location: "src/qml/components/control/buttons/LabelSegmentedControl.qml",
                             docPath: "docs/components/control/LabelSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Segment container",
@@ -319,7 +321,7 @@ QtObject {
                         component({
                             key: "icon-segmented-control",
                             label: "IconSegmentedControl",
-                            location: "qml/components/control/buttons/IconSegmentedControl.qml",
+                            location: "src/qml/components/control/buttons/IconSegmentedControl.qml",
                             docPath: "docs/components/control/IconSegmentedControl.md",
                             previewId: "segmented-control",
                             roleLabel: "Icon segment container",
@@ -330,7 +332,7 @@ QtObject {
                         component({
                             key: "combo-box",
                             label: "ComboBox",
-                            location: "qml/components/control/buttons/ComboBox.qml",
+                            location: "src/qml/components/control/buttons/ComboBox.qml",
                             docPath: "docs/components/control/ComboBox.md",
                             previewId: "selector-control",
                             roleLabel: "Compact selector",
@@ -341,7 +343,7 @@ QtObject {
                         component({
                             key: "stepper",
                             label: "Stepper",
-                            location: "qml/components/control/buttons/Stepper.qml",
+                            location: "src/qml/components/control/buttons/Stepper.qml",
                             docPath: "docs/components/control/Stepper.md",
                             previewId: "selector-control",
                             roleLabel: "Chevron indicator",
@@ -360,7 +362,7 @@ QtObject {
                         component({
                             key: "check-box",
                             label: "CheckBox",
-                            location: "qml/components/control/check/CheckBox.qml",
+                            location: "src/qml/components/control/check/CheckBox.qml",
                             docPath: "docs/components/control/CheckBox.md",
                             previewId: "selection-control",
                             roleLabel: "Multi-select control",
@@ -371,7 +373,7 @@ QtObject {
                         component({
                             key: "radio-button",
                             label: "RadioButton",
-                            location: "qml/components/control/check/RadioButton.qml",
+                            location: "src/qml/components/control/check/RadioButton.qml",
                             docPath: "docs/components/control/RadioButton.md",
                             previewId: "selection-control",
                             roleLabel: "Single-select control",
@@ -382,7 +384,7 @@ QtObject {
                         component({
                             key: "toggle-switch",
                             label: "ToggleSwitch",
-                            location: "qml/components/control/check/ToggleSwitch.qml",
+                            location: "src/qml/components/control/check/ToggleSwitch.qml",
                             docPath: "docs/components/control/ToggleSwitch.md",
                             previewId: "toggle-switch",
                             roleLabel: "Binary switch",
@@ -401,7 +403,7 @@ QtObject {
                         component({
                             key: "label",
                             label: "Label",
-                            location: "qml/components/control/display/Label.qml",
+                            location: "src/qml/components/control/display/Label.qml",
                             docPath: "docs/components/control/Label.md",
                             previewId: "label-display",
                             roleLabel: "Typography wrapper",
@@ -412,7 +414,7 @@ QtObject {
                         component({
                             key: "progress-bar",
                             label: "ProgressBar",
-                            location: "qml/components/control/display/ProgressBar.qml",
+                            location: "src/qml/components/control/display/ProgressBar.qml",
                             docPath: "docs/components/control/ProgressBar.md",
                             previewId: "progress-display",
                             roleLabel: "Progress indicator",
@@ -423,7 +425,7 @@ QtObject {
                         component({
                             key: "table",
                             label: "Table",
-                            location: "qml/components/control/display/Table.qml",
+                            location: "src/qml/components/control/display/Table.qml",
                             docPath: "docs/components/control/Table.md",
                             previewId: "table-display",
                             roleLabel: "Composite table",
@@ -434,7 +436,7 @@ QtObject {
                         component({
                             key: "table-header",
                             label: "TableHeader",
-                            location: "qml/components/control/display/TableHeader.qml",
+                            location: "src/qml/components/control/display/TableHeader.qml",
                             docPath: "docs/components/control/TableHeader.md",
                             previewId: "table-display",
                             roleLabel: "Table primitive",
@@ -445,7 +447,7 @@ QtObject {
                         component({
                             key: "table-row",
                             label: "TableRow",
-                            location: "qml/components/control/display/TableRow.qml",
+                            location: "src/qml/components/control/display/TableRow.qml",
                             docPath: "docs/components/control/TableRow.md",
                             previewId: "table-display",
                             roleLabel: "Table primitive",
@@ -456,7 +458,7 @@ QtObject {
                         component({
                             key: "table-cell-item",
                             label: "TableCellItem",
-                            location: "qml/components/control/display/TableCellItem.qml",
+                            location: "src/qml/components/control/display/TableCellItem.qml",
                             docPath: "docs/components/control/TableCellItem.md",
                             previewId: "table-display",
                             roleLabel: "Table cell",
@@ -475,7 +477,7 @@ QtObject {
                         component({
                             key: "slider",
                             label: "Slider",
-                            location: "qml/components/control/input/Slider.qml",
+                            location: "src/qml/components/control/input/Slider.qml",
                             docPath: "docs/components/control/Slider.md",
                             previewId: "slider-gallery",
                             roleLabel: "Value input",
@@ -486,7 +488,7 @@ QtObject {
                         component({
                             key: "color-picker",
                             label: "ColorPicker",
-                            location: "qml/components/control/input/ColorPicker.qml",
+                            location: "src/qml/components/control/input/ColorPicker.qml",
                             docPath: "docs/components/control/ColorPicker.md",
                             previewId: "color-picker-gallery",
                             roleLabel: "Color input view",
@@ -497,7 +499,7 @@ QtObject {
                         component({
                             key: "abstract-input-bar",
                             label: "AbstractInputBar",
-                            location: "qml/components/control/input/AbstractInputBar.qml",
+                            location: "src/qml/components/control/input/AbstractInputBar.qml",
                             previewId: "input-field",
                             roleLabel: "Input base",
                             summary: "FocusScope-based input foundation that exposes TextInput APIs, slots, and visual policy for one-line entry controls.",
@@ -507,7 +509,7 @@ QtObject {
                         component({
                             key: "input-field",
                             label: "InputField",
-                            location: "qml/components/control/input/InputField.qml",
+                            location: "src/qml/components/control/input/InputField.qml",
                             docPath: "docs/components/control/InputField.md",
                             previewId: "input-field",
                             roleLabel: "Single-line input",
@@ -518,7 +520,7 @@ QtObject {
                         component({
                             key: "text-editor",
                             label: "TextEditor",
-                            location: "qml/components/control/input/TextEditor.qml",
+                            location: "src/qml/components/control/input/TextEditor.qml",
                             docPath: "docs/components/control/TextEditor.md",
                             previewId: "text-editor",
                             roleLabel: "Multi-line editor",
@@ -529,7 +531,7 @@ QtObject {
                         component({
                             key: "code-editor",
                             label: "CodeEditor",
-                            location: "qml/components/control/input/CodeEditor.qml",
+                            location: "src/qml/components/control/input/CodeEditor.qml",
                             docPath: "docs/components/control/CodeEditor.md",
                             previewId: "code-editor",
                             roleLabel: "Code editor",
@@ -548,7 +550,7 @@ QtObject {
                         component({
                             key: "event-listener",
                             label: "EventListener",
-                            location: "qml/components/control/util/EventListener.qml",
+                            location: "src/qml/components/control/util/EventListener.qml",
                             docPath: "docs/components/control/EventListener.md",
                             previewId: "event-listener",
                             roleLabel: "Interaction bridge",
@@ -559,7 +561,7 @@ QtObject {
                         component({
                             key: "input-method-guard",
                             label: "InputMethodGuard",
-                            location: "qml/components/control/util/InputMethodGuard.qml",
+                            location: "src/qml/components/control/util/InputMethodGuard.qml",
                             docPath: "docs/components/control/InputMethodGuard.md",
                             previewId: "guard-utility",
                             roleLabel: "IME guard",
@@ -570,7 +572,7 @@ QtObject {
                         component({
                             key: "wheel-scroll-guard",
                             label: "WheelScrollGuard",
-                            location: "qml/components/control/util/WheelScrollGuard.qml",
+                            location: "src/qml/components/control/util/WheelScrollGuard.qml",
                             docPath: "docs/components/control/WheelScrollGuard.md",
                             previewId: "guard-utility",
                             roleLabel: "Wheel router",
@@ -597,7 +599,7 @@ QtObject {
                         component({
                             key: "navigator",
                             label: "Navigator",
-                            location: "qml/components/navigation/Navigator.qml",
+                            location: "src/qml/components/navigation/Navigator.qml",
                             docPath: "docs/components/navigation/Navigator.md",
                             previewId: "router-navigation",
                             roleLabel: "Navigation singleton",
@@ -608,7 +610,7 @@ QtObject {
                         component({
                             key: "page-router",
                             label: "PageRouter",
-                            location: "qml/components/navigation/PageRouter.qml",
+                            location: "src/qml/components/navigation/PageRouter.qml",
                             docPath: "docs/components/navigation/PageRouter.md",
                             previewId: "router-navigation",
                             roleLabel: "Route stack host",
@@ -619,7 +621,7 @@ QtObject {
                         component({
                             key: "link",
                             label: "Link",
-                            location: "qml/components/navigation/Link.qml",
+                            location: "src/qml/components/navigation/Link.qml",
                             docPath: "docs/components/navigation/Link.md",
                             previewId: "router-navigation",
                             roleLabel: "Declarative link",
@@ -638,7 +640,7 @@ QtObject {
                         component({
                             key: "toolbar-button",
                             label: "ToolbarButton",
-                            location: "qml/components/navigation/ToolbarButton.qml",
+                            location: "src/qml/components/navigation/ToolbarButton.qml",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Toolbar primitive",
                             summary: "IconButton-derived toolbar primitive that cooperates with HierarchyToolbar selection state.",
@@ -648,7 +650,7 @@ QtObject {
                         component({
                             key: "hierarchy-toolbar",
                             label: "HierarchyToolbar",
-                            location: "qml/components/navigation/HierarchyToolbar.qml",
+                            location: "src/qml/components/navigation/HierarchyToolbar.qml",
                             docPath: "docs/components/navigation/HierarchyToolbar.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Toolbar strip",
@@ -659,7 +661,7 @@ QtObject {
                         component({
                             key: "hierarchy",
                             label: "Hierarchy",
-                            location: "qml/components/navigation/Hierarchy.qml",
+                            location: "src/qml/components/navigation/Hierarchy.qml",
                             docPath: "docs/components/navigation/Hierarchy.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree panel",
@@ -670,7 +672,7 @@ QtObject {
                         component({
                             key: "hierarchy-list",
                             label: "HierarchyList",
-                            location: "qml/components/navigation/HierarchyList.qml",
+                            location: "src/qml/components/navigation/HierarchyList.qml",
                             docPath: "docs/components/navigation/HierarchyList.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree list manager",
@@ -681,7 +683,7 @@ QtObject {
                         component({
                             key: "hierarchy-item",
                             label: "HierarchyItem",
-                            location: "qml/components/navigation/HierarchyItem.qml",
+                            location: "src/qml/components/navigation/HierarchyItem.qml",
                             docPath: "docs/components/navigation/HierarchyItem.md",
                             previewId: "hierarchy-navigation",
                             roleLabel: "Tree row",
@@ -700,7 +702,7 @@ QtObject {
                         component({
                             key: "list",
                             label: "List",
-                            location: "qml/components/navigation/List.qml",
+                            location: "src/qml/components/navigation/List.qml",
                             previewId: "list-navigation",
                             roleLabel: "Flat list panel",
                             summary: "Mixed-height list with 17 row types, scrolling, model edit events and optional toolbar/footer slots.",
@@ -710,7 +712,7 @@ QtObject {
                         component({
                             key: "list-item",
                             label: "ListItem",
-                            location: "qml/components/navigation/ListItem.qml",
+                            location: "src/qml/components/navigation/ListItem.qml",
                             previewId: "list-navigation",
                             roleLabel: "List row",
                             summary: "17 Figma variants composing editable buttons, menus, steppers, selectors, inputs, metadata and previews.",
@@ -720,7 +722,7 @@ QtObject {
                         component({
                             key: "list-toolbar",
                             label: "ListToolbar",
-                            location: "qml/components/navigation/ListToolbar.qml",
+                            location: "src/qml/components/navigation/ListToolbar.qml",
                             previewId: "list-navigation",
                             roleLabel: "List toolbar",
                             summary: "Three-slot icon toolbar for flat list surfaces.",
@@ -730,7 +732,7 @@ QtObject {
                         component({
                             key: "list-footer",
                             label: "ListFooter",
-                            location: "qml/components/navigation/ListFooter.qml",
+                            location: "src/qml/components/navigation/ListFooter.qml",
                             docPath: "docs/components/navigation/ListFooter.md",
                             previewId: "list-navigation",
                             roleLabel: "List footer",
@@ -746,13 +748,13 @@ QtObject {
                     iconGlyph: "M",
                     summary: "Context menu surface and row primitives for item menus and submenu affordances.",
                     items: [
-                        component({"key": "context-menu-item", "label": "ContextMenuItem", "location": "qml/components/navigation/ContextMenuItem.qml", "docPath": "docs/components/navigation/ContextMenuItem.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Compact 18px row with Inter Regular 12 and Pretendard SemiBold 12 shortcut.", "usage": "LV.ContextMenuItem { label: \"Label\"; key: \"Key\" }", "related": ["context-menu", "motion"]}),
-                        component({"key": "context-menu-divider", "label": "ContextMenuDivider", "location": "qml/components/navigation/ContextMenuDivider.qml", "docPath": "docs/components/navigation/ContextMenuDivider.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "145 by 3px separator with a 4px inset and 30% white line.", "usage": "LV.ContextMenuDivider {}", "related": ["context-menu", "motion"]}),
-                        component({"key": "menu", "label": "Menu", "location": "qml/components/navigation/Menu.qml", "docPath": "docs/components/navigation/Menu.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Regular menu surface with 24px rows, 4px vertical padding and the 12% / 64px frosted window material.", "usage": "LV.Menu { items: [{ label: \"Open\", key: \"⌘O\" }] }", "related": ["context-menu", "motion"]}),
+                        component({"key": "context-menu-item", "label": "ContextMenuItem", "location": "src/qml/components/navigation/ContextMenuItem.qml", "docPath": "docs/components/navigation/ContextMenuItem.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Compact 18px row with Inter Regular 12 and Pretendard SemiBold 12 shortcut.", "usage": "LV.ContextMenuItem { label: \"Label\"; key: \"Key\" }", "related": ["context-menu", "motion"]}),
+                        component({"key": "context-menu-divider", "label": "ContextMenuDivider", "location": "src/qml/components/navigation/ContextMenuDivider.qml", "docPath": "docs/components/navigation/ContextMenuDivider.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "145 by 3px separator with a 4px inset and 30% white line.", "usage": "LV.ContextMenuDivider {}", "related": ["context-menu", "motion"]}),
+                        component({"key": "menu", "label": "Menu", "location": "src/qml/components/navigation/Menu.qml", "docPath": "docs/components/navigation/Menu.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Regular menu surface with 24px rows, 4px vertical padding and the 12% / 64px frosted window material.", "usage": "LV.Menu { items: [{ label: \"Open\", key: \"⌘O\" }] }", "related": ["context-menu", "motion"]}),
                         component({
                             key: "context-menu",
                             label: "ContextMenu",
-                            location: "qml/components/navigation/ContextMenu.qml",
+                            location: "src/qml/components/navigation/ContextMenu.qml",
                             docPath: "docs/components/navigation/ContextMenu.md",
                             previewId: "menu-navigation",
                             roleLabel: "Menu surface",
@@ -763,7 +765,7 @@ QtObject {
                         component({
                             key: "menu-item",
                             label: "MenuItem",
-                            location: "qml/components/navigation/MenuItem.qml",
+                            location: "src/qml/components/navigation/MenuItem.qml",
                             docPath: "docs/components/navigation/MenuItem.md",
                             previewId: "menu-navigation",
                             roleLabel: "Menu row",
@@ -774,7 +776,7 @@ QtObject {
                         component({
                             key: "menu-divider",
                             label: "MenuDivider",
-                            location: "qml/components/navigation/MenuDivider.qml",
+                            location: "src/qml/components/navigation/MenuDivider.qml",
                             docPath: "docs/components/navigation/MenuDivider.md",
                             previewId: "menu-navigation",
                             roleLabel: "Separator",
@@ -794,7 +796,7 @@ QtObject {
             items: [
                 component({
                     key: "window-material", label: "WindowMaterial",
-                    location: "qml/components/surfaces/WindowMaterial.qml",
+                    location: "src/qml/components/surfaces/WindowMaterial.qml",
                     docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
                     roleLabel: "Application background",
                     summary: "Uniform #0B0B0B fill at 50% without gradients. ApplicationWindow retains its native frosted backdrop.",
@@ -803,7 +805,7 @@ QtObject {
                 }),
                 component({
                     key: "panel-material", label: "PanelMaterial",
-                    location: "qml/components/surfaces/PanelMaterial.qml",
+                    location: "src/qml/components/surfaces/PanelMaterial.qml",
                     docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
                     roleLabel: "Transient surface",
                     summary: "Glass 25 combines a subtle app-accent radial gradient with a 25% neutral tint and 16px backdrop blur.",
@@ -812,7 +814,7 @@ QtObject {
                 }),
                 component({
                     key: "material-surface", label: "MaterialSurface",
-                    location: "qml/components/surfaces/MaterialSurface.qml",
+                    location: "src/qml/components/surfaces/MaterialSurface.qml",
                     docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
                     roleLabel: "Shared material renderer",
                     summary: "Configurable density, Primary color, safe backdrop capture and an optional custom silhouette.",
@@ -821,7 +823,7 @@ QtObject {
                 }),
                 component({
                     key: "popover", label: "Popover",
-                    location: "qml/components/surfaces/Popover.qml",
+                    location: "src/qml/components/surfaces/Popover.qml",
                     docPath: "docs/components/surfaces/Popover.md", previewId: "material-gallery",
                     roleLabel: "Transient content popup",
                     summary: "Composable Popup with Glass 25, app-accent inheritance and outside-click / Escape dismissal.",
@@ -831,7 +833,7 @@ QtObject {
                 component({
                     key: "app-card",
                     label: "AppCard",
-                    location: "qml/components/surfaces/AppCard.qml",
+                    location: "src/qml/components/surfaces/AppCard.qml",
                     docPath: "docs/components/surfaces/AppCard.md",
                     previewId: "app-card-surface",
                     roleLabel: "Reusable card",
@@ -842,7 +844,7 @@ QtObject {
                 component({
                     key: "card",
                     label: "Card",
-                    location: "qml/components/surfaces/Card.qml",
+                    location: "src/qml/components/surfaces/Card.qml",
                     docPath: "docs/components/surfaces/Card.md",
                     previewId: "card-gallery",
                     roleLabel: "File and resource cards",
@@ -853,7 +855,7 @@ QtObject {
                 component({
                     key: "alert",
                     label: "Alert",
-                    location: "qml/components/surfaces/Alert.qml",
+                    location: "src/qml/components/surfaces/Alert.qml",
                     docPath: "docs/components/surfaces/Alert.md",
                     previewId: "alert-surface",
                     roleLabel: "Overlay alert",
@@ -864,7 +866,7 @@ QtObject {
                 component({
                     key: "alert-button",
                     label: "AlertButton",
-                    location: "qml/components/surfaces/AlertButton.qml",
+                    location: "src/qml/components/surfaces/AlertButton.qml",
                     previewId: "alert-surface",
                     roleLabel: "Alert action button",
                     summary: "Alert-specific button variant tuned to the dialog visual contract for default and primary actions.",
@@ -874,7 +876,7 @@ QtObject {
                 component({
                     key: "modal",
                     label: "Modal",
-                    location: "qml/components/surfaces/Modal.qml",
+                    location: "src/qml/components/surfaces/Modal.qml",
                     docPath: "docs/components/surfaces/Modal.md",
                     previewId: "modal-surface",
                     roleLabel: "Modal dialog",
@@ -885,7 +887,7 @@ QtObject {
                 component({
                     key: "sheet",
                     label: "Sheet",
-                    location: "qml/components/surfaces/Sheet.qml",
+                    location: "src/qml/components/surfaces/Sheet.qml",
                     docPath: "docs/components/surfaces/Sheet.md",
                     previewId: "sheet-gallery",
                     roleLabel: "Adaptive content sheet",
@@ -896,7 +898,7 @@ QtObject {
                 component({
                     key: "tooltip",
                     label: "Tooltip",
-                    location: "qml/components/surfaces/Tooltip.qml",
+                    location: "src/qml/components/surfaces/Tooltip.qml",
                     docPath: "docs/components/surfaces/Tooltip.md",
                     previewId: "tooltip-gallery",
                     roleLabel: "Anchored content bubble",

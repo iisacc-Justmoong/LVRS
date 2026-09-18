@@ -1,6 +1,6 @@
 # EventListener
 
-Location: `qml/components/control/util/EventListener.qml`
+Location: `src/qml/components/control/util/EventListener.qml`
 
 `EventListener` is the LVRS interaction bridge component that maps trigger tokens to callback events.  
 Current policy is incident-centric: it avoids continuous state harvesting unless explicitly enabled.
@@ -73,7 +73,7 @@ Optional:
 
 - `ui` when `includeUiHit=true`
 - `input` when `includeInputState=true`
-- `backend` when `includeBackendSummary=true`
+- `src/backend` when `includeBackendSummary=true`
 
 ### Global pointer (`globalPressed|globalContextRequested`)
 

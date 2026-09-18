@@ -205,7 +205,7 @@ void PrimaryColorTests::runtime_color_updates_controls_and_overlays()
         {"menuItem", "iconPlaceholderColor"}, {"listFooter_iconButton_0", "backgroundColorPressed"},
         {"listFooter_menuButton_2", "backgroundColorPressed"}
     };
-    for (const QColor &primary : {QColor("#A571E6"), QColor("#FF9F45"), QColor("#0A84FF")}) {
+    for (const QColor &primary : {QColor("#A571E6"), QColor("#57965C"), QColor("#FF9F45"), QColor("#0A84FF")}) {
         QVERIFY(window->setProperty("primaryColor", primary));
         QCOMPARE(color(tokens, "primary"), primary);
         for (const auto &consumer : primaryConsumers) {

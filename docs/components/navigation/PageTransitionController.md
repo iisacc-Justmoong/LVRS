@@ -1,6 +1,6 @@
 # PageTransitionController
 
-Location: `qml/components/navigation/PageTransitionController.qml`
+Location: `src/qml/components/navigation/PageTransitionController.qml`
 
 `PageTransitionController` is a non-visual proxy that drives `PageRouter` interactive transitions while leaving committed route state inside the router.
 

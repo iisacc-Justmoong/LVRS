@@ -15,6 +15,7 @@ lvrs_add_example_app(
         qml/CardGallery.qml
         qml/SliderGallery.qml
         qml/TabsGallery.qml
+        qml/MobileNavigationGallery.qml
         qml/ColorPickerGallery.qml
         qml/SheetGallery.qml
         qml/TooltipGallery.qml

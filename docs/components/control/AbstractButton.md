@@ -1,6 +1,6 @@
 # AbstractButton
 
-Location: `qml/components/control/buttons/AbstractButton.qml`
+Location: `src/qml/components/control/buttons/AbstractButton.qml`
 
 `AbstractButton` is the shared base for LVRS button-family components.
 

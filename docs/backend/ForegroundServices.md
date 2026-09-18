@@ -1,6 +1,6 @@
 # ForegroundServices
 
-Location: `backend/runtime/foregroundservices.h` / `backend/runtime/foregroundservices.cpp`
+Location: `src/backend/runtime/foregroundservices.h` / `src/backend/runtime/foregroundservices.cpp`
 
 `ForegroundServices` provides a one-shot gate for starting app services after a visible workspace window exists.
 It is intended for startup work such as schedulers, monitors, or permission bootstrap entrypoints that must not

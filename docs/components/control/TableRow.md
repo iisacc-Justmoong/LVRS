@@ -1,6 +1,6 @@
 # TableRow
 
-Location: `qml/components/control/display/TableRow.qml`
+Location: `src/qml/components/control/display/TableRow.qml`
 
 `TableRow` renders one data row by repeating `TableCellItem` delegates.
 

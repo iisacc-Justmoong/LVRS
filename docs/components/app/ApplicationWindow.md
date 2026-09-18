@@ -1,6 +1,6 @@
 # ApplicationWindow
 
-Location: `qml/ApplicationWindow.qml`
+Location: `src/qml/ApplicationWindow.qml`
 
 `ApplicationWindow` is the LVRS root shell that combines adaptive navigation layout, render/runtime wiring, and global event bridging.
 `ApplicationWindow` now also carries the standard downstream bootstrap contract, so consumer app roots can mount directly on it without going through `LV.AppBootstrapWindow`.

@@ -1,10 +1,10 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `main.cpp` boots the Qt application and loads the QML module entrypoint.
-- `backend/` holds C++ singletons and helpers exposed to QML (e.g., `Backend`, `Platform`, `RenderMonitor`).
-- `qml/` holds UI source. `qml/Main.qml` is the app window root.
-- `qml/components/` is split by concern:
+- `src/main.cpp` boots the Qt application and loads the QML module entrypoint.
+- `src/backend/` holds C++ singletons and helpers exposed to QML (e.g., `Backend`, `Platform`, `RenderMonitor`).
+- `src/qml/` holds UI source. `src/qml/Main.qml` is the app window root.
+- `src/qml/components/` is split by concern:
   - `buttons/` (e.g., `AbstractButton.qml`, `LabelButton.qml`)
   - `layout/` (e.g., `VStack.qml`, `HStack.qml`)
   - `navigation/` (e.g., `PageRouter.qml`, `Link.qml`)

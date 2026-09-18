@@ -1,6 +1,6 @@
 # ToggleSwitch
 
-Location: `qml/components/control/check/ToggleSwitch.qml`
+Location: `src/qml/components/control/check/ToggleSwitch.qml`
 
 `ToggleSwitch` is an LVRS-styled switch built on `QtQuick.Controls.Switch` and aligned to the Figma two-state toggle set.
 

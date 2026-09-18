@@ -1,6 +1,6 @@
 # HierarchyList
 
-Location: `qml/components/navigation/HierarchyList.qml`
+Location: `src/qml/components/navigation/HierarchyList.qml`
 
 `HierarchyList` is a depth-aware view list that renders `HierarchyItem` rows from manual children, flat JavaScript/list models, or a direct `QAbstractItemModel` with explicit depth values.
 

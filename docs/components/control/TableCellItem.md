@@ -1,6 +1,6 @@
 # TableCellItem
 
-Location: `qml/components/control/display/TableCellItem.qml`
+Location: `src/qml/components/control/display/TableCellItem.qml`
 
 `TableCellItem` is the smallest table primitive: leading divider + single text body.
 

@@ -1,6 +1,6 @@
 # AppHeader
 
-Location: `qml/components/layout/AppHeader.qml`
+Location: `src/qml/components/layout/AppHeader.qml`
 
 `AppHeader` is a top toolbar component with optional menu trigger, title/subtitle block, and trailing action slot.
 

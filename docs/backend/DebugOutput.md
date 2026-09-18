@@ -1,6 +1,6 @@
 # Debug Output Schema
 
-Location: `backend/runtime/debuglogger.h`, `backend/runtime/debuglogger.cpp`, `backend/runtime/runtimeevents.h`, `backend/runtime/runtimeevents.cpp`, `backend/runtime/gestureevents.h`, `backend/runtime/gestureevents.cpp`, `backend/io/backend.h`, `backend/io/backend.cpp`, `example/VisualCatalog/qml/Main.qml`, `qml/components/control/util/EventListener.qml`
+Location: `src/backend/runtime/debuglogger.h`, `src/backend/runtime/debuglogger.cpp`, `src/backend/runtime/runtimeevents.h`, `src/backend/runtime/runtimeevents.cpp`, `src/backend/runtime/gestureevents.h`, `src/backend/runtime/gestureevents.cpp`, `src/backend/io/backend.h`, `src/backend/io/backend.cpp`, `example/VisualCatalog/qml/Main.qml`, `src/qml/components/control/util/EventListener.qml`
 
 This document defines the schema used by debug and runtime-event data that is emitted and displayed in the LVRS demo app. It is intended to let developers trace relationships between stdout logs, runtime events, and QML monitor views without ambiguity.
 
@@ -215,18 +215,18 @@ If samples exceed `eventMonitorMaxSamples`, oldest entries are removed first (FI
 
 ## 9. EventListener Callback Payload Schema
 
-Based on `qml/components/control/util/EventListener.qml`:
+Based on `src/qml/components/control/util/EventListener.qml`:
 
 - Local pointer triggers (`clicked|pressed|released`):
   - `x`, `y`, `globalX`, `globalY`, `button`, `buttons`, `modifiers`, `isGlobal=false`
   - `ui` (optional, `includeUiHit=true`)
   - `input` (optional, `includeInputState=true`)
-  - `backend` (optional, `includeBackendSummary=true`)
+  - `src/backend` (optional, `includeBackendSummary=true`)
 - Global triggers (`globalPressed|globalContextRequested`):
   - `x`, `y`, `globalX`, `globalY`, `buttons`, `modifiers`, `isGlobal=true`
   - `ui` (optional, `includeUiHit=true`)
   - `input` (optional, `includeInputState=true`)
-  - `backend` (optional)
+  - `src/backend` (optional)
   - for context events, `reason` and `source(mouse|context)` are added
 - Gesture triggers (`touchStarted|touchUpdated|touchEnded|touchCancelled|pressStarted|pressEnded|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|scrollStarted|scrollUpdated|scrollEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):
   - common: `sequence`, `gestureType`, `interactionKind`, `classification`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`
@@ -235,7 +235,7 @@ Based on `qml/components/control/util/EventListener.qml`:
   - swipe-specific: `swipeDirection`, `velocityX`, `velocityY`, `speed`
   - scroll-specific: `scrollAxis`, `scrollDirection`, `scrollDeltaX/Y`
   - native-gesture-specific: `nativeGestureType`, `fingerCount`, `value`, `deltaX/Y`
-  - optional `input` / `backend` enrichments follow the same opt-in switches as other triggers
+  - optional `input` / `src/backend` enrichments follow the same opt-in switches as other triggers
 - Key/wheel triggers pass Qt event objects directly.
 
 Deduplication:
@@ -256,7 +256,7 @@ Common payload:
 - `fps`
 - `lastFrameMs`
 - `frameCount`
-- `backend` (`LV.RenderQuality.graphicsBackend`)
+- `src/backend` (`LV.RenderQuality.graphicsBackend`)
 
 ## Consumer Implementation Notes
 

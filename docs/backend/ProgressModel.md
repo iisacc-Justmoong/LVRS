@@ -1,6 +1,6 @@
 # ProgressModel
 
-Location: `backend/model/progressmodel.h`, `backend/model/progressmodel.cpp`
+Location: `src/backend/model/progressmodel.h`, `src/backend/model/progressmodel.cpp`
 
 `ProgressModel` owns numeric range normalization for `ProgressBar.qml`.
 

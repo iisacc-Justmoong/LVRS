@@ -16,7 +16,7 @@ On Windows PowerShell:
 Local Qt version discovery uses `/Volumes/Storage/Qt`, including the macOS, iOS, Android, and WASM kits under `6.8.3`. `QT_VERSION_ROOT` and explicit platform Qt hints remain supported.
 On macOS, `lvrs install` resolves the host kit before the first CMake configure and supplies both `Qt6_DIR` and `LVRS_BOOTSTRAP_QT_PREFIX_MACOS`. Explicit Qt hints and valid Qt entries in `CMAKE_PREFIX_PATH` take precedence over default kits; stale search-path entries do not hide the relocated default installation. The previous installed framework is removed only after configuration succeeds, so a configuration failure preserves it.
 After updating CLI sources or moving Qt, run `./install.sh` from the checkout to build the current CLI and refresh the installed `lvrs` executable. Committing source changes alone does not replace an already installed CLI binary.
-- If `cargo` is available, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`.
+- If `cargo` is available, it runs `cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
 - `install.ps1` is the Windows wrapper. It auto-detects a Qt 6 MinGW prefix,
@@ -37,11 +37,11 @@ Platforms without a matching Qt kit are skipped during bootstrap target generati
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to constrain/override the platform set.
 On Linux hosts, the installer runs a dependency preflight before cleaning/building. It validates the host C++ toolchain, required Qt 6.5+ modules, and Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts when available.
 If those Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
-`lvrs doctor --fix` runs the same host-side dependency check/fix flow without starting an install. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` additionally validates the `main.cpp` bootstrap entry markers and reports any missing cross-platform Qt/Android/WASM auto-detect hints; it exits non-zero when the requested bootstrap target set is not ready.
+`lvrs doctor --fix` runs the same host-side dependency check/fix flow without starting an install. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` additionally validates the `src/main.cpp` bootstrap entry markers and reports any missing cross-platform Qt/Android/WASM auto-detect hints; it exits non-zero when the requested bootstrap target set is not ready.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The checkout root is `Workspace/SDK/LVRS`; the default install root is `~/.local/SDK/LVRS`. CMake uses the same default, while explicit `CMAKE_INSTALL_PREFIX`, `--prefix`, and `LVRS_INSTALL_PREFIX` overrides remain supported. Re-run `./install.sh` after moving the checkout: it recreates `build/` and records the new absolute source path in the installed snapshot.
-The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
-The installer always performs a clean reinstall: it removes the previous build directory before configuring, then removes installed LVRS artifacts only after configuration succeeds. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `rust-cli/build` and legacy `rust-cli/target` directories.
+The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `src/rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
+The installer always performs a clean reinstall: it removes the previous build directory before configuring, then removes installed LVRS artifacts only after configuration succeeds. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `src/rust-cli/build` and legacy `src/rust-cli/target` directories.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`; Linux builds additionally stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: repository launchers fall back to `build/example/.../bin`, while installed source snapshots receive refreshed desktop runtimes as sibling `*.real` files beside those launchers. If `--without-examples` is used, those snapshot runtime payloads are removed.
 
@@ -50,13 +50,13 @@ When host examples are enabled, the installer builds the `lvrs_host_examples_all
 Direct CLI invocation (without wrapper):
 
 ```bash
-cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install
+cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- install
 ```
 
 Main-entrypoint bootstrap profile:
 
 ```bash
-cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- bootstrap
+cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- bootstrap
 ```
 
 `lvrs bootstrap` defaults to a host-matched target set unless `--platforms` is provided:
@@ -64,7 +64,7 @@ cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin 
 - macOS host: `macos;ios;android`
 - Windows host: `windows;android`
 `--with-wasm` appends `wasm` to that host default set.
-Before running, it validates `main.cpp` contains the expected LVRS bootstrap entry markers (`runBootstrappedQmlApp`, `rootObject = QStringLiteral("Main")`).
+Before running, it validates `src/main.cpp` contains the expected LVRS bootstrap entry markers (`runBootstrappedQmlApp`, `rootObject = QStringLiteral("Main")`).
 
 ## Configure
 
@@ -337,9 +337,9 @@ Bootstrap render defaults are selected conservatively before app construction. M
 
 - Qt 6.5+ with `Quick` and `QuickControls2` is required.
 - Fixed backend Qt feature checks happen in `CMakeLists.txt`.
-- Backend selection logic lives in `backend/runtime/vulkanbootstrap.cpp`.
-- Downstream app bootstrap template is provided at `main.cpp` (not built by default).
-- Recommended reusable bootstrap API is `backend/runtime/appbootstrap.h`.
+- Backend selection logic lives in `src/backend/runtime/vulkanbootstrap.cpp`.
+- Downstream app bootstrap template is provided at `src/main.cpp` (not built by default).
+- Recommended reusable bootstrap API is `src/backend/runtime/appbootstrap.h`.
 
 ## CI Build Pipeline Example
 

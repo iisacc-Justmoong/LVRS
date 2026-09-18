@@ -1,6 +1,6 @@
 # TextEditor
 
-Location: `qml/components/control/input/TextEditor.qml`
+Location: `src/qml/components/control/input/TextEditor.qml`
 
 `TextEditor` is a file-connected rich text editor. It uses a native Qt Quick `TextEdit` surface fixed to `TextEdit.RichText`, so the editing behavior is closer to Mac TextEdit-style rich document editing than to a code or plain-text buffer.
 

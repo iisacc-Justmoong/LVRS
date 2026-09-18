@@ -1,6 +1,6 @@
 # ComboBox
 
-Location: `qml/components/control/buttons/ComboBox.qml`
+Location: `src/qml/components/control/buttons/ComboBox.qml`
 
 `ComboBox` is a compact context-menu trigger row that follows the Figma contract (`97x20`) and uses `Stepper` as the trailing indicator.
 

@@ -1,6 +1,6 @@
 # NativeWindowInteraction
 
-Location: `backend/platform/nativewindowinteraction.h/.cpp`
+Location: `src/backend/platform/nativewindowinteraction.h/.cpp`
 
 `NativeWindowInteraction` is a QML singleton that owns native-first interactive move and resize requests for LVRS windows.
 

@@ -1,6 +1,6 @@
 # ListItem
 
-Location: `qml/components/navigation/ListItem.qml`
+Location: `src/qml/components/navigation/ListItem.qml`
 
 `ListItem` implements the 17 variants of Figma component set `241:9253`. It composes existing LVRS controls; its inputs, selectors, buttons and selection controls are interactive.
 

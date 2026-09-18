@@ -1,6 +1,6 @@
 # Modal
 
-Location: `qml/components/surfaces/Modal.qml`
+Location: `src/qml/components/surfaces/Modal.qml`
 
 `Modal` is an Apple-style dialog surface with left icon, title/description, and up to three action buttons.
 

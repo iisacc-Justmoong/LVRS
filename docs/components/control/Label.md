@@ -1,6 +1,6 @@
 # Label
 
-Location: `qml/components/control/display/Label.qml`
+Location: `src/qml/components/control/display/Label.qml`
 
 `Label` is the LVRS text wrapper that maps style tokens to typography metrics.
 

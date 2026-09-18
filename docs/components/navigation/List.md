@@ -1,6 +1,6 @@
 # List
 
-Location: `qml/components/navigation/List.qml`
+Location: `src/qml/components/navigation/List.qml`
 
 `List` renders all 17 [ListItem variants](ListItem.md), including mixed compact and compound rows, from a direct model or a legacy `items` array. A Mini-only list retains the measured Figma `SmallList` surface and `ListFooter`.
 

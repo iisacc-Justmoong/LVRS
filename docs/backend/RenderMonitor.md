@@ -1,6 +1,6 @@
 # RenderMonitor
 
-Location: `backend/runtime/renderingmonitor.h` / `backend/runtime/renderingmonitor.cpp`
+Location: `src/backend/runtime/renderingmonitor.h` / `src/backend/runtime/renderingmonitor.cpp`
 
 `RenderMonitor` provides frame timing metrics (`fps`, frame time, percentile frame stats, drop counters) for a `QQuickWindow`.
 

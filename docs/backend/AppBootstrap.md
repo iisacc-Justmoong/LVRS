@@ -1,6 +1,6 @@
 # AppBootstrap
 
-Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp` / `backend/runtime/appentry.h`
+Location: `src/backend/runtime/appbootstrap.h` / `src/backend/runtime/appbootstrap.cpp` / `src/backend/runtime/appentry.h`
 
 `AppBootstrap` provides pre/post application initialization routines for graphics backend policy, style setup, and font fallback setup.
 
@@ -13,7 +13,7 @@ Location: `backend/runtime/appbootstrap.h` / `backend/runtime/appbootstrap.cpp` 
 - `lvrs::scheduleQmlAppLifecycleStage(receiver, context, hooks, stage, logDiagnostics) -> bool`
 - `lvrs::runBootstrappedQmlApp(argc, argv, launchSpec) -> int`
 
-For Qt Quick module apps, prefer `backend/runtime/appentry.h` and `QmlAppLaunchSpec` as the standard wrapper around the pre/post bootstrap sequence. It keeps the required bootstrap order intact and can seed root QML properties through `initialProperties` before `QQmlApplicationEngine::loadFromModule(...)`. `runBootstrappedQmlApp()` now delegates root creation to `loadQmlRootObjects()`, so downstream apps can load one root through the legacy `moduleUri/rootObject` fields or several roots through `QmlAppLaunchSpec::roots`.
+For Qt Quick module apps, prefer `src/backend/runtime/appentry.h` and `QmlAppLaunchSpec` as the standard wrapper around the pre/post bootstrap sequence. It keeps the required bootstrap order intact and can seed root QML properties through `initialProperties` before `QQmlApplicationEngine::loadFromModule(...)`. `runBootstrappedQmlApp()` now delegates root creation to `loadQmlRootObjects()`, so downstream apps can load one root through the legacy `moduleUri/rootObject` fields or several roots through `QmlAppLaunchSpec::roots`.
 
 ## QML Root Loading
 

@@ -1,6 +1,6 @@
 # Backend
 
-Location: `backend/io/backend.h` / `backend/io/backend.cpp`
+Location: `src/backend/io/backend.h` / `src/backend/io/backend.cpp`
 
 `Backend` is the QML bridge singleton for filesystem utilities and mirrored runtime-event caching.  
 It is intentionally simple: transport and bounded caching, not policy-heavy analytics.

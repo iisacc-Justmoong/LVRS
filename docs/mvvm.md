@@ -12,7 +12,7 @@ LVRS MVVM is centered on C++ ViewModel classes, `StateModel` for reusable compon
 
 ## ViewModel Shape
 
-Dedicated app ViewModels should derive from `ViewModel` (`backend/state/viewmodel.h`) and add domain-specific Q_PROPERTY state and invokable commands.
+Dedicated app ViewModels should derive from `ViewModel` (`src/backend/state/viewmodel.h`) and add domain-specific Q_PROPERTY state and invokable commands.
 
 The base class supplies:
 
@@ -26,11 +26,11 @@ The base class supplies:
 
 The base type is uncreatable from QML. QML receives app-created instances through `ViewModels`.
 
-`StateModel` (`backend/state/statemodel.h`) derives from `ViewModel` and provides a key-value state map (`values`) with `revision` and per-key change signals. Use it when migrating generic component state out of QML before a dedicated typed ViewModel exists.
+`StateModel` (`src/backend/state/statemodel.h`) derives from `ViewModel` and provides a key-value state map (`values`) with `revision` and per-key change signals. Use it when migrating generic component state out of QML before a dedicated typed ViewModel exists.
 
 ## Core API (`ViewModels`)
 
-Location: `backend/state/viewmodelregistry.h` / `backend/state/viewmodelregistry.cpp`
+Location: `src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`
 
 Registration lifecycle:
 

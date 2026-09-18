@@ -1,6 +1,6 @@
 # IconButton
 
-Location: `qml/components/control/buttons/IconButton.qml`
+Location: `src/qml/components/control/buttons/IconButton.qml`
 
 `IconButton` is the `iconMode: true` preset of [PushButton](PushButton.md), with optional glyph/text.
 

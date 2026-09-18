@@ -297,7 +297,7 @@ void TextEditorTests::text_editor_api_usage_manual_contract()
     QVERIFY(!docs.contains(QStringLiteral("Avoid `TextArea`/`TextEdit` as the document model")));
 
     const QString qmlPath = QDir(QString::fromUtf8(LVRS_TEST_SOURCE_DIR))
-        .absoluteFilePath(QStringLiteral("../qml/components/control/input/TextEditor.qml"));
+        .absoluteFilePath(QStringLiteral("../src/qml/components/control/input/TextEditor.qml"));
     QFile qmlFile(qmlPath);
     QVERIFY2(qmlFile.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(qmlPath));
 

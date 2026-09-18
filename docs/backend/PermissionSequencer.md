@@ -1,6 +1,6 @@
 # PermissionSequencer
 
-Location: `backend/runtime/permissionsequencer.h` / `backend/runtime/permissionsequencer.cpp`
+Location: `src/backend/runtime/permissionsequencer.h` / `src/backend/runtime/permissionsequencer.cpp`
 
 `PermissionSequencer` runs app-defined permission request steps sequentially and stores request history.
 It is intentionally generic: LVRS does not know about full-disk access, photo-library access, document folders,

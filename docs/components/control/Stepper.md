@@ -1,6 +1,6 @@
 # Stepper
 
-Location: `qml/components/control/buttons/Stepper.qml`
+Location: `src/qml/components/control/buttons/Stepper.qml`
 
 `Stepper` is a compact standalone directional control with a square `Theme.iconSm` frame (`18 x 18` on desktop, `36 x 36` on mobile) and `Up`, `Down`, and `UpDown` arrow modes.
 

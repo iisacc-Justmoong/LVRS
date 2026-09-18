@@ -1,6 +1,6 @@
 # HierarchyToolbar
 
-Location: `qml/components/navigation/HierarchyToolbar.qml`
+Location: `src/qml/components/navigation/HierarchyToolbar.qml`
 
 `HierarchyToolbar` is the top toolbar for hierarchy panels, rendered as an `IconButton` array.
 

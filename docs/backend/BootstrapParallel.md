@@ -1,6 +1,6 @@
 # BootstrapParallel
 
-Location: `backend/runtime/bootstrapparallel.h` / `backend/runtime/bootstrapparallel.cpp`
+Location: `src/backend/runtime/bootstrapparallel.h` / `src/backend/runtime/bootstrapparallel.cpp`
 
 `BootstrapParallel` is a small runtime executor for loading independent startup domains in parallel,
 then applying the collected results on a chosen QObject thread.

@@ -45,7 +45,7 @@ Optional enrichments:
 
 - `input`: normalized input state snapshot (`includeInputState=true`)
 - `ui`: hit-test metadata (`includeUiHit=true`)
-- `backend`: optional backend summary when requested
+- `src/backend`: optional backend summary when requested
 
 This shape is intentionally shared so feature components can consume one schema.
 
@@ -79,7 +79,7 @@ When validating event behavior, verify:
 
 - `RuntimeEvents.running == true`
 - `GestureEvents.runtimeAttached == true` for direct singleton consumers
-- `Backend.userEventHooked == true` only for listeners that opt into backend/input enrichment
+- `Backend.userEventHooked == true` only for listeners that opt into src/backend/input enrichment
 - expected trigger fires exactly once within dedup window
 - payload carries expected optional `ui`/`input` fields only when enabled
 

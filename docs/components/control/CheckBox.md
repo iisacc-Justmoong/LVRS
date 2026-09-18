@@ -1,6 +1,6 @@
 # CheckBox
 
-Location: `qml/components/control/check/CheckBox.qml`
+Location: `src/qml/components/control/check/CheckBox.qml`
 
 `CheckBox` is a custom-painted checkbox (`AbstractButton` based) with deterministic state visuals.
 

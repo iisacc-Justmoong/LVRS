@@ -19,6 +19,7 @@ Flickable {
         id: examples
         width: root.width
         spacing: 24
+        MobileNavigationGallery { Layout.fillWidth: true }
         LV.Label { style: header; text: "Tabs · Desktop / iOS / Android" }
         Repeater {
             model: [LV.Tab.Underline, LV.Tab.Surface]

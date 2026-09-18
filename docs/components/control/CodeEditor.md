@@ -1,6 +1,6 @@
 # CodeEditor
 
-Location: `qml/components/control/input/CodeEditor.qml`
+Location: `src/qml/components/control/input/CodeEditor.qml`
 
 `CodeEditor` is a code-oriented editor (`TextEdit.NoWrap`, `TextEdit.PlainText`) with optional snippet header.
 

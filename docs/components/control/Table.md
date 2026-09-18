@@ -1,6 +1,6 @@
 # Table
 
-Location: `qml/components/control/display/Table.qml`
+Location: `src/qml/components/control/display/Table.qml`
 
 `Table` composes `TableHeader` and positioned `TableCellItem` delegates into a compact spreadsheet surface. Its data, typing, range mutation, sorting, geometry, and undo behavior are backed by C++ `TableModel`; QML remains the render, selection, and event adapter.
 

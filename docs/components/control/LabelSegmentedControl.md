@@ -1,6 +1,6 @@
 # LabelSegmentedControl
 
-Location: `qml/components/control/buttons/LabelSegmentedControl.qml`
+Location: `src/qml/components/control/buttons/LabelSegmentedControl.qml`
 
 `LabelSegmentedControl` is the Figma label segmented container for `LabelButton` children.
 

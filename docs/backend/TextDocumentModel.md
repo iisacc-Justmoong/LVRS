@@ -1,6 +1,6 @@
 # TextDocumentModel
 
-Location: `backend/text/textdocumentmodel.h`, `backend/text/textdocumentmodel.cpp`
+Location: `src/backend/text/textdocumentmodel.h`, `src/backend/text/textdocumentmodel.cpp`
 
 `TextDocumentModel` is the internal C++ document engine behind `LV.TextEditor`.
 

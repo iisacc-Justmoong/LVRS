@@ -1,6 +1,6 @@
 # InputMethodGuard
 
-Location: `qml/components/control/util/InputMethodGuard.qml`
+Location: `src/qml/components/control/util/InputMethodGuard.qml`
 
 `InputMethodGuard` protects text composition state when IME locale/visibility/focus conditions change.
 

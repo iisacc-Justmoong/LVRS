@@ -1,6 +1,6 @@
 # MenuItem
 
-Location: `qml/components/navigation/MenuItem.qml`
+Location: `src/qml/components/navigation/MenuItem.qml`
 
 `MenuItem` is a context-menu row component used by `ContextMenu` delegates.
 

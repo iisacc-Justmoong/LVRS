@@ -1,6 +1,6 @@
 # IconSegmentedControl
 
-Location: `qml/components/control/buttons/IconSegmentedControl.qml`
+Location: `src/qml/components/control/buttons/IconSegmentedControl.qml`
 
 `IconSegmentedControl` is the Figma icon segmented container for `IconButton` children.
 

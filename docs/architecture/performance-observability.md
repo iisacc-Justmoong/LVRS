@@ -1,6 +1,6 @@
 # Performance Observability (P0)
 
-Location: `backend/io/backend.*` / `backend/runtime/renderingmonitor.*`
+Location: `src/backend/io/backend.*` / `src/backend/runtime/renderingmonitor.*`
 
 This document defines the P0 performance telemetry contract used by LVRS.
 

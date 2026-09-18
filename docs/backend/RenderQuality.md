@@ -1,6 +1,6 @@
 # RenderQuality
 
-Location: `backend/runtime/renderquality.h` / `backend/runtime/renderquality.cpp`
+Location: `src/backend/runtime/renderquality.h` / `src/backend/runtime/renderquality.cpp`
 
 `RenderQuality` is a QML singleton responsible for LVRS runtime rendering quality, GPU cost, and power/performance balance policy.
 
@@ -94,8 +94,8 @@ If `tier=-1`, the automatically detected device tier is applied. Stock LVRS shel
 
 ## 6. QML Integration Points
 
-- `qml/ApplicationWindow.qml`
-- `qml/Window.qml`
+- `src/qml/ApplicationWindow.qml`
+- `src/qml/Window.qml`
 - major icon/image components (`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)
 - snapshot-driven control icons (`Stepper`, `InputField` search icon) via supersampled `Image.sourceSize`
 - `Canvas`-based control icons (`CheckBox`) via supersampled `canvasSize` with per-axis ceil rounding; `ToggleSwitch` uses a scene-graph vector knob instead of a raster canvas

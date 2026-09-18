@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ManifestPath = Join-Path $ScriptDir "rust-cli\Cargo.toml"
+$ManifestPath = Join-Path $ScriptDir "src\rust-cli\Cargo.toml"
 
 function Find-CommandPath {
     param([Parameter(Mandatory = $true)][string]$Name)
@@ -419,7 +419,7 @@ if (-not (Contains-Option -Values ([string[]]$installArgs) -Name "--without-test
 $cargo = Find-CommandPath -Name "cargo.exe"
 if ($null -ne $cargo -and (Test-Path -LiteralPath $ManifestPath)) {
     if ([string]::IsNullOrWhiteSpace($env:CARGO_TARGET_DIR)) {
-        $env:CARGO_TARGET_DIR = Join-Path $ScriptDir "rust-cli\build"
+        $env:CARGO_TARGET_DIR = Join-Path $ScriptDir "build\rust-cli"
     }
     & $cargo run --manifest-path $ManifestPath --bin lvrs -- install @installArgs
     exit $LASTEXITCODE

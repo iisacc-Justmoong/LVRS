@@ -1,6 +1,6 @@
 # WheelScrollGuard
 
-Location: `qml/components/control/util/WheelScrollGuard.qml`
+Location: `src/qml/components/control/util/WheelScrollGuard.qml`
 
 `WheelScrollGuard` routes wheel deltas to an intended inner flickable and optionally consumes the event.
 

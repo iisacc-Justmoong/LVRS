@@ -1,6 +1,6 @@
 # RadioButton
 
-Location: `qml/components/control/check/RadioButton.qml`
+Location: `src/qml/components/control/check/RadioButton.qml`
 
 `RadioButton` is a compact circular selector with legacy compatibility aliases.
 

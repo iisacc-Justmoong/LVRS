@@ -1,6 +1,6 @@
 # PageRouter
 
-Location: `qml/components/navigation/PageRouter.qml`
+Location: `src/qml/components/navigation/PageRouter.qml`
 
 `PageRouter` is the LVRS stack navigation engine built on `StackView` + `RouteResolver`.
 

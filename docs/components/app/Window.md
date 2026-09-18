@@ -1,6 +1,6 @@
 # Window
 
-Location: `qml/Window.qml`
+Location: `src/qml/Window.qml`
 
 `Window` is the lightweight LVRS top-level window. It provides platform and size-class metadata, render-quality wiring, native solid chrome, and native-first move/resize interactions without the adaptive scaffold carried by `ApplicationWindow`.
 

@@ -1,6 +1,6 @@
 # HierarchyItem
 
-Location: `qml/components/navigation/HierarchyItem.qml`
+Location: `src/qml/components/navigation/HierarchyItem.qml`
 
 `HierarchyItem` is the smallest hierarchy row primitive used by `HierarchyList`, but it now exposes enough structural and UX state to act as a real directory-tree, outliner, or hierarchy node contract.
 

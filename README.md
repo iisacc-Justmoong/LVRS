@@ -28,9 +28,9 @@ cd LVRS
 ```
 
 `install.sh` is a wrapper around Rust CLI `lvrs install`.
-If `cargo` exists, it runs `cargo run --manifest-path rust-cli/Cargo.toml --target-dir rust-cli/build --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
+If `cargo` exists, it runs `cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.
 Direct `lvrs install` now also reuses the installed source metadata under `<prefix>/src/LVRS` when launched outside the repository tree. If the recorded checkout path became stale because an upper directory was renamed, the CLI relocates the project root by matching the preserved trailing path segments before falling back to the installed source snapshot itself.
-Source snapshots omit repository build directories (including hidden `.build.lvrs-stale-*` cleanup remnants), `rust-cli/build`, and legacy `rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.
+Source snapshots omit repository build directories (including hidden `.build.lvrs-stale-*` cleanup remnants), `build/rust-cli`, and legacy `src/rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.
 If `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/SDK/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.
 The install flow builds `bootstrap_lvrs_all`.
 By default, the bootstrap platform set follows the current host:
@@ -41,12 +41,12 @@ Platforms without a discoverable Qt kit are skipped.
 Use `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to override bootstrap/install platforms explicitly.
 On Linux hosts, `lvrs install` now runs a CMake preflight first: it verifies the host C++ toolchain, Qt 6.5+ modules (`Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`), and required Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts (Qt online installer, `qtpaths`/`qmake`, distro multiarch installs) when possible.
 If Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.
-Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.
+Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `src/main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.
 Install layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).
 The checkout lives under `Workspace/SDK/LVRS`. The default install root is `~/.local/SDK/LVRS` for both CMake and the install CLI. Set `--prefix <path>`, `LVRS_INSTALL_PREFIX=<path>`, or an explicit `CMAKE_INSTALL_PREFIX` to move the install root.
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.
-The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
+The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `build/rust-cli/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
 The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.
@@ -234,7 +234,7 @@ For Apple compatibility, configure the parent with `CMAKE_OSX_DEPLOYMENT_TARGET`
 
 ## Rendering Backend Policy
 
-At runtime, graphics backend selection is bootstrapped through `backend/runtime/appbootstrap.*` from each app entrypoint.
+At runtime, graphics backend selection is bootstrapped through `src/backend/runtime/appbootstrap.*` from each app entrypoint.
 
 - macOS/iOS: Metal is fixed.
 - Windows: D3D11 is preferred, the runtime is probed first, and startup falls back to OpenGL when DirectX cannot be initialized during bootstrap.
@@ -259,10 +259,10 @@ When enabled, configure fails if:
 
 ## Project Layout
 
-- `backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).
-- `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.
-- `qml/`: QML module entry files and components.
-- `main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.
+- `src/backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).
+- `src/backend/runtime/appbootstrap.h`, `src/backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.
+- `src/qml/`: QML module entry files and components.
+- `src/main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.
 - `example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.
 - `example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.
 - `resources/iconset/`: SVG icon source set used for theme accent extraction. Most icons in this set are sourced from JetBrains Int Icons (IntelliJ Platform Icons).
@@ -339,3 +339,11 @@ See [the motion system](docs/motion.md) for shared elastic feedback, accessibili
 The [Figma parity audit](docs/figma-parity.md) records the current component inventory, exact color tokens and corrected compact/regular menu contracts.
 
 ContextMenu and Menu now share a lighter frosted WindowMaterial coating. See the [menu material contract](docs/components/navigation/ContextMenu.md#window-derived-frosted-menu) for tint, blur and accent overrides.
+
+## Source layout
+
+Implementation files and their headers live together under `src/`. Existing feature and platform subdirectories retain their responsibilities. Build configuration, tests, documentation, resources, and maintenance scripts remain at the project root. Configure and build using the repository-local `build/` directory.
+
+## LVRS 모바일 탐색
+
+`MobileNavigationBar`·`MobileNavigationTab`은 [Figma 사양](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)의 기기 곡률, 선택적 독립 검색, 왼쪽 축소 배치, 점착 선택 이동 및 선택적 레이블을 제공한다. 검색은 기본적으로 없으며 `search: ({})`로 추가한다. 사용법은 [컴포넌트 문서](docs/components/navigation/MobileNavigationBar.md)를 참조한다.

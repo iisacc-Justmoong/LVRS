@@ -1,6 +1,6 @@
 # PushButton
 
-Location: `qml/components/control/buttons/PushButton.qml`
+Location: `src/qml/components/control/buttons/PushButton.qml`
 
 `PushButton` is the independent push-action family built on `AbstractButton`.
 It implements [Figma PushButton 44:599](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=44-599),

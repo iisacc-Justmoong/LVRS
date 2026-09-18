@@ -1,6 +1,6 @@
 # ModelAdapter
 
-Location: `backend/navigation/modeladapter.h`, `backend/navigation/modeladapter.cpp`
+Location: `src/backend/navigation/modeladapter.h`, `src/backend/navigation/modeladapter.cpp`
 
 `ModelAdapter` is a legacy QML singleton for reading C++ `QAbstractItemModel` rows through role names.
 

@@ -1,6 +1,6 @@
 # QmlTypeRegistrar
 
-Location: `backend/runtime/qmltyperegistrar.h` / `backend/runtime/qmltyperegistrar.cpp`
+Location: `src/backend/runtime/qmltyperegistrar.h` / `src/backend/runtime/qmltyperegistrar.cpp`
 
 `QmlTypeRegistrar` registers app-owned QML types from a declared C++ manifest.
 It is intended for downstream apps that have long repeated blocks of `qmlRegisterType(...)`,

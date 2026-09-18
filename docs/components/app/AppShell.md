@@ -1,6 +1,6 @@
 # AppShell
 
-Location: `qml/AppShell.qml`
+Location: `src/qml/AppShell.qml`
 
 `AppShell` is a compatibility wrapper that directly inherits `ApplicationWindow` without adding extra API.
 

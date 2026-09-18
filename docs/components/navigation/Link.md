@@ -1,6 +1,6 @@
 # Link
 
-Location: `qml/components/navigation/Link.qml`
+Location: `src/qml/components/navigation/Link.qml`
 
 `Link` is a navigation trigger component built on `AbstractButton`.
 

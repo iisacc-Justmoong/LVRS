@@ -14,7 +14,7 @@ The primary objective is operational clarity: each document should answer what A
 7. `docs/performance-baseline-p0.md`
 8. `docs/quality-automation-p4.md`
 9. `Chnagelog.md`
-10. `rust-cli/README.md`
+10. `src/rust-cli/README.md`
 
 ## Documentation Contract
 
@@ -48,7 +48,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Change Records and Tooling
 
 - `Chnagelog.md` (repo root): commit-trace change summary by date.
-- `rust-cli/README.md` (repo root): `lvrs` CLI entrypoints (`install`, `bootstrap`, `doctor`, `platform`).
+- `src/rust-cli/README.md` (repo root): `lvrs` CLI entrypoints (`install`, `bootstrap`, `doctor`, `platform`).
 
 ## Backend Singletons
 
@@ -129,6 +129,7 @@ This structure is intentional so the same question can be answered consistently 
 ## Navigation Components
 
 - `docs/components/navigation/Tabs.md`
+- `docs/components/navigation/MobileNavigationBar.md`
 - `docs/components/navigation/Navigator.md`
 - `docs/components/navigation/PageRouter.md`
 - `docs/components/navigation/PageTransitionController.md`
@@ -171,7 +172,7 @@ This structure is intentional so the same question can be answered consistently 
   Start with `docs/backend/RuntimeEvents.md`, `docs/backend/Debug.md`, and `docs/backend/DebugOutput.md`.
 
 - How to run install/bootstrap with current workflow?  
-  Start with `docs/build.md`, then `rust-cli/README.md`.
+  Start with `docs/build.md`, then `src/rust-cli/README.md`.
 
 ## Publishing Notes for Static Site Generators
 

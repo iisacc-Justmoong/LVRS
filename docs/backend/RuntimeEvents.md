@@ -1,6 +1,6 @@
 # RuntimeEvents
 
-Location: `backend/runtime/runtimeevents.h` / `backend/runtime/runtimeevents.cpp`
+Location: `src/backend/runtime/runtimeevents.h` / `src/backend/runtime/runtimeevents.cpp`
 
 `RuntimeEvents` is the low-level runtime daemon singleton for LVRS input/UI/process telemetry.  
 It is designed to provide observability while giving explicit controls for latency-vs-detail tradeoffs.

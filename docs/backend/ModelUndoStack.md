@@ -1,6 +1,6 @@
 # ModelUndoStack
 
-Location: `backend/model/modelundostack.h`, `backend/model/modelundostack.cpp`
+Location: `src/backend/model/modelundostack.h`, `src/backend/model/modelundostack.cpp`
 
 `ModelUndoStack` is a bounded C++ snapshot stack for model mutations.
 

@@ -1,6 +1,6 @@
 # VStack
 
-Location: `qml/components/layout/VStack.qml`
+Location: `src/qml/components/layout/VStack.qml`
 
 `VStack` is a SwiftUI-style vertical stack implemented with `ColumnLayout`.
 

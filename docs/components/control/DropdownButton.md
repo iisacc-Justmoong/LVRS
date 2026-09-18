@@ -1,6 +1,6 @@
 # DropdownButton
 
-Location: `qml/components/control/buttons/DropdownButton.qml`
+Location: `src/qml/components/control/buttons/DropdownButton.qml`
 
 `DropdownButton` is the independent menu-trigger family built on `AbstractButton`.
 It implements [Figma DropdownButton 700:337](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=700-337),

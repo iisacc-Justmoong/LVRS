@@ -1,6 +1,6 @@
 # Debug
 
-Location: `backend/runtime/debuglogger.h` / `backend/runtime/debuglogger.cpp`
+Location: `src/backend/runtime/debuglogger.h` / `src/backend/runtime/debuglogger.cpp`
 
 `Debug` (`DebugLogger`) is the shared logging singleton for QML/C++ integration with memory buffer, filtering, and optional stdout echo.
 

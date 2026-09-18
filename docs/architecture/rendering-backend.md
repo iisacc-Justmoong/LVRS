@@ -9,7 +9,7 @@ Primary bootstrap path:
 - `lvrs::preApplicationBootstrap(options)`
 - `lvrs::postApplicationBootstrap(app, options)`
 
-Location: `backend/runtime/appbootstrap.h`, `backend/runtime/appbootstrap.cpp`
+Location: `src/backend/runtime/appbootstrap.h`, `src/backend/runtime/appbootstrap.cpp`
 
 `preApplicationBootstrap` is responsible for graphics backend bootstrap and optional render-quality global defaults.
 
@@ -61,10 +61,10 @@ If bootstrap fails:
 
 ## Related Files
 
-- `backend/runtime/vulkanbootstrap.h`
-- `backend/runtime/vulkanbootstrap.cpp`
-- `backend/runtime/renderquality.h`
-- `backend/runtime/renderquality.cpp`
+- `src/backend/runtime/vulkanbootstrap.h`
+- `src/backend/runtime/vulkanbootstrap.cpp`
+- `src/backend/runtime/renderquality.h`
+- `src/backend/runtime/renderquality.cpp`
 
 ## Practical Target Matrix Validation
 

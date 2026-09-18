@@ -1,6 +1,6 @@
 # QmlContextBinder
 
-Location: `backend/runtime/qmlcontextbinder.h` / `backend/runtime/qmlcontextbinder.cpp`
+Location: `src/backend/runtime/qmlcontextbinder.h` / `src/backend/runtime/qmlcontextbinder.cpp`
 
 `QmlContextBinder` applies a declared C++ object exposure plan to a `QQmlApplicationEngine`.
 It covers two bootstrap jobs that downstream apps often repeat by hand:

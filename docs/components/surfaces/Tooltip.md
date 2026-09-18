@@ -1,6 +1,6 @@
 # Tooltip
 
-Location: `qml/components/surfaces/Tooltip.qml`
+Location: `src/qml/components/surfaces/Tooltip.qml`
 
 `LV.Tooltip` is a nonmodal speech-bubble tooltip that accepts a reusable QML `Component`, inline items, or ordinary `text`. It extends Qt Quick Controls `ToolTip`; no additional third-party dependency is required. Qt Quick Shapes draws the rounded body and tail as one vector outline.
 

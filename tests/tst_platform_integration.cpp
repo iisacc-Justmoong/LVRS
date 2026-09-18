@@ -36,6 +36,7 @@ void PlatformIntegrationTests::safe_area_tracks_window_lifetime()
 {
     WindowSafeAreaObserver observer;
     QVERIFY(!observer.resolved());
+    QCOMPARE(observer.bottomCornerRadius(), -1.0);
     QWindow window;
     window.resize(400, 700);
     observer.setWindow(&window);
@@ -44,6 +45,10 @@ void PlatformIntegrationTests::safe_area_tracks_window_lifetime()
     QVERIFY(observer.leftInset() >= 0 && observer.topInset() >= 0);
     QVERIFY(observer.rightInset() >= 0 && observer.bottomInset() >= 0);
     QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
+    QVERIFY(observer.bottomCornerRadius() >= -1.0);
+#ifndef Q_OS_ANDROID
+    QCOMPARE(observer.bottomCornerRadius(), -1.0);
+#endif
     window.resize(700, 400);
     QCoreApplication::processEvents();
     QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
@@ -51,6 +56,7 @@ void PlatformIntegrationTests::safe_area_tracks_window_lifetime()
     QVERIFY(!observer.resolved());
     QCOMPARE(observer.topInset(), 0);
     QCOMPARE(observer.bottomInset(), 0);
+    QCOMPARE(observer.bottomCornerRadius(), -1.0);
 }
 
 void PlatformIntegrationTests::platform_flags_consistency()
@@ -343,7 +349,7 @@ LV.ApplicationWindow {
         engine.addImportPath(TestUtils::qmlImportBase());
         QString mainPath = QFINDTESTDATA("../example/VisualCatalog/qml/Main.qml");
         if (mainPath.isEmpty())
-            mainPath = QFINDTESTDATA("../qml/Main.qml");
+            mainPath = QFINDTESTDATA("../src/qml/Main.qml");
         QVERIFY2(!mainPath.isEmpty(),
                  "Failed to locate ../example/VisualCatalog/qml/Main.qml");
 
@@ -366,7 +372,7 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
         QTRY_VERIFY(root->property("catalogViewportReady").toBool());
         QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-        QCOMPARE(root->property("catalogComponentCount").toInt(), 88);
+        QCOMPARE(root->property("catalogComponentCount").toInt(), 90);
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
         QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("motion"));
         QVERIFY(root->property("activeEntry").isValid());

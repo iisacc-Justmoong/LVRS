@@ -1,6 +1,6 @@
 # TableHeaderModel
 
-Location: `backend/model/tableheadermodel.h`, `backend/model/tableheadermodel.cpp`
+Location: `src/backend/model/tableheadermodel.h`, `src/backend/model/tableheadermodel.cpp`
 
 `TableHeaderModel` owns header row source resolution and geometry for `TableHeader.qml`.
 

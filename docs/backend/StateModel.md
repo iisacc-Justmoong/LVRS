@@ -1,6 +1,6 @@
 # StateModel
 
-Location: `backend/state/statemodel.h` / `backend/state/statemodel.cpp`
+Location: `src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`
 
 `StateModel` is the first concrete C++ state container for backend-driven LVRS components. It derives from `ViewModel`, so it can be registered through `ViewModels` and bound to views with the same ownership rules.
 

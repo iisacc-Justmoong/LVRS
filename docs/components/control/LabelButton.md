@@ -1,6 +1,6 @@
 # LabelButton
 
-Location: `qml/components/control/buttons/LabelButton.qml`
+Location: `src/qml/components/control/buttons/LabelButton.qml`
 
 `LabelButton` is the text-only [PushButton](PushButton.md) preset.
 

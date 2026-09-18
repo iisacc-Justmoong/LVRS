@@ -1,6 +1,6 @@
 # TableModel
 
-Location: `backend/model/tablemodel.h`, `backend/model/tablemodel.cpp`
+Location: `src/backend/model/tablemodel.h`, `src/backend/model/tablemodel.cpp`
 
 `TableModel` owns the non-visual table model behavior for `Table.qml`.
 

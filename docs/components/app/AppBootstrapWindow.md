@@ -1,6 +1,6 @@
 # AppBootstrapWindow
 
-Location: `qml/AppBootstrapWindow.qml`
+Location: `src/qml/AppBootstrapWindow.qml`
 
 `AppBootstrapWindow` is a compatibility wrapper around `ApplicationWindow`.
 

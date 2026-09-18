@@ -1,6 +1,6 @@
 # ViewStateTracker
 
-Location: `backend/navigation/viewstatetracker.h` / `backend/navigation/viewstatetracker.cpp`
+Location: `src/backend/navigation/viewstatetracker.h` / `src/backend/navigation/viewstatetracker.cpp`
 
 `ViewStateTracker` tracks route/view stack state and computes active/inactive/disabled partitions.
 

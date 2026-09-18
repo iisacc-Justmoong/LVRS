@@ -1,0 +1,35 @@
+set(LVRS_NAVIGATION_QML_FILES
+    src/qml/components/navigation/Tab.qml
+    src/qml/components/navigation/TabBar.qml
+    src/qml/components/navigation/MobileTab.qml
+    src/qml/components/navigation/MobileTabBar.qml
+    src/qml/components/navigation/MobileNavigationTab.qml
+    src/qml/components/navigation/MobileNavigationBar.qml
+    src/qml/components/navigation/Navigator.qml
+    src/qml/components/navigation/PageRouter.qml
+    src/qml/components/navigation/PageRouterTransitionDriver.qml
+    src/qml/components/navigation/PageTransitionController.qml
+    src/qml/components/navigation/Link.qml
+    src/qml/components/navigation/ToolbarButton.qml
+    src/qml/components/navigation/HierarchyToolbar.qml
+    src/qml/components/navigation/HierarchyItem.qml
+    src/qml/components/navigation/HierarchyList.qml
+    src/qml/components/navigation/Hierarchy.qml
+    src/qml/components/navigation/List.qml
+    src/qml/components/navigation/ListItem.qml
+    src/qml/components/navigation/ListItemComposite.qml
+    src/qml/components/navigation/ListItemSelector.qml
+    src/qml/components/navigation/ListFooter.qml
+    src/qml/components/navigation/ListToolbar.qml
+    src/qml/components/navigation/ContextMenu.qml
+    src/qml/components/navigation/ContextMenuItem.qml
+    src/qml/components/navigation/ContextMenuDivider.qml
+    src/qml/components/navigation/Menu.qml
+    src/qml/components/navigation/MenuItem.qml
+    src/qml/components/navigation/MenuDivider.qml
+)
+
+set_source_files_properties(
+    src/qml/components/navigation/Navigator.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)

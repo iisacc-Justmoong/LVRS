@@ -2,9 +2,9 @@
 
 Location:
 
-- `backend/state/viewmodel.h` / `backend/state/viewmodel.cpp`
-- `backend/state/statemodel.h` / `backend/state/statemodel.cpp`
-- `backend/state/viewmodelregistry.h` / `backend/state/viewmodelregistry.cpp`
+- `src/backend/state/viewmodel.h` / `src/backend/state/viewmodel.cpp`
+- `src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`
+- `src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`
 
 `ViewModel` is the C++ base type for dedicated ViewModel objects.
 `StateModel` is the concrete key-value state model used while migrating component state out of QML.

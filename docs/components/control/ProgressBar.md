@@ -1,6 +1,6 @@
 # ProgressBar
 
-Location: `qml/components/control/display/ProgressBar.qml`
+Location: `src/qml/components/control/display/ProgressBar.qml`
 
 `ProgressBar` is a lightweight range-based progress indicator.
 

@@ -1,6 +1,6 @@
 # ButtonMethodRegistry
 
-Location: `qml/components/control/buttons/ButtonMethodRegistry.qml`
+Location: `src/qml/components/control/buttons/ButtonMethodRegistry.qml`
 
 `ButtonMethodRegistry` is the shared internal method injection host used by the button family.
 

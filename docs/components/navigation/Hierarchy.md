@@ -1,6 +1,6 @@
 # Hierarchy
 
-Location: `qml/components/navigation/Hierarchy.qml`
+Location: `src/qml/components/navigation/Hierarchy.qml`
 
 `Hierarchy` is a hierarchy-panel surface composed of toolbar + scrollable depth-aware hierarchy list.
 

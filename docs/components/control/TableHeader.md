@@ -1,6 +1,6 @@
 # TableHeader
 
-Location: `qml/components/control/display/TableHeader.qml`
+Location: `src/qml/components/control/display/TableHeader.qml`
 
 `TableHeader` renders the header row for `Table`.
 

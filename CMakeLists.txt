@@ -346,23 +346,23 @@ if(NOT LVRS_BUILD_SHARED_LIBS)
     target_compile_definitions(LVRSCore INTERFACE LVRS_USE_STATIC_QML_PLUGIN=1)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/backend/CMakeLists.txt)
-include(${CMAKE_CURRENT_LIST_DIR}/qml/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/src/backend/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/src/qml/CMakeLists.txt)
 
 target_include_directories(LVRSCore
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/io>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/fonts>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/platform>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/runtime>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/navigation>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/model>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/state>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/graphics>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/text>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/backend/hierarchy>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/io>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/fonts>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/platform>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/runtime>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/navigation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/model>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/state>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/graphics>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/text>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/backend/hierarchy>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/LVRS>
 )
 
@@ -418,6 +418,15 @@ if(LVRS_BUILD_SHARED_LIBS)
     list(APPEND _lvrs_qml_module_options NO_PLUGIN)
 endif()
 
+# Keep the public QML resource URLs stable after moving sources into src/.
+foreach(_lvrs_resource IN LISTS LVRS_QML_FILES LVRS_COMPONENT_RESOURCE_FILES)
+    get_source_file_property(_lvrs_existing_alias "${_lvrs_resource}" QT_RESOURCE_ALIAS)
+    if(NOT _lvrs_existing_alias)
+        string(REGEX REPLACE "^src/" "" _lvrs_resource_alias "${_lvrs_resource}")
+        set_source_files_properties("${_lvrs_resource}" PROPERTIES QT_RESOURCE_ALIAS "${_lvrs_resource_alias}")
+    endif()
+endforeach()
+
 qt_add_qml_module(LVRSCore
     ${_lvrs_qml_module_options}
     URI LVRS
@@ -460,7 +469,7 @@ if(LVRS_ENFORCE_VULKAN)
             message(WARNING
                 "LVRS_ENFORCE_VULKAN=ON: Vulkan::Vulkan was not discovered at configure time. "
                 "LVRS will continue because runtime Vulkan loader discovery is handled dynamically "
-                "in backend/runtime/vulkanbootstrap.cpp.")
+                "in src/backend/runtime/vulkanbootstrap.cpp.")
         endif()
 
         _lvrs_detect_qt_feature(vulkan _lvrs_qt_vulkan_feature _lvrs_qtgui_config_header)
@@ -553,7 +562,7 @@ else()
 endif()
 
 install(
-    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/backend/
+    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/src/backend/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS/backend
     FILES_MATCHING
         PATTERN "*.h"

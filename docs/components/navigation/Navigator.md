@@ -1,6 +1,6 @@
 # Navigator
 
-Location: `qml/components/navigation/Navigator.qml`
+Location: `src/qml/components/navigation/Navigator.qml`
 
 `Navigator` is the global singleton delegate for active `PageRouter` navigation.
 

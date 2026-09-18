@@ -1,6 +1,6 @@
 # ColorPicker
 
-Location: `qml/components/control/input/ColorPicker.qml`
+Location: `src/qml/components/control/input/ColorPicker.qml`
 
 `LV.ColorPicker` is an embeddable color editing view. Its parent owns the panel, modal or popover surface, positioning, opening and dismissal. It has no title bar, background, shadow, overlay or automatic reparenting. The reference is [Figma ColorPickerPanel, 885:44522](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=885-44522).
 

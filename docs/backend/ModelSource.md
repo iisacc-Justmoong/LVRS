@@ -1,6 +1,6 @@
 # ModelSource
 
-Location: `backend/model/modelsource.h`, `backend/model/modelsource.cpp`
+Location: `src/backend/model/modelsource.h`, `src/backend/model/modelsource.cpp`
 
 `ModelSource` is the shared C++ reader for model-bearing QML components.
 

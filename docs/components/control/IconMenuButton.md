@@ -1,6 +1,6 @@
 # IconMenuButton
 
-Location: `qml/components/control/buttons/IconMenuButton.qml`
+Location: `src/qml/components/control/buttons/IconMenuButton.qml`
 
 `IconMenuButton` is the `iconMode: true` preset of [DropdownButton](DropdownButton.md), with a trailing chevron.
 

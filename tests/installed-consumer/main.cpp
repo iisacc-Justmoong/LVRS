@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
 #ifdef LVRS_CONSUMER_SOURCE_DIR
-    const QDir sourceRoot(QStringLiteral(LVRS_CONSUMER_SOURCE_DIR));
+    const QDir sourceRoot(QStringLiteral(LVRS_CONSUMER_SOURCE_DIR "/src"));
     QDirIterator files(sourceRoot.filePath(QStringLiteral("qml")),
                        {QStringLiteral("*.qml")}, QDir::Files, QDirIterator::Subdirectories);
     int checked = 0;

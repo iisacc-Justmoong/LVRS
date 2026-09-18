@@ -1,6 +1,6 @@
 # NavigationStackModel
 
-Location: `backend/navigation/navigationstackmodel.h`, `backend/navigation/navigationstackmodel.cpp`
+Location: `src/backend/navigation/navigationstackmodel.h`, `src/backend/navigation/navigationstackmodel.cpp`
 
 `NavigationStackModel` owns path-stack mutation and view-tracking derivation for `PageRouter.qml`.
 

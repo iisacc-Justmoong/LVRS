@@ -1,6 +1,6 @@
 # AppCard
 
-Location: `qml/components/surfaces/AppCard.qml`
+Location: `src/qml/components/surfaces/AppCard.qml`
 
 `AppCard` is a reusable titled surface with header, separator, and flexible content slot.
 
