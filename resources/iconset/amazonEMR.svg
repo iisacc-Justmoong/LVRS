@@ -1,7 +1,7 @@
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M7.99546 1L1 4.04348V6.81791L7.99546 7.31794L15 6.47826V4.04348L7.99546 1ZM14 5.5V4.69929L8.99546 2.52482V5.5H14Z" fill="#CED0D6"/>
-<path d="M4 13.8L3 13.2V8.30435H4V13.8Z" fill="#CED0D6"/>
-<path d="M1 12L2 12.6V8.30435H1V12Z" fill="#CED0D6"/>
-<path d="M6 15L5 14.4V8.3H6V15Z" fill="#CED0D6"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M15 12.5651V8.3042L7 8.30435V15L15 12.5651ZM8 13.6503L14 11.8241V9.30422L8 9.30433V13.6503Z" fill="#CED0D6"/>
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 18 18" preserveAspectRatio="xMidYMid meet">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8.99489 1.125L1.125 4.54891V7.67015L8.99489 8.23268L16.875 7.28804V4.54891L8.99489 1.125ZM15.75 6.1875V5.28671L10.1199 2.84042V6.1875H15.75Z" fill="#CED0D6"/>
+<path d="M4.5 15.525L3.375 14.85V9.34239H4.5V15.525Z" fill="#CED0D6"/>
+<path d="M1.125 13.5L2.25 14.175V9.34239H1.125V13.5Z" fill="#CED0D6"/>
+<path d="M6.75 16.875L5.625 16.2V9.3375H6.75V16.875Z" fill="#CED0D6"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M16.875 14.1357V9.34222L7.875 9.34239V16.875L16.875 14.1357ZM9 15.3566L15.75 13.3022V10.4672L9 10.4674V15.3566Z" fill="#CED0D6"/>
 </svg>

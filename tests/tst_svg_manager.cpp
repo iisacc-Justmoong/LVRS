@@ -1,10 +1,20 @@
 #include <QtTest>
 
 #include <QDir>
+#include <QDirIterator>
+#include <QCryptographicHash>
+#include <QFile>
 #include <QImage>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QPainter>
+#include <QSet>
 #include <QSignalSpy>
+#include <QSvgRenderer>
 #include <QTemporaryFile>
 #include <QUrl>
+#include <QXmlStreamReader>
 #include <QtPlugin>
 
 #include "backend/graphics/svgmanager.h"
@@ -21,6 +31,8 @@ private slots:
     void svg_manager_defaults_to_square_18_logical_pixels();
     void svg_manager_generates_png_and_clamps();
     void svg_manager_error_paths_and_cache_signals();
+    void figma_iconset_resources_are_complete_and_renderable();
+    void all_svg_icons_scale_and_center();
 };
 
 void SvgManagerTests::svg_manager_defaults_to_square_18_logical_pixels()
@@ -170,6 +182,86 @@ void SvgManagerTests::svg_manager_error_paths_and_cache_signals()
     manager.clearCache();
     QCOMPARE(manager.revision(), revisionAfterFirstClear);
     QCOMPARE(revisionSpy.count(), 2);
+}
+
+void SvgManagerTests::figma_iconset_resources_are_complete_and_renderable()
+{
+    QFile manifest(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../docs/figma-iconset-manifest.json"));
+    QVERIFY(manifest.open(QIODevice::ReadOnly));
+    const auto inventory = QJsonDocument::fromJson(manifest.readAll()).object();
+    const auto icons = inventory.value(QStringLiteral("icons")).toArray();
+    QCOMPARE(icons.size(), 2863);
+    QCOMPARE(icons.size(), inventory.value(QStringLiteral("count")).toInt());
+
+    QSet<QString> filenames;
+    for (const auto &value : icons) {
+        const auto icon = value.toObject();
+        const QString filename = icon.value(QStringLiteral("filename")).toString();
+        QVERIFY2(!filename.contains('/') && !filename.contains('\\')
+                     && filename.endsWith(QStringLiteral(".svg"))
+                     && !filenames.contains(filename.toCaseFolded()), qPrintable(filename));
+        filenames.insert(filename.toCaseFolded());
+
+        QFile resource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/") + filename);
+        QVERIFY2(resource.open(QIODevice::ReadOnly), qPrintable(filename));
+        const QByteArray svg = resource.readAll();
+        QCOMPARE(QString::fromLatin1(QCryptographicHash::hash(svg, QCryptographicHash::Sha256).toHex()),
+                 icon.value(QStringLiteral("sha256")).toString());
+
+        QSvgRenderer renderer(svg);
+        QVERIFY2(renderer.isValid(), qPrintable(filename));
+        QVERIFY2(!renderer.defaultSize().isEmpty(), qPrintable(filename));
+        QImage image(36, 36, QImage::Format_ARGB32_Premultiplied);
+        image.fill(Qt::transparent);
+        QPainter painter(&image);
+        renderer.render(&painter);
+        painter.end();
+        bool painted = false;
+        for (int y = 0; y < image.height() && !painted; ++y)
+            for (int x = 0; x < image.width() && !painted; ++x)
+                painted = qAlpha(image.pixel(x, y)) > 0;
+        QVERIFY2(painted, qPrintable(filename));
+    }
+}
+
+void SvgManagerTests::all_svg_icons_scale_and_center()
+{
+    QDirIterator files(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../resources"),
+                       {QStringLiteral("*.svg")}, QDir::Files, QDirIterator::Subdirectories);
+    int count = 0;
+    while (files.hasNext()) {
+        QFile file(files.next());
+        const QByteArray context = file.fileName().toUtf8();
+        QVERIFY2(file.open(QIODevice::ReadOnly), context.constData());
+        const QByteArray svg = file.readAll();
+        QXmlStreamReader xml(svg);
+        QVERIFY2(xml.readNextStartElement(), context.constData());
+        const auto attributes = xml.attributes();
+        QVERIFY2(attributes.value("width") == "100%", context.constData());
+        QVERIFY2(attributes.value("height") == "100%", context.constData());
+        QVERIFY2(attributes.value("preserveAspectRatio") == "xMidYMid meet", context.constData());
+        QSvgRenderer renderer(svg);
+        QVERIFY2(renderer.isValid(), context.constData());
+        QVERIFY2(renderer.viewBoxF().width() > 0, context.constData());
+        QCOMPARE(renderer.viewBoxF().width(), renderer.viewBoxF().height());
+        for (int size : {18, 36, 72, 144}) {
+            QImage image(size, size, QImage::Format_ARGB32_Premultiplied);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            renderer.render(&painter);
+            painter.end();
+            QRect bounds;
+            for (int y = 0; y < size; ++y)
+                for (int x = 0; x < size; ++x)
+                    if (qAlpha(image.pixel(x, y)) > 0) bounds |= QRect(x, y, 1, 1);
+            QVERIFY2(!bounds.isEmpty(), context.constData());
+            // Up to one raster pixel per edge accounts for antialiasing.
+            QVERIFY2(qAbs(bounds.left() - (size - 1 - bounds.right())) <= 2, context.constData());
+            QVERIFY2(qAbs(bounds.top() - (size - 1 - bounds.bottom())) <= 2, context.constData());
+        }
+        ++count;
+    }
+    QCOMPARE(count, 2876);
 }
 
 QTEST_MAIN(SvgManagerTests)

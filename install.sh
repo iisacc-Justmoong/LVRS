@@ -2,6 +2,15 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# Use system toolchains inherited from the shell. Only load an explicitly requested file.
+if [ -n "${LVRS_TOOLCHAIN_ENV_FILE:-}" ]; then
+    if [ ! -f "${LVRS_TOOLCHAIN_ENV_FILE}" ]; then
+        echo "[LVRS] Toolchain environment file not found: ${LVRS_TOOLCHAIN_ENV_FILE}" >&2
+        exit 1
+    fi
+    . "${LVRS_TOOLCHAIN_ENV_FILE}"
+fi
+
 MANIFEST_PATH="${SCRIPT_DIR}/src/rust-cli/Cargo.toml"
 CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-${SCRIPT_DIR}/build/rust-cli}"
 

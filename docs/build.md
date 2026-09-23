@@ -16,7 +16,7 @@ On Windows PowerShell:
 Local Qt version discovery uses `/Volumes/Storage/Qt`, including the macOS, iOS, Android, and WASM kits under `6.8.3`. `QT_VERSION_ROOT` and explicit platform Qt hints remain supported.
 On macOS, `lvrs install` resolves the host kit before the first CMake configure and supplies both `Qt6_DIR` and `LVRS_BOOTSTRAP_QT_PREFIX_MACOS`. Explicit Qt hints and valid Qt entries in `CMAKE_PREFIX_PATH` take precedence over default kits; stale search-path entries do not hide the relocated default installation. The previous installed framework is removed only after configuration succeeds, so a configuration failure preserves it.
 After updating CLI sources or moving Qt, run `./install.sh` from the checkout to build the current CLI and refresh the installed `lvrs` executable. Committing source changes alone does not replace an already installed CLI binary.
-- If `cargo` is available, it runs `cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- install ...`.
+- If `cargo` is available, it runs `cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli --bin lvrs -- install ...`.
 - If `cargo` is not available but `lvrs` exists in `PATH`, it runs `lvrs install ...`.
 - If neither is available, install exits with guidance to build CLI first.
 - `install.ps1` is the Windows wrapper. It auto-detects a Qt 6 MinGW prefix,
@@ -40,8 +40,8 @@ If those Linux dependencies are missing and the distro package manager is recogn
 `lvrs doctor --fix` runs the same host-side dependency check/fix flow without starting an install. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` additionally validates the `src/main.cpp` bootstrap entry markers and reports any missing cross-platform Qt/Android/WASM auto-detect hints; it exits non-zero when the requested bootstrap target set is not ready.
 Installed packages are written to `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`), then the host platform path is registered in the CMake user package registry.
 The checkout root is `Workspace/SDK/LVRS`; the default install root is `~/.local/SDK/LVRS`. CMake uses the same default, while explicit `CMAKE_INSTALL_PREFIX`, `--prefix`, and `LVRS_INSTALL_PREFIX` overrides remain supported. Re-run `./install.sh` after moving the checkout: it recreates `build/` and records the new absolute source path in the installed snapshot.
-The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `src/rust-cli/build/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
-The installer always performs a clean reinstall: it removes the previous build directory before configuring, then removes installed LVRS artifacts only after configuration succeeds. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `src/rust-cli/build` and legacy `src/rust-cli/target` directories.
+The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `build/rust-cli/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
+The installer always performs a clean reinstall: it removes the previous CMake build state before configuring, preserving `build/rust-cli/` so the running CLI remains available for installation, then removes installed LVRS artifacts only after configuration succeeds. Source snapshots exclude hidden `.build.lvrs-stale-*` cleanup remnants and both `src/rust-cli/build` and legacy `src/rust-cli/target` directories.
 `install.sh` configures examples/tests on the host build by default; pass `--without-examples --without-tests` to disable them.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`; Linux builds additionally stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: repository launchers fall back to `build/example/.../bin`, while installed source snapshots receive refreshed desktop runtimes as sibling `*.real` files beside those launchers. If `--without-examples` is used, those snapshot runtime payloads are removed.
 
@@ -50,13 +50,13 @@ When host examples are enabled, the installer builds the `lvrs_host_examples_all
 Direct CLI invocation (without wrapper):
 
 ```bash
-cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- install
+cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli --bin lvrs -- install
 ```
 
 Main-entrypoint bootstrap profile:
 
 ```bash
-cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir src/rust-cli/build --bin lvrs -- bootstrap
+cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli --bin lvrs -- bootstrap
 ```
 
 `lvrs bootstrap` defaults to a host-matched target set unless `--platforms` is provided:
@@ -410,3 +410,29 @@ ctest --test-dir build/installed-consumer --output-on-failure
 Use a fresh consumer build directory when changing `LIBRARY_PATH`, because compiler implicit directories are captured during the first configure.
 
 When running `lvrs install` inside the checkout, an inherited `LVRS_ROOT` installation prefix must not select its old source snapshot. An explicit source-directory override is still honored. Check the printed `Project root`, installer exit status, and the installed consumer independently of source CTest results.
+
+## Recovering an interrupted install
+
+`cmake --build build` requires a completed configure step and `build/CMakeCache.txt`.
+Sourcing a toolchain environment only exports variables; it does not create the cache.
+If configuration was interrupted, rerun `./install.sh` (or the shell's `lvrs install`
+wrapper). The installer configures the fixed `build/` directory before building.
+Install third-party toolchains in system locations, outside `Workspace/SDK`.
+The Unix wrapper inherits `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_NDK_ROOT`, and
+`EMSDK` from the system shell environment; it never auto-loads a sibling toolchain
+directory. Set `LVRS_TOOLCHAIN_ENV_FILE` only for an explicit environment file
+override. An explicit missing file is an error.
+
+On this macOS workstation, Java is installed by Homebrew (`openjdk@21`), Android
+SDK/NDK packages are managed by `sdkmanager` under
+`/opt/homebrew/share/android-commandlinetools`, and the versioned Emscripten SDK
+is installed under `/opt/homebrew/share/emsdk`. Qt 6.8.3 uses NDK
+`26.1.10909125` and Emscripten `3.1.56`. Persistent shell configuration exports
+these paths. After relocating a compiler, regenerate affected cross-platform
+build caches under the fixed `build/` tree before rebuilding.
+
+Regression checks: `sh tests/test_install_wrapper.sh` and
+`cargo test --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli`.
+They cover system environment inheritance, ignored sibling toolchains, explicit
+overrides, argument boundaries, preservation of the
+Cargo executable during CMake cleanup, and recreation of a missing build directory.

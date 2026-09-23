@@ -150,6 +150,12 @@ gradient, inset shadow, blur, capture source, and renderer fallback contracts.
 `Theme.iconPath(iconName)` resolves logical icon names into:
 `qrc:/qt/qml/LVRS/resources/iconset/`
 
+The directory contains the complete 2,863-icon Figma Iconset snapshot in one flat
+layer. See [the import record](figma-iconset-import.md) for naming and verification.
+All shipped SVG icons use relative root dimensions, centered square view boxes,
+and `xMidYMid meet` aspect-ratio preservation. Their visible artwork stays centered
+as the consuming control changes size; the default logical icon size remains 18 px.
+
 Rules:
 - Empty input returns empty string.
 - Full resource path (`:/`) is returned as-is.

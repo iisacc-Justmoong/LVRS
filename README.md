@@ -47,7 +47,7 @@ The checkout lives under `Workspace/SDK/LVRS`. The default install root is `~/.l
 After install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.
 `find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.
 The installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `build/rust-cli/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.
-The installer always performs a clean reinstall (build directory and previously installed LVRS artifacts are removed before configure/build).
+The installer recreates the CMake build state on every install while preserving `build/rust-cli/`, which contains the running installer. Existing LVRS artifacts are removed only after configuration succeeds.
 Use `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.
 When host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.
 
@@ -347,3 +347,21 @@ Implementation files and their headers live together under `src/`. Existing feat
 ## LVRS 모바일 탐색
 
 `MobileNavigationBar`·`MobileNavigationTab`은 [Figma 사양](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)의 기기 곡률, 선택적 독립 검색, 왼쪽 축소 배치, 점착 선택 이동 및 선택적 레이블을 제공한다. 검색은 기본적으로 없으며 `search: ({})`로 추가한다. 사용법은 [컴포넌트 문서](docs/components/navigation/MobileNavigationBar.md)를 참조한다.
+
+## Recovering an interrupted install
+
+`cmake --build build` requires a completed configure step and `build/CMakeCache.txt`.
+Sourcing a toolchain environment only exports variables; it does not create the cache.
+If configuration was interrupted, rerun `./install.sh` (or the shell's `lvrs install`
+wrapper). The installer configures the fixed `build/` directory before building.
+Install third-party toolchains in system locations, outside `Workspace/SDK`.
+The Unix wrapper inherits `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_NDK_ROOT`, and
+`EMSDK` from the system shell environment; it never auto-loads a sibling toolchain
+directory. Set `LVRS_TOOLCHAIN_ENV_FILE` only for an explicit environment file
+override. An explicit missing file is an error.
+
+Regression checks: `sh tests/test_install_wrapper.sh` and
+`cargo test --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli`.
+They cover system environment inheritance, ignored sibling toolchains, explicit
+overrides, argument boundaries, preservation of the
+Cargo executable during CMake cleanup, and recreation of a missing build directory.

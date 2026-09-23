@@ -1850,7 +1850,15 @@ fn clean_recreate_dir(target_dir: &Path, target_name: &str) -> Result<()> {
         return Ok(());
     }
 
-    remove_path_with_stale_fallback(target_dir, target_name)?;
+    // Cargo launches the installer from build/rust-cli. Removing that subtree
+    // unlinks the running executable and breaks the final CLI installation.
+    for entry in fs::read_dir(target_dir)? {
+        let entry = entry?;
+        if entry.file_name() == "rust-cli" {
+            continue;
+        }
+        remove_path_with_stale_fallback(&entry.path(), target_name)?;
+    }
     fs::create_dir_all(target_dir).with_context(|| {
         format!(
             "failed to recreate {} directory: {}",
@@ -2473,6 +2481,28 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     static CURRENT_DIR_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn clean_build_preserves_cargo_binary_and_removes_cmake_cache() -> Result<()> {
+        let root = temp_test_dir("clean-build-cargo");
+        let binary = root.join("rust-cli/debug/lvrs");
+        fs::create_dir_all(binary.parent().unwrap())?;
+        fs::write(&binary, "running CLI")?;
+        fs::write(root.join("CMakeCache.txt"), "stale cache")?;
+        fs::create_dir_all(root.join("CMakeFiles"))?;
+        clean_recreate_dir(&root, "build")?;
+        assert!(
+            binary.is_file(),
+            "cleaning CMake must preserve the running Cargo CLI"
+        );
+        assert!(!root.join("CMakeCache.txt").exists());
+        assert!(!root.join("CMakeFiles").exists());
+        remove_path(&root)?;
+        clean_recreate_dir(&root, "build")?;
+        assert!(root.is_dir(), "an absent build directory must be recreated");
+        remove_path(&root)?;
+        Ok(())
+    }
 
     #[test]
     fn cli_install_copies_binary_and_supports_running_from_install_prefix() -> Result<()> {
