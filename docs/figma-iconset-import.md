@@ -79,3 +79,12 @@ Responsive-root verification on 2026-09-20: both targeted CTest suites pass,
 including all 2,876 SVGs at four raster sizes and the packaged iconset hashes.
 The existing native-RHI-only highlight case is skipped in offscreen testing;
 warnings for previously deleted supplemental controls remain outside this change.
+
+## Control-specific variants
+
+The 14 pre-existing control SVG variants (stepper, dropdown, checkbox and search)
+are retained alongside the 2,863 imported icons. The Figma snapshot manifest only
+counts imported icons; it must not replace assets referenced by shipped controls.
+All 2,890 resource SVGs, including 13 other supplemental assets, retain responsive
+roots. `control_variant_resources_are_packaged` verifies the 14 variants in the
+compiled QML resource bundle; the import API suite verifies their actual controls.

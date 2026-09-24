@@ -32,6 +32,7 @@ private slots:
     void svg_manager_generates_png_and_clamps();
     void svg_manager_error_paths_and_cache_signals();
     void figma_iconset_resources_are_complete_and_renderable();
+    void control_variant_resources_are_packaged();
     void all_svg_icons_scale_and_center();
 };
 
@@ -224,6 +225,32 @@ void SvgManagerTests::figma_iconset_resources_are_complete_and_renderable()
     }
 }
 
+void SvgManagerTests::control_variant_resources_are_packaged()
+{
+    const QStringList names = {
+        QStringLiteral("StepperChevron.svg"),
+        QStringLiteral("StepperDownBorderless.svg"),
+        QStringLiteral("StepperDownPrimary.svg"),
+        QStringLiteral("StepperUpBorderless.svg"),
+        QStringLiteral("StepperUpDownBorderless.svg"),
+        QStringLiteral("StepperUpDownChevron.svg"),
+        QStringLiteral("StepperUpDownPrimary.svg"),
+        QStringLiteral("StepperUpPrimary.svg"),
+        QStringLiteral("checkboxCheckedDisabled.svg"),
+        QStringLiteral("checkboxCheckedEnabled.svg"),
+        QStringLiteral("generalchevronDownAccent.svg"),
+        QStringLiteral("generalchevronDownBorderless.svg"),
+        QStringLiteral("generalchevronDownDisabled.svg"),
+        QStringLiteral("inputFieldSearch.svg"),
+    };
+    for (const auto &name : names) {
+        QFile asset(QStringLiteral(":/qt/qml/LVRS/resources/iconset/") + name);
+        QVERIFY2(asset.open(QIODevice::ReadOnly), qPrintable(name));
+        QSvgRenderer renderer(asset.readAll());
+        QVERIFY2(renderer.isValid(), qPrintable(name));
+    }
+}
+
 void SvgManagerTests::all_svg_icons_scale_and_center()
 {
     QDirIterator files(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../resources"),
@@ -261,7 +288,7 @@ void SvgManagerTests::all_svg_icons_scale_and_center()
         }
         ++count;
     }
-    QCOMPARE(count, 2876);
+    QCOMPARE(count, 2890);
 }
 
 QTEST_MAIN(SvgManagerTests)
