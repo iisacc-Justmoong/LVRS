@@ -90,7 +90,7 @@ AbstractInputBar {
     sideSpacing: Theme.gap2
     centeredTextHeight: Theme.textBodyLineHeight
     shapeStyle: resolvedStyle === roundedStyle ? shapeRoundRect : shapeCylinder
-    cornerRadius: Theme.radiusControl
+    cornerRadius: Theme.radiusMd
 
     textColor: Theme.titleHeaderColor
     textColorDisabled: Theme.disabledColor

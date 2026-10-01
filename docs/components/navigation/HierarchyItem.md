@@ -227,4 +227,16 @@ LV.HierarchyItem {
 
 ## Shared motion
 
+The inherited per-instance `interactionPhase`/`interactionInput` track input
+independently of `interactionState`, selection, expansion and `uxState`.
+`interaction.enabled` is false for non-activatable rows and drag previews.
+On mobile, long-press pointer feedback and native Space/Enter down feedback both
+feed the owned press state, so keyboard activation still works in editable rows.
+Figma's foldable/non-foldable sets contain complete input variants; see
+[component instance states](../../instance-states.md).
+
+Default/hover/press colors continue using `rowBackgroundColorIdle`, `rowBackgroundColorHover` (surfaceGhost) and `rowBackgroundColorPressed` (surfaceAlt). Active selection keeps accentMuted; inactive keeps panelBackground12. These model states remain separate from keyboard focus. Release uses the same explicit 180ms OutBack policy as button/menu/list rows, with no additional fill or border.
+
+The 1.5px Primary focus ring sits 3px outside the fixed row and persists during Space/Enter press and release. Non-activatable rows have no focus ring or deformation while retaining the existing independent disclosure behavior. Mobile long-press input uses `effectivePressedState` for both content and surface transforms; inactive and active drag previews suppress deformation. Releasing a mobile pointer outside the row cancels the row action without a release rebound. Selection, expansion and drag/drop model changes remain synchronous.
+
 The row compresses subtly and its chevron rotates into the new expanded direction. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

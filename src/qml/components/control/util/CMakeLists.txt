@@ -2,6 +2,7 @@ set(LVRS_CONTROL_UTIL_QML_FILES
     src/qml/components/control/util/SpringBehavior.qml
     src/qml/components/control/util/StateColorBehavior.qml
     src/qml/components/control/util/InteractionMotion.qml
+    src/qml/components/control/util/InteractionState.qml
     src/qml/components/control/util/FocusRing.qml
     src/qml/components/control/util/EventListener.qml
     src/qml/components/control/util/InputMethodGuard.qml

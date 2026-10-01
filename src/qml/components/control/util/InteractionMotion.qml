@@ -11,17 +11,56 @@ Scale {
     property bool pressed: false
     property bool hovered: false
     property bool focused: false
+    // Authored button/menu/list families rebound only on a genuine release.
+    property bool releaseOnSignal: false
     property real strength: 1.0
     readonly property bool active: motionEnabled && target !== null && target.enabled && Motion.animated
     property real pressProgress: active && pressed ? 1 : 0
     property real hoverProgress: active && (hovered || focused) ? 1 : 0
+    property real releaseProgress: 0
+    readonly property bool releasing: releaseAnimation.running
+    readonly property real deformationProgress: !active ? 0
+        : releaseOnSignal && !pressed ? releaseProgress : pressProgress
     origin.x: target ? target.width / 2 : 0
     origin.y: target ? target.height / 2 : 0
     // Bound displacement for wide rows/cards and keep layout metrics unchanged.
-    xScale: 1 + strength * (Math.min(0.012, 2 / Math.max(1, target ? target.width : 1)) * hoverProgress
-                         - Math.min(0.045, 4 / Math.max(1, target ? target.width : 1)) * pressProgress)
-    yScale: 1 + strength * (Math.min(0.018, 2 / Math.max(1, target ? target.height : 1)) * hoverProgress
-                         - Math.min(0.09, 4 / Math.max(1, target ? target.height : 1)) * pressProgress)
+    xScale: !active ? 1 : 1 + strength * (Math.min(0.012, 2 / Math.max(1, target ? target.width : 1)) * hoverProgress
+                         - Math.min(0.045, 4 / Math.max(1, target ? target.width : 1)) * deformationProgress)
+    yScale: !active ? 1 : 1 + strength * (Math.min(0.018, 2 / Math.max(1, target ? target.height : 1)) * hoverProgress
+                         - Math.min(0.09, 4 / Math.max(1, target ? target.height : 1)) * deformationProgress)
+
+    function playRelease() {
+        if (!active || !releaseOnSignal)
+            return
+        // Guarantee feedback for a tap completed before the first press frame.
+        const initialProgress = Math.max(0.35, Math.min(1, pressProgress))
+        releaseAnimation.stop()
+        releaseProgress = initialProgress
+        releaseAnimation.restart()
+    }
+
+    function stopRelease() {
+        releaseAnimation.stop()
+        releaseProgress = 0
+    }
+    onPressedChanged: {
+        if (pressed)
+            stopRelease()
+    }
+    onActiveChanged: {
+        if (!active)
+            stopRelease()
+    }
+
+    readonly property NumberAnimation _releaseAnimation: NumberAnimation {
+        id: releaseAnimation
+        target: root
+        property: "releaseProgress"
+        to: 0
+        duration: Motion.duration(Motion.buttonReleaseDuration)
+        easing.type: Easing.OutBack
+        easing.overshoot: Motion.overshoot
+    }
 
     function syncAttachment() {
         if (_attachedTarget === (autoAttach ? target : null))
@@ -43,8 +82,8 @@ Scale {
 
     SpringBehavior on pressProgress {
         motionEnabled: root.active
-        duration: targetValue > 0.5 ? Motion.pressDuration : Motion.releaseDuration
-        easingType: targetValue > 0.5 ? Easing.OutCubic : Easing.OutBack
+        duration: targetValue > 0.5 || root.releaseOnSignal ? Motion.pressDuration : Motion.releaseDuration
+        easingType: targetValue > 0.5 || root.releaseOnSignal ? Easing.OutCubic : Easing.OutBack
     }
     SpringBehavior on hoverProgress {
         motionEnabled: root.active

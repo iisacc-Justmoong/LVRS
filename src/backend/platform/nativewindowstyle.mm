@@ -342,7 +342,9 @@ bool NativeWindowStyle::applySolidChrome(QObject *windowObject, const QColor &co
     applyNativeBackground(view, color);
     [nativeWindow setTitlebarAppearsTransparent:YES];
     [nativeWindow setTitleVisibility:NSWindowTitleHidden];
-    [nativeWindow setMovableByWindowBackground:YES];
+    // WindowChromeInteraction owns the move hit region. AppKit background
+    // dragging would bypass it and steal canvas/selection drags anywhere.
+    [nativeWindow setMovableByWindowBackground:NO];
     nativeWindow.styleMask |= NSWindowStyleMaskFullSizeContentView;
 
     if (@available(macOS 11.0, *)) {

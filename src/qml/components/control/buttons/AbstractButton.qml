@@ -8,6 +8,11 @@ Controls.AbstractButton {
     property bool motionEnabled: true
     property real motionStrength: 1.0
     property bool showFocusRing: true
+    property real focusRingOutset: 0
+    property real focusRingRadius: resolvedCornerRadius
+    property bool releaseOnSignal: false
+    property bool enterKeyActivation: false
+    property bool _enterKeyDown: false
     readonly property InteractionMotion contentMotion: InteractionMotion {
         objectName: "interactionMotion"
         target: control.contentItem
@@ -17,6 +22,7 @@ Controls.AbstractButton {
         pressed: control.down
         hovered: control.hovered
         focused: control.visualFocus
+        releaseOnSignal: control.releaseOnSignal
     }
     readonly property InteractionMotion surfaceMotion: InteractionMotion {
         target: control.background
@@ -26,13 +32,28 @@ Controls.AbstractButton {
         pressed: control.down
         hovered: control.hovered
         focused: control.visualFocus
+        releaseOnSignal: control.releaseOnSignal
     }
 
+    readonly property InteractionState interaction: InteractionState {
+        id: instanceState
+        objectName: "controlInstanceState"
+        enabled: control.effectiveEnabled
+        pressed: control.contentMotion.pressed
+        hovered: control.contentMotion.hovered
+        focused: control.visualFocus
+        releasing: control.contentMotion.releasing
+    }
+    readonly property string interactionPhase: instanceState.phase
+    readonly property string interactionInput: instanceState.input
+
     FocusRing {
+        objectName: "buttonFocusRing"
         anchors.fill: parent
-        active: control.showFocusRing && control.effectiveEnabled && control.visualFocus
+        anchors.margins: -control.focusRingOutset
+        active: control.showFocusRing && control.interaction.focusVisible
         motionEnabled: control.motionEnabled
-        radius: control.resolvedCornerRadius
+        radius: control.focusRingRadius
     }
 
     enum ButtonTone {
@@ -119,6 +140,36 @@ Controls.AbstractButton {
             control.focus = false
     }
 
+    // Enter mirrors Space: press feedback now, activation only at key release.
+    Keys.onPressed: function(event) {
+        if (control.enterKeyActivation && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && control.effectiveEnabled) {
+            event.accepted = true
+            if (!event.isAutoRepeat && !control._enterKeyDown) {
+                control._enterKeyDown = true
+                control.down = true
+            }
+        }
+    }
+    Keys.onReleased: function(event) {
+        if (control.enterKeyActivation && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+            event.accepted = true
+            if (!event.isAutoRepeat && control._enterKeyDown) {
+                control._enterKeyDown = false
+                // Restore Qt's native pressed->down tracking after Enter.
+                control.down = undefined
+                if (control.effectiveEnabled)
+                    control.click()
+            }
+        }
+    }
+    onActiveFocusChanged: {
+        if (!control.activeFocus && control._enterKeyDown) {
+            control._enterKeyDown = false
+            control.down = undefined
+            control.canceled()
+        }
+    }
+
     function createMethodEvent(triggerName) {
         return methodRegistry.createEvent(triggerName)
     }
@@ -139,6 +190,10 @@ Controls.AbstractButton {
 
     Connections {
         target: control
+        function onReleased() {
+            control.contentMotion.playRelease()
+            control.surfaceMotion.playRelease()
+        }
         function onClicked() {
             control.invokeMethods(control.createMethodEvent("clicked"))
         }
@@ -157,13 +212,13 @@ Controls.AbstractButton {
         StateColorBehavior on color { motionEnabled: control.motionEnabled && control.effectiveEnabled }
         radius: control.resolvedCornerRadius
         antialiasing: true
-        color: !control.effectiveEnabled
+        color: control.interaction.surfacePhase === "disabled"
             ? control.backgroundColorDisabled
-            : control.down
+            : control.interaction.surfacePhase === "press"
                 ? control.backgroundColorPressed
                 : control.checked
                     ? Theme.accentMuted
-                    : control.hovered
+                    : control.interaction.surfacePhase === "hover"
                     ? control.backgroundColorHover
                     : control.backgroundColor
     }

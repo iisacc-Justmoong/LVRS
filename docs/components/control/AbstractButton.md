@@ -4,7 +4,7 @@ Location: `src/qml/components/control/buttons/AbstractButton.qml`
 
 `AbstractButton` is the shared base for LVRS button-family components.
 
-The concrete button family follows Figma node `44:599`, which defines four types (`LabelButton`, `IconButton`, `LabelMenuButton`, `IconMenuButton`) across five kinds (`accent`, `default`, `borderless`, `destructive`, `disabled`).
+The concrete button family follows the Figma Button page, with label/icon PushButton sets and a DropdownButton set for label/icon menu triggers. Each complete component has its own input-state variants. See [component instance states](../../instance-states.md) for current node IDs and the runtime mapping.
 
 ## Purpose
 
@@ -25,6 +25,10 @@ Interaction:
 
 - `effectiveEnabled` (readonly, `enabled && tone !== Disabled`)
 - `hoverEnabled`/`focusPolicy` are derived from `effectiveEnabled`
+- `releaseOnSignal`: false by default; PushButton / DropdownButton enable an explicit, short release rebound
+- `interaction`: one owned nonvisual `InteractionState` per component instance
+- `interactionPhase` / `interactionInput` (readonly): current input phase and pointer/keyboard modality
+- `interaction.focusVisible`: enabled keyboard focus, independent of press/release
 
 Injected methods:
 
@@ -96,3 +100,17 @@ scoped to those families, so `AlertButton`, `Stepper`, and other direct
 Press deformation is shared by every button subclass, with a focus ring for Tab navigation. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
 
 `showFocusRing` defaults to true. Components with a Figma-authored focus border may set it false and render that border, while retaining keyboard focus and shared motion (ColorPickerButton does this).
+
+`focusRingOutset` defaults to `0` and `focusRingRadius` defaults to `resolvedCornerRadius`. The authored PushButton/DropdownButton and Menu/List/Hierarchy row families use a 3px outset; compact buttons also increase the ring radius to 11px. This keeps the focus outline outside the visual surface without changing the input or layout bounds. `enterKeyActivation` defaults to false and is enabled by these authored families; unrelated controls retain their existing keyboard handlers. Enter/Return gives immediate down-state feedback, ignores repeated key-down, invokes the native `click()` path at key-up (preserving checkable/action semantics), and cancels when focus is lost.
+
+The compact button families retain the existing default, hover, pressed and keyboard-focus policy. Their release is only a 180ms elastic return of the content and surface, triggered by `released()`; no separate release fill or border is applied. A fast tap receives a minimum visible compression before returning. Cancellation does not rebound or activate. Re-pressing interrupts the animation, and reduced motion, local motion opt-out or disabled interaction clears the transform immediately. Layout and hit geometry stay fixed; callbacks execute at activation without waiting for the animation.
+
+The background and internal focus decoration consume the instance's state object.
+`interactionPhase` prioritizes disabled, press, release, focus, hover and default.
+Release follows `InteractionMotion.releasing`; disabling motion ends that transient
+phase while logical press/focus still works. Selection, checked values and subclass
+model-state APIs remain independent. No external state overlay is required.
+
+Enter completion/cancellation resets `down` to `undefined`, restoring Qt's native
+pressed-state tracking for later pointer or Space input. Leaving an explicit false
+value would suppress those later press states; see the [Qt down contract](https://doc.qt.io/qt-6/qml-qtquick-controls-abstractbutton.html#down-prop).

@@ -62,7 +62,7 @@ The 2026-09-10 LVRS adjustment uses a `22px` field height and the Disabled token
 | Text/placeholder top and bottom inset | `4.5` | `4.5` |
 | Search/clear top and bottom inset | `5` | `5` |
 | Search/clear frame | `12 × 12` | `12 × 12` |
-| Rounded radius | `5` | `5` |
+| Rounded radius | `8` | `8` |
 | Cylinder / Inline radius | `11` | `11` |
 | Search/text/clear gap | `2` | `2` |
 | Body font and line box | `13 / 13` | `13 / 13` |
@@ -77,7 +77,7 @@ The clear-button inset is the explicit 2026-09-06 LVRS adjustment to the Figma r
 
 ## Behavior Contract
 
-- `style: roundedStyle` uses the recessed glass material with a `5px` desktop radius.
+- `style: roundedStyle` uses the recessed glass material with an `8px` radius, matching LVRS buttons. The Figma Rounded instances for default (`114:176`), disabled (`114:174`), cursor-active (`114:175`), selected (`114:177`), search (`323:9164`), and active (`114:178`) all use this radius.
 - `style: cylinderStyle` uses the same material with a half-height radius.
 - `style: inlineStyle` uses a lighter translucent material and shallower inset lighting with the same insets and affordances.
 - Disabled text uses `Theme.disabledColor`; default/active text uses `Theme.titleHeaderColor`.

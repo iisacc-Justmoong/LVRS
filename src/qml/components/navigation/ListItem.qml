@@ -290,23 +290,40 @@ AbstractButton {
     verticalPadding: control.isCompound ? control.sectionSpacing : control.size === ListItem.Detail || control.isModern ? control.detailVerticalPadding : control.rowVerticalPadding
     spacing: Theme.gapNone
     cornerRadius: control.isModern ? Theme.scaleMetric(6) : Theme.gapNone
-    clip: control.isModern
     Accessible.name: control.label
     Accessible.description: control.isModern ? control.description : control.detail
 
     implicitHeight: Math.max(control.isModern && !control.isCompound ? control.standardItemHeight : 0, contentRoot.implicitHeight + topPadding + bottomPadding)
     implicitWidth: Math.max(control.minItemWidth, contentRoot.implicitWidth + leftPadding + rightPadding)
 
+    releaseOnSignal: true
+    enterKeyActivation: true
+    focusRingOutset: Theme.gap3
     backgroundColor: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
-    backgroundColorHover: control.selected ? control.selectedBackgroundColor : control.listBackgroundColor
+    backgroundColorHover: control.selected ? control.selectedBackgroundColor : Theme.surfaceAlt
     backgroundColorPressed: control.selected ? control.selectedBackgroundColor : Theme.accentMuted
     backgroundColorDisabled: control.listBackgroundColor
     textColor: Theme.bodyColor
     textColorDisabled: Theme.disabledColor
 
+    // Embedded toggle values do not select or tint the enclosing row.
+    background: Rectangle {
+        StateColorBehavior on color { motionEnabled: control.motionEnabled && control.effectiveEnabled }
+        radius: control.resolvedCornerRadius
+        antialiasing: true
+        color: control.interaction.surfacePhase === "disabled"
+            ? control.backgroundColorDisabled
+            : control.interaction.surfacePhase === "press"
+                ? control.backgroundColorPressed
+                : control.interaction.surfacePhase === "hover"
+                    ? control.backgroundColorHover
+                    : control.backgroundColor
+    }
+
     contentItem: Item {
         id: contentRoot
         objectName: "listItem_content"
+        clip: control.isModern
 
         readonly property int miniBaseHeight: control.iconSize
         readonly property int miniSeparatorHeight: control.separatorVisible ? control.separatorTopSpacing + control.separatorHeight : 0

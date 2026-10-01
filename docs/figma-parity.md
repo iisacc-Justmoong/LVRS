@@ -48,3 +48,13 @@ VisualCatalog includes HelpButton, ColorPickerButton, ContextMenuItem, ContextMe
 Validated on macOS with Qt 6.8.3: full LVRS CTest 53/53 passed, all 84 catalog entries loaded, and native Figma parity 12/12 passed (including rendered inset highlights). The regular menu retains the existing 33px natural Label metric by sharing TextMetrics font bindings with rendered text. Native catalog captures cover HelpButton, ColorPickerButton, ContextMenuItem and Menu.
 
 Installed consumer verification: the staged library matches all 83 current QML resources. Society 16/16 and Dreamscapes 5/5 CTest passed after rebuilding against that package. Both macOS bundles were restarted and their live loaded LVRS paths were verified; Dreamscapes displayed the new compact ContextMenuItem.
+
+## Button / Menu / List interaction states
+
+The 2026-09-30 revision replaces the Button/Menu/List/ContextMenu/Hierarchy helper overlays with complete component variants. All six families now own `Interaction state=default/hover/press/release/focus`; row sets have a separate pointer/keyboard input axis. The five former helper sets were removed after consumer migration. The [instance-state contract](instance-states.md) records the 25 sets, 740 variants, review frames and audit scope. ContextMenuItem inherits the compact MenuItem runtime contract. Code retains native input/model APIs, all 17 ListItem presets, original assets and dimensions. Neutral Menu/List hover is surfaceAlt and press is accentMuted; selection fills remain unchanged. The focus outline is 1.5px Primary at a 3px outset.
+
+The user's final release specification supersedes the earlier Button Figma prototype's release-edge/120ms treatment: production uses geometry-only 180ms OutBack on genuine pointer, touch, Space or Enter release, with no new fill/border. Figma's key-down preview is implemented as real key-up activation in code. Cancellation, re-press, reduced motion and disabled behavior are covered by `LVRSTests_motion`; separate list/menu suites protect content and accessory contracts.
+
+`LVRSTests_instance_state` verifies per-instance ownership, all 17 ListItem input
+lifecycles, cancellation and model-state independence against the revised contract.
+Its dated Figma fixture records the design audit separately from runtime tests.

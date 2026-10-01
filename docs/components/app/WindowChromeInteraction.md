@@ -19,6 +19,7 @@ Location: `src/qml/WindowChromeInteraction.qml`
 ## Behavior
 
 - The move handle is disabled for minimized and fullscreen windows.
+- The move hit region ends at `moveHandleTopMargin + moveHandleHeight`; solid macOS chrome disables AppKit background movement so drags outside this region cannot bypass the LVRS handler or its exclusions.
 - Resize handles are enabled only for a visible, windowed target.
 - Corner handles sit above edge handles, and all resize handles sit above the move handle.
 - A resize press maps its `MouseArea` position to global coordinates before requesting the operation. This keeps the macOS fallback anchored to the event that started it even when a remote, tablet, or synthesized input source has not synchronized `QCursor::pos()`.

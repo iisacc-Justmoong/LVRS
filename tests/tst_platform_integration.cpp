@@ -372,7 +372,7 @@ LV.ApplicationWindow {
         QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
         QTRY_VERIFY(root->property("catalogViewportReady").toBool());
         QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-        QCOMPARE(root->property("catalogComponentCount").toInt(), 90);
+    QCOMPARE(root->property("catalogComponentCount").toInt(), 91);
         QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
         QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("motion"));
         QVERIFY(root->property("activeEntry").isValid());

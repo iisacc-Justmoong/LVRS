@@ -17,12 +17,13 @@ Item {
         LV.Label { style: header2; text: "One rhythm, different responses" }
         Flow {
             width: parent.width; spacing: LV.Theme.gap16
-            LV.PushButton { text: "Hold & release"; onClicked: root.actionCount++ }
+            LV.PushButton { id: stateButton; text: "Hold & release"; onClicked: root.actionCount++ }
             LV.CheckBox { text: "Checked state" }
             LV.RadioButton { text: "Selected dot" }
             LV.ToggleSwitch { text: "Drag or tap" }
         }
         LV.Label { style: caption; text: "Actions delivered immediately: " + root.actionCount }
+        LV.Label { style: caption; text: "Instance phase: " + stateButton.interactionPhase + " · Input: " + stateButton.interactionInput }
         LV.InputField { width: Math.min(360, parent.width); placeholderText: "Tab here to inspect focus motion" }
         LV.Slider { id: valueSlider; width: Math.min(400, parent.width); value: 0.35 }
         LV.ProgressBar { width: valueSlider.width; currentValue: valueSlider.value * 100 }

@@ -21,6 +21,7 @@ Component.onCompleted: {
 | pressDuration | 90 ms | Immediate-feeling compression |
 | hoverDuration | 160 ms | Hover and focus entry |
 | releaseDuration | 360 ms | One elastic return |
+| buttonReleaseDuration | 180 ms | Button / MenuItem / ListItem / HierarchyItem release rebound |
 | surfaceDuration | 420 ms | Larger popup / page presentation |
 | exitDuration | 150 ms | Prompt dismissal |
 | colorDuration | 130 ms | Semantic fill blending |
@@ -31,6 +32,7 @@ Component.onCompleted: {
 ## Interaction contracts
 
 - AbstractButton supplies pointer, touch and keyboard compression to its button, card, menu, list and toolbar subclasses. Transforms are attached to the content and background slots, preserving the root hit target, layout width, height and implicit size. Visual displacement is capped for large targets. A keyboard focus ring does not intercept input.
+- PushButton / DropdownButton and their label/icon presets, MenuItem / ContextMenuItem, all 17 ListItem types and HierarchyItem use an explicit `released()` response: one 180ms OutBack return, with a small minimum compression for taps completed before the first press frame. Release restores the existing hover/default fill through the existing color policy; it adds no persistent release color or border. Each component owns its input phase, including transient `release`, as described in [component instance states](instance-states.md). Dragging out cancels without rebound. Re-pressing interrupts the return, and disabled/reduced-motion/local opt-out clears deformation immediately. Keyboard Space/Enter and touch release use the same event path. Tab focus stays visible during press/release, independent of selection. Menu/List neutral hover uses surfaceAlt; Hierarchy retains its existing ghost hover.
 - Stepper and ComboBox apply the same response to their compact composite. Signals and injected callbacks execute at activation, independently of animation completion.
 - CheckBox marks and RadioButton dots grow into the selected state. ToggleSwitch retains its knob squash, travel stretch, native drag and endpoint rebound.
 - Slider value and pointer mapping remain immediate during a drag. Programmatic / keyboard changes animate a displayed position clamped to the track; the visible thumb reacts to press. ProgressBar animates displayed progress while clamping the fill to its track and preserving the actual numeric model.
@@ -65,6 +67,12 @@ Rectangle {
 
 Use a monotonic easing (OutCubic) for opacity and bounded data geometry where overshoot is inappropriate. Prefer native direct tracking for continuous input. Do not add animations to layout-owned child x/y/width/height or to backend model values.
 
+`InteractionMotion.releaseOnSignal` defaults to false, preserving the existing down-state return of other consumers. When true, call `playRelease()` from a genuine release event; `stopRelease()` clears an interrupted pulse. `deformationProgress` reports the actual compression/rebound used by the visual transform, while `pressProgress` retains its existing press-state contract. The authored button, menu and list row families enable this policy through the inherited `AbstractButton.releaseOnSignal` property.
+
+`InteractionMotion.releasing` is true only while the explicit release animation
+runs. AbstractButton's owned `interaction` state consumes it; reduced motion,
+disable and re-press therefore settle the phase together with its visual response.
+
 ## VisualCatalog verification
 
 The Component Studio indexes every shipped QML file plus WindowSafeAreaObserver (88 entries). Search matches type, summary and source path. Each entry has an explicit recipe in `CatalogMotion.js`, a real consumer playground, a response description, inspection guidance and a usage/source reference. Internal renderers are marked as supporting types. Shared family previews show composition and variants.
@@ -78,4 +86,4 @@ env DYLD_LIBRARY_PATH="$PWD/build" QML_IMPORT_PATH="$PWD/build" QML2_IMPORT_PATH
 ./example/VisualCatalog/bin/LVRSExampleVisualCatalog
 ```
 
-`LVRSTests_motion` exercises all 18 button families, pointer/keyboard/touch input, interrupted rebound, disabled/local opt-out, reduced motion during an animation, stable layout and direct slider dragging. `LVRSTests_catalog` verifies every QML file has a recipe, loads every indexed preview, and checks search/reset. The existing tests cover component semantics and embedded source-resource parity. Native Metal visual inspection is a separate check from offscreen tests. Installed packages must be validated separately from this build.
+`LVRSTests_motion` exercises all 19 button families, pointer/keyboard/touch input, interrupted rebound, disabled/local opt-out, reduced motion during an animation, stable layout and direct slider dragging. `LVRSTests_catalog` verifies every QML file has a recipe, loads every indexed preview, and checks search/reset. The existing tests cover component semantics and embedded source-resource parity. Native Metal visual inspection is a separate check from offscreen tests. Installed packages must be validated separately from this build.

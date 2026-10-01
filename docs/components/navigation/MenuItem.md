@@ -84,6 +84,15 @@ LV.MenuItem {
 
 ## Shared motion
 
+`interaction`, `interactionPhase` and `interactionInput` are owned per instance.
+They are separate from the existing integer `state` (Default/Selected/Inactive).
+Figma's collapsed/expanded sets hold complete input variants; see
+[component instance states](../../instance-states.md).
+
+Figma states are independent of the `state` selection model: default has the authored transparent fill, hover uses `Theme.surfaceAlt`, press uses `Theme.accentMuted`, and release restores the current hover/default fill with a 180ms OutBack deformation only. Selected rows retain `Theme.primary` in every input state. Inactive rows keep their authored fill and typography but cannot activate, hover, deform or receive Tab focus. Expansion and the existing label/icon/shortcut properties remain independent.
+
+Keyboard Tab/Shift+Tab moves focus. Space and Enter press immediately and activate on key release; losing focus while Enter is held cancels. A 1.5px Primary focus ring sits 3px outside the fixed row bounds and remains visible during press/release. `motionEnabled`, global reduced motion, and local color overrides remain supported.
+
 The fill blends, the row rebounds and disclosure rotation follows expansion. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
 
 `compact` defaults false. ContextMenuItem selects the actual compact Figma family: 18px row, radius 0, Inter Regular 12 label and Pretendard SemiBold 12 shortcut. The regular default remains 24px with Pretendard Medium 13. Width measurement uses the same font as the rendered label and shortcut.

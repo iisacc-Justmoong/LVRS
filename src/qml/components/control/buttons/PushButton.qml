@@ -9,6 +9,10 @@ AbstractButton {
     property bool iconMode: false
 
     tone: AbstractButton.Primary
+    releaseOnSignal: true
+    enterKeyActivation: true
+    focusRingOutset: Theme.gap3
+    focusRingRadius: resolvedCornerRadius + focusRingOutset
     readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     readonly property string fallbackIconName: "projectStructure"
     readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)

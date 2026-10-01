@@ -10,6 +10,7 @@ QtObject {
     readonly property int pressDuration: 90
     readonly property int hoverDuration: 160
     readonly property int releaseDuration: 360
+    readonly property int buttonReleaseDuration: 180
     readonly property int surfaceDuration: 420
     readonly property int exitDuration: 150
     readonly property int colorDuration: 130

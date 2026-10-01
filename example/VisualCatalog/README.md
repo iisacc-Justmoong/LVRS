@@ -48,11 +48,11 @@ shows the same app-root input for consumers.
 
 ## Standard materials
 
-WindowMaterial, PanelMaterial, MaterialSurface and Popover share the interactive Material gallery. Its accent controls update the app theme, and its actions open a ContextMenu, Tooltip and Popover above the same window. The catalog contains 90 type entries. The host ApplicationWindow and standalone WindowMaterial show a uniform #0B0B0B fill at 50% without gradients, retaining native macOS frosted blur. The PanelMaterial preview keeps its Glass 25 radial treatment. Changing the accent updates controls and panel accents while the Window fill remains near black.
+WindowMaterial, PanelMaterial, MaterialSurface and Popover share the interactive Material gallery. Its accent controls update the app theme, and its actions open a ContextMenu, Tooltip and Popover above the same window. The catalog contains 91 type entries. The host ApplicationWindow and standalone WindowMaterial show a uniform #0B0B0B fill at 50% without gradients, retaining native macOS frosted blur. The PanelMaterial preview keeps its Glass 25 radial treatment. Changing the accent updates controls and panel accents while the Window fill remains near black.
 
 ## Component Studio
 
-The window now combines a compact motion toolbar, searchable hierarchy and a responsive detail page. Each of the 90 indexed types has a live playground and a specific interaction recipe: Try it, Response, Look for and Behavior contract. Source, usage and related types remain available below the motion inspector. Supporting nonvisual types link to the real consumer that displays their behavior.
+The window now combines a compact motion toolbar, searchable hierarchy and a responsive detail page. Each of the 91 indexed types has a live playground and a specific interaction recipe: Try it, Response, Look for and Behavior contract. Source, usage and related types remain available below the motion inspector. Supporting nonvisual types link to the real consumer that displays their behavior. InteractionState shows the button's owned phase and input modality in the motion playground; its [contract](../../docs/instance-states.md) maps the full Figma component variants to the runtime.
 
 Use 1×, 0.5× and 0.25× to change the whole engine's playback speed. Reduce motion makes states immediate. Reset preview recreates the selected example without resetting global motion preferences. The Motion playground includes buttons, selection, focus, sliders, progress, layout spacing and passive-layer opacity.
 

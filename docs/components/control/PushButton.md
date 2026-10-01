@@ -1,5 +1,7 @@
 # PushButton
 
+The Figma keyboard focus ring is 1.5px Primary, with a 3px outset and 11px radius at the default scale. Space and Enter activate on key release; selection of tones and all existing label/icon dimensions are unchanged.
+
 Location: `src/qml/components/control/buttons/PushButton.qml`
 
 `PushButton` is the independent push-action family built on `AbstractButton`.
@@ -58,5 +60,9 @@ desktop and mobile matrices. Run `ctest --test-dir build --output-on-failure`
 after `cmake --build build` with the build-tree LVRS library in the runtime path.
 
 ## Shared motion
+
+`releaseOnSignal` defaults to true for both content modes and the LabelButton / IconButton presets. A genuine pointer, touch or keyboard release performs one `Motion.buttonReleaseDuration` (180ms at 1×) elastic return, including taps shorter than the press animation. Cancellation does not rebound. Existing hover/pressed fills and keyboard focus remain unchanged. Reduced motion and `motionEnabled: false` suppress the release response.
+
+The `compact_button_release`, `compact_button_cancel_and_opt_out`, and `compact_button_tones_and_keyboard_focus` cases in `LVRSTests_motion` cover immediate and held release, cancellation, opt-out, all five tones, keyboard focus and stable hit geometry.
 
 The label and icon share one compact compression and elastic release. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

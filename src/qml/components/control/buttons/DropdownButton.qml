@@ -8,6 +8,10 @@ AbstractButton {
     property bool iconMode: false
 
     tone: AbstractButton.Primary
+    releaseOnSignal: true
+    enterKeyActivation: true
+    focusRingOutset: Theme.gap3
+    focusRingRadius: resolvedCornerRadius + focusRingOutset
     readonly property int figmaButtonHeight: Theme.iconSm + (Theme.gap2 * 2)
     readonly property string fallbackIconName: "projectStructure"
     readonly property url fallbackIconSource: Theme.iconPath(control.fallbackIconName)
@@ -63,11 +67,11 @@ AbstractButton {
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight
     implicitWidth: Math.ceil(contentItem.implicitWidth) + leftPadding + rightPadding
-    clip: true
 
     contentItem: Item {
         id: contentRoot
         objectName: control.iconMode ? "iconMenuButton_content" : "labelMenuButton_content"
+        clip: true
         readonly property int naturalLabelWidth: Math.ceil(labelItem.implicitWidth)
         implicitWidth: (control.iconMode ? control.iconSize : naturalLabelWidth)
                        + control.spacing + control.indicatorSize

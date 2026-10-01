@@ -5175,6 +5175,8 @@ Item {
         + " font=" + defaultField.inputItem.font.pixelSize + "/" + defaultField.inputItem.font.weight
         + " inset=" + defaultField.leftInset + "/" + defaultField.rightInset
         + " y=" + defaultField.centeredTextY
+        + " radius=" + defaultField.cornerRadius
+        + "/token=" + LV.Theme.radiusMd
         + " style=" + defaultField.resolvedStyle + "/" + defaultField.shapeStyle
         + " inline=" + inlineField.resolvedStyle + "/" + inlineField.shapeStyle
         + " cylinder=" + cylinderField.resolvedStyle + "/" + cylinderField.shapeStyle
@@ -5200,7 +5202,7 @@ Item {
         && defaultField.insetHorizontal === 7 * expectedScale
         && defaultField.insetVertical === 4.5 * expectedScale
         && defaultField.sideSpacing === 2 * expectedScale
-        && defaultField.cornerRadius === 5 * expectedScale
+        && defaultField.cornerRadius === 8 * expectedScale
         && defaultField.centeredTextHeight === 13
         && defaultField.textLineBoxHeight === 13
         && defaultField.inputItem.height === 13

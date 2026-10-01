@@ -37,6 +37,27 @@ LV.MobileNavigationBar {
 })").arg(motion ? "true" : "false", withSearch ? "search: ({})" : "").toUtf8());
     }
 private slots:
+    void source_icon_colors_and_artwork_geometry()
+    {
+        QQmlEngine engine;
+        QScopedPointer<QObject> object(create(engine)); QVERIFY(object);
+        auto *bar = qobject_cast<QQuickItem *>(object.data());
+        QVERIFY(item(engine, bar, 0)->property("preserveIconColors").isValid());
+        QVERIFY(!item(engine, bar, 0)->property("preserveIconColors").toBool());
+        eval(engine, bar, "model = [{iconName:'collection', preserveIconColors:true, iconArtworkSize:Qt.size(17.5,20.5545)}]");
+        auto *tab = item(engine, bar, 0); QVERIFY(tab);
+        QVERIFY(tab->property("preserveIconColors").toBool());
+        auto *image = tab->findChild<QQuickItem *>("mobileNavigationIcon"); QVERIFY(image);
+        QCOMPARE(image->width(), 17.5);
+        QCOMPARE(image->height(), 20.5545);
+        QCOMPARE(image->opacity(), 1.0);
+        eval(engine, bar, "search = ({iconName:'inputFieldSearch', preserveIconColors:true})");
+        auto *search = bar->findChild<QQuickItem *>("mobileNavigationSearch"); QVERIFY(search);
+        QVERIFY(search->property("preserveIconColors").toBool());
+        QCOMPARE(search->property("iconArtworkSize").toSizeF(), QSizeF(24, 24));
+        bar->setProperty("enabled", false);
+        QVERIFY(image->opacity() < 1.0);
+    }
     void gallery_capture()
     {
         const QString output = qEnvironmentVariable("LVRS_MOBILE_NAVIGATION_CAPTURE_PATH");

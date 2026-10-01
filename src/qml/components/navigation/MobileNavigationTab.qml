@@ -8,6 +8,9 @@ Tab {
     // Figma Tab/LVRS Mobile, 1073:1291.
     property bool showLabel: text.length > 0
     property bool drawSelection: true
+    // Opt in for authored multicolor assets; monochrome remains the default.
+    property bool preserveIconColors: false
+    property size iconArtworkSize: Qt.size(iconSize, iconSize)
     readonly property color foreground: !effectiveEnabled ? Theme.disabledColor
         : effectiveSelected ? Theme.primary : Theme.bodyColor
     iconSize: Theme.mobileNavigationIconSize
@@ -25,25 +28,29 @@ Tab {
             anchors.centerIn: parent
             width: parent.width
             spacing: Theme.gap2
-            Image {
-                objectName: "mobileNavigationIcon"
+            Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: control.iconSize
                 height: control.iconSize
-                source: RenderQuality.resolveTextureSource(control.iconSource)
-                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
-                fillMode: Image.PreserveAspectFit
-                opacity: control.foreground.a
-                layer.enabled: GraphicsInfo.api !== GraphicsInfo.Software
-                layer.effect: MultiEffect {
-                    // Normalize luminance before tinting: the Figma icon uses
-                    // one solid foreground, regardless of SVG source colors.
-                    contrast: -1
-                    brightness: 0.5
-                    colorization: 1
-                    colorizationColor: Qt.rgba(control.foreground.r, control.foreground.g, control.foreground.b, 1)
+                Image {
+                    objectName: "mobileNavigationIcon"
+                    anchors.centerIn: parent
+                    width: control.iconArtworkSize.width
+                    height: control.iconArtworkSize.height
+                    source: RenderQuality.resolveTextureSource(control.iconSource)
+                    sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
+                    fillMode: Image.PreserveAspectFit
+                    opacity: control.preserveIconColors && control.effectiveEnabled ? 1 : control.foreground.a
+                    layer.enabled: !control.preserveIconColors && GraphicsInfo.api !== GraphicsInfo.Software
+                    layer.effect: MultiEffect {
+                        // Default monochrome treatment; authored colors opt out.
+                        contrast: -1
+                        brightness: 0.5
+                        colorization: 1
+                        colorizationColor: Qt.rgba(control.foreground.r, control.foreground.g, control.foreground.b, 1)
+                    }
+                    Accessible.ignored: true
                 }
-                Accessible.ignored: true
             }
             Label {
                 objectName: control.labelObjectName

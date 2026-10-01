@@ -118,6 +118,10 @@ AbstractButton {
     }
 
     tone: AbstractButton.Borderless
+    effectiveEnabled: enabled && tone !== AbstractButton.Disabled && !isInactive
+    releaseOnSignal: true
+    enterKeyActivation: true
+    focusRingOutset: Theme.gap3
     horizontalPadding: Theme.gap4
     verticalPadding: compact ? Theme.gapNone : Theme.scaleMetric(3)
     spacing: Theme.gapNone
@@ -129,8 +133,8 @@ AbstractButton {
     textColor: compact ? Theme.textTokenBase : Theme.titleHeaderColor
     textColorDisabled: Theme.disabledColor
     backgroundColor: resolvedBackgroundColor
-    backgroundColorHover: resolvedBackgroundColor
-    backgroundColorPressed: resolvedBackgroundColor
+    backgroundColorHover: isSelected || isInactive ? resolvedBackgroundColor : Theme.surfaceAlt
+    backgroundColorPressed: isSelected || isInactive ? resolvedBackgroundColor : Theme.accentMuted
     backgroundColorDisabled: resolvedBackgroundColor
 
     TextMetrics {

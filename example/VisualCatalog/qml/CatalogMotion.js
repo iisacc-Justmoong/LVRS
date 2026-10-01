@@ -92,6 +92,7 @@ var recipes = {
     "spring-behavior": ["utility", "Change a value in the motion playground, then reverse it before settling.", "The reusable Behavior retargets from its current visual value using the shared OutBack curve."],
     "state-color-behavior": ["utility", "Hover the button or change the material color in the playground.", "The reusable color Behavior blends semantic fills over the shared color duration."],
     "interaction-motion": ["utility", "Hold and release the playground button, then repeat using Space.", "The reusable transform combines press and hover progress with displacement capped by target size."],
+    "interaction-state": ["utility", "Hover, hold and release the playground button, then Tab to it and repeat using Space or Enter.", "The displayed phase belongs to that button instance; keyboard focus stays visible through press and release."],
     "focus-ring": ["input", "Tab through the motion playground and click its input field.", "The noninteractive outline scales and fades into place without intercepting input." ]
 }
 

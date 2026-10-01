@@ -199,6 +199,8 @@ Controls.Control {
                             Accessible.name: entry.accessibleName || text || qsTr("Tab %1").arg(index + 1)
                             iconName: entry.iconName || ""
                             iconSource: entry.iconSource || Theme.iconPath(iconName)
+                            preserveIconColors: entry.preserveIconColors === true
+                            iconArtworkSize: entry.iconArtworkSize || Qt.size(iconSize, iconSize)
                             enabled: entry.enabled !== false
                             selected: index === control.currentIndex
                             drawSelection: false
@@ -225,6 +227,8 @@ Controls.Control {
             text: control.search?.text || ""
             iconName: control.search?.iconName || "inputFieldSearch"
             iconSource: control.search?.iconSource || Theme.iconPath(iconName)
+            preserveIconColors: control.search?.preserveIconColors === true
+            iconArtworkSize: control.search?.iconArtworkSize || Qt.size(iconSize, iconSize)
             enabled: control.searchVisible && control.search?.enabled !== false
             Accessible.role: Accessible.Button
             Accessible.ignored: !control.searchVisible

@@ -32,6 +32,8 @@ LV.MobileNavigationBar {
 
 ## 크기와 기기 곡률
 
+`MobileNavigationTab.preserveIconColors`는 기본 `false`이다. 다색 아이콘이나 Figma에서 이미 색상이 지정된 SVG에는 `true`를 사용하여 단색 색상 효과와 활성 상태의 추가 투명도를 적용하지 않는다. 비활성 상태의 투명도는 유지한다. `iconArtworkSize`는 기본 `Qt.size(iconSize, iconSize)`이며, 24px 아이콘 슬롯 내부에 실제 SVG 아트워크를 지정 크기로 중앙 정렬한다. `model` 항목 및 `search` 객체에서도 두 속성을 전달할 수 있다. 이 옵션은 터치 영역·선택·레이블·슬롯 크기를 변경하지 않는다. `LVRSTests_mobile_navigation source_icon_colors_and_artwork_geometry`가 기본값과 탭/검색 전달, 크기 및 비활성 투명도를 검사한다.
+
 | 항목 | 값 |
 | --- | --- |
 | 탭바·검색 표면 높이 | 56 |

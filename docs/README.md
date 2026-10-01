@@ -47,6 +47,8 @@ This structure is intentional so the same question can be answered consistently 
 
 ## Change Records and Tooling
 
+- [Component instance states](instance-states.md): complete Figma variants, per-instance input ownership and regression checks.
+
 - `Chnagelog.md` (repo root): commit-trace change summary by date.
 - `src/rust-cli/README.md` (repo root): `lvrs` CLI entrypoints (`install`, `bootstrap`, `doctor`, `platform`).
 

@@ -1,5 +1,7 @@
 # DropdownButton
 
+The Figma keyboard focus ring is 1.5px Primary, with a 3px outset and 11px radius at the default scale. Space and Enter activate on key release; the menu callback and existing label/icon/chevron dimensions are unchanged.
+
 Location: `src/qml/components/control/buttons/DropdownButton.qml`
 
 `DropdownButton` is the independent menu-trigger family built on `AbstractButton`.
@@ -56,5 +58,7 @@ LV.DropdownButton { iconMode: true; iconName: "projectStructure" }
 See [PushButton validation](PushButton.md#validation) for shared verification.
 
 ## Shared motion
+
+`releaseOnSignal` defaults to true for both content modes and the LabelMenuButton / IconMenuButton presets. The label or icon, chevron and background perform one 180ms elastic return on `released()`. There is no release-specific fill or border. Existing hover/press tones, clipping, menu dispatch and keyboard focus remain in force. Fast taps receive feedback; cancellation and disabled/reduced-motion/local opt-out do not rebound. See [PushButton release validation](PushButton.md#shared-motion) for the shared regression cases.
 
 The complete trigger rebounds as one surface; any ContextMenu animates independently. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.

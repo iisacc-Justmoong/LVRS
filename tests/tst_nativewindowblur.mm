@@ -26,6 +26,7 @@ class NativeWindowBlurTests : public QObject
 private slots:
     void lifecycle_and_foreground();
     void unified_titlebar_controls();
+    void solid_chrome_disables_background_movement();
 };
 
 void NativeWindowBlurTests::lifecycle_and_foreground()
@@ -100,6 +101,33 @@ LV.ApplicationWindow {
     view = reinterpret_cast<NSView *>(window->winId());
     QTRY_COMPARE(backdrops(view).count, NSUInteger(1));
     QVERIFY(!view.window.opaque);
+    QVERIFY(!view.window.movableByWindowBackground);
+}
+
+void NativeWindowBlurTests::solid_chrome_disables_background_movement()
+{
+    if (QGuiApplication::platformName() != QStringLiteral("cocoa"))
+        QSKIP("Native window movement requires Cocoa.");
+    QQuickWindow window;
+    window.resize(900, 600);
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    const auto nativeWindow = [&window] {
+        return reinterpret_cast<NSView *>(window.winId()).window;
+    };
+    NativeWindowStyle style;
+    QVERIFY(style.applySolidChrome(&window, QColor("#141414")));
+    QVERIFY(!nativeWindow().movableByWindowBackground);
+    // Style/theme refreshes must not restore whole-window background movement.
+    nativeWindow().movableByWindowBackground = YES;
+    QVERIFY(style.applySolidChrome(&window, QColor("#242424")));
+    QVERIFY(!nativeWindow().movableByWindowBackground);
+    window.hide();
+    window.destroy();
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    QVERIFY(style.applySolidChrome(&window, QColor("#141414")));
+    QVERIFY(!nativeWindow().movableByWindowBackground);
 }
 
 void NativeWindowBlurTests::unified_titlebar_controls()

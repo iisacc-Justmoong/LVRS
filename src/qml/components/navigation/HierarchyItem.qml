@@ -384,7 +384,7 @@ AbstractButton {
     readonly property real iconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int iconSourceSize: Math.max(1, Math.round(control.iconSize * control.iconSupersampleScale * control.iconHiDpiScale))
     readonly property int chevronSourceSize: Math.max(1, Math.round(control.chevronSize * control.iconSupersampleScale * control.iconHiDpiScale))
-    readonly property bool effectivePressedState: pointerDragRequiresLongPress ? _mobilePointerPressed : control.down
+    readonly property bool effectivePressedState: control.down || (pointerDragRequiresLongPress && _mobilePointerPressed)
     readonly property bool effectiveHoverState: pointerDragRequiresLongPress ? false : control.hovered
 
     function normalizedText(value) {
@@ -563,6 +563,17 @@ AbstractButton {
     }
 
     tone: AbstractButton.Borderless
+    releaseOnSignal: true
+    enterKeyActivation: true
+    focusRingOutset: Theme.gap3
+    showFocusRing: control.canBecomeActive
+    interaction.enabled: control.effectiveEnabled && control.canBecomeActive && !control.dragPreviewActive
+    contentMotion.pressed: control.effectivePressedState
+    surfaceMotion.pressed: control.effectivePressedState
+    contentMotion.hovered: control.effectiveHoverState
+    surfaceMotion.hovered: control.effectiveHoverState
+    contentMotion.motionEnabled: control.motionEnabled && control.effectiveEnabled && control.canBecomeActive && !control.dragPreviewActive
+    surfaceMotion.motionEnabled: control.motionEnabled && control.effectiveEnabled && control.canBecomeActive && !control.dragPreviewActive
     state: control.uxStateName
     leftPadding: computedLeftPadding
     rightPadding: rowRightPadding
@@ -587,11 +598,11 @@ AbstractButton {
         StateColorBehavior on color { motionEnabled: control.motionEnabled && control.enabled }
         radius: control.resolvedCornerRadius
         antialiasing: true
-        color: !control.effectiveEnabled
+        color: control.interaction.surfacePhase === "disabled"
             ? control.backgroundColorDisabled
-            : control.effectivePressedState
+            : control.interaction.surfacePhase === "press"
                 ? control.backgroundColorPressed
-                : control.effectiveHoverState
+                : control.interaction.surfacePhase === "hover"
                     ? control.backgroundColorHover
                     : control.backgroundColor
     }
@@ -840,7 +851,13 @@ AbstractButton {
                 const dragging = control._mobilePointerDragging
                 control._mobilePointerPressed = false
                 control._mobilePointerDragging = false
-                control.released()
+                // MouseArea releases even outside its bounds; that is a cancelled row action.
+                if (mouse.x >= 0 && mouse.y >= 0
+                        && mouse.x < mobileLongPressDragArea.width
+                        && mouse.y < mobileLongPressDragArea.height)
+                    control.released()
+                else
+                    control.canceled()
                 if (dragging)
                     control.commitDrag()
             }

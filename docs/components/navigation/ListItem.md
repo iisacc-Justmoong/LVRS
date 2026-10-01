@@ -99,7 +99,21 @@ LV.ListItem {
 }
 ```
 
+## Interaction states
+
+Every row owns `interaction`, with readonly `interactionPhase` and
+`interactionInput` inherited from AbstractButton. Figma uses complete per-type
+variants with the same phases; see [component instance states](../../instance-states.md).
+Modern content clipping stays inside the content item so the external focus ring
+is not clipped by the row itself.
+
+All 17 types share default, hover, press, release and keyboard focus without changing their measured frame or embedded controls. Default uses `listBackgroundColor`, neutral hover uses `Theme.surfaceAlt`, and neutral press uses `Theme.accentMuted`. Selected rows retain `selectedBackgroundColor` in all input states. Embedded `checked` toggle values do not tint or select the enclosing row. These color properties remain overridable by consumers.
+
+Release is a 180ms OutBack return of the content and surface from a real release event, with no independent release color or border. Cancellation does not rebound; re-pressing interrupts the return. Space and Enter activate on key release. Tab navigation follows the existing row and accessory order, and the row's 1.5px Primary focus ring stays 3px outside its fixed bounds during press/release. Disabled rows cannot activate or receive focus. Embedded buttons, inputs, selectors and toggles retain their own focus, edit and action events.
+
 ## Verification
+
+`LVRSTests_motion` checks all 17 presets for row colors, focus retention and fixed bounds, plus pointer/keyboard rebound and Enter cancellation.
 
 `LVRSTests_list_composites` uses Qt Test and Qt Quick. It checks all preset dimensions, desktop/mobile policy, mixed-height lists, pointer/keyboard edits, button callbacks, popup selection, delegate identity, dynamic type changes, fixed footers, custom trailing composition and actual rendering of every preset. Set `LVRS_LIST_CAPTURE_DIR` to a directory under `build/` to save `listitem-presets.png`. Existing Mini/Detail and model contracts remain covered by `LVRSTests_import_api` and `LVRSTests_platform_integration`.
 
