@@ -1,152 +1,87 @@
-# Alert
+<a id="alert"></a>
 
-Location: `src/qml/components/surfaces/Alert.qml`
+# 경고
 
-`Alert` is a glass overlay with one, two, or three actions. The visual contract
-comes from [Figma Alert 658:229](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=658-229),
-containing variants `106:282` and `106:281`. Text sizing was reconciled with
-the current auto-height and Title/Body styles on 2026-09-11.
+위치: `src/qml/components/surfaces/Alert.qml`
+
+`Alert`는 1개, 2개 또는 3개의 작업이 포함된 유리 오버레이입니다. 시각적 계약은 변형 `106:282` 및 `106:281`를 포함하는 [Figma Alert 658:229](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=658-229)에서 제공됩니다. 텍스트 크기 조정은 2026-09-11의 현재 자동 높이 및 제목/본문 스타일과 조정되었습니다.
 
 ## API
 
-- State/content: `open`, `imageSource`, `title`, `description`,
-  `buttonCount` (`0=auto`, `2`, `3`).
-- Action arguments: `button1Text`, `button1Method`, `button2Text`, `button2Method`,
-  `button3Text`, `button3Method`.
-- Enabled states: `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`.
-- Behavior: `dismissOnBackground`, `useOverlayLayer`, `secondaryDestructive`.
-- Size/shape: `minWidth`, `maxWidth`, `preferredWidth`, `cardCornerRadius`,
-  `shapeStyle`, `resolvedCardCornerRadius`.
-- Material: `backdropColor`, `cardBackgroundColor`, `glassEnabled`,
-  `glassBlurRadius`, `backdropSource`, read-only `resolvedBackdropSource` and `glassActive`.
-- Icon: `showIcon`, `appIconSource`, `appIconSize`, `iconFrameSize`,
-  `appIconBackgroundColor`, `appIconFrameColor`, `appIconInnerColor`.
-- Signals: `primaryClicked()`, `secondaryClicked()`, `tertiaryClicked()`, `dismissed()`.
+- 상태/내용: `open` , `imageSource` , `title` , `description` , `buttonCount` ( `0=auto` , `2` , `3` ).
+- 동작 인수: `button1Text` , `button1Method` , `button2Text` , `button2Method` , `button3Text` , `button3Method`.
+- 활성화된 상태: `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`.
+- 동작: `dismissOnBackground`, `useOverlayLayer`, `secondaryDestructive`.
+- 크기/모양: `minWidth` , `maxWidth` , `preferredWidth` , `cardCornerRadius` , `shapeStyle` , `resolvedCardCornerRadius`.
+- 재료: `backdropColor` , `cardBackgroundColor` , `glassEnabled` , `glassBlurRadius` , `backdropSource` , 읽기 전용 `resolvedBackdropSource` 및 `glassActive`.
+- 아이콘: `showIcon` , `appIconSource` , `appIconSize` , `iconFrameSize` , `appIconBackgroundColor` , `appIconFrameColor` , `appIconInnerColor` .
+- 신호: `primaryClicked()`, `secondaryClicked()`, `tertiaryClicked()`, `dismissed()`.
 
-Existing action signals and auto-count behavior remain compatible: tertiary text
-selects three actions, secondary text selects two, and no secondary/tertiary text
-selects one. Actions run the supplied method and emit the existing signal; the
-caller controls closing.
+기존 액션 신호와 자동 카운트 동작은 호환성을 유지합니다: 서드터리 텍스트는 3 액션을 선택하고, 이차 텍스트는 2를 선택하며, 이차/서드터리 텍스트가 없는 경우 하나를 선택합니다. 액션은 제공된 메서드를 실행하고 기존 신호를 방출하며, 호출자가 닫기를 제어합니다.
 
-### Content and action arguments
+<a id="content-and-action-arguments"></a>
 
-| Argument | Type | Existing property / action |
+### 내용 및 작업 인수
+
+|인수|유형|기존 속성/작업|
 | --- | --- | --- |
-| `imageSource` | URL | Alias of `appIconSource`; rendered in the central image frame |
-| `title` | string | Centered title |
-| `description` | string | Alias of `message`; centered description |
-| `button1Text` | string | Alias of `primaryText` |
-| `button1Method` | callable, default `null` | Primary action; `primaryClicked()` still fires |
-| `button2Text` | string | Alias of `secondaryText` |
-| `button2Method` | callable, default `null` | Secondary action; `secondaryClicked()` still fires |
-| `button3Text` | string | Alias of `tertiaryText` |
-| `button3Method` | callable, default `null` | Tertiary action; `tertiaryClicked()` still fires |
+| `imageSource` | URL |`appIconSource` 의 별칭; 중앙 이미지 프레임에서 렌더링됨|
+| `title` |문자열|가운데 제목|
+| `description` |문자열|`message`의 별칭; 중심 설명|
+| `button1Text` |문자열|`primaryText` 의 별칭|
+| `button1Method` |호출 가능, 기본값 `null`|주요 액션; `primaryClicked()` 는 여전히 방출됨|
+| `button2Text` |문자열|`secondaryText` 의 별칭|
+| `button2Method` |호출 가능, 기본값 `null`|이차 액션; `secondaryClicked()` 는 여전히 방출됨|
+| `button3Text` |문자열|`tertiaryText` 의 별칭|
+| `button3Method` |호출 가능, 기본값 `null`|서드터리 액션; `tertiaryClicked()` 는 여전히 방출됨|
 
-Aliases share the same value with the existing properties, including updates
-after creation. Button numbers identify their action roles: button 1 is the
-primary action on the right in the two-button layout and at the top in the
-three-button layout. Button 2 is secondary; button 3 is the final/cancel action.
-Set `button3Text: ""` for two actions and also `button2Text: ""` for one action
-when `buttonCount` is automatic. Supplying a method does not change the count.
+별칭은 생성 후 업데이트를 포함하여 기존 속성과 동일한 값을 공유합니다. 버튼 번호는 액션 역할을 식별합니다: 2-버튼 레이아웃의 오른쪽과 3-버튼 레이아웃의 상단에 있는 1 번 버튼은 주요 액션입니다. 2 번 버튼은 이차이며, 3 번 버튼은 최종/취소 액션입니다. `button3Text: ""` 를 2 액션에 설정하고, `buttonCount` 가 자동일 때 하나의 액션에 `button2Text: ""` 도 설정합니다. 메서드를 제공하는 것이 카운트를 변경하지 않습니다.
 
-Each method is passed directly to the existing `AlertButton.method` API. It
-accepts a JavaScript function or an object exposing `invoke(eventData)` or
-`trigger(eventData)`, using the shared `ButtonMethodRegistry`. `eventData.source`
-is the clicked button, `eventData.trigger` is `"clicked"`, and the enabled-state
-and tone fields follow [AbstractButton](../control/AbstractButton.md).
-Methods may omit the argument. Wrap an application method when it needs its
-own receiver, for example `function() { documentController.save() }`.
-Methods can be replaced or cleared with `null` after creation. An omitted method
-leaves the signal-only API available. Keep each operation in either its method
-or its signal handler to avoid running the same application operation twice.
+각 메서드는 기존 `AlertButton.method` API 에 직접 전달됩니다. 공유 `ButtonMethodRegistry` 를 사용하여 JavaScript 함수 또는 `invoke(eventData)` 또는 `trigger(eventData)` 를 노출하는 객체를 받습니다. `eventData.source` 는 클릭된 버튼이고, `eventData.trigger` 는 `"clicked"` 입니다. 활성화 상태 필드와 톤 필드는 [AbstractButton](../control/AbstractButton.md)에 따릅니다. 메서드는 인수를 생략할 수 있습니다. 자신의 리시버가 필요한 애플리케이션 메서드를 감싸세요. 예를 들어 `function() { documentController.save() }` 입니다. 생성 후 `null` 로 메서드를 대체하거나 지울 수 있습니다. 생략된 메서드는 신호 전용 API 를 사용할 수 있게 합니다. 동일한 애플리케이션 작업을 두 번 실행하지 않기 위해 각 작업을 메서드 또는 신호 처리기 중 하나에 유지하세요.
 
-## Figma layout and typography
+<a id="figma-layout-and-typography"></a>
 
-With the reference one-line title and two-line description, the two/three-action
-dialogs are 500 × 379 / 500 × 479 logical pixels on desktop and mobile.
-The card shrinks to the available host width, including hosts narrower than
-`minWidth`. It defaults to a 36px rounded rectangle. The existing opt-in
-`shapeCylinder` remains available for compatibility; it is not used by default.
+## Figma 레이아웃 및 타이포그래피
 
-These are logical pixels. A Retina window with device pixel ratio 2 captures
-the 500px card as 1000 physical pixels and the 56px button as 112 physical
-pixels; no additional UI scale should be applied. A 390px host produces a
-342px card, retaining 24px margins on each side. The Society notice without an
-icon, with one action and one line each of title/message, is 500 × 252 logical
-pixels. Its existing geometry was verified against the design on 2026-09-18.
+참고 단일 줄 제목과 2-줄 설명을 사용하면, 2/3-액션 대화상자는 데스크톱과 모바일에서 500 × 379 / 500 × 479 로직 픽셀입니다. 카드가 호스트의 사용 가능한 너비로 축소되며, `minWidth` 보다 좁은 호스트도 포함됩니다. 기본값은 36px 둥근 사각형입니다. 호환성을 위한 기존 옵트인 `shapeCylinder` 는 여전히 사용 가능하지만 기본값으로 사용되지 않습니다.
 
-The content has 46px top and 36px bottom padding. An 86px icon frame with a 28px
-corner radius precedes the copy by 28px. The exact Figma SVG exports are bundled:
-64px adjustments for two actions, 56px file-text for three. `showIcon: false`
-removes the frame and its 28px gap. An explicit custom icon URL still works;
-an empty URL retains the configurable fallback.
+이것들은 로직 픽셀입니다. 디바이스 픽셀 비율 2 를 가진 레티나 창은 500px 카드를 1000 물리 픽셀로, 56px 버튼을 112 물리 픽셀로 포착하며, 추가 UI 스케일을 적용해서는 안 됩니다. 390px 호스트는 342px 카드를 생성하며, 각 측면에 24px 마진을 유지합니다. 아이콘이 없는 Society 공지사항은 제목/메시지 각각 한 줄씩, 하나의 액션을 포함하여 500 × 252 로직 픽셀입니다. 기하학적 구조는 2026-09-18의 디자인과 대조하여 검증되었습니다.
 
-Typography uses the existing `Label.title` (26px Bold) and `Label.body`
-(13px Medium) tokens and the framework's bundled Pretendard fonts. No new text
-style is introduced. Title and message height follow their rendered line count
-at 26px and 13px per line, with a 14px gap and centered text. Both text nodes
-in Figma use auto height. Empty text releases its line box and adjacent gap;
-when both strings are empty, the whole copy section and icon-to-copy gap collapse.
-Wrapping or adding explicit newlines grows the dialog, and shortening text
-shrinks it again.
+콘텐츠는 46px 상단과 36px 하단 패딩을 가집니다. 86px 아이콘 프레임이 28px만큼 복사 앞에 위치하며 28px 모서리 반경을 가집니다. 정확한 Figma SVG 내보내기들은 번들로 제공되며: 64px 조정 2 액션, 56px 파일 텍스트 3입니다. `showIcon: false` 는 프레임과 28px 간격을 제거합니다. 명시적 커스텀 아이콘 URL 는 여전히 작동하며, 빈 URL 는 구성 가능한 대체 경로 를 유지합니다.
 
-The Figma snapshot retrieved on 2026-09-11 reports 34px/56px text bounds and
-417px/517px card bounds despite the current 26px/13px line-height styles.
-The implementation follows those styles and auto-height behavior instead of
-preserving snapshot bounds as minimum heights. This removes 38px of unused
-height for the reference copy; a one-line title and one-line description use
-366px/466px. The width, icon frame, section padding, action geometry, and material
-remain the values specified by the design.
+타이포그래피는 기존 `Label.title` ( 26px 굵은) 와 `Label.body` ( 13px 중간) 토큰 및 프레임워크의 내장 Pretendard 글꼴을 사용합니다. 새로운 텍스트 스타일이 도입되지 않습니다. 제목과 메시지 높이는 26px 와 13px 줄당 렌더링된 줄 수에 따르며, 14px 간격과 중앙 정렬된 텍스트를 사용합니다. Figma 의 두 텍스트 노드는 자동 높이를 사용합니다. 빈 텍스트는 라인 박스와 인접 간격을 해제하며, 두 문자열이 모두 빈 경우 전체 복사 섹션과 아이콘-복사 간격이 축소됩니다. 줄 바꿈 또는 명시적인 줄 바꿈을 추가하면 대화 상자가 커지고, 텍스트를 줄이면 다시 축소됩니다.
 
-- Two actions: secondary/cancel on the left, primary on the right; 14px gap,
-  24px sides, 28px above and 32px below the buttons.
-- Three actions: primary, secondary/discard, cancel; 12px gaps, 24px sides,
-  18px above and below.
-- Main buttons: 56px height and 16px radius. Final cancel: 44px, transparent,
-  without an outline. Secondary buttons are transparent with a 1px outline.
-- `secondaryDestructive` defaults to true for three actions, applying the
-  existing `Theme.danger` red to Discard/No text. Override it for a neutral
-  secondary action; two-action Cancel remains neutral by default.
-- Alert-specific presentation is enabled through `AlertButton.dialogStyle`.
-  Standalone `AlertButton` and `Modal` retain their compact baseline.
+Figma 스냅샷은 2026-09-11 에서 검색되어 34px/56px 텍스트 경계와 417px/517px 카드 경계를 보고하며, 현재 26px/13px 줄 높이 스타일에 불구하고 있습니다. 구현은 스냅샷 경계를 최소 높이로 보존하는 대신 해당 스타일과 자동 높이 동작을 따릅니다. 이 작업은 참조 복사에 대한 38px 의 사용하지 않는 높이를 제거하며, 한 줄 제목과 한 줄 설명은 366px/466px를 사용합니다. 폭, 아이콘 프레임, 섹션 패딩, 작업 기하학, 그리고 재료는 디자인에 지정된 값으로 유지됩니다.
 
-## Glass material and rendering
+- 2 동작: 왼쪽에 보조/취소, 오른쪽에 기본; 14px 간격, 24px 측면, 28px 위 버튼 및 아래에 32px.
+- 3 동작: 기본, 보조/삭제, 취소; 12px 간격, 24px 측면, 18px 위 및 아래.
+- 주요 버튼: 56px 높이 및 16px 반경. 최종 취소: 44px, 투명, 윤곽선 없음. 보조 버튼은 1px 윤곽이 있는 투명합니다.
+- `secondaryDestructive` 는 3 동작에 대해 기본값으로 true 로 설정되어 기존 `Theme.danger` 빨간색을 Discard/No 텍스트에 적용합니다. 중립적인 보조 동작으로 오버라이드하거나, 2-액션 Cancel 은 기본적으로 중립적으로 유지됩니다.
+- 경보별 표시가 `AlertButton.dialogStyle`를 통해 활성화됩니다. 독립형 `AlertButton` 및 `Modal`는 컴팩트한 기본을 유지합니다.
 
-Alert uses the Figma color tokens under `Theme.alert*`: #1D1F21 at 72% opacity,
-a 20% white edge, #F4F5F7 titles/actions, #D6D9DF descriptions, #027DFF primary
-buttons, #596168 outlines, #363B3F dividers, and the blue icon frame in the
-default theme. A custom `ApplicationWindow.primaryColor` overrides the action
-color and tints the icon frame. Society intentionally uses its green `#57965C`
-primary; matching the Figma layout does not replace that application color.
+<a id="glass-material-and-rendering"></a>
 
-The source window is captured with Qt's
-[ShaderEffectSource](https://doc.qt.io/qt-6/qml-qtquick-shadereffectsource.html)
-and blurred through
-[MultiEffect](https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html).
-The rounded mask, 28px frost, translucent tint, and 32px soft shadow are separate
-from the sharp content. These are existing Qt Quick effects already used by
-LVRS, so no additional package dependency is introduced.
+## 유리 소재 및 렌더링
 
-The LVRS window's `materialBackdropSource` is discovered automatically when
-the Alert moves to `Controls.Overlay`. This uses the same content-only capture
-path as other LVRS materials. Plain Qt ApplicationWindows fall back to
-`ApplicationWindow.contentItem`. A custom/plain window can set `backdropSource`
-to a sibling background item. Ancestors containing the Alert are rejected to
-prevent recursive captures. When a safe source is unavailable, or glass is
-disabled, the translucent tint still renders. Closing disconnects the capture
-and stops its live updates.
+경고는 `Theme.alert*` 하위의 Figma 색상 토큰을 사용하며: 72% 불투명도의 #1D1F21 , 20% 흰색 테두리, #F4F5F7 제목/액션, #D6D9DF 설명, #027DFF 기본 버튼, #596168 윤곽선, #363B3F 구분선 및 기본 테마의 파란색 아이콘 프레임입니다. 사용자 지정 `ApplicationWindow.primaryColor` 는 작업 색상을 덮어쓰고 아이콘 프레임을 틴트합니다. Society 는 의도적으로 `#57965C` 기본 색상을 사용하며, Figma 레이아웃과 일치하는 것이 해당 애플리케이션 색상을 대체하지 않습니다.
 
-Qt's blur and edge treatment approximate the Figma material; Figma's proprietary
-refraction/light simulation is not reproduced. Shader effects require a Qt RHI
-graphics backend; software rendering retains the tint but cannot supply frost.
+소스 창은 Qt로 캡처됩니다.
+[ShaderEffectSource](https://doc.qt.io/qt-6/qml-qtquick-shadereffectsource.html) 및 흐려짐
+[MultiEffect](https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html). 둥근 마스크, 28px 프로스트, 반투명 틴트, 32px 소프트 섀도우는 샤프한 콘텐츠와 별개입니다. 이는 LVRS에서 이미 사용하고 있는 기존 Qt 빠른 효과이므로 추가 패키지 종속성이 도입되지 않습니다.
 
-## Interaction
+LVRS 창은 `materialBackdropSource` 가 `Controls.Overlay` 로 이동할 때 자동으로 발견됩니다. 이는 다른 LVRS 재료와 동일한 콘텐츠 전용 캡처 경로를 사용합니다. 일반 Qt ApplicationWindows 는 `ApplicationWindow.contentItem` 로 되돌아갑니다. 사용자 정의/일반 창은 `backdropSource` 를 자매 배경 항목으로 설정할 수 있습니다. Alert 를 포함하는 조상들은 재귀적 캡처를 방지하기 위해 거부됩니다. 안전한 소스가 사용 불가능하거나 글래스가 비활성화되면 반투명한 틴트가 여전히 렌더링됩니다. 닫는 것은 캡처를 연결 해제하고 라이브 업데이트를 중지합니다.
 
-Background input is consumed while open. A backdrop click dismisses only when
-`dismissOnBackground` is true; clicking blank card space never dismisses.
-Disabled actions do not invoke methods or emit click signals.
+Qt의 흐림 및 가장자리 처리는 Figma 소재와 유사합니다. Figma의 독점 굴절/광 시뮬레이션은 재현되지 않습니다. 셰이더 효과에는 Qt RHI 그래픽 백엔드가 필요합니다. 소프트웨어 렌더링은 색조를 유지하지만 성에를 제공할 수는 없습니다.
 
-## Usage
+<a id="interaction"></a>
+
+## 상호작용
+
+열려 있는 동안 백그라운드 입력이 사용됩니다. `dismissOnBackground`가 true인 경우에만 배경화면 클릭이 해제됩니다. 빈 카드 공간을 클릭해도 절대 닫히지 않습니다. 비활성화된 작업은 메서드를 호출하거나 클릭 신호를 내보내지 않습니다.
+
+<a id="usage"></a>
+
+## 사용법
 
 ```qml
 import LVRS 1.0 as LV
@@ -173,26 +108,15 @@ LV.Alert {
 }
 ```
 
-`documentController` is supplied by the application. The image URL can point to
-a Qt resource, a local file, or a remote image supported by Qt Quick `Image`.
+`documentController`는 애플리케이션에서 제공됩니다. URL 이미지는 Qt 리소스, 로컬 파일 또는 Qt Quick `Image`에서 지원하는 원격 이미지를 가리킬 수 있습니다.
 
-## Validation
+<a id="validation"></a>
 
-`LVRSTests_import_api` checks the Figma geometry, Title/Body tokens, action
-ordering, non-capsule corners, icon exports, width containment, icon visibility,
-copy-driven growth and shrinkage, empty-copy collapse, responsive wrapping,
-isolated button defaults, actual backdrop blur, red Discard
-pixels, click signals, modal input blocking, and capture lifecycle. It also
-checks content arguments and live aliases, image loading, all six rendered
-action positions across one/two/three-button layouts, function/command methods,
-method replacement, disabled actions, and compatibility with signal handlers.
-The material/input test runs against both Qt and LVRS ApplicationWindows.
-Native RHI checks sample `QQuickWindow::grabWindow()` so blur assertions cover
-the presented window, not just an intermediate item render.
-`LVRSTests_primary_color` verifies live app accent updates, including Society's
-green, across Alert actions/icon frames and ordinary controls.
+## 검증
 
-Run with a supported graphics backend:
+`LVRSTests_import_api` 는 Figma 기하학, 제목/본문 토큰, 작업 순서, 캡슐이 아닌 모서리, 아이콘 내보내기, 너비 포함, 아이콘 가시성, 복사 기반 성장 및 축소, 빈 복사 축소, 반응형 래핑, 격리된 버튼 기본값, 실제 배경 흐림, 빨간색 Discard 픽셀, 클릭 신호, 모달 입력 차단, 및 캡처 수명 주기를 확인합니다. 또한 콘텐츠 인자와 라이브 별칭, 이미지 로딩, 하나/2/3-버튼 레이아웃에 걸쳐 렌더링된 모든 6 작업 위치, 함수/명령 방법, 방법 대체, 비활성화된 작업, 및 신호 처리기와의 호환성을 확인합니다. 재료/입력 테스트는 Qt 와 LVRS ApplicationWindows 에 대해 실행됩니다. 네이티브 RHI 는 샘플 `QQuickWindow::grabWindow()` 를 확인하므로 흐림 주장은 제시된 창뿐만 아니라 중간 항목 렌더링만 포함하지 않습니다. `LVRSTests_primary_color` 는 Alert 작업/아이콘 프레임 및 일반 컨트롤을 포함한 Society 의 녹색을 포함한 라이브 앱 강조 업데이트를 확인합니다.
+
+지원되는 그래픽 백엔드로 실행:
 
 ```sh
 cmake -S . -B build -DLVRS_BUILD_TESTS=ON
@@ -200,9 +124,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-CTest uses the offscreen platform, which may choose software rendering. In that
-case the pixel test validates the translucent fallback. Run the focused tests on
-the native platform as well to verify actual GPU frost. For a macOS build tree:
+CTest는 소프트웨어 렌더링을 선택할 수 있는 오프스크린 플랫폼을 사용합니다. 이 경우 픽셀 테스트는 반투명 대체 경로를 검증합니다. 실제 GPU 서리를 확인하려면 네이티브 플랫폼에서도 집중 테스트를 실행하세요. macOS 빌드 트리의 경우:
 
 ```sh
 DYLD_LIBRARY_PATH="$PWD/build" QT_QPA_PLATFORM=cocoa QSG_RHI_BACKEND=metal \
@@ -212,13 +134,12 @@ DYLD_LIBRARY_PATH="$PWD/build" QT_QPA_PLATFORM=cocoa QSG_RHI_BACKEND=metal \
   alert_action_button_padding_scopes_to_alert alert_glass_overlay_and_input_contract
 ```
 
-The explicit library path prevents an older installed LVRS from shadowing the
-library being validated. Other platforms should use their native RHI backend.
+명시적인 라이브러리 경로는 이전에 설치된 LVRS가 검증 중인 라이브러리를 섀도잉하는 것을 방지합니다. 다른 플랫폼은 네이티브 RHI 백엔드를 사용해야 합니다.
 
-Set `LVRS_ALERT_CAPTURE_DIR` to a folder under `build/` when running
-`alert_glass_overlay_and_input_contract` to save rendered reference images.
-Icon notices are bundled in `resources/images/alert-icons-LICENSE.txt`.
+렌더링된 참조 이미지를 저장하려면 `alert_glass_overlay_and_input_contract`를 실행할 때 `LVRS_ALERT_CAPTURE_DIR`를 `build/` 아래의 폴더로 설정하세요. 아이콘 알림은 `resources/images/alert-icons-LICENSE.txt`에 번들로 제공됩니다.
 
-## Shared motion
+<a id="shared-motion"></a>
 
-The centered card grows from 92% with rebound while the backdrop fades. The exit remains visible until settled. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+## 공유 모션
+
+중앙에 위치한 카드는 배경이 희미해지는 동안 리바운드를 통해 92%에서 성장합니다. 출구는 정착될 때까지 계속 보입니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.

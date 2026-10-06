@@ -1,30 +1,36 @@
 # ViewStateTracker
 
-Location: `src/backend/navigation/viewstatetracker.h` / `src/backend/navigation/viewstatetracker.cpp`
+위치: `src/backend/navigation/viewstatetracker.h` / `src/backend/navigation/viewstatetracker.cpp`
 
-`ViewStateTracker` tracks route/view stack state and computes active/inactive/disabled partitions.
+`ViewStateTracker`는 경로/뷰 스택 상태를 추적하고 활성/비활성/비활성화 파티션을 계산합니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Represent current page stack as stateful records.
-- Compute one active top-most enabled view.
-- Apply explicit disable overrides independent of base route metadata.
+## 목적
 
-## States
+- 현재 페이지 스택을 상태 저장 레코드로 나타냅니다.
+- 활성화된 최상위 활성 뷰 하나를 계산합니다.
+- 기본 경로 메타데이터와 관계없이 명시적인 비활성화 재정의를 적용합니다.
 
-Enum `ViewState`:
+<a id="states"></a>
+
+## 상태
+
+열거형 `ViewState`:
 
 - `Active`
 - `Inactive`
 - `Disabled`
 
-String representation from API:
+API의 문자열 표현:
 
 - `"Active"`
 - `"Inactive"`
 - `"Disabled"`
 
-## Properties
+<a id="properties"></a>
+
+## 속성
 
 - `stack: list`
 - `loadedViews: stringList`
@@ -34,15 +40,17 @@ String representation from API:
 - `currentActiveView: string`
 - `loadedCount: int`
 
-## Methods
+<a id="methods"></a>
 
-Stack sync and overrides:
+## 방법
+
+스택 동기화 및 재정의:
 
 - `syncStack(entries)`
 - `setViewDisabled(viewId, disabled)`
 - `setViewEnabled(viewId, enabled)`
 
-Lookup/snapshot:
+조회/스냅샷:
 
 - `isLoaded(viewId)`
 - `stateOf(viewId)`
@@ -50,26 +58,32 @@ Lookup/snapshot:
 - `snapshot()`
 - `clear()`
 
-## Entry Parsing Rules
+<a id="entry-parsing-rules"></a>
 
-`syncStack(entries)` accepts entry maps with optional fields:
+## 항목 구문 분석 규칙
+
+`syncStack(entries)`는 선택적 필드가 있는 항목 맵을 허용합니다.
 
 - `viewId`
 - `path`
 - `enabled` / `disabled`
 
-If `viewId` is missing:
+`viewId`가 누락된 경우:
 
-- use `path` when available,
-- otherwise generate `_component_<index>`.
+- 가능한 경우 `path`를 사용하세요.
+- 그렇지 않으면 `_component_<index>`를 생성합니다.
 
-## State Resolution Rule
+<a id="state-resolution-rule"></a>
 
-- Starting from stack tail, first effectively enabled entry becomes `Active`.
-- Other effectively enabled entries become `Inactive`.
-- Disabled entries become `Disabled`.
+## 상태 해결 규칙
 
-## Usage Example
+- 스택 테일에서 시작하여 처음으로 효과적으로 활성화된 항목은 `Active`가 됩니다.
+- 효과적으로 활성화된 다른 항목은 `Inactive`가 됩니다.
+- 비활성화된 항목은 `Disabled`가 됩니다.
+
+<a id="usage-example"></a>
+
+## 사용예
 
 ```qml
 import LVRS 1.0 as LV
@@ -82,7 +96,9 @@ Component.onCompleted: {
 }
 ```
 
-## Extended Example: Temporary Disable Override
+<a id="extended-example-temporary-disable-override"></a>
+
+## 확장된 예: 임시 비활성화 재정의
 
 ```qml
 import LVRS 1.0 as LV
@@ -96,13 +112,14 @@ function resumeView(viewId) {
 }
 ```
 
-## Operational Notes
+<a id="operational-notes"></a>
 
-- Disable overrides are independent from route-provided `enabled` flags.
-- `currentActiveView` always resolves to the top-most effectively enabled entry.
-- `clear()` resets both stack records and disable overrides.
+## 운영 참고 사항
+
+- 비활성화 재정의는 경로 제공 `enabled` 플래그와 별개입니다.
+- `currentActiveView`는 항상 가장 효과적으로 활성화된 항목을 확인합니다.
+- `clear()`는 스택 레코드를 모두 재설정하고 재정의를 비활성화합니다.
 
 ## FAQ
 
-Q. Why is only one view marked Active?  
-A. Tracker defines active state as top-most effectively enabled view in current stack.
+Q. 하나의 보기에만 활성으로 표시된 이유는 무엇입니까?   A. 추적기는 활성 상태를 현재 스택에서 가장 효과적으로 활성화된 보기로 정의합니다.

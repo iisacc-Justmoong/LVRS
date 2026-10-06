@@ -17,6 +17,8 @@ private slots:
     void owned_input_lifecycle();
     void cancellation_and_motion_preferences();
     void model_states_remain_independent();
+    void menu_selected_uses_press_fill_data();
+    void menu_selected_uses_press_fill();
     void mobile_hierarchy_input();
     void native_focus_capture();
     void recorded_figma_contract();
@@ -210,6 +212,88 @@ void InstanceStateTests::model_states_remain_independent()
         QCOMPARE(phase(control), QStringLiteral("disabled"));
         QVERIFY(!control->property("interaction").value<QObject *>()->property("focusVisible").toBool());
     }
+}
+
+void InstanceStateTests::menu_selected_uses_press_fill_data()
+{
+    QTest::addColumn<bool>("expanded");
+    QTest::addColumn<QString>("primary");
+    for (bool expanded : {false, true}) {
+        for (const QString &primary : {QStringLiteral("#0A84FF"), QStringLiteral("#A571E6")}) {
+            const QByteArray name = (expanded ? "expanded-" : "collapsed-") + primary.toUtf8();
+            QTest::newRow(name.constData()) << expanded << primary;
+        }
+    }
+}
+
+void InstanceStateTests::menu_selected_uses_press_fill()
+{
+    QFETCH(bool, expanded);
+    QFETCH(QString, primary);
+    QQmlEngine engine;
+    QScopedPointer<QObject> root(fixture(engine, "MenuItem",
+        QStringLiteral("expanded: %1; motionEnabled: false").arg(expanded ? "true" : "false")));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    auto *control = root->findChild<QQuickItem *>("control");
+    auto *other = root->findChild<QQuickItem *>("other");
+    auto *next = root->findChild<QQuickItem *>("next");
+    QVERIFY(control && other && next);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    QScopedPointer<QObject> tokens(TestUtils::createFromQml(engine,
+        "import QtQuick; import LVRS as LV; QtObject { property var theme: LV.Theme }"));
+    QVERIFY(tokens);
+    auto *theme = tokens->property("theme").value<QObject *>();
+    QVERIFY(theme);
+    QVERIFY(theme->setProperty("primaryColor", QColor(primary)));
+    const QColor expected = other->property("backgroundColorPressed").value<QColor>();
+    if (primary == "#0A84FF")
+        QCOMPARE(expected, QColor("#25324D"));
+    auto *background = control->property("background").value<QQuickItem *>();
+    QVERIFY(background);
+    QVERIFY(control->setProperty("state", control->property("selectedState")));
+    const auto verifyFill = [&] {
+        QCOMPARE(background->property("color").value<QColor>(), expected);
+        const QImage frame = window->grabWindow();
+        QVERIFY(!frame.isNull());
+        const QPointF center = control->mapToScene(control->boundingRect().center()) * frame.devicePixelRatio();
+        const QColor pixel = frame.pixelColor(qRound(center.x()), qRound(center.y()));
+        QVERIFY2(qAbs(pixel.red() - expected.red()) <= 2
+                 && qAbs(pixel.green() - expected.green()) <= 2
+                 && qAbs(pixel.blue() - expected.blue()) <= 2,
+                 qPrintable(QString("Selected rendered %1; press uses %2").arg(pixel.name(), expected.name())));
+    };
+    next->forceActiveFocus(Qt::MouseFocusReason);
+    QTest::mouseMove(window, QPoint(650, 350));
+    QTRY_COMPARE(phase(control), QStringLiteral("default"));
+    verifyFill();
+    const QPoint point = control->mapToScene(QPointF(2, control->height() / 2)).toPoint();
+    QTest::mouseMove(window, point);
+    QTRY_COMPARE(phase(control), QStringLiteral("hover"));
+    verifyFill();
+    control->setProperty("motionEnabled", true);
+    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
+    QCOMPARE(phase(control), QStringLiteral("press"));
+    verifyFill();
+    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
+    QCOMPARE(phase(control), QStringLiteral("release"));
+    verifyFill();
+    QTest::mouseMove(window, QPoint(650, 350));
+    next->forceActiveFocus(Qt::TabFocusReason);
+    control->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+    verifyFill();
+    QTest::keyPress(window, Qt::Key_Return);
+    QCOMPARE(phase(control), QStringLiteral("press"));
+    verifyFill();
+    QTest::keyRelease(window, Qt::Key_Return);
+    QCOMPARE(phase(control), QStringLiteral("release"));
+    verifyFill();
+    QCOMPARE(control->property("state").toInt(), control->property("selectedState").toInt());
+    QScopedPointer<QObject> compact(TestUtils::createFromQml(engine,
+        "import LVRS as LV; LV.ContextMenuItem { state: selectedState }"));
+    QVERIFY(compact);
+    QCOMPARE(compact->property("resolvedBackgroundColor").value<QColor>(), QColor(primary));
 }
 
 void InstanceStateTests::recorded_figma_contract()

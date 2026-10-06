@@ -1,23 +1,27 @@
-# Hierarchy
+<a id="hierarchy"></a>
 
-Location: `src/qml/components/navigation/Hierarchy.qml`
+# 계층 구조
 
-`Hierarchy` is a hierarchy-panel surface composed of toolbar + scrollable depth-aware hierarchy list.
+위치: `src/qml/components/navigation/Hierarchy.qml`
 
-## Purpose
+`Hierarchy`는 도구 모음 + 스크롤 가능한 깊이 인식 계층 목록으로 구성된 계층 패널 표면입니다.
 
-- Render depth-array/list/model hierarchy data with explicit expand/collapse controls.
-- Provide activation and expansion callbacks for host features.
-- Keep tree navigation usable inside nested scroll containers.
+<a id="purpose"></a>
+
+## 목적
+
+- 명시적인 확장/축소 컨트롤을 사용하여 깊이 배열/목록/모델 계층 구조 데이터를 렌더링합니다.
+- 호스트 기능에 대한 활성화 및 확장 콜백을 제공합니다.
+- 중첩된 스크롤 컨테이너 내에서 트리 탐색을 사용할 수 있도록 유지합니다.
 
 ## API
 
-Required inputs:
+필수 입력:
 
-- Toolbar declaration: `toolbarItems` (array model) or `toolbarButtons` (manual `ToolbarButton` children)
-- List model binding: `model` / `treeModel`
+- 도구 모음 선언: `toolbarItems`(배열 모델) 또는 `toolbarButtons`(수동 `ToolbarButton` 하위)
+- 목록 모델 바인딩: `model` / `treeModel`
 
-Model and selection aliases:
+모델 및 선택 별칭:
 
 - `model` / `treeModel`
 - `modelColumn`
@@ -25,7 +29,7 @@ Model and selection aliases:
 - `activeListItemId`
 - `activeListItemKey`
 
-Model role aliases:
+모델 역할 별칭:
 
 - `itemIdRole`
 - `itemKeyRole`
@@ -42,7 +46,7 @@ Model role aliases:
 - `draggableRole`
 - `showChevronRole`
 
-Toolbar aliases:
+도구 모음 별칭:
 
 - `toolbarButtons`
 - `toolbarItems`
@@ -50,14 +54,14 @@ Toolbar aliases:
 - `activeToolbarButtonId`
 - `activeToolbarIndex`
 
-Behavior aliases:
+동작 별칭:
 
 - `keyboardListNavigationEnabled`
 - `editable`
-- list scroll physics: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`
-- readonly list viewport policy: `listBoundsBehavior`, `listBoundsMovement`
+- 목록 스크롤 물리학: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`
+- 읽기 전용 목록 뷰포트 정책: `listBoundsBehavior`, `listBoundsMovement`
 
-Optional footer:
+선택적 바닥글:
 
 - `footerVisible`
 - `footerInteractive`
@@ -65,7 +69,7 @@ Optional footer:
 - `footerButton2`
 - `footerButton3`
 
-Methods:
+방법:
 
 - `expandAll()`
 - `collapseAll(keepRootExpanded)`
@@ -73,7 +77,7 @@ Methods:
 - `activateListItemByKey(itemKey)`
 - `triggerFooterButton(index)`
 
-Signals:
+신호:
 
 - `toolbarActivated(button, buttonId, index)`
 - `toolbarButtonTriggered(button, buttonId, index, item)`
@@ -83,7 +87,9 @@ Signals:
 - `listItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)`
 - `footerButtonTriggered(index, config)`
 
-## Usage
+<a id="usage"></a>
+
+## 사용법
 
 ```qml
 import LVRS 1.0 as LV
@@ -117,22 +123,26 @@ LV.Hierarchy {
 }
 ```
 
-## How It Works
+<a id="how-it-works"></a>
 
-- The Figma panel (`180:1012`) is `200x530` on desktop and mobile, using `Theme.panelBackground05`.
-- Its toolbar occupies the top `26px` (`52px` mobile). The list starts immediately below it and the sixteen-row reference content occupies `320px` (`640px` mobile), leaving the remaining panel height available to the scroll viewport.
-- Toolbar and list communicate through explicit signals and forwarded aliases.
-- `model`, `modelColumn`, and role aliases forward directly to the internal `HierarchyList`, so arrays, QML `ListModel`, and C++ `QAbstractItemModel` sources can be injected at the panel level.
-- `ensureListItemVisible` adjusts flickable viewport when list requests visibility.
-- `WheelScrollGuard` is installed to prevent nested scroll bleed.
-- Optional `ListFooter` is anchored bottom-left; when visible, list viewport ends at footer top.
-- `editable` enables item-owned drag/drop on generated `HierarchyItem` rows; the underlying model must expose mutable object rows with depth state, either as an object array, QML `ListModel`/list-like model, or C++ `QAbstractItemModel` with writable depth roles and row moving.
-- In mobile-target runs, editable row drag requires a `1000ms` long press before `HierarchyItem` enters drag/drop mode, which preserves touch scrolling priority inside the panel `Flickable`.
-- In mobile-target runs, row activation also commits on release/click instead of press, so a vertical drag can still be claimed by the list scroll path before the active row changes.
-- Mobile-target list scrolling now enables overshoot + rebound (`DragAndOvershootBounds`/`FollowBoundsBehavior`) and tuned flick momentum (`listFlickDeceleration`, `listMaximumFlickVelocity`) for iOS-like inertial feel at edges.
-- `listItemActivated` mirrors deliberate repeat activation gestures on the already-active row, so panel hosts can treat a second tap/click as an action trigger without changing selection.
+## 동작 원리
 
-## Advanced Usage: Programmatic Activation
+- Figma 패널(`180:1012`)은 `Theme.panelBackground05`를 사용하여 데스크톱 및 모바일에서 `200x530`입니다.
+- 해당 도구 모음은 상단 `26px`(`52px` 모바일)을 차지합니다. 목록은 바로 아래에서 시작하고 16개 행 참조 콘텐츠가 `320px`(`640px` 모바일)를 차지하므로 나머지 패널 높이를 스크롤 뷰포트에 사용할 수 있습니다.
+- 도구 모음과 목록은 명시적인 신호와 전달된 별칭을 통해 통신합니다.
+- `model`, `modelColumn` 및 역할 별칭은 내부 `HierarchyList`로 직접 전달되므로 어레이, QML `ListModel` 및 C++ `QAbstractItemModel` 소스를 패널 수준에서 삽입할 수 있습니다.
+- `ensureListItemVisible`는 목록이 가시성을 요청할 때 깜박일 수 있는 뷰포트를 조정합니다.
+- 중첩된 스크롤 블리드를 방지하기 위해 `WheelScrollGuard`가 설치되었습니다.
+- 옵션 `ListFooter`는 왼쪽 하단에 고정되어 있습니다. 표시되면 목록 뷰포트가 바닥글 상단에서 끝납니다.
+- `editable`는 생성된 `HierarchyItem` 행에서 항목 소유 드래그/드롭을 활성화합니다. 기본 모델은 객체 배열, QML `ListModel`/목록 유사 모델 또는 쓰기 가능한 깊이 역할 및 행 이동이 있는 C++ `QAbstractItemModel` 등 깊이 상태가 있는 변경 가능한 객체 행을 노출해야 합니다.
+- 모바일 대상 실행에서 편집 가능한 행 드래그에는 `HierarchyItem`가 드래그/드롭 모드로 들어가기 전에 `1000ms`를 길게 눌러야 하며, 이는 패널 `Flickable` 내에서 터치 스크롤 우선 순위를 유지합니다.
+- 모바일 대상 실행에서 행 활성화는 누르는 대신 놓기/클릭할 때도 커밋되므로 활성 행이 변경되기 전에 목록 스크롤 경로에 의해 수직 드래그가 계속 요구될 수 있습니다.
+- 이제 모바일 대상 목록 스크롤을 사용하면 가장자리에서 iOS와 유사한 관성 느낌을 위해 오버슈트 + 리바운드(`DragAndOvershootBounds`/`FollowBoundsBehavior`) 및 조정된 플릭 모멘텀(`listFlickDeceleration`, `listMaximumFlickVelocity`)이 가능합니다.
+- `listItemActivated`는 이미 활성화된 행에서 의도적인 반복 활성화 제스처를 미러링하므로 패널 호스트는 선택 항목을 변경하지 않고도 두 번째 탭/클릭을 작업 트리거로 처리할 수 있습니다.
+
+<a id="advanced-usage-programmatic-activation"></a>
+
+## 고급 사용법: 프로그래밍 방식 활성화
 
 ```qml
 import LVRS 1.0 as LV
@@ -146,16 +156,21 @@ function focusNodeByKey(key) {
 }
 ```
 
-## Operational Notes
+<a id="operational-notes"></a>
 
-- Keep item ids/keys stable for reliable programmatic activation.
-- Combine `expandAll()` with `activate*()` in onboarding flows to reveal deep nodes deterministically.
+## 운영 참고 사항
 
-## Failure Pattern
+- 안정적인 프로그래밍 방식 활성화를 위해 항목 ID/키를 안정적으로 유지하세요.
+- 온보딩 흐름에서 `expandAll()`와 `activate*()`를 결합하여 결정론적으로 딥 노드를 표시합니다.
 
-Using non-unique keys for sibling nodes breaks programmatic activation and expansion tracking.
-Assign stable unique identifiers for each logical node.
+<a id="failure-pattern"></a>
 
-## Shared motion
+## 실패 패턴
 
-Rows rebound, disclosure arrows rotate, and overscrolled content returns with shared timing. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+형제 노드에 고유하지 않은 키를 사용하면 프로그래밍 방식 활성화 및 확장 추적이 중단됩니다. 각 논리 노드에 안정적인 고유 식별자를 할당합니다.
+
+<a id="shared-motion"></a>
+
+## 공유 모션
+
+행이 리바운드되고, 공개 화살표가 회전하고, 오버스크롤된 콘텐츠가 공유된 타이밍으로 반환됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.

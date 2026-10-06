@@ -1,17 +1,17 @@
 # QmlTypeRegistrar
 
-Location: `src/backend/runtime/qmltyperegistrar.h` / `src/backend/runtime/qmltyperegistrar.cpp`
+위치: `src/backend/runtime/qmltyperegistrar.h` / `src/backend/runtime/qmltyperegistrar.cpp`
 
-`QmlTypeRegistrar` registers app-owned QML types from a declared C++ manifest.
-It is intended for downstream apps that have long repeated blocks of `qmlRegisterType(...)`,
-`qmlRegisterUncreatableType(...)`, or custom singleton registration calls.
+`QmlTypeRegistrar`는 선언된 C++ 매니페스트에서 앱 소유 QML 유형을 등록합니다. 이는 `qmlRegisterType(...)`, `qmlRegisterUncreatableType(...)` 또는 사용자 정의 싱글턴 등록 호출이 오랫동안 반복되는 하위 소비 측 앱을 위한 것입니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Keep type registration order explicit.
-- Aggregate registration diagnostics in one report.
-- Make repeated app bootstrap code smaller.
-- Keep app domain types in the app; LVRS only owns the registration harness.
+## 목적
+
+- 유형 등록 순서를 명시적으로 유지하세요.
+- 하나의 보고서에 등록 진단을 집계합니다.
+- 반복되는 앱 부트스트랩 코드를 더 작게 만듭니다.
+- 앱에서 앱 도메인 유형을 유지합니다. LVRS는 등록 하네스만 소유합니다.
 
 ## API
 
@@ -20,25 +20,28 @@ It is intended for downstream apps that have long repeated blocks of `qmlRegiste
 - `lvrs::qmlCustomTypeRegistration(uri, major, minor, qmlName, kind, callback, diagnosticName?, required?)`
 - `lvrs::registerQmlTypes(manifest) -> QmlTypeRegistrationReport`
 
-Core structs:
+핵심 구조체:
 
 - `QmlTypeRegistration`
 - `QmlTypeRegistrationResult`
 - `QmlTypeRegistrationReport`
 
-## Registration Kinds
+<a id="registration-kinds"></a>
 
-- `Creatable`: wraps `qmlRegisterType<T>()`.
-- `Uncreatable`: wraps `qmlRegisterUncreatableType<T>()`.
-- `Singleton`: reserved diagnostic kind for app-provided singleton callbacks.
-- `Custom`: app-provided callback.
+## 등록 종류
 
-Use `qmlCustomTypeRegistration()` for registrations that need app-specific construction,
-for example `qmlRegisterSingletonType(...)`, singleton instance registration, or platform-gated types.
+- `Creatable`: `qmlRegisterType<T>()`를 래핑합니다.
+- `Uncreatable`: `qmlRegisterUncreatableType<T>()`를 래핑합니다.
+- `Singleton`: 앱에서 제공하는 싱글턴 콜백을 위해 예약된 진단 종류입니다.
+- `Custom`: 앱 제공 콜백.
 
-## Result
+앱별 구성이 필요한 등록(예: `qmlRegisterSingletonType(...)`, 싱글턴 인스턴스 등록 또는 플랫폼 기반 유형)에는 `qmlCustomTypeRegistration()`를 사용하세요.
 
-`QmlTypeRegistrationReport` contains:
+<a id="result"></a>
+
+## 결과
+
+`QmlTypeRegistrationReport`에는 다음이 포함됩니다.
 
 - `ok`
 - `results`
@@ -46,7 +49,7 @@ for example `qmlRegisterSingletonType(...)`, singleton instance registration, or
 - `errorMessage()`
 - `diagnostics()`
 
-Each result includes:
+각 결과에는 다음이 포함됩니다.
 
 - `uri`
 - `majorVersion`
@@ -60,10 +63,11 @@ Each result includes:
 - `skipped`
 - `error`
 
-Required failures set `report.ok=false`. Optional failures are marked as `skipped=true` and do not fail the report.
-Duplicate `(uri, version, qmlName)` entries are diagnosed before the second callback is invoked.
+필수 오류는 `report.ok=false`를 설정합니다. 선택적 실패는 `skipped=true`로 표시되며 보고서에 실패하지 않습니다. 두 번째 콜백이 호출되기 전에 중복된 `(uri, version, qmlName)` 항목이 진단됩니다.
 
-## Usage
+<a id="usage"></a>
+
+## 사용법
 
 ```cpp
 const QList<lvrs::QmlTypeRegistration> manifest = {
@@ -88,7 +92,7 @@ if (!report.ok)
     qWarning().noquote() << report.errorMessage();
 ```
 
-Custom singleton example:
+사용자 정의 싱글턴 예:
 
 ```cpp
 auto singletonRegistration = lvrs::qmlCustomTypeRegistration(
@@ -110,18 +114,20 @@ auto singletonRegistration = lvrs::qmlCustomTypeRegistration(
     QStringLiteral("WorkspaceServices"));
 ```
 
-## Responsibility Boundary
+<a id="responsibility-boundary"></a>
 
-LVRS owns:
+## 책임 경계
 
-- manifest validation,
-- duplicate detection,
-- registration callback execution,
-- diagnostics and error aggregation.
+LVRS 소유:
 
-The app owns:
+- 매니페스트 검증,
+- 중복 감지,
+- 등록 콜백 실행,
+- 진단 및 오류 집계.
 
-- type classes,
-- module URI and version policy,
-- singleton construction semantics,
-- platform/domain gating.
+앱이 소유하는 것:
+
+- 유형 수업,
+- 모듈 URI 및 버전 정책,
+- 싱글턴 구성 의미론,
+- 플랫폼/도메인 게이팅.

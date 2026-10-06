@@ -1,44 +1,50 @@
 # ModelUndoStack
 
-Location: `src/backend/model/modelundostack.h`, `src/backend/model/modelundostack.cpp`
+위치: `src/backend/model/modelundostack.h`, `src/backend/model/modelundostack.cpp`
 
-`ModelUndoStack` is a bounded C++ snapshot stack for model mutations.
+`ModelUndoStack`는 모델 돌연변이를 위한 한계가 설정된 C++ 스냅샷 스택입니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Keep undo/redo history outside QML view code.
-- Store model snapshots before destructive or typed edits.
-- Provide a reusable stack for model controllers that restore their own snapshots.
+## 목적
+
+- QML 보기 코드 외부에서 실행 취소/다시 실행 기록을 유지합니다.
+- 파괴적이거나 입력된 편집 전에 모델 스냅샷을 저장합니다.
+- 자체 스냅샷을 복원하는 모델 컨트롤러에 재사용 가능한 스택을 제공합니다.
 
 ## API
 
-Properties:
+속성:
 
 - `limit`
-- `undoDepth` (readonly)
-- `redoDepth` (readonly)
-- `canUndo` (readonly)
-- `canRedo` (readonly)
+- `undoDepth`(읽기 전용)
+- `redoDepth`(읽기 전용)
+- `canUndo`(읽기 전용)
+- `canRedo`(읽기 전용)
 
-Methods:
+방법:
 
 - `pushSnapshot(snapshot)`
 - `takeUndoSnapshot(currentSnapshot)`
 - `takeRedoSnapshot(currentSnapshot)`
 - `clear()`
 
-Signals:
+신호:
 
 - `limitChanged()`
 - `stackChanged()`
 
-## Behavior Contract
+<a id="behavior-contract"></a>
 
-- `pushSnapshot(...)` appends an undo snapshot and clears redo history.
-- `takeUndoSnapshot(current)` returns the previous snapshot and pushes `current` onto redo.
-- `takeRedoSnapshot(current)` returns the redo snapshot and pushes `current` onto undo.
-- `limit` is clamped to at least `1`; older snapshots are trimmed when the limit is exceeded.
+## 행동 계약
 
-## Consumers
+- `pushSnapshot(...)`는 실행 취소 스냅샷을 추가하고 다시 실행 기록을 지웁니다.
+- `takeUndoSnapshot(current)`는 이전 스냅샷을 반환하고 `current`를 다시 실행하도록 푸시합니다.
+- `takeRedoSnapshot(current)`는 다시 실행 스냅샷을 반환하고 `current`를 실행 취소로 푸시합니다.
+- `limit`는 최소 `1`에 고정됩니다. 한도를 초과하면 이전 스냅샷이 잘립니다.
 
-`TableModel` uses `ModelUndoStack` internally for cell edits, merge/split, row/column structure edits, and row/column resize edits. `Table.qml` exposes the resulting `undo()`, `redo()`, `canUndo`, and `canRedo` API.
+<a id="consumers"></a>
+
+## 소비자
+
+`TableModel`는 셀 편집, 병합/분할, 행/열 구조 편집 및 행/열 크기 조정 편집을 위해 내부적으로 `ModelUndoStack`를 사용합니다. `Table.qml`는 결과 `undo()`, `redo()`, `canUndo` 및 `canRedo` API를 노출합니다.

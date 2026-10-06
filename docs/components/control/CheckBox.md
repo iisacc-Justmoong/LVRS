@@ -1,30 +1,34 @@
 # CheckBox
 
-Location: `src/qml/components/control/check/CheckBox.qml`
+위치: `src/qml/components/control/check/CheckBox.qml`
 
-`CheckBox` is a custom-painted checkbox (`AbstractButton` based) with deterministic state visuals.
+`CheckBox`는 결정적 상태 시각적 기능을 갖춘 사용자 정의 페인트 확인란(`AbstractButton` 기반)입니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Keep checkbox visuals independent from platform style variance.
-- Expose explicit checked/unchecked + enabled/disabled palette and border policy.
+## 목적
 
-## Core API
+- 플랫폼 스타일 변화와 별개로 체크박스 시각적 요소를 유지하세요.
+- 명시적인 선택/선택 취소 + 활성화/비활성화 팔레트 및 테두리 정책을 노출합니다.
 
-State:
+<a id="core-api"></a>
 
-- `checked` (inherited)
-- `enabled` (inherited)
-- `text` (inherited)
+## 코어 API
 
-Shape and metrics:
+상태:
+
+- `checked`(상속됨)
+- `enabled`(상속됨)
+- `text`(상속됨)
+
+형태 및 지표:
 
 - `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)
-- `boxSize` (desktop `17 x 17`, mobile `34 x 34`)
-- `framePadding` (`0.5`) keeps the indicator inside an `18 x 18` interaction frame on desktop and mobile.
-- `boxRadius` (`3.5`), `checkMarkStrokeWidth`, and border widths retain the Figma 17px-frame ratios on desktop and mobile.
+- `boxSize`(데스크톱 `17 x 17`, 모바일 `34 x 34`)
+- `framePadding`(`0.5`)는 데스크톱 및 모바일의 `18 x 18` 상호 작용 프레임 내부에 표시기를 유지합니다.
+- `boxRadius`(`3.5`), `checkMarkStrokeWidth` 및 테두리 너비는 데스크톱 및 모바일에서 Figma 17px프레임 비율을 유지합니다.
 
-Palette and border:
+팔레트 및 테두리:
 
 - `checkedColor`, `uncheckedColor`
 - `disabledCheckedColor`, `disabledUncheckedColor`
@@ -34,7 +38,7 @@ Palette and border:
 - `useFigmaCheckedAssets`
 - `checkedAssetSourceEnabled`, `checkedAssetSourceDisabled`
 
-Resolved values:
+해결된 값:
 
 - `resolvedCheckedFillColor`, `resolvedUncheckedFillColor`
 - `resolvedCheckedAssetSource`, `usingFigmaCheckedAsset`
@@ -42,17 +46,21 @@ Resolved values:
 - `resolvedBoxBorderWidth`, `resolvedBoxBorderColor`
 - `showInnerShadow`
 
-## Behavior Contract
+<a id="behavior-contract"></a>
 
-- `checkable: true`, `tone: Borderless`, transparent background layers.
-- The Figma component set (`44:724`) contains four `57 x 18` desktop variants: checked/unchecked crossed with enabled/disabled.
-- The indicator begins at `(0.5, 0.5)`, the label begins at `(23.5, 2.5)`, and the indicator-to-label gap is `6px`. Body text remains fixed at `13px/13px` Medium.
-- Mobile uses the same `17 x 17` indicator, `0.5px` frame padding, `6px` gap, `3.5px` radius, and `57 x 18` labeled bounds as desktop.
-- Checked states use the exact exported Figma SVG assets by default: enabled is `#0A84FF` with an 80% white mark; disabled is `Theme.panelBackground12` with a 30% white mark and the exported inner-shadow treatment.
-- `useFigmaCheckedAssets` defaults to true for the original blue checked color and false for a custom `checkedColor`, including an app's custom `ApplicationWindow.primaryColor`. The drawn checkmark then exposes the configured fill instead of covering it with the stock blue image. Set it explicitly to true to opt into custom snapshot assets, or false for custom checkmark palette properties. `shapeCylinder` also selects the Canvas renderer automatically. Its supersampled backing store (`RenderQuality` + HiDPI) remains available and repaints on state/color/stroke changes and renderer switches.
-- `showInnerShadow` is disabled only when checked+enabled.
+## 행동 계약
 
-## Usage
+- `checkable: true`, `tone: Borderless`, 투명 배경 레이어.
+- Figma 구성 요소 세트(`44:724`)에는 4개의 `57 x 18` 데스크톱 변형이 포함되어 있습니다. 선택/선택 취소 및 활성화/비활성화 교차.
+- 표시기는 `(0.5, 0.5)`에서 시작하고, 레이블은 `(23.5, 2.5)`에서 시작하며, 표시기-레이블 간격은 `6px`입니다. 본문 텍스트는 `13px/13px` Medium에 고정되어 있습니다.
+- 모바일은 데스크탑과 동일한 `17 x 17` 표시기, `0.5px` 프레임 패딩, `6px` 간격, `3.5px` 반경 및 `57 x 18` 레이블 경계를 사용합니다.
+- 선택된 상태는 기본적으로 내보낸 정확한 Figma SVG 자산을 사용합니다. 활성화된 것은 80% 흰색 표시가 있는 `#0A84FF`입니다. 비활성화된 것은 30% 흰색 표시와 내보낸 내부 그림자 처리가 있는 `Theme.panelBackground12`입니다.
+- 원본 파란 체크 색상에는 `useFigmaCheckedAssets` 가 기본값으로 true 로 설정되고, 사용자 정의 `checkedColor` 에는 false 로 설정되며, 앱의 사용자 정의 `ApplicationWindow.primaryColor` 를 포함합니다. 그리해진 체크 표시는 스톡 파란 이미지로 덮는 대신 구성된 채우기를 노출합니다. 사용자 정의 스냅샷 자산을 선택하려면 명시적으로 true 로 설정하거나, 사용자 정의 체크 표시 팔레트 속성을 선택하려면 false 로 설정합니다. Canvas 렌더러도 `shapeCylinder` 를 자동으로 선택합니다. 그의 업샘플링 백킹 스토어 ( `RenderQuality` + HiDPI ) 는 사용 가능하게 유지되며 상태/색상/스트로크 변경 및 렌더러 전환 시 다시 그립니다.
+- `showInnerShadow`는 체크+활성화 시에만 비활성화됩니다.
+
+<a id="usage"></a>
+
+## 사용법
 
 ```qml
 import LVRS 1.0 as LV
@@ -63,6 +71,8 @@ LV.CheckBox {
 }
 ```
 
-## Shared motion
+<a id="shared-motion"></a>
 
-The checked asset or drawn mark grows into place; the fill blends and the button rebounds. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+## 공유 모션
+
+확인된 자산 또는 그려진 마크가 제자리에 고정됩니다. 채우기가 혼합되고 버튼이 리바운드됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.

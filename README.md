@@ -324,9 +324,11 @@ Key references:
 - `docs/components/navigation/Hierarchy.md`
 - `docs/components/control/InputMethodGuard.md`
 
-### Android 시스템 안전 영역
+<a id="android-시스템-안전-영역"></a>
 
-Qt 6.8 Android의 기본 QPA 안전 여백이 0인 경우에도 `WindowSafeAreaObserver`가 Android WindowInsets의 시스템 막대와 display cutout을 읽고 Qt 논리 좌표로 변환한다. 앱은 기존 `ApplicationWindow.mobileSystemSafe*Inset` 속성을 그대로 사용한다. 회전·창 크기·포커스 변경 시 여백을 갱신한다. 데스크톱과 iOS는 기존 QPA 여백 경로를 유지한다. `PlatformIntegrationTests::safe_area_tracks_window_lifetime`은 창 연결·회전 크기·연결 해제를 검사하고, Society Android 에뮬레이터의 하단 Files 버튼과 실제 파일 앱 진입이 기기 통합 검사이다.
+### Android system safety zone
+
+Even if Qt 6.8 Android's default QPA safety margin is 0, `WindowSafeAreaObserver` reads Android WindowInsets system bar and display cutout and converts them to Qt logical coordinates. Apps use existing `ApplicationWindow.mobileSystemSafe*Inset` properties as is. Margins are refreshed on rotation, window size, and focus changes. Desktop and iOS maintain existing QPA margin paths. `PlatformIntegrationTests::safe_area_tracks_window_lifetime` checks window connections, rotation size, and connection removal, and Society Android emulator's bottom Files button and actual file app entry constitute device integration checks.
 
 ### Standard window and popup materials
 
@@ -344,9 +346,11 @@ ContextMenu and Menu now share a lighter frosted WindowMaterial coating. See the
 
 Implementation files and their headers live together under `src/`. Existing feature and platform subdirectories retain their responsibilities. Build configuration, tests, documentation, resources, and maintenance scripts remain at the project root. Configure and build using the repository-local `build/` directory.
 
-## LVRS 모바일 탐색
+<a id="lvrs-모바일-탐색"></a>
 
-`MobileNavigationBar`·`MobileNavigationTab`은 [Figma 사양](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)의 기기 곡률, 선택적 독립 검색, 왼쪽 축소 배치, 점착 선택 이동 및 선택적 레이블을 제공한다. 검색은 기본적으로 없으며 `search: ({})`로 추가한다. 사용법은 [컴포넌트 문서](docs/components/navigation/MobileNavigationBar.md)를 참조한다.
+## LVRS mobile navigation
+
+`MobileNavigationBar` · `MobileNavigationTab` provides [Figma spec](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)device curvature, optional independent search, left collapse placement, sticky selection movement, and optional labels. Search is disabled by default and added via `search: ({})`. Usage refers to [component documentation](docs/components/navigation/MobileNavigationBar.md).
 
 ## Recovering an interrupted install
 

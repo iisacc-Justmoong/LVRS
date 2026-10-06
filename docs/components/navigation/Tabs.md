@@ -1,6 +1,10 @@
-# Tabs
+<a id="tabs"></a>
 
-## Purpose
+# 탭
+
+<a id="purpose"></a>
+
+## 목적
 
 `Tab`·`TabBar`는 데스크톱 콘텐츠 전환을, `MobileTab`·`MobileTabBar`는 iOS 및 Android 형태의 하단 목적지 탐색을 제공한다. [Figma Tabs](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1035-6)의 6개 계열·40개 변형을 네 가지 QML 타입의 속성 조합으로 표현한다.
 
@@ -12,8 +16,8 @@ LVRS 고유 스타일과 선택적 독립 검색·왼쪽 축소·점착 이동�
 
 | 타입 | 주요 속성 |
 | --- | --- |
-| Tab | `text`, `selected`, `tabStyle`(Underline/Surface), `displayState`, `iconName`/`iconSource`, `showIcon`, `badge`, `showBadge` |
-| TabBar | `model`, `currentIndex`, `autoSelect`, `widthPolicy`(Equal/Content/Scrollable), `tabStyle`, `delegate`, `motionEnabled` |
+|탭|`text`, `selected`, `tabStyle`(밑줄/곡면), `displayState`, `iconName`/`iconSource`, `showIcon`, `badge`, `showBadge`|
+| TabBar |`model`, `currentIndex`, `autoSelect`, `widthPolicy`(동등/콘텐츠/스크롤 가능), `tabStyle`, `delegate`, `motionEnabled`|
 | MobileTab | Tab의 입력·선택 계약과 `platformStyle`(Automatic/IOS/Android), `showLabel`, `badgeDot` |
 | MobileTabBar | TabBar의 모델·선택 계약과 `platformStyle`, `presentation`(Expanded/Search/Minimized), `bottomSafeInset`, `backdropSource` |
 
@@ -23,7 +27,9 @@ LVRS 고유 스타일과 선택적 독립 검색·왼쪽 축소·점착 이동�
 
 `autoSelect: true`는 입력 시 currentIndex를 갱신한다. 외부 라우터나 팝업을 함께 사용하는 앱은 `autoSelect: false`와 바인딩된 currentIndex를 사용한다. 이때 activated 처리기가 화면을 바꾸거나 팝업을 열며, 탭바는 외부 바인딩을 덮어쓰지 않는다. 배열 변경 후 자동 선택 모드에서는 유효한 기존 인덱스를 유지하거나 첫 활성 항목으로 이동한다.
 
-## Usage
+<a id="usage"></a>
+
+## 사용법
 
 ```qml
 LV.TabBar {
@@ -46,7 +52,9 @@ LV.MobileTabBar {
 }
 ```
 
-## How It Works
+<a id="how-it-works"></a>
+
+## 동작 원리
 
 - Tab은 32 px, TabBar는 40 px이며 선택 밑줄은 2 px이다. Content는 자연 너비·최소 120 px, Equal은 균등 분배, Scrollable은 최소 192 px 항목과 가로 스크롤을 사용한다.
 - 모바일 자동 스타일은 Android에서 Android, 나머지 환경에서 iOS 프리뷰를 선택한다. 명시적인 platformStyle로 다른 플랫폼을 미리 볼 수 있다.
@@ -59,7 +67,9 @@ LV.MobileTabBar {
 - PageTabList/PageTab 역할과 선택 상태를 노출한다. 이미지·레이블 장식은 중복 읽기를 막기 위해 접근성 트리에서 제외한다.
 - Safe area는 부모 창 또는 bottomSafeInset 한 곳에서만 적용한다. 회전과 너비 변경은 선택 값과 외부 콘텐츠 인스턴스를 교체하지 않는다.
 
-## Verification
+<a id="verification"></a>
+
+## 검증
 
 `ctest --test-dir build -R 'LVRSTests_(tabs|catalog)' --output-on-failure`로 상태 조합, 비활성 항목 건너뛰기, 키보드·터치, 외부 선택 바인딩, 스크롤 포커스, 모바일 3/4/5개 항목과 320/360/412 px 배치, 안전 영역 및 카탈로그를 검사한다. VisualCatalog의 Tabs에서 실제 컨트롤을 조작할 수 있다. OS 실기기 검증과 호스트 Qt 프리뷰 검증은 구분한다.
 

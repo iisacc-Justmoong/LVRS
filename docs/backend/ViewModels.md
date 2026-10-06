@@ -1,30 +1,31 @@
 # ViewModels
 
-Location:
+위치:
 
 - `src/backend/state/viewmodel.h` / `src/backend/state/viewmodel.cpp`
 - `src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`
 - `src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`
 
-`ViewModel` is the C++ base type for dedicated ViewModel objects.
-`StateModel` is the concrete key-value state model used while migrating component state out of QML.
-`ViewModels` is the singleton registry and ownership gate for MVVM model objects.
+`ViewModel`는 전용 ViewModel 개체에 대한 C++ 기본 유형입니다. `StateModel`는 QML에서 구성 요소 상태를 마이그레이션하는 동안 사용되는 구체적인 키-값 상태 모델입니다. `ViewModels`는 싱글턴 레지스트리이며 MVVM 모델 개체에 대한 소유권 게이트입니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Give C++ ViewModels a consistent diagnostic surface.
-- Provide a reusable C++ state object for components that do not yet need a domain-specific subclass.
-- Register model objects by key.
-- Bind view ids to keys.
-- Enforce single-writer ownership semantics.
-- Expose descriptors that developer tooling can inspect without knowing domain classes.
+## 목적
 
-## C++ ViewModel Base
+- C++ ViewModels에 일관된 진단 표면을 제공합니다.
+- 아직 도메인별 하위 클래스가 필요하지 않은 구성 요소에 대해 재사용 가능한 C++ 상태 개체를 제공합니다.
+- 키로 모델 객체를 등록합니다.
+- 뷰 ID를 키에 바인딩합니다.
+- 단일 작성자 소유권 의미 체계를 적용합니다.
+- 개발자 도구가 도메인 클래스를 몰라도 검사할 수 있는 설명자를 노출합니다.
 
-Apps should prefer C++ ViewModel classes that derive from `ViewModel` when they need a stable MVVM contract.
-Domain-specific state and commands still live in the app subclass.
+<a id="c-viewmodel-base"></a>
 
-Base properties:
+## C++ ViewModel 베이스
+
+앱은 안정적인 MVVM 계약이 필요할 때 `ViewModel`에서 파생되는 C++ ViewModel 클래스를 선호해야 합니다. 도메인별 상태 및 명령은 여전히 ​​앱 하위 클래스에 있습니다.
+
+기본 속성:
 
 - `key: string`
 - `displayName: string`
@@ -33,16 +34,16 @@ Base properties:
 - `hasError: bool`
 - `metadata: map`
 
-Base methods:
+기본 방법:
 
 - `clearError()`
 - `snapshot()`
 
-The base type is registered to QML as an uncreatable C++ type. QML consumes concrete instances registered by the app bootstrap; it should not instantiate the base type.
+기본 유형은 생성할 수 없는 C++ 유형으로 QML에 등록됩니다. QML는 부트스트랩 앱에 등록된 구체적인 인스턴스를 사용합니다. 기본 유형을 인스턴스화해서는 안됩니다.
 
 ## StateModel
 
-`StateModel` derives from `ViewModel` and adds:
+`StateModel`는 `ViewModel`에서 파생되며 다음을 추가합니다.
 
 - `values`
 - `stateKeys`
@@ -52,9 +53,11 @@ The base type is registered to QML as an uncreatable C++ type. QML consumes conc
 - `valueOr(...)`
 - `stateSnapshot()`
 
-It is the preferred first step when moving ad-hoc QML component state into C++ before designing a typed domain ViewModel.
+형식화된 도메인 ViewModel를 설계하기 전에 임시 QML 구성 요소 상태를 C++로 이동할 때 선호되는 첫 번째 단계입니다.
 
-## Properties
+<a id="properties"></a>
+
+## 속성
 
 - `keys: stringList`
 - `views: stringList`
@@ -63,7 +66,9 @@ It is the preferred first step when moving ad-hoc QML component state into C++ b
 - `descriptors: map`
 - `lastError: string`
 
-## Registration APIs
+<a id="registration-apis"></a>
+
+## 등록 API
 
 - `set(key, object)`
 - `registerViewModel(object, fallbackKey = "")`
@@ -71,9 +76,11 @@ It is the preferred first step when moving ad-hoc QML component state into C++ b
 - `remove(key)`
 - `clear()`
 
-`registerViewModel()` is the preferred C++ bootstrap entrypoint for ViewModel objects. It resolves the key from the explicit fallback first, then from `ViewModel::key`, stores the object, and starts descriptor observation.
+`registerViewModel()`는 ViewModel 개체에 대한 기본 C++ 부트스트랩 진입점입니다. 먼저 명시적인 대체 경로에서 키를 확인한 다음 `ViewModel::key`에서 키를 확인하고 개체를 저장하고 설명자 관찰을 시작합니다.
 
-## Binding and Ownership APIs
+<a id="binding-and-ownership-apis"></a>
+
+## 바인딩 및 소유권 API
 
 - `bindView(viewId, key, writable = false)`
 - `unbindView(viewId)`
@@ -84,48 +91,56 @@ It is the preferred first step when moving ad-hoc QML component state into C++ b
 - `canWrite(viewId, key?)`
 - `ownerOf(key)`
 
-## Property Access APIs
+<a id="property-access-apis"></a>
+
+## 자산 액세스 API
 
 - `updateProperty(viewId, property, value)`
 - `updatePropertyByKey(viewId, key, property, value)`
 - `readProperty(viewId, property)`
 
-## Descriptor APIs
+<a id="descriptor-apis"></a>
+
+## 설명자 API
 
 - `descriptor(key)`
 - `descriptors`
 
-Descriptor maps include:
+설명 맵에는 다음이 포함됩니다.
 
 - `key`
 - `className`
 - `owner`
 - `views`
 - `viewModel`
-- `viewModelKey`, `displayName`, `busy`, `error`, `hasError`, `metadata` for objects derived from `ViewModel`
-- `stateModel`, `values`, `stateKeys`, `revision`, `empty` for objects derived from `StateModel`
+- `ViewModel`에서 파생된 개체의 경우 `viewModelKey`, `displayName`, `busy`, `error`, `hasError`, `metadata`
+- `StateModel`에서 파생된 개체의 경우 `stateModel`, `values`, `stateKeys`, `revision`, `empty`
 
-`descriptorsChanged` is emitted when registered ViewModel diagnostics change, when keys are added/removed, or when view bindings/ownership change.
+`descriptorsChanged`는 등록된 ViewModel 진단 변경, 키가 추가/제거될 때 또는 보기 바인딩/소유권이 변경될 때 내보내집니다.
 
-## Write Guard Semantics
+<a id="write-guard-semantics"></a>
 
-Write updates fail when:
+## 가드 의미론 작성
 
-- view id is empty,
-- view has no binding,
-- view is not owner of target key,
-- key/object/property is invalid.
+다음과 같은 경우 쓰기 업데이트가 실패합니다.
 
-On failure, API returns `false` and updates `lastError`.
+- 보기 ID가 비어 있습니다.
+- 뷰에는 바인딩이 없습니다.
+- 뷰는 대상 키의 소유자가 아닙니다.
+- 키/객체/속성이 잘못되었습니다.
 
-## Usage Example
+실패하면 API는 `false`를 반환하고 `lastError`를 업데이트합니다.
+
+<a id="usage-example"></a>
+
+## 사용예
 
 ```cpp
 class DashboardViewModel : public ViewModel
 {
     Q_OBJECT
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
-    // Domain state and commands omitted.
+    // 도메인 상태와 명령은 생략하였다.
 };
 
 auto *vm = new DashboardViewModel(&engine);
@@ -139,7 +154,7 @@ registry->registerViewModel(vm);
 registry->bindView(QStringLiteral("DashboardPage"), QStringLiteral("Dashboard"), true);
 ```
 
-QML should consume the object through the registry:
+QML는 레지스트리를 통해 객체를 사용해야 합니다.
 
 ```qml
 import LVRS 1.0 as LV
@@ -147,14 +162,18 @@ import LVRS 1.0 as LV
 property var vm: LV.ViewModels.getForView("DashboardPage")
 ```
 
-## Internal Behavior Notes
+<a id="internal-behavior-notes"></a>
 
-- Tokens are trim-normalized.
-- Stale bindings/owners are pruned when keys vanish.
-- Objects parented by registry may be auto-disposed when no key references remain.
-- Descriptor observation is disconnected when an object is no longer referenced by a registry key.
+## 내부 행동 참고 사항
 
-## Extended Example: Explicit Ownership Transfer
+- 토큰은 트림 정규화됩니다.
+- 키가 사라지면 오래된 바인딩/소유자가 정리됩니다.
+- 레지스트리에 부모로 지정된 객체는 키 참조가 모두 사라지면 자동으로 처분될 수 있습니다.
+- 개체가 더 이상 레지스트리 키에 의해 참조되지 않으면 설명자 관찰의 연결이 끊어집니다.
+
+<a id="extended-example-explicit-ownership-transfer"></a>
+
+## 확장된 예: 명시적인 소유권 이전
 
 ```qml
 import LVRS 1.0 as LV
@@ -166,13 +185,14 @@ function transferOwner(fromView, toView, key) {
 }
 ```
 
-## Review Checklist
+<a id="review-checklist"></a>
 
-- every writable view must have explicit ownership claim,
-- read-only views should bind with `writable=false`,
-- `lastError` must be surfaced in developer tooling for failed writes.
+## 체크리스트 검토
+
+- 모든 쓰기 가능한 뷰에는 명시적인 소유권 주장이 있어야 합니다.
+- 읽기 전용 뷰는 `writable=false`와 바인딩되어야 합니다.
+- `lastError`는 쓰기 실패에 대한 개발자 도구에 표시되어야 합니다.
 
 ## FAQ
 
-Q. Can two views write to one key simultaneously?  
-A. No. Ownership model is single-writer by contract.
+Q. 2 뷰가 동시에 하나의 키에 쓸 수 있나요? A. 아니요. 소유권 모델은 계약상 단일 작성자입니다.

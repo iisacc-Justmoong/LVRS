@@ -7557,7 +7557,7 @@ Item {
         selectionDirection: "auto"
     }
 
-    property string menuItemDiagnostics: JSON.stringify({labelWidth: figmaItem.labelNaturalWidth, row: [figmaItem.implicitWidth, figmaItem.implicitHeight], selected: selectedItem.resolvedBackgroundColor === LV.Theme.primary, inactive: inactiveItem.resolvedBackgroundColor === LV.Theme.panelBackground08, iconColor: collapsedSubmenu.iconPlaceholderColor === LV.Theme.accentBlueMuted})
+    property string menuItemDiagnostics: JSON.stringify({labelWidth: figmaItem.labelNaturalWidth, row: [figmaItem.implicitWidth, figmaItem.implicitHeight], selected: selectedItem.resolvedBackgroundColor === LV.Theme.accentMuted, inactive: inactiveItem.resolvedBackgroundColor === LV.Theme.panelBackground08, iconColor: collapsedSubmenu.iconPlaceholderColor === LV.Theme.accentBlueMuted})
     property bool menuItemContract:
         defaultItem.keyVisible
         && defaultItem.resolvedShortcutText === "key"
@@ -7581,7 +7581,7 @@ Item {
         && figmaItem.labelNaturalWidth === 33
         && figmaItem.resolvedIconSource.toString() === LV.Theme.iconPath("procedure").toString()
         && selectedItem.isSelected
-        && selectedItem.resolvedBackgroundColor === LV.Theme.primary
+        && selectedItem.resolvedBackgroundColor === LV.Theme.accentMuted
         && inactiveItem.isInactive
         && inactiveItem.resolvedBackgroundColor === LV.Theme.panelBackground08
         && collapsedSubmenu.keyVisible

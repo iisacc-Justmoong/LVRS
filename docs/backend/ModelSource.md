@@ -1,26 +1,28 @@
 # ModelSource
 
-Location: `src/backend/model/modelsource.h`, `src/backend/model/modelsource.cpp`
+위치: `src/backend/model/modelsource.h`, `src/backend/model/modelsource.cpp`
 
-`ModelSource` is the shared C++ reader for model-bearing QML components.
+`ModelSource`는 모델 베어링 QML 구성 요소용 공유 C++ 리더입니다.
 
-## Purpose
+<a id="purpose"></a>
 
-- Accept JavaScript arrays, primitive arrays, QML list-like objects, and `QAbstractItemModel` instances through one injected `source`.
-- Project item-model rows into role-name maps without QML-side adapter logic.
-- Emit revision/count changes when the backing C++ item model changes.
+## 목적
+
+- 하나의 주입된 `source`를 통해 JavaScript 배열, 기본 배열, QML 목록형 객체 및 `QAbstractItemModel` 인스턴스를 허용합니다.
+- QML 측 어댑터 로직 없이 항목 모델 행을 역할 이름 맵으로 프로젝트합니다.
+- 지원 C++ 항목 모델이 변경되면 개정/개수 변경 사항을 내보냅니다.
 
 ## API
 
-Properties:
+속성:
 
 - `source`
 - `column`
-- `count` (readonly)
-- `revision` (readonly)
-- `itemModel` (readonly)
+- `count`(읽기 전용)
+- `revision`(읽기 전용)
+- `itemModel`(읽기 전용)
 
-Methods:
+방법:
 
 - `at(index)`
 - `row(index)`
@@ -30,14 +32,18 @@ Methods:
 - `intValue(entry, roleName, fallbackValue)`
 - `invalidate()`
 
-## How It Works
+<a id="how-it-works"></a>
 
-- `QAbstractItemModel` input is read at the requested `column` and converted into a map keyed by `roleNames()`.
-- `display`, `edit`, `index`, `row`, and `column` are added as stable fallback fields.
-- JS/list-like inputs are read by index, `get(index)`, or `at(index)` where available.
-- `rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, and `dataChanged` all invalidate `revision`.
+## 동작 원리
 
-## Consumers
+- `QAbstractItemModel` 입력은 요청된 `column`에서 읽혀지고 `roleNames()`에 의해 키가 지정된 맵으로 변환됩니다.
+- `display`, `edit`, `index`, `row` 및 `column`가 안정적인 대체 경로 필드로 추가되었습니다.
+- JS/목록 유사 입력은 가능한 경우 인덱스, `get(index)` 또는 `at(index)`로 읽습니다.
+- `rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged` 및 `dataChanged`는 모두 `revision`를 무효화합니다.
 
-- `List` uses `ModelSource` for row count, role lookup, label resolution, enabled state, and selection state.
-- `HierarchyModel` uses `ModelSource` before projecting tree row descriptors.
+<a id="consumers"></a>
+
+## 소비자
+
+- `List`는 행 수, 역할 조회, 레이블 확인, 활성화 상태 및 선택 상태에 `ModelSource`를 사용합니다.
+- `HierarchyModel`는 트리 행 설명자를 투영하기 전에 `ModelSource`를 사용합니다.

@@ -1,32 +1,36 @@
 # WindowChromeInteraction
 
-Location: `src/qml/WindowChromeInteraction.qml`
+위치: `src/qml/WindowChromeInteraction.qml`
 
-`WindowChromeInteraction` is the reusable pointer layer behind `LV.Window` and `LV.ApplicationWindow`. Most applications should configure the properties exposed by those root types instead of instantiating this component directly.
+`WindowChromeInteraction`는 `LV.Window` 및 `LV.ApplicationWindow` 뒤에 있는 재사용 가능한 포인터 레이어입니다. 대부분의 애플리케이션은 이 구성 요소를 직접 인스턴스화하는 대신 해당 루트 유형에 의해 노출되는 속성을 구성해야 합니다.
 
 ## API
 
-- target: `targetWindow`
-- master switch: `interactionEnabled`
-- move region: `moveHandleEnabled`, `moveHandleHeight`, `moveHandleTopMargin`, `moveHandleLeftMargin`, `moveHandleRightMargin`
-- move exclusions: `moveExclusionItems`
-- resize regions: `resizeHandlesEnabled`, `resizeEdges`, `resizeBorderThickness`, `resizeCornerSize`
-- calculated geometry: `effectiveResizeBorderThickness`, `effectiveResizeCornerSize`
-- move handle alias: `moveHandleItem`
-- methods: `requestMove()`, `requestResize(edges)`, `isResizeEdgeEnabled(edge)`
-- signals: `moveAttempted(started)`, `resizeAttempted(edges, started)`
+- 대상: `targetWindow`
+- 마스터 스위치: `interactionEnabled`
+- 지역 이동: `moveHandleEnabled`, `moveHandleHeight`, `moveHandleTopMargin`, `moveHandleLeftMargin`, `moveHandleRightMargin`
+- 이동 제외: `moveExclusionItems`
+- 영역 크기 조정: `resizeHandlesEnabled`, `resizeEdges`, `resizeBorderThickness`, `resizeCornerSize`
+- 계산된 형상: `effectiveResizeBorderThickness`, `effectiveResizeCornerSize`
+- 이동 핸들 별칭: `moveHandleItem`
+- 방법: `requestMove()`, `requestResize(edges)`, `isResizeEdgeEnabled(edge)`
+- 신호: `moveAttempted(started)`, `resizeAttempted(edges, started)`
 
-## Behavior
+<a id="behavior"></a>
 
-- The move handle is disabled for minimized and fullscreen windows.
-- The move hit region ends at `moveHandleTopMargin + moveHandleHeight`; solid macOS chrome disables AppKit background movement so drags outside this region cannot bypass the LVRS handler or its exclusions.
-- Resize handles are enabled only for a visible, windowed target.
-- Corner handles sit above edge handles, and all resize handles sit above the move handle.
-- A resize press maps its `MouseArea` position to global coordinates before requesting the operation. This keeps the macOS fallback anchored to the event that started it even when a remote, tablet, or synthesized input source has not synchronized `QCursor::pos()`.
-- A resize press stays accepted when either native resize or the macOS manual fallback starts. Requests rejected by both paths release the `MouseArea` press so an item underneath can still process it.
-- Exclusion coordinates are mapped across the target window item tree, so controls may live in scaled or nested content.
+## 행동
 
-## Direct use
+- 최소화된 창과 전체 화면 창에서는 이동 핸들이 비활성화됩니다.
+- 이동 히트 영역은 `moveHandleTopMargin + moveHandleHeight`에서 끝납니다. 솔리드 macOS 크롬은 AppKit 배경 이동을 비활성화하므로 이 영역 외부의 드래그는 LVRS 핸들러 또는 해당 제외를 우회할 수 없습니다.
+- 크기 조정 핸들은 보이는 창 대상에 대해서만 활성화됩니다.
+- 모서리 핸들은 가장자리 핸들 위에 있고 모든 크기 조정 핸들은 이동 핸들 위에 있습니다.
+- 크기 조정 프레스는 작업을 요청하기 전에 `MouseArea` 위치를 전역 좌표에 매핑합니다. 이렇게 하면 원격, 태블릿 또는 합성 입력 소스가 `QCursor::pos()`를 동기화하지 않은 경우에도 macOS 대체 경로를 시작한 이벤트에 고정된 상태로 유지됩니다.
+- 네이티브 크기 조정 또는 macOS 매뉴얼 대체 경로가 시작되면 크기 조정 누르기가 계속 허용됩니다. 두 경로 모두에서 요청이 거부되면 `MouseArea` 프레스가 해제되어 아래 항목이 계속 처리될 수 있습니다.
+- 제외 좌표는 대상 창 항목 트리 전체에 매핑되므로 컨트롤은 크기가 조정되거나 중첩된 콘텐츠에 있을 수 있습니다.
+
+<a id="direct-use"></a>
+
+## 직접 사용
 
 ```qml
 import QtQuick

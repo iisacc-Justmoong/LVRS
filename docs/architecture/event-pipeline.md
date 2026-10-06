@@ -1,114 +1,131 @@
-# Event Pipeline
+<a id="event-pipeline"></a>
 
-This document describes the end-to-end event path from OS/Qt events to high-level QML behavior in LVRS.
+# 이벤트 파이프라인
 
-## Pipeline Stages
+이 문서에서는 OS/Qt 이벤트부터 LVRS의 상위 수준 QML 동작까지의 엔드투엔드 이벤트 경로를 설명합니다.
 
-1. Capture Stage: `RuntimeEvents`
-- Installs event filter and records keyboard/pointer/context/touch/tablet/gesture/UI lifecycle events.
-- Maintains counters, recent-event ring buffer, and input snapshot (`inputState()`).
-- Emits `eventRecorded(eventData)` as canonical runtime stream.
+<a id="pipeline-stages"></a>
 
-2. Recognition Stage: `GestureEvents`
-- Subscribes to `RuntimeEvents::eventRecorded`.
-- Interprets raw `touch-event` and `native-gesture` entries.
-- Emits normalized high-level gesture payloads (`touch*`, `press*`, `scroll*`, `holdStarted`, `drag*`, `swipeDetected`, `nativeGestureDetected`).
+## 파이프라인 단계
 
-3. Hook Stage: `Backend`
-- `hookUserEvents()` subscribes to `RuntimeEvents::eventRecorded`.
-- Mirrors events into bounded backend cache (`hookedUserEvents`).
-- Maintains per-type counters and last input snapshot for backend-first reads.
+1. 캡처 단계: `RuntimeEvents`
+- 이벤트 필터를 설치하고 키보드/포인터/컨텍스트/터치/태블릿/제스처/UI 수명 주기 이벤트를 기록합니다.
+- 카운터, 최근 이벤트 링 버퍼 및 입력 스냅샷(`inputState()`)을 유지합니다.
+- `eventRecorded(eventData)`를 표준 런타임 스트림으로 내보냅니다.
 
-4. Consumption Stage: `EventListener`
-- Converts trigger names to concrete source subscriptions across both `RuntimeEvents` and `GestureEvents`.
-- Builds incident-first payloads (coordinates/button/modifier core).
-- Adds `input`/`ui` enrichment only when explicitly enabled.
-- Supports dedup windows for global press/context sequences.
+2. 인식 단계: `GestureEvents`
+- `RuntimeEvents::eventRecorded`를 구독합니다.
+- 원시 `touch-event` 및 `native-gesture` 항목을 해석합니다.
+- 정규화된 상위 수준 제스처 페이로드(`touch*`, `press*`, `scroll*`, `holdStarted`, `drag*`, `swipeDetected`, `nativeGestureDetected`)를 방출합니다.
 
-5. Dispatch Stage: `ApplicationWindow`
-- Hosts always-on global listeners for app-level pressed/context signals.
-- Re-emits normalized payloads as `globalPressedEvent` and `globalContextEvent`.
+3. 후크 스테이지: `Backend`
+- `hookUserEvents()`는 `RuntimeEvents::eventRecorded`를 구독합니다.
+- 이벤트를 한계가 설정된 백엔드 캐시(`hookedUserEvents`)로 미러링합니다.
+- 백엔드 우선 읽기에 대한 유형별 카운터와 마지막 입력 스냅샷을 유지합니다.
 
-6. Feature Stage
-- `ContextMenu`: outside-dismiss and action dispatch.
-- Editors/hierarchy: nested wheel isolation via `WheelScrollGuard`.
-- Runtime console/debug tools: event stream visualization.
+4. 소비단계: `EventListener`
+- `RuntimeEvents` 및 `GestureEvents` 모두에서 트리거 이름을 구체적인 소스 구독으로 변환합니다.
+- 사건 우선 페이로드(좌표/버튼/수정자 코어)를 구축합니다.
+- 명시적으로 활성화된 경우에만 `input`/`ui` 강화를 추가합니다.
+- 글로벌 프레스/컨텍스트 시퀀스에 대한 중복 제거 창을 지원합니다.
 
-## Canonical Payload Shape
+5. 파견 단계: `ApplicationWindow`
+- 앱 수준 누름/컨텍스트 신호에 대한 상시 글로벌 리스너를 호스팅합니다.
+- 정규화된 페이로드를 `globalPressedEvent` 및 `globalContextEvent`로 다시 내보냅니다.
 
-Global pointer/context flows always carry:
+6. 기능 단계
+- `ContextMenu`: 외부 해제 및 조치 파견.
+- 편집자/계층: `WheelScrollGuard`를 통한 중첩 휠 격리.
+- 런타임 콘솔/디버그 도구: 이벤트 스트림 시각화.
 
-- Position: `x`, `y`, `globalX`, `globalY`
-- Input masks: `buttons`, `modifiers`
+<a id="canonical-payload-shape"></a>
 
-Optional enrichments:
+## 표준 페이로드 형태
 
-- `input`: normalized input state snapshot (`includeInputState=true`)
-- `ui`: hit-test metadata (`includeUiHit=true`)
-- `src/backend`: optional backend summary when requested
+전역 포인터/컨텍스트 흐름은 항상 다음을 전달합니다.
 
-This shape is intentionally shared so feature components can consume one schema.
+- 위치: `x`, `y`, `globalX`, `globalY`
+- 입력 마스크: `buttons`, `modifiers`
 
-Touch/gesture flows additionally carry:
+선택적 강화:
 
-- gesture identity: `gestureType`, `interactionKind`, `sequence`, `sessionId`
-- geometry: `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`
-- timing: `timestampEpochMs`, `durationMs`
-- press lifecycle: `pressDurationMs`, `released`, `cancelled`, `releaseEpochMs`
-- direction: `directionX`, `directionY`, `dominantAxis`
-- contact detail: `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `multiTouch`, native `points[]`
-- optional semantic extensions such as `scrollAxis`, `scrollDirection`, `swipeDirection`, `velocityX`, `velocityY`
+- `input`: 정규화된 입력 상태 스냅샷(`includeInputState=true`)
+- `ui`: 적중 테스트 메타데이터(`includeUiHit=true`)
+- `src/backend`: 요청 시 선택적 백엔드 요약
 
-## Why Backend-First Exists (Opt-In)
+이 모양은 기능 구성 요소가 하나의 스키마를 사용할 수 있도록 의도적으로 공유됩니다.
 
-Directly reading runtime singleton state from many QML handlers can cause temporal skew under bursty input.
-Backend-first mode reduces skew by reading from a stable mirrored cache, but it is intentionally opt-in to avoid hot-path overhead.
+터치/제스처 흐름에는 다음이 추가로 포함됩니다.
 
-Gesture listeners are intentionally not mirrored through `Backend`; they consume the recognized stream directly from `GestureEvents`.
+- 제스처 ID: `gestureType`, `interactionKind`, `sequence`, `sessionId`
+- 기하학: `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`
+- 타이밍: `timestampEpochMs`, `durationMs`
+- 프레스 수명주기: `pressDurationMs`, `released`, `cancelled`, `releaseEpochMs`
+- 방향: `directionX`, `directionY`, `dominantAxis`
+- 연락처: `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `multiTouch`, 네이티브 `points[]`
+- `scrollAxis`, `scrollDirection`, `swipeDirection`, `velocityX`, `velocityY`와 같은 선택적 의미 확장
 
-## Context Dismiss Flow (Reference)
+<a id="why-backend-first-exists-opt-in"></a>
 
-1. Global press/context event arrives with global coordinates.
-2. Target component maps global coordinates into overlay-local space.
-3. If point is outside popup/dialog bounds, close component.
-4. Dedup windows suppress duplicate context events generated by overlapping source paths.
+## 백엔드 우선이 존재하는 이유(선택)
 
-## Operational Checks
+많은 QML 핸들러에서 런타임 싱글턴 상태를 직접 읽으면 버스트 입력 시 일시적인 왜곡이 발생할 수 있습니다. 백엔드 우선 모드는 안정적인 미러링 캐시에서 읽어 왜곡을 줄이지만 핫 경로 오버헤드를 피하기 위해 의도적으로 선택되었습니다.
 
-When validating event behavior, verify:
+제스처 수신기는 의도적으로 `Backend`를 통해 미러링되지 않습니다. `GestureEvents`에서 직접 인식된 스트림을 사용합니다.
+
+<a id="context-dismiss-flow-reference"></a>
+
+## 컨텍스트 닫기 흐름(참조)
+
+1. 글로벌 언론/컨텍스트 이벤트는 글로벌 좌표와 함께 도착합니다.
+2. 대상 구성 요소는 전역 좌표를 오버레이 로컬 공간에 매핑합니다.
+3. 포인트가 팝업/대화 상자 범위를 벗어나면 구성 요소를 닫습니다.
+4. 중복 제거 기간은 소스 경로가 겹쳐서 생성된 중복 컨텍스트 이벤트를 억제합니다.
+
+<a id="operational-checks"></a>
+
+## 운영 점검
+
+이벤트 동작을 검증할 때 다음을 확인하세요.
 
 - `RuntimeEvents.running == true`
-- `GestureEvents.runtimeAttached == true` for direct singleton consumers
-- `Backend.userEventHooked == true` only for listeners that opt into src/backend/input enrichment
-- expected trigger fires exactly once within dedup window
-- payload carries expected optional `ui`/`input` fields only when enabled
+- 직접 싱글턴 소비자를 위한 `GestureEvents.runtimeAttached == true`
+- src/backend/input 강화를 선택한 청취자에게만 `Backend.userEventHooked == true`
+- 예상되는 트리거는 중복 제거 기간 내에 정확히 한 번만 실행됩니다.
+- 페이로드는 활성화된 경우에만 예상되는 선택적 `ui`/`input` 필드를 전달합니다.
 
-## Extended Example: Global Context Menu Dispatch
+<a id="extended-example-global-context-menu-dispatch"></a>
 
-A reliable context-menu dispatch flow in a complex page typically uses:
+## 확장된 예: 전역 컨텍스트 메뉴 디스패치
+
+복잡한 페이지의 안정적인 컨텍스트 메뉴 전달 흐름은 일반적으로 다음을 사용합니다.
 
 1. `EventListener(trigger: "globalContextRequested")`
-2. payload UI hit-test inspection (`eventData.ui.path`)
-3. menu model selection by target path/class
-4. menu open at `eventData.globalX/globalY`
+2. 페이로드 UI 적중 테스트 검사(`eventData.ui.path`)
+3. 대상 경로/클래스별 메뉴 모델 선택
+4. `eventData.globalX/globalY`에서 메뉴 열기
 
-This flow avoids dependency on local event boundaries.
+이 흐름은 로컬 이벤트 경계에 대한 종속성을 방지합니다.
 
-## Observability Probes
+<a id="observability-probes"></a>
 
-During troubleshooting, log at least these probes:
+## 관찰 가능성 프로브
 
-- runtime sequence (`RuntimeEvents.eventSequence`)
-- gesture sequence (`GestureEvents.gestureSequence`)
-- backend mirror count (`Backend.hookedEventCount`)
-- dedup timestamps in listener payload handling
-- menu/dialog outside-dismiss geometry checks
+문제 해결 중에 최소한 다음 프로브를 기록하십시오.
 
-## Failure Analysis Playbook
+- 런타임 시퀀스(`RuntimeEvents.eventSequence`)
+- 제스처 시퀀스(`GestureEvents.gestureSequence`)
+- 백엔드 미러 수(`Backend.hookedEventCount`)
+- 리스너 페이로드 처리의 중복 제거 타임스탬프
+- 메뉴/대화상자 외부-형상 검사 해제
 
-If global interactions feel inconsistent:
+<a id="failure-analysis-playbook"></a>
 
-1. check runtime daemon running state,
-2. check backend hook state when backend-first listeners are enabled,
-3. validate dedup thresholds are not overly aggressive,
-4. verify coordinate mapping against overlay parent.
+## 실패 분석 플레이북
+
+글로벌 상호 작용이 일관성이 없다고 느껴지는 경우:
+
+1. 런타임 데몬 실행 상태를 확인하세요.
+2. 백엔드 우선 리스너가 활성화되면 백엔드 후크 상태를 확인합니다.
+3. 중복 제거 임계값이 지나치게 공격적이지 않은지 확인합니다.
+4. 상위 오버레이에 대한 좌표 매핑을 확인합니다.

@@ -1,31 +1,39 @@
-# Performance Observability (P0)
+<a id="performance-observability-p0"></a>
 
-Location: `src/backend/io/backend.*` / `src/backend/runtime/renderingmonitor.*`
+# 성능 관찰성(P0)
 
-This document defines the P0 performance telemetry contract used by LVRS.
+위치: `src/backend/io/backend.*` / `src/backend/runtime/renderingmonitor.*`
 
-## Purpose
+이 문서는 LVRS에서 사용하는 P0 성능 원격 측정 계약을 정의합니다.
 
-- Establish one shared metrics schema for CPU/GPU-adjacent runtime telemetry.
-- Provide per-request async timeline traces for queue/start/finish analysis.
-- Keep sampling overhead bounded and predictable for debug builds.
+<a id="purpose"></a>
 
-## Schemas
+## 목적
 
-### 1) Snapshot Schema: `lvrs.performance.v1`
+- CPU/GPU 인접 런타임 원격 측정에 대한 하나의 공유 지표 스키마를 설정합니다.
+- 대기열/시작/종료 분석을 위해 요청별 비동기 타임라인 추적을 제공합니다.
+- 샘플링 오버헤드 한계가 설정된를 유지하고 디버그 빌드에 대해 예측 가능합니다.
 
-Used by:
+<a id="schemas"></a>
+
+## 스키마
+
+<a id="1-snapshot-schema-lvrsperformancev1"></a>
+
+### 1) 스냅샷 스키마: `lvrs.performance.v1`
+
+사용처:
 
 - `Backend.performanceMetrics()`
 - `RenderMonitor.performanceSnapshot()`
 
-Common required fields:
+공통 필수 필드:
 
 - `schema`
 - `component`
 - `epochMs`
 
-Backend-specific fields:
+백엔드 관련 필드:
 
 - `asyncJobsInFlight`
 - `asyncMaxConcurrency`
@@ -47,7 +55,7 @@ Backend-specific fields:
 - `asyncLaneMetrics`
 - `asyncLatencyByOperation` (`avg/p50/p95/p99/max/failureRate`)
 
-RenderMonitor-specific fields:
+RenderMonitor 관련 필드:
 
 - `active`
 - `fps`
@@ -61,52 +69,62 @@ RenderMonitor-specific fields:
 - `recentSampleCount`
 - `frameSampleCapacity`
 
-### 2) Timeline Trace Schema: `lvrs.performance.trace.v1`
+<a id="2-timeline-trace-schema-lvrsperformancetracev1"></a>
 
-Used by:
+### 2) 타임라인 추적 스키마: `lvrs.performance.trace.v1`
+
+사용처:
 
 - `Backend.recentPerformanceTrace()`
 
-Required fields:
+필수 입력 사항:
 
 - `schema`
-- `sequence` (monotonic in-process)
+- `sequence`(단조 진행 중)
 - `epochMs`
 - `phase` (`queued`, `started`, `finished`, `canceled`)
 - `requestId`
 - `operation`
 - `subject`
-- `detail` (phase-specific map)
+- `detail`(단계별 맵)
 
-## Timeline Semantics
+<a id="timeline-semantics"></a>
 
-- `queued`: request accepted and `requestId` assigned.
-- `started`: worker thread started actual task body.
-- `finished`: task completed and completion signal was emitted.
-- `canceled`: cancellation token was requested.
+## 타임라인 의미론
 
-Expected order per request:
+- `queued`: 요청이 승인되고 `requestId`가 할당되었습니다.
+- `started`: 작업자 스레드가 실제 작업 본문을 시작했습니다.
+- `finished`: 작업이 완료되고 완료 신호가 발생했습니다.
+- `canceled`: 취소 토큰이 요청되었습니다.
+
+요청당 예상 순서:
 
 1. `queued`
-2. `started` (may be absent for immediate-fast path)
+2. `started`(즉각적 빠른 경로에는 없을 수 있음)
 3. `finished`
 
-## Overhead Policy
+<a id="overhead-policy"></a>
 
-- Trace retention is bounded by `performanceTraceCapacity`.
-- Latency samples are bounded per operation (`m_asyncLatencySampleCapacity`).
-- Render percentiles are bounded by rolling sample capacity (`frameSampleCapacity`).
+## 간접비 정책
 
-## Operational Usage
+- 추적 보존은 `performanceTraceCapacity`의 한계가 설정된입니다.
+- 대기 시간 샘플은 작업당 한계가 설정된(`m_asyncLatencySampleCapacity`)입니다.
+- 렌더링 백분위수는 롤링 샘플 용량(`frameSampleCapacity`)을 기준으로 한계가 설정된입니다.
 
-1. Capture `Backend.performanceMetrics()` and `RenderMonitor.performanceSnapshot()` together for a measurement window.
-2. Export `Backend.recentPerformanceTrace()` for queue/wait bottleneck analysis.
-3. Compare p95/p99 across revisions, not only averages.
+<a id="operational-usage"></a>
 
-## P4 Quality Gate Integration
+## 운영 사용량
 
-P4 automated quality gate consumes this schema through:
+1. 측정 창을 위해 `Backend.performanceMetrics()` 및 `RenderMonitor.performanceSnapshot()`를 함께 캡처합니다.
+2. 대기열/대기 병목 현상 분석을 위해 `Backend.recentPerformanceTrace()`를 내보냅니다.
+3. 평균뿐만 아니라 개정판 전체에서 p95/p99를 비교하십시오.
 
-- `tests/tst_performance_gate.cpp` (p95/p99 regression check),
-- `tests/ci/run_p4_quality.sh` (PR gate entrypoint),
-- `tests/ci/run_p4_sanitizers.sh` (sanitizer matrix with the same metrics contract).
+<a id="p4-quality-gate-integration"></a>
+
+## P4 품질 게이트 통합
+
+P4 자동화된 품질 게이트는 다음을 통해 이 스키마를 사용합니다.
+
+- `tests/tst_performance_gate.cpp`(p95/p99 회귀 확인),
+- `tests/ci/run_p4_quality.sh`(PR 게이트 진입점),
+- `tests/ci/run_p4_sanitizers.sh`(동일한 메트릭 계약을 가진 살균제 매트릭스).

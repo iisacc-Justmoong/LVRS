@@ -13,7 +13,7 @@ AbstractButton {
     readonly property int directionDown: 3
 
     property int state: defaultState
-    // The two authored menu families share input/model behavior, not typography.
+    // The authored menu families share input/model behavior but retain their own paints and typography.
     property bool compact: false
     property string label: "Label"
     QtObject {
@@ -103,7 +103,7 @@ AbstractButton {
         return control.expanded ? directionDown : directionRight
     }
     readonly property color resolvedBackgroundColor: isSelected
-        ? Theme.contextMenuItemSelectedBackground
+        ? (compact ? Theme.contextMenuItemSelectedBackground : Theme.accentMuted)
         : isInactive
             ? Theme.contextMenuItemInactiveBackground
             : "transparent"

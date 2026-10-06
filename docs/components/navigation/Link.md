@@ -1,53 +1,63 @@
-# Link
+<a id="link"></a>
 
-Location: `src/qml/components/navigation/Link.qml`
+# 링크
 
-`Link` is a navigation trigger component built on `AbstractButton`.
+위치: `src/qml/components/navigation/Link.qml`
 
-## Purpose
+`Link`는 `AbstractButton`를 기반으로 구축된 탐색 트리거 구성 요소입니다.
 
-- Provide declarative route/component navigation without per-view router boilerplate.
-- Support both path navigation and component navigation with optional replace semantics.
+<a id="purpose"></a>
 
-## Core API
+## 목적
 
-Routing:
+- 뷰별 라우터 상용구 없이 선언적 경로/구성 요소 탐색을 제공합니다.
+- 선택적 대체 의미 체계를 통해 경로 탐색과 구성 요소 탐색을 모두 지원합니다.
 
-- `router` (optional explicit router)
+<a id="core-api"></a>
+
+## 코어 API
+
+라우팅:
+
+- `router`(선택적 명시적 라우터)
 - `href`
-- `to` (alias of `href`)
+- `to`(`href`의 별칭)
 - `params`
 - `replace`
 - `targetComponent`
 
-Visual:
+시각적:
 
 - `linkColor`, `hoverColor`, `pressedColor`, `disabledColor`
 - `underline`
 
-Content:
+내용:
 
-- default `content` slot
-- text fallback label when slot is empty
+- 기본 `content` 슬롯
+- 슬롯이 비어 있는 경우 텍스트 대체 경로 라벨
 
-## Behavior Contract
+<a id="behavior-contract"></a>
 
-Router resolution order:
+## 행동 계약
+
+라우터 해결 순서:
 
 1. `router`
 2. `Navigator.router`
-3. no-op when unresolved
+3. 해결되지 않은 경우 작동하지 않음
 
-Navigation behavior:
+탐색 동작:
 
-- if `targetComponent` is set:
+- `targetComponent`가 설정된 경우:
   - `replace == true` -> `replaceWith(targetComponent, params)`
-  - else -> `goTo(targetComponent, params)`
-- else if `href` exists:
+  - 그렇지 않으면 -> `goTo(targetComponent, params)`
+- 그렇지 않으면 `href`가 존재하는 경우:
   - `replace == true` -> `replace(href, params)`
-  - else -> `go(href, params)`
+  - 그렇지 않으면 -> `go(href, params)`
 
-## Usage
+<a id="usage"></a>
+
+## 사용법
 
 ```qml
 import LVRS 1.0 as LV
@@ -58,6 +68,8 @@ LV.Link {
 }
 ```
 
-## Shared motion
+<a id="shared-motion"></a>
 
-The link rebounds at activation and its router handles the destination transition. See [motion policy](../../motion.md) for global speed, reduced motion, local overrides and the component-specific VisualCatalog recipe.
+## 공유 모션
+
+활성화 시 링크가 리바운드되고 해당 라우터가 대상 전환을 처리합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.
