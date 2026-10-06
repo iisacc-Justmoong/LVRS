@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include "backend/runtime/appentry.h"
@@ -70,7 +71,7 @@ struct ForegroundServiceStartResult {
 QList<QWindow *> visibleWorkspaceWindows(const QmlRootLoadResult &rootLoadResult);
 bool hasVisibleWorkspace(const QmlRootLoadResult &rootLoadResult);
 
-class ForegroundServiceGate : public QObject
+class LVRS_EXPORT ForegroundServiceGate : public QObject
 {
 public:
     explicit ForegroundServiceGate(QObject *parent = nullptr);

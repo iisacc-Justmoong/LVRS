@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include "backend/state/viewmodel.h"
@@ -7,7 +8,7 @@
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
-class StateModel : public ViewModel
+class LVRS_EXPORT StateModel : public ViewModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(StateModel)

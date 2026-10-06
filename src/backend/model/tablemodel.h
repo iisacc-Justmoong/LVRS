@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include "backend/model/modelundostack.h"
@@ -12,7 +13,7 @@
 
 class QAbstractItemModel;
 
-class TableModel : public QObject
+class LVRS_EXPORT TableModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(TableModel)

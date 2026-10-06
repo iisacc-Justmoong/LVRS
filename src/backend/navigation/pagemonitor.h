@@ -1,10 +1,11 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
 #include <QStringList>
 #include <QtQml/qqml.h>
 
-class PageMonitor : public QObject
+class LVRS_EXPORT PageMonitor : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(PageMonitor)

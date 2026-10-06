@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -7,7 +8,7 @@
 
 class QAbstractItemModel;
 
-class ModelAdapter : public QObject
+class LVRS_EXPORT ModelAdapter : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ModelAdapter)

@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include "colorpickermodel.h"
@@ -6,7 +7,7 @@
 #include <QQuickPaintedItem>
 
 // Interactive color domains. Ordinary controls, labels and layout remain in QML.
-class ColorPickerSurface : public QQuickPaintedItem
+class LVRS_EXPORT ColorPickerSurface : public QQuickPaintedItem
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ColorPickerSurface)

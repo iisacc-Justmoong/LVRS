@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -7,7 +8,7 @@
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
-class NavigationStackModel : public QObject
+class LVRS_EXPORT NavigationStackModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(NavigationStackModel)

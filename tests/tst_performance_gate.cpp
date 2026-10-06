@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "backend/io/backend.h"
+#include "millisecond_timer.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -55,6 +56,8 @@ private slots:
 
 void PerformanceGateTests::backend_dispatch_latency_regression_gate()
 {
+    MillisecondTimerResolution timerResolution;
+    QVERIFY(timerResolution.available());
     const int rounds = envInt("LVRS_PERF_GATE_ROUNDS", 5, 3, 15);
     const int tasksPerRound = envInt("LVRS_PERF_GATE_TASKS", 48, 16, 512);
     const int workMs = envInt("LVRS_PERF_GATE_WORK_MS", 2, 1, 20);

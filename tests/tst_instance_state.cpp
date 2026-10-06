@@ -256,7 +256,7 @@ void InstanceStateTests::menu_selected_uses_press_fill()
         QCOMPARE(background->property("color").value<QColor>(), expected);
         const QImage frame = window->grabWindow();
         QVERIFY(!frame.isNull());
-        const QPointF center = control->mapToScene(control->boundingRect().center()) * frame.devicePixelRatio();
+        const QPointF center = control->mapToScene(control->boundingRect().center()) * (qreal(frame.width()) / window->width());
         const QColor pixel = frame.pixelColor(qRound(center.x()), qRound(center.y()));
         QVERIFY2(qAbs(pixel.red() - expected.red()) <= 2
                  && qAbs(pixel.green() - expected.green()) <= 2
@@ -398,7 +398,7 @@ void InstanceStateTests::native_focus_capture()
         QTest::qWait(100);
         const QImage frame = window->grabWindow();
         QVERIFY(!frame.isNull());
-        const qreal scale = frame.devicePixelRatio();
+        const qreal scale = qreal(frame.width()) / window->width();
         // Count primary-blue pixels above the row: the external ring must render.
         const QPointF top = control->mapToScene(QPointF(control->width() / 2, -2));
         int bluePixels = 0;

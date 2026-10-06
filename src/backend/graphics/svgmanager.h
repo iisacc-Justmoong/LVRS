@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -13,7 +14,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QUrl;
 
-class SvgManager : public QObject
+class LVRS_EXPORT SvgManager : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(SvgManager)

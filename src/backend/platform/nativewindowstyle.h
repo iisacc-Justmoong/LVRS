@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QColor>
@@ -5,7 +6,7 @@
 #include <QRectF>
 #include <QtQml/qqml.h>
 
-class NativeWindowStyle : public QObject
+class LVRS_EXPORT NativeWindowStyle : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(NativeWindowStyle)

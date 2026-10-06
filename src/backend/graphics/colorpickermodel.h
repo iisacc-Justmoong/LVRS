@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QColor>
@@ -6,7 +7,7 @@
 #include <array>
 
 // State and sRGB channel conversion for ColorPicker. Presentation stays in QML.
-class ColorPickerModel : public QObject
+class LVRS_EXPORT ColorPickerModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ColorPickerModel)

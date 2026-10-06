@@ -104,6 +104,9 @@ set(LVRS_BOOTSTRAP_INSTALL_ROOT
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
+# Resource paths are case sensitive even on a Windows file system.
+set_source_files_properties(resources/iconset/javaScript.svg PROPERTIES QT_RESOURCE_ALIAS "resources/iconset/javascript.svg")
+set_source_files_properties(resources/iconset/nodesTest.svg PROPERTIES QT_RESOURCE_ALIAS "resources/iconset/nodestest.svg")
 if(LVRS_BUILD_TESTS)
     find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
 endif()
@@ -334,6 +337,21 @@ set_target_properties(LVRSCore PROPERTIES
     EXPORT_NAME "LVRS"
 )
 add_library(LVRS::LVRS ALIAS LVRSCore)
+include(GenerateExportHeader)
+generate_export_header(LVRSCore BASE_NAME LVRS EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/lvrs_export.h")
+target_include_directories(LVRSCore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+if(NOT LVRS_BUILD_SHARED_LIBS)
+    target_compile_definitions(LVRSCore PUBLIC LVRS_STATIC_DEFINE)
+endif()
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lvrs_export.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LVRS")
+if(WIN32 AND LVRS_BUILD_SHARED_LIBS)
+    set_target_properties(LVRSCore PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    if(MINGW)
+        target_link_options(LVRSCore PRIVATE "-Wl,--export-all-symbols")
+        # Keep the DLL dependency even in QML-only consumers with no C++ API calls.
+        target_link_options(LVRSCore INTERFACE "LINKER:--undefined=_Z25qInitResources_qmake_LVRSv")
+    endif()
+endif()
 
 if(DEFINED LVRS_SANITIZER_COMPILE_OPTIONS)
     target_compile_options(LVRSCore PRIVATE ${LVRS_SANITIZER_COMPILE_OPTIONS})

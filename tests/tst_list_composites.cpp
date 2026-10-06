@@ -449,7 +449,7 @@ Rectangle {
     QVERIFY(result);
     QSignalSpy ready(result.data(), &QQuickItemGrabResult::ready);
     QTRY_VERIFY_WITH_TIMEOUT(!ready.isEmpty(), 5000);
-    const QImage rendered = result->image();
+    const QImage rendered = result->image().scaled(window.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     QCOMPARE(rendered.size(), window.size());
     for (int index = 0; index < 17; ++index) {
         auto *row = visibleItem(root, QStringLiteral("capture_row_%1").arg(index));

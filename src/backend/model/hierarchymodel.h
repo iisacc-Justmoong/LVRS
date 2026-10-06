@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include "backend/model/modelsource.h"
@@ -10,7 +11,7 @@
 class QAbstractItemModel;
 class QJSValue;
 
-class HierarchyModel : public QObject
+class LVRS_EXPORT HierarchyModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(HierarchyModel)

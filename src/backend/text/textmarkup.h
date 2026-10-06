@@ -1,10 +1,11 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
 #include <QRegularExpression>
 #include <QtQml/qqml.h>
 
-class TextMarkup : public QObject
+class LVRS_EXPORT TextMarkup : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(TextMarkup)

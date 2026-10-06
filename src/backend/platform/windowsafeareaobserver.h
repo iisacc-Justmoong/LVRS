@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -8,7 +9,7 @@ class QScreen;
 class QEvent;
 class QWindow;
 
-class WindowSafeAreaObserver : public QObject
+class LVRS_EXPORT WindowSafeAreaObserver : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(WindowSafeAreaObserver)

@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <functional>
@@ -87,7 +88,7 @@ struct PermissionRequestRunResult {
     QVariantList diagnostics() const;
 };
 
-class PermissionRequestSequencer : public QObject
+class LVRS_EXPORT PermissionRequestSequencer : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList history READ history NOTIFY historyChanged)

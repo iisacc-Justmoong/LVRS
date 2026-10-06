@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -5,7 +6,7 @@
 #include <QVector>
 #include <QtQml/qqml.h>
 
-class ModelUndoStack : public QObject
+class LVRS_EXPORT ModelUndoStack : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ModelUndoStack)

@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -9,7 +10,7 @@
 
 class QQuickWindow;
 
-class RenderingMonitor : public QObject
+class LVRS_EXPORT RenderingMonitor : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(RenderMonitor)

@@ -81,3 +81,6 @@ CMakeLists.txt.user*
 .uic/
 /build*/
 /.build*/
+
+# Figma source icons whose names collide with Makefile ignore patterns.
+!resources/iconset/makefile*.svg

@@ -575,7 +575,8 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
     const QVariantMap holdPayload = holdStartedSpy.constFirst().constFirst().toMap();
     QCOMPARE(holdPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("holdStarted"));
     QCOMPARE(holdPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
-    QVERIFY(holdPayload.value(QStringLiteral("durationMs")).toLongLong() >= 60);
+    QVERIFY2(holdPayload.value(QStringLiteral("durationMs")).toLongLong() >= gestures.holdThresholdMs(),
+             "A hold must not start before the configured duration has elapsed.");
     QVERIFY(holdPayload.value(QStringLiteral("holdActive")).toBool());
 
     QTouchEvent holdEnd(QEvent::TouchEnd,

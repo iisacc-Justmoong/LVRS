@@ -1,10 +1,11 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
 #include <QString>
 #include <QtQml/qqml.h>
 
-class FontPolicy : public QObject
+class LVRS_EXPORT FontPolicy : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(FontPolicy)

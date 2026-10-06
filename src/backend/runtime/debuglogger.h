@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -6,7 +7,7 @@
 
 class RuntimeEvents;
 
-class DebugLogger : public QObject
+class LVRS_EXPORT DebugLogger : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(Debug)

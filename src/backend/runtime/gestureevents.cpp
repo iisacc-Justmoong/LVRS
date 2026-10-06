@@ -114,6 +114,7 @@ GestureEvents::GestureEvents(QObject *parent)
     : QObject(parent)
 {
     m_holdTimer.setSingleShot(true);
+    m_holdTimer.setTimerType(Qt::PreciseTimer);
     connect(&m_holdTimer, &QTimer::timeout, this, &GestureEvents::emitHoldStarted);
 }
 

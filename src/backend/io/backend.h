@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -18,7 +19,7 @@
 
 class RuntimeEvents;
 
-class Backend : public QObject
+class LVRS_EXPORT Backend : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(Backend)

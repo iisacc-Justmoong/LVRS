@@ -1,10 +1,11 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
-class RouteMatcher : public QObject
+class LVRS_EXPORT RouteMatcher : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(RouteMatcher)
@@ -19,4 +20,3 @@ public:
 private:
     static QStringList splitSegments(const QString &normalizedPath);
 };
-

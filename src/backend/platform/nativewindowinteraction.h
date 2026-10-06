@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -9,7 +10,7 @@
 class QEvent;
 class QWindow;
 
-class NativeWindowInteraction : public QObject
+class LVRS_EXPORT NativeWindowInteraction : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(NativeWindowInteraction)

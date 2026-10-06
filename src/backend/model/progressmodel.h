@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -8,7 +9,7 @@
 
 class StateModel;
 
-class ProgressModel : public QObject
+class LVRS_EXPORT ProgressModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ProgressModel)

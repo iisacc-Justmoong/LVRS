@@ -1,5 +1,17 @@
 # LVRS
 
+Windows shared builds export the C++ runtime API as well as QML registration
+symbols. MinGW uses `--export-all-symbols`; MSVC uses CMake's automatic exports.
+`LVRSTests_windows_exports` links and invokes bootstrap and foreground-service
+APIs through the resulting DLL import library.
+MinGW consumers retain the module's resource initializer as a link dependency,
+including QML-only consumers verified by `LVRSTests_import_api`.
+Public QObject classes also use generated DLL import/export annotations so
+pointer-to-member signal connections resolve to the same address across DLLs.
+The Windows export smoke test verifies a typed signal connection and delivery.
+The example aggregate-target check is registered only when `LVRS_BUILD_EXAMPLES`
+is enabled; all independent example configuration checks remain available.
+
 LVRS is a Qt 6.5+ UI framework focused on deterministic rendering, event observability, and reusable QML components.
 
 The repository ships three layers together:

@@ -568,6 +568,8 @@ AbstractButton {
     focusRingOutset: Theme.gap3
     showFocusRing: control.canBecomeActive
     interaction.enabled: control.effectiveEnabled && control.canBecomeActive && !control.dragPreviewActive
+    interaction.hovered: control.effectiveHoverState
+    interaction.pressed: control.effectivePressedState
     contentMotion.pressed: control.effectivePressedState
     surfaceMotion.pressed: control.effectivePressedState
     contentMotion.hovered: control.effectiveHoverState

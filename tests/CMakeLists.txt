@@ -35,8 +35,13 @@ function(uifw_add_test test_name test_source)
     # Test the library and QML produced by this build even after sourcing an
     # installed SDK's env.sh. An inherited loader path can otherwise silently
     # replace LVRSCore (including its embedded QML) with an older installation.
+    if(WIN32)
+        set(_uifw_qpa windows) # Exercise the native Windows font engine.
+    else()
+        set(_uifw_qpa offscreen)
+    endif()
     set(_uifw_test_env
-        "QT_QPA_PLATFORM=offscreen"
+        "QT_QPA_PLATFORM=${_uifw_qpa}"
         "QT_QUICK_CONTROLS_STYLE=Basic"
         "QML_IMPORT_PATH=${CMAKE_BINARY_DIR}"
         "QML2_IMPORT_PATH=${CMAKE_BINARY_DIR}"
@@ -59,6 +64,9 @@ function(uifw_add_test test_name test_source)
 endfunction()
 
 uifw_add_test(LVRSTests_materials tst_materials.cpp)
+if(WIN32)
+    uifw_add_test(LVRSTests_windows_exports tst_windows_exports.cpp)
+endif()
 if(APPLE AND NOT IOS)
     uifw_add_test(LVRSTests_nativewindowblur tst_nativewindowblur.mm)
     target_link_libraries(LVRSTests_nativewindowblur PRIVATE "-framework AppKit")
@@ -124,12 +132,14 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_example_runtime_output_dir.cmake"
 )
 
+if(LVRS_BUILD_EXAMPLES)
 add_test(
     NAME LVRSTests_cmake_example_host_aggregate_target
     COMMAND "${CMAKE_COMMAND}"
         "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_example_host_aggregate_target.cmake"
 )
+endif()
 
 add_test(
     NAME LVRSTests_cmake_app_bootstrap_skip_missing_qt_kit
@@ -157,6 +167,16 @@ uifw_add_test(LVRSTests_examples tst_examples.cpp)
 uifw_add_test(LVRSTests_catalog tst_catalog.cpp)
 uifw_add_test(LVRSTests_debug tst_debug.cpp)
 uifw_add_test(LVRSTests_import_api tst_import_api.cpp)
+if(WIN32)
+    set_property(TEST LVRSTests_import_api APPEND PROPERTY ENVIRONMENT "LVRS_IMPORT_CONTRACT_SET=native")
+    add_test(NAME LVRSTests_import_toggle_pixel COMMAND LVRSTests_import_api toggle_switch_figma_contract_loads)
+    set_tests_properties(LVRSTests_import_toggle_pixel PROPERTIES ENVIRONMENT
+        "QT_QPA_PLATFORM=windows;QT_QUICK_CONTROLS_STYLE=Basic;QT_QUICK_BACKEND=rhi;QSG_RHI_BACKEND=d3d11;QML_IMPORT_PATH=${CMAKE_BINARY_DIR};QT_ENABLE_HIGHDPI_SCALING=0;QT_SCALE_FACTOR=1")
+    add_test(NAME LVRSTests_window_chrome_offscreen COMMAND LVRSTests_import_api
+        window_custom_chrome_interaction_contract_loads)
+    set_tests_properties(LVRSTests_window_chrome_offscreen PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Basic;QT_QUICK_BACKEND=software;QML_IMPORT_PATH=${CMAKE_BINARY_DIR}")
+endif()
 uifw_add_test(LVRSTests_primary_color tst_primary_color.cpp)
 uifw_add_test(LVRSTests_list_composites tst_list_composites.cpp)
 uifw_add_test(LVRSTests_card tst_card.cpp)
@@ -191,7 +211,18 @@ uifw_add_test(LVRSTests_hierarchy_codec tst_hierarchy_codec.cpp)
 uifw_add_test(LVRSTests_hierarchy_interaction tst_hierarchy_interaction.cpp)
 uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
 uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
+if(WIN32)
+    foreach(_pixel_test IN ITEMS LVRSTests_visual_regression LVRSTests_list_composites
+            LVRSTests_slider LVRSTests_instance_state)
+        set_property(TEST ${_pixel_test} APPEND PROPERTY ENVIRONMENT
+            "QT_ENABLE_HIGHDPI_SCALING=0" "QT_SCALE_FACTOR=1")
+    endforeach()
+endif()
 uifw_add_test(LVRSTests_soak_runtime tst_soak_runtime.cpp LABELS "p4;quality;soak;long")
+if(WIN32)
+    target_link_libraries(LVRSTests_performance_gate PRIVATE winmm)
+    target_link_libraries(LVRSTests_soak_runtime PRIVATE winmm)
+endif()
 
 add_test(
     NAME LVRSTests_cmake_install_defaults

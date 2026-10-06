@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QMetaObject>
@@ -11,7 +12,7 @@
 
 class RuntimeEvents;
 
-class GestureEvents : public QObject
+class LVRS_EXPORT GestureEvents : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(GestureEvents)

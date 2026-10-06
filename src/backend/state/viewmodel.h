@@ -1,10 +1,11 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
 #include <QVariantMap>
 #include <QtQml/qqml.h>
 
-class ViewModel : public QObject
+class LVRS_EXPORT ViewModel : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ViewModel)

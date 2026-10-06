@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -10,7 +11,7 @@
 #undef linux
 #endif
 
-class PlatformInfo : public QObject
+class LVRS_EXPORT PlatformInfo : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(Platform)

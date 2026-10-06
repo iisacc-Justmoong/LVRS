@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QElapsedTimer>
@@ -18,7 +19,7 @@
 class QQuickWindow;
 class QQuickItem;
 
-class RuntimeEvents : public QObject
+class LVRS_EXPORT RuntimeEvents : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(RuntimeEvents)

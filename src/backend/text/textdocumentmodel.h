@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QAbstractListModel>
@@ -10,7 +11,7 @@
 
 #include <memory>
 
-class TextDocumentModel : public QAbstractListModel
+class LVRS_EXPORT TextDocumentModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(TextDocumentModel)

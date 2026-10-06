@@ -1,5 +1,7 @@
 #include "backend/runtime/renderquality.h"
 
+constexpr qreal RenderQuality::kForcedSupersampleScale;
+
 #include <QDir>
 #include <QFileInfo>
 #include <QQuickGraphicsConfiguration>

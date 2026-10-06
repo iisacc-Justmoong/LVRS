@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -11,7 +12,7 @@
 
 class ViewModel;
 
-class ViewModelRegistry : public QObject
+class LVRS_EXPORT ViewModelRegistry : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(ViewModels)

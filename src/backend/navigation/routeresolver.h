@@ -1,3 +1,4 @@
+#include "lvrs_export.h"
 #pragma once
 
 #include <QObject>
@@ -9,7 +10,7 @@
 
 #include "backend/navigation/routematcher.h"
 
-class RouteResolver : public QObject
+class LVRS_EXPORT RouteResolver : public QObject
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(RouteResolver)

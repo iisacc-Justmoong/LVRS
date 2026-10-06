@@ -7,6 +7,7 @@
 #include <QtPlugin>
 
 #include "backend/io/backend.h"
+#include "millisecond_timer.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -43,6 +44,8 @@ private slots:
 
 void SoakRuntimeTests::backend_io_dispatch_soak_contract()
 {
+    MillisecondTimerResolution timerResolution;
+    QVERIFY(timerResolution.available());
     const int iterations = envInt("LVRS_SOAK_ITERATIONS", 300, 64, 200000);
     const int workMs = envInt("LVRS_SOAK_WORK_MS", 1, 0, 20);
     const int waitTimeoutMs = envInt("LVRS_SOAK_TIMEOUT_MS", 120000, 10000, 900000);
@@ -76,6 +79,9 @@ void SoakRuntimeTests::backend_io_dispatch_soak_contract()
         };
         const qulonglong requestId = backend.dispatchAsyncTask(QStringLiteral("soak-runtime-task"), payload, 0);
         QVERIFY(requestId > 0);
+        // Keep servicing worker completions while the fixture performs 300
+        // synchronous filesystem writes, as the application event loop does.
+        QCoreApplication::processEvents();
     }
 
     QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.count(), iterations, waitTimeoutMs);
