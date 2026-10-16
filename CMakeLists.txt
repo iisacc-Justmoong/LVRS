@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 project(LVRS VERSION 1.0.1 LANGUAGES CXX)
+# File creation is owned by iiFileProvider.
+find_package(iiFileProvider 0.6 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
+link_libraries(iiFileProvider::iiFileProvider)
+
+
+
+
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -104,9 +111,6 @@ set(LVRS_BOOTSTRAP_INSTALL_ROOT
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
-# Resource paths are case sensitive even on a Windows file system.
-set_source_files_properties(resources/iconset/javaScript.svg PROPERTIES QT_RESOURCE_ALIAS "resources/iconset/javascript.svg")
-set_source_files_properties(resources/iconset/nodesTest.svg PROPERTIES QT_RESOURCE_ALIAS "resources/iconset/nodestest.svg")
 if(LVRS_BUILD_TESTS)
     find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
 endif()
@@ -462,6 +466,10 @@ qt_add_qml_module(LVRSCore
         ${LVRS_RESOURCE_FILES}
 )
 unset(_lvrs_qml_module_options)
+
+# Keep legacy resource URLs while storing each current Figma SVG only once.
+qt_add_resources(LVRS_ICON_ALIAS_SOURCES resources/figma_icon_aliases.qrc)
+target_sources(LVRSCore PRIVATE ${LVRS_ICON_ALIAS_SOURCES})
 
 # LVRSCore is a library target; QML plugin import scanning is performed on
 # consuming app targets via lvrs_configure_qml_app().

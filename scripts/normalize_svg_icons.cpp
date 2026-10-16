@@ -1,7 +1,7 @@
+#include <iiFileProviderDevice.h>
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDirIterator>
-#include <QFile>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     QHash<QString, QString> oldHashes;
     int count = 0;
     while (files.hasNext()) {
-        QFile file(files.next());
+        iiFileProvider::FileDevice file(files.next());
         if (!file.open(QIODevice::ReadOnly)) return 1;
         const QByteArray original = file.readAll();
         file.close();
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
         }
         ++count;
     }
-    QFile manifest(root + "/docs/figma-iconset-manifest.json");
+    iiFileProvider::FileDevice manifest(root + "/docs/figma-iconset-manifest.json");
     if (!manifest.open(QIODevice::ReadOnly)) return 6;
     auto inventory = QJsonDocument::fromJson(manifest.readAll()).object();
     manifest.close();
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     for (qsizetype i = 0; i < icons.size(); ++i) {
         auto icon = icons[i].toObject();
         const QString filename = icon["filename"].toString();
-        QFile file(root + "/resources/iconset/" + filename);
+        iiFileProvider::FileDevice file(root + "/resources/iconset/" + filename);
         const QString absolutePath = QFileInfo(file).absoluteFilePath();
         if (!icon.contains("preResponsiveSha256") && oldHashes.contains(absolutePath))
             icon["preResponsiveSha256"] = oldHashes[absolutePath];
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     inventory["icons"] = icons;
     if (!manifest.open(QIODevice::WriteOnly | QIODevice::Truncate)) return 8;
     manifest.write(QJsonDocument(inventory).toJson(QJsonDocument::Indented));
-    QFile fixture(root + "/tests/fixtures/figma-contract.json");
+    iiFileProvider::FileDevice fixture(root + "/tests/fixtures/figma-contract.json");
     if (!fixture.open(QIODevice::ReadOnly)) return 9;
     QByteArray fixtureBytes = fixture.readAll();
     const auto contract = QJsonDocument::fromJson(fixtureBytes).object();
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
     auto assets = contract["assets"].toObject();
     for (auto it = assets.begin(); it != assets.end(); ++it) {
         if (!it.key().endsWith(".svg")) continue;
-        QFile asset(root + "/resources/" + it.key());
+        iiFileProvider::FileDevice asset(root + "/resources/" + it.key());
         if (!asset.open(QIODevice::ReadOnly)) return 10;
         fixtureBytes.replace(it.value().toString().toLatin1(),
             QCryptographicHash::hash(asset.readAll(), QCryptographicHash::Sha256).toHex());

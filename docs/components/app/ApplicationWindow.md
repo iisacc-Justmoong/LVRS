@@ -77,7 +77,7 @@ LV.ApplicationWindow {
 
 - `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#0A84FF`)
 - `windowColor`
-- `windowBackgroundOpacity`(기본값 0.50, 배경 채우기만)
+- `windowBackgroundOpacity`(기본값 0.66, 중립 배경 채우기에 적용)
 - `backgroundBlurEnabled`(네이티브 백엔드가 지원하면 기본적으로 활성화된다)
 - read-only `backgroundBlurSupported`, `backgroundBlurActive`
 - `forceNativeDarkTitleBar`
@@ -234,6 +234,7 @@ LV.ApplicationWindow {
 - 고체 데스크톱 크롬은 8-영역 네이티브 우선 리사이즈 레이어를 사용하여 동일한 시스템 이동 및 `LV.Window` 와 같은 기능을 포함하며, Qt 에서 Cocoa 가 시스템 리사이즈를 거부할 때 macOS 대체 경로 를 설정합니다. 애플리케이션 소유 히트 영역이 요청 메서드를 직접 호출하는 경우 `windowDragHandleEnabled` 또는 `windowResizeHandlesEnabled` 를 `false` 로 설정하고, `windowDragExclusionItems` 를 사용하여 제목 표시줄 컨트롤을 인터랙티브하게 유지합니다.
 - macOS 에서 솔리드 크롬은 AppKit 의 전체 창 배경 드래깅을 비활성화합니다. 창 이동은 구성된 LVRS 이동 핸들 또는 명시적인 `requestWindowMove()` 호출에 의해만 시작되므로, 페인팅, 텍스트 선택 및 기타 콘텐츠 드래그는 해당 항목에 의해 소유됩니다. `LVRSTests_nativewindowblur::solid_chrome_disables_background_movement` 는 초기 스타일링, 스타일 새로고침 및 Cocoa 와의 네이티브 창 재창조 후 네이티브 플래그를 확인합니다.
 - 유니파이드 툴바는 `nativeTitleBarHeight: 56` 를 설정할 수 있으며, 내용을 y= 0에서 시작할 수 있습니다. 툴바 컨트롤 전에 `nativeTitleBarControlsRect.x + nativeTitleBarControlsRect.width` 를 예약한 후, 애플리케이션의 일반적인 간격을 추가합니다. `windowDragHandleHeight` 행의 동일한 높이로 설정하고 인터랙티브 툴바 항목을 제외합니다. LVRS 는 AppKit 의 실제 버튼과 그들의 네이티브 간격을 유지하며, 리사이즈/재열기 시 기하학을 업데이트하고 풀스크린 중 시스템 레이아웃을 복원합니다. 지원되지 않는 플랫폼은 빈 컨트롤 직사각형을 반환합니다. `LVRSTests_nativewindowblur::unified_titlebar_controls` 는 네이티브 버튼 중심, 타격 영역, 초기화, 리사이즈, 풀스크린 왕복 변환 왕복 변환 및 Cocoa 와 네이티브 창 재생성을 확인합니다.
+- AppKit이 크기 변경·활성화 콜백 이후에 창 버튼을 다시 배치하더라도 `NSWindowDidUpdateNotification`에서 지정한 행의 세로 중심을 복원한다. 이미 맞는 프레임은 다시 설정하지 않아 매 이벤트 루프의 불필요한 레이아웃 변경을 피한다. `unified_titlebar_survives_native_update`는 실제 네이티브 버튼 프레임을 어긋나게 한 뒤 창 업데이트에서 세 버튼의 중심과 클릭 영역이 복원되는지 검사하며, `nativeTitleBarHeight: 0`으로 해제하면 시스템 배치를 유지하는지도 확인한다.
 - `windowMoveAttempted(started)` 및 `windowResizeAttempted(edges, started)`는 플랫폼이 각 포인터 시작 요청을 수락했는지 여부를 보고합니다.
 - 적응형 스캐폴드 메트릭은 이제 대략적인 모바일/데스크톱 제품군 분할에서 추론되는 대신 OS 기준으로 `Platform.runtimeProfile()`에서 제공됩니다.
 - `globalEventListenersEnabled` 및 `autoHookBackendUserEvents`는 독립적입니다. 백엔드 사용자 이벤트 미러링을 활성화해도 전역 리스너가 강제 실행되지는 않습니다.
@@ -280,7 +281,13 @@ LV.ApplicationWindow {
 
 ## 기본 배경 자료
 
-표준 `background` 은 WindowMaterial 으로, 50% 투명도에서 균일한 검정색에 가까운 채색 ( #0B0B0B ) 을 가지며 그라데이션이 없습니다. macOS 에서 활성 네이티브 안개 낀 배경판은 이 창 뒤의 다른 창과 데스크톱도 흐리게 합니다. 창/전경 투명도는 1 로 유지되며, `windowBackgroundOpacity` 는 배경 채색만 제어합니다. `windowColor` 는 테마로 기본값입니다. materialWindowFill ( #0B0B0B ) 은 primaryColor 와 독립적으로 명시적으로 오버라이드할 수 있습니다. 버튼과 선택지는 앱 악센트를 유지합니다. 64px 재료 안개 낀 효과는 캡처된 배경판에 여전히 사용 가능합니다. 배경은 풀 블리드로 유지되며, 외부 테두리/모서리/높이는 네이티브 창 크로스에 위임됩니다. 소비자는 `background` 를 일반적으로 오버라이드할 수 있습니다. [재료](../surfaces/Materials.md)를 참조하세요.
+기본 배경은 [Figma ApplicationWindow 997:3](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=997-3)을 따른다. `#141414` 중립 채색을 `windowBackgroundOpacity`의 기본값 0.66으로 그리고, 그 위에 `primaryColor`를 불투명도 0.04로 균일하게 합성한다. 기본 배경의 방사형 그레디언트 강도는 모두 0이다. 4%는 강조색 레이어에만 적용되며 창과 전경 콘텐츠의 불투명도는 1이다. 투명한 바탕에서 두 레이어의 합성 알파는 `0.04 + 0.66 × 0.96 = 0.6736`이다.
+
+`primaryColor`가 앱 강조색 인자이다. Dreamscapes는 `primaryColor: LV.Theme.defaultPrimary`(파란색 `#0A84FF`), Society는 `primaryColor: LV.Theme.accentGreen`(녹색 `#57965C`)을 지정한다. 실행 중 이 값을 바꾸면 기존 공유 색상 전환을 통해 오버레이도 갱신된다. 앱 이름에 따른 분기는 없다. 보조 창은 앱 테마를 따르며 명시적인 창 강조색은 독립적으로 유지된다.
+
+`windowColor`와 `windowBackgroundOpacity`는 중립 채색과 불투명도를 재정의한다. 강조색 오버레이 강도는 `Theme.applicationWindowAccentOpacity`의 0.04를 사용한다. 기본 배경은 기존 WindowMaterial 렌더러를 재사용하되 방사형 처리를 끄고, 전경 아래에 전체 창 크기의 강조색 레이어를 배치한다. 독립 WindowMaterial과 PanelMaterial은 기존 방사형 재질을 유지한다.
+
+macOS에서는 투명한 Qt 표면 아래의 활성 `NSVisualEffectView`가 창 뒤 콘텐츠를 흐리게 한다. QML 재질 확산은 64 논리 px이며 네이티브 블러 커널은 AppKit이 제어한다. 네이티브 블러를 지원하지 않는 플랫폼은 불투명한 창 바탕 위에 같은 강조색 오버레이를 사용한다. 외곽선과 크롬은 네이티브 창이 담당하며, 소비자는 표준 `background`를 재정의할 수 있다. [재질](../surfaces/Materials.md)을 참조한다.
 
 <a id="shared-motion"></a>
 

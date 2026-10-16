@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QPainter>
+#include <QRegularExpression>
 #include <QSet>
 #include <QSignalSpy>
 #include <QSvgRenderer>
@@ -33,6 +34,7 @@ private slots:
     void svg_manager_error_paths_and_cache_signals();
     void figma_iconset_resources_are_complete_and_renderable();
     void control_variant_resources_are_packaged();
+    void translate_object_preserves_image_alpha();
     void all_svg_icons_scale_and_center();
 };
 
@@ -191,10 +193,14 @@ void SvgManagerTests::figma_iconset_resources_are_complete_and_renderable()
     QVERIFY(manifest.open(QIODevice::ReadOnly));
     const auto inventory = QJsonDocument::fromJson(manifest.readAll()).object();
     const auto icons = inventory.value(QStringLiteral("icons")).toArray();
-    QCOMPARE(icons.size(), 2863);
+    QCOMPARE(icons.size(), 2846);
     QCOMPARE(icons.size(), inventory.value(QStringLiteral("count")).toInt());
+    QCOMPARE(inventory.value(QStringLiteral("componentCount")).toInt(), 2844);
+    QCOMPARE(inventory.value(QStringLiteral("standaloneVectorCount")).toInt(), 2);
 
     QSet<QString> filenames;
+    QSet<QString> nodeIds;
+    int accentedIcons = 0;
     for (const auto &value : icons) {
         const auto icon = value.toObject();
         const QString filename = icon.value(QStringLiteral("filename")).toString();
@@ -202,6 +208,9 @@ void SvgManagerTests::figma_iconset_resources_are_complete_and_renderable()
                      && filename.endsWith(QStringLiteral(".svg"))
                      && !filenames.contains(filename.toCaseFolded()), qPrintable(filename));
         filenames.insert(filename.toCaseFolded());
+        const QString nodeId = icon.value(QStringLiteral("nodeId")).toString();
+        QVERIFY2(!nodeId.isEmpty() && !nodeIds.contains(nodeId), qPrintable(filename));
+        nodeIds.insert(nodeId);
 
         QFile resource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/") + filename);
         QVERIFY2(resource.open(QIODevice::ReadOnly), qPrintable(filename));
@@ -218,10 +227,36 @@ void SvgManagerTests::figma_iconset_resources_are_complete_and_renderable()
         renderer.render(&painter);
         painter.end();
         bool painted = false;
+        bool colored = false;
         for (int y = 0; y < image.height() && !painted; ++y)
             for (int x = 0; x < image.width() && !painted; ++x)
                 painted = qAlpha(image.pixel(x, y)) > 0;
         QVERIFY2(painted, qPrintable(filename));
+        if (icon.contains(QStringLiteral("accentVariableId"))) {
+            for (int y = 0; y < image.height() && !colored; ++y) {
+                for (int x = 0; x < image.width() && !colored; ++x) {
+                    const QColor color = image.pixelColor(x, y);
+                    colored = color.alpha() > 32
+                        && qMax(color.red(), qMax(color.green(), color.blue()))
+                            - qMin(color.red(), qMin(color.green(), color.blue())) > 16;
+                }
+            }
+            QVERIFY2(colored, qPrintable(filename + " lost its Figma accent"));
+            ++accentedIcons;
+        }
+    }
+    QCOMPARE(accentedIcons, 892);
+
+    // Old resource URLs resolve to the current artwork, including new accents.
+    for (const auto &value : inventory.value(QStringLiteral("legacyAliases")).toArray()) {
+        const auto alias = value.toObject();
+        const QString name = alias.value(QStringLiteral("filename")).toString();
+        QFile oldResource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/") + name);
+        QFile currentResource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/")
+                              + alias.value(QStringLiteral("target")).toString());
+        QVERIFY2(oldResource.open(QIODevice::ReadOnly), qPrintable(name));
+        QVERIFY2(currentResource.open(QIODevice::ReadOnly), qPrintable(name));
+        QCOMPARE(oldResource.readAll(), currentResource.readAll());
     }
 }
 
@@ -249,6 +284,35 @@ void SvgManagerTests::control_variant_resources_are_packaged()
         QSvgRenderer renderer(asset.readAll());
         QVERIFY2(renderer.isValid(), qPrintable(name));
     }
+}
+
+void SvgManagerTests::translate_object_preserves_image_alpha()
+{
+    QFile resource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/translateObject.svg"));
+    QVERIFY(resource.open(QIODevice::ReadOnly));
+    const QByteArray svg = resource.readAll();
+    const QRegularExpression embedded(QStringLiteral("data:image/png;base64,([^\"]+)"));
+    const auto match = embedded.match(QString::fromUtf8(svg));
+    QVERIFY(match.hasMatch());
+    const QImage tinted = QImage::fromData(QByteArray::fromBase64(match.captured(1).toLatin1()));
+    const QImage original(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/translate-object-mask.png"));
+    QVERIFY(!tinted.isNull());
+    QVERIFY(!original.isNull());
+    QCOMPARE(tinted.size(), original.size());
+    bool visible = false;
+    for (int y = 0; y < original.height(); ++y) {
+        for (int x = 0; x < original.width(); ++x) {
+            QCOMPARE(tinted.pixelColor(x, y).alpha(), original.pixelColor(x, y).alpha());
+            if (original.pixelColor(x, y).alpha() > 0) {
+                const QColor color = tinted.pixelColor(x, y);
+                QCOMPARE(color.red(), 64);
+                QCOMPARE(color.green(), 182);
+                QCOMPARE(color.blue(), 224);
+                visible = true;
+            }
+        }
+    }
+    QVERIFY(visible);
 }
 
 void SvgManagerTests::all_svg_icons_scale_and_center()
@@ -288,7 +352,7 @@ void SvgManagerTests::all_svg_icons_scale_and_center()
         }
         ++count;
     }
-    QCOMPARE(count, 2890);
+    QCOMPARE(count, 2873);
 }
 
 QTEST_MAIN(SvgManagerTests)

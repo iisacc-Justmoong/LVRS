@@ -1,8 +1,7 @@
+#include <iiFileProviderDevice.h>
 #include "backend/runtime/renderquality.h"
 
 constexpr qreal RenderQuality::kForcedSupersampleScale;
-
-#include <QDir>
 #include <QFileInfo>
 #include <QQuickGraphicsConfiguration>
 #include <QQuickWindow>
@@ -100,9 +99,9 @@ QString resolveDefaultPsoCacheFilePath()
     if (cacheDir.isEmpty())
         cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     if (cacheDir.isEmpty())
-        cacheDir = QDir::tempPath() + QStringLiteral("/lvrs-cache");
+        cacheDir = iiFileProvider::Directory::tempPath() + QStringLiteral("/lvrs-cache");
 
-    QDir dir(cacheDir);
+    iiFileProvider::Directory dir(cacheDir);
     if (!dir.exists())
         dir.mkpath(QStringLiteral("."));
     return dir.filePath(QStringLiteral("lvrs_scenegraph_pso.cache"));

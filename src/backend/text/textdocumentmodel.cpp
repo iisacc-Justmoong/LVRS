@@ -1,8 +1,6 @@
+#include <iiFileProviderDevice.h>
 #include "backend/text/textdocumentmodel.h"
-
-#include <QFile>
 #include <QFileInfo>
-#include <QSaveFile>
 #include <QTextBoundaryFinder>
 #include <QTimer>
 
@@ -312,7 +310,7 @@ bool TextDocumentModel::loadFile(const QString &path)
         return false;
     }
 
-    auto file = std::make_unique<QFile>(targetPath);
+    auto file = std::make_unique<iiFileProvider::FileDevice>(targetPath);
     if (!file->open(QIODevice::ReadOnly)) {
         if (!QFileInfo::exists(targetPath)) {
             cancelLoad();
@@ -717,7 +715,7 @@ QString TextDocumentModel::lineTextForRecord(const LineRecord &record) const
     if (!record.fileBacked)
         return record.text;
 
-    QFile file(m_filePath);
+    iiFileProvider::FileDevice file(m_filePath);
     if (!file.open(QIODevice::ReadOnly))
         return QString();
     if (!file.seek(record.byteOffset))
@@ -909,7 +907,7 @@ void TextDocumentModel::failLoad(const QString &path, const QString &error)
 
 bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
 {
-    QSaveFile file(path);
+    iiFileProvider::SaveFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         if (error)
             *error = file.errorString();

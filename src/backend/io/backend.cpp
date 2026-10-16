@@ -1,3 +1,4 @@
+#include <iiFileProviderDevice.h>
 #include "backend/io/backend.h"
 
 #include "backend/runtime/runtimeevents.h"
@@ -5,11 +6,8 @@
 #include <algorithm>
 #include <QCoreApplication>
 #include <QDateTime>
-#include <QDir>
-#include <QFile>
 #include <QFileInfo>
 #include <QRunnable>
-#include <QSaveFile>
 #include <QStandardPaths>
 #include <QThread>
 
@@ -128,7 +126,7 @@ SaveTextOutcome saveTextFileSync(const QString &path, const QString &text)
         return outcome;
     }
 
-    QSaveFile file(path);
+    iiFileProvider::SaveFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         outcome.error = file.errorString();
         return outcome;
@@ -160,7 +158,7 @@ ReadTextOutcome readTextFileSync(const QString &path)
         return outcome;
     }
 
-    QFile file(path);
+    iiFileProvider::FileDevice file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         outcome.error = file.errorString();
         return outcome;
@@ -209,7 +207,7 @@ EnsureDirOutcome ensureDirSync(const QString &path)
         return outcome;
     }
 
-    QDir dir(path);
+    iiFileProvider::Directory dir(path);
     if (dir.exists()) {
         outcome.ok = true;
         return outcome;
@@ -1668,7 +1666,7 @@ QString Backend::normalizePathForCache(const QString &path) const
     const QString trimmed = path.trimmed();
     if (trimmed.isEmpty())
         return QString();
-    return QDir::cleanPath(trimmed);
+    return iiFileProvider::Directory::cleanPath(trimmed);
 }
 
 bool Backend::isReadCacheEntryExpired(const ReadCacheEntry &entry, qint64 nowMs) const

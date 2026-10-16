@@ -116,7 +116,7 @@ Controls.ApplicationWindow {
                                                          layoutSafeAreaHost.height)
     // Unconfigured auxiliary windows follow the current app theme.
     property color primaryColor: Theme.primaryColor
-    property color windowColor: Theme.materialWindowFill
+    property color windowColor: Theme.applicationWindowFill
     property real windowBackgroundOpacity: Theme.applicationWindowOpacity
     property bool backgroundBlurEnabled: isDesktopPlatform && NativeWindowStyle.backgroundBlurSupported
     readonly property bool backgroundBlurSupported: NativeWindowStyle.backgroundBlurSupported
@@ -238,18 +238,27 @@ Controls.ApplicationWindow {
     }
 
     background: WindowMaterial {
+        id: applicationWindowMaterial
         objectName: "applicationWindowMaterial"
         x: 0
         y: 0
         width: windowRoot.width
         height: windowRoot.height
         color: windowRoot.windowColor
-        primaryColor: windowRoot.primaryColor
         tintOpacity: windowRoot.windowBackgroundOpacity
+        intenseOpacity: 0
+        faintOpacity: 0
         // Native window clipping/chrome owns the outer edge.
         radius: 0
         borderWidth: 0
         shadowOpacity: 0
+
+        Rectangle {
+            objectName: "applicationWindowAccentOverlay"
+            anchors.fill: parent
+            color: applicationWindowMaterial.displayedPrimaryColor
+            opacity: Theme.applicationWindowAccentOpacity
+        }
     }
 
     Binding {

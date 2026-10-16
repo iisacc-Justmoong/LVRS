@@ -1,7 +1,7 @@
+#include <iiFileProviderDevice.h>
 #include "backend/graphics/svgmanager.h"
 
 #include <QBuffer>
-#include <QFile>
 #include <QGuiApplication>
 #include <QImage>
 #include <QNetworkAccessManager>
@@ -255,7 +255,7 @@ qreal SvgManager::resolveScale(qreal requestedScale) const
 QByteArray SvgManager::loadSvgPayload(const QString &sourceUrl)
 {
     if (sourceUrl.startsWith(QStringLiteral(":/"))) {
-        QFile file(sourceUrl);
+        iiFileProvider::FileDevice file(sourceUrl);
         if (!file.open(QIODevice::ReadOnly)) {
             setLastError(file.errorString());
             return QByteArray();
@@ -271,7 +271,7 @@ QByteArray SvgManager::loadSvgPayload(const QString &sourceUrl)
 
     if (parsed.scheme() == QStringLiteral("qrc")) {
         const QString qrcPath = QStringLiteral(":") + parsed.path();
-        QFile file(qrcPath);
+        iiFileProvider::FileDevice file(qrcPath);
         if (!file.open(QIODevice::ReadOnly)) {
             setLastError(file.errorString());
             return QByteArray();
@@ -280,7 +280,7 @@ QByteArray SvgManager::loadSvgPayload(const QString &sourceUrl)
     }
 
     if (parsed.isLocalFile()) {
-        QFile file(parsed.toLocalFile());
+        iiFileProvider::FileDevice file(parsed.toLocalFile());
         if (!file.open(QIODevice::ReadOnly)) {
             setLastError(file.errorString());
             return QByteArray();

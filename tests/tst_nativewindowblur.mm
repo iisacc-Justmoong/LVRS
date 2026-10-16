@@ -26,6 +26,7 @@ class NativeWindowBlurTests : public QObject
 private slots:
     void lifecycle_and_foreground();
     void unified_titlebar_controls();
+    void unified_titlebar_survives_native_update();
     void solid_chrome_disables_background_movement();
 };
 
@@ -195,6 +196,48 @@ LV.ApplicationWindow {
     window->show();
     QVERIFY(QTest::qWaitForWindowExposed(window));
     QTRY_VERIFY(qAbs(controlsRect().center().y() - 28.0) < 0.5);
+}
+
+void NativeWindowBlurTests::unified_titlebar_survives_native_update()
+{
+    if (QGuiApplication::platformName() != QStringLiteral("cocoa"))
+        QSKIP("Native title-bar updates require Cocoa.");
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+LV.ApplicationWindow {
+    width: 900; height: 600; visible: true
+    nativeTitleBarHeight: 56
+})"));
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window && QTest::qWaitForWindowExposed(window));
+    NSView *view = reinterpret_cast<NSView *>(window->winId());
+    NSWindow *nativeWindow = view.window;
+    QTest::qWait(100);
+    // AppKit may reflow its controls after LVRS handled resize/activation.
+    // A later window update must restore their center before drawing.
+    for (int pass = 0; pass < 3; ++pass) {
+        for (NSWindowButton kind : {NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton}) {
+            NSButton *button = [nativeWindow standardWindowButton:kind];
+            [button setFrameOrigin:NSMakePoint(button.frame.origin.x, button.frame.origin.y + 12)];
+        }
+        [nativeWindow update];
+        for (NSWindowButton kind : {NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton}) {
+            NSButton *button = [nativeWindow standardWindowButton:kind];
+            const NSRect frame = [view convertRect:button.bounds fromView:button];
+            const qreal center = view.isFlipped ? NSMidY(frame) : view.bounds.size.height - NSMidY(frame);
+            QVERIFY2(qAbs(center - 28.0) < 0.5, qPrintable(QString("Native control center: %1").arg(center)));
+            NSPoint hit = [button.superview convertPoint:NSMakePoint(NSMidX(button.bounds), NSMidY(button.bounds)) fromView:button];
+            QVERIFY([button hitTest:hit] == button);
+        }
+    }
+    QVERIFY(root->setProperty("nativeTitleBarHeight", 0));
+    NSButton *close = [nativeWindow standardWindowButton:NSWindowCloseButton];
+    const NSRect originalFrame = close.frame;
+    [nativeWindow update];
+    QVERIFY(NSEqualRects(close.frame, originalFrame));
 }
 
 QTEST_MAIN(NativeWindowBlurTests)

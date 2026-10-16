@@ -42,7 +42,7 @@ static char titleBarLayoutKey;
             _originalButtonOrigins[i] = [window standardWindowButton:titleBarButtons[i]].frame.origin;
         NSNotificationCenter *center = NSNotificationCenter.defaultCenter;
         for (NSNotificationName name in @[NSWindowDidResizeNotification, NSWindowDidBecomeKeyNotification,
-                                           NSWindowDidDeminiaturizeNotification])
+                                           NSWindowDidDeminiaturizeNotification, NSWindowDidUpdateNotification])
             [center addObserver:self selector:@selector(updateLayout:) name:name object:window];
         [center addObserver:self selector:@selector(willEnterFullScreen:) name:NSWindowWillEnterFullScreenNotification object:window];
         [center addObserver:self selector:@selector(didExitFullScreen:) name:NSWindowDidExitFullScreenNotification object:window];
@@ -56,10 +56,12 @@ static char titleBarLayoutKey;
     NSRect frame = container.frame;
     frame.origin.y += frame.size.height - containerHeight;
     frame.size.height = containerHeight;
-    container.frame = frame;
+    if (!NSEqualRects(container.frame, frame))
+        container.frame = frame;
     frame = titleBar.frame;
     frame.size.height = barHeight;
-    titleBar.frame = frame;
+    if (!NSEqualRects(titleBar.frame, frame))
+        titleBar.frame = frame;
 }
 - (void)updateLayout:(NSNotification *)notification
 {
@@ -68,13 +70,17 @@ static char titleBarLayoutKey;
             || (_targetWindow.styleMask & NSWindowStyleMaskFullScreen))
         return;
     _updating = YES;
+    // AppKit can reflow the controls after resize/activation callbacks. Its
+    // window-update notification lets us restore the row before it is drawn.
     [self resizeTitleBar:self.height containerHeight:self.height];
     for (int i = 0; i < 3; ++i) {
         NSButton *button = [_targetWindow standardWindowButton:titleBarButtons[i]];
         NSRect frame = button.frame;
         frame.origin.x = self.leftMargin + _originalButtonOrigins[i].x - _originalButtonOrigins[0].x;
         frame.origin.y = (self.height - frame.size.height) * 0.5;
-        button.frame = frame;
+        // Window updates recur each event-loop pass; leave settled frames alone.
+        if (!NSEqualRects(button.frame, frame))
+            button.frame = frame;
     }
     _updating = NO;
 }

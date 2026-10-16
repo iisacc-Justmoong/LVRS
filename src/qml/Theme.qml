@@ -96,27 +96,36 @@ QtObject {
 
     readonly property color window: "#141414"
 
-    // Panel background scale: saturation constrained to 1~3% (brighter steps are more saturated)
-    readonly property color panelBackground01: Qt.rgba(0.04892867058515549, 0.04892867058515549, 0.05038686841726303, 1)
-    readonly property color panelBackground02: Qt.rgba(0.05507083609700203, 0.05517596751451492, 0.05570162087678909, 1)
-    readonly property color panelBackground03: Qt.rgba(0.08394163101911545, 0.08394163101911545, 0.08631309866905212, 1)
-    readonly property color panelBackground04: Qt.rgba(0.09516431391239166, 0.09655113518238068, 0.09793794900178909, 1)
-    readonly property color panelBackground05: Qt.rgba(0.11397916078567505, 0.11664287745952606, 0.11664287745952606, 1)
-    readonly property color panelBackground06: Qt.rgba(0.12302529811859131, 0.12528030574321747, 0.12753531336784363, 1)
-    readonly property color panelBackground07: Qt.rgba(0.1411764770746231, 0.1411764770746231, 0.1411764770746231, 1)
-    readonly property color panelBackground08: Qt.rgba(0.13709451258182526, 0.14029954373836517, 0.14190204441547394, 1)
-    readonly property color panelBackground09: Qt.rgba(0.14820532500743866, 0.15256911516189575, 0.15256911516189575, 1)
-    readonly property color panelBackground10: Qt.rgba(0.1555851548910141, 0.15707255899906158, 0.15855994820594788, 1)
-    readonly property color panelBackground11: Qt.rgba(0.17537428438663483, 0.1819191724061966, 0.18410080671310425, 1)
-    readonly property color panelBackground12: Qt.rgba(0.19355684518814087, 0.1978072077035904, 0.19993239641189575, 1)
+    // Purpose-named panel surfaces preserve the authored RGBA values.
+    readonly property color canvas: Qt.rgba(0.04892867058515549, 0.04892867058515549, 0.05038686841726303, 1)
+    readonly property color surfaceGhost: Qt.rgba(0.05507083609700203, 0.05517596751451492, 0.05570162087678909, 1)
+    readonly property color windowAlt: Qt.rgba(0.08394163101911545, 0.08394163101911545, 0.08631309866905212, 1)
+    readonly property color subSurface: Qt.rgba(0.09516431391239166, 0.09655113518238068, 0.09793794900178909, 1)
+    readonly property color surfaceSolid: Qt.rgba(0.11397916078567505, 0.11664287745952606, 0.11664287745952606, 1)
+    readonly property color surfaceAlt: Qt.rgba(0.12302529811859131, 0.12528030574321747, 0.12753531336784363, 1)
+    readonly property color surfaceInteractive: Qt.rgba(0.1411764770746231, 0.1411764770746231, 0.1411764770746231, 1)
+    readonly property color surfacePanel: Qt.rgba(0.13709451258182526, 0.14029954373836517, 0.14190204441547394, 1)
+    readonly property color surfaceControl: Qt.rgba(0.14820532500743866, 0.15256911516189575, 0.15256911516189575, 1)
+    readonly property color surfaceInput: Qt.rgba(0.1555851548910141, 0.15707255899906158, 0.15855994820594788, 1)
+    readonly property color surfaceInputHover: Qt.rgba(0.17537428438663483, 0.1819191724061966, 0.18410080671310425, 1)
+    readonly property color surfaceRaised: Qt.rgba(0.19355684518814087, 0.1978072077035904, 0.19993239641189575, 1)
 
-    readonly property color windowAlt: panelBackground03
-    readonly property color subSurface: panelBackground04
-    readonly property color surfaceSolid: panelBackground05
-    readonly property color surfaceAlt: panelBackground06
-    readonly property color surfaceGhost: panelBackground02
+    // Compatibility names remain available to existing consumers.
+    readonly property color panelBackground01: canvas
+    readonly property color panelBackground02: surfaceGhost
+    readonly property color panelBackground03: windowAlt
+    readonly property color panelBackground04: subSurface
+    readonly property color panelBackground05: surfaceSolid
+    readonly property color panelBackground06: surfaceAlt
+    readonly property color panelBackground07: surfaceInteractive
+    readonly property color panelBackground08: surfacePanel
+    readonly property color panelBackground09: surfaceControl
+    readonly property color panelBackground10: surfaceInput
+    readonly property color panelBackground11: surfaceInputHover
+    readonly property color panelBackground12: surfaceRaised
 
-    //Text Color (Figma tokens: TitleHeader / Body / Description / Caption / Disabled)
+    // Text colors (Figma: Text/titleHeaderColor, Text/bodyColor, Text/descriptionColor,
+    // Text/captionColor, Text/disabledColor).
 
     readonly property color textTokenBase: "#FFFFFF"
     readonly property real textTokenTitleHeaderOpacity: 0.9
@@ -168,7 +177,7 @@ QtObject {
     readonly property color accent: primary
     readonly property bool usingDefaultPrimary: Qt.colorEqual(primary, defaultPrimary)
     readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted
-        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
+        : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
     readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary
     readonly property color success: "#32d74b"
     readonly property color warning: "#ffd60a"
@@ -186,7 +195,11 @@ QtObject {
     // Primary radial opacity is halved from the original 80% / 22% design.
     readonly property color materialTint: "#141414"
     readonly property color materialWindowFill: "#0B0B0B"
-    readonly property real applicationWindowOpacity: 0.50
+    readonly property real materialWindowOpacity: 0.50
+    // ApplicationWindow, Figma 997:3: neutral diffusion plus a flat app accent.
+    readonly property color applicationWindowFill: "#141414"
+    readonly property real applicationWindowOpacity: 0.66
+    readonly property real applicationWindowAccentOpacity: 0.04
     readonly property real materialDenseOpacity: 0.75
     readonly property real materialGlassOpacity: 0.25
     readonly property real materialDenseBlur: scaleRealMetric(64)
@@ -210,18 +223,35 @@ QtObject {
     readonly property color alertActionBorder: "#596168"
     readonly property color alertDivider: "#363B3F"
     readonly property color alertIconSurface: usingDefaultPrimary ? "#192840"
-        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.16))
+        : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.16))
     readonly property color alertIconBorder: usingDefaultPrimary ? "#244B7E"
-        : Qt.tint(panelBackground07, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.36))
+        : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.36))
     // Material/TextField semantic fills, Figma 114:179.
-    readonly property color inputFieldGlassTint: Qt.rgba(panelBackground10.r, panelBackground10.g,
-                                                        panelBackground10.b, 0.64)
-    readonly property color inputFieldGlassTintDisabled: Qt.rgba(panelBackground10.r, panelBackground10.g,
-                                                                panelBackground10.b, 0.36)
-    readonly property color inputFieldGlassTintInline: Qt.rgba(panelBackground10.r, panelBackground10.g,
-                                                              panelBackground10.b, 0.16)
+    readonly property color inputFieldGlassTint: Qt.rgba(surfaceInput.r, surfaceInput.g,
+                                                        surfaceInput.b, 0.64)
+    readonly property color inputFieldGlassTintDisabled: Qt.rgba(surfaceInput.r, surfaceInput.g,
+                                                                surfaceInput.b, 0.36)
+    readonly property color inputFieldGlassTintInline: Qt.rgba(surfaceInput.r, surfaceInput.g,
+                                                              surfaceInput.b, 0.16)
     readonly property color inputFieldGlassReflection: Qt.rgba(1, 1, 1, 0.018)
     readonly property color strokeSoft: "#D0D7E2"
+
+    // Fixed UI accent palette sampled from the supplied sRGB reference.
+    readonly property color accentPaletteBlue: "#007AFF"
+    readonly property color accentPalettePurple: "#A550A7"
+    readonly property color accentPalettePink: "#F74F9E"
+    readonly property color accentPaletteRed: "#FF5257"
+    readonly property color accentPaletteOrange: "#F7821B"
+    readonly property color accentPaletteYellow: "#FFC600"
+    readonly property color accentPaletteGreen: "#62BA46"
+    readonly property color accentPaletteGray: "#8C8C8C"
+
+    // Flat representative hues from the existing icon artwork palette.
+    readonly property color accentOrange: accentOrangeMuted
+    readonly property color accentBrown: accentBrownMuted
+    readonly property color accentCyan: "#40B6E0"
+    readonly property color accentTeal: "#24A394"
+
     // Accent palette (all fill/stroke colors found in resources/iconset)
     readonly property color accentTransparent: "transparent" // none
     readonly property color accentWhite: "#FFFFFF"
@@ -652,10 +682,10 @@ QtObject {
     //ContextMenu
 
     readonly property color contextMenuSurface: materialTint
-    readonly property color menuDivider: panelBackground08
+    readonly property color menuDivider: surfacePanel
     readonly property color contextMenuDivider: disabledColor
     readonly property color contextMenuItemSelectedBackground: primary
-    readonly property color contextMenuItemInactiveBackground: panelBackground08
+    readonly property color contextMenuItemInactiveBackground: surfacePanel
 
     //Radius
 
@@ -724,21 +754,21 @@ QtObject {
     readonly property string textTitleStyleName: "Bold"
     readonly property int textTitleLineHeight: scaleTextMetric(26)
     readonly property real textTitleLetterSpacing: 0
-    readonly property int textTitle2: scaleTextMetric(22)
-    readonly property int textTitle2Weight: Font.Bold
-    readonly property string textTitle2StyleName: "Bold"
-    readonly property int textTitle2LineHeight: scaleTextMetric(22)
-    readonly property real textTitle2LetterSpacing: 0
+    readonly property int textSubtitle: scaleTextMetric(22)
+    readonly property int textSubtitleWeight: Font.Bold
+    readonly property string textSubtitleStyleName: "Bold"
+    readonly property int textSubtitleLineHeight: scaleTextMetric(22)
+    readonly property real textSubtitleLetterSpacing: 0
     readonly property int textHeader: scaleTextMetric(17)
     readonly property int textHeaderWeight: Font.DemiBold
     readonly property string textHeaderStyleName: "SemiBold"
     readonly property int textHeaderLineHeight: scaleTextMetric(17)
     readonly property real textHeaderLetterSpacing: 0
-    readonly property int textHeader2: scaleTextMetric(15)
-    readonly property int textHeader2Weight: Font.DemiBold
-    readonly property string textHeader2StyleName: "SemiBold"
-    readonly property int textHeader2LineHeight: scaleTextMetric(15)
-    readonly property real textHeader2LetterSpacing: 0
+    readonly property int textSubheader: scaleTextMetric(15)
+    readonly property int textSubheaderWeight: Font.DemiBold
+    readonly property string textSubheaderStyleName: "SemiBold"
+    readonly property int textSubheaderLineHeight: scaleTextMetric(15)
+    readonly property real textSubheaderLetterSpacing: 0
     readonly property int textBody: 13
     readonly property int textBodyWeight: Font.Medium
     readonly property string textBodyStyleName: "Medium"
@@ -755,6 +785,18 @@ QtObject {
     readonly property int textCaptionLineHeight: scaleTextMetric(11)
     readonly property real textCaptionLetterSpacing: 0
 
+    // Previous typography role names remain read-only compatibility aliases.
+    readonly property int textTitle2: textSubtitle
+    readonly property int textTitle2Weight: textSubtitleWeight
+    readonly property string textTitle2StyleName: textSubtitleStyleName
+    readonly property int textTitle2LineHeight: textSubtitleLineHeight
+    readonly property real textTitle2LetterSpacing: textSubtitleLetterSpacing
+    readonly property int textHeader2: textSubheader
+    readonly property int textHeader2Weight: textSubheaderWeight
+    readonly property string textHeader2StyleName: textSubheaderStyleName
+    readonly property int textHeader2LineHeight: textSubheaderLineHeight
+    readonly property real textHeader2LetterSpacing: textSubheaderLetterSpacing
+
     readonly property int textDisabled: textCaption
     readonly property int textDisabledWeight: textCaptionWeight
     readonly property string textDisabledStyleName: textCaptionStyleName
@@ -764,15 +806,15 @@ QtObject {
     readonly property int textOverline: textCaption
     readonly property int textOverlineWeight: textCaptionWeight
     readonly property string textOverlineStyleName: textCaptionStyleName
-    readonly property int textDisplay: textTitle2
-    readonly property int textDisplayWeight: textTitle2Weight
-    readonly property string textDisplayStyleName: textTitle2StyleName
+    readonly property int textDisplay: textSubtitle
+    readonly property int textDisplayWeight: textSubtitleWeight
+    readonly property string textDisplayStyleName: textSubtitleStyleName
     readonly property int textDisplaySm: textHeader
     readonly property int textDisplaySmWeight: textHeaderWeight
     readonly property string textDisplaySmStyleName: textHeaderStyleName
-    readonly property int textBodyLg: textHeader2
-    readonly property int textBodyLgWeight: textHeader2Weight
-    readonly property string textBodyLgStyleName: textHeader2StyleName
+    readonly property int textBodyLg: textSubheader
+    readonly property int textBodyLgWeight: textSubheaderWeight
+    readonly property string textBodyLgStyleName: textSubheaderStyleName
 
     function weightForTextSize(pixelSize) {
         return FontPolicy.weightForTextSize(pixelSize, textBodyWeight)
