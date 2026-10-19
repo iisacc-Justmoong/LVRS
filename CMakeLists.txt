@@ -354,6 +354,9 @@ if(WIN32 AND LVRS_BUILD_SHARED_LIBS)
         target_link_options(LVRSCore PRIVATE "-Wl,--export-all-symbols")
         # Keep the DLL dependency even in QML-only consumers with no C++ API calls.
         target_link_options(LVRSCore INTERFACE "LINKER:--undefined=_Z25qInitResources_qmake_LVRSv")
+    elseif(MSVC)
+        # QML-only applications must load the DLL even without C++ API calls.
+        target_link_options(LVRSCore INTERFACE "LINKER:/INCLUDE:?qInitResources_qmake_LVRS@@YAHXZ")
     endif()
 endif()
 

@@ -22,11 +22,11 @@ private slots:
 
 static QByteArray fixture(const QByteArray &body = {}, bool defaultContent = true)
 {
-    const QByteArray content = defaultContent ? R"(
+    const QByteArray content = defaultContent ? QByteArray(R"(
         contentComponent: Component {
             Rectangle { objectName: "providedView"; implicitWidth: 180; implicitHeight: 80; color: "#3A4050" }
         }
-)" : QByteArray();
+)") : QByteArray();
     return R"(
 import QtQuick
 import QtQuick.Controls as Controls
