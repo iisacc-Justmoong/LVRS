@@ -1,5 +1,7 @@
 # LVRS
 
+[Windows 빌드 및 실행](docs/WindowsBuildAndRun.md)
+
 Windows shared builds retain the LVRS DLL dependency for QML-only consumers on
 both MSVC and MinGW. The native resource initialization symbol is retained at
 link time so QML types register even when no C++ LVRS API is called. The Windows

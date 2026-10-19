@@ -1,6 +1,6 @@
 # Windows 검증
 
-Qt 6.8.3의 MinGW 키트와 Ninja를 사용하며 생성물은 `build/`에 둔다. DLL 소비자와 QML 가져오기, SVG 렌더링, 텍스트 편집 및 성능 테스트를 실제 실행한다.
+현재 검증 구성은 Qt 6.8.3 MSVC 2022 키트와 MSVC x64 Ninja이며 생성물은 `build/`에 둔다. DLL 소비자와 QML 가져오기, SVG 렌더링, 텍스트 편집 및 성능 테스트를 실제 실행한다.
 
 누락된 `makefile`, `makefileApp`, `makefileToolWindow` 아이콘은 원본 Figma의 Iconset 페이지에서 다시 내보냈다. 세 원본 SVG의 해시는 기존 manifest의 `preResponsiveSha256`와 일치한다. 고정 크기를 반응형 루트 속성으로 변경한 현재 파일의 해시를 검증 목록에 반영하였다. 원본 노드는 `207:34377`, `207:34374`, `207:34152`이다. Makefile 패턴 때문에 다시 누락되지 않도록 Git 추적 예외를 추가하였다.
 
@@ -27,3 +27,5 @@ HierarchyItem의 interaction 상태는 행의 effectiveHoverState 및 effectiveP
 HierarchyItem의 native fixture 좌표는 창 노출과 초기 layout이 완료된 뒤 계산한다. 초기 visible 상태만으로 좌표를 계산하던 DPI/layout 경쟁을 제거하였다.
 
 Hold 제스처의 단발 timer는 Qt::PreciseTimer를 사용한다. 기본 CoarseTimer가 임계 시간보다 최대 5% 먼저 만료되어 60 ms hold가 조기에 시작될 수 있는 문제를 수정하였다. 실제 emitted duration이 설정된 holdThresholdMs 이상인지 검사하며 기존 상한과 입력 계약을 유지한다. Qt timer의 조기 만료 계약은 https://doc.qt.io/qt-6.8/qtimer.html#accuracy-and-timer-resolution 에서 확인하였다.
+
+최신 MSVC 구성과 실제 실행 결과는 [Windows 빌드 및 실행](WindowsBuildAndRun.md)에 기록한다. 이 문서의 개별 호환 구현 설명을 이번 전체 실행의 성공 증거로 대신하지 않는다.

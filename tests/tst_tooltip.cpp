@@ -244,6 +244,12 @@ void TooltipTests::hover_delay_timeout_and_escape()
     tip->setProperty("delay", 100);
     tip->setProperty("timeout", 400);
     tip->setProperty("automatic", true);
+#ifdef Q_OS_WIN
+    // Native hover delivery requires activation, beyond window exposure.
+    window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(window));
+#endif
+    QTest::mouseMove(window, QPoint(20, 20));
     const QPoint point = target->mapToScene(target->boundingRect().center()).toPoint();
     QTest::mouseMove(window, point);
     QVERIFY(!tip->property("visible").toBool());

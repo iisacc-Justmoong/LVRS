@@ -215,6 +215,9 @@ uifw_add_test(LVRSTests_hierarchy_codec tst_hierarchy_codec.cpp)
 uifw_add_test(LVRSTests_hierarchy_interaction tst_hierarchy_interaction.cpp)
 uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
 uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
+  # The shared pixel golden is a raster reference. GPU backends use different
+  # rounded-edge tessellation; component/effect tests still run on native RHI.
+  set_property(TEST LVRSTests_visual_regression APPEND PROPERTY ENVIRONMENT "QT_QUICK_BACKEND=software")
 if(WIN32)
     foreach(_pixel_test IN ITEMS LVRSTests_visual_regression LVRSTests_list_composites
             LVRSTests_slider LVRSTests_instance_state)

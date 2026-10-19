@@ -13,6 +13,7 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QSignalSpy>
+#include <cmath>
 #include "test_utils.h"
 
 class FigmaParityTests : public QObject
@@ -37,12 +38,28 @@ private slots:
     void button_states_and_activation();
     void footer_overrides();
     void material_inner_highlight();
+    void text_layout_keeps_design_metrics();
 private:
     QJsonObject fixture;
     QJsonObject themeFixture;
     QHash<QString, QJsonObject> themeVariablesByProperty;
     QHash<QString, QJsonObject> themeVariablesById;
 };
+
+void FigmaParityTests::text_layout_keeps_design_metrics()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> label(TestUtils::createFromQml(engine,
+        "import LVRS as LV\nLV.Label { text: 'Button'; style: body }"));
+    QVERIFY(label);
+    QCOMPARE(label->property("font").value<QFont>().hintingPreference(), QFont::PreferNoHinting);
+    const auto width = label->property("implicitWidth").toReal();
+    QCOMPARE(width, std::ceil(width));
+    const auto rendering = label->property("renderType").toInt();
+    label->setProperty("renderType", rendering == 0 ? 1 : 0);
+    QCOMPARE(label->property("implicitWidth").toReal(), width);
+}
 
 void FigmaParityTests::initTestCase()
 {
@@ -616,15 +633,19 @@ Controls.ApplicationWindow {
     QTest::qWait(150);
     auto frame = window->grabWindow();
     QVERIFY(!frame.isNull());
+    const auto capture = qEnvironmentVariable("LVRS_MATERIAL_CAPTURE_PATH");
+    if (!capture.isEmpty()) QVERIFY(frame.save(capture));
     const qreal ratio = qreal(frame.width()) / window->width();
-    const auto top = frame.pixelColor(qRound(100 * ratio), qRound(20.5 * ratio));
+    // QImage indices address pixel cells. Round-up selects the next row on a
+    // 1x display and misses this exactly one-logical-pixel inset highlight.
+    const auto top = frame.pixelColor(qFloor(100 * ratio), qFloor(20.5 * ratio));
     const auto body = frame.pixelColor(qRound(100 * ratio), qRound(24 * ratio));
-    QVERIFY2(top.red() > body.red() + 20, qPrintable(QString("Top %1, body %2").arg(top.red()).arg(body.red())));
+    QVERIFY2(top.red() > body.red() + 20, qPrintable(QString("Top %1, body %2; size %3x%4; DPR %5").arg(top.red()).arg(body.red()).arg(frame.width()).arg(frame.height()).arg(window->devicePixelRatio())));
     material->setProperty("density", 0);
     QCOMPARE(material->property("innerHighlightOpacity").toReal(), 0.06);
     QTest::qWait(150);
     frame = window->grabWindow();
-    const auto denseTop = frame.pixelColor(qRound(100 * ratio), qRound(20.5 * ratio));
+    const auto denseTop = frame.pixelColor(qFloor(100 * ratio), qFloor(20.5 * ratio));
     QVERIFY(denseTop.red() < top.red() - 10);
 }
 

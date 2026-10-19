@@ -444,10 +444,17 @@ if(LVRS_BUILD_SHARED_LIBS)
 endif()
 
 # Keep the public QML resource URLs stable after moving sources into src/.
-foreach(_lvrs_resource IN LISTS LVRS_QML_FILES LVRS_COMPONENT_RESOURCE_FILES)
+foreach(_lvrs_resource IN LISTS LVRS_QML_FILES LVRS_RESOURCE_FILES)
     get_source_file_property(_lvrs_existing_alias "${_lvrs_resource}" QT_RESOURCE_ALIAS)
     if(NOT _lvrs_existing_alias)
         string(REGEX REPLACE "^src/" "" _lvrs_resource_alias "${_lvrs_resource}")
+        # QFile resource lookup is case-sensitive even on Windows. These two
+        # existing source spellings differ from the public Figma manifest URLs.
+        if(_lvrs_resource_alias STREQUAL "resources/iconset/javaScript.svg")
+            set(_lvrs_resource_alias "resources/iconset/javascript.svg")
+        elseif(_lvrs_resource_alias STREQUAL "resources/iconset/nodesTest.svg")
+            set(_lvrs_resource_alias "resources/iconset/nodestest.svg")
+        endif()
         set_source_files_properties("${_lvrs_resource}" PROPERTIES QT_RESOURCE_ALIAS "${_lvrs_resource_alias}")
     endif()
 endforeach()

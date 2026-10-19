@@ -136,7 +136,7 @@ Item {
     property alias textFormat: textNode.textFormat
     property alias linkColor: textNode.linkColor
 
-    implicitWidth: textNode.implicitWidth
+    implicitWidth: Math.ceil(textNode.implicitWidth)
     implicitHeight: textNode.implicitHeight
 
     Text {
@@ -147,6 +147,7 @@ Item {
         font.pixelSize: control.stylePixelSize
         font.weight: control.styleWeight
         font.styleName: control.styleName
+        font.hintingPreference: Font.PreferNoHinting
         font.letterSpacing: control.styleLetterSpacing
         lineHeight: control.styleLineHeight
         lineHeightMode: Text.FixedHeight
