@@ -420,3 +420,11 @@ Regression checks: `sh tests/test_install_wrapper.sh` and
 They cover system environment inheritance, ignored sibling toolchains, explicit
 overrides, argument boundaries, preservation of the
 Cargo executable during CMake cleanup, and recreation of a missing build directory.
+
+## License
+
+SPDX-License-Identifier: MIT
+
+The original code and documentation in this repository are licensed under the
+[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
+weights retain their respective licenses.
