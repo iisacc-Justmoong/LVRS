@@ -18,7 +18,7 @@ Item {
     property alias previousColor: colorState.previousColor
     property bool showRecentColors: true
     property bool showActions: true
-    property var recentColors: ["#7A5AF8", "#0A84FF", "#32D7E8", "#38D996", "#FFD65A", "#FF9F45", "#FF647C", "#C28AFF"]
+    property var recentColors: [Theme.accentBlue, Theme.accentRed, Theme.accentGreen, Theme.accentYellow, Theme.accentPurple, Theme.accentRose, Theme.accentOrange, Theme.accentBrown, Theme.accentCyan, Theme.accentTeal]
     property string applyText: qsTr("Apply")
     property string cancelText: qsTr("Cancel")
     property real padding: Theme.gap12
@@ -62,6 +62,7 @@ Item {
     ColorPickerModel {
         id: colorState
         objectName: "colorPicker_state"
+        color: Theme.accentPurple
         onColorEdited: function (color) {
             root.colorEdited(color);
         }
@@ -365,16 +366,20 @@ Item {
                 text: qsTr("Recent")
             }
             Row {
+                id: recentRow
                 x: 48
                 spacing: Theme.gap8
                 Repeater {
-                    model: root.recentColors.slice(0, 8)
+                    id: recentPalette
+                    model: root.recentColors.slice(0, 10)
                     delegate: AbstractButton {
                         id: recentButton
                         required property color modelData
                         required property int index
                         objectName: "colorPicker_recent_" + index
-                        width: Math.max(1, (content.width - 48 - 56) / 8)
+                        width: Math.max(1, (content.width - 48
+                            - Math.max(0, recentPalette.count - 1) * recentRow.spacing)
+                            / Math.max(1, recentPalette.count))
                         height: 20
                         Accessible.name: qsTr("Recent color %1").arg(String(modelData))
                         onClicked: colorState.editColor(modelData)

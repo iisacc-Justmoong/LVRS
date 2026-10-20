@@ -1,0 +1,195 @@
+{
+  "source": "figma-authored-nodes",
+  "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
+  "pageId": "116:13",
+  "capturedOn": "2026-10-19",
+  "colors": [
+    {
+      "property": "accentBlue",
+      "nodeId": "1477:30",
+      "variableId": "VariableID:1305:76",
+      "rgba": {
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
+        "b": 1,
+        "a": 1
+      },
+      "hex": "#1582FF",
+      "previousHex": "#548AF7"
+    },
+    {
+      "property": "accentRed",
+      "nodeId": "1477:31",
+      "variableId": "VariableID:1305:77",
+      "rgba": {
+        "r": 1,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
+        "a": 1
+      },
+      "hex": "#FF4646",
+      "previousHex": "#DB5C5C"
+    },
+    {
+      "property": "accentGreen",
+      "nodeId": "1477:32",
+      "variableId": "VariableID:1305:78",
+      "rgba": {
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
+        "a": 1
+      },
+      "hex": "#66FF48",
+      "previousHex": "#57965C"
+    },
+    {
+      "property": "accentYellow",
+      "nodeId": "1477:33",
+      "variableId": "VariableID:1305:79",
+      "rgba": {
+        "r": 1,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
+        "a": 1
+      },
+      "hex": "#FFD427",
+      "previousHex": "#F2C55C"
+    },
+    {
+      "property": "accentPurple",
+      "nodeId": "1477:34",
+      "variableId": "VariableID:1305:80",
+      "rgba": {
+        "r": 0.5275065302848816,
+        "g": 0.291259765625,
+        "b": 1,
+        "a": 1
+      },
+      "hex": "#874AFF",
+      "previousHex": "#A571E6"
+    },
+    {
+      "property": "accentRose",
+      "nodeId": "1477:36",
+      "variableId": "VariableID:1305:81",
+      "rgba": {
+        "r": 0.975510835647583,
+        "g": 0.26653972268104553,
+        "b": 0.4437825083732605,
+        "a": 1
+      },
+      "hex": "#F94471",
+      "previousHex": "#E55765"
+    },
+    {
+      "property": "accentOrange",
+      "nodeId": "1477:35",
+      "variableId": "VariableID:1305:82",
+      "rgba": {
+        "r": 1,
+        "g": 0.47672274708747864,
+        "b": 0.15144230425357819,
+        "a": 1
+      },
+      "hex": "#FF7A27",
+      "previousHex": "#C77D55"
+    },
+    {
+      "property": "accentBrown",
+      "nodeId": "1477:37",
+      "variableId": "VariableID:1305:83",
+      "rgba": {
+        "r": 0.2616060674190521,
+        "g": 0.13824503123760223,
+        "b": 0.09279626607894897,
+        "a": 1
+      },
+      "hex": "#432318",
+      "previousHex": "#45322B"
+    },
+    {
+      "property": "accentCyan",
+      "nodeId": "1477:38",
+      "variableId": "VariableID:1305:84",
+      "rgba": {
+        "r": 0.12926307320594788,
+        "g": 0.8258525729179382,
+        "b": 1,
+        "a": 1
+      },
+      "hex": "#21D3FF",
+      "previousHex": "#40B6E0"
+    },
+    {
+      "property": "accentTeal",
+      "nodeId": "1477:40",
+      "variableId": "VariableID:1305:85",
+      "rgba": {
+        "r": 0,
+        "g": 0.7790151238441467,
+        "b": 0.8655723929405212,
+        "a": 1
+      },
+      "hex": "#00C7DD",
+      "previousHex": "#24A394"
+    }
+  ],
+  "legacyAliases": {
+    "accentPaletteBlue": "accentBlue",
+    "accentPalettePurple": "accentPurple",
+    "accentPalettePink": "accentRose",
+    "accentPaletteRed": "accentRed",
+    "accentPaletteOrange": "accentOrange",
+    "accentPaletteYellow": "accentYellow",
+    "accentPaletteGreen": "accentGreen"
+  },
+  "replacements": {
+    "#548AF7": "accentBlue",
+    "#DB5C5C": "accentRed",
+    "#57965C": "accentGreen",
+    "#F2C55C": "accentYellow",
+    "#A571E6": "accentPurple",
+    "#E55765": "accentRose",
+    "#C77D55": "accentOrange",
+    "#45322B": "accentBrown",
+    "#40B6E0": "accentCyan",
+    "#24A394": "accentTeal",
+    "#007AFF": "accentBlue",
+    "#A550A7": "accentPurple",
+    "#F74F9E": "accentRose",
+    "#FF5257": "accentRed",
+    "#F7821B": "accentOrange",
+    "#FFC600": "accentYellow",
+    "#62BA46": "accentGreen",
+    "#0A84FF": "accentBlue",
+    "#32D74B": "accentGreen",
+    "#FFD60A": "accentYellow",
+    "#FF453A": "accentRed",
+    "#027DFF": "accentBlue",
+    "#328CF9": "accentBlue"
+  },
+  "derivedReplacements": {
+    "#25324D": {
+      "r": 0.12618358505561073,
+      "g": 0.23337636029019077,
+      "b": 0.3558823529411765,
+      "a": 1
+    },
+    "#192840": {
+      "r": 0.13158102384735557,
+      "g": 0.20018439999748677,
+      "b": 0.27858823529411764,
+      "a": 1
+    },
+    "#244B7E": {
+      "r": 0.1195867154212559,
+      "g": 0.27394431175905115,
+      "b": 0.45035294117647057,
+      "a": 1
+    }
+  },
+  "neutralCompatibility": {
+    "accentPaletteGray": "#8C8C8C"
+  }
+}

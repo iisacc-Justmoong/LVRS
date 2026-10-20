@@ -70,6 +70,7 @@
 - 헤더 개체는 `type`, `valueType`, `cellType` 또는 `dataType`를 선언할 수 있습니다.
 - 기본 헤더는 해당 값에서 `string`, `int`, `float` 또는 `bool`를 추론합니다.
 - `visibleCells()`는 `x`, `y`, `width` 및 `height`를 사용하여 평면화된 렌더링 모델을 반환하고 포함된 병합 멤버를 제외합니다.
+- 병합 범위의 종료 행에서는 해당 범위가 더 이상 셀을 가리지 않는다. 명시적인 병합 멤버 표시는 별도로 유지한다. `LVRSTests_navigation_state::table_projection_matches_public_cell_queries`는 종료 직전·종료 행의 표시 셀 수와 명시적 멤버 표시를 검사한다.
 - `count`/`get(index)`가 있는 객체를 포함하여 배열 및 목록과 같은 객체를 표시할 수 있습니다.
 - C++ 항목 모델은 모델 개체를 `rows`에 할당하여 직접 표시할 수 있습니다.
 - `setCellValue(rowIndex, columnIndex, value)`는 표준 `QAbstractItemModel::setData(index, coercedValue, Qt::EditRole)` 경로를 통해 C++ 항목 모델 행을 작성합니다. 모델이 `value`, `edit` 또는 `text` 역할을 노출하는 경우 해당 역할은 `Qt::EditRole` 이후에 시도됩니다.

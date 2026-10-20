@@ -4,35 +4,23 @@ This document records the Figma-first color and typography contract for the LVRS
 GUI theme. The authoritative captured data is
 [`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json),
 from the [LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS).
-The initial snapshot was captured at `2026-10-08 15:05:38 UTC` and contained
-**69 core variables: 33 colors and 36 typography variables**, plus **seven text
-styles**. The 2026-10-09 attached-palette extension adds eight named, opaque
-colors. The current fixture was captured at `2026-10-09 00:35:00 UTC` and
-contains **77 variables: 41 colors and the same 36 typography variables**. The
-saved readback passes validation and preserves every original variable and text
-style. The eight source properties are registered; the full source build and
-all 56 CTest targets passed. The initial 69-variable evidence is retained below
-separately from the current 77-variable results.
+The 2026-10-19 accent revision uses the ten user-selected swatches on the Color page as its color authority. The fixture retains **77 variables: 41 colors and 36 typography variables**, plus **seven text styles**. All 41 color variables were read back after the update. Existing variable IDs and names, typography and style bindings are retained. Component bounds are retained; ColorPicker recent-color cells share the same row width across ten swatches. The authored RGBA values and source-node mapping are also recorded in [`accent-palette.json`](../tests/fixtures/accent-palette.json).
 
-The source mapping is `src/qml/Theme.qml`. The fixture records the saved design;
-source build and test evidence is recorded separately below. On 2026-10-09 the
-initial full source build succeeded and all 56 CTest targets passed. The 133
-initial Figma contract rows passed. Installed consumers, Dreamscapes/Society application runs
-and Figma library publication were not verified. No non-GUI SDK dependency is
-changed by this contract.
+The source mapping is `src/qml/Theme.qml`. Hex values below are rounded display values; the canonical QML properties use original floating-point `Qt.rgba` values. Tests compare those channels at QColor precision. Building and testing this checkout is separate from updating an installed SDK. The user performs `lvrs install` for this revision.
 
 ## Scope and naming
 
 - `Theme Colors` contains 13 panel/window colors, six text colors, four action
-  colors and 18 accent colors after the attached-palette extension: ten original
-  accents and eight image-sampled palette colors. Names express roles and color
-  names rather than a new numbered color scale.
+  colors and 18 named accent properties: ten canonical colors, seven compatibility
+  aliases and one neutral Gray. Names express roles and color names.
 - `Theme Typography` contains a shared family and seven five-property recipes.
 - Existing IDs are retained when an existing variable or style is renamed. Old
   QML panel and typography property names remain compatibility aliases.
 - Existing control-specific fills, pressed/selected state overrides, materials,
   icon-derived colors and platform-specific tokens are outside the core inventory.
-  Their absence from the core set does not authorize deleting them.
+  Their absence from the core set does not authorize deleting them. Existing
+  paints that used the replaced accents, including their opacity stops and
+  composites, follow the new colors while retaining their state behavior.
 - The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**
   `Theme.<property>` references. It is not CSS syntax or a web-only implementation.
 
@@ -101,89 +89,54 @@ is fully opaque. They describe text opacity independently from a text-size recip
 | `Text/disabledColor` | `Theme.disabledColor` | `0.30000001192092896` | `VariableID:44:462` |
 | `Text/textTokenBase` | `Theme.textTokenBase` | `1` | `VariableID:1305:75` |
 
-| Figma variable | QML property | Normalized RGBA | Retained ID |
+| Figma variable | QML property | Canonical alias | Retained ID |
 | --- | --- | --- | --- |
-| `Action/primary` | `Theme.primary` | `(0.03921568766236305, 0.5176470875740051, 1, 1)` | `VariableID:44:463` |
-| `Action/success` | `Theme.success` | `(0.19607843458652496, 0.843137264251709, 0.29411765933036804, 1)` | `VariableID:44:464` |
-| `Action/warning` | `Theme.warning` | `(1, 0.8392156958580017, 0.03921568766236305, 1)` | `VariableID:44:465` |
-| `Action/danger` | `Theme.danger` | `(1, 0.2705882489681244, 0.22745098173618317, 1)` | `VariableID:44:466` |
+| `Action/primary` | `Theme.primary` | `Accent/accentBlue` | `VariableID:44:463` |
+| `Action/success` | `Theme.success` | `Accent/accentGreen` | `VariableID:44:464` |
+| `Action/warning` | `Theme.warning` | `Accent/accentYellow` | `VariableID:44:465` |
+| `Action/danger` | `Theme.danger` | `Accent/accentRed` | `VariableID:44:466` |
 
-`Action/primary` records the default app primary `#0A84FF`. At runtime,
-`ApplicationWindow.primaryColor` configures the mutable `Theme.primaryColor`.
-`Theme.primary` and `Theme.accent` expose that app value. Derived action tints
-follow the existing primary-color behavior. This does not replace the fixed
-original accent blue, whose value is `#548AF7`.
+`Action/primary` records the default Blue. `ApplicationWindow.primaryColor` still configures the mutable `Theme.primaryColor`; `Theme.primary` and `Theme.accent` expose that app value. Primary overlays and 25%/16%/36% surface composites follow it, including custom alpha. Status colors and canonical accent properties remain fixed when app branding changes.
 
-## Ten original accent colors
+<a id="ten-original-accent-colors"></a>
 
-The following ten original colors remain part of the visible Figma `Accent` core
-and map to named QML `color` properties. Hexadecimal text is a readable 8-bit presentation;
-the fixture retains the actual floating RGBA oracle. This core inventory is
-separate from the existing extracted icon-color list.
+## Ten authored accent colors
 
-| Figma variable | QML property | Hex display | Retained ID |
+The ten swatches supplied by the user replace the previous canonical palette in place. Existing variable IDs and public property names are retained. Every alpha is 1. The exact floating-point oracle is `authoredAccentPalette.colors` in the fixture; HEX is for display and static SVG paints.
+
+| Figma variable / QML property | HEX display | Source node | Retained variable ID |
 | --- | --- | --- | --- |
-| `Accent/accentBlue` | `Theme.accentBlue` | `#548AF7` | `VariableID:1305:76` |
-| `Accent/accentRed` | `Theme.accentRed` | `#DB5C5C` | `VariableID:1305:77` |
-| `Accent/accentGreen` | `Theme.accentGreen` | `#57965C` | `VariableID:1305:78` |
-| `Accent/accentYellow` | `Theme.accentYellow` | `#F2C55C` | `VariableID:1305:79` |
-| `Accent/accentPurple` | `Theme.accentPurple` | `#A571E6` | `VariableID:1305:80` |
-| `Accent/accentRose` | `Theme.accentRose` | `#E55765` | `VariableID:1305:81` |
-| `Accent/accentOrange` | `Theme.accentOrange` | `#C77D55` | `VariableID:1305:82` |
-| `Accent/accentBrown` | `Theme.accentBrown` | `#45322B` | `VariableID:1305:83` |
-| `Accent/accentCyan` | `Theme.accentCyan` | `#40B6E0` | `VariableID:1305:84` |
-| `Accent/accentTeal` | `Theme.accentTeal` | `#24A394` | `VariableID:1305:85` |
+| `Accent/accentBlue` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |
+| `Accent/accentRed` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |
+| `Accent/accentGreen` / `Theme.accentGreen` | `#66FF48` | `1477:32` | `VariableID:1305:78` |
+| `Accent/accentYellow` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |
+| `Accent/accentPurple` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |
+| `Accent/accentRose` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |
+| `Accent/accentOrange` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |
+| `Accent/accentBrown` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |
+| `Accent/accentCyan` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |
+| `Accent/accentTeal` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |
 
-`accentOrange` and `accentBrown` expose the existing values of
-`accentOrangeMuted` and `accentBrownMuted`; the old public properties remain.
-`accentCyan` and `accentTeal` register existing original palette colors.
-The existing `accentPaletteTokens` array retains all **386** extracted entries,
-their order and the `{ name: string, color: string }` schema. Its `color` values
-remain `#HEX` strings; `accentPaletteTokenCount` remains `386`. The named
-`Theme.accent*` properties are QML colors, which are distinct from those strings.
-Do not shrink the compatibility array to the core accents or append the new
-palette colors to it. No additional abstract list is needed for eight named
-properties.
-No `50..900` numeric palette is introduced.
+`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.
 
-## Eight attached palette colors
+<a id="eight-attached-palette-colors"></a>
 
-The 2026-10-09 user-attached image specifies eight additional accent colors in
-this left-to-right order. The editable
-[palette reference](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1325-10&m=dev)
-contains eight 48-pixel circles, each bound to its corresponding saved variable. The 590 × 78 PNG declares sRGB metadata. Each swatch
-was sampled in a central 21 × 21 region; all **441 pixels** in every region
-matched exactly, and every sampled alpha is **255/255**. This avoids sampling
-the antialiased circle boundary or the dark background. The sampled 8-bit values
-are the source for these new opaque colors; existing floating panel and text
-values keep their original precision.
+## Compatibility accent aliases
 
-| Figma variable | QML property | Exact sRGB hex | Saved ID |
-| --- | --- | --- | --- |
-| `Accent/accentPaletteBlue` | `Theme.accentPaletteBlue` | `#007AFF` | `VariableID:1325:2` |
-| `Accent/accentPalettePurple` | `Theme.accentPalettePurple` | `#A550A7` | `VariableID:1325:3` |
-| `Accent/accentPalettePink` | `Theme.accentPalettePink` | `#F74F9E` | `VariableID:1325:4` |
-| `Accent/accentPaletteRed` | `Theme.accentPaletteRed` | `#FF5257` | `VariableID:1325:5` |
-| `Accent/accentPaletteOrange` | `Theme.accentPaletteOrange` | `#F7821B` | `VariableID:1325:6` |
-| `Accent/accentPaletteYellow` | `Theme.accentPaletteYellow` | `#FFC600` | `VariableID:1325:7` |
-| `Accent/accentPaletteGreen` | `Theme.accentPaletteGreen` | `#62BA46` | `VariableID:1325:8` |
-| `Accent/accentPaletteGray` | `Theme.accentPaletteGray` | `#8C8C8C` | `VariableID:1325:9` |
+The former independently sampled palette is superseded by the authored ten-color system. Its saved IDs and editable circles remain available. Seven properties alias canonical colors in Figma and QML; Gray stays neutral.
 
-The `accentPalette<Color>` name identifies this supplied eight-color palette.
-These properties are fixed QML `color` values, not intensity levels, generated
-shades or dynamic app-primary aliases. In particular, `accentPaletteBlue`
-(`#007AFF`), original `accentBlue` (`#548AF7`) and default action primary
-(`#0A84FF`) retain separate values. Purple and Pink are separate named colors;
-Gray is a selectable accent in this palette. The existing 386-entry
-`accentPaletteTokens` icon snapshot and all original ten properties remain
-unchanged.
+| Compatibility property | Canonical property / value | Retained ID |
+| --- | --- | --- |
+| `accentPaletteBlue` | `accentBlue` | `VariableID:1325:2` |
+| `accentPalettePurple` | `accentPurple` | `VariableID:1325:3` |
+| `accentPalettePink` | `accentRose` | `VariableID:1325:4` |
+| `accentPaletteRed` | `accentRed` | `VariableID:1325:5` |
+| `accentPaletteOrange` | `accentOrange` | `VariableID:1325:6` |
+| `accentPaletteYellow` | `accentYellow` | `VariableID:1325:7` |
+| `accentPaletteGreen` | `accentGreen` | `VariableID:1325:8` |
+| `accentPaletteGray` | neutral `#8C8C8C` | `VariableID:1325:9` |
 
-The extraction record is
-[`build/accent-palette-20261009/image-colors.json`](../build/accent-palette-20261009/image-colors.json).
-It records the image hash, dimensions, sRGB metadata, each sample center and
-region, all eight RGBA byte values and the uniform-pixel counts. The source PNG
-SHA256 is
-`cb3939c530f047ab1354972d7dbf5277ade1b9bea3d3762e7ac24a05f35c210d`.
+Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.
 
 ## Typography variables and recipes
 
@@ -307,142 +260,21 @@ existing consumers. The captured selected original-color aliases are:
 | `Primitive/accentDimTeal` | `VariableID:964:186` | `VariableID:1305:85` |
 | `Primitive/accentLightCyan` | `VariableID:964:222` | `VariableID:1305:84` |
 
-## Initial 69-variable source, test and runtime evidence
+## Accent revision verification — 2026-10-19
 
-The original 69-variable readback is preserved in
-[`build/theme-token-refresh-20261008/figma-theme-readback.json`](../build/theme-token-refresh-20261008/figma-theme-readback.json).
-The active test fixture can advance to the 77-variable extension without
-relabeling the earlier snapshot or its test results.
+The Figma update preserves all ten source-node bounds and binds them to the existing canonical variables. It updates matching variables, unbound component paints, gradient stops, shared paint styles and reference labels across the file. The ColorPicker current-color variable is an alias of canonical Purple. Its six master views and six existing instances expose all ten colors inside their existing row bounds. Both the design reference and source examples use the new system.
 
-The initial plan and read-only source inventory are stored in
-`build/theme-token-refresh-20261008/token-plan.json`, `audit-inventory.json` and
-`figma-before.json`. The plan describes intended names; the actual fixture is
-authoritative for saved values, IDs, scopes and bindings. Scope ordering is not
-meaningful. Float comparisons may allow only the documented Figma serialization
-precision; they must not introduce 8-bit quantization or change authored values.
+Source validation covers:
 
-The initial Figma contract had `validation.passed: true` with no errors. That
-validation was scoped to the captured 69-variable design contract. Its
-`LVRSTests_figma_parity` extensions separately covered:
+- Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.
+- All 77 saved typed Theme properties and retained typography/style contracts.
+- Rendered pixel samples for all ten canonical swatches.
+- Default and custom app Primary propagation, controls, overlays, and ten catalog choices.
+- SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.
+- ColorPicker defaults and recent colors from the same canonical palette.
 
-- `saved_theme_tokens`: 69 typed actual values and corresponding QML properties.
-- `legacy_theme_aliases`: 12 panel aliases and ten Title2/Header2 companions.
-- `saved_text_style_bindings`: seven styles × five exact variable-ID, property,
-  resolved-value and runtime comparisons.
-- `saved_text_style_font_recipes`: seven preferred families, style names and Qt
-  weights, with matching bundled font-face availability.
+The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.
 
-The original fixture and earlier tests remain. These tests are distinct from
-the compatibility palette's unchanged 386-entry string contract. All **133**
-added rows passed: **69 + 22 + 35 + 7**. The complete `LVRSTests_figma_parity` Qt
-result is **144 passed, 0 failed, 1 skipped**. Its existing
-`material_inner_highlight` test requires a native RHI scene graph and was skipped
-in the offscreen run. This is not a native-rendering pass.
+The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.
 
-The parent task executed these commands from the source checkout, using the
-repository's fixed `build/` directory:
-
-```sh
-cmake --build build -j4
-ctest --test-dir build --output-on-failure -j2 --output-junit build/theme-token-refresh-20261008/full-ctest.xml
-```
-
-Both returned exit status `0`. The full build completed; CTest reports **56/56
-targets passed**, zero failed targets and **82.23 seconds** real time. The full
-Qt test log contains **11 conditional skipped cases**, including the parity RHI
-case, native screenshot/capture checks, offscreen hover delivery and Cocoa/RHI
-checks. Passing CTest targets does not mean every conditional native case ran.
-
-| Evidence | Collected artifact |
-| --- | --- |
-| Full build | [build.log](../build/theme-token-refresh-20261008/build.log) |
-| Full CTest | [full-ctest.log](../build/theme-token-refresh-20261008/full-ctest.log) |
-| JUnit XML | [full-ctest.xml](../build/theme-token-refresh-20261008/full-ctest.xml) |
-| Figma parity details | [canonical_green.log](../build/theme-token-refresh-20261008/canonical_green.log) |
-| Preserved full Qt case output | [full-qt-tests.log](../build/theme-token-refresh-20261008/full-qt-tests.log) |
-
-CTest interpreted the `--output-junit` relative path after entering `build/`,
-initially producing `build/build/theme-token-refresh-20261008/full-ctest.xml`.
-The parent moved that XML into `build/theme-token-refresh-20261008/` after the
-run to collect the evidence. The recorded invocation above is the actual command.
-
-Updating `~/.local`, testing installed consumers, launching/restarting consumer
-applications and verifying Figma library publication were not performed. The
-successful source build and full CTest run do not establish those outcomes.
-
-LVRS is already the GUI/QML layer. This refresh does not add Qt to a non-GUI
-leaf SDK, modify image-processing modules or migrate another application. A
-passing source test or Figma contract is insufficient evidence for an installed
-LVRS package or a running Dreamscapes/Society session.
-
-Initial 69-variable fixture SHA256:
-`663cf9fca8bfb7ee6544866df45f7ddc9b152de7a2c67ed8bb81511b6ff51514`.
-
-## Attached-palette extension evidence
-
-The extension follows the same Figma-first sequence: add the eight named
-variables in the existing `Theme Colors` collection, save and read their actual
-IDs/values/scopes/code syntax, update the independent fixture from that readback,
-then register the matching QML properties. The fixture contains 77 variables
-and retains the original 69 values and IDs, 36 typography variables, seven text
-styles and existing compatibility aliases. Runtime tests compare every saved
-typed value to its corresponding `Theme` property and separately preserve the
-386-entry icon palette contract.
-
-The actual saved readback is recorded in
-[`build/accent-palette-20261009/figma-readback.json`](../build/accent-palette-20261009/figma-readback.json).
-The preserved original fixture is
-[`figma-contract-before.json`](../build/accent-palette-20261009/figma-contract-before.json).
-All original 69 variable IDs, names, values and scopes and all seven styles are
-unchanged. The 1,548 hidden compatibility variables remain hidden. The eight
-new variables are visible in the existing Dark-mode color collection, use
-`FRAME_FILL`, `SHAPE_FILL`, `TEXT_FILL` and `STROKE_COLOR` scopes, and record
-the matching QML code syntax. The editable specimen passed variable binding,
-48-pixel ellipse, frame-boundary and font checks.
-
-Before registering the eight source properties, the updated tests produced the
-expected Red result: **144 passed, 16 failed, 1 skipped**. Each missing property
-failed once in `saved_theme_tokens` and once in
-`image_accent_palette_remains_fixed`. The latter has eight rows that compare
-independent image samples, saved Figma values and QML colors, then change
-`primaryColor` to `#A571E6`, `#FF9F45` and `#0A84FF` while requiring each fixed
-palette color to remain unchanged. The
-captured failing test evidence is [red-ctest.log](../build/accent-palette-20261009/red-ctest.log)
-and [red-summary.json](../build/accent-palette-20261009/red-summary.json).
-The eight properties are now registered. The current extension was verified
-with the following source-checkout commands, both returning exit status `0`:
-
-```sh
-cmake --build build -j4
-ctest --test-dir build --output-on-failure -j2 --output-junit accent-palette-20261009/full-ctest.xml
-```
-
-The full build succeeded. The full CTest run passed **56/56 targets**, failed
-**zero targets** and took **84.62 seconds**. All **149 current contract rows**
-passed: `saved_theme_tokens` **77**, `image_accent_palette_remains_fixed` **8**,
-`legacy_theme_aliases` **22**, `saved_text_style_bindings` **35** and
-`saved_text_style_font_recipes` **7**. This total includes the retained earlier
-contract and the new palette requirements; it is distinct from the historical
-69-variable / 133-row results above.
-
-The parity Qt result is **160 passed, 0 failed, 1 skipped**. The full Qt output
-retains the same **11 conditional skipped cases** as the earlier run. The parity
-skip still requires a native RHI scene graph; skipped capture, hover and
-Cocoa/RHI cases are not native-rendering proof.
-
-| Current extension evidence | Collected artifact |
-| --- | --- |
-| Full build | [build.log](../build/accent-palette-20261009/build.log) |
-| Full CTest | [full-ctest.log](../build/accent-palette-20261009/full-ctest.log) |
-| JUnit XML | [full-ctest.xml](../build/accent-palette-20261009/full-ctest.xml) |
-| Figma parity details | [canonical-green.log](../build/accent-palette-20261009/canonical-green.log) |
-| Full Qt case output | [full-qt-tests.log](../build/accent-palette-20261009/full-qt-tests.log) |
-| Machine-readable test summary | [test-summary.json](../build/accent-palette-20261009/test-summary.json) |
-
-Updating installed packages, testing installed consumers, launching/restarting
-consumer applications and verifying Figma library publication were not
-performed for this extension. The current source build and tests do not
-establish those outcomes.
-
-Current 77-variable fixture SHA256:
-`4abd11e1c8bdc19ea92c8b17522674dc6915756ac71385198a21290911940dbb`.
+The final macOS source build succeeded. A fresh focused CTest run passed **12/12 targets** with **0 failures** in **64.29 seconds** after the final helper-resource update. The JUnit report is [`final-ctest.xml`](../build/accent-palette-20261019/final-ctest.xml), with a machine-readable summary in [`verification.json`](../build/accent-palette-20261019/verification.json). Six conditional cases for native RHI, hover delivery and optional captures remain skipped and are recorded in `final-qt-tests.log`; this run does not claim all-platform native execution or installation.

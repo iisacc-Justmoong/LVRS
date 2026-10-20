@@ -29,7 +29,7 @@ Item {
     property string currentValueStateKey: "currentValue"
 
     property color trackColor: "#0D000000"
-    property color fillColor: "#007AFF"
+    property color fillColor: Theme.accentBlue
     property real cornerRadius: Theme.scaleRealMetric(100)
     property real largeHeight: Theme.scaleRealMetric(6)
     property real regularHeight: Theme.scaleRealMetric(3)

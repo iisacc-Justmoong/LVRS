@@ -5,9 +5,9 @@ import LVRS as LV
 Item {
     id: root
     property var catalogEntry: ({})
-    property color selectedColor: "#7a5af8"
-    property color committedColor: "#0a84ff"
-    property color modalStartColor: "#7a5af8"
+    property color selectedColor: LV.Theme.accentPurple
+    property color committedColor: LV.Theme.accentBlue
+    property color modalStartColor: LV.Theme.accentPurple
     property string feedback: "Edit a channel, drag a color field, or choose a recent color."
     readonly property var typeNames: ["Wheel", "Hue–Saturation", "Saturation–Brightness", "Grayscale", "RGB", "CMYK"]
     implicitWidth: 1032

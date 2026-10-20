@@ -6,7 +6,7 @@ Item {
     id: root
     property var catalogEntry: ({})
     property string lastAction: "Press a control or choose a menu action."
-    property color chosenColor: "#7A5AF8"
+    property color chosenColor: LV.Theme.accentPurple
     readonly property bool buttonPage: catalogEntry.key === "help-button" || catalogEntry.key === "color-picker-button"
     implicitHeight: content.implicitHeight
 
@@ -40,7 +40,8 @@ Item {
                         buttonSize: modelData
                         currentColor: root.chosenColor
                         onClicked: {
-                            root.chosenColor = root.chosenColor.r < 0.5 ? "#FF453A" : "#7A5AF8"
+                            root.chosenColor = Qt.colorEqual(root.chosenColor, LV.Theme.accentPurple)
+                                ? LV.Theme.accentRed : LV.Theme.accentPurple
                             root.lastAction = "Current color changed to " + root.chosenColor
                         }
                     }

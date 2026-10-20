@@ -12,8 +12,10 @@
 #include <QQmlExpression>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QQuickItemGrabResult>
 #include <QSignalSpy>
 #include "test_utils.h"
+#include "accent_fixture.h"
 
 class FigmaParityTests : public QObject
 {
@@ -23,8 +25,9 @@ private slots:
     void tokens_and_icon_names();
     void saved_theme_tokens_data();
     void saved_theme_tokens();
-    void image_accent_palette_remains_fixed_data();
-    void image_accent_palette_remains_fixed();
+    void compatibility_accent_aliases_remain_fixed_data();
+    void compatibility_accent_aliases_remain_fixed();
+    void authored_accent_palette_is_rendered();
     void legacy_theme_aliases_data();
     void legacy_theme_aliases();
     void saved_text_style_bindings_data();
@@ -155,58 +158,29 @@ void FigmaParityTests::saved_theme_tokens()
     }
 }
 
-void FigmaParityTests::image_accent_palette_remains_fixed_data()
+void FigmaParityTests::compatibility_accent_aliases_remain_fixed_data()
 {
     QTest::addColumn<QString>("property");
     QTest::addColumn<QColor>("expected");
-    const auto colors = themeFixture["imageAccentPalette"].toObject()["colors"].toArray();
-    QCOMPARE(colors.size(), 8);
-    const QStringList expectedProperties{
-        "accentPaletteBlue", "accentPalettePurple", "accentPalettePink", "accentPaletteRed",
-        "accentPaletteOrange", "accentPaletteYellow", "accentPaletteGreen", "accentPaletteGray"
-    };
-    QStringList properties;
-    for (const auto &entry : colors) {
-        const auto color = entry.toObject();
-        const auto property = color["property"].toString();
-        const auto hex = color["hex"].toString();
-        QVERIFY2(expectedProperties.contains(property), qPrintable(property));
-        QVERIFY2(!properties.contains(property), qPrintable(property));
-        QCOMPARE(hex.size(), 7);
-        QVERIFY(hex.startsWith('#'));
-        const QColor expected(hex);
-        QVERIFY2(expected.isValid(), qPrintable(hex));
-        QCOMPARE(expected.alpha(), 255);
-        QCOMPARE(expected.name().toUpper(), hex.toUpper());
-        properties.append(property);
-        QTest::newRow(qPrintable(property)) << property << expected;
+    const auto aliases = themeFixture["legacyAccentAliases"].toObject();
+    QCOMPARE(aliases.size(), 7);
+    for (auto it = aliases.begin(); it != aliases.end(); ++it) {
+        const auto target = it.value().toString();
+        QVERIFY(themeVariablesByProperty.contains(target));
+        const auto alias = themeVariablesByProperty.value(it.key())["value"].toObject();
+        QCOMPARE(alias["type"].toString(), QStringLiteral("VARIABLE_ALIAS"));
+        QCOMPARE(alias["id"].toString(), themeVariablesByProperty.value(target)["id"].toString());
+        const QColor expected = AccentFixture::color(target);
+        QVERIFY(expected.isValid());
+        QTest::newRow(qPrintable(it.key())) << it.key() << expected;
     }
-    QCOMPARE(properties, expectedProperties);
+    QTest::newRow("accentPaletteGray") << QStringLiteral("accentPaletteGray") << QColor("#8C8C8C");
 }
 
-void FigmaParityTests::image_accent_palette_remains_fixed()
+void FigmaParityTests::compatibility_accent_aliases_remain_fixed()
 {
     QFETCH(QString, property);
     QFETCH(QColor, expected);
-    // Image samples are independent of the saved Figma variable values.
-    QVERIFY2(themeVariablesByProperty.contains(property), qPrintable(property));
-    const auto variable = themeVariablesByProperty.value(property);
-    QCOMPARE(variable["type"].toString(), QStringLiteral("COLOR"));
-    QCOMPARE(variable["name"].toString(), "Accent/" + property);
-    QVERIFY(variable["resolved"].isObject());
-    const auto resolved = variable["resolved"].toObject();
-    const QList<qreal> expectedChannels{
-        expected.redF(), expected.greenF(), expected.blueF(), expected.alphaF()
-    };
-    const QStringList channels{"r", "g", "b", "a"};
-    for (int i = 0; i < channels.size(); ++i) {
-        QVERIFY(resolved[channels[i]].isDouble());
-        const double actual = resolved[channels[i]].toDouble();
-        QVERIFY(qIsFinite(actual) && actual >= 0 && actual <= 1);
-        QVERIFY2(qAbs(actual - expectedChannels[i]) <= 1.0 / 65535.0,
-                 qPrintable("Image and Figma color differ: " + property + "." + channels[i]));
-    }
-
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine,
@@ -215,16 +189,67 @@ void FigmaParityTests::image_accent_palette_remains_fixed()
     auto *theme = qvariant_cast<QObject *>(root->property("theme"));
     QVERIFY(theme);
     const auto propertyName = property.toUtf8();
-    QVERIFY2(theme->metaObject()->indexOfProperty(propertyName.constData()) >= 0,
-             qPrintable("Missing image accent Theme property: " + property));
-    const auto initial = theme->property(propertyName.constData());
-    QCOMPARE(initial.metaType(), QMetaType::fromType<QColor>());
-    QCOMPARE(initial.value<QColor>(), expected);
+    QCOMPARE(theme->property(propertyName.constData()).value<QColor>(), expected);
     for (const QColor &primary : {QColor("#A571E6"), QColor("#FF9F45"), QColor("#0A84FF")}) {
         QVERIFY(theme->setProperty("primaryColor", primary));
         QCOMPARE(theme->property("primary").value<QColor>(), primary);
         QCOMPARE(theme->property(propertyName.constData()).value<QColor>(), expected);
     }
+}
+
+void FigmaParityTests::authored_accent_palette_is_rendered()
+{
+    const auto colors = AccentFixture::colors();
+    QCOMPARE(colors.size(), 10);
+    QCOMPARE(themeFixture["authoredAccentPalette"].toObject()["colors"].toArray().size(), 10);
+    QByteArray properties;
+    for (const auto &entry : colors) {
+        if (!properties.isEmpty())
+            properties += ',';
+        properties += '"' + entry.toObject()["property"].toString().toUtf8() + '"';
+    }
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, QByteArray(R"(
+import QtQuick
+import LVRS as LV
+Window {
+    width: 400; height: 40; visible: true
+    Row {
+        objectName: "palette"
+        Repeater {
+            model: [)") + properties + R"(]
+            delegate: Rectangle {
+                required property string modelData
+                width: 40; height: 40
+                color: LV.Theme[modelData]
+            }
+        }
+    }
+})"));
+    QVERIFY(root);
+    auto *window = qobject_cast<QQuickWindow *>(root.data());
+    QVERIFY(window);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    auto *palette = root->findChild<QQuickItem *>("palette");
+    QVERIFY(palette);
+    const auto grab = palette->grabToImage(QSize(400, 40));
+    QVERIFY(grab);
+    QTRY_VERIFY(!grab->image().isNull());
+    const QImage pixels = grab->image();
+    for (int i = 0; i < colors.size(); ++i) {
+        const auto property = colors[i].toObject()["property"].toString();
+        const QColor expected = AccentFixture::color(property);
+        const QColor actual = pixels.pixelColor(qRound((i + 0.5) * pixels.width() / 10), pixels.height() / 2);
+        QVERIFY2(qAbs(actual.red() - expected.red()) <= 1
+                     && qAbs(actual.green() - expected.green()) <= 1
+                     && qAbs(actual.blue() - expected.blue()) <= 1
+                     && actual.alpha() == 255,
+                 qPrintable(property + ": rendered " + actual.name() + ", expected " + expected.name()));
+    }
+    const QString capturePath = qEnvironmentVariable("LVRS_ACCENT_CAPTURE_PATH");
+    if (!capturePath.isEmpty())
+        QVERIFY2(pixels.save(capturePath), qPrintable(capturePath));
 }
 
 void FigmaParityTests::legacy_theme_aliases_data()

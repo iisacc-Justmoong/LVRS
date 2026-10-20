@@ -370,9 +370,49 @@ private slots:
     void viewmodel_base_and_registry_descriptors_track_cpp_state();
     void state_model_stores_state_and_registry_descriptors_track_values();
     void cpp_model_sources_own_list_hierarchy_and_table_contracts();
+    void table_projection_matches_public_cell_queries();
     void qml_context_bind_plan_exposes_context_objects_and_viewmodels();
     void qml_context_bind_plan_reports_missing_required_objects();
 };
+
+void NavigationStateTests::table_projection_matches_public_cell_queries()
+{
+    TableModel model;
+    QVariantList rows;
+    for (int row=0;row<12;++row) {
+        QVariantList cells;
+        for (int column=0;column<6;++column) cells.append(QVariantMap{{"value",QString::number(row*6+column)}});
+        if (row==0 || row==3) cells[1]=QVariantMap{{"value","span"},{"rowSpan",4},{"columnSpan",3}};
+        if (row==1) cells[2]=QVariantMap{{"value","overlap"},{"rowSpan",5},{"columnSpan",3}};
+        if (row==2) cells[2]=QVariantMap{{"_lvrsMerged",true},{"_lvrsMergeAnchorRow",2},{"_lvrsMergeAnchorColumn",2}};
+        if (row==8) cells[0]=QVariantMap{{"_lvrsMerged",true},{"_lvrsMergeAnchorRow",7},{"_lvrsMergeAnchorColumn",0}};
+        rows.append(QVariant(cells));
+    }
+    model.setRows(rows);model.setColumnWidths(QVariantList{41,55,79,81,120,160});
+    model.setRowHeights(QVariantList{25,29,35,47});
+    const auto actual=model.visibleCells();
+    qsizetype i=0;
+    for (int row=0;row<model.rowCount();++row) for (int column=0;column<6;++column) {
+        if (model.isCoveredCell(row,column)) continue;
+        QVERIFY(i<actual.size());
+        const auto value=actual[i++].toMap();
+        QCOMPARE(value["rowIndex"].toInt(),row);QCOMPARE(value["columnIndex"].toInt(),column);
+        QCOMPARE(value["cellData"],model.cellAt(row,column));QCOMPARE(value["text"].toString(),model.cellText(row,column));
+        QCOMPARE(value["x"].toInt(),model.columnX(column));QCOMPARE(value["y"].toInt(),model.rowY(row));
+        const auto rs=model.cellRowSpan(row,column), cs=model.cellColumnSpan(row,column);
+        QCOMPARE(value["rowSpan"].toInt(),rs);QCOMPARE(value["columnSpan"].toInt(),cs);
+        QCOMPARE(value["width"].toInt(),model.columnSpanWidth(column,cs));
+        QCOMPARE(value["height"].toInt(),model.rowSpanHeight(row,rs));
+    }
+    QCOMPARE(i,actual.size());
+    QVector<int> visiblePerRow(model.rowCount());
+    for (const auto &cell : actual)
+        ++visiblePerRow[cell.toMap().value("rowIndex").toInt()];
+    QCOMPARE(visiblePerRow[6], 3); // The last active span still covers columns 1–3.
+    QCOMPARE(visiblePerRow[7], 6); // Its end row immediately exposes every column.
+    QCOMPARE(visiblePerRow[8], 5); // An explicit covered marker remains hidden.
+    model.setRows(QVariantList{});QVERIFY(model.visibleCells().isEmpty());
+}
 
 void NavigationStateTests::page_monitor_history_metrics()
 {

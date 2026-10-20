@@ -117,11 +117,12 @@ Controls.ApplicationWindow {
     // Unconfigured auxiliary windows follow the current app theme.
     property color primaryColor: Theme.primaryColor
     property color windowColor: Theme.applicationWindowFill
+    // Compatibility input only: the default window material is always opaque.
     property real windowBackgroundOpacity: Theme.applicationWindowOpacity
-    property bool backgroundBlurEnabled: isDesktopPlatform && NativeWindowStyle.backgroundBlurSupported
-    readonly property bool backgroundBlurSupported: NativeWindowStyle.backgroundBlurSupported
-    readonly property bool backgroundBlurActive: _nativeBackgroundBlurActive
-    property bool _nativeBackgroundBlurActive: false
+    // Compatibility input: the default opaque surface has no blur source.
+    property bool backgroundBlurEnabled: false
+    readonly property bool backgroundBlurSupported: false
+    readonly property bool backgroundBlurActive: false
     property bool forceNativeDarkTitleBar: Theme.dark
     property bool solidChrome: true
     // Opt into one native title-bar row; zero preserves AppKit's default layout.
@@ -229,7 +230,7 @@ Controls.ApplicationWindow {
 
     minimumWidth: isMobilePlatform ? mobileMinWidth : desktopMinWidth
     minimumHeight: isMobilePlatform ? mobileMinHeight : desktopMinHeight
-    color: windowRoot.backgroundBlurEnabled && windowRoot.backgroundBlurSupported ? "transparent" : windowRoot.windowColor
+    color: Qt.rgba(windowColor.r, windowColor.g, windowColor.b, 1)
     palette: Palette {
         window: windowRoot.windowColor
         base: windowRoot.windowColor
@@ -237,27 +238,31 @@ Controls.ApplicationWindow {
         link: Theme.primary
     }
 
-    background: WindowMaterial {
+    background: Rectangle {
         id: applicationWindowMaterial
         objectName: "applicationWindowMaterial"
         x: 0
         y: 0
         width: windowRoot.width
         height: windowRoot.height
-        color: windowRoot.windowColor
-        tintOpacity: windowRoot.windowBackgroundOpacity
-        intenseOpacity: 0
-        faintOpacity: 0
-        // Native window clipping/chrome owns the outer edge.
-        radius: 0
-        borderWidth: 0
-        shadowOpacity: 0
+        property color primaryColor: windowRoot.primaryColor
+        readonly property real accentMix: Theme.applicationWindowAccentOpacity
+        // Mix RGB directly and keep the final surface fully opaque.
+        color: Qt.rgba(
+            Math.round((windowRoot.windowColor.r * (1 - accentMix) + primaryColor.r * accentMix) * 255) / 255,
+            Math.round((windowRoot.windowColor.g * (1 - accentMix) + primaryColor.g * accentMix) * 255) / 255,
+            Math.round((windowRoot.windowColor.b * (1 - accentMix) + primaryColor.b * accentMix) * 255) / 255,
+            1)
 
-        Rectangle {
-            objectName: "applicationWindowAccentOverlay"
+        WindowNoiseTexture {
+            objectName: "applicationWindowNoiseTexture"
             anchors.fill: parent
-            color: applicationWindowMaterial.displayedPrimaryColor
-            opacity: Theme.applicationWindowAccentOpacity
+            color: applicationWindowMaterial.color
+            primaryColor: applicationWindowMaterial.primaryColor
+            noiseStrength: 0
+            blurRadius: 0
+            grainStrength: Theme.applicationWindowGrainStrength
+            smooth: false
         }
     }
 
@@ -413,10 +418,10 @@ Controls.ApplicationWindow {
     }
 
     function applyNativeWindowStyle() {
-        windowRoot._nativeBackgroundBlurActive = NativeWindowStyle.applyBackgroundBlur(windowRoot, windowRoot.backgroundBlurEnabled)
-            && windowRoot.backgroundBlurEnabled
+        // A solid window must never retain a WindowServer backdrop view.
+        NativeWindowStyle.applyBackgroundBlur(windowRoot, false)
         if (windowRoot.solidChrome && NativeWindowStyle.solidChromeSupported) {
-            const applied = NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
+            const applied = NativeWindowStyle.applySolidChrome(windowRoot, windowRoot.color, windowRoot.forceNativeDarkTitleBar)
             windowRoot._nativeTitleBarControlsRect = NativeWindowStyle.layoutTitleBar(windowRoot,
                 windowRoot.nativeTitleBarHeight, windowRoot.nativeTitleBarLeftMargin)
             return applied
@@ -424,7 +429,7 @@ Controls.ApplicationWindow {
         windowRoot._nativeTitleBarControlsRect = NativeWindowStyle.layoutTitleBar(windowRoot, 0)
         if (!NativeWindowStyle.titleBarColorSupported)
             return false
-        return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.windowColor, windowRoot.forceNativeDarkTitleBar)
+        return NativeWindowStyle.applyTitleBarColor(windowRoot, windowRoot.color, windowRoot.forceNativeDarkTitleBar)
     }
 
     // Qt's iOS backend uses maximized + fullscreen-geometry-hint for edge-to-edge
@@ -551,6 +556,7 @@ Controls.ApplicationWindow {
         ? RenderQuality.effectiveSupersampleScaleValue
         : 1.0
     readonly property bool sceneSupersamplingActive: RenderQuality.sceneSupersamplingActive
+        && supersampleHost.GraphicsInfo.api !== GraphicsInfo.Software
 
     WindowSafeAreaObserver {
         id: windowSafeArea
@@ -1553,4 +1559,4 @@ Controls.ApplicationWindow {
 
 // API usage (external):
 // import LVRS as LV
-// LV.ApplicationWindow { title: "App"; primaryColor: "#A571E6"; windowDragExclusionItems: [menuButton] }
+// LV.ApplicationWindow { title: "App"; primaryColor: LV.Theme.accentPurple; windowDragExclusionItems: [menuButton] }

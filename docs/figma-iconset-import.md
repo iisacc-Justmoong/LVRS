@@ -6,7 +6,13 @@ The 2026-10-12 [LVRS Iconset](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJz
 
 This snapshot includes the 177 panel icons added to Figma, the consolidation of 194 duplicate components, and the 113 component name changes. Canonical resource filenames use the current Figma names and are unique under Unicode normalization and case-insensitive comparison. Existing control-specific resources remain separate from the Figma catalog.
 
-The 892 formerly monochrome icons retain their Figma accents. Their selected vector, text, or original image silhouette uses the existing LVRS ThemeColors tokens: blue, cyan, teal, yellow, red, purple, green, palette orange, and palette pink. SVG exports resolve those bindings to their authored colors. Already colored artwork remains as exported; no renderer tint or replacement glyph is introduced. Twelve Boolean-operation icons additionally bind their visible union fill or stroke to the same token: coloring a consumed child alone does not affect the exported union. Their node geometry, dimensions, and path data are preserved.
+The 892 formerly monochrome icons retain their Figma accents. Their selected vector, text, or original image silhouette uses the existing LVRS ThemeColors tokens: blue, cyan, teal, yellow, red, purple, green, palette orange, and palette pink. SVG exports resolve those bindings to their authored colors. The 2026-10-19 palette revision recolors the replaced accent paints and opacity composites; unrelated artwork remains as exported; no renderer tint or replacement glyph is introduced. Twelve Boolean-operation icons additionally bind their visible union fill or stroke to the same token: coloring a consumed child alone does not affect the exported union. Their node geometry, dimensions, and path data are preserved.
+
+## Authored accent revision — 2026-10-19
+
+The ten swatches `1477:30..38`, `1477:40` replace the former accent palette. Canonical variables and seven compatibility palette aliases retain their IDs. Matching SVG paint values follow the new accents, including alpha stops and existing dark composites. Path data, root scaling, dimensions and opacity remain intact. The manifest's `accentPaletteUpdate` records source nodes, exact RGBA, display HEX and the color-update method. Five Alert/Card helper SVGs are also recolored and recorded under `additionalResources`. Each changed vector icon records `paletteGeometrySha256`, computed after removing only paint attributes, and a refreshed packaged `sha256`. Original native export hashes remain historical provenance unless an icon is exported again.
+
+The translation icon uses an embedded raster silhouette; its visible Cyan is verified separately from its unchanged per-pixel alpha. Native export provenance and packaged compatibility hashes remain distinct. Test coverage includes this raster exception as well as the vector palette migration.
 
 ## Importing a complete snapshot
 

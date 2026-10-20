@@ -1,10 +1,46 @@
 #include <QtTest>
+#include <QtMath>
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QQuickItemGrabResult>
 #include <QSGRendererInterface>
 #include "test_utils.h"
+#include "accent_fixture.h"
+
+namespace {
+QColor accent5Mix(const QColor &base, const QColor &accent)
+{
+    return QColor(qRound((base.redF() * 0.95 + accent.redF() * 0.05) * 255),
+                  qRound((base.greenF() * 0.95 + accent.greenF() * 0.05) * 255),
+                  qRound((base.blueF() * 0.95 + accent.blueF() * 0.05) * 255));
+}
+
+struct GrainStats {
+    qreal mean;
+    qreal deviation;
+    qreal changedNeighbors;
+};
+
+GrainStats grainStats(const QImage &image, const QRect &region)
+{
+    qint64 sum = 0, squares = 0, count = 0, changed = 0, neighbors = 0;
+    for (int y = region.top(); y <= region.bottom(); ++y) {
+        for (int x = region.left(); x <= region.right(); ++x) {
+            const int value = image.pixelColor(x, y).green();
+            sum += value;
+            squares += value * value;
+            ++count;
+            if (x > region.left()) {
+                changed += value != image.pixelColor(x - 1, y).green();
+                ++neighbors;
+            }
+        }
+    }
+    const qreal mean = qreal(sum) / count;
+    return {mean, qSqrt(qMax(qreal(0), qreal(squares) / count - mean * mean)), qreal(changed) / neighbors};
+}
+}
 
 class MaterialTests : public QObject
 {
@@ -12,7 +48,9 @@ class MaterialTests : public QObject
 private slots:
     void window_default_and_primary();
     void window_material_inherits_owning_window_accent();
-    void application_window_accent_overlay_matches_figma();
+    void application_window_theme_accent_mix();
+    void application_window_custom_background();
+    void noise_texture_inputs_are_bounded_and_opaque();
     void window_gradient_tracks_accent_and_resize();
     void transient_defaults_and_capture_safety();
     void backdrop_blur_and_color_rendering();
@@ -31,27 +69,36 @@ import LVRS as LV
 LV.ApplicationWindow {
     width: 900; height: 600; visible: false
     LV.LabelButton { objectName: "accentButton"; tone: LV.AbstractButton.Primary; text: "Continue" }
-    })"));
+})"));
     QVERIFY(root);
-    auto *background = root->findChild<QQuickItem *>("applicationWindowMaterial");
+    auto *background = qobject_cast<QQuickItem *>(root->property("background").value<QObject *>());
     auto *button = root->findChild<QObject *>("accentButton");
     QVERIFY(background && button);
-    QCOMPARE(background->property("tintOpacity").toReal(), 0.66);
-    QCOMPARE(background->property("blurRadius").toReal(), 64.0);
-    QCOMPARE(background->property("intenseOpacity").toReal(), 0.0);
-    QCOMPARE(background->property("faintOpacity").toReal(), 0.0);
-    QCOMPARE(background->property("primaryColor").value<QColor>(), QColor("#0A84FF"));
-    QCOMPARE(background->property("color").value<QColor>(), QColor("#141414"));
+    auto *theme = engine.singletonInstance<QObject *>("LVRS", "Theme");
+    QVERIFY(theme);
+    const QColor windowBase = theme->property("window").value<QColor>();
+    QCOMPARE(windowBase, QColor("#141414"));
+    QCOMPARE(theme->property("applicationWindowFill").value<QColor>(), windowBase);
+    QCOMPARE(root->property("windowColor").value<QColor>(), windowBase);
+    QVERIFY(!root->findChild<QObject *>("applicationWindowGlassOverlay"));
+    auto *grain = background->findChild<QQuickItem *>("applicationWindowNoiseTexture");
+    QVERIFY(grain);
+    QCOMPARE(grain->property("noiseStrength").toReal(), 0.0);
+    QCOMPARE(grain->property("blurRadius").toReal(), 0.0);
+    QCOMPARE(grain->property("grainStrength").toReal(), 2.0 / 255);
+    const QColor blue = AccentFixture::color("accentBlue");
+    QCOMPARE(background->property("primaryColor").value<QColor>(), blue);
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(windowBase, blue).rgba());
     QVERIFY(root->setProperty("primaryColor", QColor("#A571E6")));
     QTRY_COMPARE(background->property("primaryColor").value<QColor>(), QColor("#A571E6"));
-    QCOMPARE(background->property("color").value<QColor>(), QColor("#141414"));
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(windowBase, QColor("#A571E6")).rgba());
     QTRY_COMPARE(button->property("backgroundColor").value<QColor>(), QColor("#A571E6"));
     QCOMPARE(background->opacity(), 1.0);
     QCOMPARE(qobject_cast<QQuickWindow *>(root.data())->opacity(), 1.0);
     QVERIFY(root->setProperty("windowBackgroundOpacity", 0.35));
-    QCOMPARE(background->property("tintOpacity").toReal(), 0.35);
+    QCOMPARE(background->opacity(), 1.0);
     QVERIFY(root->setProperty("windowColor", QColor("#202124")));
-    QCOMPARE(background->property("color").value<QColor>(), QColor("#202124"));
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(QColor("#202124"), QColor("#A571E6")).rgba());
 }
 
 void MaterialTests::window_material_inherits_owning_window_accent()
@@ -87,7 +134,7 @@ Controls.ApplicationWindow {
     QCOMPARE(greenMaterial->property("primaryColor").value<QColor>(), QColor("#57965C"));
 }
 
-void MaterialTests::application_window_accent_overlay_matches_figma()
+void MaterialTests::application_window_theme_accent_mix()
 {
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
@@ -98,67 +145,162 @@ LV.ApplicationWindow {
     width: 900; height: 600; visible: true
     primaryColor: LV.Theme.defaultPrimary
     LV.ApplicationWindow { objectName: "auxiliary"; width: 360; height: 240; visible: false }
+    Text { x: 40; y: 54; text: "ApplicationWindow"; color: "white"; font.pixelSize: 26 }
+    Text { x: 40; y: 96; text: "Theme.window 95% + app accent 5% / fine grain"; color: "#B8C2CC"; font.pixelSize: 13 }
+    LV.LabelButton { x: 40; y: 140; text: "Continue"; tone: LV.AbstractButton.Primary }
     Rectangle { objectName: "foregroundProof"; x: 300; y: 220; width: 48; height: 48; color: "#F0A060" }
 })"));
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     QVERIFY(window && QTest::qWaitForWindowExposed(window));
-    auto *material = root->findChild<QQuickItem *>("applicationWindowMaterial");
+    auto *material = qobject_cast<QQuickItem *>(root->property("background").value<QObject *>());
     auto *auxiliary = root->findChild<QQuickWindow *>("auxiliary");
-    QVERIFY(material && auxiliary);
-    auto *auxiliaryMaterial = auxiliary->findChild<QObject *>("applicationWindowMaterial");
-    QVERIFY(auxiliaryMaterial);
-    auto *overlay = material->findChild<QQuickItem *>("applicationWindowAccentOverlay");
-    auto *auxiliaryOverlay = auxiliaryMaterial->findChild<QQuickItem *>("applicationWindowAccentOverlay");
     auto *foreground = root->findChild<QQuickItem *>("foregroundProof");
-    QVERIFY(overlay && auxiliaryOverlay && foreground);
-    QCOMPARE(overlay->opacity(), 0.04);
-    QCOMPARE(material->property("intenseOpacity").toReal(), 0.0);
-    QCOMPARE(material->property("faintOpacity").toReal(), 0.0);
+    QVERIFY(material && auxiliary && foreground);
+    auto *auxiliaryMaterial = qobject_cast<QQuickItem *>(auxiliary->property("background").value<QObject *>());
+    QVERIFY(auxiliaryMaterial);
+    QVERIFY(!root->findChild<QObject *>("applicationWindowGlassOverlay"));
+    auto *grain = material->findChild<QQuickItem *>("applicationWindowNoiseTexture");
+    auto *auxiliaryGrain = auxiliaryMaterial->findChild<QQuickItem *>("applicationWindowNoiseTexture");
+    QVERIFY(grain && auxiliaryGrain);
+    QCOMPARE(grain->property("noiseStrength").toReal(), 0.0);
+    QCOMPARE(grain->property("blurRadius").toReal(), 0.0);
+    QCOMPARE(grain->property("grainStrength").toReal(), 2.0 / 255);
+    QVERIFY(!window->property("backgroundBlurSupported").toBool());
+    const auto matches = [](const QColor &actual, const QColor &expected) {
+        return actual.alpha() == 255 && qAbs(actual.red() - expected.red()) <= 2
+            && qAbs(actual.green() - expected.green()) <= 2 && qAbs(actual.blue() - expected.blue()) <= 2;
+    };
     const QString directory = qEnvironmentVariable("LVRS_MATERIAL_CAPTURE_DIR");
+    QHash<QRgb, QImage> originalTiles;
     for (const QSize size : {QSize(900, 600), QSize(1600, 1000)}) {
         window->resize(size);
         QTRY_COMPARE(material->size(), QSizeF(size));
-        for (const QColor accent : {QColor("#0A84FF"), QColor("#57965C"), QColor("#A571E6"), QColor("#0A84FF")}) {
+        QTRY_COMPARE(grain->size(), QSizeF(size));
+        for (const QColor accent : {QColor("#0A84FF"), QColor("#66FF48"), QColor("#A571E6"), QColor(Qt::white), QColor(Qt::black)}) {
             QVERIFY(window->setProperty("primaryColor", accent));
             QTRY_COMPARE(material->property("primaryColor").value<QColor>(), accent);
-            QTRY_COMPARE(material->property("displayedPrimaryColor").value<QColor>(), accent);
             QTRY_COMPARE(auxiliaryMaterial->property("primaryColor").value<QColor>(), accent);
-            QTRY_COMPARE(overlay->property("color").value<QColor>(), accent);
-            QTRY_COMPARE(auxiliaryOverlay->property("color").value<QColor>(), accent);
-            QCOMPARE(overlay->size(), QSizeF(size));
+            const QColor expected = accent5Mix(QColor("#141414"), accent);
+            QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
+            QTRY_COMPARE(grain->property("color").value<QColor>().rgba(), expected.rgba());
+            QTRY_COMPARE(auxiliaryGrain->property("color").value<QColor>().rgba(), expected.rgba());
             auto capture = material->grabToImage();
             QVERIFY(capture);
             QTRY_VERIFY(!capture->image().isNull());
-            const QImage image = capture->image();
-            // Figma 997:3: a uniform 4% accent over #141414 at 66% opacity.
-            constexpr double alpha = 0.04 + 0.66 * (1.0 - 0.04);
-            const auto channel = [&](int value) { return qRound((value * 0.04 + 20 * 0.66 * 0.96) / alpha); };
-            const QColor expected(channel(accent.red()), channel(accent.green()), channel(accent.blue()), qRound(alpha * 255));
-            for (const QPoint point : {QPoint(48, 32), QPoint(size.width() / 2, 48),
-                                      QPoint(size.width() - 12, size.height() / 2),
-                                      QPoint(72, size.height() - 40), QPoint(size.width() / 2, size.height() / 2)}) {
-                const QColor pixel = image.pixelColor(point.x() * image.width() / size.width(),
-                                                     point.y() * image.height() / size.height());
-                QVERIFY2(qAbs(pixel.red() - expected.red()) <= 2 && qAbs(pixel.green() - expected.green()) <= 2
-                             && qAbs(pixel.blue() - expected.blue()) <= 2 && qAbs(pixel.alpha() - expected.alpha()) <= 2,
-                         qPrintable(QString("Uniform Figma accent overlay expected %1, got %2 at %3,%4")
-                             .arg(expected.name(QColor::HexArgb), pixel.name(QColor::HexArgb)).arg(point.x()).arg(point.y())));
-            }
-            QVERIFY(material->findChildren<QObject *>(QRegularExpression("^materialGradient_")).isEmpty());
-            QCOMPARE(material->property("color").value<QColor>(), QColor("#141414"));
-            QCOMPARE(material->property("tintOpacity").toReal(), 0.66);
-            QCOMPARE(material->property("blurRadius").toReal(), 64.0);
-            QCOMPARE(window->opacity(), 1.0);
+            const QImage background = capture->image();
+            for (int y = 0; y < background.height(); ++y)
+                for (int x = 0; x < background.width(); ++x)
+                    QVERIFY2(matches(background.pixelColor(x, y), expected), "Fine grain must stay within two RGB levels of the opaque 95:5 mix.");
+            const auto stats = grainStats(background, QRect(16, 16, 256, 256));
+            QVERIFY(qAbs(stats.mean - expected.green()) < 0.65);
+            QVERIFY2(stats.deviation > 0.4 && stats.deviation < 1.5, "Grain must be perceptible without strong contrast.");
+            const qreal minimumChanges = expected.green() == 0 ? 0.45 : 0.65;
+            QVERIFY2(stats.changedNeighbors > minimumChanges, "Grain must vary at individual physical pixels, including on Retina displays.");
+            const QImage tile = background.copy(0, 0, 128, 128);
+            if (originalTiles.contains(accent.rgb()))
+                QCOMPARE(tile, originalTiles.value(accent.rgb()));
+            else
+                originalTiles.insert(accent.rgb(), tile);
             const QImage frame = window->grabWindow();
+            QVERIFY(!frame.isNull());
+            QVERIFY(matches(frame.pixelColor(500 * frame.width() / size.width(), 400 * frame.height() / size.height()), expected));
+            const qreal scale = frame.width() / qreal(size.width());
+            const auto frameStats = grainStats(frame, QRect(qRound(500 * scale), qRound(350 * scale), qRound(128 * scale), qRound(128 * scale)));
+            QVERIFY(frameStats.deviation > 0.4 && frameStats.deviation < 1.5);
+            QVERIFY(frameStats.changedNeighbors > minimumChanges);
             const QPointF position = foreground->mapToScene(QPointF(24, 24));
             QCOMPARE(frame.pixelColor(qRound(position.x() * frame.width() / window->width()),
                                       qRound(position.y() * frame.height() / window->height())), QColor("#F0A060"));
             if (!directory.isEmpty()) {
                 QVERIFY(QDir().mkpath(directory));
-                QVERIFY(frame.save(directory + "/app-overlay-" + accent.name().mid(1) + "-" + QString::number(size.width()) + ".png"));
+                QVERIFY(frame.save(directory + "/app-accent5-" + accent.name().mid(1) + "-" + QString::number(size.width()) + ".png"));
+                if (accent == QColor("#0A84FF") && size.width() == 900)
+                    QVERIFY(frame.copy(qRound(500 * scale), qRound(350 * scale), qRound(256 * scale), qRound(192 * scale)).save(directory + "/fine-grain-detail.png"));
             }
+            for (const bool enabled : {false, true}) {
+                QVERIFY(window->setProperty("backgroundBlurEnabled", enabled));
+                QVERIFY(!window->property("backgroundBlurActive").toBool());
+                QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
+            }
+            QCOMPARE(window->color(), QColor("#141414"));
+            QCOMPARE(window->opacity(), 1.0);
         }
     }
+    QVERIFY(window->setProperty("windowBackgroundOpacity", 0.05));
+    QVERIFY(window->setProperty("windowColor", QColor("#33202124")));
+    QVERIFY(window->setProperty("primaryColor", QColor("#00A571E6")));
+    QTRY_COMPARE(window->color(), QColor("#202124"));
+    const QColor expected = accent5Mix(QColor("#202124"), QColor("#A571E6"));
+    QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
+    auto capture = material->grabToImage();
+    QVERIFY(capture);
+    QTRY_VERIFY(!capture->image().isNull());
+    QVERIFY(matches(capture->image().pixelColor(64, 64), expected));
+    const QImage original = capture->image();
+    QVERIFY(grain->setProperty("grainStrength", 0.0));
+    capture = material->grabToImage();
+    QVERIFY(capture);
+    QTRY_VERIFY(!capture->image().isNull());
+    const auto flat = grainStats(capture->image(), QRect(16, 16, 256, 256));
+    QCOMPARE(flat.deviation, 0.0);
+    QCOMPARE(flat.mean, qreal(expected.green()));
+    QVERIFY(grain->setProperty("grainStrength", 2.0 / 255));
+    capture = material->grabToImage();
+    QVERIFY(capture);
+    QTRY_VERIFY(!capture->image().isNull());
+    QCOMPARE(capture->image(), original); // A fixed pattern survives toggles and resizing.
+}
+
+void MaterialTests::application_window_custom_background()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+LV.ApplicationWindow {
+    visible: false
+    background: Rectangle { objectName: "customBackground"; color: "#334455" }
+})"));
+    QVERIFY(root);
+    auto *custom = root->property("background").value<QObject *>();
+    QVERIFY(custom);
+    QCOMPARE(custom->objectName(), QStringLiteral("customBackground"));
+    QVERIFY(!root->property("backgroundBlurSupported").toBool());
+    QVERIFY(!root->property("backgroundBlurActive").toBool());
+    QCOMPARE(qobject_cast<QQuickWindow *>(root.data())->color().alpha(), 255);
+}
+
+void MaterialTests::noise_texture_inputs_are_bounded_and_opaque()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, R"(
+import LVRS as LV
+LV.WindowNoiseTexture { color: "#33123456"; primaryColor: "#00A571E6" }
+)"));
+    QVERIFY(root);
+    QCOMPARE(root->property("color").value<QColor>(), QColor("#123456"));
+    QCOMPARE(root->property("primaryColor").value<QColor>(), QColor("#A571E6"));
+    QVERIFY(root->setProperty("noiseStrength", -1.0));
+    QCOMPARE(root->property("noiseStrength").toReal(), 0.0);
+    QVERIFY(root->setProperty("noiseStrength", 2.0));
+    QCOMPARE(root->property("noiseStrength").toReal(), 1.0);
+    QVERIFY(root->setProperty("blurRadius", -1.0));
+    QCOMPARE(root->property("blurRadius").toReal(), 0.0);
+    QVERIFY(root->setProperty("blurRadius", 20.0));
+    QCOMPARE(root->property("blurRadius").toReal(), 20.0);
+    QVERIFY(root->setProperty("blurRadius", 80.0));
+    QCOMPARE(root->property("blurRadius").toReal(), 50.0);
+    QVERIFY(root->setProperty("blurRadius", qQNaN()));
+    QCOMPARE(root->property("blurRadius").toReal(), 50.0);
+    QVERIFY(root->setProperty("blurRadius", 0.0));
+    QVERIFY(root->setProperty("grainStrength", -1.0));
+    QCOMPARE(root->property("grainStrength").toReal(), 0.0);
+    QVERIFY(root->setProperty("grainStrength", 2.0));
+    QCOMPARE(root->property("grainStrength").toReal(), 1.0);
+    QVERIFY(root->setProperty("grainStrength", qQNaN()));
+    QCOMPARE(root->property("grainStrength").toReal(), 1.0);
 }
 
 void MaterialTests::window_gradient_tracks_accent_and_resize()
@@ -336,8 +478,19 @@ void MaterialTests::catalog_transient_interaction()
     for (const char *name : {"galleryMaterialMenu", "galleryMaterialTooltip", "galleryMaterialPopover"}) {
         auto *popup = root->findChild<QObject *>(name);
         QVERIFY(popup);
+        QSignalSpy opening(popup, SIGNAL(aboutToShow()));
+        QSignalSpy closing(popup, SIGNAL(aboutToHide()));
+        const auto popupState = [&] {
+            return QStringLiteral("%1 visible=%2 opacity=%3 opened=%4 opening=%5 closing=%6 windowActive=%7 exposed=%8")
+                .arg(QString::fromLatin1(name))
+                .arg(popup->property("visible").toBool())
+                .arg(popup->property("opacity").toReal())
+                .arg(popup->property("opened").toBool())
+                .arg(opening.count()).arg(closing.count())
+                .arg(window->isActive()).arg(window->isExposed());
+        };
         QVERIFY(QMetaObject::invokeMethod(popup, "open"));
-        QTRY_VERIFY2(popup->property("opened").toBool(), name);
+        QTRY_VERIFY2(popup->property("opened").toBool(), qPrintable(popupState()));
         auto *background = qobject_cast<QQuickItem *>(popup->property("background").value<QObject *>());
         QVERIFY(background);
         QCOMPARE(background->property("tintOpacity").toReal(), qstrcmp(name, "galleryMaterialMenu") == 0 ? 0.12 : 0.25);
@@ -371,6 +524,8 @@ LV.ApplicationWindow {
     LV.Menu { objectName: "regularMenu"; items: ["Open", "Duplicate"]; motionEnabled: false }
 })"));
     QVERIFY(root);
+    auto *windowBackground = root->property("background").value<QObject *>();
+    QVERIFY(windowBackground);
     for (const char *name : {"frostMenu", "regularMenu"}) {
         auto *menu = root->findChild<QObject *>(name);
         QVERIFY(menu);
@@ -384,7 +539,8 @@ LV.ApplicationWindow {
         QCOMPARE(material->property("intenseOpacity").toReal(), 0.032);
         QCOMPARE(material->property("faintOpacity").toReal(), 0.0088);
         QCOMPARE(material->property("shadowRadius").toReal(), 48.0);
-        QCOMPARE(material->property("color").value<QColor>(), QColor("#20242a"));
+        QCOMPARE(menu->property("backdropBackground").value<QObject *>(), windowBackground);
+        QCOMPARE(material->property("color").value<QColor>(), windowBackground->property("color").value<QColor>());
         const QColor captureBase = material->property("backdropBaseColor").value<QColor>();
         QCOMPARE(captureBase.alpha(), 255);
         QCOMPARE(captureBase.red(), captureBase.green());

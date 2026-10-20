@@ -9,6 +9,9 @@ QVector<HierarchyVisibleRow> HierarchyVisibility::project(
     QHash<QString, int> depth;
     QHash<QString, bool> hasChildren;
     QHash<QString, QString> parentById;
+    depth.reserve(nodes.size());
+    hasChildren.reserve(nodes.size());
+    parentById.reserve(nodes.size());
 
     for (const HierarchyNode &node : nodes)
     {
@@ -22,33 +25,45 @@ QVector<HierarchyVisibleRow> HierarchyVisibility::project(
         }
     }
 
-    for (const HierarchyNode &node : nodes)
-    {
-        int d = 0;
-        QString cursor = node.parentId;
-        while (!cursor.isEmpty())
+    struct Ancestry { int length = 0; bool expanded = true; };
+    QHash<QString, Ancestry> ancestry;
+    ancestry.reserve(nodes.size());
+    QVector<QString> path;
+    QSet<QString> visiting;
+    // Resolve each ancestor once, without recursion or dependence on input order.
+    auto resolve = [&](const QString &start) {
+        path.clear();
+        visiting.clear();
+        QString cursor = start;
+        while (!cursor.isEmpty() && !ancestry.contains(cursor))
         {
-            ++d;
+            if (visiting.contains(cursor))
+            {
+                // Malformed cyclic branches cannot have a finite visible depth.
+                for (const auto &id : path) ancestry.insert(id, {0, false});
+                return Ancestry{0, false};
+            }
+            visiting.insert(cursor);
+            path.push_back(cursor);
             cursor = parentById.value(cursor);
         }
-        depth.insert(node.id, d);
-    }
+        auto info = cursor.isEmpty() ? Ancestry{} : ancestry.value(cursor);
+        for (auto it = path.crbegin(); it != path.crend(); ++it)
+        {
+            ++info.length;
+            info.expanded = expandedIds.contains(*it) && info.expanded;
+            ancestry.insert(*it, info);
+        }
+        return info;
+    };
+    for (const HierarchyNode &node : nodes)
+        depth.insert(node.id, resolve(node.parentId).length);
 
     QVector<HierarchyVisibleRow> rows;
+    rows.reserve(nodes.size());
     for (const HierarchyNode &node : nodes)
     {
-        bool visible = true;
-        QString cursor = node.parentId;
-        while (!cursor.isEmpty())
-        {
-            if (!expandedIds.contains(cursor))
-            {
-                visible = false;
-                break;
-            }
-            cursor = parentById.value(cursor);
-        }
-        if (!visible)
+        if (!resolve(node.parentId).expanded)
         {
             continue;
         }

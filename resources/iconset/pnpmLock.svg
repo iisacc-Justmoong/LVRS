@@ -4,8 +4,8 @@
 <path d="M6 6H9V9H6V6Z" fill="#CED0D6"/>
 <path d="M6 10H9V13H6V10Z" fill="#CED0D6"/>
 <path d="M2 10H5V13H2V10Z" fill="#CED0D6"/>
-<path d="M2 2H5V5H2V2Z" fill="#F2C55C"/>
-<path d="M6 2H9V5H6V2Z" fill="#F2C55C"/>
-<path d="M10 2H13V5H10V2Z" fill="#F2C55C"/>
-<path d="M10 6H13V7C11.6938 7 10.5825 7.83481 10.1707 9H10V6Z" fill="#F2C55C"/>
+<path d="M2 2H5V5H2V2Z" fill="#FFD427"/>
+<path d="M6 2H9V5H6V2Z" fill="#FFD427"/>
+<path d="M10 2H13V5H10V2Z" fill="#FFD427"/>
+<path d="M10 6H13V7C11.6938 7 10.5825 7.83481 10.1707 9H10V6Z" fill="#FFD427"/>
 </svg>

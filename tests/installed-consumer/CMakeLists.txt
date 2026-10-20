@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 project(LVRSInstalledConsumer LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 option(LVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH
     "Verify Darwin RPATH propagation when LIBRARY_PATH makes LVRS implicit" OFF)
 set(LVRS_CONSUMER_SOURCE_DIR "" CACHE PATH
     "Optional checkout whose QML must match the installed library resources")
 find_package(LVRS CONFIG REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Test)
 get_target_property(_lvrs_library LVRS::LVRS IMPORTED_LOCATION_RELEASE)
 if(NOT _lvrs_library)
     get_target_property(_lvrs_library LVRS::LVRS IMPORTED_LOCATION)
@@ -27,12 +28,16 @@ if(LVRS_CONSUMER_REQUIRE_IMPLICIT_LIBRARY_PATH)
 endif()
 add_executable(lvrs_installed_consumer main.cpp)
 target_link_libraries(lvrs_installed_consumer PRIVATE LVRS::LVRS)
+add_executable(lvrs_installed_avatar ../tst_avatar.cpp)
+set_target_properties(lvrs_installed_avatar PROPERTIES AUTOMOC ON)
+target_link_libraries(lvrs_installed_avatar PRIVATE LVRS::LVRS Qt6::Test)
 if(LVRS_CONSUMER_SOURCE_DIR)
     target_compile_definitions(lvrs_installed_consumer PRIVATE
         LVRS_CONSUMER_SOURCE_DIR="${LVRS_CONSUMER_SOURCE_DIR}")
 endif()
 enable_testing()
 add_test(NAME installed_lvrs_qml_consumer COMMAND lvrs_installed_consumer)
+add_test(NAME installed_lvrs_avatar COMMAND lvrs_installed_avatar)
 set(_lvrs_consumer_env
     "QT_QPA_PLATFORM=offscreen"
     "QML_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}"
@@ -42,5 +47,5 @@ if(APPLE)
 elseif(UNIX)
     list(APPEND _lvrs_consumer_env "LD_LIBRARY_PATH=${_lvrs_library_directory}")
 endif()
-set_tests_properties(installed_lvrs_qml_consumer PROPERTIES
+set_tests_properties(installed_lvrs_qml_consumer installed_lvrs_avatar PROPERTIES
     ENVIRONMENT "${_lvrs_consumer_env}")

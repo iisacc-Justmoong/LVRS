@@ -33,8 +33,16 @@ QString TextDocumentModel::text() const
 {
     QStringList lines;
     lines.reserve(m_lines.size());
-    for (const LineRecord &line : m_lines)
-        lines.append(lineTextForRecord(line));
+    iiFileProvider::FileDevice source(m_filePath);
+    bool attemptedOpen = false;
+    for (const LineRecord &line : m_lines) {
+        if (!line.fileBacked) lines.append(line.text);
+        else {
+            if (!attemptedOpen) { attemptedOpen = true; source.open(QIODevice::ReadOnly); }
+            lines.append(source.isOpen() && source.seek(line.byteOffset)
+                ? decodeUtf8Line(source.read(line.byteLength)) : QString());
+        }
+    }
     return lines.join(QLatin1Char('\n'));
 }
 
@@ -917,6 +925,7 @@ bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
     QVector<LineRecord> savedRecords;
     savedRecords.reserve(m_lines.size());
     qint64 writtenBytes = 0;
+    iiFileProvider::FileDevice source(m_filePath);
 
     for (int i = 0; i < m_lines.size(); ++i) {
         if (i > 0) {
@@ -929,7 +938,22 @@ bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
             writtenBytes += 1;
         }
 
-        const QString line = lineTextForRecord(m_lines.at(i));
+        const auto &record = m_lines.at(i);
+        QString line = record.text;
+        if (record.fileBacked) {
+            if ((!source.isOpen() && !source.open(QIODevice::ReadOnly)) || !source.seek(record.byteOffset)) {
+                if (error) *error = source.errorString();
+                file.cancelWriting();
+                return false;
+            }
+            const auto bytes = source.read(record.byteLength);
+            if (bytes.size() != record.byteLength) {
+                if (error) *error = QStringLiteral("Source text changed while saving");
+                file.cancelWriting();
+                return false;
+            }
+            line = decodeUtf8Line(bytes);
+        }
         const QByteArray data = line.toUtf8();
         const qint64 lineOffset = writtenBytes;
         if (file.write(data) != data.size()) {
@@ -943,16 +967,15 @@ bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
         writtenBytes += data.size();
     }
 
+    source.close(); // Release the source handle before atomic replacement on Windows.
     if (!file.commit()) {
         if (error)
             *error = file.errorString();
         return false;
     }
 
-    setFilePath(path);
-    beginResetModel();
     m_lines = savedRecords.isEmpty() ? QVector<LineRecord> { memoryLine(QString()) } : savedRecords;
-    endResetModel();
+    setFilePath(path);
     emit lineStorageChanged();
     return true;
 }

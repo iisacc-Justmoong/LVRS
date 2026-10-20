@@ -874,27 +874,48 @@ bool TableModel::isCoveredCell(int rowIndex, int columnIndex) const
 QVariantList TableModel::visibleCells() const
 {
     QVariantList result;
+    const int rowTotal = rowCount(), columnTotal = columnCount();
+    QVector<int> rowOffsets(rowTotal + 1), columnOffsets(columnTotal + 1);
+    for (int row = 0; row < rowTotal; ++row)
+        rowOffsets[row + 1] = rowOffsets[row] + rowHeightAt(row);
+    for (int column = 0; column < columnTotal; ++column)
+        columnOffsets[column + 1] = columnOffsets[column] + columnWidth(column);
+    struct Span { int endRow, firstColumn, endColumn; };
+    QVector<Span> spans;
     int visibleIndex = 0;
-    for (int row = 0; row < rowCount(); ++row) {
+    for (int row = 0; row < rowTotal; ++row) {
+        spans.removeIf([row](const Span &span) { return span.endRow <= row; });
         const int count = columnCountForRow(rowAt(row));
         for (int column = 0; column < count; ++column) {
-            if (isCoveredCell(row, column))
-                continue;
+            const auto entry = cellAt(row, column);
+            const auto map = mapFromVariant(entry);
+            const bool marker = isMergeCoveredMarker(entry);
+            const bool covered = marker && map.contains(QStringLiteral("_lvrsMergeAnchorRow"))
+                    && map.contains(QStringLiteral("_lvrsMergeAnchorColumn"))
+                ? map.value(QStringLiteral("_lvrsMergeAnchorRow")).toInt() != row
+                    || map.value(QStringLiteral("_lvrsMergeAnchorColumn")).toInt() != column
+                : std::any_of(spans.cbegin(), spans.cend(), [column](const Span &span) {
+                    return span.firstColumn <= column && column < span.endColumn;
+                });
             const int rowSpan = cellRowSpan(row, column);
             const int columnSpan = cellColumnSpan(row, column);
+            // Even an overlapping regular anchor participates in later coverage.
+            if (!marker && (rowSpan > 1 || columnSpan > 1))
+                spans.push_back({row + rowSpan, column, column + columnSpan});
+            if (covered) continue;
             result.append(QVariantMap {
                 {QStringLiteral("index"), visibleIndex},
                 {QStringLiteral("rowIndex"), row},
                 {QStringLiteral("columnIndex"), column},
                 {QStringLiteral("rowSpan"), rowSpan},
                 {QStringLiteral("columnSpan"), columnSpan},
-                {QStringLiteral("cellData"), cellAt(row, column)},
+                {QStringLiteral("cellData"), entry},
                 {QStringLiteral("text"), cellText(row, column)},
                 {QStringLiteral("valueType"), headerCellType(column)},
-                {QStringLiteral("x"), columnX(column)},
-                {QStringLiteral("y"), rowY(row)},
-                {QStringLiteral("width"), columnSpanWidth(column, columnSpan)},
-                {QStringLiteral("height"), rowSpanHeight(row, rowSpan)},
+                {QStringLiteral("x"), columnOffsets[column]},
+                {QStringLiteral("y"), rowOffsets[row]},
+                {QStringLiteral("width"), columnOffsets[column + columnSpan] - columnOffsets[column]},
+                {QStringLiteral("height"), rowOffsets[row + rowSpan] - rowOffsets[row]},
                 {QStringLiteral("inputable"), cellInputable(row, column)}
             });
             ++visibleIndex;

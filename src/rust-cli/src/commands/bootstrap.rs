@@ -231,7 +231,7 @@ pub(crate) fn apply_auto_bootstrap_hints(
             }
         }
 
-        if should_inject_var(cmake_args, "LVRS_BOOTSTRAP_ANDROID_NDK") {
+        if !has_cmake_definition(cmake_args, "LVRS_BOOTSTRAP_ANDROID_NDK") {
             if let Some(path) = detect_android_ndk_root(android_sdk.as_deref()) {
                 inject_cmake_var(cmake_args, "LVRS_BOOTSTRAP_ANDROID_NDK", &path);
                 injected.push(format!("LVRS_BOOTSTRAP_ANDROID_NDK={}", path.display()));
@@ -304,8 +304,12 @@ fn should_inject_var(cmake_args: &[String], key: &str) -> bool {
 }
 
 fn has_cmake_definition(cmake_args: &[String], key: &str) -> bool {
-    let prefix = format!("-D{}=", key);
-    cmake_args.iter().any(|arg| arg.starts_with(&prefix))
+    cmake_args.iter().any(|arg| {
+        arg.strip_prefix("-D")
+            .and_then(|definition| definition.split_once('='))
+            .map(|(name, _)| name.split(':').next() == Some(key))
+            .unwrap_or(false)
+    })
 }
 
 fn is_env_var_set(name: &str) -> bool {
@@ -477,6 +481,7 @@ fn detect_android_sdk_root(home_dir: Option<&Path>) -> Option<PathBuf> {
 }
 
 fn detect_android_ndk_root(android_sdk_root: Option<&Path>) -> Option<PathBuf> {
+    let mut candidates = Vec::new();
     for env_name in [
         "LVRS_BOOTSTRAP_ANDROID_NDK",
         "CMAKE_ANDROID_NDK",
@@ -484,27 +489,41 @@ fn detect_android_ndk_root(android_sdk_root: Option<&Path>) -> Option<PathBuf> {
         "ANDROID_NDK_HOME",
     ] {
         if let Ok(value) = env::var(env_name) {
-            let candidate = PathBuf::from(value.trim());
-            if candidate.is_dir() {
-                return Some(candidate);
+            if !value.trim().is_empty() {
+                candidates.push(PathBuf::from(value.trim()));
             }
         }
     }
-
-    let sdk_root = android_sdk_root?;
-    let ndk_parent = sdk_root.join("ndk");
-    if !ndk_parent.is_dir() {
-        return None;
+    candidates.extend([
+        PathBuf::from("/opt/homebrew/share/android-ndk"),
+        PathBuf::from("/usr/local/share/android-ndk"),
+    ]);
+    if let Some(sdk_root) = android_sdk_root {
+        if let Ok(entries) = fs::read_dir(sdk_root.join("ndk")) {
+            let mut sdk_candidates = entries
+                .flatten()
+                .map(|entry| entry.path())
+                .filter(|path| path.is_dir())
+                .collect::<Vec<_>>();
+            sdk_candidates.sort_by(|a, b| b.file_name().cmp(&a.file_name()));
+            candidates.extend(sdk_candidates);
+        }
     }
+    // These hints become explicit CMake definitions. Never promote an obsolete
+    // ambient NDK into an override that prevents CMake's compatible fallback.
+    candidates
+        .into_iter()
+        .find(|candidate| android_ndk_supports_cpp23(candidate))
+}
 
-    let mut candidates = fs::read_dir(&ndk_parent)
-        .ok()?
-        .flatten()
-        .map(|entry| entry.path())
-        .filter(|path| path.is_dir())
-        .collect::<Vec<_>>();
-    candidates.sort_by(|a, b| b.file_name().cmp(&a.file_name()));
-    candidates.into_iter().next()
+fn android_ndk_supports_cpp23(root: &Path) -> bool {
+    let Ok(entries) = fs::read_dir(root.join("toolchains/llvm/prebuilt")) else {
+        return false;
+    };
+    entries.flatten().any(|entry| {
+        let headers = entry.path().join("sysroot/usr/include/c++/v1");
+        headers.join("stop_token").is_file() && headers.join("expected").is_file()
+    })
 }
 
 fn detect_emsdk_root(home_dir: Option<&Path>) -> Option<PathBuf> {
@@ -661,6 +680,41 @@ fn resolve_home_dir() -> Result<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn android_ndk_requires_cpp23_headers_in_one_prebuilt_sysroot() -> Result<()> {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../build/rust-cli/ndk-fixture")
+            .join(std::process::id().to_string());
+        if root.exists() {
+            fs::remove_dir_all(&root)?;
+        }
+        let first = root.join("toolchains/llvm/prebuilt/first/sysroot/usr/include/c++/v1");
+        let second = root.join("toolchains/llvm/prebuilt/second/sysroot/usr/include/c++/v1");
+        fs::create_dir_all(&first)?;
+        fs::create_dir_all(&second)?;
+        assert!(!android_ndk_supports_cpp23(&root));
+        fs::write(first.join("expected"), "")?;
+        assert!(!android_ndk_supports_cpp23(&root));
+        fs::write(second.join("stop_token"), "")?;
+        assert!(!android_ndk_supports_cpp23(&root));
+        fs::write(first.join("stop_token"), "")?;
+        assert!(android_ndk_supports_cpp23(&root));
+        fs::remove_dir_all(root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn explicit_android_ndk_definition_is_not_auto_replaced() {
+        for definition in [
+            "-DLVRS_BOOTSTRAP_ANDROID_NDK=/explicit/ndk",
+            "-DLVRS_BOOTSTRAP_ANDROID_NDK:PATH=/explicit/ndk",
+        ] {
+            let arguments = vec![definition.to_string()];
+            assert!(has_cmake_definition(&arguments, "LVRS_BOOTSTRAP_ANDROID_NDK"));
+            assert!(!should_inject_var(&arguments, "LVRS_BOOTSTRAP_ANDROID_NDK"));
+        }
+    }
 
     #[test]
     fn host_aware_bootstrap_defaults_include_linux_only_on_linux_hosts() {

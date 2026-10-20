@@ -117,7 +117,7 @@ QtObject {
                     previewId: "application-shell",
                     roleLabel: "Bootstrap root",
                     summary: "Adaptive LVRS root shell with an app primary color, window policy, bootstrap defaults, navigation scaffold, runtime wiring, and page-stack hosting.",
-                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    primaryColor: \"#A571E6\"\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
+                    usage: "LV.ApplicationWindow {\n    visible: true\n    width: 1320\n    height: 860\n    primaryColor: LV.Theme.accentPurple\n    title: \"Workspace\"\n    subtitle: \"Adaptive shell\"\n    pageRoutes: [{ path: \"/\", component: homePage }]\n}",
                     related: ["app-shell", "page-router", "navigator", "window-safe-area-observer"]
                 }),
                 component({
@@ -230,7 +230,7 @@ QtObject {
                     summary: "Action buttons, menu triggers, segmented containers, and compact selectors.",
                     items: [
                         component({"key": "help-button", "label": "HelpButton", "location": "src/qml/components/control/buttons/HelpButton.qml", "docPath": "docs/components/control/HelpButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Circular help trigger with the Figma question-mark text and 21px footprint.", "usage": "LV.HelpButton { onClicked: showHelp() }", "related": ["abstract-button", "motion"]}),
-                        component({"key": "color-picker-button", "label": "ColorPickerButton", "location": "src/qml/components/control/buttons/ColorPickerButton.qml", "docPath": "docs/components/control/ColorPickerButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Color trigger in three sizes, with the exported hue ring and current-color well.", "usage": "LV.ColorPickerButton { currentColor: \"#7A5AF8\"; buttonSize: LV.ColorPickerButton.Medium }", "related": ["abstract-button", "motion"]}),
+                        component({"key": "color-picker-button", "label": "ColorPickerButton", "location": "src/qml/components/control/buttons/ColorPickerButton.qml", "docPath": "docs/components/control/ColorPickerButton.md", "previewId": "figma-parity", "roleLabel": "Figma component", "summary": "Color trigger in three sizes, with the exported hue ring and current-color well.", "usage": "LV.ColorPickerButton { currentColor: LV.Theme.accentPurple; buttonSize: LV.ColorPickerButton.Medium }", "related": ["abstract-button", "motion"]}),
                         component({
                             key: "abstract-button",
                             label: "AbstractButton",
@@ -401,6 +401,17 @@ QtObject {
                     iconGlyph: "D",
                     summary: "Text, progress, and table primitives for structured information display.",
                     items: [
+                        component({
+                            key: "avatar",
+                            label: "Avatar",
+                            location: "src/qml/components/control/display/Avatar.qml",
+                            docPath: "docs/components/control/Avatar.md",
+                            previewId: "avatar-display",
+                            roleLabel: "Profile image",
+                            summary: "Circular image profiles with centered aspect-fill cropping in Large, Medium, and Small sizes.",
+                            usage: "LV.Avatar {\n    source: user.photoUrl\n    size: LV.Avatar.Medium\n}",
+                            related: ["label", "card"]
+                        }),
                         component({
                             key: "label",
                             label: "Label",
@@ -801,7 +812,7 @@ QtObject {
                     docPath: "docs/components/surfaces/Materials.md", previewId: "material-gallery",
                     roleLabel: "Application background",
                     summary: "Uniform #0B0B0B fill at 50% without gradients. ApplicationWindow retains its native frosted backdrop.",
-                    usage: "LV.ApplicationWindow { primaryColor: \"#A571E6\" }",
+                    usage: "LV.ApplicationWindow { primaryColor: LV.Theme.accentPurple }",
                     related: ["panel-material", "popover", "tooltip"]
                 }),
                 component({

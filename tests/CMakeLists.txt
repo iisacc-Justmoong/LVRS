@@ -124,6 +124,14 @@ add_test(
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_framework_bootstrap_action_contract.cmake"
 )
+add_test(NAME LVRSTests_cmake_framework_provider_bootstrap
+    COMMAND "${CMAKE_COMMAND}" "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_framework_provider_bootstrap.cmake")
+add_test(NAME LVRSTests_cmake_android_ndk_cpp23
+    COMMAND "${CMAKE_COMMAND}" "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+        "-DLVRS_BINARY_DIR=${CMAKE_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_android_ndk_cpp23.cmake")
 
 add_test(
     NAME LVRSTests_cmake_example_runtime_output_dir
@@ -180,6 +188,7 @@ endif()
 uifw_add_test(LVRSTests_primary_color tst_primary_color.cpp)
 uifw_add_test(LVRSTests_list_composites tst_list_composites.cpp)
 uifw_add_test(LVRSTests_card tst_card.cpp)
+uifw_add_test(LVRSTests_avatar tst_avatar.cpp)
 uifw_add_test(LVRSTests_slider tst_slider.cpp)
 uifw_add_test(LVRSTests_tabs tst_tabs.cpp)
 uifw_add_test(LVRSTests_mobile_navigation tst_mobile_navigation.cpp)
@@ -187,6 +196,8 @@ uifw_add_test(LVRSTests_toggle_switch tst_toggle_switch.cpp)
 uifw_add_test(LVRSTests_motion tst_motion.cpp)
 uifw_add_test(LVRSTests_instance_state tst_instance_state.cpp)
 uifw_add_test(LVRSTests_figma_parity tst_figma_parity.cpp)
+set_property(TEST LVRSTests_figma_parity APPEND PROPERTY ENVIRONMENT
+    "LVRS_ACCENT_CAPTURE_PATH=${CMAKE_BINARY_DIR}/accent-palette-preview.png")
 uifw_add_test(LVRSTests_colorpicker tst_colorpicker.cpp)
 uifw_add_test(LVRSTests_sheet tst_sheet.cpp)
 uifw_add_test(LVRSTests_tooltip tst_tooltip.cpp)
@@ -199,9 +210,17 @@ uifw_add_test(LVRSTests_navigation_state tst_navigation_state.cpp)
 uifw_add_test(LVRSTests_qml_type_registrar tst_qml_type_registrar.cpp)
 uifw_add_test(LVRSTests_runtime_services tst_runtime_services.cpp)
 uifw_add_test(LVRSTests_svg_manager tst_svg_manager.cpp)
+# Embed exact, unnormalized source bytes once instead of reopening thousands of
+# external-storage files during each geometry/raster check.
+file(GLOB_RECURSE _lvrs_test_svg_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../resources/*.svg")
+qt_add_resources(LVRSTests_svg_manager lvrs_test_source_svg
+    PREFIX "/lvrs-test-source-svg" BASE "${CMAKE_CURRENT_SOURCE_DIR}/../resources"
+    FILES ${_lvrs_test_svg_sources})
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME LVRSTests_figma_iconset_import
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_figma_iconset_import.py")
+add_test(NAME LVRSTests_accent_palette
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_accent_palette.py")
 add_executable(LVRSNormalizeSvgIcons EXCLUDE_FROM_ALL ../scripts/normalize_svg_icons.cpp)
 target_compile_features(LVRSNormalizeSvgIcons PRIVATE cxx_std_23)
 target_link_libraries(LVRSNormalizeSvgIcons PRIVATE Qt6::Core Qt6::Gui Qt6::Svg)
@@ -212,6 +231,7 @@ uifw_add_test(LVRSTests_text_editor tst_text_editor.cpp)
 uifw_add_test(LVRSTests_text_markup tst_text_markup.cpp)
 uifw_add_test(LVRSTests_hierarchy_codec tst_hierarchy_codec.cpp)
 uifw_add_test(LVRSTests_hierarchy_interaction tst_hierarchy_interaction.cpp)
+uifw_add_test(LVRSTests_text_document_model tst_text_document_model.cpp)
 uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
 uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
 if(WIN32)

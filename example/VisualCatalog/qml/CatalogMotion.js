@@ -3,6 +3,7 @@
 // Every shipped QML type has an explicit interaction recipe. Nonvisual types
 // document the visible consumer rather than pretending to own a hit target.
 var recipes = {
+    "avatar": ["display", "Compare the three profile sizes, then switch between landscape and portrait images.", "The image retains its aspect ratio and stays centered inside the circular crop at every size."],
     "tab": ["navigation", "Press a tab or focus it with Tab and activate it with Enter or Space.", "The selected underline or surface persists independently of pointer hover and press feedback."],
     "tab-bar": ["navigation", "Move focus with arrow keys, activate a destination and resize the scrollable bar.", "Only the selected tab is highlighted; keyboard focus is revealed inside the clipped horizontal viewport."],
     "mobile-tab": ["navigation", "Tap the icon and label, then compare selected, focused and disabled states.", "The platform-shaped selected capsule and badge remain aligned while the shared press motion rebounds."],

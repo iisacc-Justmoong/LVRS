@@ -26,13 +26,13 @@ import LVRS 1.0 as LV
 LV.ApplicationWindow {
     id: app
     visible: true
-    primaryColor: "#A571E6"
+    primaryColor: "#874AFF"
 
     LV.LabelButton { text: "Continue" }
 }
 ```
 
-초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(`#0A84FF`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.
+초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(`#1582FF`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.
 
 같은 QML 엔진의 창들이 테마 색상을 공유합니다. 기본 앱 루트에서 색상을 설정하면, `primaryColor` 를 생략하는 보조 창들은 현재 테마를 재설정하지 않고 이를 상속받습니다. 여러 개의 명시적인 입력은 동일한 테마를 업데이트하며, 독립적인 창 팔레트를 설정하지 않습니다. 별도의 QML 엔진들은 별도의 테마를 유지합니다. `AppBootstrapWindow` 와 `AppShell` 도 입력을 상속받습니다.
 
@@ -75,11 +75,11 @@ LV.ApplicationWindow {
 
 ### 창 및 플랫폼 재정의
 
-- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#0A84FF`)
-- `windowColor`
-- `windowBackgroundOpacity`(기본값 0.66, 중립 배경 채우기에 적용)
-- `backgroundBlurEnabled`(네이티브 백엔드가 지원하면 기본적으로 활성화된다)
-- read-only `backgroundBlurSupported`, `backgroundBlurActive`
+- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#1582FF`)
+- `windowColor`(기본값 검정이며 배경 혼합의 RGB 바탕색이다)
+- `windowBackgroundOpacity`(기본값 1.0인 호환성 입력이며, 기본 솔리드 배경의 알파를 변경하지 않는다)
+- `backgroundBlurEnabled`(기본값 `false`인 호환성 입력이며, 불투명 기본 배경에는 블러를 적용하지 않는다)
+- read-only `backgroundBlurSupported`, `backgroundBlurActive`(불투명 기본 배경에서 모두 `false`)
 - `forceNativeDarkTitleBar`
 - `nativeTitleBarHeight`: 선택적으로 활성화하는 macOS 제목 표시줄 행의 높이이며 논리 픽셀 단위이다. `0`는 네이티브 기본값을 유지한다.
 - `nativeTitleBarLeftMargin`: 네이티브 버튼 그룹의 시작 여백이며 기본값은 `Theme.gap12`이다.
@@ -281,13 +281,16 @@ LV.ApplicationWindow {
 
 ## 기본 배경 자료
 
-기본 배경은 [Figma ApplicationWindow 997:3](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=997-3)을 따른다. `#141414` 중립 채색을 `windowBackgroundOpacity`의 기본값 0.66으로 그리고, 그 위에 `primaryColor`를 불투명도 0.04로 균일하게 합성한다. 기본 배경의 방사형 그레디언트 강도는 모두 0이다. 4%는 강조색 레이어에만 적용되며 창과 전경 콘텐츠의 불투명도는 1이다. 투명한 바탕에서 두 레이어의 합성 알파는 `0.04 + 0.66 × 0.96 = 0.6736`이다.
+기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#141414`)이고 앱 `primaryColor`를 5% 혼합한다. RGB 채널을 `windowColor × 0.95 + primaryColor × 0.05`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 예를 들어 강조색 `#0A84FF`는 중심색 `#141A20`이 되고, `#66FF48`은 `#182017`이 된다. 이 중심색에 미세 입자가 더해진다.
 
-`primaryColor`가 앱 강조색 인자이다. Dreamscapes는 `primaryColor: LV.Theme.defaultPrimary`(파란색 `#0A84FF`), Society는 `primaryColor: LV.Theme.accentGreen`(녹색 `#57965C`)을 지정한다. 실행 중 이 값을 바꾸면 기존 공유 색상 전환을 통해 오버레이도 갱신된다. 앱 이름에 따른 분기는 없다. 보조 창은 앱 테마를 따르며 명시적인 창 강조색은 독립적으로 유지된다.
+`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#141414`이다. `Theme.applicationWindowAccentOpacity`는 0.05, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 95% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.
 
-`windowColor`와 `windowBackgroundOpacity`는 중립 채색과 불투명도를 재정의한다. 강조색 오버레이 강도는 `Theme.applicationWindowAccentOpacity`의 0.04를 사용한다. 기본 배경은 기존 WindowMaterial 렌더러를 재사용하되 방사형 처리를 끄고, 전경 아래에 전체 창 크기의 강조색 레이어를 배치한다. 독립 WindowMaterial과 PanelMaterial은 기존 방사형 재질을 유지한다.
+이 중심색 위에는 `WindowNoiseTexture`가 매우 고운 단색 노이즈를 불투명하게 그린다. `Theme.applicationWindowGrainStrength`의 기본값은 `2 / 255`이다. 각 채널에 같은 난수 밝기 값을 더하며 최대 변화는 8비트 RGB 기준 ±2단계이다. 검정 근처의 값은 0에서 제한한다. 입자 크기는 물리 픽셀 1개이며 Retina에서도 2×2 픽셀로 커지지 않는다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. `windowBackgroundOpacity`와 `backgroundBlurEnabled`는 호환성 입력으로 남지만 기본 불투명 표면을 바꾸지 않는다. `backgroundBlurSupported`와 `backgroundBlurActive`는 false이다. 표준 `background`를 재정의하면 앱이 해당 배경을 소유한다.
 
-macOS에서는 투명한 Qt 표면 아래의 활성 `NSVisualEffectView`가 창 뒤 콘텐츠를 흐리게 한다. QML 재질 확산은 64 논리 px이며 네이티브 블러 커널은 AppKit이 제어한다. 네이티브 블러를 지원하지 않는 플랫폼은 불투명한 창 바탕 위에 같은 강조색 오버레이를 사용한다. 외곽선과 크롬은 네이티브 창이 담당하며, 소비자는 표준 `background`를 재정의할 수 있다. [재질](../surfaces/Materials.md)을 참조한다.
+앱과 보조 창은 기존 강조색 상속을 사용하며, 강조색 변경 즉시 중심색을 갱신한다. 노이즈는 고정 시드의 256×256 타일로 캐시하며 크기 조정과 프레임 경과에도 같은 패턴을 유지한다. 노이즈 강도를 0으로 설정하면 원래 중심색의 단색이 된다. 텍스트와 버튼의 색상·불투명도는 별도로 유지한다. 소프트웨어 렌더러는 추가 콘텐츠 슈퍼샘플링 레이어를 사용하지 않으며, RHI의 기존 슈퍼샘플링 정책은 유지한다.
+
+macOS는 불투명한 네이티브 창과 알파 버퍼 0을 사용한다. 창 뒤 화면을 흐리게 하는 `NSVisualEffectView`를 생성하지 않는다. 기존 네이티브 프레임, 제목 표시줄과 입력 처리는 유지한다. 독립 `WindowMaterial`, `PanelMaterial`과 팝업은 별도 재질을 유지한다. 기본 노이즈 항목은 `noiseStrength: 0`, `blurRadius: 0`, `grainStrength: Theme.applicationWindowGrainStrength`를 사용하여 95:5 중심색에 미세한 입자만 더한다. [재질](../surfaces/Materials.md)을 참조한다.
+
 
 <a id="shared-motion"></a>
 

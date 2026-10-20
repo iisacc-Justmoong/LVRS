@@ -163,6 +163,8 @@ LV.ApplicationWindow {
             return toggleSwitchPreview
         case "label-display":
             return motionLabPreview
+        case "avatar-display":
+            return avatarPreview
         case "progress-display":
             return motionLabPreview
         case "table-display":
@@ -436,9 +438,16 @@ LV.ApplicationWindow {
 
                             Repeater {
                                 model: [
-                                    { key: "blue", label: "LVRS blue", color: LV.Theme.defaultPrimary },
-                                    { key: "purple", label: "Purple", color: "#A571E6" },
-                                    { key: "orange", label: "Orange", color: "#FF9F45" }
+                                    { key: "blue", label: "LVRS blue", color: LV.Theme.accentBlue },
+                                    { key: "red", label: "Red", color: LV.Theme.accentRed },
+                                    { key: "green", label: "Green", color: LV.Theme.accentGreen },
+                                    { key: "yellow", label: "Yellow", color: LV.Theme.accentYellow },
+                                    { key: "purple", label: "Purple", color: LV.Theme.accentPurple },
+                                    { key: "rose", label: "Rose", color: LV.Theme.accentRose },
+                                    { key: "orange", label: "Orange", color: LV.Theme.accentOrange },
+                                    { key: "brown", label: "Brown", color: LV.Theme.accentBrown },
+                                    { key: "cyan", label: "Cyan", color: LV.Theme.accentCyan },
+                                    { key: "teal", label: "Teal", color: LV.Theme.accentTeal }
                                 ]
 
                                 delegate: LV.LabelButton {
@@ -1868,6 +1877,39 @@ LV.ApplicationWindow {
                         endValue: 100
                     }
                 }
+            }
+        }
+    }
+
+    Component {
+        id: avatarPreview
+        Column {
+            width: parent ? parent.width : 560
+            spacing: LV.Theme.gap18
+            property bool portrait: false
+            LV.Label {
+                width: parent.width
+                text: "Avatar · Large / Medium / Small"
+                style: header
+            }
+            Row {
+                spacing: LV.Theme.gap18
+                Repeater {
+                    model: [LV.Avatar.Large, LV.Avatar.Medium, LV.Avatar.Small]
+                    delegate: LV.Avatar {
+                        required property int modelData
+                        size: modelData
+                        source: Qt.resolvedUrl(portrait ? "../assets/cards/document.png" : "../assets/cards/landscape.png")
+                    }
+                }
+            }
+            LV.LabelButton {
+                text: "Switch portrait / landscape"
+                onClicked: portrait = !portrait
+            }
+            LV.Label {
+                width: parent.width
+                text: "The image fills each circle without stretching. Both crop axes stay centered."
             }
         }
     }

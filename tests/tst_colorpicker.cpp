@@ -4,6 +4,7 @@
 #include <QQuickItemGrabResult>
 #include <QQmlEngine>
 #include "test_utils.h"
+#include "accent_fixture.h"
 #include "backend/graphics/colorpickermodel.h"
 #include "backend/graphics/colorpickersurface.h"
 #include <limits>
@@ -24,6 +25,7 @@ class ColorPickerTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void authored_palette_defaults();
     void content_variants_data();
     void content_variants();
     void color_conversion_and_validation();
@@ -34,6 +36,36 @@ private slots:
     void all_color_domains();
     void catalog_renders_six_views();
 };
+
+void ColorPickerTests::authored_palette_defaults()
+{
+    ColorPickerModel model;
+    QCOMPARE(model.color(), QColor(Qt::white));
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+Item {
+    LV.ColorPicker { objectName: "picker" }
+    LV.ColorPickerButton { objectName: "button" }
+})"));
+    QVERIFY(root);
+    auto *picker = root->findChild<QObject *>("picker");
+    auto *button = root->findChild<QObject *>("button");
+    QVERIFY(picker && button);
+    QCOMPARE(picker->property("currentColor").value<QColor>(), AccentFixture::color("accentPurple"));
+    QCOMPARE(button->property("currentColor").value<QColor>(), AccentFixture::color("accentPurple"));
+    const auto recent = qvariant_cast<QJSValue>(picker->property("recentColors"));
+    QCOMPARE(recent.property("length").toInt(), 10);
+    const auto colors = AccentFixture::colors();
+    for (int i = 0; i < colors.size(); ++i)
+        QCOMPARE(recent.property(i).toVariant().value<QColor>(),
+                 AccentFixture::color(colors[i].toObject()["property"].toString()));
+    auto *last = findVisual(qobject_cast<QQuickItem *>(picker), "colorPicker_recent_9");
+    QVERIFY(last);
+    QCOMPARE(last->property("modelData").value<QColor>(), AccentFixture::color("accentTeal"));
+}
 
 void ColorPickerTests::content_variants_data()
 {
@@ -312,10 +344,10 @@ LV.ColorPicker { type: LV.ColorPicker.SaturationBrightness; currentColor: "#ff00
     auto *recent = findVisual(picker, QStringLiteral("colorPicker_recent_1"));
     QVERIFY(recent);
     QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, recent->mapToScene(QPointF(12, 10)).toPoint());
-    QCOMPARE(state->color(), QColor("#0a84ff"));
+    QCOMPARE(state->color(), AccentFixture::color("accentRed"));
     picker->setEnabled(false);
     QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, at(.1, .1));
-    QCOMPARE(state->color(), QColor("#0a84ff"));
+    QCOMPARE(state->color(), AccentFixture::color("accentRed"));
 }
 
 void ColorPickerTests::catalog_renders_six_views()
@@ -339,7 +371,7 @@ void ColorPickerTests::catalog_renders_six_views()
         auto *picker = findVisual(gallery, QString("gallery_colorPicker_%1").arg(i));
         QVERIFY(picker);
         QCOMPARE(picker->property("type").toInt(), i);
-        QCOMPARE(picker->property("currentColor").value<QColor>(), QColor("#7a5af8"));
+        QCOMPARE(picker->property("currentColor").value<QColor>(), AccentFixture::color("accentPurple"));
     }
     auto grab = gallery->grabToImage();
     QVERIFY(grab);

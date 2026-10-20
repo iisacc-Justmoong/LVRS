@@ -247,8 +247,7 @@ void InstanceStateTests::menu_selected_uses_press_fill()
     QVERIFY(theme);
     QVERIFY(theme->setProperty("primaryColor", QColor(primary)));
     const QColor expected = other->property("backgroundColorPressed").value<QColor>();
-    if (primary == "#0A84FF")
-        QCOMPARE(expected, QColor("#25324D"));
+    QCOMPARE(expected, theme->property("accentMuted").value<QColor>());
     auto *background = control->property("background").value<QQuickItem *>();
     QVERIFY(background);
     QVERIFY(control->setProperty("state", control->property("selectedState")));

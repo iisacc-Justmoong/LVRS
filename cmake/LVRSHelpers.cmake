@@ -1374,7 +1374,13 @@ function(lvrs_create_framework_bootstrap_targets)
     if(DEFINED LVRS_BOOTSTRAP_ANDROID_NDK AND NOT LVRS_BOOTSTRAP_ANDROID_NDK STREQUAL "")
         set(_lvrs_bootstrap_android_ndk "${LVRS_BOOTSTRAP_ANDROID_NDK}")
     elseif(DEFINED ENV{LVRS_BOOTSTRAP_ANDROID_NDK} AND NOT "$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}" STREQUAL "")
-        set(_lvrs_bootstrap_android_ndk "$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}")
+        include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/LVRSBootstrapAndroidNdk.cmake")
+        _lvrs_bootstrap_ndk_supports_cpp23("$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}" _lvrs_environment_ndk_supported)
+        if(_lvrs_environment_ndk_supported)
+            set(_lvrs_bootstrap_android_ndk "$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}")
+        else()
+            message(STATUS "LVRS framework bootstrap: ignoring incompatible environment LVRS_BOOTSTRAP_ANDROID_NDK='$ENV{LVRS_BOOTSTRAP_ANDROID_NDK}'; detecting a C++23 NDK.")
+        endif()
     endif()
 
     set(_lvrs_ios_architectures "")
@@ -1499,6 +1505,7 @@ function(lvrs_create_framework_bootstrap_targets)
             COMMAND "${CMAKE_COMMAND}"
                 "-DLVRS_BOOTSTRAP_SOURCE_DIR=${_lvrs_bootstrap_source_dir}"
                 "-DLVRS_BOOTSTRAP_BINARY_DIR=${_lvrs_platform_build_dir}"
+                "-DLVRS_BOOTSTRAP_FILE_PROVIDER_SOURCE_DIR=${LVRS_BOOTSTRAP_FILE_PROVIDER_SOURCE_DIR}"
                 "-DLVRS_BOOTSTRAP_PLATFORM=${_lvrs_platform}"
                 "-DLVRS_BOOTSTRAP_SYSTEM_NAME=${_lvrs_system_name}"
                 "-DLVRS_BOOTSTRAP_PREFIX_PATH=${_lvrs_combined_prefix_path_escaped}"

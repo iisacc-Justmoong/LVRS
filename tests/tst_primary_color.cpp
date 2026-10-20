@@ -4,6 +4,7 @@
 #include <QQuickWindow>
 #include <QQmlEngine>
 #include "test_utils.h"
+#include "accent_fixture.h"
 
 namespace {
 QByteArray windowQml(const QByteArray &properties = {}, const QByteArray &content = {})
@@ -101,19 +102,21 @@ void PrimaryColorTests::default_blue_is_compatible()
     engine.addImportPath(TestUtils::qmlImportBase());
     QScopedPointer<QObject> window(TestUtils::createFromQml(engine, windowQml({}, controls)));
     QVERIFY(window);
-    QCOMPARE(color(window.data(), "primaryColor"), QColor("#0A84FF"));
+    const QColor blue = AccentFixture::color("accentBlue");
+    QVERIFY(blue.isValid());
+    QCOMPARE(color(window.data(), "primaryColor"), blue);
     QObject *tokens = theme(window.data());
     QVERIFY(tokens);
-    QCOMPARE(color(tokens, "defaultPrimary"), QColor("#0A84FF"));
-    QCOMPARE(color(tokens, "primary"), QColor("#0A84FF"));
-    QCOMPARE(color(tokens, "accentTint"), QColor("#1F0A84FF"));
-    QCOMPARE(color(tokens, "primaryOverlay"), QColor("#400A84FF"));
-    QCOMPARE(color(tokens, "accentMuted"), QColor("#25324D"));
-    QCOMPARE(color(tokens, "accentDetail"), QColor("#548AF7"));
-    QCOMPARE(color(tokens, "alertActionPrimary"), QColor("#027DFF"));
-    QCOMPARE(color(tokens, "alertIconSurface"), QColor("#192840"));
-    QCOMPARE(color(tokens, "alertIconBorder"), QColor("#244B7E"));
-    QCOMPARE(color(window->findChild<QObject *>("primaryButton"), "backgroundColor"), QColor("#0A84FF"));
+    QCOMPARE(color(tokens, "defaultPrimary"), blue);
+    QCOMPARE(color(tokens, "primary"), blue);
+    QCOMPARE(color(tokens, "accentTint"), AccentFixture::blueWithAlpha(31.0 / 255));
+    QCOMPARE(color(tokens, "primaryOverlay"), AccentFixture::blueWithAlpha(64.0 / 255));
+    QCOMPARE(color(tokens, "accentMuted"), AccentFixture::blueComposite(0.25));
+    QCOMPARE(color(tokens, "accentDetail"), blue);
+    QCOMPARE(color(tokens, "alertActionPrimary"), blue);
+    QCOMPARE(color(tokens, "alertIconSurface"), AccentFixture::blueComposite(0.16));
+    QCOMPARE(color(tokens, "alertIconBorder"), AccentFixture::blueComposite(0.36));
+    QCOMPARE(color(window->findChild<QObject *>("primaryButton"), "backgroundColor"), blue);
     auto *checkBox = window->findChild<QObject *>("checkBox");
     QVERIFY(checkBox);
     QVERIFY(checkBox->property("usingFigmaCheckedAsset").toBool());
@@ -205,7 +208,7 @@ void PrimaryColorTests::runtime_color_updates_controls_and_overlays()
         {"menuItem", "iconPlaceholderColor"}, {"listFooter_iconButton_0", "backgroundColorPressed"},
         {"listFooter_menuButton_2", "backgroundColorPressed"}
     };
-    for (const QColor &primary : {QColor("#A571E6"), QColor("#57965C"), QColor("#FF9F45"), QColor("#0A84FF")}) {
+    for (const QColor &primary : {QColor("#A571E6"), QColor("#57965C"), QColor("#FF9F45"), QColor("#0A84FF"), AccentFixture::color("accentBlue")}) {
         QVERIFY(window->setProperty("primaryColor", primary));
         QCOMPARE(color(tokens, "primary"), primary);
         for (const auto &consumer : primaryConsumers) {
@@ -229,20 +232,20 @@ void PrimaryColorTests::runtime_color_updates_controls_and_overlays()
         QCOMPARE(color(window->findChild<QObject *>("listItem"), "selectedBackgroundColor"), color(tokens, "accentOverlay"));
         QCOMPARE(color(window->findChild<QObject *>("table"), "selectionColor"), color(tokens, "accentTint"));
         QCOMPARE(color(window->findChild<QObject *>("alertButton"), "backgroundColor"),
-                 primary == QColor("#0A84FF") ? QColor("#027DFF") : primary);
+                 primary);
         QCOMPARE(color(window->findChild<QObject *>("overrideButton"), "backgroundColor"), QColor("#57965C"));
-        QCOMPARE(color(window->findChild<QObject *>("dangerButton"), "backgroundColor"), QColor("#FF453A"));
-        QCOMPARE(color(tokens, "success"), QColor("#32D74B"));
-        QCOMPARE(color(tokens, "warning"), QColor("#FFD60A"));
-        QCOMPARE(color(tokens, "accentBlue"), QColor("#548AF7"));
-        QCOMPARE(color(tokens, "accentBlueMuted"), QColor("#25324D"));
+        QCOMPARE(color(window->findChild<QObject *>("dangerButton"), "backgroundColor"), AccentFixture::color("accentRed"));
+        QCOMPARE(color(tokens, "success"), AccentFixture::color("accentGreen"));
+        QCOMPARE(color(tokens, "warning"), AccentFixture::color("accentYellow"));
+        QCOMPARE(color(tokens, "accentBlue"), AccentFixture::color("accentBlue"));
+        QCOMPARE(color(tokens, "accentBlueMuted"), AccentFixture::blueComposite(0.25));
         QCOMPARE(color(window->property("palette").value<QObject *>(), "highlight"), primary);
         auto *checkBox = window->findChild<QObject *>("checkBox");
-        QCOMPARE(checkBox->property("usingFigmaCheckedAsset").toBool(), primary == QColor("#0A84FF"));
-        if (primary != QColor("#0A84FF")) {
-            QVERIFY(color(tokens, "accentMuted") != QColor("#25324D"));
-            QVERIFY(color(tokens, "alertIconSurface") != QColor("#192840"));
-            QVERIFY(color(tokens, "alertIconBorder") != QColor("#244B7E"));
+        QCOMPARE(checkBox->property("usingFigmaCheckedAsset").toBool(), primary == AccentFixture::color("accentBlue"));
+        if (primary != AccentFixture::color("accentBlue")) {
+            QVERIFY(color(tokens, "accentMuted") != AccentFixture::blueComposite(0.25));
+            QVERIFY(color(tokens, "alertIconSurface") != AccentFixture::blueComposite(0.16));
+            QVERIFY(color(tokens, "alertIconBorder") != AccentFixture::blueComposite(0.36));
         }
         QVERIFY(loader->setProperty("active", true));
         QTRY_VERIFY(loader->property("item").value<QObject *>());
@@ -276,7 +279,7 @@ void PrimaryColorTests::engines_have_independent_themes()
     QScopedPointer<QObject> second(TestUtils::createFromQml(secondEngine, windowQml()));
     QVERIFY(first && second);
     QCOMPARE(color(theme(first.data()), "primary"), QColor("#A571E6"));
-    QCOMPARE(color(theme(second.data()), "primary"), QColor("#0A84FF"));
+    QCOMPARE(color(theme(second.data()), "primary"), AccentFixture::color("accentBlue"));
 }
 
 void PrimaryColorTests::custom_color_is_rendered()
@@ -336,9 +339,11 @@ void PrimaryColorTests::catalog_accent_choices_update_the_app()
     QVERIFY(window);
     QVERIFY(QMetaObject::invokeMethod(root.data(), "activateCatalogEntry",
                                      Q_ARG(QVariant, QStringLiteral("application-window"))));
-    const QList<QPair<QString, QColor>> choices = {
-        {"purple", QColor("#A571E6")}, {"orange", QColor("#FF9F45")}, {"blue", QColor("#0A84FF")}
-    };
+    QList<QPair<QString, QColor>> choices;
+    for (const auto &entry : AccentFixture::colors()) {
+        const auto property = entry.toObject()["property"].toString();
+        choices.append({property.mid(6).toLower(), AccentFixture::color(property)});
+    }
     for (const auto &choice : choices) {
         const QString name = "catalogPrimaryColor_" + choice.first;
         QTRY_VERIFY(findVisualItem(window->contentItem(), name));

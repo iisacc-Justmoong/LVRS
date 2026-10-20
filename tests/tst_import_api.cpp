@@ -22,6 +22,7 @@
 #include <QSGRendererInterface>
 #include <QVector>
 #include <QtPlugin>
+#include "accent_fixture.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -6235,7 +6236,7 @@ Item {
     };
     const QColor capturedOnTrack = logicalPixel(28, 33);
     const QColor capturedOffTrack = logicalPixel(124, 33);
-    QVERIFY2(opaqueRgbMatches(capturedOnTrack, QColor(QStringLiteral("#0A84FF"))),
+    QVERIFY2(opaqueRgbMatches(capturedOnTrack, AccentFixture::color("accentBlue")),
              qPrintable(capturedOnTrack.name(QColor::HexArgb)));
     QVERIFY2(opaqueRgbMatches(capturedOffTrack, QColor(QStringLiteral("#313233"))),
              qPrintable(capturedOffTrack.name(QColor::HexArgb)));
@@ -6956,7 +6957,7 @@ Item {
     QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(26));
     QTRY_COMPARE(twoCard->height(), qreal(379));
     QTRY_COMPARE(threeCard->height(), qreal(479));
-    QCOMPARE(threeSecondary->property("textColor").value<QColor>(), QColor("#ff453a"));
+    QCOMPARE(threeSecondary->property("textColor").value<QColor>(), AccentFixture::color("accentRed"));
     QCOMPARE(twoSecondary->property("textColor").value<QColor>(), QColor("#f4f5f7"));
     QCOMPARE(threeTertiary->property("backgroundColor").value<QColor>(), QColor(Qt::transparent));
 

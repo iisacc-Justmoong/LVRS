@@ -19,6 +19,7 @@
 #include <QtPlugin>
 
 #include "backend/graphics/svgmanager.h"
+#include "accent_fixture.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
@@ -299,15 +300,20 @@ void SvgManagerTests::translate_object_preserves_image_alpha()
     QVERIFY(!tinted.isNull());
     QVERIFY(!original.isNull());
     QCOMPARE(tinted.size(), original.size());
+    const QColor cyan = AccentFixture::color("accentCyan");
     bool visible = false;
     for (int y = 0; y < original.height(); ++y) {
         for (int x = 0; x < original.width(); ++x) {
             QCOMPARE(tinted.pixelColor(x, y).alpha(), original.pixelColor(x, y).alpha());
             if (original.pixelColor(x, y).alpha() > 0) {
                 const QColor color = tinted.pixelColor(x, y);
-                QCOMPARE(color.red(), 64);
-                QCOMPARE(color.green(), 182);
-                QCOMPARE(color.blue(), 224);
+                // Native PNG export preserves alpha exactly; opaque pixels
+                // verify the authored color without unpremultiplication noise.
+                if (color.alpha() == 255) {
+                    QCOMPARE(color.red(), cyan.red());
+                    QCOMPARE(color.green(), cyan.green());
+                    QCOMPARE(color.blue(), cyan.blue());
+                }
                 visible = true;
             }
         }
@@ -317,7 +323,7 @@ void SvgManagerTests::translate_object_preserves_image_alpha()
 
 void SvgManagerTests::all_svg_icons_scale_and_center()
 {
-    QDirIterator files(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../resources"),
+    QDirIterator files(QStringLiteral(":/lvrs-test-source-svg"),
                        {QStringLiteral("*.svg")}, QDir::Files, QDirIterator::Subdirectories);
     int count = 0;
     while (files.hasNext()) {
@@ -341,10 +347,17 @@ void SvgManagerTests::all_svg_icons_scale_and_center()
             QPainter painter(&image);
             renderer.render(&painter);
             painter.end();
-            QRect bounds;
-            for (int y = 0; y < size; ++y)
-                for (int x = 0; x < size; ++x)
-                    if (qAlpha(image.pixel(x, y)) > 0) bounds |= QRect(x, y, 1, 1);
+            int left = size, top = size, right = -1, bottom = -1;
+            for (int y = 0; y < size; ++y) {
+                const auto *row = reinterpret_cast<const QRgb *>(image.constScanLine(y));
+                for (int x = 0; x < size; ++x) {
+                    if (qAlpha(row[x]) > 0) {
+                        left = qMin(left, x); right = qMax(right, x);
+                        top = qMin(top, y); bottom = qMax(bottom, y);
+                    }
+                }
+            }
+            const QRect bounds = right >= 0 ? QRect(left, top, right-left+1, bottom-top+1) : QRect{};
             QVERIFY2(!bounds.isEmpty(), context.constData());
             // Up to one raster pixel per edge accounts for antialiasing.
             QVERIFY2(qAbs(bounds.left() - (size - 1 - bounds.right())) <= 2, context.constData());

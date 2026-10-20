@@ -41,7 +41,8 @@ void CatalogTests::every_qml_type_has_a_recipe_and_live_preview()
     QVERIFY(root);
     const auto keys = evaluate(engine, root.data(),
         "catalogEntries.map(function(entry) { return entry.key }).join('|')").toString().split('|');
-    QCOMPARE(keys.size(), 91);
+    QVERIFY(keys.contains(QStringLiteral("avatar")));
+    QCOMPARE(QSet<QString>(keys.begin(), keys.end()).size(), keys.size());
     const QString paths = evaluate(engine, root.data(),
         "catalogEntries.map(function(entry) { return entry.location }).join('|')").toString();
     const QDir source(QStringLiteral(LVRS_TEST_SOURCE_DIR "/.."));

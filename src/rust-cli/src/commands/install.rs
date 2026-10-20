@@ -231,6 +231,7 @@ fn run_internal(
             &build_dir,
             build_examples,
         )?;
+        install_file_provider_snapshot(&project_root, &source_install_dir)?;
     }
 
     let cli_binary = install_cli_binary(&env::current_exe()?, &install_prefix)?;
@@ -2152,6 +2153,20 @@ fn should_skip_snapshot_entry(name: &str) -> bool {
         || name.starts_with("cmake-build-")
 }
 
+fn install_file_provider_snapshot(project_root: &Path, source_install_dir: &Path) -> Result<()> {
+    let Some(source_parent) = project_root.parent() else { return Ok(()); };
+    let Some(install_parent) = source_install_dir.parent() else { return Ok(()); };
+    let source = source_parent.join("iiFileProvider");
+    let destination = install_parent.join("iiFileProvider");
+    if !source.join("CMakeLists.txt").is_file()
+        || paths_refer_to_same_location(&source, &destination)
+    {
+        return Ok(());
+    }
+    remove_path(&destination)?;
+    copy_source_snapshot_directory(&source, &destination)
+}
+
 fn copy_source_snapshot_directory(source: &Path, destination: &Path) -> Result<()> {
     fs::create_dir_all(destination).with_context(|| {
         format!(
@@ -2829,6 +2844,29 @@ mod tests {
             default_bootstrap_framework_platforms("windows"),
             "windows;android;wasm"
         );
+    }
+
+    #[test]
+    fn provider_snapshot_retains_cross_build_sources_without_build_artifacts() -> Result<()> {
+        let root = temp_test_dir("provider-snapshot");
+        let checkout = root.join("SDK/LVRS");
+        let provider = root.join("SDK/iiFileProvider");
+        let snapshot = root.join("installed/src/LVRS");
+        fs::create_dir_all(&checkout)?;
+        fs::create_dir_all(provider.join("Native/third_party/sqlite"))?;
+        fs::create_dir_all(provider.join("Native/build"))?;
+        fs::write(provider.join("CMakeLists.txt"), "project(iiFileProvider)\n")?;
+        fs::write(provider.join("Native/third_party/sqlite/sqlite3.c"), "/* fixture */\n")?;
+        fs::write(provider.join("Native/build/stale"), "do not install")?;
+        install_file_provider_snapshot(&checkout, &snapshot)?;
+        let installed = root.join("installed/src/iiFileProvider");
+        assert!(installed.join("CMakeLists.txt").is_file());
+        assert!(installed.join("Native/third_party/sqlite/sqlite3.c").is_file());
+        assert!(!installed.join("Native/build").exists());
+        install_file_provider_snapshot(&snapshot, &snapshot)?;
+        assert!(installed.join("CMakeLists.txt").is_file());
+        remove_path(&root)?;
+        Ok(())
     }
 
     #[test]

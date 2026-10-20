@@ -6,7 +6,7 @@ AbstractButton {
     id: control
     enum ButtonSize { Small = 22, Medium = 28, Large = 36 }
     property int buttonSize: ColorPickerButton.Medium
-    property color currentColor: "#7A5AF8"
+    property color currentColor: Theme.accentPurple
     property bool showHueRing: true
     readonly property real wellSize: Math.max(0, Math.min(availableWidth, availableHeight))
 

@@ -59,6 +59,26 @@ LV.Tooltip {
 
 `resolvedPlacement`, `resolvedAnchorPoint`, `bodyRect`, `tailPoint`, `availableContentWidth` 및 `availableContentHeight`는 확인된 형상을 노출합니다. 앵커는 오버레이 좌표에 있습니다. 본문/꼬리 좌표는 팝업에 로컬입니다. 데스크톱과 모바일의 모든 크기는 논리적 픽셀입니다.
 
+Window chrome targets may lie above the content safe area, such as notification
+or account buttons in an integrated title bar. The body remains within
+`availableRect` and the display, while an attached target's origin is checked
+against the visible window and clipped ancestors. A safe-area inset alone must
+not close a tooltip for a visible chrome control. Manual, unattached origins
+continue to use `availableRect`. `chrome_target_above_content_safe_area` covers
+automatic hover and dismissal after the target leaves the window.
+
+Automatic dismissal also remains latched while the closing overlay restores
+hover to its target. The close handoff settles for `hideDelay` (at least 32 ms)
+so Escape and timeout do not create a new tooltip without a new interaction.
+The chrome regression checks Escape beyond the next show delay on Cocoa/Metal.
+
+Controls contribute their own `pressed` state; the tooltip's fallback press
+handler is enabled only for targets without that state. The body accepts input
+while the decorative tail passes input to its origin. These rules keep buttons
+clickable before the show delay and while a bubble is visible, including below
+title-bar controls. `automatic_hover_does_not_consume_clicks` checks both cases
+in Qt and LVRS application windows.
+
 <a id="standard-interaction"></a>
 
 ## 표준 상호작용

@@ -24,10 +24,10 @@
 |속성/시그널/방법|계약|
 | --- | --- |
 | `type` |6개의 열거형 중 하나입니다. 이를 변경하면 색상 상태가 유지됩니다.|
-| `currentColor` |편집 가능한 `color` 속성이며 기본값은 `#7A5AF8`이다. 네이티브 편집은 외부 QML 바인딩을 유지한다.|
+| `currentColor` |편집 가능한 `color` 속성이며 기본값은 `#874AFF`이다. 네이티브 편집은 외부 QML 바인딩을 유지한다.|
 | `previousColor` |기준선과 비교 견본의 왼쪽 절반을 취소합니다. 기본값은 외부에서 제공한 초기 색상입니다. 실시간 문서 미리보기를 지원할 때 명시적으로 전달하세요.|
 | `hex` |읽기 전용 대문자 RRGGBB 텍스트입니다.|
-| `recentColors` |호출자가 소유한 색상 배열이며 처음 8개 항목을 표시한다. 기본값은 8개의 Figma 색상 견본이다. 전역 이력은 영속 저장하지 않는다.|
+| `recentColors` |호출자가 소유한 색상 배열이며 처음 10개 항목을 표시한다. 기본값은 정식 Figma 악센트 10색이다. 전역 이력은 영속 저장하지 않는다.|
 | `showRecentColors`, `showActions` |둘 다 기본값은 `true`입니다.|
 | `applyText`, `cancelText` |번역 가능한 작업 텍스트입니다.|
 | `colorEdited(color)` |최근 색상 선택 또는 취소 시 복원을 포함한 사용자 편집. 외부 속성 변경은 이를 내보내지 않습니다.|
@@ -54,8 +54,8 @@ import LVRS as LV
 
 Item {
     id: editor
-    property color documentColor: "#7A5AF8"
-    property color originalColor: "#7A5AF8"
+    property color documentColor: "#874AFF"
+    property color originalColor: "#874AFF"
 
     Component {
         id: colorView
@@ -112,3 +112,5 @@ QML 모듈은 `DEPENDENCIES QtQuick`를 선언하므로 컴파일러/린트 도�
 ## 공유 모션
 
 슬라이더 썸, 입력 포커스 및 작업 버튼은 LVRS 동작을 공유합니다. 색상 샘플링은 즉시 유지됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.
+
+순수 `ColorPickerModel`은 흰색으로 초기화하며, QML `ColorPicker`가 `Theme.accentPurple`을 기본 편집색으로 공급한다. 데이터 모델은 테마 토큰에 의존하지 않는다.

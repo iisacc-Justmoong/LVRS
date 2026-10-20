@@ -16,6 +16,9 @@ private slots:
     void content_replacement_and_scrolling();
     void transformed_target_and_resize();
     void hover_delay_timeout_and_escape();
+    void chrome_target_above_content_safe_area();
+    void automatic_hover_does_not_consume_clicks_data();
+    void automatic_hover_does_not_consume_clicks();
     void touch_hold_and_nonmodal_input();
     void gallery_loads();
 };
@@ -227,6 +230,90 @@ void TooltipTests::transformed_target_and_resize()
     QVERIFY(QMetaObject::invokeMethod(tip, "open"));
     QTRY_VERIFY(tip->property("opened").toBool());
     target->deleteLater();
+    QTRY_VERIFY(!tip->property("visible").toBool());
+}
+
+void TooltipTests::automatic_hover_does_not_consume_clicks_data()
+{
+    QTest::addColumn<bool>("lvrsWindow");
+    QTest::addColumn<int>("targetY");
+    QTest::newRow("controls-body") << false << 220;
+    QTest::newRow("controls-chrome") << false << 0;
+    QTest::newRow("lvrs-body") << true << 220;
+    QTest::newRow("lvrs-chrome") << true << 0;
+}
+
+void TooltipTests::automatic_hover_does_not_consume_clicks()
+{
+    QFETCH(bool, lvrsWindow);
+    QFETCH(int, targetY);
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    auto source = fixture("text: \"Help\"", false);
+    if (lvrsWindow) source.replace("Controls.ApplicationWindow {", "LV.ApplicationWindow {");
+    QScopedPointer<QObject> object(TestUtils::createFromQml(engine, source));
+    QVERIFY(object);
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    auto *tip = object->findChild<QObject *>("tip");
+    auto *target = object->findChild<QQuickItem *>("trigger");
+    QVERIFY(window && tip && target);
+    target->setY(targetY);
+    tip->setProperty("delay", 500);
+    tip->setProperty("automatic", true);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(window));
+    const auto point = target->mapToScene(target->boundingRect().center()).toPoint();
+    QTest::mouseMove(window, point);
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_COMPARE(object->property("clicks").toInt(), 1);
+    QTest::mouseMove(window, QPoint(20, 200));
+    QTest::mouseMove(window, point);
+    QTRY_VERIFY(tip->property("opened").toBool());
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_COMPARE(object->property("clicks").toInt(), 2);
+}
+
+void TooltipTests::chrome_target_above_content_safe_area()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> object(TestUtils::createFromQml(engine, fixture(R"(
+        text: "Account"
+        availableRect: Qt.rect(0, 32, parent.width, parent.height - 32)
+    )", false)));
+    QVERIFY(object);
+    auto *window = qobject_cast<QQuickWindow *>(object.data());
+    auto *tip = object->findChild<QObject *>("tip");
+    auto *target = object->findChild<QQuickItem *>("trigger");
+    QVERIFY(window && tip && target);
+    target->setPosition({480, 0});
+    tip->setProperty("delay", 80);
+    tip->setProperty("animationDuration", 120);
+    tip->setProperty("automatic", true);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    const auto point = target->mapToScene(target->boundingRect().center()).toPoint();
+    QVERIFY(point.y() < 32);
+    QTest::mouseMove(window, point);
+    QTRY_VERIFY(tip->property("opened").toBool());
+    const auto body = tip->property("bodyRect").toRectF();
+    QVERIFY(tip->property("y").toReal() + body.y() >= 32);
+    QCOMPARE(tip->property("resolvedAnchorPoint").toPointF(), target->mapToScene(target->boundingRect().center()));
+    QTest::qWait(300);
+    QVERIFY(tip->property("opened").toBool());
+    QTest::keyClick(window, Qt::Key_Escape);
+    QTRY_VERIFY(!tip->property("visible").toBool());
+    QTest::qWait(600);
+    QVERIFY(!tip->property("visible").toBool());
+    QTest::mouseMove(window, QPoint(20, 200));
+    QTest::mouseMove(window, point);
+    QTRY_VERIFY(tip->property("opened").toBool());
+    QTest::mouseMove(window, QPoint(20, 200));
+    QTRY_VERIFY(!tip->property("visible").toBool());
+    tip->setProperty("automatic", false);
+    QVERIFY(QMetaObject::invokeMethod(tip, "open"));
+    QTRY_VERIFY(tip->property("opened").toBool());
+    target->setY(-100);
     QTRY_VERIFY(!tip->property("visible").toBool());
 }
 

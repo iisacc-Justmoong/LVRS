@@ -24,7 +24,7 @@ The framework target itself does not build an application executable; all runnab
 ## Requirements
 
 - CMake 3.21+
-- C++20 compiler
+- C++23 compiler
 - Qt 6.5+
 - Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`
 - Qt `Test` module only when `LVRS_BUILD_TESTS=ON`
@@ -167,6 +167,8 @@ Page-stack API on `LV.ApplicationWindow`: `initialRoutePath`, `pageRoutes`, `pag
 By default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.
 `LV.ApplicationWindow` is now the standard downstream app root. It carries the bootstrap contract directly: platform-profile-driven runtime attach, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath` seeded from `initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`. `LV.ApplicationWindow` and `LV.Window` default `forcedDeviceTierPreset` to auto-detect mode (`-1`), and mobile display-coverage/fullscreen overrides follow `Platform.runtimeProfile(...)` so Android keeps the edge-to-edge bootstrap path while iOS uses maximized edge-to-edge coverage instead of a forced fullscreen transition. `LV.AppBootstrapWindow` remains only as a compatibility wrapper that presets `visible: true`.
 On desktop, the default solid chrome for `LV.Window` and `LV.ApplicationWindow` includes system-owned move plus native-first edge/corner resize handling. Qt 6.8 Cocoa does not implement `QWindow::startSystemResize()`, so macOS transparently falls back to pointer-driven, min/max-constrained window geometry. Built-in resize handles forward the exact global press position, keeping remote, tablet, and synthesized input aligned with the fallback session. Configure the hit regions with `windowDragHandle*`, `windowDragExclusionItems`, and `windowResize*`, or disable those regions and call `requestWindowMove()` / `requestWindowResize(edges)` from application-owned chrome.
+`LV.ApplicationWindow` uses a fully opaque background centered on 95% `windowColor` RGB plus 5% app `primaryColor` RGB. The default `windowColor` follows `Theme.window` (`#141414`). A rectangle defines that center color, while a cached opaque texture adds fixed monochrome grain at one physical pixel per sample, with a maximum variation of two 8-bit RGB levels. The grain is unblurred and uses no glass layer or Overlay blending. Legacy `windowBackgroundOpacity` and `backgroundBlurEnabled` inputs do not change this opaque surface; `backgroundBlurSupported` and `backgroundBlurActive` are false. macOS retains an opaque native window and its existing frame/input behavior. See [ApplicationWindow material](docs/components/app/ApplicationWindow.md#default-background-material). LVRS is built as C++23.
+
 Root content is now full-bleed by default on mobile: `LV.ApplicationWindow` and `LV.Window` no longer auto-place downstream content inside `safeMargin`. `LV.ApplicationWindow` also drives the native fullscreen/client-area coverage hints needed to reach the iOS status-bar and home-indicator regions, and on iOS it does so through `Window.Maximized + MaximizeUsingFullscreenGeometryHint` so the system status indicators can remain visible. Use `layoutSafeAreaBounds` as a helper rect or bind `LV.WindowSafeAreaObserver` when the app wants to reserve the actual iOS status-bar/notch/home-indicator insets explicitly.
 In addition, LVRS generates bootstrap targets for cross-platform output/installation:
 - `bootstrap_<YourTarget>_macos`
@@ -344,7 +346,7 @@ Even if Qt 6.8 Android's default QPA safety margin is 0, `WindowSafeAreaObserver
 
 ### Standard window and popup materials
 
-`ApplicationWindow` and `WindowMaterial` use a uniform near-black fill (#0B0B0B) at 50% opacity without gradients, retaining 64px diffusion and native macOS backdrop blur. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).
+`ApplicationWindow` uses an opaque 95% `Theme.window` (`#141414`) + 5% app-accent RGB center color with very fine, fixed monochrome grain (one physical pixel, at most ±2 RGB levels). Standalone `WindowMaterial` retains its near-black 50% coating, radial accents, and 64px backdrop diffusion. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).
 
 ## Interaction and motion
 
@@ -365,6 +367,32 @@ Implementation files and their headers live together under `src/`. Existing feat
 `MobileNavigationBar` · `MobileNavigationTab` provides [Figma spec](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)device curvature, optional independent search, left collapse placement, sticky selection movement, and optional labels. Search is disabled by default and added via `search: ({})`. Usage refers to [component documentation](docs/components/navigation/MobileNavigationBar.md).
 
 ## Recovering an interrupted install
+
+LVRS now requests iiFileProvider 0.7.1 or a compatible newer package to match
+the current SDK interfaces. Framework bootstrap builds iiFileProvider
+from the sibling SDK checkout for iOS, Android and WebAssembly with the same Qt
+kit, ABI, sysroot and toolchain. Each cross package owns its dependency under
+`deps/iiFileProvider`; its installed config selects this target package before
+ambient host packages. `LVRS_BOOTSTRAP_FILE_PROVIDER_SOURCE_DIR` overrides the
+source location. iOS, Android and WASM use the provider's pinned SQLite source.
+Bootstrap and installed consumers discover the installed provider package set
+and resolve Native, Catalog, Objects, Temporary and SQLite from that target
+prefix. Explicit package directories retain this closure under root-only
+cross-toolchain searches and exclude ambient host package hints.
+LVRS remains version 1.0.1. The provider-bootstrap CTest exercises target
+selection, ABI forwarding, installation and dependency-failure propagation.
+The source snapshot also preserves the sibling iiFileProvider sources, excluding
+its build outputs, so reinstalling from the installed snapshot can rebuild
+cross dependencies when the original checkout is unavailable.
+Android discovery rejects an incompatible explicit CMake NDK override and skips
+obsolete shell hints when a compatible installed NDK is available. The provider
+requires libc++ `<stop_token>` and `<expected>` support. NDK r30 and the Qt
+multithread WASM kit provide the required C++23 library/thread facilities.
+Both parent CMake target generation and the Rust CLI check shell NDK hints before
+promoting them into explicit child settings. This includes a stale
+`LVRS_BOOTSTRAP_ANDROID_NDK` in the shell. Explicit `-DLVRS_BOOTSTRAP_ANDROID_NDK=...`
+command-line overrides remain authoritative and incompatible explicit paths
+produce a diagnostic.
 
 `cmake --build build` requires a completed configure step and `build/CMakeCache.txt`.
 Sourcing a toolchain environment only exports variables; it does not create the cache.

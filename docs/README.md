@@ -111,6 +111,7 @@ This structure is intentional so the same question can be answered consistently 
 - `docs/components/control/ComboBox.md`
 - `docs/components/control/Stepper.md`
 - `docs/components/control/Label.md`
+- [Avatar](components/control/Avatar.md): circular, centered image profiles in three sizes.
 - `docs/components/control/CheckBox.md`
 - `docs/components/control/RadioButton.md`
 - `docs/components/control/ToggleSwitch.md`

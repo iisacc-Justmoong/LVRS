@@ -2,7 +2,9 @@
 
 # Figma 패리티 감사 — 2026-09-12
 
-이후 사용자 지향적 수정: ApplicationWindow는 최신 Figma 997:3에 따라 #141414 66% 중립 채색과 primaryColor 4% 균일 오버레이를 사용하며 기본 배경의 방사형 그레디언트는 비활성화한다. 독립 WindowMaterial은 기존 방사형 재질을 유지한다. 현재 윈도우 처리는 [마테리얼 계약](components/surfaces/Materials.md)을 따릅니다. 메뉴 수정: ContextMenu 와 메뉴는 이제 더 가벼운 WindowMaterial 코팅 ( 12% 틴트 / 64px 블러 / 8% 추가 강조 강도) 을 사용합니다. 아래 Figma 재고는 역사적 소스 스냅샷이며, 현재 메뉴 코팅은 [수정된 계약](components/navigation/ContextMenu.md#window-derived-frosted-menu)을 따릅니다.
+현재 악센트는 2026-10-19 지정한 10색으로 교체하였다. 아래 날짜별 감사의 과거 HEX는 당시 기록이며, 현재 기본색과 합성색은 [테마 계약](figma-theme-tokens.md#ten-authored-accent-colors)을 따른다.
+
+이후 사용자 지향적 수정: ApplicationWindow는 최신 Figma 997:3에 따라 Theme.window (#141414) 95%와 앱 primaryColor 5%의 불투명 중심색에 물리 픽셀 1개 크기의 고정 단색 입자(최대 ±2 RGB)를 더한다. 기본 배경은 Overlay 합성과 블러를 사용하지 않는다. 독립 WindowMaterial은 기존 방사형 재질을 유지한다. 현재 윈도우 처리는 [마테리얼 계약](components/surfaces/Materials.md)을 따릅니다. 메뉴 수정: ContextMenu 와 메뉴는 이제 더 가벼운 WindowMaterial 코팅 ( 12% 틴트 / 64px 블러 / 8% 추가 강조 강도) 을 사용합니다. 아래 Figma 재고는 역사적 소스 스냅샷이며, 현재 메뉴 코팅은 [수정된 계약](components/navigation/ContextMenu.md#window-derived-frosted-menu)을 따릅니다.
 
 기준 원본: [레이어드 비주얼 렌더 시스템](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System). 감사에서는 현재 구성 요소와 바인딩된 변수를 읽습니다. Figma는 변경되지 않습니다.
 

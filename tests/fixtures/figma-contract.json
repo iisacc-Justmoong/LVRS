@@ -1,261 +1,262 @@
 {
-    "assets": {
-        "iconset/nodestest.svg": "1cd79703ac9ccb7c707a53407f79cd559a912d3bf8c1060542ff62947a35fab2",
-        "iconset/weChat.svg": "3dbe0f2290b742400421c8c92e7389eb99928692b01c9888eba33ab85f400a45",
-        "images/color-picker-hue-ring.png": "75e39c9111d53f25e87fb1bd44eb7048074721bcb22a2d337d4e11927c94c427"
+  "assets": {
+    "iconset/nodestest.svg": "8dfb1ba03dae2919768ee5cca64d134facf1a97ad5f833f87f7240204ed16db1",
+    "iconset/weChat.svg": "3dbe0f2290b742400421c8c92e7389eb99928692b01c9888eba33ab85f400a45",
+    "images/color-picker-hue-ring.png": "75e39c9111d53f25e87fb1bd44eb7048074721bcb22a2d337d4e11927c94c427"
+  },
+  "capturedOn": "2026-09-12",
+  "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
+  "geometry": [
+    {
+      "height": 21,
+      "node": "44:819",
+      "radius": 100,
+      "type": "HelpButton",
+      "width": 21
     },
-    "capturedOn": "2026-09-12",
-    "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
-    "geometry": [
-        {
-            "height": 21,
-            "node": "44:819",
-            "radius": 100,
-            "type": "HelpButton",
-            "width": 21
-        },
-        {
-            "height": 28,
-            "node": "892:2",
-            "radius": 4,
-            "type": "ColorPickerButton",
-            "width": 28
-        },
-        {
-            "height": 18,
-            "node": "331:9282",
-            "radius": 0,
-            "type": "ContextMenuItem",
-            "width": 141
-        },
-        {
-            "height": 3,
-            "node": "331:9283",
-            "type": "ContextMenuDivider",
-            "width": 145
-        },
-        {
-            "height": 26,
-            "node": "209:9199",
-            "type": "ListFooter",
-            "width": 88
-        }
-    ],
-    "iconAliases": {
-        " volume": "volume",
-        "nodesTest": "nodestest",
-        "wechat": "weChat"
+    {
+      "height": 28,
+      "node": "892:2",
+      "radius": 4,
+      "type": "ColorPickerButton",
+      "width": 28
     },
-    "tokens": [
-        {
-            "id": "VariableID:44:458",
-            "name": "TitleHeader",
-            "value": {
-                "a": 0.8999999761581421,
-                "b": 1,
-                "g": 1,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:459",
-            "name": "Body",
-            "value": {
-                "a": 0.800000011920929,
-                "b": 1,
-                "g": 1,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:460",
-            "name": "Description",
-            "value": {
-                "a": 0.6000000238418579,
-                "b": 1,
-                "g": 1,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:461",
-            "name": "Caption",
-            "value": {
-                "a": 0.5,
-                "b": 1,
-                "g": 1,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:462",
-            "name": "Disabled",
-            "value": {
-                "a": 0.30000001192092896,
-                "b": 1,
-                "g": 1,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:463",
-            "name": "accent",
-            "value": {
-                "a": 1,
-                "b": 1,
-                "g": 0.5176470875740051,
-                "r": 0.03921568766236305
-            }
-        },
-        {
-            "id": "VariableID:44:464",
-            "name": "success",
-            "value": {
-                "a": 1,
-                "b": 0.29411765933036804,
-                "g": 0.843137264251709,
-                "r": 0.19607843458652496
-            }
-        },
-        {
-            "id": "VariableID:44:465",
-            "name": "warning",
-            "value": {
-                "a": 1,
-                "b": 0.03921568766236305,
-                "g": 0.8392156958580017,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:466",
-            "name": "danger",
-            "value": {
-                "a": 1,
-                "b": 0.22745098173618317,
-                "g": 0.2705882489681244,
-                "r": 1
-            }
-        },
-        {
-            "id": "VariableID:44:467",
-            "name": "panelBackground01",
-            "value": {
-                "a": 1,
-                "b": 0.05038686841726303,
-                "g": 0.04892867058515549,
-                "r": 0.04892867058515549
-            }
-        },
-        {
-            "id": "VariableID:44:468",
-            "name": "panelBackground02",
-            "value": {
-                "a": 1,
-                "b": 0.05570162087678909,
-                "g": 0.05517596751451492,
-                "r": 0.05507083609700203
-            }
-        },
-        {
-            "id": "VariableID:44:469",
-            "name": "panelBackground03",
-            "value": {
-                "a": 1,
-                "b": 0.08631309866905212,
-                "g": 0.08394163101911545,
-                "r": 0.08394163101911545
-            }
-        },
-        {
-            "id": "VariableID:44:470",
-            "name": "panelBackground04",
-            "value": {
-                "a": 1,
-                "b": 0.09793794900178909,
-                "g": 0.09655113518238068,
-                "r": 0.09516431391239166
-            }
-        },
-        {
-            "id": "VariableID:215:9618",
-            "name": "panelBackground05",
-            "value": {
-                "a": 1,
-                "b": 0.11664287745952606,
-                "g": 0.11664287745952606,
-                "r": 0.11397916078567505
-            }
-        },
-        {
-            "id": "VariableID:215:9620",
-            "name": "panelBackground06",
-            "value": {
-                "a": 1,
-                "b": 0.12753531336784363,
-                "g": 0.12528030574321747,
-                "r": 0.12302529811859131
-            }
-        },
-        {
-            "id": "VariableID:215:9621",
-            "name": "panelBackground07",
-            "value": {
-                "a": 1,
-                "b": 0.1411764770746231,
-                "g": 0.1411764770746231,
-                "r": 0.1411764770746231
-            }
-        },
-        {
-            "id": "VariableID:215:9622",
-            "name": "panelBackground08",
-            "value": {
-                "a": 1,
-                "b": 0.14190204441547394,
-                "g": 0.14029954373836517,
-                "r": 0.13709451258182526
-            }
-        },
-        {
-            "id": "VariableID:215:9623",
-            "name": "panelBackground09",
-            "value": {
-                "a": 1,
-                "b": 0.15256911516189575,
-                "g": 0.15256911516189575,
-                "r": 0.14820532500743866
-            }
-        },
-        {
-            "id": "VariableID:215:9624",
-            "name": "panelBackground10",
-            "value": {
-                "a": 1,
-                "b": 0.15855994820594788,
-                "g": 0.15707255899906158,
-                "r": 0.1555851548910141
-            }
-        },
-        {
-            "id": "VariableID:215:9625",
-            "name": "panelBackground11",
-            "value": {
-                "a": 1,
-                "b": 0.18410080671310425,
-                "g": 0.1819191724061966,
-                "r": 0.17537428438663483
-            }
-        },
-        {
-            "id": "VariableID:215:9626",
-            "name": "panelBackground12",
-            "value": {
-                "a": 1,
-                "b": 0.19993239641189575,
-                "g": 0.1978072077035904,
-                "r": 0.19355684518814087
-            }
-        }
-    ]
+    {
+      "height": 18,
+      "node": "331:9282",
+      "radius": 0,
+      "type": "ContextMenuItem",
+      "width": 141
+    },
+    {
+      "height": 3,
+      "node": "331:9283",
+      "type": "ContextMenuDivider",
+      "width": 145
+    },
+    {
+      "height": 26,
+      "node": "209:9199",
+      "type": "ListFooter",
+      "width": 88
+    }
+  ],
+  "iconAliases": {
+    " volume": "volume",
+    "nodesTest": "nodestest",
+    "wechat": "weChat"
+  },
+  "tokens": [
+    {
+      "id": "VariableID:44:458",
+      "name": "TitleHeader",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.8999999761581421
+      }
+    },
+    {
+      "id": "VariableID:44:459",
+      "name": "Body",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.800000011920929
+      }
+    },
+    {
+      "id": "VariableID:44:460",
+      "name": "Description",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.6000000238418579
+      }
+    },
+    {
+      "id": "VariableID:44:461",
+      "name": "Caption",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.5
+      }
+    },
+    {
+      "id": "VariableID:44:462",
+      "name": "Disabled",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 0.30000001192092896
+      }
+    },
+    {
+      "id": "VariableID:44:463",
+      "name": "accent",
+      "value": {
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:464",
+      "name": "success",
+      "value": {
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:465",
+      "name": "warning",
+      "value": {
+        "r": 1,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:466",
+      "name": "danger",
+      "value": {
+        "r": 1,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:467",
+      "name": "panelBackground01",
+      "value": {
+        "r": 0.04892867058515549,
+        "g": 0.04892867058515549,
+        "b": 0.05038686841726303,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:468",
+      "name": "panelBackground02",
+      "value": {
+        "r": 0.05507083609700203,
+        "g": 0.05517596751451492,
+        "b": 0.05570162087678909,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:469",
+      "name": "panelBackground03",
+      "value": {
+        "r": 0.08394163101911545,
+        "g": 0.08394163101911545,
+        "b": 0.08631309866905212,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:44:470",
+      "name": "panelBackground04",
+      "value": {
+        "r": 0.09516431391239166,
+        "g": 0.09655113518238068,
+        "b": 0.09793794900178909,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9618",
+      "name": "panelBackground05",
+      "value": {
+        "r": 0.11397916078567505,
+        "g": 0.11664287745952606,
+        "b": 0.11664287745952606,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9620",
+      "name": "panelBackground06",
+      "value": {
+        "r": 0.12302529811859131,
+        "g": 0.12528030574321747,
+        "b": 0.12753531336784363,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9621",
+      "name": "panelBackground07",
+      "value": {
+        "r": 0.1411764770746231,
+        "g": 0.1411764770746231,
+        "b": 0.1411764770746231,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9622",
+      "name": "panelBackground08",
+      "value": {
+        "r": 0.13709451258182526,
+        "g": 0.14029954373836517,
+        "b": 0.14190204441547394,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9623",
+      "name": "panelBackground09",
+      "value": {
+        "r": 0.14820532500743866,
+        "g": 0.15256911516189575,
+        "b": 0.15256911516189575,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9624",
+      "name": "panelBackground10",
+      "value": {
+        "r": 0.1555851548910141,
+        "g": 0.15707255899906158,
+        "b": 0.15855994820594788,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9625",
+      "name": "panelBackground11",
+      "value": {
+        "r": 0.17537428438663483,
+        "g": 0.1819191724061966,
+        "b": 0.18410080671310425,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:215:9626",
+      "name": "panelBackground12",
+      "value": {
+        "r": 0.19355684518814087,
+        "g": 0.1978072077035904,
+        "b": 0.19993239641189575,
+        "a": 1
+      }
+    }
+  ],
+  "accentPaletteUpdatedOn": "2026-10-19"
 }

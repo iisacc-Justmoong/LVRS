@@ -1,6 +1,6 @@
 {
   "source": "figma-readback",
-  "capturedAtUtc": "2026-10-09 00:35:00 UTC",
+  "capturedAtUtc": "2026-10-19T04:12:30Z",
   "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
   "scope": "panel roles, text recipes, ten artwork accent colors and eight fixed image accent palette colors",
   "collections": {
@@ -162,14 +162,12 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.03921568766236305,
-        "g": 0.5176470875740051,
-        "b": 1,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:76"
       },
       "resolved": {
-        "r": 0.03921568766236305,
-        "g": 0.5176470875740051,
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
         "b": 1,
         "a": 1
       },
@@ -192,15 +190,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.19607843458652496,
-        "g": 0.843137264251709,
-        "b": 0.29411765933036804,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:78"
       },
       "resolved": {
-        "r": 0.19607843458652496,
-        "g": 0.843137264251709,
-        "b": 0.29411765933036804,
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
         "a": 1
       },
       "scopes": [
@@ -222,15 +218,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 1,
-        "g": 0.8392156958580017,
-        "b": 0.03921568766236305,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:79"
       },
       "resolved": {
         "r": 1,
-        "g": 0.8392156958580017,
-        "b": 0.03921568766236305,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
         "a": 1
       },
       "scopes": [
@@ -252,15 +246,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 1,
-        "g": 0.2705882489681244,
-        "b": 0.22745098173618317,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:77"
       },
       "resolved": {
         "r": 1,
-        "g": 0.2705882489681244,
-        "b": 0.22745098173618317,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
         "a": 1
       },
       "scopes": [
@@ -688,15 +680,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.3294117748737335,
-        "g": 0.5411764979362488,
-        "b": 0.9686274528503418,
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
+        "b": 1,
         "a": 1
       },
       "resolved": {
-        "r": 0.3294117748737335,
-        "g": 0.5411764979362488,
-        "b": 0.9686274528503418,
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
+        "b": 1,
         "a": 1
       },
       "scopes": [
@@ -718,15 +710,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.8588235378265381,
-        "g": 0.3607843220233917,
-        "b": 0.3607843220233917,
+        "r": 1,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
         "a": 1
       },
       "resolved": {
-        "r": 0.8588235378265381,
-        "g": 0.3607843220233917,
-        "b": 0.3607843220233917,
+        "r": 1,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
         "a": 1
       },
       "scopes": [
@@ -748,15 +740,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.34117648005485535,
-        "g": 0.5882353186607361,
-        "b": 0.3607843220233917,
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
         "a": 1
       },
       "resolved": {
-        "r": 0.34117648005485535,
-        "g": 0.5882353186607361,
-        "b": 0.3607843220233917,
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
         "a": 1
       },
       "scopes": [
@@ -778,15 +770,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.9490196108818054,
-        "g": 0.772549033164978,
-        "b": 0.3607843220233917,
+        "r": 1,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
         "a": 1
       },
       "resolved": {
-        "r": 0.9490196108818054,
-        "g": 0.772549033164978,
-        "b": 0.3607843220233917,
+        "r": 1,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
         "a": 1
       },
       "scopes": [
@@ -808,15 +800,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.6470588445663452,
-        "g": 0.4431372582912445,
-        "b": 0.9019607901573181,
+        "r": 0.5275065302848816,
+        "g": 0.291259765625,
+        "b": 1,
         "a": 1
       },
       "resolved": {
-        "r": 0.6470588445663452,
-        "g": 0.4431372582912445,
-        "b": 0.9019607901573181,
+        "r": 0.5275065302848816,
+        "g": 0.291259765625,
+        "b": 1,
         "a": 1
       },
       "scopes": [
@@ -838,15 +830,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.8980392217636108,
-        "g": 0.34117648005485535,
-        "b": 0.3960784375667572,
+        "r": 0.975510835647583,
+        "g": 0.26653972268104553,
+        "b": 0.4437825083732605,
         "a": 1
       },
       "resolved": {
-        "r": 0.8980392217636108,
-        "g": 0.34117648005485535,
-        "b": 0.3960784375667572,
+        "r": 0.975510835647583,
+        "g": 0.26653972268104553,
+        "b": 0.4437825083732605,
         "a": 1
       },
       "scopes": [
@@ -868,15 +860,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.7803921699523926,
-        "g": 0.4901960790157318,
-        "b": 0.3333333432674408,
+        "r": 1,
+        "g": 0.47672274708747864,
+        "b": 0.15144230425357819,
         "a": 1
       },
       "resolved": {
-        "r": 0.7803921699523926,
-        "g": 0.4901960790157318,
-        "b": 0.3333333432674408,
+        "r": 1,
+        "g": 0.47672274708747864,
+        "b": 0.15144230425357819,
         "a": 1
       },
       "scopes": [
@@ -898,15 +890,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.2705882489681244,
-        "g": 0.19607843458652496,
-        "b": 0.16862745583057404,
+        "r": 0.2616060674190521,
+        "g": 0.13824503123760223,
+        "b": 0.09279626607894897,
         "a": 1
       },
       "resolved": {
-        "r": 0.2705882489681244,
-        "g": 0.19607843458652496,
-        "b": 0.16862745583057404,
+        "r": 0.2616060674190521,
+        "g": 0.13824503123760223,
+        "b": 0.09279626607894897,
         "a": 1
       },
       "scopes": [
@@ -928,15 +920,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.250980406999588,
-        "g": 0.7137255072593689,
-        "b": 0.8784313797950745,
+        "r": 0.12926307320594788,
+        "g": 0.8258525729179382,
+        "b": 1,
         "a": 1
       },
       "resolved": {
-        "r": 0.250980406999588,
-        "g": 0.7137255072593689,
-        "b": 0.8784313797950745,
+        "r": 0.12926307320594788,
+        "g": 0.8258525729179382,
+        "b": 1,
         "a": 1
       },
       "scopes": [
@@ -958,15 +950,15 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.1411764770746231,
-        "g": 0.6392157077789307,
-        "b": 0.5803921818733215,
+        "r": 0,
+        "g": 0.7790151238441467,
+        "b": 0.8655723929405212,
         "a": 1
       },
       "resolved": {
-        "r": 0.1411764770746231,
-        "g": 0.6392157077789307,
-        "b": 0.5803921818733215,
+        "r": 0,
+        "g": 0.7790151238441467,
+        "b": 0.8655723929405212,
         "a": 1
       },
       "scopes": [
@@ -988,14 +980,12 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0,
-        "g": 0.47843137383461,
-        "b": 1,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:76"
       },
       "resolved": {
-        "r": 0,
-        "g": 0.47843137383461,
+        "r": 0.08120492845773697,
+        "g": 0.5099760293960571,
         "b": 1,
         "a": 1
       },
@@ -1018,15 +1008,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.6470588445663452,
-        "g": 0.3137255012989044,
-        "b": 0.6549019813537598,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:80"
       },
       "resolved": {
-        "r": 0.6470588445663452,
-        "g": 0.3137255012989044,
-        "b": 0.6549019813537598,
+        "r": 0.5275065302848816,
+        "g": 0.291259765625,
+        "b": 1,
         "a": 1
       },
       "scopes": [
@@ -1048,15 +1036,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.9686274528503418,
-        "g": 0.30980393290519714,
-        "b": 0.6196078658103943,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:81"
       },
       "resolved": {
-        "r": 0.9686274528503418,
-        "g": 0.30980393290519714,
-        "b": 0.6196078658103943,
+        "r": 0.975510835647583,
+        "g": 0.26653972268104553,
+        "b": 0.4437825083732605,
         "a": 1
       },
       "scopes": [
@@ -1078,15 +1064,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 1,
-        "g": 0.32156863808631897,
-        "b": 0.34117648005485535,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:77"
       },
       "resolved": {
         "r": 1,
-        "g": 0.32156863808631897,
-        "b": 0.34117648005485535,
+        "g": 0.2760854959487915,
+        "b": 0.2760854959487915,
         "a": 1
       },
       "scopes": [
@@ -1108,15 +1092,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.9686274528503418,
-        "g": 0.5098039507865906,
-        "b": 0.10588235408067703,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:82"
       },
       "resolved": {
-        "r": 0.9686274528503418,
-        "g": 0.5098039507865906,
-        "b": 0.10588235408067703,
+        "r": 1,
+        "g": 0.47672274708747864,
+        "b": 0.15144230425357819,
         "a": 1
       },
       "scopes": [
@@ -1138,15 +1120,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 1,
-        "g": 0.7764706015586853,
-        "b": 0,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:79"
       },
       "resolved": {
         "r": 1,
-        "g": 0.7764706015586853,
-        "b": 0,
+        "g": 0.8303598165512085,
+        "b": 0.15179912745952606,
         "a": 1
       },
       "scopes": [
@@ -1168,15 +1148,13 @@
       "collection": "VariableCollectionId:44:457",
       "mode": "44:0",
       "value": {
-        "r": 0.3843137323856354,
-        "g": 0.729411780834198,
-        "b": 0.27450981736183167,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:1305:78"
       },
       "resolved": {
-        "r": 0.3843137323856354,
-        "g": 0.729411780834198,
-        "b": 0.27450981736183167,
+        "r": 0.4012451171875,
+        "g": 1,
+        "b": 0.281494140625,
         "a": 1
       },
       "scopes": [
@@ -2205,206 +2183,154 @@
     "imageColorsMatchSavedFigma": true
   },
   "fontStyleBindingPolicy": "Figma fontWeight binding selects the static style and replaces fontStyle binding; styleName variables record the matching QML recipe.",
-  "imageAccentPalette": {
-    "source": "user-attached-image",
-    "capturedAtUtc": "2026-10-09T00:31:21.656219+00:00",
-    "imageSize": [
-      590,
-      78
-    ],
-    "pngColorType": 6,
-    "pngColorMetadata": [
-      "sRGB"
-    ],
-    "sha256": "cb3939c530f047ab1354972d7dbf5277ade1b9bea3d3762e7ac24a05f35c210d",
+  "authoredAccentPalette": {
+    "source": "figma-authored-nodes",
+    "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
+    "pageId": "116:13",
+    "capturedOn": "2026-10-19",
     "colors": [
       {
-        "label": "Blue",
-        "property": "accentPaletteBlue",
-        "name": "Accent/accentPaletteBlue",
-        "hex": "#007AFF",
-        "rgba8": [
-          0,
-          122,
-          255,
-          255
-        ],
-        "center": [
-          36,
-          40
-        ],
-        "sampleRegion": [
-          26,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentBlue",
+        "nodeId": "1477:30",
+        "variableId": "VariableID:1305:76",
+        "rgba": {
+          "r": 0.08120492845773697,
+          "g": 0.5099760293960571,
+          "b": 1,
+          "a": 1
+        },
+        "hex": "#1582FF",
+        "previousHex": "#548AF7"
       },
       {
-        "label": "Purple",
-        "property": "accentPalettePurple",
-        "name": "Accent/accentPalettePurple",
-        "hex": "#A550A7",
-        "rgba8": [
-          165,
-          80,
-          167,
-          255
-        ],
-        "center": [
-          108,
-          40
-        ],
-        "sampleRegion": [
-          98,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentRed",
+        "nodeId": "1477:31",
+        "variableId": "VariableID:1305:77",
+        "rgba": {
+          "r": 1,
+          "g": 0.2760854959487915,
+          "b": 0.2760854959487915,
+          "a": 1
+        },
+        "hex": "#FF4646",
+        "previousHex": "#DB5C5C"
       },
       {
-        "label": "Pink",
-        "property": "accentPalettePink",
-        "name": "Accent/accentPalettePink",
-        "hex": "#F74F9E",
-        "rgba8": [
-          247,
-          79,
-          158,
-          255
-        ],
-        "center": [
-          180,
-          40
-        ],
-        "sampleRegion": [
-          170,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentGreen",
+        "nodeId": "1477:32",
+        "variableId": "VariableID:1305:78",
+        "rgba": {
+          "r": 0.4012451171875,
+          "g": 1,
+          "b": 0.281494140625,
+          "a": 1
+        },
+        "hex": "#66FF48",
+        "previousHex": "#57965C"
       },
       {
-        "label": "Red",
-        "property": "accentPaletteRed",
-        "name": "Accent/accentPaletteRed",
-        "hex": "#FF5257",
-        "rgba8": [
-          255,
-          82,
-          87,
-          255
-        ],
-        "center": [
-          252,
-          40
-        ],
-        "sampleRegion": [
-          242,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentYellow",
+        "nodeId": "1477:33",
+        "variableId": "VariableID:1305:79",
+        "rgba": {
+          "r": 1,
+          "g": 0.8303598165512085,
+          "b": 0.15179912745952606,
+          "a": 1
+        },
+        "hex": "#FFD427",
+        "previousHex": "#F2C55C"
       },
       {
-        "label": "Orange",
-        "property": "accentPaletteOrange",
-        "name": "Accent/accentPaletteOrange",
-        "hex": "#F7821B",
-        "rgba8": [
-          247,
-          130,
-          27,
-          255
-        ],
-        "center": [
-          324,
-          40
-        ],
-        "sampleRegion": [
-          314,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentPurple",
+        "nodeId": "1477:34",
+        "variableId": "VariableID:1305:80",
+        "rgba": {
+          "r": 0.5275065302848816,
+          "g": 0.291259765625,
+          "b": 1,
+          "a": 1
+        },
+        "hex": "#874AFF",
+        "previousHex": "#A571E6"
       },
       {
-        "label": "Yellow",
-        "property": "accentPaletteYellow",
-        "name": "Accent/accentPaletteYellow",
-        "hex": "#FFC600",
-        "rgba8": [
-          255,
-          198,
-          0,
-          255
-        ],
-        "center": [
-          396,
-          40
-        ],
-        "sampleRegion": [
-          386,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentRose",
+        "nodeId": "1477:36",
+        "variableId": "VariableID:1305:81",
+        "rgba": {
+          "r": 0.975510835647583,
+          "g": 0.26653972268104553,
+          "b": 0.4437825083732605,
+          "a": 1
+        },
+        "hex": "#F94471",
+        "previousHex": "#E55765"
       },
       {
-        "label": "Green",
-        "property": "accentPaletteGreen",
-        "name": "Accent/accentPaletteGreen",
-        "hex": "#62BA46",
-        "rgba8": [
-          98,
-          186,
-          70,
-          255
-        ],
-        "center": [
-          468,
-          40
-        ],
-        "sampleRegion": [
-          458,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentOrange",
+        "nodeId": "1477:35",
+        "variableId": "VariableID:1305:82",
+        "rgba": {
+          "r": 1,
+          "g": 0.47672274708747864,
+          "b": 0.15144230425357819,
+          "a": 1
+        },
+        "hex": "#FF7A27",
+        "previousHex": "#C77D55"
       },
       {
-        "label": "Gray",
-        "property": "accentPaletteGray",
-        "name": "Accent/accentPaletteGray",
-        "hex": "#8C8C8C",
-        "rgba8": [
-          140,
-          140,
-          140,
-          255
-        ],
-        "center": [
-          540,
-          40
-        ],
-        "sampleRegion": [
-          530,
-          30,
-          21,
-          21
-        ],
-        "uniformSamples": 441
+        "property": "accentBrown",
+        "nodeId": "1477:37",
+        "variableId": "VariableID:1305:83",
+        "rgba": {
+          "r": 0.2616060674190521,
+          "g": 0.13824503123760223,
+          "b": 0.09279626607894897,
+          "a": 1
+        },
+        "hex": "#432318",
+        "previousHex": "#45322B"
+      },
+      {
+        "property": "accentCyan",
+        "nodeId": "1477:38",
+        "variableId": "VariableID:1305:84",
+        "rgba": {
+          "r": 0.12926307320594788,
+          "g": 0.8258525729179382,
+          "b": 1,
+          "a": 1
+        },
+        "hex": "#21D3FF",
+        "previousHex": "#40B6E0"
+      },
+      {
+        "property": "accentTeal",
+        "nodeId": "1477:40",
+        "variableId": "VariableID:1305:85",
+        "rgba": {
+          "r": 0,
+          "g": 0.7790151238441467,
+          "b": 0.8655723929405212,
+          "a": 1
+        },
+        "hex": "#00C7DD",
+        "previousHex": "#24A394"
       }
-    ],
-    "figmaSectionNodeId": "1325:10",
-    "figmaReferenceNodeId": "1309:2",
-    "primaryChangePolicy": "fixed colors independent of primaryColor"
+    ]
+  },
+  "legacyAccentAliases": {
+    "accentPaletteBlue": "accentBlue",
+    "accentPalettePurple": "accentPurple",
+    "accentPalettePink": "accentRose",
+    "accentPaletteRed": "accentRed",
+    "accentPaletteOrange": "accentOrange",
+    "accentPaletteYellow": "accentYellow",
+    "accentPaletteGreen": "accentGreen"
+  },
+  "neutralAccentCompatibility": {
+    "accentPaletteGray": "#8C8C8C"
   }
 }

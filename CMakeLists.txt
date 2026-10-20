@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
 project(LVRS VERSION 1.0.1 LANGUAGES CXX)
 # File creation is owned by iiFileProvider.
-find_package(iiFileProvider 0.6 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
+find_package(iiFileProvider 0.7.1 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
 link_libraries(iiFileProvider::iiFileProvider)
 
 
 
 
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -16,6 +16,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 include(GNUInstallDirs)
+install(FILES docs/PERFORMANCE.md DESTINATION ${CMAKE_INSTALL_DATADIR}/LVRS/docs)
 include(CMakePackageConfigHelpers)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -639,6 +640,7 @@ install(FILES
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapExportAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapWasmLaunchAction.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSBootstrapAndroidNdk.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSAppEntryPoint.cpp.in"
     DESTINATION ${LVRS_INSTALL_CMAKE_DIR}
 )

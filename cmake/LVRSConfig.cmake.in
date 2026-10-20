@@ -142,7 +142,16 @@ if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/LVRSTargets.cmake")
 endif()
 
 include(CMakeFindDependencyMacro)
-find_dependency(iiFileProvider 0.6 CONFIG HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
+set(_lvrs_bundled_provider "${CMAKE_CURRENT_LIST_DIR}/../../../deps/iiFileProvider/lib/cmake")
+if(EXISTS "${_lvrs_bundled_provider}/iiFileProvider/iiFileProviderConfig.cmake")
+    file(GLOB _lvrs_provider_configs "${_lvrs_bundled_provider}/iiFileProvider*/*Config.cmake")
+    foreach(_lvrs_provider_file IN LISTS _lvrs_provider_configs)
+        get_filename_component(_lvrs_provider_package "${_lvrs_provider_file}" NAME_WE)
+        string(REGEX REPLACE "Config$" "" _lvrs_provider_package "${_lvrs_provider_package}")
+        get_filename_component(${_lvrs_provider_package}_DIR "${_lvrs_provider_file}" DIRECTORY)
+    endforeach()
+endif()
+find_dependency(iiFileProvider 0.7.1 CONFIG HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
 
 
 

@@ -25,6 +25,7 @@ class NativeWindowBlurTests : public QObject
     Q_OBJECT
 private slots:
     void lifecycle_and_foreground();
+    void explicit_native_blur_remains_opt_in();
     void unified_titlebar_controls();
     void unified_titlebar_survives_native_update();
     void solid_chrome_disables_background_movement();
@@ -60,26 +61,20 @@ LV.ApplicationWindow {
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     QVERIFY(window);
     QVERIFY(QTest::qWaitForWindowExposed(window));
-    QTRY_VERIFY(root->property("backgroundBlurActive").toBool());
+    QVERIFY(!root->property("backgroundBlurActive").toBool());
     NSView *view = reinterpret_cast<NSView *>(window->winId());
-    QCOMPARE(backdrops(view).count, NSUInteger(1));
-    NSVisualEffectView *effect = static_cast<NSVisualEffectView *>(backdrops(view).firstObject);
-    QCOMPARE(effect.blendingMode, NSVisualEffectBlendingModeBehindWindow);
-    QCOMPARE(effect.material, NSVisualEffectMaterialUnderWindowBackground);
-    QCOMPARE(effect.state, NSVisualEffectStateActive);
-    QVERIFY(!view.window.opaque);
+    QTRY_COMPARE(backdrops(view).count, NSUInteger(0));
+    QTRY_VERIFY(view.window.opaque);
+    QCOMPARE(window->format().alphaBufferSize(), 0);
     QCOMPARE(view.window.alphaValue, CGFloat(1.0));
-    QCOMPARE(window->color().alpha(), 0);
+    QCOMPARE(window->color().alpha(), 255);
     QCOMPARE(window->opacity(), 1.0);
-    QVERIFY([effect hitTest:NSMakePoint(200, 200)] == nil);
     QVERIFY(view.window.contentView == view);
     for (const QSize size : {QSize(1100, 720), QSize(900, 600)}) {
         window->resize(size);
-        QTRY_VERIFY(NSEqualRects(effect.frame, view.frame));
-        QVERIFY(style.applyBackgroundBlur(window));
         QVERIFY(style.applySolidChrome(window, QColor("#141414")));
-        QCOMPARE(backdrops(view).count, NSUInteger(1));
-        QVERIFY(!view.window.opaque);
+        QCOMPARE(backdrops(view).count, NSUInteger(0));
+        QVERIFY(view.window.opaque);
     }
     auto *button = root->findChild<QQuickItem *>("foregroundButton");
     QVERIFY(button);
@@ -88,21 +83,50 @@ LV.ApplicationWindow {
     QTRY_COMPARE(root->property("clicks").toInt(), 1);
     const QColor buttonPixel = window->grabWindow().pixelColor(204 * window->devicePixelRatio(), 190 * window->devicePixelRatio());
     QCOMPARE(buttonPixel.alpha(), 255);
-    QVERIFY(root->setProperty("backgroundBlurEnabled", false));
-    QTRY_VERIFY(!root->property("backgroundBlurActive").toBool());
-    QCOMPARE(backdrops(view).count, NSUInteger(0));
-    QVERIFY(view.window.opaque);
-    QCOMPARE(window->color(), root->property("windowColor").value<QColor>());
-    QVERIFY(root->setProperty("backgroundBlurEnabled", true));
-    QTRY_COMPARE(backdrops(view).count, NSUInteger(1));
+    for (const bool enabled : {false, true}) {
+        QVERIFY(root->setProperty("backgroundBlurEnabled", enabled));
+        QVERIFY(!root->property("backgroundBlurActive").toBool());
+        QCOMPARE(backdrops(view).count, NSUInteger(0));
+        QVERIFY(view.window.opaque);
+        QCOMPARE(window->color().alpha(), 255);
+    }
+    QVERIFY(root->setProperty("windowColor", QColor("#33202124")));
+    QTRY_VERIFY(view.window.opaque);
+    QCOMPARE(window->color(), QColor("#202124"));
     window->hide();
     window->destroy();
     window->show();
     QVERIFY(QTest::qWaitForWindowExposed(window));
     view = reinterpret_cast<NSView *>(window->winId());
-    QTRY_COMPARE(backdrops(view).count, NSUInteger(1));
-    QVERIFY(!view.window.opaque);
+    QTRY_COMPARE(backdrops(view).count, NSUInteger(0));
+    QTRY_VERIFY(view.window.opaque);
     QVERIFY(!view.window.movableByWindowBackground);
+}
+
+void NativeWindowBlurTests::explicit_native_blur_remains_opt_in()
+{
+    if (QGuiApplication::platformName() != QStringLiteral("cocoa"))
+        QSKIP("Explicit native blur requires Cocoa.");
+    QQuickWindow window;
+    window.setColor(QColor("#141414"));
+    window.resize(640, 400);
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    NativeWindowStyle style;
+    QVERIFY(style.applySolidChrome(&window, QColor("#141414")));
+    NSView *view = reinterpret_cast<NSView *>(window.winId());
+    QCOMPARE(backdrops(view).count, NSUInteger(0));
+    QVERIFY(style.applyBackgroundBlur(&window, true));
+    QCOMPARE(window.format().alphaBufferSize(), 8);
+    QCOMPARE(backdrops(view).count, NSUInteger(1));
+    auto *effect = static_cast<NSVisualEffectView *>(backdrops(view).firstObject);
+    QCOMPARE(effect.blendingMode, NSVisualEffectBlendingModeBehindWindow);
+    QVERIFY([effect hitTest:NSMakePoint(100, 100)] == nil);
+    QVERIFY(!view.window.opaque);
+    QVERIFY(style.applyBackgroundBlur(&window, false));
+    QCOMPARE(window.format().alphaBufferSize(), 0);
+    QCOMPARE(backdrops(view).count, NSUInteger(0));
+    QVERIFY(view.window.opaque);
 }
 
 void NativeWindowBlurTests::solid_chrome_disables_background_movement()

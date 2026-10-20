@@ -44,6 +44,13 @@ Controls.ToolTip {
     readonly property point tailPoint: Qt.point(_anchor.x - x, _anchor.y - y)
     readonly property real availableContentWidth: viewport.width
     readonly property real availableContentHeight: viewport.height
+    readonly property QtObject bodyInputMask: QtObject {
+        function contains(position: point): bool {
+            const body = root.bodyRect;
+            return position.x >= body.x && position.y >= body.y
+                && position.x < body.x + body.width && position.y < body.y + body.height;
+        }
+    }
 
     readonly property WindowSafeAreaObserver safeArea: WindowSafeAreaObserver {
         window: root.parent ? root.parent.Window.window : null
@@ -51,11 +58,15 @@ Controls.ToolTip {
     property point _anchor: Qt.point(0, 0)
     property rect _bounds: availableRect
     property bool _autoLatched: false
+    property bool _autoClosing: false
+    property bool _closeSawTarget: false
     readonly property bool _targetReady: target && target.visible && target.enabled && target.Window.window
     readonly property bool _focusWanted: _targetReady
         && (target.visualFocus !== undefined ? target.visualFocus : target.activeFocus)
+    readonly property bool _pressWanted: _targetReady
+        && (target.pressed !== undefined ? target.pressed : triggerPress.pressed)
     readonly property bool _autoWanted: _targetReady
-        && (triggerHover.hovered || triggerPress.pressed || _focusWanted)
+        && (triggerHover.hovered || _pressWanted || _focusWanted)
     readonly property real _naturalWidth: contentComponent !== null
         ? (loadedContent ? nonnegative(loadedContent.implicitWidth) : 0)
         : (inlineContent.children.length > 0 ? inlineContent.implicitWidth : textLabel.implicitWidth)
@@ -74,6 +85,9 @@ Controls.ToolTip {
         if (isFinite(point.x) && isFinite(point.y))
             _anchor = point;
         let bounds = availableRect;
+        // The body respects the content safe area. A real target may live in
+        // window chrome above it, so its origin uses the visible window bounds.
+        let originBounds = target ? Qt.rect(0, 0, parent.width, parent.height) : bounds;
         // The overlay is also clipped to its current physical display when a
         // desktop window is partly off-screen. All coordinates remain logical.
         const window = parent.Window.window;
@@ -86,6 +100,11 @@ Controls.ToolTip {
             const top = Math.max(bounds.y, topLeft.y);
             bounds = Qt.rect(left, top, Math.max(0, Math.min(bounds.x + bounds.width, bottomRight.x) - left),
                              Math.max(0, Math.min(bounds.y + bounds.height, bottomRight.y) - top));
+            const originLeft = Math.max(originBounds.x, topLeft.x);
+            const originTop = Math.max(originBounds.y, topLeft.y);
+            originBounds = Qt.rect(originLeft, originTop,
+                Math.max(0, Math.min(originBounds.x + originBounds.width, bottomRight.x) - originLeft),
+                Math.max(0, Math.min(originBounds.y + originBounds.height, bottomRight.y) - originTop));
         }
         _bounds = bounds;
         let clipped = false;
@@ -99,8 +118,8 @@ Controls.ToolTip {
             }
         }
         if (visible && (clipped || (!isFinite(point.x) || !isFinite(point.y)) || (target && !_targetReady)
-                || point.x < bounds.x || point.y < bounds.y
-                || point.x > bounds.x + bounds.width || point.y > bounds.y + bounds.height))
+                || point.x < originBounds.x || point.y < originBounds.y
+                || point.x > originBounds.x + originBounds.width || point.y > originBounds.y + originBounds.height))
             close();
         updatePlacement();
     }
@@ -178,6 +197,11 @@ Controls.ToolTip {
     function syncAutomatic() {
         if (!automatic)
             return;
+        if (_autoClosing) {
+            if (_autoWanted) _closeSawTarget = true;
+            else if (_closeSawTarget) _autoLatched = false;
+            return;
+        }
         if (_autoWanted || (visible && bubbleHover.hovered)) {
             hideTimer.stop();
             if (_autoWanted && !_autoLatched) {
@@ -224,7 +248,27 @@ Controls.ToolTip {
     width: _layout.width
     height: _layout.height
 
-    onAboutToShow: { refreshAnchor(); viewport.contentY = 0; }
+    onAboutToShow: {
+        refreshAnchor();
+        viewport.contentY = 0;
+        // The tail can overlap its origin. Only the body accepts input, so
+        // clicking the underlying control keeps reaching that control.
+        contentItem.parent.containmentMask = bodyInputMask;
+    }
+    onAboutToHide: {
+        if (automatic) {
+            _autoClosing = true;
+            _autoLatched = true;
+            _closeSawTarget = false;
+            hideTimer.stop();
+        }
+    }
+    // Closing an overlay restores hover to the target on the following frame.
+    // Keep dismissal latched through that handoff, rather than reopening it.
+    onClosed: if (_autoClosing) {
+        _closeSawTarget = _autoWanted;
+        dismissalGuard.restart();
+    }
     onAnchorPointChanged: refreshAnchor()
     onAvailableRectChanged: refreshAnchor()
     // Wrapped content depends on the assigned width. Resolve its new height
@@ -243,6 +287,14 @@ Controls.ToolTip {
         interval: Math.max(0, root.hideDelay)
         onTriggered: root.close()
     }
+    readonly property Timer dismissalGuard: Timer {
+        interval: Math.max(32, root.hideDelay)
+        onTriggered: {
+            root._autoClosing = false;
+            if (!root._autoWanted) root._autoLatched = false;
+            root.syncAutomatic();
+        }
+    }
     readonly property Item triggerSurface: Item {
         parent: root.target
         anchors.fill: parent
@@ -250,6 +302,9 @@ Controls.ToolTip {
         HoverHandler { id: triggerHover; onHoveredChanged: root.syncAutomatic() }
         TapHandler {
             id: triggerPress
+            // Controls already own their press/grab. A second handler over a
+            // button must not intercept its click or cancel its release.
+            enabled: root.target && root.target.pressed === undefined
             gesturePolicy: TapHandler.DragThreshold
             onPressedChanged: {
                 if (pressed && root.visible) root.close();

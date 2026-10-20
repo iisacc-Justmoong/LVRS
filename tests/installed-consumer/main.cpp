@@ -51,6 +51,9 @@ LV.VStack {
     Component.onCompleted: LV.Theme.targetOverride = target
 
     LV.Label { id: titleLabel; style: title; text: "Title" }
+    LV.Avatar { id: avatarSmall; size: LV.Avatar.Small }
+    LV.Avatar { id: avatarMedium; size: LV.Avatar.Medium }
+    LV.Avatar { id: avatarLarge; size: LV.Avatar.Large }
     LV.IconButton { id: button }
     LV.InputField { id: field }
     LV.LabelSegmentedControl {
@@ -79,7 +82,10 @@ LV.VStack {
     }
     property bool hierarchySettled: !toolbar._normalizeScheduled
     property bool componentContract:
-        field.implicitHeight === 22 && field.height === 22
+        avatarSmall.width === 24 && avatarSmall.height === 24
+        && avatarMedium.width === 40 && avatarMedium.height === 40
+        && avatarLarge.width === 64 && avatarLarge.height === 64
+        && field.implicitHeight === 22 && field.height === 22
         && field.insetVertical === 4.5 && field.inputItem.y === 4.5
         && field.inputItem.height === 13
         && field.placeholderColor === LV.Theme.disabledColor

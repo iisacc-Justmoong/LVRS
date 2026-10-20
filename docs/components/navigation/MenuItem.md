@@ -54,7 +54,7 @@
 - Figma 소스: 노드 `107:498`(`MenuItem` 구성 요소 세트), 기본 변형은 노드 `107:495`에 있습니다.
 - 독립 실행형 기본값은 측정된 Figma 인스턴스(`label: "Label"`, `key: "key"`, `keyVisible: true`, `iconName: "procedure"`) 및 표시되는 오른쪽 갈매기형입니다. `ContextMenu` 모델 대리인은 여전히 ​​정규화된 항목 값을 명시적으로 제공합니다.
 - 데스크톱과 모바일은 동일한 `161 x 24` 프레임과 `13px` 본문 타이포그래피를 사용합니다.
-- 일반 `MenuItem`의 `selected` 배경은 Press와 동일한 `Theme.accentMuted`이다. 기본 Primary에서는 짙은 파란색 `#25324D`이며, 사용자 지정 Primary에서는 Press와 함께 갱신된다. `inactive` 배경은 기존 토큰을 유지한다.
+- 일반 `MenuItem`의 `selected` 배경은 Press와 동일한 `Theme.accentMuted`이다. 기본 Primary에서는 짙은 파란색 `#203C5B`이며, 사용자 지정 Primary에서는 Press와 함께 갱신된다. `inactive` 배경은 기존 토큰을 유지한다.
 - 아이콘 프레임은 데스크톱에서는 `18 x 18`, 모바일에서는 `36 x 36`입니다. 쉐브론 프레임은 데스크톱에서는 `16 x 16`이고 모바일에서는 `32 x 32`입니다.
 - 행은 데스크톱 및 모바일에서 `4px` 가로 및 `3px` 세로 패딩을 사용합니다.
 - Figma 패리티 픽스처는 `procedure.svg`(아이콘 `x=4, y=3, 18 x 18`, 레이블 `x=30, y=5.5, 33 x 13`, 바로 가기 `x=112, y=5.5, 21 x 13` 및 `x=141, y=4, 16 x 16`의 `generalchevronRight.svg`)를 사용합니다.

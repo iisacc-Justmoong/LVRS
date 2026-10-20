@@ -1,4 +1,5 @@
 set(LVRS_CONTROL_DISPLAY_QML_FILES
+    src/qml/components/control/display/Avatar.qml
     src/qml/components/control/display/Label.qml
     src/qml/components/control/display/ProgressBar.qml
     src/qml/components/control/display/TableHeader.qml

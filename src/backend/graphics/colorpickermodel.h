@@ -51,7 +51,8 @@ signals:
 
 private:
     void updateColor(const QColor &color, bool edited, bool keepHsv = false, bool keepCmyk = false);
-    QColor m_color = QColor("#7a5af8");
+    // The data model starts neutral; the QML view supplies its theme default.
+    QColor m_color = Qt::white;
     QColor m_previousColor = m_color;
     double m_hue = 0;
     double m_saturation = 0;

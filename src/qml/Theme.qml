@@ -170,7 +170,7 @@ QtObject {
 
     //Primary
 
-    readonly property color defaultPrimary: "#0a84ff"
+    readonly property color defaultPrimary: accentBlue
     // Shared by all windows in this QML engine; configured by the app root.
     property color primaryColor: defaultPrimary
     readonly property color primary: primaryColor
@@ -179,16 +179,16 @@ QtObject {
     readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
     readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary
-    readonly property color success: "#32d74b"
-    readonly property color warning: "#ffd60a"
-    readonly property color danger: "#ff453a"
+    readonly property color success: accentGreen
+    readonly property color warning: accentYellow
+    readonly property color danger: accentRed
     readonly property color surface: "#38383c"
     readonly property color darkGrey10: "#b4b8bf"
     readonly property color accentTint: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (31 / 255))
-    readonly property color dangerTint: "#1FFF453A"
+    readonly property color dangerTint: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (31 / 255))
     readonly property color primaryOverlay: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (64 / 255))
     readonly property color accentOverlay: primaryOverlay
-    readonly property color dangerOverlay: "#59FF453A"
+    readonly property color dangerOverlay: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (89 / 255))
     readonly property color overlayBackdrop: "#59000000"
     readonly property color shadowStrong: "#40000000"
     // Standard Material/Window and Material/Panel, Figma 944:31 and 944:28.
@@ -196,10 +196,11 @@ QtObject {
     readonly property color materialTint: "#141414"
     readonly property color materialWindowFill: "#0B0B0B"
     readonly property real materialWindowOpacity: 0.50
-    // ApplicationWindow, Figma 997:3: neutral diffusion plus a flat app accent.
-    readonly property color applicationWindowFill: "#141414"
-    readonly property real applicationWindowOpacity: 0.66
-    readonly property real applicationWindowAccentOpacity: 0.04
+    // ApplicationWindow: an opaque 95% window / 5% app-accent mix with fine grain.
+    readonly property color applicationWindowFill: window
+    readonly property real applicationWindowOpacity: 1.0
+    readonly property real applicationWindowAccentOpacity: 0.05
+    readonly property real applicationWindowGrainStrength: 2 / 255
     readonly property real materialDenseOpacity: 0.75
     readonly property real materialGlassOpacity: 0.25
     readonly property real materialDenseBlur: scaleRealMetric(64)
@@ -219,12 +220,12 @@ QtObject {
     readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)
     readonly property color alertTitleColor: "#F4F5F7"
     readonly property color alertBodyColor: "#D6D9DF"
-    readonly property color alertActionPrimary: usingDefaultPrimary ? "#027DFF" : primary
+    readonly property color alertActionPrimary: primary
     readonly property color alertActionBorder: "#596168"
     readonly property color alertDivider: "#363B3F"
-    readonly property color alertIconSurface: usingDefaultPrimary ? "#192840"
+    readonly property color alertIconSurface: usingDefaultPrimary ? Qt.rgba(0.13158102384735557, 0.20018439999748677, 0.27858823529411764, 1)
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.16))
-    readonly property color alertIconBorder: usingDefaultPrimary ? "#244B7E"
+    readonly property color alertIconBorder: usingDefaultPrimary ? Qt.rgba(0.1195867154212559, 0.27394431175905115, 0.45035294117647057, 1)
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.36))
     // Material/TextField semantic fills, Figma 114:179.
     readonly property color inputFieldGlassTint: Qt.rgba(surfaceInput.r, surfaceInput.g,
@@ -236,46 +237,46 @@ QtObject {
     readonly property color inputFieldGlassReflection: Qt.rgba(1, 1, 1, 0.018)
     readonly property color strokeSoft: "#D0D7E2"
 
-    // Fixed UI accent palette sampled from the supplied sRGB reference.
-    readonly property color accentPaletteBlue: "#007AFF"
-    readonly property color accentPalettePurple: "#A550A7"
-    readonly property color accentPalettePink: "#F74F9E"
-    readonly property color accentPaletteRed: "#FF5257"
-    readonly property color accentPaletteOrange: "#F7821B"
-    readonly property color accentPaletteYellow: "#FFC600"
-    readonly property color accentPaletteGreen: "#62BA46"
+    // Compatibility names resolve to the authored ten-color accent system.
+    readonly property color accentPaletteBlue: accentBlue
+    readonly property color accentPalettePurple: accentPurple
+    readonly property color accentPalettePink: accentRose
+    readonly property color accentPaletteRed: accentRed
+    readonly property color accentPaletteOrange: accentOrange
+    readonly property color accentPaletteYellow: accentYellow
+    readonly property color accentPaletteGreen: accentGreen
     readonly property color accentPaletteGray: "#8C8C8C"
 
-    // Flat representative hues from the existing icon artwork palette.
-    readonly property color accentOrange: accentOrangeMuted
-    readonly property color accentBrown: accentBrownMuted
-    readonly property color accentCyan: "#40B6E0"
-    readonly property color accentTeal: "#24A394"
+    // Authored Figma swatches 1477:30..40; retain their original RGBA precision.
+    readonly property color accentOrange: Qt.rgba(1, 0.47672274708747864, 0.15144230425357819, 1)
+    readonly property color accentBrown: Qt.rgba(0.2616060674190521, 0.13824503123760223, 0.09279626607894897, 1)
+    readonly property color accentCyan: Qt.rgba(0.12926307320594788, 0.8258525729179382, 1, 1)
+    readonly property color accentTeal: Qt.rgba(0, 0.7790151238441467, 0.8655723929405212, 1)
 
-    // Accent palette (all fill/stroke colors found in resources/iconset)
+    // Canonical accents and retained artwork-specific color names.
     readonly property color accentTransparent: "transparent" // none
     readonly property color accentWhite: "#FFFFFF"
     readonly property color accentGrayLight: "#CED0D6"
-    readonly property color accentBlue: "#548AF7"
-    readonly property color accentRed: "#DB5C5C"
+    readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)
+    readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)
     readonly property color accentSlate: "#43454A"
-    readonly property color accentGreen: "#57965C"
-    readonly property color accentBlueMuted: "#25324D"
-    readonly property color accentOrangeMuted: "#C77D55"
+    readonly property color accentGreen: Qt.rgba(0.4012451171875, 1, 0.281494140625, 1)
+    readonly property color accentBlueMuted: Qt.rgba(0.12618358505561073, 0.23337636029019077, 0.3558823529411765, 1)
+    readonly property color accentOrangeMuted: accentOrange
     readonly property color accentGreenMuted: "#253627"
-    readonly property color accentYellow: "#F2C55C"
+    readonly property color accentYellow: Qt.rgba(1, 0.8303598165512085, 0.15179912745952606, 1)
     readonly property color accentRedBrownDark: "#402929"
     readonly property color accentGray: "#868A91"
     readonly property color accentYellowMuted: "#D6AE58"
-    readonly property color accentBrownMuted: "#45322B"
-    readonly property color accentPurple: "#A571E6"
+    readonly property color accentBrownMuted: accentBrown
+    readonly property color accentPurple: Qt.rgba(0.5275065302848816, 0.291259765625, 1, 1)
     readonly property color accentBrownDarker: "#3D3223"
     readonly property color accentCharcoal: "#1E1F22"
     readonly property color accentGrayPale: "#B4B8BF"
     readonly property color accentBlueBright: "#3574F0"
     readonly property color accentPurpleDarker: "#2F2936"
     readonly property color accentGrayBright: "#F0F1F2"
-    readonly property color accentRose: "#E55765"
+    readonly property color accentRose: Qt.rgba(0.975510835647583, 0.26653972268104553, 0.4437825083732605, 1)
     readonly property color accentRoseDarker: "#5E3838"
     readonly property color accentGrayMuted: "#5A5D63"
     readonly property color accentGreenBright: "#55A76A"
@@ -287,25 +288,25 @@ QtObject {
     readonly property color accentGreenDarker: "#375239"
 
     // Extracted accent palette snapshot (resources/iconset/*.svg)
-    // Generated from 2182 icons, 386 unique colors.
+    // Stable 386-entry name/color contract; authored accent paints are recolored.
     readonly property var accentPaletteTokens: [
         { name: "accentTransparent", color: "transparent" },
         { name: "accentGrayLight", color: "#CED0D6" },
-        { name: "accentBlue", color: "#548AF7" },
+        { name: "accentBlue", color: "#1582FF" },
         { name: "accentSlate", color: "#43454A" },
-        { name: "accentGreen", color: "#57965C" },
-        { name: "accentRed", color: "#DB5C5C" },
+        { name: "accentGreen", color: "#66FF48" },
+        { name: "accentRed", color: "#FF4646" },
         { name: "accentWhite", color: "#FFFFFF" },
-        { name: "accentOrangeMuted", color: "#C77D55" },
-        { name: "accentBlueMuted", color: "#25324D" },
+        { name: "accentOrangeMuted", color: "#FF7A27" },
+        { name: "accentBlueMuted", color: "#203C5B" },
         { name: "accentGreenMuted", color: "#253627" },
-        { name: "accentBrownMuted", color: "#45322B" },
+        { name: "accentBrownMuted", color: "#432318" },
         { name: "accentLightYellowVivid", color: "#F4EC4F" },
         { name: "accentRedBrownDark", color: "#402929" },
-        { name: "accentPurple", color: "#A571E6" },
+        { name: "accentPurple", color: "#874AFF" },
         { name: "accentYellowMuted", color: "#D6AE58" },
         { name: "accentPurpleDarker", color: "#2F2936" },
-        { name: "accentYellow", color: "#F2C55C" },
+        { name: "accentYellow", color: "#FFD427" },
         { name: "accentDeepestBlack", color: "#000000" },
         { name: "accentLighterIndigo", color: "#B589EC" },
         { name: "accentBrownDarker", color: "#3D3223" },
@@ -324,7 +325,7 @@ QtObject {
         { name: "accentSlateDarker", color: "#6C707E" },
         { name: "accentPaleBlueVivid", color: "#999DF7" },
         { name: "accentLightRose", color: "#DD507B" },
-        { name: "accentDimTeal", color: "#24A394" },
+        { name: "accentDimTeal", color: "#00C7DD" },
         { name: "accentLightCyanVividBirch", color: "#29B6F6" },
         { name: "accentBaseSkyMuted", color: "#5D87A1" },
         { name: "accentDimOrange", color: "#9C5121" },
@@ -334,7 +335,7 @@ QtObject {
         { name: "accentDarkerIndigo", color: "#2C2255" },
         { name: "accentBaseSky", color: "#3592C4" },
         { name: "accentDarkerRoseMuted", color: "#392A31" },
-        { name: "accentLightCyan", color: "#40B6E0" },
+        { name: "accentLightCyan", color: "#21D3FF" },
         { name: "accentLightYellowVividBirch", color: "#FDEE21" },
         { name: "accentBaseRedVivid", color: "#FF0D2A" },
         { name: "accentLightAmberVivid", color: "#FFA72A" },
@@ -360,7 +361,7 @@ QtObject {
         { name: "accentBaseAmber", color: "#BA9752" },
         { name: "accentBaseRedBirch", color: "#C62E53" },
         { name: "accentBrightPearl", color: "#E4E6E6" },
-        { name: "accentRose", color: "#E55765" },
+        { name: "accentRose", color: "#F94471" },
         { name: "accentBaseOrangeVivid", color: "#E97826" },
         { name: "accentBrightBlueMuted", color: "#EBECF0" },
         { name: "accentGrayBright", color: "#F0F1F2" },
@@ -417,7 +418,7 @@ QtObject {
         { name: "accentLightOrangeVividEmber", color: "#FE9133" },
         { name: "accentLightOrangeVividFlint", color: "#FF9235" },
         { name: "accentDeepestGreenVivid", color: "#004300" },
-        { name: "accentBaseSkyVivid", color: "#007AFF" },
+        { name: "accentBaseSkyVivid", color: "#1582FF" },
         { name: "accentDimCyanVivid", color: "#0097CB" },
         { name: "accentDimCyanVividBirch", color: "#00ADD7" },
         { name: "accentBaseCyanVivid", color: "#00AEFF" },
