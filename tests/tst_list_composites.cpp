@@ -445,12 +445,17 @@ Rectangle {
     window.show();
     QVERIFY(QTest::qWaitForWindowExposed(&window));
     QTest::qWait(100);
-    const auto result = root->grabToImage(window.size());
+    // Windows may clamp a top-level window to the available monitor height.
+    // Capture in the root item's coordinates, which the row bounds also use.
+    const QSize captureSize(qRound(root->width()), qRound(root->height()));
+    const auto result = root->grabToImage(captureSize);
     QVERIFY(result);
     QSignalSpy ready(result.data(), &QQuickItemGrabResult::ready);
     QTRY_VERIFY_WITH_TIMEOUT(!ready.isEmpty(), 5000);
-    const QImage rendered = result->image().scaled(window.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QCOMPARE(rendered.size(), window.size());
+    const QImage rendered = result->image().scaled(captureSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QCOMPARE(rendered.size(), captureSize);
+    const QString diagnosticCapture = qEnvironmentVariable("LVRS_LIST_DIAGNOSTIC_CAPTURE");
+    if (!diagnosticCapture.isEmpty()) QVERIFY(rendered.save(diagnosticCapture));
     for (int index = 0; index < 17; ++index) {
         auto *row = visibleItem(root, QStringLiteral("capture_row_%1").arg(index));
         QVERIFY(row);
@@ -465,7 +470,7 @@ Rectangle {
                     ++painted;
             }
         }
-        QVERIFY2(painted > 100, qPrintable(QStringLiteral("Variant %1 must render visible content").arg(index)));
+        QVERIFY2(painted > 100, qPrintable(QStringLiteral("Variant %1 must render visible content at %2,%3 (%4x%5), painted %6").arg(index).arg(bounds.x()).arg(bounds.y()).arg(bounds.width()).arg(bounds.height()).arg(painted)));
     }
     const QString captureDir = qEnvironmentVariable("LVRS_LIST_CAPTURE_DIR");
     if (!captureDir.isEmpty()) {

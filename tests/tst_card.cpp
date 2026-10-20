@@ -122,6 +122,12 @@ LV.Card { type: LV.Card.Folder; title: "Brand assets"; statusText: "Shared"; foo
     QSignalSpy clicked(card, SIGNAL(clicked()));
     QSignalSpy menu(card, SIGNAL(menuRequested()));
     QSignalSpy action(card, SIGNAL(actionTriggered()));
+#ifdef Q_OS_WIN
+    // Exposure alone does not make the native Windows input window active.
+    window.requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(&window));
+#endif
+    QTest::mouseMove(&window, QPoint(380, 380));
     QTest::mouseMove(&window, QPoint(100, 100));
     QTRY_VERIFY(card->property("effectiveHovered").toBool());
     QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, QPoint(100, 100));

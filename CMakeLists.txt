@@ -355,6 +355,9 @@ if(WIN32 AND LVRS_BUILD_SHARED_LIBS)
         target_link_options(LVRSCore PRIVATE "-Wl,--export-all-symbols")
         # Keep the DLL dependency even in QML-only consumers with no C++ API calls.
         target_link_options(LVRSCore INTERFACE "LINKER:--undefined=_Z25qInitResources_qmake_LVRSv")
+    elseif(MSVC)
+        # QML-only applications must load the DLL even without C++ API calls.
+        target_link_options(LVRSCore INTERFACE "LINKER:/INCLUDE:?qInitResources_qmake_LVRS@@YAHXZ")
     endif()
 endif()
 
@@ -442,10 +445,17 @@ if(LVRS_BUILD_SHARED_LIBS)
 endif()
 
 # Keep the public QML resource URLs stable after moving sources into src/.
-foreach(_lvrs_resource IN LISTS LVRS_QML_FILES LVRS_COMPONENT_RESOURCE_FILES)
+foreach(_lvrs_resource IN LISTS LVRS_QML_FILES LVRS_RESOURCE_FILES)
     get_source_file_property(_lvrs_existing_alias "${_lvrs_resource}" QT_RESOURCE_ALIAS)
     if(NOT _lvrs_existing_alias)
         string(REGEX REPLACE "^src/" "" _lvrs_resource_alias "${_lvrs_resource}")
+        # QFile resource lookup is case-sensitive even on Windows. These two
+        # existing source spellings differ from the public Figma manifest URLs.
+        if(_lvrs_resource_alias STREQUAL "resources/iconset/javaScript.svg")
+            set(_lvrs_resource_alias "resources/iconset/javascript.svg")
+        elseif(_lvrs_resource_alias STREQUAL "resources/iconset/nodesTest.svg")
+            set(_lvrs_resource_alias "resources/iconset/nodestest.svg")
+        endif()
         set_source_files_properties("${_lvrs_resource}" PROPERTIES QT_RESOURCE_ALIAS "${_lvrs_resource_alias}")
     endif()
 endforeach()

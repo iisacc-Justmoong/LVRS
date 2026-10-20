@@ -139,6 +139,7 @@ AbstractButton {
 
     TextMetrics {
         id: labelMetrics
+        font.hintingPreference: Font.PreferNoHinting
         font.family: control.compact ? "Inter" : Theme.fontBody
         font.pixelSize: control.compact ? Theme.scaleTextMetric(12) : Theme.textBody
         font.weight: control.compact ? Font.Normal : Theme.textBodyWeight
@@ -149,6 +150,7 @@ AbstractButton {
 
     TextMetrics {
         id: shortcutMetrics
+        font.hintingPreference: Font.PreferNoHinting
         font.family: Theme.fontBody
         font.pixelSize: control.compact ? Theme.textDescription : Theme.textBody
         font.weight: control.compact ? Theme.textDescriptionWeight : Theme.textBodyWeight

@@ -185,17 +185,38 @@ class VisualRegressionTests : public QObject
     Q_OBJECT
 
 private slots:
+    void comparison_detects_changes();
     void reference_scene_matches_golden();
 };
+
+void VisualRegressionTests::comparison_detects_changes()
+{
+    QImage reference(320, 200, QImage::Format_RGBA8888);
+    reference.fill(QColor("#111827"));
+    QImage changed = reference;
+    for (int y = 16; y < 88; ++y)
+        for (int x = 16; x < 136; ++x)
+            changed.setPixelColor(x, y, QColor("#FF5A5F"));
+    QCOMPARE(mismatchRatio(reference, reference, 8), 0.0);
+    QVERIFY(mismatchRatio(changed, reference, 8) > 0.1);
+    QImage shifted = changed.copy();
+    for (int y = 16; y < 88; ++y) {
+        shifted.setPixelColor(16, y, QColor("#111827"));
+        shifted.setPixelColor(136, y, QColor("#FF5A5F"));
+    }
+    QVERIFY(mismatchRatio(changed, shifted, 8) > 0.001);
+}
 
 void VisualRegressionTests::reference_scene_matches_golden()
 {
     const QString sourceRoot = QStringLiteral(LVRS_TEST_SOURCE_DIR);
     const QString goldenPath = sourceRoot + QStringLiteral("/golden/visual_baseline_scene.png");
-    const QString diffPath = sourceRoot + QStringLiteral("/golden/visual_baseline_scene.diff.png");
+    const QString diffPath = QDir::current().filePath(QStringLiteral("visual_baseline_scene.diff.png"));
 
     const QImage actual = renderReferenceScene();
     QVERIFY2(!actual.isNull(), "Failed to render reference scene for visual regression.");
+    const QString capturePath = qEnvironmentVariable("LVRS_VISUAL_CAPTURE_PATH");
+    if (!capturePath.isEmpty()) QVERIFY(actual.save(capturePath));
 
     if (qEnvironmentVariableIsSet("LVRS_UPDATE_GOLDEN")) {
         QDir().mkpath(QFileInfo(goldenPath).absolutePath());

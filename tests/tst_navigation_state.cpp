@@ -1047,11 +1047,12 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     QCOMPARE(navigationStack.currentPath(), QStringLiteral("/"));
 
     VariantListObject readOnlyRows(QVariantList {
-        QVariantList {
+        QVariant(QVariantList {
             QVariantMap {{QStringLiteral("text"), QStringLiteral("Model Cell")}},
             QVariantMap {{QStringLiteral("text"), QStringLiteral("Second")}}
-        }
+        })
     });
+    QCOMPARE(readOnlyRows.count(), 1);
     TableModel readOnlyTableModel;
     readOnlyTableModel.setRows(QVariant::fromValue(static_cast<QObject *>(&readOnlyRows)));
     QCOMPARE(readOnlyTableModel.rowCount(), 1);

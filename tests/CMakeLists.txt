@@ -66,6 +66,7 @@ endfunction()
 uifw_add_test(LVRSTests_materials tst_materials.cpp)
 if(WIN32)
     uifw_add_test(LVRSTests_windows_exports tst_windows_exports.cpp)
+    uifw_add_test(LVRSTests_windows_qml_link tst_windows_qml_link.cpp)
 endif()
 if(APPLE AND NOT IOS)
     uifw_add_test(LVRSTests_nativewindowblur tst_nativewindowblur.mm)
@@ -234,6 +235,9 @@ uifw_add_test(LVRSTests_hierarchy_interaction tst_hierarchy_interaction.cpp)
 uifw_add_test(LVRSTests_text_document_model tst_text_document_model.cpp)
 uifw_add_test(LVRSTests_performance_gate tst_performance_gate.cpp LABELS "p4;quality;performance;ci")
 uifw_add_test(LVRSTests_visual_regression tst_visual_regression.cpp LABELS "p4;quality;visual;ci")
+  # The shared pixel golden is a raster reference. GPU backends use different
+  # rounded-edge tessellation; component/effect tests still run on native RHI.
+  set_property(TEST LVRSTests_visual_regression APPEND PROPERTY ENVIRONMENT "QT_QUICK_BACKEND=software")
 if(WIN32)
     foreach(_pixel_test IN ITEMS LVRSTests_visual_regression LVRSTests_list_composites
             LVRSTests_slider LVRSTests_instance_state)

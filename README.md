@@ -1,9 +1,20 @@
 # LVRS
 
+[Windows 빌드 및 실행](docs/WindowsBuildAndRun.md)
+
+Windows shared builds retain the LVRS DLL dependency for QML-only consumers on
+both MSVC and MinGW. The native resource initialization symbol is retained at
+link time so QML types register even when no C++ LVRS API is called. The Windows
+QML link regression creates an EventListener without referencing a backend API.
+See [Windows validation](docs/Windows-validation.md) for the current full-suite
+results and remaining Windows failures.
+
 Windows shared builds export the C++ runtime API as well as QML registration
 symbols. MinGW uses `--export-all-symbols`; MSVC uses CMake's automatic exports.
 `LVRSTests_windows_exports` links and invokes bootstrap and foreground-service
 APIs through the resulting DLL import library.
+Tooltip test fixtures construct QByteArray explicitly so conditional expressions
+have the same type on MSVC, Clang and GCC.
 MinGW consumers retain the module's resource initializer as a link dependency,
 including QML-only consumers verified by `LVRSTests_import_api`.
 Public QObject classes also use generated DLL import/export annotations so

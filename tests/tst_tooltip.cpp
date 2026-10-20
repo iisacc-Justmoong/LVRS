@@ -25,11 +25,11 @@ private slots:
 
 static QByteArray fixture(const QByteArray &body = {}, bool defaultContent = true)
 {
-    const QByteArray content = defaultContent ? R"(
+    const QByteArray content = defaultContent ? QByteArray(R"(
         contentComponent: Component {
             Rectangle { objectName: "providedView"; implicitWidth: 180; implicitHeight: 80; color: "#3A4050" }
         }
-)" : QByteArray();
+)") : QByteArray();
     return R"(
 import QtQuick
 import QtQuick.Controls as Controls
@@ -331,6 +331,12 @@ void TooltipTests::hover_delay_timeout_and_escape()
     tip->setProperty("delay", 100);
     tip->setProperty("timeout", 400);
     tip->setProperty("automatic", true);
+#ifdef Q_OS_WIN
+    // Native hover delivery requires activation, beyond window exposure.
+    window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(window));
+#endif
+    QTest::mouseMove(window, QPoint(20, 20));
     const QPoint point = target->mapToScene(target->boundingRect().center()).toPoint();
     QTest::mouseMove(window, point);
     QVERIFY(!tip->property("visible").toBool());
