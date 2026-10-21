@@ -6,6 +6,8 @@
 #include <QtMath>
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <utility>
 
 namespace {
@@ -375,9 +377,12 @@ int TableModel::headerCount() const
 
 int TableModel::columnCount() const
 {
+    if (m_cachedColumnCount >= 0)
+        return m_cachedColumnCount;
     int count = qMax(1, headerCount());
     for (const QVariant &row : m_rows)
         count = qMax(count, columnCountForRow(row));
+    m_cachedColumnCount = count;
     return count;
 }
 
@@ -873,7 +878,14 @@ bool TableModel::isCoveredCell(int rowIndex, int columnIndex) const
 
 QVariantList TableModel::visibleCells() const
 {
+    return visibleCellsInRange(0, std::numeric_limits<double>::max());
+}
+
+QVariantList TableModel::visibleCellsInRange(double top, double bottom) const
+{
     QVariantList result;
+    if (!std::isfinite(top) || !std::isfinite(bottom) || bottom <= top)
+        return result;
     const int rowTotal = rowCount(), columnTotal = columnCount();
     QVector<int> rowOffsets(rowTotal + 1), columnOffsets(columnTotal + 1);
     for (int row = 0; row < rowTotal; ++row)
@@ -884,6 +896,8 @@ QVariantList TableModel::visibleCells() const
     QVector<Span> spans;
     int visibleIndex = 0;
     for (int row = 0; row < rowTotal; ++row) {
+        if (rowOffsets[row] >= bottom)
+            break;
         spans.removeIf([row](const Span &span) { return span.endRow <= row; });
         const int count = columnCountForRow(rowAt(row));
         for (int column = 0; column < count; ++column) {
@@ -903,8 +917,11 @@ QVariantList TableModel::visibleCells() const
             if (!marker && (rowSpan > 1 || columnSpan > 1))
                 spans.push_back({row + rowSpan, column, column + columnSpan});
             if (covered) continue;
+            const int index = visibleIndex++;
+            if (rowOffsets[row + rowSpan] <= top)
+                continue;
             result.append(QVariantMap {
-                {QStringLiteral("index"), visibleIndex},
+                {QStringLiteral("index"), index},
                 {QStringLiteral("rowIndex"), row},
                 {QStringLiteral("columnIndex"), column},
                 {QStringLiteral("rowSpan"), rowSpan},
@@ -918,7 +935,6 @@ QVariantList TableModel::visibleCells() const
                 {QStringLiteral("height"), rowOffsets[row + rowSpan] - rowOffsets[row]},
                 {QStringLiteral("inputable"), cellInputable(row, column)}
             });
-            ++visibleIndex;
         }
     }
     return result;
@@ -1776,6 +1792,7 @@ void TableModel::recordUndoSnapshot()
 
 void TableModel::bumpRevision()
 {
+    m_cachedColumnCount = -1;
     ++m_revision;
     emit revisionChanged();
 }

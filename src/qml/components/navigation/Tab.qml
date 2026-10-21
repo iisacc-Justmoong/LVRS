@@ -10,10 +10,10 @@ AbstractButton {
     property int tabStyle: Tab.Underline
     property int displayState: Tab.StateAutomatic
     property bool selected: false
-    property string iconName: ""
+    required property string iconName
     property url iconSource: Theme.iconPath(iconName)
+    readonly property bool iconValid: iconName.trim().length > 0 && iconSource.toString().trim().length > 0
     property string badge: ""
-    property bool showIcon: iconSource.toString().length > 0
     property bool showBadge: badge.length > 0
     property int iconSize: 18
     property string labelObjectName: "tabLabel"
@@ -23,8 +23,8 @@ AbstractButton {
     readonly property bool effectiveHovered: displayState === Tab.StateHover || (displayState === Tab.StateAutomatic && hovered)
     readonly property bool effectivePressed: displayState === Tab.StatePressed || (displayState === Tab.StateAutomatic && down)
     readonly property bool effectiveFocus: displayState === Tab.StateFocus || visualFocus
-    effectiveEnabled: enabled && displayState !== Tab.StateDisabled
-    enabled: displayState !== Tab.StateDisabled
+    effectiveEnabled: enabled && iconValid && displayState !== Tab.StateDisabled
+    enabled: iconValid && displayState !== Tab.StateDisabled
     showFocusRing: false
     horizontalPadding: 12
     verticalPadding: 0
@@ -60,7 +60,7 @@ AbstractButton {
     contentItem: RowLayout {
         spacing: 8
         Image {
-            visible: control.showIcon
+            objectName: "tabIcon"
             source: RenderQuality.resolveTextureSource(control.iconSource)
             sourceSize: Qt.size(control.iconSize * Screen.devicePixelRatio, control.iconSize * Screen.devicePixelRatio)
             Layout.preferredWidth: control.iconSize
@@ -114,4 +114,4 @@ AbstractButton {
     }
 }
 
-// LV.Tab { text: "Overview"; selected: true; tabStyle: LV.Tab.Underline }
+// LV.Tab { text: "Overview"; iconName: "nodesfolder"; selected: true; tabStyle: LV.Tab.Underline }

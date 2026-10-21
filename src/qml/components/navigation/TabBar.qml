@@ -24,7 +24,7 @@ Controls.Control {
         text: typeof modelData === "string" ? modelData : (modelData.text || "")
         iconName: modelData.iconName || ""
         badge: modelData.badge || ""
-        enabled: modelData.enabled !== false
+        enabled: iconValid && modelData.enabled !== false
         selected: index === control.currentIndex
         tabStyle: control.tabStyle
         motionEnabled: control.motionEnabled
@@ -116,4 +116,4 @@ Controls.Control {
     }
 }
 
-// LV.TabBar { model: [{text: "Overview"}, {text: "Activity"}]; onActivated: index => stack.currentIndex = index }
+// LV.TabBar { model: [{text: "Overview", iconName: "nodesfolder"}, {text: "Activity", iconName: "generalsettings"}]; onActivated: index => stack.currentIndex = index }

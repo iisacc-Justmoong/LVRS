@@ -196,10 +196,10 @@ QtObject {
     readonly property color materialTint: "#141414"
     readonly property color materialWindowFill: "#0B0B0B"
     readonly property real materialWindowOpacity: 0.50
-    // ApplicationWindow: an opaque 95% window / 5% app-accent mix with fine grain.
+    // ApplicationWindow: an opaque 98% window / 2% app-accent mix with fine grain.
     readonly property color applicationWindowFill: window
     readonly property real applicationWindowOpacity: 1.0
-    readonly property real applicationWindowAccentOpacity: 0.05
+    readonly property real applicationWindowAccentOpacity: 0.02
     readonly property real applicationWindowGrainStrength: 2 / 255
     readonly property real materialDenseOpacity: 0.75
     readonly property real materialGlassOpacity: 0.25
@@ -260,7 +260,7 @@ QtObject {
     readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)
     readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)
     readonly property color accentSlate: "#43454A"
-    readonly property color accentGreen: Qt.rgba(0.4012451171875, 1, 0.281494140625, 1)
+    readonly property color accentGreen: Qt.rgba(0, 0.9058823585510254, 0.12156862765550613, 1)
     readonly property color accentBlueMuted: Qt.rgba(0.12618358505561073, 0.23337636029019077, 0.3558823529411765, 1)
     readonly property color accentOrangeMuted: accentOrange
     readonly property color accentGreenMuted: "#253627"
@@ -294,7 +294,7 @@ QtObject {
         { name: "accentGrayLight", color: "#CED0D6" },
         { name: "accentBlue", color: "#1582FF" },
         { name: "accentSlate", color: "#43454A" },
-        { name: "accentGreen", color: "#66FF48" },
+        { name: "accentGreen", color: "#00E71F" },
         { name: "accentRed", color: "#FF4646" },
         { name: "accentWhite", color: "#FFFFFF" },
         { name: "accentOrangeMuted", color: "#FF7A27" },

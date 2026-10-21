@@ -35,13 +35,14 @@
       "nodeId": "1477:32",
       "variableId": "VariableID:1305:78",
       "rgba": {
-        "r": 0.4012451171875,
-        "g": 1,
-        "b": 0.281494140625,
+        "r": 0,
+        "g": 0.9058823585510254,
+        "b": 0.12156862765550613,
         "a": 1
       },
-      "hex": "#66FF48",
-      "previousHex": "#57965C"
+      "hex": "#00E71F",
+      "previousHex": "#66FF48",
+      "updatedOn": "2026-10-21"
     },
     {
       "property": "accentYellow",
@@ -167,7 +168,8 @@
     "#FFD60A": "accentYellow",
     "#FF453A": "accentRed",
     "#027DFF": "accentBlue",
-    "#328CF9": "accentBlue"
+    "#328CF9": "accentBlue",
+    "#66FF48": "accentGreen"
   },
   "derivedReplacements": {
     "#25324D": {

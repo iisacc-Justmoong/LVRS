@@ -174,7 +174,7 @@ Figma 컴팩트 기본값은 141px 최소 항목 너비, 18px 행, 모든 측면
 
 ## 창 파생 프로스트 메뉴
 
-기본 `menuColor`는 창 `background.color`를 상속한다. ApplicationWindow의 기본 배경에서는 `Theme.window` (`#141414`) 95%와 앱 강조색 5%를 혼합한 최종 색상이며, `windowColor` 바탕색과 구별된다. `menuColor`를 직접 지정하면 해당 값이 우선한다.
+기본 `menuColor`는 창 `background.color`를 상속한다. ApplicationWindow의 기본 배경에서는 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 혼합한 최종 색상이며, `windowColor` 바탕색과 구별된다. `menuColor`를 직접 지정하면 해당 값이 우선한다.
 
 2026-09-12 시각적 수정안은 사용자의 글래스 처리 요청을 따르며 이전 Figma 글래스 25 메뉴 코팅을 대체합니다. ContextMenu 와 메뉴는 WindowMaterial , 윈도우의 채움 색상과 주요 팔레트, 그리고 48px/16px/30% 높이를 공유합니다. 컴팩트/규칙 행 레이아웃은 이 소재와 독립적입니다.
 

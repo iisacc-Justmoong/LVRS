@@ -6,11 +6,11 @@
 
 ## 목적
 
-`ApplicationWindow`의 기본 배경은 `Theme.window` (`#141414`) 95%와 앱 강조색 5%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.
+`ApplicationWindow`의 기본 배경은 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.
 
 | 재질 | 채우기 | 배경 흐림 | 기본 사용 |
 | --- | --- | --- | --- |
-| ApplicationWindow | `Theme.window` (`#141414`) 95% + 앱 강조색 5% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |
+| ApplicationWindow | `Theme.window` (`#141414`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |
 | 독립 WindowMaterial | #0B0B0B 50%와 강조색 방사형 그레디언트 | 64 논리 px | 명시적인 창 재질 |
 | ContextMenu / 메뉴 | 창 채색 12%와 옅은 강조색 | 64 논리 px | 컴팩트 및 일반 메뉴 |
 | Dense 75 MaterialSurface / PanelMaterial | #141414 75%와 강조색 방사형 그레디언트 | 64 논리 px | 조밀한 패널 |
@@ -54,7 +54,7 @@ import LVRS as LV
 
 LV.ApplicationWindow {
     primaryColor: "#A571E6"
-    // `Theme.window` (`#141414`) 95%와 앱 강조색 5%의 중심색에 고운 단색 입자를 더한다.
+    // `Theme.window` (`#141414`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.
     LV.Popover {
         id: details
         width: 320; height: 180
@@ -63,7 +63,7 @@ LV.ApplicationWindow {
 }
 ```
 
-`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 검정이다. `Theme.applicationWindowAccentOpacity`의 0.05를 사용하여 `바탕 RGB × 0.95 + primaryColor RGB × 0.05`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.
+`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 `Theme.window` (`#141414`)이다. `Theme.applicationWindowAccentOpacity`의 0.02를 사용하여 `바탕 RGB × 0.98 + primaryColor RGB × 0.02`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.
 
 <a id="how-it-works"></a>
 
@@ -79,7 +79,7 @@ ApplicationWindow의 기본 Rectangle은 채널별 RGB를 직접 혼합하고 8�
 
 Figma 참조: [Window](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=944-31), [Panel](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=944-28), [ApplicationWindow](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=997-3). ApplicationWindow 링크는 이전 반투명 디자인의 참조이며 현재 미세 노이즈 배경의 시각 기준으로 사용하지 않는다.
 
-검증: `LVRSTests_nativewindowblur`는 기본 창의 불투명도, 네이티브 뒤 배경 뷰의 부재, 크기 조정, 입력과 네이티브 표면 재생성을 검사한다. `application_window_theme_accent_mix`는 파랑·녹색·보라색·흰색·검정 강조색과 900×600·1600×1000 크기에서 95:5 중심색, 모든 배경 픽셀의 ±2 RGB 범위와 알파, 실제 입자 대비와 물리 픽셀별 변화, 고정 패턴, 강도 전환, 보조 창 상속, 전경 선명도와 저알파 입력을 검사한다. 독립 재질·팝업과 캡처 안전성 검사도 유지한다.
+검증: `LVRSTests_nativewindowblur`는 기본 창의 불투명도, 네이티브 뒤 배경 뷰의 부재, 크기 조정, 입력과 네이티브 표면 재생성을 검사한다. `application_window_theme_accent_mix`는 파랑·녹색·보라색·흰색·검정 강조색과 900×600·1600×1000 크기에서 98:2 중심색, 모든 배경 픽셀의 ±2 RGB 범위와 알파, 실제 입자 대비와 물리 픽셀별 변화, 고정 패턴, 강도 전환, 보조 창 상속, 전경 선명도와 저알파 입력을 검사한다. 독립 재질·팝업과 캡처 안전성 검사도 유지한다.
 
 <a id="window-noise-texture"></a>
 
@@ -113,6 +113,6 @@ ContextMenu 및 메뉴는 명시적 반투명 코팅이 있는 WindowMaterial를
 
 이전의 균일한 채색 구현은 2026-09-12에 macOS/Metal에서 검증했다. 해당 결과는 그레디언트 복원 전의 기록이다. 53개의 LVRS CTest 사례와 9개의 네이티브 재질 검사가 통과했다. 렌더링한 채우기 샘플은 50% 알파에서 #0B0B0B를 유지했고, 900×600와 1600×1000에서 파란색·보라색 강조색을 사용했다. 설치된 83개의 QML 리소스 전체가 현재 소스와 일치했다. Society는 16개 테스트를, Dreamscapes는 5개를 통과했으며, 검정에 가까운 채우기와 앱 강조색의 별도 기대값을 포함했다. Society, Dreamscapes, VisualCatalog를 갱신한 Workspace 런타임으로 다시 빌드하고 재실행했으며, 두 앱 창을 시각적으로 확인했다.
 
-2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#141414`) 95%와 강조색 5%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.
+2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#141414`) 98%와 강조색 2%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.
 
 `window_material_inherits_owning_window_accent`는 같은 QML 엔진의 창 두 개가 서로 다른 강조색을 유지하는지 검사한다. ApplicationWindow의 기본 중심색과 미세 노이즈도 기존 창 강조색 상속을 사용한다.

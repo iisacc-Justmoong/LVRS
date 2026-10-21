@@ -108,7 +108,7 @@ The ten swatches supplied by the user replace the previous canonical palette in 
 | --- | --- | --- | --- |
 | `Accent/accentBlue` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |
 | `Accent/accentRed` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |
-| `Accent/accentGreen` / `Theme.accentGreen` | `#66FF48` | `1477:32` | `VariableID:1305:78` |
+| `Accent/accentGreen` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |
 | `Accent/accentYellow` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |
 | `Accent/accentPurple` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |
 | `Accent/accentRose` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |
@@ -120,6 +120,12 @@ The ten swatches supplied by the user replace the previous canonical palette in 
 `accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.
 
 <a id="eight-attached-palette-colors"></a>
+
+On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,
+`Action/success`, the compatibility Green alias, and the Green gradient stops
+retain their IDs. The stops retain their existing alpha. Matching SVG paints
+and their current manifest hashes follow the new Green while geometry remains
+unchanged. The authored fixture records this per-color revision.
 
 ## Compatibility accent aliases
 

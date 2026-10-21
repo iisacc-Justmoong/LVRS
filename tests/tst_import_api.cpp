@@ -460,6 +460,7 @@ private slots:
     void model_component_delegate_contract_loads();
     void table_figma_geometry_contract_loads();
     void table_spreadsheet_api_contract_loads();
+    void table_viewport_reuses_delegates_and_creates_one_menu_on_demand();
     void table_cell_item_contract_loads();
     void table_cell_merge_split_contract_loads();
     void table_structure_editing_contract_loads();
@@ -8932,6 +8933,58 @@ Item {
     QVERIFY(root);
     QTRY_VERIFY2(root->property("spreadsheetContractReady").toBool(),
                  qPrintable(root->property("spreadsheetDiagnostics").toString()));
+}
+
+void ImportApiTests::table_viewport_reuses_delegates_and_creates_one_menu_on_demand()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    QScopedPointer<QObject> root(createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+LV.Table {
+    id: table
+    width: 640
+    columns: ["Name", "Value"]
+    rows: []
+    viewportHeight: 144
+    resizeHandlesVisible: false
+    deleteContextMenuEnabled: false
+    property int created: 0
+    cellDelegate: Component {
+        Item {
+            required property var modelData
+            objectName: "reusableCell"
+            Component.onCompleted: table.created++
+        }
+    }
+    Component.onCompleted: {
+        const values = []
+        for (let i = 0; i < 2000; ++i) values.push([String(i), i])
+        rows = values
+    }
+})"));
+    QVERIFY(root);
+    const auto count = [&] { return engine.newQObject(root.data()).property("visibleCellItems").property("length").toInt(); };
+    QTRY_VERIFY(count() > 0);
+    auto *table = qobject_cast<QQuickItem *>(root.data()); QVERIFY(table);
+    QTRY_VERIFY(visualChildByObjectName(table, "reusableCell"));
+    QVERIFY(engine.newQObject(root.data()).property("_cellContextMenu").isNull());
+    QPointer<QObject> first = visualChildByObjectName(table, "reusableCell"); QVERIFY(first);
+    const auto initial = count();
+    const auto created = root->property("created").toInt();
+    root->setProperty("viewportY", 2400);
+    QTRY_VERIFY(engine.newQObject(first).property("modelData").property("rowIndex").toInt() > 80);
+    QCOMPARE(root->property("created").toInt(), created + qMax(0, count() - initial));
+    QVERIFY(first);
+    root->setProperty("deleteContextMenuEnabled", true);
+    QVariant one, two;
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, one)));
+    QVERIFY(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, two)));
+    const auto menu = engine.newQObject(root.data()).property("_cellContextMenu").toQObject();
+    QVERIFY(menu);
+    QCOMPARE(one.value<QObject *>(), menu);
+    QCOMPARE(two.value<QObject *>(), menu);
 }
 
 void ImportApiTests::table_cell_item_contract_loads()

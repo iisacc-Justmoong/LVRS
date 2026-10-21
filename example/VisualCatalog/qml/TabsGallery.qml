@@ -38,6 +38,7 @@ Flickable {
                             required property string modelData
                             Layout.fillWidth: true
                             text: modelData
+                            iconName: "nodesfolder"
                             tabStyle: states.modelData
                             displayState: index + 1
                         }
@@ -52,7 +53,8 @@ Flickable {
                 required property int modelData
                 Layout.fillWidth: true
                 widthPolicy: modelData
-                model: [{text: "Overview", iconName: "nodesfolder"}, {text: "Activity", badge: "8"}, {text: "Members"}, {text: "Settings"}]
+                model: [{text: "Overview", iconName: "nodesfolder"}, {text: "Activity", iconName: "toolwindownotifications", badge: "8"},
+                    {text: "Members", iconName: "loggedInUser"}, {text: "Settings", iconName: "generalsettings"}]
             }
         }
         LV.Label { text: "iOS · Expanded / Separate Search / Minimized" }

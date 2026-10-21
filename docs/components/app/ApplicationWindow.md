@@ -281,15 +281,15 @@ LV.ApplicationWindow {
 
 ## 기본 배경 자료
 
-기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#141414`)이고 앱 `primaryColor`를 5% 혼합한다. RGB 채널을 `windowColor × 0.95 + primaryColor × 0.05`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 예를 들어 강조색 `#0A84FF`는 중심색 `#141A20`이 되고, `#66FF48`은 `#182017`이 된다. 이 중심색에 미세 입자가 더해진다.
+기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#141414`)이고 앱 `primaryColor`를 2% 혼합한다. RGB 채널을 `windowColor × 0.98 + primaryColor × 0.02`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 예를 들어 강조색 `#0A84FF`는 중심색 `#141619`가 되고, `#00E71F`는 `#141814`가 된다. 이 중심색에 미세 입자가 더해진다.
 
-`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#141414`이다. `Theme.applicationWindowAccentOpacity`는 0.05, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 95% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.
+`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#141414`이다. `Theme.applicationWindowAccentOpacity`는 0.02, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 98% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.
 
 이 중심색 위에는 `WindowNoiseTexture`가 매우 고운 단색 노이즈를 불투명하게 그린다. `Theme.applicationWindowGrainStrength`의 기본값은 `2 / 255`이다. 각 채널에 같은 난수 밝기 값을 더하며 최대 변화는 8비트 RGB 기준 ±2단계이다. 검정 근처의 값은 0에서 제한한다. 입자 크기는 물리 픽셀 1개이며 Retina에서도 2×2 픽셀로 커지지 않는다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. `windowBackgroundOpacity`와 `backgroundBlurEnabled`는 호환성 입력으로 남지만 기본 불투명 표면을 바꾸지 않는다. `backgroundBlurSupported`와 `backgroundBlurActive`는 false이다. 표준 `background`를 재정의하면 앱이 해당 배경을 소유한다.
 
 앱과 보조 창은 기존 강조색 상속을 사용하며, 강조색 변경 즉시 중심색을 갱신한다. 노이즈는 고정 시드의 256×256 타일로 캐시하며 크기 조정과 프레임 경과에도 같은 패턴을 유지한다. 노이즈 강도를 0으로 설정하면 원래 중심색의 단색이 된다. 텍스트와 버튼의 색상·불투명도는 별도로 유지한다. 소프트웨어 렌더러는 추가 콘텐츠 슈퍼샘플링 레이어를 사용하지 않으며, RHI의 기존 슈퍼샘플링 정책은 유지한다.
 
-macOS는 불투명한 네이티브 창과 알파 버퍼 0을 사용한다. 창 뒤 화면을 흐리게 하는 `NSVisualEffectView`를 생성하지 않는다. 기존 네이티브 프레임, 제목 표시줄과 입력 처리는 유지한다. 독립 `WindowMaterial`, `PanelMaterial`과 팝업은 별도 재질을 유지한다. 기본 노이즈 항목은 `noiseStrength: 0`, `blurRadius: 0`, `grainStrength: Theme.applicationWindowGrainStrength`를 사용하여 95:5 중심색에 미세한 입자만 더한다. [재질](../surfaces/Materials.md)을 참조한다.
+macOS는 불투명한 네이티브 창과 알파 버퍼 0을 사용한다. 창 뒤 화면을 흐리게 하는 `NSVisualEffectView`를 생성하지 않는다. 기존 네이티브 프레임, 제목 표시줄과 입력 처리는 유지한다. 독립 `WindowMaterial`, `PanelMaterial`과 팝업은 별도 재질을 유지한다. 기본 노이즈 항목은 `noiseStrength: 0`, `blurRadius: 0`, `grainStrength: Theme.applicationWindowGrainStrength`를 사용하여 98:2 중심색에 미세한 입자만 더한다. [재질](../surfaces/Materials.md)을 참조한다.
 
 
 <a id="shared-motion"></a>

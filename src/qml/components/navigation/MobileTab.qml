@@ -24,7 +24,6 @@ Tab {
     verticalPadding: 0
     bottomPadding: 0
     cornerRadius: iosStyle ? height / 2 : 16
-    showIcon: true
 
     contentItem: Item {
         Image {

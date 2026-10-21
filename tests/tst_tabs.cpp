@@ -22,6 +22,61 @@ private:
         return qobject_cast<QQuickItem *>(evaluate(engine, bar, QString("itemAt(%1)").arg(index)).value<QObject *>());
     }
 private slots:
+    void icon_is_required_data()
+    {
+        QTest::addColumn<QString>("type");
+        for (const auto &type : {"Tab", "MobileTab", "MobileNavigationTab"})
+            QTest::newRow(type) << QString::fromLatin1(type);
+    }
+
+    void icon_is_required()
+    {
+        QFETCH(QString, type);
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        QQmlComponent component(&engine);
+        component.setData(QString("import LVRS as LV\nLV.%1 { text: 'Overview' }").arg(type).toUtf8(), QUrl());
+        QScopedPointer<QObject> item(component.create());
+        QVERIFY2(!item, "A Tab without an explicit iconName must fail creation.");
+        QVERIFY2(component.errorString().contains("Required property iconName was not initialized"),
+            qPrintable(component.errorString()));
+    }
+
+    void icon_is_always_left_of_label()
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        QScopedPointer<QObject> object(TestUtils::createFromQml(engine,
+            "import LVRS as LV\nLV.Tab { width: 180; text: 'Overview'; iconName: 'nodesfolder'; badge: '8'; motionEnabled: false }"));
+        QVERIFY(object);
+        auto *item = qobject_cast<QQuickItem *>(object.data());
+        QQuickWindow window; window.resize(240, 100); item->setParentItem(window.contentItem());
+        window.show(); QVERIFY(QTest::qWaitForWindowExposed(&window));
+        auto *icon = item->findChild<QQuickItem *>("tabIcon");
+        auto *label = item->findChild<QQuickItem *>("tabLabel");
+        QVERIFY(icon && label);
+        QTRY_VERIFY(icon->isVisible());
+        QTRY_COMPARE(icon->width(), 18.0);
+        QTRY_COMPARE(icon->height(), 18.0);
+        QTRY_COMPARE(label->x() - icon->x() - icon->width(), 8.0);
+        QCOMPARE(item->metaObject()->indexOfProperty("showIcon"), -1);
+        QTRY_COMPARE(icon->property("status").toInt(), 1); // Image.Ready
+        item->setProperty("displayState", 6);
+        QVERIFY(icon->isVisible());
+        QCOMPARE(icon->opacity(), 0.3);
+        item->setParentItem(nullptr);
+    }
+
+    void empty_icon_cannot_activate()
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        QScopedPointer<QObject> object(TestUtils::createFromQml(engine,
+            "import LVRS as LV\nLV.Tab { text: 'Overview'; iconName: '  '; motionEnabled: false }"));
+        QVERIFY(object);
+        QVERIFY(!object->property("effectiveEnabled").toBool());
+    }
+
     void desktop_variants()
     {
         QQmlEngine engine;
@@ -29,7 +84,7 @@ private slots:
         for (int style = 0; style < 2; ++style) {
             for (int state = 1; state <= 6; ++state) {
                 QScopedPointer<QObject> item(TestUtils::createFromQml(engine, QString(
-                    "import LVRS as LV\nLV.Tab { text: 'Overview'; tabStyle: %1; displayState: %2; motionEnabled: false }")
+                    "import LVRS as LV\nLV.Tab { text: 'Overview'; iconName: 'nodesfolder'; tabStyle: %1; displayState: %2; motionEnabled: false }")
                     .arg(style).arg(state).toUtf8()));
                 QVERIFY(item);
                 QCOMPARE(item->property("implicitHeight").toReal(), 32.0);
@@ -37,6 +92,77 @@ private slots:
                 QCOMPARE(item->property("effectiveEnabled").toBool(), state != 6);
             }
         }
+    }
+
+    void missing_model_icon_is_disabled()
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        for (const auto &type : {"TabBar", "MobileTabBar", "MobileNavigationBar"}) {
+            QScopedPointer<QObject> object(TestUtils::createFromQml(engine, QString(
+                "import LVRS as LV\nLV.%1 { model: [{text:'Missing'}, {text:'Blank', iconName:'  '}, {text:'Ready', iconName:'nodesfolder'}]; motionEnabled: false }")
+                .arg(QString::fromLatin1(type)).toUtf8()));
+            QVERIFY2(object, type);
+            QTRY_COMPARE(object->property("count").toInt(), 3);
+            QVERIFY(!tab(engine, object.data(), 0)->isEnabled());
+            QVERIFY(!tab(engine, object.data(), 1)->isEnabled());
+            QVERIFY(tab(engine, object.data(), 2)->isEnabled());
+            QTRY_COMPARE(object->property("currentIndex").toInt(), 2);
+            QSignalSpy activated(object.data(), SIGNAL(activated(int)));
+            evaluate(engine, object.data(), "activate(0); activate(1)");
+            QCOMPARE(activated.size(), 0);
+            evaluate(engine, object.data(), "activate(2)");
+            QCOMPARE(activated.size(), 1);
+            QTest::qWait(1); // Drain deferred scroll callbacks before destroying the bar.
+        }
+    }
+
+    void desktop_icon_capture()
+    {
+        const auto output = qEnvironmentVariable("LVRS_TAB_ICON_SCREENSHOT_PATH");
+        if (output.isEmpty()) QSKIP("Set LVRS_TAB_ICON_SCREENSHOT_PATH for a desktop Tab capture.");
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        QScopedPointer<QObject> object(TestUtils::createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+Rectangle {
+    width: 1000; height: 280; color: '#141414'
+    Column {
+        x: 24; y: 20; width: 952; spacing: 16
+        Repeater {
+            model: [LV.Tab.Underline, LV.Tab.Surface]
+            Row {
+                id: row
+                required property int modelData
+                spacing: 8
+                Repeater {
+                    model: ['Default', 'Hover', 'Pressed', 'Selected', 'Focus', 'Disabled']
+                    LV.Tab {
+                        required property int index
+                        required property string modelData
+                        width: 152; text: modelData; iconName: 'nodesfolder'
+                        tabStyle: row.modelData; displayState: index + 1; motionEnabled: false
+                    }
+                }
+            }
+        }
+        LV.TabBar {
+            width: 952; motionEnabled: false
+            model: [{text:'Overview',iconName:'nodesfolder'}, {text:'Activity',iconName:'toolwindownotifications',badge:'8'},
+                {text:'Members',iconName:'loggedInUser'}, {text:'Settings',iconName:'generalsettings'}]
+        }
+    }
+})"));
+        QVERIFY(object);
+        auto *content = qobject_cast<QQuickItem *>(object.data()); QVERIFY(content);
+        QQuickWindow window; window.resize(1000, 280);
+        content->setParentItem(window.contentItem()); window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        QTest::qWait(200);
+        const auto capture = window.grabWindow(); QVERIFY(!capture.isNull());
+        QVERIFY(capture.save(output));
+        content->setParentItem(nullptr);
     }
 
     void activation_focus_disabled_and_controlled_selection()
@@ -48,7 +174,8 @@ import QtQuick
 import LVRS as LV
 LV.TabBar {
     width: 480; motionEnabled: false
-    model: [{text: 'Overview'}, {text: 'Disabled', enabled: false}, {text: 'Settings', badge: '8'}]
+    model: [{text: 'Overview', iconName: 'nodesfolder'}, {text: 'Disabled', iconName: 'locked', enabled: false},
+        {text: 'Settings', iconName: 'generalsettings', badge: '8'}]
 })"));
         QVERIFY(object);
         auto *bar = qobject_cast<QQuickItem *>(object.data());
@@ -56,6 +183,8 @@ LV.TabBar {
         window.show(); QVERIFY(QTest::qWaitForWindowExposed(&window));
         QTRY_COMPARE(bar->property("count").toInt(), 3);
         auto *first = tab(engine, bar, 0); auto *last = tab(engine, bar, 2); QVERIFY(first && last);
+        QCOMPARE(first->property("iconName").toString(), QStringLiteral("nodesfolder"));
+        QCOMPARE(last->property("iconName").toString(), QStringLiteral("generalsettings"));
         QSignalSpy activated(bar, SIGNAL(activated(int))); QVERIFY(activated.isValid());
         first->forceActiveFocus(); QTest::keyClick(&window, Qt::Key_Right);
         QTRY_VERIFY(last->hasActiveFocus());
@@ -101,7 +230,7 @@ LV.MobileTabBar {
         for (int platform : {1, 2}) {
             bar->setProperty("platformStyle", platform);
             for (int count : {3, 4, 5}) {
-                evaluate(engine, bar, QString("model = [{text:'Home'}, {text:'Library'}, {text:'Activity'}, {text:'Profile'}, {text:'Search'}].slice(0,%1)").arg(count));
+                evaluate(engine, bar, QString("model = [{text:'Home',iconName:'home'}, {text:'Library',iconName:'nodesfolder'}, {text:'Activity',iconName:'generalsettings'}, {text:'Profile',iconName:'loggedInUser'}, {text:'Search',iconName:'inputFieldSearch'}].slice(0,%1)").arg(count));
                 QTRY_COMPARE(bar->property("count").toInt(), count);
                 for (int presentation : {0, 1, 2}) {
                     bar->setProperty("presentation", presentation);

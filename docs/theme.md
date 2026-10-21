@@ -105,7 +105,7 @@ Figma 변수의 `codeSyntax.WEB`는 의도적으로 `Theme.canvas`, `Theme.textB
 
 ## 창 및 패널 표면
 
-창 기초는 `window`이며 `Panel/window`와 대응한다. 기본 렌더링 색상은 `#141414`이다. `applicationWindowFill`은 이 `window` 토큰을 참조한다. ApplicationWindow는 이 바탕색 95%와 앱 강조색 5%를 혼합하고 미세 단색 입자를 더한 불투명 표면을 사용한다. 패널은 밝기 번호보다 실제 용도를 나타내는 이름을 우선한다. 아래 호환 별칭은 기존 색상값과 소비자의 동작을 유지하며 각 의미 역할을 가리킨다.
+창 기초는 `window`이며 `Panel/window`와 대응한다. 기본 렌더링 색상은 `#141414`이다. `applicationWindowFill`은 이 `window` 토큰을 참조한다. ApplicationWindow는 이 바탕색 98%와 앱 강조색 2%를 혼합하고 미세 단색 입자를 더한 불투명 표면을 사용한다. 패널은 밝기 번호보다 실제 용도를 나타내는 이름을 우선한다. 아래 호환 별칭은 기존 색상값과 소비자의 동작을 유지하며 각 의미 역할을 가리킨다.
 
 | 기존 호환 속성 | 정식 역할 속성 | Figma 변수 |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ Figma TextField `114:179`는 기존 `panelBackground10` RGB 채널에서 파생�
 | --- | --- | --- |
 | `accentBlue` | `#1582FF` | `1477:30` |
 | `accentRed` | `#FF4646` | `1477:31` |
-| `accentGreen` | `#66FF48` | `1477:32` |
+| `accentGreen` | `#00E71F` | `1477:32` |
 | `accentYellow` | `#FFD427` | `1477:33` |
 | `accentPurple` | `#874AFF` | `1477:34` |
 | `accentRose` | `#F94471` | `1477:36` |

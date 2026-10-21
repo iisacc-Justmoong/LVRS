@@ -9,11 +9,11 @@
 #include "accent_fixture.h"
 
 namespace {
-QColor accent5Mix(const QColor &base, const QColor &accent)
+QColor accent2Mix(const QColor &base, const QColor &accent)
 {
-    return QColor(qRound((base.redF() * 0.95 + accent.redF() * 0.05) * 255),
-                  qRound((base.greenF() * 0.95 + accent.greenF() * 0.05) * 255),
-                  qRound((base.blueF() * 0.95 + accent.blueF() * 0.05) * 255));
+    return QColor(qRound((base.redF() * 0.98 + accent.redF() * 0.02) * 255),
+                  qRound((base.greenF() * 0.98 + accent.greenF() * 0.02) * 255),
+                  qRound((base.blueF() * 0.98 + accent.blueF() * 0.02) * 255));
 }
 
 struct GrainStats {
@@ -79,6 +79,7 @@ LV.ApplicationWindow {
     const QColor windowBase = theme->property("window").value<QColor>();
     QCOMPARE(windowBase, QColor("#141414"));
     QCOMPARE(theme->property("applicationWindowFill").value<QColor>(), windowBase);
+    QCOMPARE(theme->property("applicationWindowAccentOpacity").toReal(), 0.02);
     QCOMPARE(root->property("windowColor").value<QColor>(), windowBase);
     QVERIFY(!root->findChild<QObject *>("applicationWindowGlassOverlay"));
     auto *grain = background->findChild<QQuickItem *>("applicationWindowNoiseTexture");
@@ -88,17 +89,17 @@ LV.ApplicationWindow {
     QCOMPARE(grain->property("grainStrength").toReal(), 2.0 / 255);
     const QColor blue = AccentFixture::color("accentBlue");
     QCOMPARE(background->property("primaryColor").value<QColor>(), blue);
-    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(windowBase, blue).rgba());
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent2Mix(windowBase, blue).rgba());
     QVERIFY(root->setProperty("primaryColor", QColor("#A571E6")));
     QTRY_COMPARE(background->property("primaryColor").value<QColor>(), QColor("#A571E6"));
-    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(windowBase, QColor("#A571E6")).rgba());
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent2Mix(windowBase, QColor("#A571E6")).rgba());
     QTRY_COMPARE(button->property("backgroundColor").value<QColor>(), QColor("#A571E6"));
     QCOMPARE(background->opacity(), 1.0);
     QCOMPARE(qobject_cast<QQuickWindow *>(root.data())->opacity(), 1.0);
     QVERIFY(root->setProperty("windowBackgroundOpacity", 0.35));
     QCOMPARE(background->opacity(), 1.0);
     QVERIFY(root->setProperty("windowColor", QColor("#202124")));
-    QCOMPARE(background->property("color").value<QColor>().rgba(), accent5Mix(QColor("#202124"), QColor("#A571E6")).rgba());
+    QCOMPARE(background->property("color").value<QColor>().rgba(), accent2Mix(QColor("#202124"), QColor("#A571E6")).rgba());
 }
 
 void MaterialTests::window_material_inherits_owning_window_accent()
@@ -146,7 +147,7 @@ LV.ApplicationWindow {
     primaryColor: LV.Theme.defaultPrimary
     LV.ApplicationWindow { objectName: "auxiliary"; width: 360; height: 240; visible: false }
     Text { x: 40; y: 54; text: "ApplicationWindow"; color: "white"; font.pixelSize: 26 }
-    Text { x: 40; y: 96; text: "Theme.window 95% + app accent 5% / fine grain"; color: "#B8C2CC"; font.pixelSize: 13 }
+    Text { x: 40; y: 96; text: "Theme.window 98% + app accent 2% / fine grain"; color: "#B8C2CC"; font.pixelSize: 13 }
     LV.LabelButton { x: 40; y: 140; text: "Continue"; tone: LV.AbstractButton.Primary }
     Rectangle { objectName: "foregroundProof"; x: 300; y: 220; width: 48; height: 48; color: "#F0A060" }
 })"));
@@ -176,11 +177,11 @@ LV.ApplicationWindow {
         window->resize(size);
         QTRY_COMPARE(material->size(), QSizeF(size));
         QTRY_COMPARE(grain->size(), QSizeF(size));
-        for (const QColor accent : {QColor("#0A84FF"), QColor("#66FF48"), QColor("#A571E6"), QColor(Qt::white), QColor(Qt::black)}) {
+        for (const QColor accent : {QColor("#0A84FF"), AccentFixture::color("accentGreen"), QColor("#A571E6"), QColor(Qt::white), QColor(Qt::black)}) {
             QVERIFY(window->setProperty("primaryColor", accent));
             QTRY_COMPARE(material->property("primaryColor").value<QColor>(), accent);
             QTRY_COMPARE(auxiliaryMaterial->property("primaryColor").value<QColor>(), accent);
-            const QColor expected = accent5Mix(QColor("#141414"), accent);
+            const QColor expected = accent2Mix(QColor("#141414"), accent);
             QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
             QTRY_COMPARE(grain->property("color").value<QColor>().rgba(), expected.rgba());
             QTRY_COMPARE(auxiliaryGrain->property("color").value<QColor>().rgba(), expected.rgba());
@@ -190,7 +191,7 @@ LV.ApplicationWindow {
             const QImage background = capture->image();
             for (int y = 0; y < background.height(); ++y)
                 for (int x = 0; x < background.width(); ++x)
-                    QVERIFY2(matches(background.pixelColor(x, y), expected), "Fine grain must stay within two RGB levels of the opaque 95:5 mix.");
+                    QVERIFY2(matches(background.pixelColor(x, y), expected), "Fine grain must stay within two RGB levels of the opaque 98:2 mix.");
             const auto stats = grainStats(background, QRect(16, 16, 256, 256));
             QVERIFY(qAbs(stats.mean - expected.green()) < 0.65);
             QVERIFY2(stats.deviation > 0.4 && stats.deviation < 1.5, "Grain must be perceptible without strong contrast.");
@@ -213,7 +214,7 @@ LV.ApplicationWindow {
                                       qRound(position.y() * frame.height() / window->height())), QColor("#F0A060"));
             if (!directory.isEmpty()) {
                 QVERIFY(QDir().mkpath(directory));
-                QVERIFY(frame.save(directory + "/app-accent5-" + accent.name().mid(1) + "-" + QString::number(size.width()) + ".png"));
+                QVERIFY(frame.save(directory + "/app-accent2-" + accent.name().mid(1) + "-" + QString::number(size.width()) + ".png"));
                 if (accent == QColor("#0A84FF") && size.width() == 900)
                     QVERIFY(frame.copy(qRound(500 * scale), qRound(350 * scale), qRound(256 * scale), qRound(192 * scale)).save(directory + "/fine-grain-detail.png"));
             }
@@ -230,7 +231,7 @@ LV.ApplicationWindow {
     QVERIFY(window->setProperty("windowColor", QColor("#33202124")));
     QVERIFY(window->setProperty("primaryColor", QColor("#00A571E6")));
     QTRY_COMPARE(window->color(), QColor("#202124"));
-    const QColor expected = accent5Mix(QColor("#202124"), QColor("#A571E6"));
+    const QColor expected = accent2Mix(QColor("#202124"), QColor("#A571E6"));
     QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
     auto capture = material->grabToImage();
     QVERIFY(capture);

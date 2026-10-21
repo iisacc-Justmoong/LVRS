@@ -139,6 +139,8 @@ public:
     Q_INVOKABLE QVariantMap mergeAnchorForCell(int rowIndex, int columnIndex) const;
     Q_INVOKABLE bool isCoveredCell(int rowIndex, int columnIndex) const;
     Q_INVOKABLE QVariantList visibleCells() const;
+    // Body coordinates; include anchors whose merged geometry intersects [top, bottom).
+    Q_INVOKABLE QVariantList visibleCellsInRange(double top, double bottom) const;
     Q_INVOKABLE int numericSize(const QVariant &value, int fallbackValue, int minimumValue) const;
     Q_INVOKABLE int autoCellWidth(const QVariant &rowEntry) const;
     Q_INVOKABLE int autoColumnWidth() const;
@@ -287,6 +289,7 @@ private:
     int m_contextRowIndex = -1;
     int m_contextColumnIndex = -1;
     int m_revision = 0;
+    mutable int m_cachedColumnCount = -1;
     bool m_inputable = false;
     bool m_rowsStructureMutable = true;
     bool m_refreshingRowsSource = false;

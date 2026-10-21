@@ -29,6 +29,10 @@ Item {
     property int cellWidth: 0
     property var columnWidths: []
     property var rowHeights: []
+    // Bind to the owning Flickable's contentY/height. Zero height keeps all cells.
+    property real viewportY: 0
+    property real viewportHeight: 0
+    property real viewportOverscan: rowHeight * 2
     property int minColumnWidth: Theme.scaleMetric(32)
     property int minRowHeight: Theme.scaleMetric(18)
     property bool resizeHandlesVisible: true
@@ -78,6 +82,7 @@ Item {
     readonly property int contextColumnIndex: tableModel.contextColumnIndex
     property bool _syncingFromTableModel: false
     property bool _syncingGeometryFromTableModel: false
+    property var _cellContextMenu: null
 
     signal cellInputEdited(int rowIndex, int columnIndex, string text)
     signal cellInputSubmitted(int rowIndex, int columnIndex, string text)
@@ -164,6 +169,14 @@ Item {
     readonly property var visibleCellItems: _modelRevision >= 0
         ? buildVisibleCellItems()
         : []
+    ListModel { id: cellSlots }
+    function syncCellSlots() {
+        if (!cellSlots) return
+        const count = visibleCellItems.length
+        while (cellSlots.count < count) cellSlots.append({ slot: cellSlots.count })
+        if (cellSlots.count > count) cellSlots.remove(count, cellSlots.count - count)
+    }
+    onVisibleCellItemsChanged: syncCellSlots()
     readonly property bool structureMutationAvailable: tableModel.structureMutationAvailable
     readonly property bool canUndo: tableModel.canUndo
     readonly property bool canRedo: tableModel.canRedo
@@ -838,7 +851,11 @@ Item {
         tableModel.rowCount
         tableModel.columnCount
         tableModel.headerCount
-        const source = tableModel.visibleCells()
+        const top = Math.max(0, viewportY - tableHeader.implicitHeight - viewportOverscan)
+        const bottom = viewportY + viewportHeight - tableHeader.implicitHeight + viewportOverscan
+        const source = viewportHeight > 0
+            ? tableModel.visibleCellsInRange(top, bottom)
+            : tableModel.visibleCells()
         const result = []
         for (let index = 0; index < source.length; index++) {
             const sourceDescriptor = source[index]
@@ -1015,6 +1032,7 @@ Item {
         syncHeadersToModel()
         syncColumnWidthsToModel()
         syncRowHeightsToModel()
+        syncCellSlots()
     }
 
     onRowsChanged: syncRowsToModel()
@@ -1204,6 +1222,20 @@ Item {
         return true
     }
 
+    function cellContextMenu() {
+        if (!_cellContextMenu)
+            _cellContextMenu = cellContextMenuComponent.createObject(control)
+        return _cellContextMenu
+    }
+
+    Component {
+        id: cellContextMenuComponent
+        ContextMenu {
+            objectName: "tableCellContextMenu"
+            itemWidth: Theme.scaleMetric(132)
+        }
+    }
+
     function canMergeCells(rowIndex, columnIndex, rowSpan, columnSpan) {
         return tableModel.canMergeCells(rowIndex, columnIndex, rowSpan, columnSpan)
     }
@@ -1283,12 +1315,14 @@ Item {
                 height: control.resolvedBodyHeight
 
                 Repeater {
-                    model: control.visibleCellItems
+                    // Keep the viewport's delegate slots alive as their rows change.
+                    model: cellSlots
 
                     delegate: Item {
                         id: cellDelegateRoot
                         required property int index
-                        required property var modelData
+                        readonly property var modelData: control.visibleCellItems[index]
+                            || ({ rowIndex: -1, columnIndex: -1, index: index, x: 0, y: 0, width: 0, height: 0 })
                         property Item delegateItem: null
 
                         x: modelData.x
@@ -1313,7 +1347,13 @@ Item {
                         }
 
                         Component.onCompleted: rebuildDelegate()
-                        onModelDataChanged: rebuildDelegate()
+                        onModelDataChanged: {
+                            // Editors retain local input overrides; give a new cell a fresh editor.
+                            if (delegateItem && (delegateItem.inputable === true || modelData.inputable === true))
+                                rebuildDelegate()
+                            else if (delegateItem)
+                                delegateItem.modelData = modelData
+                        }
 
                         Connections {
                             target: control
@@ -1359,7 +1399,7 @@ Item {
                                 control.forceActiveFocus()
                                 control.openContextMenuForCell(modelData.rowIndex,
                                                                modelData.columnIndex,
-                                                               cellDeleteContextMenu,
+                                                               control.cellContextMenu(),
                                                                cellContextArea,
                                                                mouse.x,
                                                                mouse.y)
@@ -1367,11 +1407,6 @@ Item {
                             }
                         }
 
-                        ContextMenu {
-                            id: cellDeleteContextMenu
-                            itemWidth: Theme.scaleMetric(132)
-                            items: control.buildContextMenuItems(modelData.rowIndex, modelData.columnIndex)
-                        }
                     }
                 }
             }
@@ -1384,7 +1419,7 @@ Item {
             z: 20
 
             Repeater {
-                model: Math.max(1, control.resolvedColumnCount)
+                model: control.resizeHandlesVisible ? Math.max(1, control.resolvedColumnCount) : 0
 
                 delegate: MouseArea {
                     id: columnResizeArea
@@ -1429,7 +1464,7 @@ Item {
             }
 
             Repeater {
-                model: control.resolvedRowCount
+                model: control.resizeHandlesVisible ? control.resolvedRowCount : 0
 
                 delegate: MouseArea {
                     id: rowResizeArea
@@ -1549,3 +1584,4 @@ Item {
 // API usage (external):
 // import LVRS 1.0 as LV
 // LV.Table { columns: [{ label: "Name" }, { label: "Count", type: "int" }]; model: [["Renderer", 3]]; editable: true; sortingEnabled: true }
+// Large read-only lists: viewportY: flickable.contentY; viewportHeight: flickable.height; resizeHandlesVisible: false

@@ -134,7 +134,7 @@ private slots:
         QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, search->mapToScene(QPointF(28,28)).toPoint());
         QTRY_COMPARE(searched.size(), 1); QCOMPARE(activated.size(), 0);
         QCOMPARE(bar->property("currentIndex").toInt(), 0);
-        eval(engine, bar, "model = [{text:'Home'}, {text:'Off', enabled:false}, {text:'Library'}]");
+        eval(engine, bar, "model = [{text:'Home', iconName:'home-1'}, {text:'Off', iconName:'locked', enabled:false}, {text:'Library', iconName:'nodesfolder'}]");
         QTRY_COMPARE(bar->property("count").toInt(), 3);
         item(engine, bar, 0)->forceActiveFocus(); QTest::keyClick(&window, Qt::Key_Right);
         QTRY_VERIFY(item(engine, bar, 2)->hasActiveFocus());

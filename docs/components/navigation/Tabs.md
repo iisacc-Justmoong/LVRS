@@ -16,14 +16,16 @@ LVRS 고유 스타일과 선택적 독립 검색·왼쪽 축소·점착 이동�
 
 | 타입 | 주요 속성 |
 | --- | --- |
-|탭|`text`, `selected`, `tabStyle`(밑줄/곡면), `displayState`, `iconName`/`iconSource`, `showIcon`, `badge`, `showBadge`|
+| Tab |`text`, `selected`, `tabStyle`(밑줄/곡면), `displayState`, 필수 `iconName`, `iconSource`, `iconValid`, `badge`, `showBadge`|
 | TabBar |`model`, `currentIndex`, `autoSelect`, `widthPolicy`(동등/콘텐츠/스크롤 가능), `tabStyle`, `delegate`, `motionEnabled`|
 | MobileTab | Tab의 입력·선택 계약과 `platformStyle`(Automatic/IOS/Android), `showLabel`, `badgeDot` |
 | MobileTabBar | TabBar의 모델·선택 계약과 `platformStyle`, `presentation`(Expanded/Search/Minimized), `bottomSafeInset`, `backdropSource` |
 
 `Tab.displayState`는 StateAutomatic(실제 입력), StateDefault, StateHover, StatePressed, StateSelected, StateFocus, StateDisabled 순이다. 기본값은 StateAutomatic이다. 전시·테스트용 강제 상태와 실제 `selected` 값은 별도이다.
 
-모델은 문자열 또는 `{text, iconName, badge, badgeDot, enabled, objectName, labelObjectName, accessibleName}` 객체의 배열이다. 모델을 갱신할 때 새 배열을 대입한다. `itemAt(index)`는 해당 컨트롤을 반환하며 `count`는 모델 항목 수이다. `activated(index)`는 유효하고 활성화된 탭의 실제 입력에만 발생한다. `activate(index)`도 같은 검증을 적용한다.
+`Tab.iconName`은 필수 QML 속성이다. 직접 생성할 때 이를 생략하면 생성에 실패한다. `MobileTab`과 `MobileNavigationTab`도 이 계약을 상속한다. `iconSource`를 외부 에셋으로 재정의하더라도 해당 아이콘의 식별자인 `iconName`을 지정해야 한다. 공백 이름 또는 빈 소스는 `iconValid: false`로 처리하며 탭을 비활성화한다. `showIcon` 옵션은 제공하지 않는다.
+
+모델은 `{text, iconName, badge, badgeDot, enabled, objectName, labelObjectName, accessibleName}` 객체의 배열이며, 각 항목의 비어 있지 않은 `iconName`이 필수이다. 문자열만 있는 모델은 사용하지 않는다. 아이콘이 빠진 모델 항목은 비활성화되어 선택·포커스 이동에서 제외된다. 모델을 갱신할 때 새 배열을 대입한다. `itemAt(index)`는 해당 컨트롤을 반환하며 `count`는 모델 항목 수이다. `activated(index)`는 유효하고 활성화된 탭의 실제 입력에만 발생한다. `activate(index)`도 같은 검증을 적용한다.
 
 `autoSelect: true`는 입력 시 currentIndex를 갱신한다. 외부 라우터나 팝업을 함께 사용하는 앱은 `autoSelect: false`와 바인딩된 currentIndex를 사용한다. 이때 activated 처리기가 화면을 바꾸거나 팝업을 열며, 탭바는 외부 바인딩을 덮어쓰지 않는다. 배열 변경 후 자동 선택 모드에서는 유효한 기존 인덱스를 유지하거나 첫 활성 항목으로 이동한다.
 
@@ -32,8 +34,15 @@ LVRS 고유 스타일과 선택적 독립 검색·왼쪽 축소·점착 이동�
 ## 사용법
 
 ```qml
+LV.Tab {
+    text: "Overview"
+    iconName: "nodesfolder"
+    selected: true
+}
+
 LV.TabBar {
-    model: [{text: "Overview"}, {text: "Activity", badge: "8"}]
+    model: [{text: "Overview", iconName: "nodesfolder"},
+        {text: "Activity", iconName: "toolwindownotifications", badge: "8"}]
     widthPolicy: LV.TabBar.Equal
     onActivated: index => stack.currentIndex = index
 }
@@ -56,7 +65,7 @@ LV.MobileTabBar {
 
 ## 동작 원리
 
-- Tab은 32 px, TabBar는 40 px이며 선택 밑줄은 2 px이다. Content는 자연 너비·최소 120 px, Equal은 균등 분배, Scrollable은 최소 192 px 항목과 가로 스크롤을 사용한다.
+- Tab은 32 px, TabBar는 40 px이며 선택 밑줄은 2 px이다. Tab의 아이콘 하나는 항상 레이블 왼쪽에 표시하며 기본 크기 18×18 px, 레이블과의 간격 8 px이다. Content는 자연 너비·최소 120 px, Equal은 균등 분배, Scrollable은 최소 192 px 항목과 가로 스크롤을 사용한다.
 - 모바일 자동 스타일은 Android에서 Android, 나머지 환경에서 iOS 프리뷰를 선택한다. 명시적인 platformStyle로 다른 플랫폼을 미리 볼 수 있다.
 - iOS는 54 px 항목과 위 16 px, 좌우 22 px 간격의 떠 있는 캡슐을 사용한다. 기본 높이는 안전 영역을 제외한 70 px이다. Figma의 95 px 프레임 중 아래 25 px는 고정 OS 인셋으로 사용하지 않는다.
 - iOS 형태의 레이블은 `FontPolicy.systemFamily`를 통해 Qt가 보고하는 시스템 글꼴을 사용한다. Android 형태는 사용 가능한 Roboto를 사용하며 호스트에 없으면 기존 FontPolicy의 대체 글꼴을 쓴다. 운영체제의 숨겨진 글꼴 이름을 하드코딩하지 않는다.
@@ -71,6 +80,6 @@ LV.MobileTabBar {
 
 ## 검증
 
-`ctest --test-dir build -R 'LVRSTests_(tabs|catalog)' --output-on-failure`로 상태 조합, 비활성 항목 건너뛰기, 키보드·터치, 외부 선택 바인딩, 스크롤 포커스, 모바일 3/4/5개 항목과 320/360/412 px 배치, 안전 영역 및 카탈로그를 검사한다. VisualCatalog의 Tabs에서 실제 컨트롤을 조작할 수 있다. OS 실기기 검증과 호스트 Qt 프리뷰 검증은 구분한다.
+`ctest --test-dir build -R 'LVRSTests_(tabs|catalog)' --output-on-failure`로 필수 아이콘 누락 시 생성 실패, 아이콘 크기·좌측 배치·간격, 빈 아이콘 비활성화, 상태 조합, 비활성 항목 건너뛰기, 키보드·터치, 외부 선택 바인딩, 스크롤 포커스, 모바일 3/4/5개 항목과 320/360/412 px 배치, 안전 영역 및 카탈로그를 검사한다. VisualCatalog의 Tabs에서 실제 컨트롤을 조작할 수 있다. OS 실기기 검증과 호스트 Qt 프리뷰 검증은 구분한다.
 
 [Qt Controls](https://doc.qt.io/qt-6/qtquickcontrols-index.html)와 [접근성 API](https://doc.qt.io/qt-6/qml-qtquick-accessible.html)를 기존 프로젝트 의존성 안에서 사용한다.

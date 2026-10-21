@@ -201,7 +201,7 @@ Controls.Control {
                             iconSource: entry.iconSource || Theme.iconPath(iconName)
                             preserveIconColors: entry.preserveIconColors === true
                             iconArtworkSize: entry.iconArtworkSize || Qt.size(iconSize, iconSize)
-                            enabled: entry.enabled !== false
+                            enabled: iconValid && entry.enabled !== false
                             selected: index === control.currentIndex
                             drawSelection: false
                             cornerRadius: Math.max(0, control.resolvedCornerRadius - Theme.gap4)

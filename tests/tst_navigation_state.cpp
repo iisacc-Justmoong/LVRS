@@ -371,6 +371,8 @@ private slots:
     void state_model_stores_state_and_registry_descriptors_track_values();
     void cpp_model_sources_own_list_hierarchy_and_table_contracts();
     void table_projection_matches_public_cell_queries();
+    void table_viewport_projection_preserves_merged_anchors_and_bounds();
+    void table_column_count_tracks_headers_structure_and_undo();
     void qml_context_bind_plan_exposes_context_objects_and_viewmodels();
     void qml_context_bind_plan_reports_missing_required_objects();
 };
@@ -412,6 +414,58 @@ void NavigationStateTests::table_projection_matches_public_cell_queries()
     QCOMPARE(visiblePerRow[7], 6); // Its end row immediately exposes every column.
     QCOMPARE(visiblePerRow[8], 5); // An explicit covered marker remains hidden.
     model.setRows(QVariantList{});QVERIFY(model.visibleCells().isEmpty());
+}
+
+void NavigationStateTests::table_viewport_projection_preserves_merged_anchors_and_bounds()
+{
+    TableModel model;
+    QVariantList rows;
+    for (int row = 0; row < 10000; ++row)
+        rows.append(QVariant(QVariantList{QString::number(row), "date", "kind", "size"}));
+    model.setRows(rows);
+    model.setDefaultRowHeight(24);
+    const auto window = model.visibleCellsInRange(2400, 2640);
+    QCOMPARE(window.size(), 40);
+    QCOMPARE(window.first().toMap().value("rowIndex").toInt(), 100);
+    QCOMPARE(window.last().toMap().value("rowIndex").toInt(), 109);
+    QCOMPARE(window.first().toMap().value("y").toInt(), 2400);
+    QCOMPARE(model.totalBodyHeight(), 240000);
+    QVERIFY(model.visibleCellsInRange(240000, 240100).isEmpty());
+    QVERIFY(model.visibleCellsInRange(20, 10).isEmpty());
+    // An anchor above the viewport must remain present until its last covered row.
+    model.setRows(QVariantList{
+        QVariant(QVariantList{QVariantMap{{"value", "span"}, {"rowSpan", 3}}, "a"}),
+        QVariant(QVariantList{"covered", "b"}),
+        QVariant(QVariantList{"covered", "c"}),
+        QVariant(QVariantList{"plain", "d"})});
+    model.setRowHeights(QVariantList{24, 30, 40, 24});
+    const auto full = model.visibleCells();
+    for (const auto bounds : {QPair<double, double>{24, 54}, {54, 94}, {94, 118}}) {
+        QVariantList expected;
+        for (const auto &cell : full) {
+            const auto map = cell.toMap();
+            if (map.value("y").toDouble() < bounds.second
+                && map.value("y").toDouble() + map.value("height").toDouble() > bounds.first)
+                expected.append(cell);
+        }
+        QCOMPARE(model.visibleCellsInRange(bounds.first, bounds.second), expected);
+    }
+}
+
+void NavigationStateTests::table_column_count_tracks_headers_structure_and_undo()
+{
+    TableModel model;
+    model.setHeaderColumns(QVariantList{"Name", "Size"});
+    model.setRows(QVariantList{QVariant(QVariantList{"a"}), QVariant(QVariantList{"b", 1, true})});
+    QCOMPARE(model.columnCount(), 3);
+    QCOMPARE(model.columnCount(), 3);
+    model.setRows(QVariantList{QVariant(QVariantList{"a", 1})});
+    QCOMPARE(model.columnCount(), 2);
+    QVERIFY(model.insertColumn(1)); QCOMPARE(model.columnCount(), 3);
+    QVERIFY(model.undo()); QCOMPARE(model.columnCount(), 2);
+    QVERIFY(model.redo()); QCOMPARE(model.columnCount(), 3);
+    model.setHeaderColumns(QVariantList{"a", "b", "c", "d"});
+    QCOMPARE(model.columnCount(), 4);
 }
 
 void NavigationStateTests::page_monitor_history_metrics()

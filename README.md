@@ -357,7 +357,7 @@ Even if Qt 6.8 Android's default QPA safety margin is 0, `WindowSafeAreaObserver
 
 ### Standard window and popup materials
 
-`ApplicationWindow` uses an opaque 95% `Theme.window` (`#141414`) + 5% app-accent RGB center color with very fine, fixed monochrome grain (one physical pixel, at most ±2 RGB levels). Standalone `WindowMaterial` retains its near-black 50% coating, radial accents, and 64px backdrop diffusion. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).
+`ApplicationWindow` uses an opaque 98% `Theme.window` (`#141414`) + 2% app-accent RGB center color with very fine, fixed monochrome grain (one physical pixel, at most ±2 RGB levels). Standalone `WindowMaterial` retains its near-black 50% coating, radial accents, and 64px backdrop diffusion. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).
 
 ## Interaction and motion
 

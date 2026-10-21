@@ -28,7 +28,7 @@ LV.MobileNavigationBar {
 
 검색이 있는 경우에만 독립 버튼을 물리적 최우측에 표시한다. 기본 아이콘은 `inputFieldSearch`이며 탭 수·선택 인덱스에 포함되지 않는다. 입력 시 `searchRequested()`만 발생한다. 검색의 가시 텍스트 역시 생략 가능하다. `search: { enabled: false }`는 보이는 비활성 버튼이다. 숨긴 검색은 너비와 간격을 예약하지 않으며 접근성 및 키보드 포커스 대상에서도 제외된다. 표시 여부를 바꾸어도 탭 선택은 유지한다.
 
-`MobileNavigationTab`은 단독 사용 가능한 `Tab` 파생 컴포넌트이다. `showLabel`은 기본적으로 `text.length > 0`이며 `drawSelection`으로 개별 선택 배경을 제어한다. 탭바 안에서는 개별 배경을 끄고 탭바가 소유한 하나의 배경을 이동한다.
+`MobileNavigationTab`은 단독 사용 가능한 `Tab` 파생 컴포넌트이다. `iconName`은 필수이며 외부 `iconSource`를 쓰는 경우에도 아이콘 식별자를 제공한다. 모델의 빈 아이콘 이름은 해당 탭을 비활성화한다. `showLabel`은 기본적으로 `text.length > 0`이며 `drawSelection`으로 개별 선택 배경을 제어한다. 탭바 안에서는 개별 배경을 끄고 탭바가 소유한 하나의 배경을 이동한다.
 
 ## 크기와 기기 곡률
 

@@ -37,7 +37,7 @@ TabBar {
         iconName: modelData.iconName || ""
         badge: modelData.badge || ""
         badgeDot: modelData.badgeDot === true
-        enabled: modelData.enabled !== false
+        enabled: iconValid && modelData.enabled !== false
         selected: index === control.currentIndex
         platformStyle: control.resolvedPlatformStyle
         motionEnabled: control.motionEnabled
