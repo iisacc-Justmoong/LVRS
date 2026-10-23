@@ -1,0 +1,19 @@
+import vm PageRouterGalleryBackend
+ApplicationWindow(title: "LVRS · native page routing", width: 800, height: 620) {
+    VStack(id: "root", spacing: 12, padding: 24, alignment: .stretch) {
+        Label(text: "LVUI pages · one iiGUI surface", style: .title)
+        HStack(spacing: 8) {
+            LabelButton(id: "home", text: "Home", onClick: vm.home)
+            LabelButton(id: "report", text: "Report 42", onClick: vm.report)
+            LabelButton(id: "back", text: "Back", onClick: vm.back)
+            LabelButton(id: "alternate", text: "Target 43", onClick: vm.alternate)
+            LabelButton(id: "undoVisit", text: "Undo visit", onClick: vm.undo_visit)
+            LabelButton(id: "close", text: "Close", onClick: vm.close)
+        }
+        Label(id: "route", text: "Route: /")
+        Label(id: "visits", text: "Visits: pending")
+        Label(id: "tracking", text: "Logical views: pending")
+        Label(id: "worker", text: "Background result: pending")
+        PageRouter(id: "pages", router: vm.router, width: 752, height: 350)
+    }
+}

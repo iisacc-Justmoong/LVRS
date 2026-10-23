@@ -1,0 +1,21 @@
+import vm DataTableBackend
+ApplicationWindow(title: "LVRS Native Data Table · 100,000 rows", width: 760, height: 620, accent: .green) {
+    VStack(spacing: 10, padding: 24) {
+        Label(text: "LVRS Native Table", style: .header)
+        Label(text: "100,000 rows · two-axis native scrolling · one C++ editor", style: .description)
+        Table(id: "data", model: vm.model, width: 700, height: 300,
+              sortingEnabled: true, selectionMode: .RangeSelection, structureControlsVisible: true, fitColumnsToViewport: false,
+              onCellInputEdited: vm.edited, onCellInputSubmitted: vm.submitted,
+              onCellInputRejected: vm.rejected, onRangeValuesChanged: vm.range_changed,
+              onColumnResized: vm.column_resized, onRowResized: vm.row_resized)
+        Label(id: "status", text: "Click to edit; Shift-click selects; Shift-wheel scrolls columns", style: .body)
+        Label(id: "worker", text: "Background result: pending", style: .description)
+        Label(id: "frames", text: "Core display frames: 0", style: .description)
+        HStack(spacing: 8) {
+            LabelButton(vm.append_row, text: "Append row")
+            LabelButton(vm.undo, text: "Undo")
+            LabelButton(vm.redo, text: "Redo")
+        }
+        LabelButton(vm.close, id: "close", text: "Close")
+    }
+}

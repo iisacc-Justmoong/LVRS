@@ -1,0 +1,78 @@
+import vm GalleryBackend
+ApplicationWindow(title: "LVRS · iiGUI 자체 위젯", width: 980, height: 800, minimumWidth: 760, minimumHeight: 720, accent: .green) {
+    VStack(id: "root", padding: 28, spacing: 16) {
+        Label(text: "LVRS Native", style: .title)
+        Label(text: "LVUI → C++23 위젯 → iiGUI · Metal", style: .header)
+        Label(text: "레이아웃 · 그리기 · 히트 테스트 · 포커스 · 입력을 iiGUI가 처리한다.", style: .description)
+        HStack(spacing: 12) {
+            PushButton(vm.action, id: "action", text: "Primary")
+            LabelButton(vm.action, text: "Default", tone: .default)
+            PushButton(vm.action, text: "Borderless", tone: .borderless)
+            PushButton(vm.action, text: "Destructive", tone: .destructive)
+            PushButton(text: "Disabled", enabled: false)
+        }
+        HStack(spacing: 20) {
+            IconButton(vm.action, id: "add", iconName: "add")
+            PushButton(vm.action, text: "Folder", iconMode: true, iconName: "nodesfolder", tone: .default)
+            LabelMenuButton(vm.open_menu, id: "dropdown", text: "Dropdown")
+            LabelMenuButton(vm.open_context, id: "contextTrigger", text: "Context")
+            IconMenuButton(vm.action, iconName: "projectStructure", tone: .borderless)
+            HelpButton(vm.action, id: "help")
+        }
+        TabBar(id: "tabs", onCurrentIndexChanged: vm.selected) {
+            Tab(id: "overview", text: "Overview", iconName: "nodesfolder")
+            Tab(id: "details", text: "Details", iconName: "generaladd", badge: "3", tabStyle: .surface)
+            Tab(text: "Disabled", iconName: "nodesfolder", enabled: false)
+        }
+        HStack(spacing: 20) {
+            ComboBox(vm.action, id: "combo", text: "Choice", onPressed: vm.pressed, onReleased: vm.released, onCanceled: vm.canceled)
+            ComboBox(vm.action, text: "Borderless", tone: .borderless, arrow: .down, width: 120)
+            Stepper(id: "stepper", onStepped: vm.stepped, onPressed: vm.pressed, onReleased: vm.released, onCanceled: vm.canceled)
+            Stepper(onStepped: vm.stepped, arrow: .up, tone: .borderless)
+            Stepper(onStepped: vm.stepped, arrow: .down)
+        }
+        HStack(spacing: 20) {
+            LabelSegmentedControl(id: "segments", shapeStyle: .cylinder) {
+                LabelButton(vm.action, id: "segmentOne", text: "One")
+                LabelButton(vm.action, id: "segmentTwo", text: "Two")
+            }
+            IconSegmentedControl(id: "iconSegments") {
+                IconButton(vm.action, iconName: "nodesfolder")
+                IconButton(vm.action, iconName: "generaladd")
+            }
+        }
+        HStack(spacing: 20) {
+            CheckBox(id: "check", text: "CheckBox", onToggled: vm.checked)
+            RadioButton(id: "radioA", text: "Radio A", checked: true, group: "demo")
+            RadioButton(id: "radioB", text: "Radio B", group: "demo")
+            ToggleSwitch(id: "switch", text: "ToggleSwitch", checked: true, onToggled: vm.checked)
+        }
+        InputField(id: "input", placeholder: "자체 입력란 · 한글/IME", width: 500, onEdited: vm.edited)
+        Slider(id: "slider", from: 0, to: 100, value: 25, stepSize: 1, width: 500, onMoved: vm.moved)
+        ProgressBar(id: "progress", currentValue: 25, width: 500, height: 6)
+        Label(id: "status", text: "준비 완료 · OS 컨트롤 0개", style: .body)
+        Label(id: "worker", text: "Background: waiting…", style: .description)
+        Label(id: "timer", text: "Frame: 0 · display sync", style: .caption)
+        HStack(spacing: 12) {
+            ZStack { Label(text: "자체 ZStack", style: .caption) }
+            Spacer(minLength: 16)
+            PushButton(vm.close, id: "close", text: "Close", tone: .default)
+        }
+        Menu(id: "menu", itemWidth: 190, onItemTriggered: vm.menu_selected) {
+            MenuItem(vm.action, id: "menuOpen", label: "Open", shortcut: "⌘O", iconName: "nodesfolder", hasChildItems: false)
+            MenuDivider()
+            MenuItem(vm.open_more, id: "more", label: "More", shortcut: "") {
+                ContextMenu(id: "submenu", onClosed: vm.submenu_closed, onItemTriggered: vm.menu_selected) {
+                    ContextMenuItem(vm.action, label: "Nested action", shortcut: "", hasChildItems: false)
+                }
+            }
+            MenuItem(label: "Inactive", state: .inactive, hasChildItems: false)
+        }
+        ContextMenu(id: "context", targetId: "input", itemWidth: 190, onItemTriggered: vm.menu_selected) {
+            ContextMenuItem(vm.action, id: "contextAction", label: "Context action", shortcut: "⌘K", iconName: "generaladd", hasChildItems: false)
+            ContextMenuDivider()
+            ContextMenuItem(label: "Unavailable", state: .inactive, hasChildItems: false)
+        }
+        ContextMenu(id: "quick", targetId: "worker", items: ["First", "Second", "Third"], showIconSlot: false, onItemTriggered: vm.menu_selected)
+    }
+}

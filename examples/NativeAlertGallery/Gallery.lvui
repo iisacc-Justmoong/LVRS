@@ -1,0 +1,25 @@
+import vm AlertBackend
+ApplicationWindow(title: "LVRS Native Alert", width: 900, height: 720, minimumWidth: 160, minimumHeight: 400, accent: .green) {
+    VStack(spacing: 16, padding: 24) {
+        Label(text: "LVRS · native Alert", style: .header)
+        Label(text: "Original LVRS layout · iiGUI widgets · native GPU glass", style: .body)
+        HStack(spacing: 12) {
+            LabelButton(id: "oneOpen", text: "One action", onClick: vm.one)
+            LabelButton(id: "twoOpen", text: "Two actions", onClick: vm.two)
+            LabelButton(id: "threeOpen", text: "Three actions", onClick: vm.three)
+        }
+        AlertButton(id: "compact", text: "Standalone AlertButton", method: vm.primary_method, onClick: vm.primary)
+        Label(id: "status", text: "AOT method → clicked · no automatic close", style: .body)
+        Label(id: "worker", text: "Background result pending", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        HStack(spacing: 12) {
+            LabelButton(text: "Toggle reduced motion", onClick: vm.reduce_motion)
+            LabelButton(text: "Toggle 1× / 2× speed", onClick: vm.motion_speed)
+        }
+        Label(id: "motion", text: "Motion: native display frames · 1× · reduced off", style: .caption)
+        LabelButton(id: "close", text: "Close application", onClick: vm.close)
+        Alert(motion: vm.motion, id: "one", title: "One native action", description: "The action stays open.\nPress Escape to dismiss this variant.", secondaryText: "", button1Text: "Keep open", dismissOnBackground: true, closeOnEscape: true, button1Method: vm.primary_method, onPrimaryClicked: vm.primary, onOpened: vm.opened, onClosed: vm.closed, onDismissed: vm.dismissed)
+        Alert(motion: vm.motion, id: "two", open: true, title: "A native LVRS Alert", message: "Two actions share one horizontal row.\nThe background is blurred on the GPU.", buttonCount: 2, primaryText: "Keep open", secondaryText: "Close dialog", button1Method: vm.primary_method, button2Method: vm.secondary_method, onPrimaryClicked: vm.primary, onSecondaryClicked: vm.secondary, onOpened: vm.opened, onClosed: vm.closed, onDismissed: vm.dismissed)
+        Alert(motion: vm.motion, id: "three", title: "Three native actions", description: "The parent backend remains alive.\nThe dialog reuses its C++ widgets.", buttonCount: 3, primaryText: "Keep open", secondaryText: "Discard", tertiaryText: "Later", imageSource: "alert-file-text.svg", button1Method: vm.primary_method, button2Method: vm.secondary_method, button3Method: vm.tertiary_method, onPrimaryClicked: vm.primary, onSecondaryClicked: vm.secondary, onTertiaryClicked: vm.tertiary, onOpened: vm.opened, onClosed: vm.closed, onDismissed: vm.dismissed)
+    }
+}

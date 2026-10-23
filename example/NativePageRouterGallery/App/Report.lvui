@@ -1,0 +1,9 @@
+import vm PageBackend
+Window {
+    VStack(id: "page", spacing: 12, padding: 20, alignment: .stretch) {
+        Label(text: vm.title, style: .title, fontSize: 20)
+        Label(text: vm.context)
+        Label(text: "AOT C++ widgets · no additional window")
+        LabelButton(id: "previous", text: "Back to a fresh Home scope", onClick: vm.back)
+    }
+}

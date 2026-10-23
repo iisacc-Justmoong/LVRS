@@ -1,0 +1,19 @@
+import vm NavigationGalleryBackend
+ApplicationWindow(title: "LVRS Native Navigation Model", width: 680, height: 520, accent: .green) {
+    VStack(spacing: 12, padding: 24) {
+        Label(text: "Native routing and presentation history", style: .header)
+        Label(text: "Compiled C++ backend · Core change ports · no Qt", style: .description)
+        Label(id: "route", text: "Route: /", style: .body)
+        Label(id: "history", text: "Depth: 1", style: .body)
+        Label(id: "params", text: "Parameters: none", style: .description)
+        Label(id: "worker", text: "Background result: pending", style: .description)
+        LabelButton(vm.report, id: "report", text: "Push report 42")
+        LabelButton(vm.replace_report, id: "replace", text: "Replace with report 43")
+        LabelButton(vm.logs, id: "logs", text: "Push logs/build/native")
+        HStack(spacing: 8) {
+            LabelButton(vm.back, id: "back", text: "Back")
+            LabelButton(vm.root, id: "root", text: "Root")
+            LabelButton(vm.close, id: "close", text: "Close")
+        }
+    }
+}

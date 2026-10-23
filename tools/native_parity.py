@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""Full existing LVRS source inventory and native parity ledger, build tooling only."""
+from pathlib import Path
+import argparse, hashlib, json, re, subprocess
+root=Path(__file__).resolve().parents[1]
+parser=argparse.ArgumentParser(); parser.add_argument('--check',action='store_true'); args=parser.parse_args()
+baseline=json.loads((root/'catalog/native/source-baseline.json').read_text())
+implemented={
+ 'ListToolbar':('lvrs::ListToolbar / Widgets::list_toolbar / AOT',['three retained native icon slots with original 90x30 defaults / blank and interactive policy','canonical embedded icon resolution, typed slot event, same-instance options and Core bindings; execution deferred']),
+ 'ListFooter':('lvrs::ListFooter / Widgets::list_footer / AOT',['three typed configurable icon/menu slots with original asymmetric 88x26 defaults','slot-before-parent event order, visibility, callbacks and retained replacement','plain or immutable shared slot input and Core bindings; execution deferred']),
+ 'ToolbarButton':('lvrs::ToolbarButton / Widgets::toolbar_button / AOT',['native C++ icon action, stable typed identity and active tone','same-instance option/callback replacement and automatic direct LVUI hierarchy registration; execution deferred']),
+ 'HierarchyToolbar':('lvrs::HierarchyToolbar / Widgets::hierarchy_toolbar / AOT',['retained manual slots and typed model entries with stable-ID normalization','same-order native updates / transactional structural generation replacement','named Core Value events, typed callback context, guarded emit/activate and source retirement','actual-width distributed spacing, original hidden-entry selection and all-disabled fallback','plain or immutable shared model input and Core bindings; execution deferred']),
+ 'PageMonitor':('lvrs::PageMonitor',['independent UTF-8 visit log with Unicode trim and consecutive duplicate suppression','record / undo retaining first visit / clear / count-current-canUndo summary and owned or borrowed history','weak typed Core ports / owner-thread default or isolated instance / bounded append without whole-log cloning','explicit committed-page integration and separate visit undo in existing LVUI gallery; execution deferred']),
+ 'ViewStateTracker':('lvrs::ViewStateTracker / Navigator tracking domain',['typed stack and Core Value input/snapshot / original field names and Active-Inactive-Disabled partitions','anonymous/path ids, topmost duplicate lookup, base enabled and persistent duplicate-wide disabled overrides','indexed lookup and targeted override updates without full-stack copying / clear and change-only publication','selected NavigationTarget history sync, explicit isolated or owner-thread default models and registration restoration','weak Core ports / coherent commit notifications / owner and receiver retirement boundaries / execution deferred']),
+ 'Link':('lvrs::Link / Widgets::link / LVUI AOT',['own-rendered action container with text fallback and arbitrary native child composition','original description typography, padding/minimum size, transparent surface and state text colors / native shaped underline','explicit weak target or shared/default Navigator, href/to alias, typed params, component priority and replace','Core Observable typed input subscriptions / weak generation lifetime / preserved latest text and enabled during restyling','typed ButtonEvent method/methods and control callbacks, target errors, recursion guard and retirement boundaries','build-only normal/sanitizer and relocated-consumer verification; execution deferred']),
+ 'Navigator':('lvrs::Navigator / NavigationTarget',['weak target registry / original same-parent sibling insertion and active stack restoration','owner-thread default or explicitly isolated domain / scoped registration leases','path and compiled-component push/replace/root/back forwarding with dispatch-admission bool','Core weak change ports, direct-target tracking and coalesced command notifications','selected logical ViewStateTracker synchronization, delayed busy-target retry and isolated tracking domains','in-flight owner retirement / target exception boundary / registry budget / execution deferred']),
+ 'PageRouter':('lvrs::PageRouter / Widgets::page_router / LVUI AOT',['typed compiled page constructors mounted into a generic iiGUI content host','candidate budget preflight and atomic page/history publication / explicit fallback','path/component push, replace, root, back and pop-to-root / captured params with typed overrides','independent per-activation scopes and bindings / old-handle retirement / fresh back generation','one native drawing surface, owner thread, Core weak ports and notification reentry barriers','build-only source/sanitizer and installed-consumer verification; execution deferred']),
+ 'RouteMatcher':('lvrs::RouteMatcher',['UTF-8 and Unicode White_Space path normalization','literal / named / rest segments and original empty/duplicate capture rules','bounded pure C++23 matching; final runtime verification deferred']),
+ 'RouteResolver':('lvrs::RouteResolver',['precompiled declared-order route patterns with stable source indices','immutable shared positive/negative results and O(1) LRU touch','capacity and byte admission budgets / weak Core configuration ports / owner thread']),
+ 'NavigationStackModel':('lvrs::NavigationStackModel',['typed Core Value path/component entries and presentation history','push/replace/root/back/pop-to-root and nonmutating previews','incremental tracking, stable unique ids and removed-id ordering','geometric storage growth, resource admission and mutation/notification barriers','owner thread / weak Core ports / in-flight internal state ownership']),
+ 'AppCard':('lvrs::AppCard / Widgets::app_card / AOT',['native title/subtitle, separator and ordinary body slot in the same scope','original 280 minimum width / 18 padding / 10 spacing / 12 radius / content-derived implicit height','retained body handles and input across live title/color/geometry/shape changes','rectangular clip / round-rect or cylinder surface / explicit legacy geometry support','Core Observable typed inputs, direct C++ factories, error/retirement boundaries; execution deferred']),
+ 'AppHeader':('lvrs::AppHeader / Widgets::app_header / AOT',['native title2/description typography, menu and trailing ordinary action slot','original regular/compact padding and spacing, minimum height and fixed implicit inset contract','same-instance compact/menu geometry, text, colors, callbacks and Core input updates','same scope/retained user actions, optional C++ factory, validation and retirement barriers; execution deferred']),
+ 'EventListener':('lvrs::Widgets::event_listener / AOT',['typed WidgetInput callback / local coordinates / pointer capture and cancellation','layout callback / scoped backend ownership / native drawing surface']),
+ 'List':('lvrs::List / ListModel / Widgets::list / AOT',['stable-key row model / bounded virtual drawing / one reusable native editor','owner-thread observable data and selection / model replacement before construction','selection, activation, UTF-8 rename, reorder, checks and weak retirement leases']),
+ 'Hierarchy':('lvrs::List / ListModel / Widgets::hierarchy / AOT',['validated parent graph / cycle and depth checks','expand/collapse without document mutation / keyboard navigation / visible-row virtualization']),
+ 'ListItem':('lvrs::Widgets::list_item / AOT',['native flat list action / scoped callback reference / text and enabled state']),
+ 'ViewModels':('LVUI scoped C++ backends / Core Observable',['one backend instance per view scope / direct typed callbacks','Core subscription ownership and deterministic widget-generation retirement']),
+ 'Table':('lvrs::Table / Widgets::table / AOT',['retained two-axis virtual viewport / row- and column-count-independent native nodes / one C++ editor','native clipped vector cells and header / intersecting large merge anchors','UI-only cell/range/row/column/all selection, Shift ranges, keyboard navigation and no-selection editing','typed edit/rejection/submit / bounded streaming TSV and A1 addresses / atomic paste and clipboard routing','captured/coalesced row and column resizing / bounded structure gutters / context deletion menus','model replacement and weak Core change bridge / visible-cell invalidation / public Result callback boundary','header sorting / merge/split/structure/undo commands / AOT geometry and interaction options','horizontal position/reveal / logical header, resize, gutter and context hit testing','build-only verification; execution deferred']),
+ 'TableModel':('lvrs::TableModel',['Qt-free value-owned typed cells, rows, headers and input overrides','transactional cell and range edits / stable typed sort / original-value-preserving merges and split','row and column insertion/deletion / typed defaults / coherent dimensions and context actions','delta cell and axis history / coalesced resize / bounded undo and redo','Fenwick dimension updates and prefix lookup / two-axis viewport anchor descriptors','weak Core QueryPort changes / thread ownership and notification reentry barrier / execution verification deferred']),
+ 'TableCellItem':('lvrs::TableCellItem / Widgets::table_cell_item / AOT',['original 234x24 / body 13 metrics / divider and content spacing','read-only native ellipsis or transparent C++ editor','selected tint / current border / explicit styling','optional typed validator / accept, reject, edit and submit / scoped lifetime','same-instance options replacement / retained selection changes']),
+ 'TableRow':('lvrs::TableRow / Widgets::table_row / AOT',['static typed cells / original equal-width spacing','row inputable and cell override / indexed edit and submit','same-count geometry and data replacement preserves handles']),
+ 'TableHeader':('lvrs::TableHeader / Widgets::table_header / AOT',['static columns / native description typography / separator','explicit or automatic column geometry / native ellipsis','pointer, keyboard and AX column activation / indexed source payload','same-count replacement / updated accessible names']),
+ 'TableHeaderModel':('lvrs::TableHeaderModel',['value-owned text/type/padding descriptors','rounded/minimum/fallback column widths / cached prefix offsets','O(1) descriptor lookup / change-only revision / validated transaction']),
+ 'Sheet':('lvrs::Sheet / Widgets::sheet / AOT retained content',['desktop center / mobile bottom presentation / fit-medium-large detents','bounded viewport / authored radius / explicit safe insets / RGBA surface and backdrop','persistent inline C++ body / fixed chrome / native scroll viewport / reset scroll on reopen','close button / outside and Escape policy / focus return / grabber drag threshold','420ms OutBack enter and snap-back / InCubic exit / shared reduced motion and speed','explicit C++ options replacement preserves content / parent Core scope ownership']),
+ 'Motion':('lvrs::Motion / MotionTokens / explicit AOT Alert/Modal/Sheet model',['native enabled / reduced_motion / speed preferences and original duration tokens','weak Core query notifications / live synchronous reduced-motion completion','display-driven unscaled Alert/Modal/Sheet enter/exit and snap-back tracks / on-demand idle source']),
+ 'Alert':('lvrs::Alert / Widgets::alert / AOT methods',['original responsive 500-wide one/two/three-action layouts and fixed typography','buttonCount auto semantics / text and image aliases / enabled states','typed or parameterless C++ method then clicked / no automatic close','retained closed widgets / once-only dismiss / modal input and optional Escape','original embedded SVG bytes / inherited primary color','actual Metal content Gaussian blur / transparent tint / rounded border / retained ROI cache','original 16-offset 32-blur GPU shadow with retained mask','420ms OutBack / 150ms InCubic / live reduced motion and speed / static exit retention']),
+ 'AlertButton':('lvrs::AlertButton / Widgets::alert_button / AOT methods',['compact and dialogStyle metrics / five tones / optional colors and geometry','pointer / keyboard / virtual AX action / pressed-released-method-clicked-canceled','typed source Widget and clicked trigger / parameterless AOT method selection','generation-owned callbacks / live method replacement / owner-removal barrier']),
+ 'Modal':('lvrs::Modal / Widgets::modal / AOT activation content',['centered responsive frame / original width limits and vertical offset','icon / title / wrapped description and message fallback','automatic or clamped one-to-three actions / enabled and fallback text','actions do not close / explicit close versus canceled event','fresh compiled child factory per opening / retained parent backend','modal backdrop input / Tab and Escape / resize without reconstruction','persistent header/icon/action chrome / per-open anchored body','420ms OutBack / 150ms InCubic / live reduced-motion and speed','body retires before exit / continuous reversal / unscaled game-pause behavior','translucent authored frame color']),
+ 'ColorPickerButton':('lvrs::Widgets::color_picker_button / iiGUI native button',['22 / 28 / 36 sizes and original purple default','independent original embedded hue-ring PNG','current-color circle / alpha / optional ring','authored idle / hover / pressed / focus / disabled visuals','pointer / keyboard / virtual AX button / pressed-released-clicked-canceled','explicit initial color or shared Core color model / retained preview cache']),
+ 'Popover':('lvrs::Widgets::popover / iiGUI native overlay',['one composed content View','open_at / open_for / close_popup','automatic or explicit size / viewport margins / live anchor position','nonmodal outside input / modal blocking / optional dim','text / numeric / pointer capture / Tab scope / child-first Escape','owned nested menus / Core scope lifetime / opened and closed callbacks']),
+ 'ColorPicker':('lvrs::ColorPicker / Widgets::color_picker',['six native composed variants / authored base geometry','shared model / channel ramps and numeric commits','comparison checker swatch / HEX / alpha','first ten recent colors / Apply / Cancel / Escape','typed edited / accepted / canceled / eyedropper request','C++ type / width / visibility options and generation-owned lifetime']),
+ 'ColorPickerModel':('lvrs::ColorPickerModel / iiGUI native model',['RGBA / HSV / CMYK / grayscale channels','six/eight-digit HEX','previous color / accept / cancel','typed weak Core change receivers / revision / UI ownership']),
+ 'ColorPickerSurface':('lvrs::Widgets::color_surface',['shared native model','wheel / HS / SV / spectrum / hue and brightness rails','original embedded PNG wheel','pointer capture / keyboard / AX / GPU','model and field replacement','dependency-keyed domain cache']),
+ 'ColorField':('lvrs::Widgets::color_surface',['native ColorPickerSurface alias','shared model / six domains / typed color edit callback']),
+ 'ApplicationWindow':('Core Application + iiGUI Host',['title','width','height','minimumWidth','minimumHeight','accent']),
+ 'Window':('Core Application + iiGUI Host',['title','width','height','minimumWidth','minimumHeight','accent']),
+ 'VStack':('lvrs::Widgets::vstack',['spacing','padding']), 'HStack':('lvrs::Widgets::hstack',['spacing','padding']),
+ 'ZStack':('lvrs::Widgets::zstack',[]), 'Spacer':('lvrs::Widgets::spacer',['minLength']),
+ 'Label':('lvrs::Widgets::label',['text','fontSize','style']),
+ 'PushButton':('lvrs::Widgets::button',['text','enabled','tone','onClick']),
+ 'LabelButton':('lvrs::Widgets::button',['text','enabled','tone','onClick']),
+ 'AbstractButton':('lvrs::Widgets::button',['text','enabled','tone','onClick']),
+ 'IconButton':('lvrs::Widgets::icon_button',['text','enabled','tone','iconName','iconSize','onClick']),
+ 'HelpButton':('lvrs::Widgets::help_button',['text','enabled','tone','onClick']),
+ 'DropdownButton':('lvrs::Widgets::dropdown_button',['text','enabled','tone','iconMode','iconName','iconSize','onClick']),
+ 'LabelMenuButton':('lvrs::Widgets::dropdown_button',['text','enabled','tone','onClick']),
+ 'IconMenuButton':('lvrs::Widgets::icon_menu_button',['text','enabled','tone','iconName','iconSize','onClick']),
+ 'Tab':('lvrs::Widgets::tab',['text','iconName required','iconSize','badge','enabled','selected','tabStyle','onClick']),
+ 'TabBar':('lvrs::Widgets::tab_bar',['static Tab children','spacing','minimumTabWidth','currentIndex','autoSelect','onCurrentIndexChanged']),
+ 'ComboBox':('lvrs::Widgets::combo_box',['text','enabled','tone','arrow','width','onClick','onPressed','onReleased','onCanceled']),
+ 'Stepper':('lvrs::Widgets::stepper',['enabled','tone','arrow','cornerRadius','onClick','onStepped','onPressed','onReleased','onCanceled']),
+ 'LabelSegmentedControl':('lvrs::Widgets::label_segmented_control',['static child Views','horizontalPadding','verticalPadding','spacing','borderWidth','cornerRadius','shapeStyle','forceBorderlessTone','independent child actions']),
+ 'IconSegmentedControl':('lvrs::Widgets::icon_segmented_control',['static child Views','horizontalPadding','verticalPadding','spacing','borderWidth','cornerRadius','shapeStyle','forceBorderlessTone','independent child actions']),
+ 'Menu':('lvrs::Widgets::menu',['static typed children / String items','open_at / open_for / close_popup','context target binding','placement / scrolling / focus scope','selectedIndex','onItemTriggered(int) / opened / closed']),
+ 'ContextMenu':('lvrs::Widgets::context_menu',['static typed children / String items','open_at / open_for / close_popup','context target binding','placement / scrolling / focus scope','compactItems','selectedIndex','onItemTriggered(int) / opened / closed']),
+ 'MenuItem':('lvrs::Widgets::menu_item',['label / shortcut / keyPlaceholder','original icon / four chevrons','enabled / state / expanded','sizes / icon / key visibility','keepOpen / closeOnTrigger','onClick / owner menu index','owned popup children']),
+ 'ContextMenuItem':('lvrs::Widgets::context_menu_item',['compact Inter Regular 12 / Pretendard shortcut','label / shortcut / icon','enabled / state / expanded','onClick / owner menu index','owned popup children']),
+ 'MenuDivider':('lvrs::Widgets::menu_divider',['axis','thickness / crossPadding / linePadding / lineLength']),
+ 'ContextMenuDivider':('lvrs::Widgets::context_menu_divider',['axis','thickness / crossPadding / linePadding / lineLength','authored context color / inset']),
+ 'CheckBox':('lvrs::Widgets::check_box',['text','enabled','checked','onToggled']),
+ 'RadioButton':('lvrs::Widgets::radio_button',['text','enabled','checked','group','onToggled']),
+ 'ToggleSwitch':('lvrs::Widgets::toggle_switch',['text','enabled','checked','onToggled']),
+ 'InputField':('lvrs::Widgets::input_field',['text','placeholder','enabled','readOnly','width','onEdited','onSubmit']),
+ 'Slider':('lvrs::Widgets::slider',['from','to','value','stepSize','width','enabled','onMoved']),
+ 'ProgressBar':('lvrs::Widgets::progress',['minimumValue','maximumValue','startValue','currentValue','width','height']),
+ 'Theme':('lvrs::Theme + lvrs::Icons',['12 accent palettes','idle/hover/pressed','2% window tint','text roles','2860 embedded SVGs and aliases']),
+}
+def digest(p):
+    return hashlib.sha256(p.read_bytes().replace(b'\r\n',b'\n').replace(b'\r',b'\n')).hexdigest()
+def mask(text):
+    return re.sub(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`|//[^\n]*|/\*[\s\S]*?\*/',lambda m:re.sub(r'[^\n]',' ',m[0]),text)
+def members(d):
+    text=(root/d['path']).read_text(); code=mask(text)
+    if d['origin']=='cpp':
+        return [{'kind':m[1],'declaration':m[0].strip(),'line':text.count('\n',0,m.start())+1} for m in re.finditer(r'\b(Q_PROPERTY|Q_INVOKABLE)\s*[^\n]+',text)]
+    offset=sum(len(x) for x in code.splitlines(keepends=True)[:d['line']-1]); start=code.find('{',offset); depth=0; result=[]; raw=text.splitlines()
+    for number,line in enumerate(code[start:].splitlines(keepends=True),text.count('\n',0,start)+1):
+        if depth==1:
+            match=re.match(r'\s*(?:(?:readonly|required|default)\s+)*(property|signal|function)\b',line)
+            if match: result.append({'kind':match[1],'declaration':raw[number-1].strip(),'line':number})
+        depth+=line.count('{')-line.count('}')
+        if depth==0: break
+    return result
+entries=[]
+for d in baseline['declarations']:
+    native=implemented.get(d['name'])
+    entry={**d,'declared_members':members(d),'status':'partial' if native else 'pending',
+           'native_api':native[0] if native else None,'supported_inputs':native[1] if native else [],
+           'pending':['Complete declared and inherited API parity','Full LVRS visuals, states and motion','Windows/Linux/mobile/WASM input and presentation verification']}
+    if d['name']=='Label': entry['pending'].append('Pointer text selection and clipboard')
+    if d['name'] in {'ListToolbar','ListFooter','HierarchyToolbar','ToolbarButton'}:
+        entry['pending'].extend(['All source/sanitizer/installed-consumer and gallery runtime verification at final batch','Automatic arbitrary IconButton registration, QObject/model-role/props adapters and glyph/external URL sources','Full inherited/reactive API, signal ordering, motion, live global Theme and platform input/accessibility parity'])
+    if d['name'] in {'AppCard','AppHeader'}:
+        entry['pending'].extend(['All compiled source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch','StateColorBehavior/shared motion and live global Theme scale/theme replacement','All inherited geometry/reactive inputs, full signal order and platform accessibility/input parity'])
+    if d['name'] in {'RouteMatcher','RouteResolver','NavigationStackModel'}:
+        entry['pending'].extend(['Execution of compiled normal/sanitizer and installed-consumer cases at final whole-goal batch','Full QVariant/QJSValue/model-role input conversion and Unicode-version compatibility','Inactive-page caching/restore and all transition/gesture contracts','Full original signal ordering, complete tracking conversion and ViewModels ownership integration'])
+    if d['name']=='PageRouter':
+        entry['pending'].extend(['Final runtime execution of source, sanitizer and installed-consumer cases','Retained inactive pages, state restoration and reactive route/external path replacement','Navigator interactive forwarding, Link inherited API and ViewModels ownership integration; full signals','Interactive transitions, preview/commit/cancel, gestures and complete shared motion','All platform execution and visual/accessibility parity including mobile/WASM widget hosts'])
+    if d['name']=='Navigator':
+        entry['pending'].extend(['Final runtime execution of normal/sanitizer and installed-consumer cases','Interactive transition state and all preview/progress/commit/cancel forwarding','ViewModels ownership integration, incremental tracking transport and full original signal ordering','Full inherited Link behavior and interactive transition integration','All platform runtime verification and full inherited/reactive API parity'])
+    if d['name'] in {'PageMonitor','ViewStateTracker'}:
+        entry['pending'].extend(['All compiled source/sanitizer/installed cases and actual LVUI example execution at final batch','Complete QObject/QML singleton and QVariant conversion compatibility','ViewModels binding ownership, inactive live-page caches and full original signal order','All platform runtime and full inherited/reactive API parity'])
+    if d['name']=='Link':
+        entry['pending'].extend(['Final runtime execution of source/sanitizer and installed-consumer cases','All inherited spring/color motion, input-modality focus/outset and repeated/long/touch presses','Complete Qt overflow, implicit geometry and disabled hit shielding parity','Named method-trigger registry, complete signals, automatic inherited geometry/style rebinding','All platform native accessibility/input/presentation verification including mobile/WASM hosts'])
+    if d['name']=='Table':
+        entry['pending'].extend(['All new source/sanitizer and installed-consumer runtime verification at final batch','Text shaping beyond the retained 8192 logical-pixel width limit; complete wide-cell layout/ellipsis parity','Virtual accessibility for vector structure controls and OS resize cursors / full pointer gesture parity','Virtual accessibility cells/headers and complete keyboard/touch/IME/cut metadata','Delegate/role adapters and general reactive/inherited API; complete signal order','Original implicit layout, external Flickable/overscan and state styles/motion; Windows/Linux behavior verification and mobile/WASM widget adapters'])
+    if d['name']=='TableModel':
+        entry['pending'].extend(['Execution of newly compiled model tests and sanitizer/installed-consumer validation at final batch','Complete Table viewport/selection and LVUI integration, inherited/reactive API and full signal order','Arbitrary model roles/delegates and full nonvisual API/reactivity; native model-backed adapter','Locale collation, original QVariant conversion and geometry-normalization edge parity','Structural/sort/merge history currently retains full state; model-scale history memory optimization'])
+    if d['name'] in {'TableCellItem','TableRow','TableHeader','TableHeaderModel'}:
+        entry['pending'].extend(['Arbitrary itemData/model roles, delegates, full inherited/reactive API and original normalization edge cases','Structural item-count replacement, full IME/clipboard and selection text rendering','Table integration: ranges, sorting, merges, resizing, structure undo and viewport virtualization','Animated selection color and all non-macOS execution evidence'])
+    if d['name']=='InputField': entry['pending'].extend(['Full cursor/selection/clipboard and validator contract','Full IME replacement-range contract','Search/clear-button and material styles'])
+    if d['name'] in {'ComboBox','Stepper','LabelSegmentedControl','IconSegmentedControl'}:
+        entry['pending'].extend(['Reactive option/style changes and complete method registry contract','Full motion contract'])
+    if d['name'] in {'LabelSegmentedControl','IconSegmentedControl'}:
+        entry['pending'].append('Translucent fill/border colors; current C++ surfaces require opaque authored colors')
+    if d['name'] in {'Menu','ContextMenu','MenuItem','ContextMenuItem','MenuDivider','ContextMenuDivider'}:
+        entry['pending'].extend(['Full dynamic item/delegate and named event payload models','Backdrop blur, radial coating, grain and spring motion','Reactive options and complete inherited method registry'])
+    if d['name'] in {'ColorPickerModel','ColorPickerSurface','ColorField'}:
+        entry['pending'].extend(['Automatic C++ member-reference rebinding beyond explicit native model replacement','Touch and non-macOS native input adapters'])
+    if d['name']=='ColorPicker':
+        entry['pending'].extend(['Automatic reactive model/options rebinding and inherited API','Exact shared control material/motion, disabled subtree opacity and selector decoration','Unicode whitespace/Qt Number edge compatibility and all accessibility value metadata','Document/screen sampling is supplied by the owner through eyedropperRequested'])
+    if d['name']=='ColorPickerButton':
+        entry['pending'].extend(['Spring press/rebound, animated opacity and reduced-motion contract','General reactive currentColor/style bindings beyond the explicit native model bridge','Full inherited background/padding/radius customization and arbitrary size values'])
+    if d['name']=='Popover':
+        entry['pending'].extend(['Glass 25 backdrop blur/radial/grain material and spring transitions','Automatic reactive geometry/policy bindings, arbitrary contentData and inherited API','All mixed independent-popup focus policies and platform input parity'])
+    if d['name']=='Modal':
+        entry['pending'].extend(['Reactive property rebinding, alternate overlay-parent selection and complete inherited API','Language-local imported child backends and initially open nested factories','Full icon URL/resource resolution'])
+    if d['name']=='Sheet':
+        entry['pending'].extend(['Full reactive and inherited API / live contentComponent replacement and Loader item identity','Qt Popup transition-completion signal timing and focus-return parity','Automatic OS safe-area observation / touch inertia and direct scrollbar dragging','Separate child backend imports and initially open nested retained content','D3D11/Vulkan transforms and non-macOS widget adapters'])
+    if d['name']=='Alert':
+        entry['pending'].extend(['Arbitrary backdropSource and overlay parent / automatic reactive property rebinding','D3D11/Vulkan backdrop, shadows and content transforms; all native input adapters','Arbitrary URL/resource loading and all icon frame combinations','Complete inherited method/event payload and initially open nested-factory contract'])
+    if d['name']=='Motion':
+        entry['pending'].extend(['General SpringBehavior/property-animation AOT lowering and all component adoption','OS reduced-motion preference discovery and full cross-platform display sources'])
+    if d['name']=='AlertButton':
+        entry['pending'].extend(['Color/press motion and reduced-motion contract','Full inherited padding/background/icon customization and reactive properties','Focus visibility by input modality and inherited ring/outset options','Named multi-event method registry beyond the typed native method callback'])
+    entries.append(entry)
+source_files=[{'path':x['path'],'sha256':digest(root/x['path'])} for x in baseline['files']]
+inventory=subprocess.check_output(['git','-C',str(root),'ls-files','-z','--cached','--others','--exclude-standard','--','src']).decode().split('\0')
+current={p for p in inventory if p and not p.startswith('src/LVRS/')}
+expected={x['path'] for x in source_files}
+if current!=expected: raise SystemExit('Legacy source inventory changed; refresh the audited baseline: '+str(sorted(current^expected)[:20]))
+api_files=[{'path':str(p.relative_to(root)),'sha256':digest(p)} for p in sorted((root/'src/LVRS').glob('*')) if p.suffix in {'.h','.cpp'}]
+result={'schema':1,'source_revision':baseline['source_revision'],'renderer':'iiGUI self-rendered C++ widgets','runtime':'iiSDKCore',
+        'remaining_global_contracts':['Read-only AX value-attribute metadata for virtual peers','Full IME replacement ranges, selection, copy/cut and validators','Glyph/icon atlas, damage tracking and large-view performance parity','All platform input/presentation adapters and original LVRS behavior'],
+        'legacy_source_files':source_files,'native_api_files':api_files,
+        'counts':{'declarations':len(entries),'partial':sum(x['status']=='partial' for x in entries),'pending':sum(x['status']=='pending' for x in entries),'complete':0},'components':entries}
+rows=['# LVRS 네이티브 이식 대응표','','기준은 현재 QML·C++ 구현 전체이다. `partial`은 지원 입력과 기본 동작만 실제로 구현했다는 뜻이며 원본과 완전 동등함을 의미하지 않는다. 모든 항목이 요구 범위에 남아 있다.','','- 렌더링: iiGUI 자체 C++ 위젯과 GPU 그리기 명령','- OS 경계: 창·이벤트·IME·접근성만 연결','- 앱 수명과 최종 실행 파일: iiSDKCore','','| 선언 | 종류 | 상태 | 네이티브 API | 직접 노출 멤버 수 |','|---|---|---|---|---:|']
+for e in entries: rows.append(f"| {e['name']} | {e['kind']}{' (internal)' if e['internal'] else ''} | {e['status']} | {e['native_api'] or '—'} | {len(e['declared_members'])} |")
+rows+=['','각 항목의 원본 위치·직접 노출 멤버·지원 입력·남은 기능은 `catalog/native/parity.json`에 기록한다. 상속 API, 동작, 렌더링 품질과 플랫폼 검증을 모두 충족하기 전에는 `complete`로 바꾸지 않는다.','']
+for p,content in [(root/'catalog/native/parity.json',json.dumps(result,indent=2,ensure_ascii=False)+'\n'),(root/'docs/native/Parity.md','\n'.join(rows))]:
+    if args.check:
+        if not p.exists() or p.read_text()!=content: raise SystemExit('Stale native parity ledger: '+str(p))
+    else: p.write_text(content)
+print(json.dumps(result['counts']))

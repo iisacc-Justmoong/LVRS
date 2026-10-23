@@ -1,0 +1,15 @@
+import vm PageBackend
+Window {
+    VStack(id: "page", spacing: 12, padding: 20, alignment: .stretch) {
+        Label(text: vm.title, style: .title, fontSize: 20)
+        Label(text: vm.context)
+        InputField(id: "note", placeholder: "This edit belongs to this page generation")
+        Link(id: "next", text: "Open bound report", to: vm.href, navigator: vm.navigator, replace: vm.replace, underline: vm.underline, linkColor: vm.link_color)
+        Link(id: "rich", href: vm.href, navigator: vm.navigator, replace: vm.replace) {
+            HStack(spacing: 6) {
+                Label(text: "Custom native child content")
+                Label(text: "↗")
+            }
+        }
+    }
+}

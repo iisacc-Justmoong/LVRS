@@ -1,0 +1,15 @@
+import vm NativePickerBackend
+ApplicationWindow(title: "LVRS Native Color Pickers", width: 1100, height: 760, minimumWidth: 1040, minimumHeight: 700, accent: .purple) {
+    VStack(spacing: 12, padding: 20) {
+        Label(text: "LVRS ColorPicker · native C++ composition", style: .header)
+        HStack(spacing: 18) {
+            ColorPicker(id: "wheel", model: vm.model, type: .Wheel, onColorEdited: vm.edited, onAccepted: vm.accepted, onCanceled: vm.canceled, onEyedropperRequested: vm.eyedropper)
+            ColorPicker(id: "hs", model: vm.model, type: .HueSaturation, onAccepted: vm.accepted, onCanceled: vm.canceled, onEyedropperRequested: vm.eyedropper)
+            ColorPicker(id: "cmyk", model: vm.model, type: .CMYK, onAccepted: vm.accepted, onCanceled: vm.canceled, onEyedropperRequested: vm.eyedropper)
+        }
+        Label(id: "status", text: "Edit HEX, channels, opacity or recent swatches", style: .body)
+        Label(id: "worker", text: "Background result pending", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        LabelButton(id: "close", text: "Close", onClick: vm.close)
+    }
+}

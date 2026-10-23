@@ -1,0 +1,21 @@
+import vm TableBackend
+ApplicationWindow(title: "LVRS Native Table · LVUI / iiGUI / iiSDKCore", width: 820, height: 520, accent: .green) {
+    VStack(spacing: 12, padding: 24) {
+        Label(text: "LVRS Native Table", style: .header)
+        Label(text: "Self-rendered C++ cells · editable rows · native text", style: .description)
+        TableHeader(id: "header", columns: ["Asset", "Type", "Status"], width: 660, columnWidths: [220, 220, 220], interactive: true, onColumnClicked: vm.columnClicked)
+        TableRow(id: "row0", cells: ["Hello World.lvui", "LVUI source", "Ready"], width: 660, cellWidth: 220, inputable: true, onCellInputEdited: vm.rowEdited, onCellInputSubmitted: vm.rowSubmitted)
+        TableRow(id: "row1", cells: ["Pretendard-Regular.ttf", "Native font", "Bundled"], width: 660, cellWidth: 220)
+        TableRow(id: "row2", cells: ["A very long asset name ends with an ellipsis without rebuilding the row", "C++23", "Compiled"], width: 660, cellWidth: 220)
+        Label(text: "Integer validator: invalid edits keep the last accepted value", style: .body)
+        HStack(spacing: 0) {
+            TableCellItem(id: "count", text: "12", width: 220, inputable: true, selected: true, current: true, valueType: "int", valueValidator: vm.validator, onInputEdited: vm.edited, onInputSubmitted: vm.submitted, onInputRejected: vm.rejected)
+            TableCellItem(text: "Selected / current cell", width: 220, selected: true)
+            TableCellItem(text: "Read-only cell", width: 220)
+        }
+        Label(id: "status", text: "Edit a cell or activate a header", style: .body)
+        Label(id: "worker", text: "Background result: pending", style: .description)
+        Label(id: "frames", text: "Core display frames: 0", style: .description)
+        LabelButton(vm.close, id: "close", text: "Close")
+    }
+}

@@ -1,0 +1,46 @@
+import vm SheetBackend
+ApplicationWindow(title: "LVRS Native Sheet", width: 960, height: 700, minimumWidth: 560, minimumHeight: 500, accent: .green) {
+    VStack(spacing: 12, padding: 20) {
+        Label(text: "LVRS · retained native Sheet", style: .header)
+        LabelButton(id: "openDesktop", text: "Open desktop Sheet", onClick: vm.desktop)
+        LabelButton(id: "openMobile", text: "Open mobile Sheet", onClick: vm.mobile)
+        Label(id: "status", text: "One backend · persistent body", style: .body)
+        Label(id: "worker", text: "Background result pending", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        HStack(spacing: 12) {
+            LabelButton(text: "Toggle reduced motion", onClick: vm.reduce_motion)
+            LabelButton(text: "Toggle 1× / 2× speed", onClick: vm.motion_speed)
+        }
+        Label(id: "motion", text: "Motion: 1× · reduced off", style: .caption)
+        LabelButton(id: "close", text: "Close", onClick: vm.close)
+        Sheet(id: "desktop", open: true, presentation: .desktop, title: "Desktop Sheet", description: "The header stays fixed. Scroll the body; edits survive closing and reopening.", motion: vm.motion, onOpened: vm.opened, onClosed: vm.closed) {
+            VStack(spacing: 12) {
+                InputField(id: "desktopInput", text: "Persistent desktop editor", width: 420, onEdited: vm.edited)
+                LabelButton(id: "apply", text: "Apply without closing", onClick: vm.apply)
+                Label(text: "01 · Native C++ widgets", style: .body)
+                Label(text: "02 · iiSDKCore application ownership", style: .body)
+                Label(text: "03 · Display-driven frame phases", style: .body)
+                Label(text: "04 · Retained content lifetime", style: .body)
+                Label(text: "05 · Hardware viewport clipping", style: .body)
+                Label(text: "06 · Independent header and body", style: .body)
+                Label(text: "07 · Keyboard focus reveals content", style: .body)
+                Label(text: "08 · Shared motion preferences", style: .body)
+                Label(text: "09 · No Qt runtime", style: .body)
+                Label(text: "10 · Close and reopen to keep edits", style: .body)
+                InputField(id: "desktopLast", text: "Last focus target", width: 420)
+            }
+        }
+        Sheet(id: "mobile", presentation: .mobile, detent: .medium, bottomSafeInset: 34, title: "Mobile Sheet", description: "A bottom sheet with a native grabber, safe inset, scrolling and retained content.", motion: vm.motion, onOpened: vm.opened, onClosed: vm.closed) {
+            VStack(spacing: 12) {
+                InputField(id: "mobileInput", text: "Persistent mobile editor", width: 420, onEdited: vm.edited)
+                Label(text: "Drag the grabber down to dismiss.", style: .body)
+                Label(text: "A short drag springs back.", style: .body)
+                Label(text: "The display moves retained GPU content.", style: .body)
+                Label(text: "UI motion continues while gameplay is paused.", style: .body)
+                Label(text: "This same body is retained while closed.", style: .body)
+                Label(text: "No Cocoa sheet or control is constructed.", style: .body)
+                InputField(id: "mobileLast", text: "Last mobile focus target", width: 420)
+            }
+        }
+    }
+}

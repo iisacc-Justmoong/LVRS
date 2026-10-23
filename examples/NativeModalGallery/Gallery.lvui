@@ -1,0 +1,24 @@
+import vm ModalBackend
+ApplicationWindow(title: "LVRS Native Modal", width: 960, height: 700, minimumWidth: 560, minimumHeight: 500, accent: .purple) {
+    VStack(spacing: 12, padding: 20) {
+        Label(text: "LVRS · native Modal", style: .header)
+        LabelButton(id: "open", text: "Open fresh Modal", onClick: vm.open)
+        LabelButton(id: "outside", text: "Background action", onClick: vm.outside)
+        Label(id: "status", text: "Modal opens with the compiled View", style: .body)
+        Label(id: "worker", text: "Background result pending", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        HStack(spacing: 12) {
+            LabelButton(text: "Toggle reduced motion", onClick: vm.reduce_motion)
+            LabelButton(text: "Toggle 1× / 2× speed", onClick: vm.motion_speed)
+        }
+        Label(id: "motion", text: "Motion: 1× · reduced off", style: .caption)
+        LabelButton(id: "close", text: "Close", onClick: vm.close)
+        Modal(motion: vm.motion, id: "modal", open: true, title: "A native LVRS Modal", description: "This dialog is composed of iiGUI C++ widgets. The header and actions stay alive. Each opening creates only a fresh body.", iconName: "projectStructure", buttonCount: 3, primaryText: "Apply", secondaryText: "Close dialog", tertiaryText: "Reset editor", onPrimaryClicked: vm.primary, onSecondaryClicked: vm.secondary, onTertiaryClicked: vm.tertiary, onOpened: vm.opened, onClosed: vm.closed, onCanceled: vm.canceled) {
+            VStack(spacing: 12) {
+                Label(text: "The action buttons do not close automatically.", style: .body)
+                InputField(id: "input", text: "Fresh editor", width: 380, onEdited: vm.edited)
+                Slider(id: "slider", from: 0, to: 100, value: 50, width: 380, onMoved: vm.moved)
+            }
+        }
+    }
+}

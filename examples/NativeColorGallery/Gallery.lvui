@@ -1,0 +1,60 @@
+import vm NativeColorBackend
+ApplicationWindow(title: "LVRS Native Color · C++23", width: 1000, height: 760, minimumWidth: 880, minimumHeight: 680, accent: .purple) {
+    VStack(padding: 24, spacing: 12) {
+        Label(text: "Native Color", style: .title)
+        Label(text: "하나의 C++ 모델 · 여섯 색상 표면 · iiGUI 자체 입력과 Metal 렌더링", style: .description)
+        HStack(spacing: 14) {
+            VStack(spacing: 8) {
+                Label(text: "Wheel", style: .caption)
+                ColorPickerSurface(id: "wheel", model: vm.model, field: .Wheel, width: 192, height: 192, accessibilityName: "Hue wheel")
+            }
+            VStack(spacing: 8) {
+                Label(text: "Hue / Saturation", style: .caption)
+                ColorPickerSurface(id: "hs", model: vm.model, field: .HueSaturation, width: 160, height: 192, accessibilityName: "Hue and saturation")
+            }
+            VStack(spacing: 8) {
+                Label(text: "Saturation / Value", style: .caption)
+                ColorField(id: "sv", model: vm.model, field: .SaturationBrightness, width: 160, height: 192, accessibilityName: "Saturation and brightness")
+            }
+            VStack(spacing: 8) {
+                Label(text: "Spectrum", style: .caption)
+                ColorPickerSurface(id: "spectrum", model: vm.model, field: .Spectrum, width: 160, height: 192, accessibilityName: "Color spectrum")
+            }
+            VStack(spacing: 8) {
+                Label(text: "Hue", style: .caption)
+                ColorPickerSurface(id: "hueRail", model: vm.model, field: .HueRail, width: 18, height: 192, accessibilityName: "Hue rail")
+            }
+            VStack(spacing: 8) {
+                Label(text: "Value", style: .caption)
+                ColorPickerSurface(id: "valueRail", model: vm.model, field: .BrightnessRail, width: 18, height: 192, accessibilityName: "Brightness rail")
+            }
+        }
+        HStack(spacing: 12) {
+            Label(text: "H", style: .body)
+            Slider(id: "hue", from: 0, to: 360, value: 0, width: 180, onMoved: vm.hue)
+            Label(text: "S", style: .body)
+            Slider(id: "saturation", from: 0, to: 100, value: 0, width: 180, onMoved: vm.saturation)
+            Label(text: "V", style: .body)
+            Slider(id: "value", from: 0, to: 100, value: 100, width: 180, onMoved: vm.brightness)
+        }
+        HStack(spacing: 12) {
+            Label(text: "Alpha", style: .body)
+            Slider(id: "alpha", from: 0, to: 100, value: 100, stepSize: 1, width: 240, onMoved: vm.alpha)
+            PushButton(vm.red, id: "red", text: "RGB Red", tone: .default)
+            PushButton(vm.ink, id: "ink", text: "CMYK K +10", tone: .default)
+            PushButton(vm.gray, id: "gray", text: "Gray 50%", tone: .default)
+        }
+        HStack(spacing: 12) {
+            InputField(id: "hex", text: "FFFFFF", placeholder: "RRGGBB / RRGGBBAA", width: 220, onSubmit: vm.commit)
+            PushButton(vm.commit, id: "commit", text: "Set HEX", tone: .default)
+            PushButton(vm.accept, id: "accept", text: "Apply")
+            PushButton(vm.cancel, id: "cancel", text: "Cancel", tone: .default)
+        }
+        Label(id: "color", text: "Color: waiting…", style: .body)
+        Label(id: "channels", text: "Channels: waiting…", style: .description)
+        Label(id: "message", text: "준비 완료 · 원본 색상 휠 PNG 내장", style: .description)
+        Label(id: "worker", text: "Background: waiting…", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        PushButton(vm.close, id: "close", text: "Close", tone: .default)
+    }
+}

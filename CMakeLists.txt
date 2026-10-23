@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 project(LVRS VERSION 1.0.1 LANGUAGES CXX)
+set(LVRS_BACKEND "native" CACHE STRING "LVRS implementation: native (LVUI/iiGUI) or qt (legacy compatibility)")
+set_property(CACHE LVRS_BACKEND PROPERTY STRINGS native qt)
+if(LVRS_BACKEND STREQUAL "native")
+    include(cmake/LVRSNative.cmake)
+    return()
+elseif(NOT LVRS_BACKEND STREQUAL "qt")
+    message(FATAL_ERROR "LVRS_BACKEND must be native or qt")
+endif()
 # File creation is owned by iiFileProvider.
 find_package(iiFileProvider 0.7.1 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
 link_libraries(iiFileProvider::iiFileProvider)

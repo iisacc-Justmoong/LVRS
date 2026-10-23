@@ -1,0 +1,31 @@
+import vm SurfaceBackend
+ApplicationWindow(title: "LVRS · native application surfaces", width: 840, height: 700) {
+    VStack(id: "root", spacing: 12, padding: 24, alignment: .stretch) {
+        AppHeader(id: "header", title: vm.header_title, subtitle: "LVUI AOT · iiGUI · iiSDKCore",
+                  menuVisible: true, compact: vm.compact, onMenuClicked: vm.menu) {
+            LabelButton(id: "update", text: "Update card", onClick: vm.update)
+            LabelButton(id: "shape", text: "Shape", onClick: vm.round)
+            LabelButton(id: "close", text: "Close", onClick: vm.close)
+        }
+        HStack(spacing: 12) {
+            ListToolbar(id: "listTools", icon1: vm.toolbar_icon, icon2: "generaldelete",
+                        icon3: "settings", onIconClicked: vm.list_icon)
+            ListFooter(id: "footerTools", button1: vm.footer_first, onButtonClicked: vm.footer_clicked)
+        }
+        HierarchyToolbar(id: "modelTools", buttonItems: vm.toolbar_items,
+                         width: vm.width, distributeSpacing: true, onButtonTriggered: vm.toolbar_triggered) {}
+        HierarchyToolbar(id: "manualTools", width: vm.width, distributeSpacing: true) {
+            ToolbarButton(id: "manualStructure", buttonId: "structure", iconName: vm.toolbar_icon, onClick: vm.manual_clicked)
+            ToolbarButton(id: "manualSettings", buttonId: "settings", iconName: "settings")
+        }
+        AppCard(id: "card", title: vm.card_title, subtitle: vm.card_subtitle,
+                width: vm.width, height: vm.height, shapeStyle: vm.shape) {
+            VStack(id: "body", spacing: 10, alignment: .leading) {
+                Label(text: "The body is an ordinary native View slot.", style: .body)
+                InputField(id: "editor", text: "Keep this text", width: 300)
+                CheckBox(id: "check", text: "Retained native control", checked: true)
+            }
+        }
+        Label(id: "status", text: vm.status)
+    }
+}

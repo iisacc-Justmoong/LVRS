@@ -1,5 +1,9 @@
 # PageRouter
 
+현재 C++23 자체 위젯 경로는 [네이티브 PageRouter](../../native/PageRouter.md)를
+참조한다. 아래는 보존한 기존 Qt/QML 구현의 전체 비교 계약이며, 네이티브의
+구현 완료 목록이 아니다.
+
 위치: `src/qml/components/navigation/PageRouter.qml`
 
 `PageRouter`는 `StackView` + `RouteResolver`를 기반으로 구축된 LVRS 스택 탐색 엔진입니다.

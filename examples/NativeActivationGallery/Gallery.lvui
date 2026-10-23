@@ -1,0 +1,15 @@
+import vm ActivationBackend
+ApplicationWindow(title: "LVRS Activation Content", width: 800, height: 700, minimumWidth: 640, minimumHeight: 600, accent: .purple) {
+    VStack(spacing: 12, padding: 20) {
+        Label(text: "LVRS · activation-owned content", style: .header)
+        Label(text: "Each open creates an editor; close retires it", style: .body)
+        ColorPickerButton(id: "open", model: vm.preview, buttonSize: .Large, accessibilityName: "Open fresh editor", onClick: vm.open)
+        LabelButton(id: "outside", text: "Background action", tone: .default, onClick: vm.outside)
+        Label(id: "color", text: "Current color", style: .body)
+        Label(id: "status", text: "Editor has not been created", style: .caption)
+        Label(id: "worker", text: "Background result pending", style: .caption)
+        Label(id: "frames", text: "Core display frames: 0", style: .caption)
+        LabelButton(id: "close", text: "Close", onClick: vm.close)
+        Popover(id: "editor", modal: true, dim: true, accessibilityName: "Activation editor", onOpened: vm.opened, onClosed: vm.closed) {}
+    }
+}

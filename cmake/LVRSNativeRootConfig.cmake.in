@@ -1,0 +1,2 @@
+# Native root entry replaces the legacy platform-dispatch entry when installed.
+include("${CMAKE_CURRENT_LIST_DIR}/@CMAKE_INSTALL_LIBDIR@/cmake/LVRS/LVRSConfig.cmake")

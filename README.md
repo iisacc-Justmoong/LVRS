@@ -1,5 +1,100 @@
 # LVRS
 
+Native [application surfaces](docs/native/AppSurfaces.md) now provide AppHeader
+actions and AppCard header/body composition, original implicit metrics, retained
+children and typed live LVUI inputs. The new NativeAppSurfaces example uses the
+Core application entry point; runtime execution stays deferred to the final batch.
+
+Native [navigation tracking](docs/native/NavigationTracking.md) now supplies a
+separate PageMonitor visit log and ViewStateTracker logical-stack model. Navigator
+synchronizes only its selected target, while applications explicitly record visits.
+The native page gallery displays both models and keeps visit undo separate from navigation.
+Runtime verification remains deferred to the final whole-goal batch.
+
+Native [Link](docs/native/Link.md) now composes text or arbitrary native child
+views in a transparent iiGUI action surface, with typed routing, state colors,
+shaped underline and Core Observable inputs. The two-page gallery includes live
+href rebinding. Execution remains deferred to the final whole-goal batch.
+
+
+LVRS now has a native C++23 implementation built from LVUI AOT and iiGUI's own
+GPU-rendered widgets. `LVRS_BACKEND=native` is the default; this path does not
+find or link Qt. Cocoa provides the window, input/IME and accessibility boundary;
+component layout, state and rendering belong to iiGUI. Native migration is in
+progress: [architecture](docs/native/Architecture.md) and the
+[full parity ledger](docs/native/Parity.md) distinguish implemented basic behavior
+from the complete existing LVRS contract.
+
+Build native LVRS in `build/native/build` using the updated iiSDKCore, LVUI and
+iiGUI package prefixes. `examples/NativeGallery` is a runnable LVUI app using
+`LVRS::LVRS` and Core's application entrypoint. The legacy Qt/QML implementation
+below is available with `-DLVRS_BACKEND=qt`; existing installed Qt consumers have
+not been replaced by this source migration.
+
+The native gallery includes icon/help/dropdown buttons, icon-bearing tabs,
+ComboBox fields, directional steppers and label/icon segmented rows. Segmented
+rows keep independent child actions; they do not introduce a selection model.
+Native Menu/ContextMenu families add owned popup scopes, scrolling, context
+targets, shortcuts and regular/context typography. Backdrop blur, spring motion
+and dynamic object models remain part of the full migration.
+Authored SVG assets and aliases are embedded as native data; text/image foreground
+textures survive panel-only state changes. See the architecture for supported
+SVG semantics and the remaining component and platform contracts.
+
+`examples/NativeColorGallery` shares one native color model across wheel, HS, SV,
+spectrum and hue/brightness rails. It exercises RGB, HSV, CMYK, grayscale, alpha,
+RRGGBB/RRGGBBAA input and apply/cancel through Core change queries. The original
+wheel PNG is embedded unchanged. Color backgrounds use dependency-keyed caches;
+selection changes reuse their images. `ColorPicker` now composes the six original
+editing variants, channel ramps and numeric commits, comparison/recent swatches,
+HEX/alpha and apply/cancel/eyedropper requests from native iiGUI widgets.
+`examples/NativePickerGallery` AOT-compiles three shared-model pickers. See the
+[native ColorPicker contract](docs/native/ColorPicker.md) for supported inputs and
+remaining visual, reactive and platform parity.
+
+`Popover` retains ordinary C++ widget content in the same native GPU overlay,
+including ColorPicker editing, nested menus, modal/nonmodal input and owner-driven
+apply/cancel. `examples/NativePopoverGallery` exercises reopening one scoped
+backend and Core display frames. See the [native Popover contract](docs/native/Popover.md)
+for close policies and remaining material, reactive and platform work.
+
+The same example now opens its editor from a native `ColorPickerButton`, using
+the separate original button-ring PNG, 22/28/36 metrics, authored state colors,
+focus border and whole-button disabled opacity. Shared Core color state updates
+the preview without rebuilding it. See [ColorPickerButton](docs/native/ColorPickerButton.md)
+for the supported API and remaining motion/inherited contracts.
+
+`examples/NativeActivationGallery` demonstrates compiled per-open content factories
+above LVUI's outer view. Editor objects, models and subscriptions retire on close;
+the parent backend and native GPU surface remain. See [activation ownership](docs/native/ActivationContent.md).
+The native [Modal](docs/native/Modal.md) now uses that mechanism for centered,
+width-aware persistent header/icon/action chrome and a fresh AOT-compiled body.
+Actions remain open until their owner closes the dialog; cancellation is distinct
+from programmatic closure. `examples/NativeModalGallery` exercises initial open,
+reopening, 420ms/150ms native frame transitions, immediate body retirement, live
+reduced-motion settings, Core worker delivery, resize and teardown. Reactive
+options, inherited behavior and platform parity remain ongoing.
+
+[Alert and AlertButton](docs/native/Alert.md) now compile from LVUI to native C++
+widgets with the authored one/two/three-action layouts, typed method-before-click
+dispatch, static reopen lifetime, original embedded SVGs and real Metal GPU glass.
+`examples/NativeAlertGallery` exercises all six action positions and both C++
+method signatures through Core's application runtime. Authored GPU shadows and
+420ms OutBack / 150ms InCubic transitions now share native display frames, with
+live reduced-motion/speed preferences and retained exit pixels. General reactive
+bindings, AlertButton feedback, other components' motion and additional RHI
+effects remain pending. See [native motion](../iiGUI/docs/NativeMotion.md).
+
+The native [Sheet](docs/native/Sheet.md) retains its header and editor while closed,
+with desktop centering and mobile bottom presentation, fit/medium/large detents,
+explicit safe insets, fixed chrome, native body scrolling and grabber dismissal.
+`examples/NativeSheetGallery` compiles both presentations from LVUI and exercises
+retained edits, display-driven slide/snap-back motion and Core-owned teardown.
+General reactive/inherited behavior, transition-completion signal timing and
+additional platform adapters remain part of the full migration.
+
+## Legacy Qt/QML implementation
+
 [Windows 빌드 및 실행](docs/WindowsBuildAndRun.md)
 
 Windows shared builds retain the LVRS DLL dependency for QML-only consumers on
@@ -428,3 +523,73 @@ SPDX-License-Identifier: MIT
 The original code and documentation in this repository are licensed under the
 [MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
 weights retain their respective licenses.
+
+`TableCellItem`, `TableRow`, and `TableHeader` now generate native C++ cells,
+editable rows, and interactive column headers with typed validation callbacks.
+The [table contract](docs/native/Tables.md) distinguishes these standalone parts
+from the model-backed Table view and the remaining full-parity work.
+
+## Native table data model
+
+`lvrs::TableModel` adds a Qt-free C++23 value-owned model for typed edits, atomic
+range paste, stable sorting, merges, row/column mutation, coalesced resizing and
+undo/redo. Axis updates and prefix queries use a Fenwick index; viewport queries
+include intersecting merged anchors without enumerating preceding ordinary rows.
+Core `QueryPort` receivers report scoped changes. See
+[TableModel](docs/native/TableModel.md) for ownership, costs, limits and remaining
+parity. The new model tests are compiled; execution is deferred to the final
+verification batch. The full native `Table` view and automatic LVUI model binding
+remain in scope and are not complete.
+
+## Model-backed native Table
+
+The native `Table` view connects to `lvrs::TableModel` through retained viewport
+drawing, one reusable editor, selection, navigation, sorting and a scoped LVUI
+C++ model reference. See [TableView](docs/native/TableView.md) and
+`examples/NativeDataTableGallery`. Execution remains deferred; full inherited APIs,
+virtual accessibility, full reactive/delegate contracts and cross-platform
+verification remain in scope. Native resize gestures, structure gutters,
+deletion menus, model replacement and bounded TSV/clipboard transfer now have
+C++ implementations and AOT options. See [Table transfer](docs/native/TableTransfer.md).
+The current native
+path requires iiSDKCore 0.18.1 for its portable number contract.
+
+The Table viewport now supports atomic two-axis positions, horizontal/Shift-wheel
+scrolling, offscreen cell reveal and horizontal editor activation. Header sorting,
+resize handles, structure gutters and context menus use the same logical X axis.
+The gallery includes five columns wider than its viewport. Runtime tests remain
+deferred to the final batch; the retained text layout still has an 8192-unit limit.
+
+## Native route and navigation models
+
+`lvrs::RouteMatcher`, `lvrs::RouteResolver` and `lvrs::NavigationStackModel` now
+provide C++23 path matching, compiled route lookup, bounded immutable result
+caching and typed presentation history through Core value/change contracts.
+See [Native navigation](docs/native/Navigation.md) and
+`example/NativeNavigationGallery`. The gallery connects an AOT LVUI backend to
+the models; it does not yet implement the full routed-page lifecycle host.
+Runtime and sanitizer execution remain deferred to the final whole-goal batch.
+
+## Native routed pages
+
+[`lvrs::PageRouter`](docs/native/PageRouter.md) now connects typed history to
+independent iiGUI content generations. Compiled page factories use LVUI's `build`
+entry point within one existing surface. A successful candidate replaces the old
+page; failure preserves its widgets and history. Back constructs a fresh page
+scope. `example/NativePageRouterGallery` contains two independently generated
+pages, native input, Core background-result delivery, frame progression, resize
+and shutdown contracts. Compilation, packaging and relocated-consumer checks
+remain separate from the final runtime batch. Inactive-page caching, global
+navigation, interactive transitions and full source parity remain in scope.
+
+The native [Navigator](docs/native/Navigator.md) now manages weak target stacks,
+same-parent sibling order and scoped registration through a replaceable
+`NavigationTarget` interface. PageRouter registers by default; an explicitly
+shared Navigator can isolate an application or editor domain. The page gallery
+uses that shared service and retires registrations with the widget scope.
+Interactive forwarding and native Link remain pending. All execution is deferred
+to the final whole-goal validation batch.
+
+Native ListToolbar, ListFooter, HierarchyToolbar and ToolbarButton provide retained
+slots, stable-ID selection, typed event payloads and LVUI bindings. See
+[native toolbars](docs/native/Toolbars.md). Runtime checks remain deferred.
