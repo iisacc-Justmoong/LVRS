@@ -7,6 +7,13 @@
 using namespace ii;
 using namespace std::chrono_literals;
 namespace {
+#if defined(__APPLE__)
+constexpr auto native_api=gui::GraphicsApi::metal;
+#elif defined(_WIN32)
+constexpr auto native_api=gui::GraphicsApi::direct3d11;
+#else
+constexpr auto native_api=gui::GraphicsApi::vulkan;
+#endif
 void check(bool v,const char* message){if(!v)throw std::runtime_error(message);}
 template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
 void good(core::Result<void> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}}
@@ -62,7 +69,7 @@ core::Result<void> runtime::configure_application(Application& app){
                 const auto revision=take(state->model->state()).revision;good(state->hex.set_text("invalid"));good(take(widgets.find("commit")).activate());check(take(state->model->state()).revision==revision && take(state->message.snapshot()).text=="Invalid HEX","Invalid HEX changed state or lacked feedback");
                 good(state->hex.set_text("AABBCCFF"));good(take(widgets.find("commit")).activate());good(take(widgets.find("accept")).activate());good(take(widgets.find("red")).activate());good(take(widgets.find("cancel")).activate());check(take(state->model->state()).hex=="AABBCC" && take(state->color.snapshot()).text.find("AABBCC")!=std::string::npos,"Compiled apply/cancel or reactive color display failed");
                 good(state->alpha.focus());good(widgets.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::left}));check(std::abs(take(state->model->state()).color.alpha-.99)<1e-6,"Compiled alpha control did not edit original model");
-                check(state->changes>=7,"Model changes did not reach native receiver");auto pixels=take(state->host->capture_canvas());check(!pixels.rgba.empty() && take(state->host->graphics_info()).api==gui::GraphicsApi::metal,"Color gallery did not render natively");
+                check(state->changes>=7,"Model changes did not reach native receiver");auto pixels=take(state->host->capture_canvas());check(!pixels.rgba.empty() && take(state->host->graphics_info()).api==native_api,"Color gallery did not render natively");
                 good(state->host->set_content_size({1040,800}));submitted(ui.after(5s,[state]{throw std::runtime_error("Color gallery watchdog: frames="+std::to_string(state->frame)+" background="+std::to_string(state->background)+" resized="+std::to_string(state->resized));}));
             }
         },

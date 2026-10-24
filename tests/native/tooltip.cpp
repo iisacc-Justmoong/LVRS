@@ -8,8 +8,8 @@ using namespace ii;
 using namespace std::chrono_literals;
 namespace {
 void check(bool v,const char* m){if(!v)throw std::runtime_error(m);}
-template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
-void good(core::Result<void> r){if(!r)throw std::runtime_error(r.error().message);}
+template<class T>T take(core::Result<T> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}return std::move(*r);}
+void good(core::Result<void> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}}
 void run(const std::string& name){
     runtime::EventLoop loop;runtime::FrameLoop frames(loop);gui::Host host({.size={640,480},.event_loop=&loop,.frame_loop=&frames});
     lvrs::Tooltip tooltip;gui::Widget target,second,label;gui::WidgetMount mount;unsigned made=0,clicks=0,opened=0,closed=0;
@@ -26,7 +26,7 @@ void run(const std::string& name){
             lvrs::TooltipContentFactory content;if(name=="content"||name=="scroll")content=[&](gui::WidgetBuilder& c,gui::Widget p)->core::Result<void>{++made;for(unsigned i=0;i<(name=="scroll"?40u:1u);++i){auto l=take(c.label(p,"content"+std::to_string(i),{.text="Retained native content",.font_size=13,.line_height=16}));if(!i)label=l;}return {};};
             tooltip=take(lvrs::Tooltip::create(b,root,"tooltip",o,{.opened=[&]{++opened;},.closed=[&]{++closed;}},content));return {};
         },lvrs::Theme().appearance()));
-        take(target.snapshot());
+        take(target.snapshot());const auto host_pending=loop.stats().pending;
         if(name=="defaults"){auto options=take(tooltip.options());check(options.delay==500ms&&options.timeout==5000ms&&options.hide_delay==120ms&&options.corner_radius==12&&options.maximum_width==320,"Authored Tooltip defaults changed");}
         else if(name=="automatic"||name=="hide"||name=="latch"){
             good(mount.dispatch_input({.kind=gui::WidgetInputKind::pointer_move,.x=320,.y=240}));check(take(tooltip.state()).opened,"Origin hover did not open the native Tooltip");
@@ -43,12 +43,12 @@ void run(const std::string& name){
             else if(name=="update"){auto options=take(tooltip.options());options.text="Changed native help";good(tooltip.set_options(options));check(take(take(mount.find("tooltip.label")).snapshot()).text==options.text&&opened==1,"Text update rebuilt or reopened its view");}
             else if(name=="retarget"){good(tooltip.set_target(second));check(!take(tooltip.state()).opened,"Retarget did not dismiss the previous bubble");good(tooltip.open());auto s=take(tooltip.state());auto b=take(second.interaction()).bounds;check(s.layout.anchor==lvrs::TooltipPoint{b.x+b.width/2,b.y+b.height/2},"Retarget retained a stale origin");}
             else if(name=="hidden"){good(target.set_visible(false));take(target.snapshot());check(!take(tooltip.state()).opened,"A hidden target retained its bubble");}
-            else if(name=="timeout"){check(loop.stats().pending>=1,"Opened Tooltip has no Core-owned expiry");auto deadline=loop.next_deadline();auto options=take(tooltip.options());options.text="A text update must keep the original timeout";good(tooltip.set_options(options));check(loop.next_deadline()==deadline,"A style/text binding extended the Tooltip expiry");good(tooltip.close());check(loop.stats().pending==0,"Closing retained its timeout task");}
+            else if(name=="timeout"){check(loop.stats().pending>=1,"Opened Tooltip has no Core-owned expiry");auto deadline=loop.next_deadline();auto options=take(tooltip.options());options.text="A text update must keep the original timeout";good(tooltip.set_options(options));check(loop.next_deadline()==deadline,"A style/text binding extended the Tooltip expiry");good(tooltip.close());(void)loop.poll();check(loop.stats().pending==host_pending,"Closing retained its timeout task beyond the native host baseline");}
             else if(name=="escape"){good(mount.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::escape}));check(!take(tooltip.state()).opened&&closed==1,"Escape did not dismiss a focus-preserving bubble");}
             else if(name=="click"){good(mount.dispatch_input({.kind=gui::WidgetInputKind::pointer_down,.x=320,.y=240}));good(mount.dispatch_input({.kind=gui::WidgetInputKind::pointer_up,.x=320,.y=240}));check(clicks==1,"Tooltip tail/origin dismissal consumed a button click");}
             else if(name=="invalid"){auto options=take(tooltip.options());options.maximum_width=0;check(!tooltip.set_options(options)&&take(tooltip.state()).opened,"Rejected options damaged an open Tooltip");}
             else if(name=="owner"){bool rejected=false;std::thread t([&]{auto r=tooltip.state();rejected=!r&&r.error().code==core::ErrorCode::wrong_executor;});t.join();check(rejected,"Tooltip crossed its UI owner thread");}
-            else if(name=="retirement"){auto old=tooltip;good(host.unmount_widgets());check(!old.state()&&loop.stats().pending==0,"Retired Tooltip addressed a successor or retained owned timers");}
+            else if(name=="retirement"){auto old=tooltip;good(host.unmount_widgets());(void)loop.poll();check(!old.state()&&loop.stats().pending==host_pending,"Retired Tooltip retained owned timers beyond the native host baseline");}
             else throw std::runtime_error("Unknown Tooltip case");
         }
         good(host.request_close());

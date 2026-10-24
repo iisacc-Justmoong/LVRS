@@ -7,6 +7,13 @@
 using namespace ii;
 using namespace std::chrono_literals;
 namespace {
+#if defined(__APPLE__)
+constexpr auto native_api=gui::GraphicsApi::metal;
+#elif defined(_WIN32)
+constexpr auto native_api=gui::GraphicsApi::direct3d11;
+#else
+constexpr auto native_api=gui::GraphicsApi::vulkan;
+#endif
 template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
 void good(core::Result<void> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}}
 void check(bool v,const char* m){if(!v)throw std::runtime_error(m);}
@@ -31,7 +38,7 @@ core::Result<void> runtime::configure_application(Application& app){
                 edit(m,"cmyk.channel.9.input","25");check(std::abs(take(s->model->channel_value(gui::ColorChannel::black))-25)<1e-6,"CMYK numeric input lost latent ink");good(take(m.find("wheel.apply")).activate());const auto baseline=take(s->model->state()).color;
                 good(take(m.find("hs.recent.1")).activate());for(auto id:{"wheel.hex","hs.hex","cmyk.hex"})check(take(take(m.find(id)).snapshot()).text==take(s->model->state()).hex,"AOT action left a stale focused HEX editor");good(take(m.find("hs.cancel")).activate());check(take(s->model->state()).color==baseline,"Composite recent/apply/cancel failed");
                 auto revision=take(s->model->state()).revision;edit(m,"hs.hex","bad");check(take(s->model->state()).revision==revision,"Invalid composite HEX changed model");good(take(m.find("wheel.eyedropper")).activate());check(take(s->status.snapshot()).text.find("Eyedropper requested")!=std::string::npos,"Typed eyedropper callback missing");
-                auto pixels=take(s->host->capture_canvas());check(!pixels.rgba.empty()&&take(s->host->graphics_info()).api==gui::GraphicsApi::metal,"Picker composition did not render on Metal");good(s->host->set_content_size({1120,780}));check(bool(sender.after(5s,[]{throw std::runtime_error("Picker gallery completion watchdog");})),"Watchdog rejected");}
+                auto pixels=take(s->host->capture_canvas());check(!pixels.rgba.empty()&&take(s->host->graphics_info()).api==native_api,"Picker composition did not use the platform native graphics API");good(s->host->set_content_size({1120,780}));check(bool(sender.after(5s,[]{throw std::runtime_error("Picker gallery completion watchdog");})),"Watchdog rejected");}
         },
         .resized=[weak](gui::Size size){if(auto s=weak.lock())s->resized=s->resized||size==gui::Size{1120,780};},
         .closed=[weak]{if(auto s=weak.lock()){s->closed=true;s->model.reset();check(NativePickerBackend::destroyed==0,"Backend retired before Core view teardown");}}

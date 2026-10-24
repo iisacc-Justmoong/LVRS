@@ -1,6 +1,6 @@
 {
   "assets": {
-    "iconset/nodestest.svg": "8dfb1ba03dae2919768ee5cca64d134facf1a97ad5f833f87f7240204ed16db1",
+    "iconset/nodesTest.svg": "8dfb1ba03dae2919768ee5cca64d134facf1a97ad5f833f87f7240204ed16db1",
     "iconset/weChat.svg": "3dbe0f2290b742400421c8c92e7389eb99928692b01c9888eba33ab85f400a45",
     "images/color-picker-hue-ring.png": "75e39c9111d53f25e87fb1bd44eb7048074721bcb22a2d337d4e11927c94c427"
   },
@@ -43,7 +43,7 @@
   ],
   "iconAliases": {
     " volume": "volume",
-    "nodesTest": "nodestest",
+    "nodesTest": "nodesTest",
     "wechat": "weChat"
   },
   "tokens": [

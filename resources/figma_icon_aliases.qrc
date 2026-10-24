@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/qt/qml/LVRS/resources/iconset">
+        <file alias="nodestest.svg">iconset/nodesTest.svg</file>
         <file alias="GroupByModule-1.svg">iconset/GroupByModule.svg</file>
         <file alias="MPS-1.svg">iconset/MPS-alt.svg</file>
         <file alias="STM32CubeMX.svg">iconset/package.svg</file>

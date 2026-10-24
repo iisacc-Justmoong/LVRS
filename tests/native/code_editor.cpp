@@ -8,8 +8,8 @@
 using namespace ii;
 namespace {
 void check(bool v,const char* m){if(!v)throw std::runtime_error(m);}
-template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
-void good(core::Result<void> r){if(!r)throw std::runtime_error(r.error().message);}
+template<class T>T take(core::Result<T> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}return std::move(*r);}
+void good(core::Result<void> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}}
 void run(const std::string& name){
     runtime::EventLoop loop;auto model=take(lvrs::TextDocumentModel::create(loop));
     std::string text="alpha\nbeta\ngamma";

@@ -11,6 +11,9 @@ int main() {
         check(Icons::sources().size()>=2860,"authored icon inventory lost");
         check(Icons::normalize(" /general/add.SVG ")=="generaladd","Theme path/name normalization");
         check(Icons::normalize(" ADD ")=="generaladd" && Icons::normalize("wechat")=="weChat","Theme name aliases");
+        check(Icons::normalize("nodestest")=="nodesTest","Theme alias must retain the authored SVG spelling");
+        auto testIcon=Icons::data("nodestest"),authoredTestIcon=Icons::data("nodesTest");
+        check(testIcon && authoredTestIcon && *testIcon==*authoredTestIcon,"mixed-case test icon alias resolves to authored bytes");
         auto canonical=Icons::data("generaladd"),alias=Icons::data("add");
         check(canonical && alias && *canonical==*alias,"alias resolves to exact authored SVG");
         auto qrc=Icons::data("qrc:/qt/qml/LVRS/resources/iconset/generaladd.svg");check(qrc && *qrc==*canonical,"existing resource names resolve from embedded data");

@@ -250,7 +250,8 @@ void TooltipTests::automatic_hover_does_not_consume_clicks()
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
     auto source = fixture("text: \"Help\"", false);
-    if (lvrsWindow) source.replace("Controls.ApplicationWindow {", "LV.ApplicationWindow {");
+    if (lvrsWindow) source.replace("Controls.ApplicationWindow {",
+                                  "LV.ApplicationWindow { windowDragExclusionItems: [trigger]");
     QScopedPointer<QObject> object(TestUtils::createFromQml(engine, source));
     QVERIFY(object);
     auto *window = qobject_cast<QQuickWindow *>(object.data());
@@ -292,10 +293,15 @@ void TooltipTests::chrome_target_above_content_safe_area()
     tip->setProperty("animationDuration", 120);
     tip->setProperty("automatic", true);
     QVERIFY(QTest::qWaitForWindowExposed(window));
+    window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(window));
     const auto point = target->mapToScene(target->boundingRect().center()).toPoint();
     QVERIFY(point.y() < 32);
+    QTest::mouseMove(window, QPoint(20, 200));
     QTest::mouseMove(window, point);
-    QTRY_VERIFY(tip->property("opened").toBool());
+    QTRY_VERIFY2(tip->property("opened").toBool(), qPrintable(QStringLiteral("ready=%1 wanted=%2 visible=%3 position=%4,%5")
+        .arg(tip->property("_targetReady").toBool()).arg(tip->property("_autoWanted").toBool())
+        .arg(tip->property("visible").toBool()).arg(point.x()).arg(point.y())));
     const auto body = tip->property("bodyRect").toRectF();
     QVERIFY(tip->property("y").toReal() + body.y() >= 32);
     QCOMPARE(tip->property("resolvedAnchorPoint").toPointF(), target->mapToScene(target->boundingRect().center()));

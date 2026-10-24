@@ -916,7 +916,8 @@ void TextDocumentModel::failLoad(const QString &path, const QString &error)
 bool TextDocumentModel::writeModelToFile(const QString &path, QString *error)
 {
     iiFileProvider::SaveFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    // LineRecord offsets address UTF-8 bytes, including one byte per LF.
+    if (!file.open(QIODevice::WriteOnly)) {
         if (error)
             *error = file.errorString();
         return false;

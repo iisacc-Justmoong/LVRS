@@ -8,6 +8,13 @@
 using namespace ii;
 using namespace std::chrono_literals;
 namespace {
+#if defined(__APPLE__)
+constexpr auto native_api=gui::GraphicsApi::metal;
+#elif defined(_WIN32)
+constexpr auto native_api=gui::GraphicsApi::direct3d11;
+#else
+constexpr auto native_api=gui::GraphicsApi::vulkan;
+#endif
 void check(bool v,const char* why) { if(!v) throw std::runtime_error(why); }
 template<class T> T take(core::Result<T> r) { if(!r) throw std::runtime_error(r.error().message); return std::move(*r); }
 void good(core::Result<void> r) { if(!r) { if(r.error().cause) std::rethrow_exception(r.error().cause); throw std::runtime_error(r.error().message); } }
@@ -39,7 +46,7 @@ core::Result<void> runtime::configure_application(Application& app) {
             auto m=s->view->widgets(); s->status=take(m.find("status")); s->progress=take(m.find("progress")); s->timer=take(m.find("timer")); s->worker=take(m.find("worker"));
             s->menu=take(m.find("menu"));s->context=take(m.find("context"));s->submenu=take(m.find("submenu"));s->more=take(m.find("more"));s->dropdown=take(m.find("dropdown"));s->context_trigger=take(m.find("contextTrigger"));
             for(auto& item:take(m.snapshot())) check(item.renderer=="iiGUI" && item.native_class.starts_with("iiGUI."),"OS widget substituted for own renderer");
-            check(take(s->host->graphics_info()).api==gui::GraphicsApi::metal,"Gallery must render through Metal on macOS");
+            check(take(s->host->graphics_info()).api==native_api,"Gallery must use the platform native graphics API");
             submitted(app.post([s,ui] { submitted(ui.post([s] { s->background=true; good(s->worker.set_text("Background result: 42 · iiSDKCore")); })); }));
             (void)take(app.frame_loop().add([s](const runtime::FrameContext& frame) {
                 s->ticks=int(frame.frame);

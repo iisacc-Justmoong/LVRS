@@ -179,6 +179,8 @@ Controls.ApplicationWindow {
     auto *motion = control->findChild<QObject *>("interactionMotion");
     QVERIFY(motion);
     QVERIFY(QTest::qWaitForWindowExposed(window));
+    window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(window));
     const QRectF bounds = control->mapRectToScene(control->boundingRect());
     const QPoint point = bounds.center().toPoint();
     QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);

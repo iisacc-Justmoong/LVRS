@@ -390,25 +390,31 @@ void InstanceStateTests::native_focus_capture()
         auto *window = qobject_cast<QQuickWindow *>(root.data());
         auto *control = root->findChild<QQuickItem *>("control");
         QVERIFY(QTest::qWaitForWindowExposed(window));
+        window->requestActivate();
+        QVERIFY(QTest::qWaitForWindowActive(window));
         control->setProperty("motionEnabled", false);
         root->findChild<QQuickItem *>("next")->forceActiveFocus(Qt::TabFocusReason);
         control->forceActiveFocus(Qt::TabFocusReason);
         QTRY_COMPARE(phase(control), QStringLiteral("focus"));
-        QTest::qWait(100);
-        const QImage frame = window->grabWindow();
-        QVERIFY(!frame.isNull());
-        const qreal scale = qreal(frame.width()) / window->width();
-        // Count primary-blue pixels above the row: the external ring must render.
-        const QPointF top = control->mapToScene(QPointF(control->width() / 2, -2));
-        int bluePixels = 0;
-        for (int x = qRound((top.x() - 12) * scale); x <= qRound((top.x() + 12) * scale); ++x) {
-            for (int y = qRound((top.y() - 1) * scale); y <= qRound(top.y() * scale); ++y) {
-                const QColor pixel = frame.pixelColor(x, y);
-                if (pixel.blue() > 180 && pixel.blue() > pixel.red() * 2)
-                    ++bluePixels;
+        QImage frame;
+        const auto hasFocusOutline = [&] {
+            frame = window->grabWindow();
+            if (frame.isNull()) return false;
+            const qreal scale = qreal(frame.width()) / window->width();
+            const QPointF top = control->mapToScene(QPointF(control->width() / 2, -2));
+            int bluePixels = 0;
+            for (int x = qRound((top.x() - 12) * scale); x <= qRound((top.x() + 12) * scale); ++x) {
+                for (int y = qRound((top.y() - 1) * scale); y <= qRound(top.y() * scale); ++y) {
+                    const QColor pixel = frame.pixelColor(x, y);
+                    if (pixel.blue() > 180 && pixel.blue() > pixel.red() * 2)
+                        ++bluePixels;
+                }
             }
-        }
-        QVERIFY2(bluePixels > 5, qPrintable(type + " external focus outline was clipped"));
+            return bluePixels > 5;
+        };
+        QTRY_VERIFY2(hasFocusOutline(), qPrintable(type + " external focus outline was clipped"));
+        QVERIFY(frame.save(directory + '/' + type + "-window.png"));
+        const qreal scale = qreal(frame.width()) / window->width();
         const QRectF bounds = control->mapRectToScene(control->boundingRect()).adjusted(-8, -8, 8, 8);
         const QRect crop(qRound(bounds.x() * scale), qRound(bounds.y() * scale),
                          qRound(bounds.width() * scale), qRound(bounds.height() * scale));

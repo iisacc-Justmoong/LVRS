@@ -20,6 +20,11 @@ private slots:
         QSignalSpy storage(&model,&TextDocumentModel::lineStorageChanged);
         const auto path=directory.filePath("document.txt");
         QVERIFY(model.saveFile(path));
+        {
+            iiFileProvider::FileDevice bytes(path);
+            QVERIFY(bytes.open(QIODevice::ReadOnly));
+            QCOMPARE(bytes.readAll(), text.toUtf8());
+        }
         QCOMPARE(reset.size(),0);QCOMPARE(changed.size(),0);QCOMPARE(storage.size(),1);
         QVERIFY(index.isValid());QCOMPARE(index.row(),2);
         QCOMPARE(index.data(TextDocumentModel::TextRole).toString(),QString::fromUtf8("한글 🎵"));

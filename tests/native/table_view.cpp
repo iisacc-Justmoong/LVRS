@@ -42,6 +42,8 @@ void run(const std::string& name){
         auto viewport=take(table.viewport().snapshot());
         if(name=="virtual"){
             check(viewport.content_height==2400000&&take(mount.snapshot()).size()<16,"Native table allocated one widget per row/cell");
+            good(table.viewport().set_scroll_offset(24));
+            check(take(table.snapshot()).first_visible_row==1&&take(mount.snapshot()).size()<16,"Viewport callback must redraw without rewriting its scroll configuration");
             good(table.set_scroll_offset(1200000));auto state=take(table.snapshot());
             check(state.first_visible_row>=49999&&state.visible_cells<50,"Viewport did not query the deep logical rows");
             check(take(table.body().snapshot()).bounds.y==viewport.bounds.y,"Deep scroll became a huge physical coordinate");

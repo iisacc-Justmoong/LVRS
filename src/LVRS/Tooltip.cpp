@@ -141,7 +141,6 @@ struct Tooltip::Impl final:std::enable_shared_from_this<Impl>{
         if(retarget||automatic_changed){suppressed=false;value.automatic_latched=false;cancel(guard);}
         if(!custom)good(label.set_text(options.text));
         if(automatic_changed&&!options.automatic){cancel(show);cancel(hide);if(value.opened)good(root.close_popup());}
-        good(root.set_accessibility_name(options.accessibility_name.empty()?options.text:options.accessibility_name));
         refresh();
         if(value.opened&&timeout_changed){cancel(expiry);if(options.timeout>options.timeout.zero())schedule(expiry,options.timeout);}
         if(pending&&!value.pending&&!retarget&&!(automatic_changed&&!options.automatic))request_open();
@@ -159,7 +158,6 @@ core::Result<Tooltip> Tooltip::create(gui::WidgetBuilder& b,gui::Widget parent,s
         p->viewport=take(b.scroll_view(p->chrome,prefix+".viewport",{.width=1,.height=1}));
         p->content=take(b.vstack(p->viewport,prefix+".content",{.spacing=0,.alignment=gui::StackAlignment::leading,.intrinsic_width=true}));
         if(content)good(content(b,p->content));else p->label=take(b.label(p->content,prefix+".label",{.text=options.text,.font_size=13,.selectable=false,.role=gui::TextRole::body,.line_height=16}));
-        good(p->root.set_input_handler([](const auto&)->core::Result<bool>{return false;}));
         p->root_port=std::make_shared<gui::WidgetInteractionPort>([weak](const auto& state){if(auto s=weak.lock()){const auto size=s->root_state.surface;s->root_state=state;s->receive([&]{if(!state.alive){for(auto t:{Impl::show,Impl::hide,Impl::expiry,Impl::guard})s->cancel(t);return;}if(size!=state.surface&&(s->value.opened||s->value.pending))s->refresh();s->synchronize();});}});
         p->content_port=std::make_shared<gui::WidgetInteractionPort>([weak,last=gui::Size{}](const auto& state)mutable{if(auto s=weak.lock()){if(state.alive&&last!=state.implicit_size){last=state.implicit_size;s->receive([&]{if(s->value.opened||s->value.pending)s->refresh();});}}});
         good(p->root.observe_interaction(p->root_port));good(p->content.observe_interaction(p->content_port));p->bind_target(options.target);good(b.retain(p));

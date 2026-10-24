@@ -4,8 +4,8 @@
 #include <stdexcept>
 using namespace ii;
 namespace {
-template<class T>T take(core::Result<T> result){if(!result)throw std::runtime_error(result.error().message);return std::move(*result);}
-void good(core::Result<void> result){if(!result)throw std::runtime_error(result.error().message);}
+template<class T>T take(core::Result<T> result){if(!result){if(result.error().cause)std::rethrow_exception(result.error().cause);throw std::runtime_error(result.error().message);}return std::move(*result);}
+void good(core::Result<void> result){if(!result){if(result.error().cause)std::rethrow_exception(result.error().cause);throw std::runtime_error(result.error().message);}}
 void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 using View=lvui_generated::Gallery;
 struct State final {
@@ -26,7 +26,7 @@ core::Result<void> runtime::configure_application(Application& app){
             check(bool(app.post([weak,sender]{(void)sender.post([weak]{if(auto p=weak.lock();p&&!p->closed){p->background=true;good(p->get("worker").set_text("Background result: 42 · iiSDKCore"));}});})),"Worker admission failed");
             take(app.frame_loop().add([p](const auto& frame){p->frame=frame.frame;if(frame.frame%15==0)good(p->get("frames").set_text("Core display frames: "+std::to_string(frame.frame)));if(p->test&&p->background&&p->resized&&frame.frame>=3)good(p->get("close").activate());},{.phase=runtime::FramePhase::end,.clock=runtime::TickClock::unscaled}));
             if(!p->test)return;
-            p->click_cell();p->replace("42");good(p->view->widgets().dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::enter}));
+            p->click_cell();p->replace("42");good(p->view->widgets().dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::enter}));good(p->view->widgets().dispatch_input({.kind=gui::WidgetInputKind::key_up,.key=gui::WidgetKey::enter}));
             p->click_cell();p->replace("bad");check(take(p->get("data.editor").snapshot()).text=="42","Rejected AOT edit replaced accepted text");good(p->view->widgets().dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::escape}));
             const auto body_x=take(p->get("data.body").snapshot()).bounds.x;
             good(p->get("data.viewport").set_horizontal_scroll_offset(500));check(take(p->get("data.viewport").snapshot()).horizontal_scroll_offset==500&&take(p->get("data.body").snapshot()).bounds.x==body_x,"Horizontal AOT viewport translated physical content");

@@ -7,6 +7,13 @@
 using namespace ii;
 using namespace std::chrono_literals;
 namespace {
+#if defined(__APPLE__)
+constexpr auto native_api=gui::GraphicsApi::metal;
+#elif defined(_WIN32)
+constexpr auto native_api=gui::GraphicsApi::direct3d11;
+#else
+constexpr auto native_api=gui::GraphicsApi::vulkan;
+#endif
 template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
 void good(core::Result<void> r){if(!r){if(r.error().cause)std::rethrow_exception(r.error().cause);throw std::runtime_error(r.error().message);}}
 void check(bool v,const char* m){if(!v)throw std::runtime_error(m);}
@@ -29,7 +36,7 @@ core::Result<void> runtime::configure_application(Application& app){
             if(s->test){auto preview=take(s->anchor.snapshot());check(preview.color_button&&preview.size==gui::Size{36,36}&&preview.color_state->hex=="874AFF","LVUI did not mount the native shared-model color button");check(!take(s->popup.snapshot()).opened,"Popover initially exposed");good(s->anchor.activate());edit(m,"00E71F80");good(take(m.find("picker.apply")).activate());auto baseline=take(s->model->state()).color;check(!take(s->popup.snapshot()).opened&&take(s->model->state()).hex=="00E71F"&&take(s->anchor.snapshot()).color_state->color==baseline,"Apply did not commit/dismiss/update preview");
                 good(s->anchor.activate());edit(m,"FF0000");auto r=take(take(m.find("outside")).snapshot()).bounds;good(m.dispatch_input({.kind=gui::WidgetInputKind::pointer_down,.x=r.x+2,.y=r.y+2}));good(m.dispatch_input({.kind=gui::WidgetInputKind::pointer_up,.x=r.x+2,.y=r.y+2}));check(!take(s->popup.snapshot()).opened&&s->outside==1&&take(s->model->state()).color==baseline,"Outside close did not restore baseline and forward click");
                 good(s->anchor.activate());edit(m,"11223380");good(m.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::escape}));check(!take(s->popup.snapshot()).opened&&take(s->model->state()).color==baseline&&take(s->anchor.snapshot()).color_state->color==baseline,"Child Escape did not cancel owner popup/preview");
-                good(s->anchor.activate());auto pixels=take(s->host->capture_canvas());check(!pixels.rgba.empty()&&take(s->host->graphics_info()).api==gui::GraphicsApi::metal,"Popover did not render native content");good(s->host->set_content_size({820,720}));good(s->popup.close_popup());check(s->opened==4&&s->dismissed==4&&NativePopoverBackend::created==1&&NativePopoverBackend::destroyed==0,"Reopening reconstructed backend or lost callbacks");check(bool(sender.after(5s,[]{throw std::runtime_error("Popover gallery completion watchdog");})),"Watchdog rejected");}
+                good(s->anchor.activate());auto pixels=take(s->host->capture_canvas());check(!pixels.rgba.empty()&&take(s->host->graphics_info()).api==native_api,"Popover did not render native content");good(s->host->set_content_size({820,720}));good(s->popup.close_popup());check(s->opened==4&&s->dismissed==4&&NativePopoverBackend::created==1&&NativePopoverBackend::destroyed==0,"Reopening reconstructed backend or lost callbacks");check(bool(sender.after(5s,[]{throw std::runtime_error("Popover gallery completion watchdog");})),"Watchdog rejected");}
         },
         .resized=[weak](gui::Size size){if(auto s=weak.lock())s->resized=s->resized||size==gui::Size{820,720};},
         .closed=[weak]{if(auto s=weak.lock()){s->closed=true;s->receiver.reset();s->model.reset();check(NativePopoverBackend::destroyed==0,"Backend retired before Core view teardown");}}

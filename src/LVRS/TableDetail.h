@@ -4,8 +4,14 @@
 #include <iiSDKCore/Core/Text/Utf8.h>
 #include <algorithm>
 #include <cmath>
+#include <exception>
+#include <utility>
 namespace lvrs::table_detail {
-struct BuildError final {ii::core::Error error;};
+struct BuildError final : std::exception {
+    ii::core::Error error;
+    explicit BuildError(ii::core::Error value):error(std::move(value)){}
+    const char* what() const noexcept override {return error.message.c_str();}
+};
 template<class T>T take(ii::core::Result<T> r){if(!r)throw BuildError{r.error()};return std::move(*r);}
 void good(ii::core::Result<void>);
 bool metric(double,double low=0);

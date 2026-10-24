@@ -30,7 +30,7 @@ QtObject {
     readonly property string iconSetBasePath: "qrc:/qt/qml/LVRS/resources/iconset/"
     readonly property var iconNameAliases: ({
         "add": "generaladd",
-        "nodestest": "nodestest",
+        "nodestest": "nodesTest",
         "wechat": "weChat",
         "projectstructure": "generalprojectStructure",
         "viewmoresymbolicdefault": "generalmoreHorizontal",

@@ -88,7 +88,7 @@ struct Table::Impl final {
         if(value.selection){auto& range=*value.selection;range.row=std::min(range.row,model->row_count()-1);range.column=std::min(range.column,model->column_count()-1);range.row_count=std::min(range.row_count,model->row_count()-range.row);range.column_count=std::min(range.column_count,model->column_count()-range.column);}
         if(editing){auto cell=model->cell_at(*editing);if(!cell||take(model->merge_anchor(*editing))!=*editing)editing.reset();}
     }
-    void refresh(){
+    void refresh(bool configure_viewport=true){
         if(painting)return;
         painting=true;struct Reset final{bool& flag;~Reset(){flag=false;}}reset{painting};
         auto outer=root.snapshot();if(!outer){if(outer.error().code==core::ErrorCode::closed)return;throw BuildError{outer.error()};}
@@ -100,7 +100,7 @@ struct Table::Impl final {
         heading_height=header_height;this->body_height=body_height;
         good(header.set_frame({0,0,float(width),float(header_height+1)}));
         good(viewport.set_frame({0,float(header_height+1),float(width),float(body_height)}));
-        good(viewport.set_scroll_options({.width=width,.height=body_height,.virtual_content_height=model->total_body_height(),.virtual_content_width=model->total_width()}));
+        if(configure_viewport)good(viewport.set_scroll_options({.width=width,.height=body_height,.virtual_content_height=model->total_body_height(),.virtual_content_width=model->total_width()}));
         good(body.set_extent({width,body_height}));good(frame.set_frame({0,0,float(total_width),float(total_height)}));
         const auto view=take(viewport.snapshot());value.scroll_offset=view.scroll_offset;value.horizontal_scroll_offset=view.horizontal_scroll_offset;
         gui::WidgetDrawing background,heading,drawing;
@@ -354,7 +354,7 @@ core::Result<Table> Table::create(gui::WidgetBuilder& builder,gui::Widget parent
         state->delete_column_item=take(builder.menu_item(state->menu,prefix+".delete-column",{.style=gui::MenuStyle::context,.label="Delete column",.show_icon_slot=false,.show_chevron=false,.has_child_items=false},[weak]{if(auto p=weak.lock())p->context_action(TableContextAction::delete_column);}));
         if(options.delete_context_menu_enabled)good(state->root.set_context_menu(state->menu));
         good(state->root.set_input_handler([weak](const auto& input)->core::Result<bool>{if(auto state=weak.lock())return state->input(input);return false;}));
-        good(state->viewport.set_scroll_handler([weak](const auto&){if(auto state=weak.lock())state->refresh();}));
+        good(state->viewport.set_scroll_handler([weak](const auto&){if(auto state=weak.lock())state->refresh(false);}));
         state->bind_model(state,state->model);state->refresh();good(builder.retain(state));
         Table table;table.root_=state->root;table.viewport_=state->viewport;table.body_=state->body;table.editor_=state->editor;table.menu_=state->menu;table.state_=state;return table;
     }catch(const BuildError& error){return std::unexpected(error.error);}

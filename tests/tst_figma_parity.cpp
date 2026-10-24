@@ -476,7 +476,7 @@ void FigmaParityTests::tokens_and_icon_names()
         const QString path = expression.evaluate().toString();
         QVERIFY(!expression.hasError());
         QVERIFY2(path.endsWith(it.value().toString() + ".svg"), qPrintable(path));
-        QVERIFY(QFile::exists(QString(path).replace("qrc:", ":")));
+        QVERIFY2(QFile::exists(QString(path).replace("qrc:", ":")), qPrintable(path));
     }
     const auto assets = fixture["assets"].toObject();
     for (auto it = assets.begin(); it != assets.end(); ++it) {
@@ -485,6 +485,11 @@ void FigmaParityTests::tokens_and_icon_names()
         QCOMPARE(QString(QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha256).toHex()), it.value().toString());
     }
     QVERIFY(QFile::exists(":/qt/qml/LVRS/resources/font/Inter-OFL.txt"));
+    QFile canonical(":/qt/qml/LVRS/resources/iconset/nodesTest.svg");
+    QFile legacy(":/qt/qml/LVRS/resources/iconset/nodestest.svg");
+    QVERIFY(canonical.open(QIODevice::ReadOnly));
+    QVERIFY(legacy.open(QIODevice::ReadOnly));
+    QCOMPARE(canonical.readAll(), legacy.readAll());
 }
 
 void FigmaParityTests::component_geometry_data()

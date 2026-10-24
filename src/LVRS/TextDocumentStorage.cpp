@@ -27,11 +27,12 @@ public:
     }
 };
 class FileWrite final : public TextDocumentWrite {
+    std::filesystem::path destination_;
     provider::StagedFile stage_;
     provider::OutputFile output_;
     bool finished_ = false;
 public:
-    explicit FileWrite(const std::filesystem::path& path) : stage_(path), output_(stage_.path(), std::ios::out | std::ios::binary | std::ios::trunc) {
+    explicit FileWrite(const std::filesystem::path& path) : destination_(path), stage_(path), output_(stage_.path(), std::ios::out | std::ios::binary | std::ios::trunc) {
         if (!output_) throw std::runtime_error("iiFileProvider text stage could not open");
     }
     core::Result<void> write(std::string_view value) override {
@@ -51,11 +52,17 @@ public:
             if (!output_) return core::fail(core::ErrorCode::failed, "iiFileProvider text stage flush failed");
             output_.close();
             if (output_.fail()) return core::fail(core::ErrorCode::failed, "iiFileProvider text stage close failed");
-            // ReadFile grants FILE_SHARE_DELETE on Windows. Retaining this
-            // handle also keeps the exact published inode on POSIX systems.
+            // ReplaceFileW opens the replacement with no sharing mode. Its
+            // staging file cannot have even a FILE_SHARE_DELETE reader yet.
+#ifdef _WIN32
+            const auto published = stage_.publish();
+            if (!published.succeeded) return core::fail(core::ErrorCode::failed, published.message);
+            auto source = std::make_shared<FileSource>(destination_);
+#else
             auto source = std::make_shared<FileSource>(stage_.path());
             const auto published = stage_.publish();
             if (!published.succeeded) return core::fail(core::ErrorCode::failed, published.message);
+#endif
             return std::shared_ptr<const TextDocumentSource>(std::move(source));
         } catch (...) { return std::unexpected(storage_error("iiFileProvider text publication failed")); }
     }
