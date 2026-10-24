@@ -6,6 +6,8 @@ ii::core::Result<ii::gui::Widget> Widgets::page_router(Widget parent,std::string
     if(!router)return ii::core::fail(ii::core::ErrorCode::invalid_argument,"PageRouter requires a scoped controller");return router->mount(builder_,parent,id,size);
 }
 Widgets::Result<Widgets::Widget> Widgets::table(Widget p,std::string_view id,TableOptions o,TableEvents e){auto r=Table::create(builder_,p,id,std::move(o),std::move(e));if(!r)return std::unexpected(r.error());return r->root();}
+Widgets::Result<Widgets::Widget> Widgets::code_editor(Widget p,std::string_view id,CodeEditorOptions o,CodeEditorEvents e){auto r=CodeEditor::create(builder_,p,id,std::move(o),std::move(e));if(!r)return std::unexpected(r.error());return r->root();}
+Widgets::Result<Widgets::Widget> Widgets::tooltip(Widget p,std::string_view id,TooltipOptions o,TooltipEvents e,TooltipContentFactory f){auto r=Tooltip::create(builder_,p,id,std::move(o),std::move(e),std::move(f));if(!r)return std::unexpected(r.error());return r->root();}
 Widgets::Result<Widgets::Widget> Widgets::list(Widget p,std::string_view id,ListOptions o,ListEvents e){auto view=List::create(builder_,p,id,std::move(o),std::move(e));if(!view)return std::unexpected(view.error());return view->root();}
 Widgets::Result<Widgets::Widget> Widgets::hierarchy(Widget p,std::string_view id,ListOptions o,ListEvents e){o.hierarchy=true;return list(p,id,std::move(o),std::move(e));}
 Widgets::Result<Widgets::Widget> Widgets::list_item(Widget p,std::string_view id,ii::gui::ButtonOptions o,ii::runtime::Task action){o.tone=ii::gui::ButtonTone::borderless;return builder_.button(p,id,std::move(o),std::move(action));}
@@ -18,6 +20,11 @@ Widgets::Result<Widgets::Widget> Widgets::toolbar_button(Widget p,std::string_vi
 Widgets::Result<Widgets::Widget> Widgets::hierarchy_toolbar(Widget p,std::string_view id,HierarchyToolbarOptions o,std::vector<HierarchyToolbarEntry> entries,HierarchyToolbarEvents e){auto view=HierarchyToolbar::create(builder_,p,id,std::move(o),std::move(entries),std::move(e));if(!view)return std::unexpected(view.error());return view->root();}
 Widgets::Result<Widgets::Widget> Widgets::list_toolbar(Widget p,std::string_view id,ListToolbarOptions o,ListToolbarEvents e){auto view=ListToolbar::create(builder_,p,id,std::move(o),std::move(e));if(!view)return std::unexpected(view.error());return view->root();}
 Widgets::Result<Widgets::Widget> Widgets::list_footer(Widget p,std::string_view id,ListFooterOptions o,ListFooterEvents e){auto view=ListFooter::create(builder_,p,id,std::move(o),std::move(e));if(!view)return std::unexpected(view.error());return view->root();}
+Widgets::Result<Widgets::Widget> Widgets::material_surface(Widget parent,std::string_view id,MaterialOptions o){auto view=MaterialSurface::create(builder_,parent,id,std::move(o));if(!view)return std::unexpected(view.error());return view->root();}
+Widgets::Result<Widgets::Widget> Widgets::panel_material(Widget parent,std::string_view id,MaterialOptions o){auto view=PanelMaterial::create(builder_,parent,id,std::move(o));if(!view)return std::unexpected(view.error());return view->root();}
+Widgets::Result<Widgets::Widget> Widgets::window_material(Widget parent,std::string_view id,MaterialOptions o){auto view=WindowMaterial::create(builder_,parent,id,std::move(o));if(!view)return std::unexpected(view.error());return view->root();}
+Widgets::Result<Widgets::Widget> Widgets::avatar(Widget parent,std::string_view id,AvatarOptions options){auto view=Avatar::create(builder_,parent,id,std::move(options));if(!view)return std::unexpected(view.error());return view->root();}
+Widgets::Result<Widgets::Widget> Widgets::card(Widget parent,std::string_view id,CardOptions options,CardEvents events,CardContent content){auto view=Card::create(builder_,parent,id,std::move(options),std::move(events),std::move(content));if(!view)return std::unexpected(view.error());return view->root();}
 Widgets::Result<Widgets::Widget> Widgets::app_card(Widget p,std::string_view id,AppCardOptions options){
     auto card=AppCard::create(builder_,p,id,std::move(options));if(!card)return std::unexpected(card.error());return card->root();
 }

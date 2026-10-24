@@ -1,5 +1,22 @@
 # 자체 렌더링 전환 검증
 
+**Hierarchy 데이터·투영 추가 단계:** HierarchyModel과 HierarchyProjection을 Qt 없는
+C++23으로 추가했다. 구조 인덱스·요청별 메타데이터·이동 계획/확정과 뷰별 펼침·가변
+높이·가시/활성 가능 순번을 제공한다. 모델 37개·투영 32개 검사 소스를 일반/계측 및
+재배치한 공개 API 소비자 두 구성에서 컴파일·링크했다. 작업용 설치의 공개 헤더와
+각 아카이브 객체, Qt·LVUI 파서·OS 컨트롤 링크, 런타임 검색 경로를 정적으로 검사한다.
+
+이 단계의 기록은 `build/native-hierarchy-model-evidence/`와
+`build/native-hierarchy-model-consumer/`이다. 설치 과정에서 갱신될 수 있는 정적
+아카이브 컨테이너/인덱스 메타데이터 대신 이름별 객체 본문을 비교한다. 최초의 과도한
+컨테이너 전체 바이트 비교 실패도 별도 기록으로 보존한다.
+
+모든 앱·테스트·self-test 실행은 전체 작업의 최종 일괄 단계까지 보류하며 이 단계에서도
+실행하지 않는다. Core·LVUI·제공자 내장 SQLite는 sanitizer 계측 범위에 포함하지 않는다.
+알고리즘 경계를 실제 레이턴시/RSS 측정 결과로 표시하지 않는다. 실제 HierarchyItem·
+HierarchyList 위젯, 선택·입력·드래그·터치·LVUI AOT 연결은 아직 남아 있으며,
+[Hierarchy 데이터 계약](Hierarchy.md)과 대응표에서 partial/pending 범위를 구분한다.
+
 **도구 막대 추가 단계:** ListToolbar·ListFooter·HierarchyToolbar·ToolbarButton을 네이티브
 객체와 LVUI AOT로 연결한다. 33개 컴포넌트·5개 공통 버튼·AOT 생성 사례와 기존
 NativeAppSurfaces 예제의 수명/모델 갱신 검사를 추가했다. 기록은
@@ -688,6 +705,109 @@ Sheet를 열어 두었다. 접근성·이미지와 관측은 `live-observations.
 이는 Mac의 모바일 프레젠테이션 실행이며 iOS/Android 장치 실행·물리적 표시 FPS의
 측정은 아니다. 기본 `~/.local` 설치와 기존 실행 앱은 교체하지 않았다.
 
-현재 대응표는 149개 선언 중 부분 45개·대기 104개·전체 계약 완료 0개이다.
+해당 Sheet 검증 당시 대응표는 149개 선언 중 부분 45개·대기 104개·전체 계약 완료 0개였다.
 Sheet의 전체 상속/반응형·전환 완료 신호 타이밍·자동 OS 안전 영역 관찰·터치 관성과
 모든 플랫폼 어댑터가 남아 있으며 전체 LVRS 이식 목표는 계속 진행 상태이다.
+
+
+## Card·Avatar 구현 단계
+
+Card의 여덟 유형, Avatar, 이미지 원본 영역·마스크·그라데이션·전경 텍스처 영역 및
+순수 paint provider를 연결한다. LVUI AOT와 반응형 이미지/행/커스텀 팩토리, 네이티브
+갤러리를 추가한다. 자세한 범위와 미완성 계약은 Media.md와 parity 장부를 따른다.
+모든 앱·테스트·self-test 실행은 전체 목표 최종 일괄 단계로 보류한다. 중간 빌드와
+비공개 설치 소비자·정적 바이너리 검사는 실행 검증과 분리해 build/native-media-evidence에
+기록한다. 기존 Qt 구현과 전역 설치본은 별도 유지한다.
+
+
+## 네이티브 머티리얼 단계
+
+MaterialSurface·PanelMaterial·WindowMaterial과 여덟 악센트 그라데이션, 임의 윤곽,
+공유 마스크 그림자, 흐림 전 투명 입력, 안쪽 하이라이트와 Core 색상 전환을 연결한다.
+일반 위젯 paint provider와 뷰별 공유 Core 프레임을 사용한다. 앱·검사·self-test 실행은
+전체 목표의 최종 일괄 단계로 보류한다. 컴파일·설치 소비자·셰이더·패키지 정적 증거는
+build/native-materials-evidence에 기록한다. 기능 범위와 남은 계약은 Materials.md 및
+대응표를 따른다. Windows HLSL 전처리/셰이더 프런트엔드 확인은 Windows 네이티브 빌드와 다르다.
+
+## 텍스트 문서 기반 단계
+
+TextDocumentModel·TextMarkup과 창 없는 iiGUI TextIndex를 추가한다. 파일 오프셋·청크·
+문자 경계·범위 수정·이력·iiFileProvider 원자적 저장을 연결한다. LVUI 문서 모델 갤러리는
+현재 줄만 조회하는 유지 스코프를 시연하며 TextEditor/CodeEditor 화면의 대체물이 아니다.
+앱·검사·self-test는 전체 목표의 최종 일괄 단계로 보류한다. 소스/계측 컴파일과 설치 소비자
+정적 증거는 build/native-text-document-evidence에 기록한다. 기능 범위와 남은 계약은
+TextDocuments.md 및 대응표를 따른다.
+
+## 자체 CodeEditor 기반 단계 기록
+
+PlainText/NoWrap CodeEditor, iiGUI TextLine의 네이티브 단락 배치·가로 crop,
+요청 범위를 제한한 TextInputProvider, 독립 선택·IME 투영과 Core 소유 caret 작업을 연결했다.
+원본 CodeEditor.qml과 현재 Theme의 수치를 대조했으며 기능 범위와 남은 시각·입력 계약은
+CodeEditor.md 및 대응표를 따른다. RichText TextEditor의 대체 구현으로 간주하지 않는다.
+
+2026-10-24 macOS arm64에서 일반/ASan+UBSan 구성의 컴파일·링크·작업 폴더 내 설치를
+완료했다. 재배치 패키지로 소비자와 일곱 독립 갤러리를 빌드·설치했다. 현재 공개 헤더
+134개와 범위 내 소스 객체 178개, Core 진입점, 정적 아카이브, AOT 출력·리소스·문서의
+일치를 정적으로 확인했다. 검사한 macOS 소비자에서 Qt·LVUI 런타임 파서와 Cocoa 편집
+컨트롤의 직접 클래스 참조는 발견되지 않았다. 이는 실제 창·입력기·픽셀 실행 검증과 다르다.
+
+기록은 build/native-code-editor-evidence/final-build-audit.json 및
+runtime-batch-pending.json에 있다. 여러 빌드 구성을 포함한 등록 항목 1,818개는 모두
+미실행이다. 이번 단계에서 앱·테스트·self-test를 실행하지 않았으며 사용자의 요청에 따라
+전체 이식 목표의 최종 일괄 단계로 보류했다. ASan/UBSan으로 컴파일했다는 사실은 런타임
+메모리 안전성의 통과 증거가 아니다. Core·LVUI·provider의 번들 SQLite는 계측하지 않았다.
+Windows/Linux 새 폰트·입력 소스는 실제 대상에서 빌드/실행하지 않았다.
+
+최신 대응표는 149개 선언 중 부분 79개·대기 70개·전체 계약 완료 0개이다.
+기존 전역 설치와 실행 중인 앱은 교체하지 않았으며 전체 LVRS 이식 목표는 진행 상태이다.
+
+## 공유 편집 상태·네이티브 글리프 색상 확장
+
+정확한 UTF-16 범위·transaction·정규화한 삽입 길이·undo/redo 방향을
+TextDocumentEdit로 통지한다. 모델은 실패한 수신자 이후의 살아 있는 뷰에도 이미 반영된
+변경을 전달하고 오류를 반환한다. CodeEditor는 외부 편집에 따라 독립 선택을 재배치하며
+편집을 시작한 뷰의 역방향 선택까지 제한된 메타데이터로 undo/redo한다. 빈 undo와 뷰 탐색은
+문서 이력이나 커서를 갱신하지 않는다. 두 CodeEditor가 한 모델을 공유하는 AOT 예제를 확장했다.
+
+iiGUI TextRasterCache는 네이티브 RGB·컬러 글꼴 픽셀을 유지하고 LRU 예산을 적용한다.
+투명도만 바뀌면 이미지를 재사용하고 본문/선택 RGB가 다르면 각각의 네이티브 결과를 캐시한다.
+TextLine은 일반 문자와 컬러 글리프의 투명도를 래스터화 후 동일하게 적용한다. Windows
+TextLine의 Direct2D는 컬러 글꼴 플래그를 사용하도록 소스를 갱신했으나 실제 Windows 빌드·실행은 미확인이다.
+
+이 단계 기록은 build/native-text-state-evidence/와 build/native-text-state-consumer/에 둔다.
+2026-10-24 macOS arm64 일반·ASan/UBSan 컴파일·링크·작업용 설치와 재배치 패키지만을
+사용한 소비자·일곱 독립 갤러리의 빌드·설치를 완료했다. Qt·LVUI 런타임 파서·Cocoa 편집
+컨트롤의 직접 클래스 참조, 공개 헤더·아카이브·AOT 생성 결과·리소스·문서를 정적으로
+감사한다. 최신 감사 기록은 final-build-audit.json, 실행 대기 목록은 runtime-batch-pending.json이다.
+새 구성을 포함한 1,932개 등록 항목은 모두 미실행이다. 신규 범위/알림 15개·편집기 9개·글리프 캐시 12개·
+투명도 2개의 검사 소스를 추가했다. 이 단계에서도 앱·테스트·self-test는 실행하지 않았으며
+전체 LVRS 목표의 마지막 일괄 단계까지 보류한다. 새 API·픽셀·입력·메모리 안전성의 실행
+통과를 주장하지 않는다. 전역 SDK 설치와 현재 실행 중인 앱은 이 단계에서 변경하지 않는다.
+
+## 네이티브 Tooltip 추가 단계
+
+원본 말풍선 배치·꼬리 경로, PanelMaterial·유지 콘텐츠·스크롤, 대상 hover/press/focus 관찰과
+Core 소유 지연·타임아웃·닫힘 latch를 연결했다. iiGUI는 독립 상호작용 구독과 명시적 팝업 프레임·
+입력 영역·기원 캡처 보존·모달 배경 차단을 제공한다. LVUI는 같은 객체의 바인딩과 앞/뒤 targetId
+연결을 생성한다. NativeTooltipGallery는 두 종류의 말풍선과 scoped backend·비동기 결과를 구성한다.
+
+이 단계의 컴파일·설치 소비자·정적 감사 기록은 build/native-tooltip-evidence/와
+build/native-tooltip-consumer/에 둔다. 모든 앱·테스트·self-test 실행은 전체 목표의 마지막
+일괄 단계까지 계속 보류한다. 원본의 자동 OS 안전 영역·물리 화면 교차, 완전한 모션/상속 API·
+픽셀과 플랫폼 실행은 아직 완료하지 않았으며 Tooltip은 partial로 기록한다.
+
+2026-10-24 macOS arm64에서 일반·ASan/UBSan 컴파일·링크·작업용 설치와 재배치 패키지만을
+사용한 소비자·여덟 독립 갤러리의 빌드·설치를 완료했다. 공개 헤더 139개와 범위 내 소스 객체
+202개, 정적 아카이브·Core 진입점·AOT 출력·리소스·문서를 현재 소스와 정적으로 대조했다.
+검사한 소비자에서 Qt·LVUI 런타임 파서·Cocoa 컨트롤의 직접 클래스 참조는 발견되지 않았다.
+최신 기록은 final-build-audit.json, 실행 대기 목록은 runtime-batch-pending.json이다.
+
+새 검사는 iiGUI 상호작용/입력 17개, Tooltip 배치/시간 변환 15개, 컨트롤러/유지 콘텐츠 19개,
+LVUI AOT 1개와 갤러리 self-test이다. 여러 구성을 포함한 2,090개 등록 항목은 모두 미실행이다.
+이 단계의 앱·테스트·self-test 실행 횟수는 0회이며 전체 목표의 최종 일괄 단계까지 보류했다.
+ASan/UBSan 컴파일과 정적 감사는 런타임 메모리 안전성·입력·타이밍·픽셀 통과 증거가 아니다.
+Core·LVUI와 provider 번들 SQLite는 계측하지 않았다. Windows/Linux 실제 대상의 빌드·실행은
+이 단계에서 수행하지 않았다. 전역 설치와 현재 실행 앱은 변경하지 않았다.
+
+대응표는 149개 선언 중 부분 80개·대기 69개·전체 계약 완료 0개이다. Tooltip의 상세 미구현
+경계는 Tooltip.md와 catalog/native/parity.json에 유지하며 전체 LVRS 이식 목표는 진행 상태이다.

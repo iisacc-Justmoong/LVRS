@@ -1,5 +1,11 @@
 # LVRS
 
+Native [hierarchy data](docs/native/Hierarchy.md) now provides typed preorder rows,
+indexed subtree moves and a separate visibility/height projection for each view.
+Branch expansion and navigation queries preserve the shared model revision.
+The full HierarchyItem/HierarchyList widget and LVUI integration are still pending;
+all newly compiled tests remain deferred to the final whole-goal runtime batch.
+
 Native [application surfaces](docs/native/AppSurfaces.md) now provide AppHeader
 actions and AppCard header/body composition, original implicit metrics, retained
 children and typed live LVUI inputs. The new NativeAppSurfaces example uses the
@@ -593,3 +599,21 @@ to the final whole-goal validation batch.
 Native ListToolbar, ListFooter, HierarchyToolbar and ToolbarButton provide retained
 slots, stable-ID selection, typed event payloads and LVUI bindings. See
 [native toolbars](docs/native/Toolbars.md). Runtime checks remain deferred.
+
+Native [Card and Avatar](docs/native/Media.md) and the [media gallery](example/NativeMediaGallery/README.md) use retained C++23 widgets and immutable image inputs. Runtime verification remains deferred.
+
+Native [MaterialSurface, PanelMaterial and WindowMaterial](docs/native/Materials.md) provide masked GPU blur, authored accent fields and on-demand Core color motion. See the [material gallery](example/NativeMaterialGallery/README.md); runtime execution remains deferred.
+
+The Qt-free [text document foundation](docs/native/TextDocuments.md) provides chunked, file-backed UTF-8 storage, native UTF-16 positions, exact edit metadata, incremental edits, bounded history and iiFileProvider Native publication. TextMarkup supplies the existing inline conversion contract. Native [CodeEditor](docs/native/CodeEditor.md) connects a virtual PlainText/NoWrap viewport and IME projection to that model, rebases independent view selections and retains bounded selection metadata for undo/redo. Its native glyph cache preserves RGB and color-font palettes with separate opacity. TextEditor's rich-text viewport and full source parity remain pending; runtime checks remain deferred.
+
+The [text document gallery](example/NativeTextDocumentGallery/README.md) connects that model to a retained LVUI/iiGUI scope without materializing the whole document during view queries.
+
+The [native CodeEditor gallery](example/NativeCodeEditorGallery/README.md) compiles
+the editor from LVUI into a Core-owned C++23 application with retained property
+bindings and explicit iiFileProvider Native file publication. Build/package
+checks remain separate from the final runtime batch.
+
+The native [Tooltip](docs/native/Tooltip.md) adds anchored rounded-tail placement,
+PanelMaterial, retained scrollable content, focus-preserving interaction and
+Core-owned show/hide/expiry deadlines. The [Tooltip gallery](example/NativeTooltipGallery/README.md)
+uses real LVUI AOT bindings and one retained C++ backend. Runtime checks are deferred.

@@ -1,0 +1,87 @@
+#include <LVRS/CodeEditor.h>
+#include <iiGUI/Bindings.h>
+#include <iiGUI/TextBoundary.h>
+#include <iiGUI/Desktop.h>
+#include <iostream>
+#include <stdexcept>
+#include <thread>
+using namespace ii;
+namespace {
+void check(bool v,const char* m){if(!v)throw std::runtime_error(m);}
+template<class T>T take(core::Result<T> r){if(!r)throw std::runtime_error(r.error().message);return std::move(*r);}
+void good(core::Result<void> r){if(!r)throw std::runtime_error(r.error().message);}
+void run(const std::string& name){
+    runtime::EventLoop loop;auto model=take(lvrs::TextDocumentModel::create(loop));
+    std::string text="alpha\nbeta\ngamma";
+    if(name=="unicode")text="e\xcc\x81👩‍👩‍👧‍👦Z";
+    if(name=="horizontal")text=std::string(20000,'M');
+    if(name=="virtual"){text.clear();for(unsigned i=0;i<100000;++i)text+="row "+std::to_string(i)+"\n";}
+    take(model->set_text(text));std::shared_ptr<lvrs::TextDocumentPort> broken;
+    if(name=="fanout_view"){broken=std::make_shared<lvrs::TextDocumentPort>([](const auto&){throw std::runtime_error("Broken subscriber");});good(model->observe(broken));}
+    gui::Host host({.size={740,520},.event_loop=&loop});gui::WidgetMount mount;lvrs::CodeEditor editor,other_editor;gui::Widget other;
+    unsigned edits=0,submits=0,selections=0;bool reentry=false;auto bindings=std::make_shared<gui::BindingScope>();core::Observable<bool> read_only{false};
+    good(host.run({.opened=[&]{
+        mount=take(host.mount_widgets([&](gui::WidgetBuilder& b)->core::Result<void>{
+            auto root=take(b.vstack({},"root",{.alignment=gui::StackAlignment::leading}));lvrs::CodeEditorOptions o;o.model=model;
+            if(name!="defaults"){o.width=620;o.editor_height=name=="shared"?180:360;}
+            if(name=="overwrite")o.overwrite_mode=true;if(name=="focus_policy")o.auto_focus_on_press=false;
+            editor=take(lvrs::CodeEditor::create(b,root,"editor",o,{.document_edited=[&](const auto&){++edits;if(name=="notification"){auto result=model->replace_range(0,0,"blocked");reentry=!result&&result.error().code==core::ErrorCode::busy;}},
+                .submitted=[&](std::string value){check(value==take(model->text()),"Submit payload differs from committed text");++submits;},.selection_changed=[&](auto){++selections;}}));
+            if(name.starts_with("shared"))other_editor=take(lvrs::CodeEditor::create(b,root,"second",{.model=model,.width=620,.editor_height=180}));
+            other=take(b.button(root,"other"));good(b.retain(bindings));
+            if(name=="bindings")good(gui::bind_member(*bindings,editor.root(),read_only,[editor](auto,const auto& value)->core::Result<void>{auto o=editor.options();if(!o)return std::unexpected(o.error());o->read_only=value;return editor.set_options(std::move(*o));}));
+            return {};
+        }));
+        const auto key=[&](gui::WidgetKey k,bool shift=false,bool control=false){good(mount.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=k,.shift=shift,.control=control}));};
+        const auto input=[&](std::string s){good(mount.dispatch_input({.kind=gui::WidgetInputKind::text,.text=std::move(s)}));};
+        if(name=="defaults"){auto o=take(editor.options());auto s=take(editor.state());check(o.width==180&&o.editor_height==144&&o.header_height==22&&o.inset_horizontal==10&&o.inset_vertical==8&&o.text_line_height==13&&s.centered_text_y==77&&o.text_color.alpha==.9&&o.placeholder_color.alpha==.6&&o.text_color_disabled.alpha==.3,"Authored code editor defaults changed");}
+        else if(name=="plain"){check(take(editor.text())==text&&take(editor.root().snapshot()).native_class=="iiGUI.AbsoluteStack","CodeEditor is not a retained own-rendered C++ widget");}
+        else if(name=="edit"){take(editor.set_cursor_position(5));take(editor.replace_selection("!"));check(take(editor.text())=="alpha!\nbeta\ngamma"&&edits==1,"Range edit did not reach the model once");take(editor.undo());check(take(editor.text())==text,"Code editor undo failed");take(editor.redo());check(take(editor.text())=="alpha!\nbeta\ngamma","Code editor redo failed");}
+        else if(name=="unicode"){take(editor.set_cursor_position(13));take(editor.move_cursor(lvrs::TextCursorMove::left));check(take(editor.state()).cursor_position==2,"Left movement split a family emoji");good(editor.force_editor_focus());key(gui::WidgetKey::backspace);check(take(editor.text())=="👩‍👩‍👧‍👦Z","Backspace split a combining sequence");}
+        else if(name=="selection"){take(editor.select(2,8));check(take(editor.selected_text())=="pha\nbe","Multiline selection differs from UTF-16 range");take(editor.replace_selection("X\nY"));check(take(editor.text())=="alX\nYta\ngamma"&&selections>=1,"Multiline selection replacement failed");}
+        else if(name=="undo_selection"){take(editor.select(8,2));take(editor.replace_selection("Q"));take(editor.undo());auto before=take(editor.state());check(before.anchor_position==8&&before.cursor_position==2&&take(editor.selected_text())=="pha\nbe","Undo lost the originating view's reverse selection");take(editor.set_cursor_position(0));take(editor.redo());check(take(editor.state()).cursor_position==3&&take(editor.state()).selection.length==0,"Redo restored a later navigation state instead of the committed edit cursor");}
+        else if(name=="undo_noop"){take(editor.set_cursor_position(5));auto before=take(editor.state());check(!take(editor.undo())&&take(editor.state()).cursor_position==5&&take(editor.state()).revision==before.revision,"Empty undo moved the view cursor or revised view state");}
+        else if(name=="external_selection"){take(editor.select(2,8));const auto revision=take(model->state()).document_revision;take(model->replace_range(0,0,"😀"));auto s=take(editor.state());check(s.anchor_position==4&&s.cursor_position==10&&take(editor.selected_text())=="pha\nbe"&&take(model->state()).document_revision==revision+1,"External insertion did not rebase the selected original text exactly once");take(model->undo());check(take(editor.state()).selection==gui::TextRange{2,6},"Inverse edit did not restore an external view range");}
+        else if(name=="external_edges"){take(editor.select(2,8));take(model->replace_range(8,8,"ZZ"));check(take(editor.state()).selection==gui::TextRange{2,6}&&take(editor.selected_text())=="pha\nbe","Boundary insertion entered an existing selection");}
+        else if(name=="history_limit"){auto o=take(editor.options());o.selection_history_entries=1;good(editor.set_options(o));take(editor.select(2,8));take(editor.replace_selection("Q"));take(editor.select(0,1));take(editor.replace_selection("Z"));check(take(editor.state()).selection_history_size==1,"View selection history exceeded its independent budget");take(editor.undo());check(take(editor.state()).selection==gui::TextRange{0,1},"Latest retained view history was not restored");take(editor.undo());check(take(editor.text())==text,"Evicted view metadata broke document undo");}
+        else if(name=="history_clear"){take(editor.replace_selection("X"));check(take(editor.state()).selection_history_size==1,"Origin edit did not retain its selection metadata");take(model->clear_history());check(take(editor.state()).selection_history_size==0,"Model history clear retained stale per-view transactions");}
+        else if(name=="keyboard"){good(editor.force_editor_focus());take(editor.set_cursor_position(5));key(gui::WidgetKey::enter);input("X");key(gui::WidgetKey::enter,false,true);check(submits==1&&take(editor.text())=="alpha\nX\nbeta\ngamma","Enter/typing/submit used different edit paths");}
+        else if(name=="vertical"){take(editor.set_cursor_position(3));take(editor.move_cursor(lvrs::TextCursorMove::down));auto a=take(editor.state()).cursor_position;check(a>=6&&a<=10,"Vertical movement missed the next native line");take(editor.move_cursor(lvrs::TextCursorMove::up));check(take(editor.state()).cursor_position==3,"Vertical movement lost its preferred glyph x");}
+        else if(name=="word"){take(editor.move_cursor(lvrs::TextCursorMove::word_right));check(take(editor.state()).cursor_position==5,"Unicode word movement did not use the document contract");}
+        else if(name=="overwrite"){take(editor.set_text("abc"));take(editor.set_cursor_position(1));take(editor.replace_selection("😀x"));check(take(editor.text())=="a😀x","Overwrite split or miscounted inserted graphemes");}
+        else if(name=="read_only"||name=="bindings"){auto o=take(editor.options());if(name=="bindings")read_only.set(true);else{o.read_only=true;good(editor.set_options(o));}good(editor.force_editor_focus());take(editor.select(0,5));const auto revision=take(model->state()).document_revision;input("blocked");key(gui::WidgetKey::backspace);check(take(model->state()).document_revision==revision&&take(editor.selected_text())=="alpha","Read-only mode changed content or disabled selection");}
+        else if(name.starts_with("composition")){
+            take(editor.select(6,10));good(editor.force_editor_focus());const auto before=take(model->state());std::string preedit=name=="composition_multiline"?"한\n😀":"한글";
+            good(mount.dispatch_input({.kind=gui::WidgetInputKind::composition,.text=preedit,.composition_selection=gui::TextRange{name=="composition_multiline"?4u:2u,0}}));
+            check(take(model->state()).document_revision==before.document_revision&&take(editor.state()).input_method_composing,"Preedit edited storage or was not displayed");
+            auto native=take(editor.root().snapshot());check(native.marked_range&&native.marked_range->location==6&&take(editor.root().text_content({6,name=="composition_multiline"?4u:2u})).text==preedit,"IME surrounding text omitted the virtual composition");
+            if(name=="composition_select_all"){take(editor.select_all());auto s=take(editor.state());check(s.selection==gui::TextRange{0,14}&&!s.input_method_composing&&take(editor.root().snapshot()).text_length==14,"Select-all used the pre-commit document length");}
+            else if(name=="composition_cut"){check(!take(editor.cut())&&take(editor.text())==text&&take(editor.state()).input_method_composing,"Cut with no IME selection deleted the replaced source range");}
+            else if(name=="composition_invalid"){check(!editor.replace_selection(std::string("\xff",1))&&take(editor.state()).input_method_composing&&take(editor.root().text_content({6,2})).text=="한글"&&take(editor.text())==text,"Rejected replacement discarded the virtual preedit");}
+            else if(name=="composition_cancel"){take(editor.cancel_composition());check(take(editor.text())==text&&edits==0,"Preedit cancellation mutated source");}
+            else if(name=="composition_external"){take(model->replace_range(0,1,"Q"));check(!take(editor.state()).input_method_composing&&take(editor.text()).starts_with("Qlpha"),"External document change retained a stale preedit");}
+            else if(name=="composition_blur"){good(other.focus());check(take(editor.text())=="alpha\n한글\ngamma"&&edits==1,"Focus loss discarded or duplicated preedit commit");}
+            else if(name=="composition_range"){good(mount.dispatch_input({.kind=gui::WidgetInputKind::composition,.text="Z",.replacement_range=gui::TextRange{0,1},.composition_selection=gui::TextRange{1,0}}));take(editor.commit_composition());check(take(editor.text())=="Zlpha\n한글\ngamma","New native replacement range did not resolve the old composition");}
+            else{if(name=="composition_multiline")check(take(editor.state()).line_count==4,"Multiline composition did not project visual rows");take(editor.commit_composition());check(take(editor.text())=="alpha\n"+preedit+"\ngamma"&&edits==1,"IME commit was not one range edit");take(editor.undo());check(take(editor.text())==text,"IME commit was not one undo operation");}
+        }
+        else if(name=="virtual"){const auto before=take(model->state());good(editor.set_scroll_position(0,1200000));auto s=take(editor.state());check(s.first_visible_line>74000&&s.visible_lines<30&&take(mount.snapshot()).size()<10,"Virtual editor allocated or prepared all document rows");check(take(model->state()).revision==before.revision&&take(model->stats()).materializations==0,"Deep scrolling edited/materialized the document");}
+        else if(name=="horizontal"){good(editor.set_scroll_position(50000,0));check(take(editor.state()).scroll_x==50000&&take(editor.state()).content_width>50000,"Long native line did not expose a horizontal viewport");take(host.capture_canvas());}
+        else if(name=="cache"||name=="palette_cache"){take(host.capture_canvas());auto before=take(editor.state());if(name=="palette_cache"){auto o=take(editor.options());o.selected_text_color={1,.1,.3,1};good(editor.set_options(o));}take(editor.select(1,3));take(host.capture_canvas());auto after=take(editor.state());if(name=="cache")check(after.rasterizations==before.rasterizations&&after.shaped_lines==before.shaped_lines,"Default selection rerasterized glyphs or reshaped unchanged paragraphs");else{check(after.rasterizations>before.rasterizations,"A new selected RGB did not reach native glyph rendering");take(editor.select(2,4));take(host.capture_canvas());check(take(editor.state()).rasterizations==after.rasterizations,"Moving the same palette selection rerasterized native glyphs");}}
+        else if(name=="viewport_state"){auto before=take(model->state());take(editor.select(1,9));good(editor.set_scroll_position(0,20));take(editor.move_cursor(lvrs::TextCursorMove::document_end));auto after=take(model->state());check(before.revision==after.revision&&before.document_revision==after.document_revision&&before.undo_depth==after.undo_depth&&before.dirty==after.dirty,"View navigation changed document state/history");}
+        else if(name=="shared"){take(editor.select(1,3));check(take(other_editor.state()).selection.length==0,"Shared models shared selection state");take(editor.replace_selection("Q"));check(take(other_editor.text())==take(editor.text()),"Shared document edit did not reach the second retained editor");}
+        else if(name=="shared_undo"){take(editor.select(8,2));take(other_editor.select(11,16));take(editor.replace_selection("Q"));check(take(other_editor.selected_text())=="gamma"&&take(other_editor.state()).selection==gui::TextRange{6,5},"Sibling view did not rebase its selection independently");take(other_editor.undo());check(take(editor.state()).anchor_position==8&&take(editor.state()).cursor_position==2&&take(other_editor.state()).selection==gui::TextRange{11,5},"Undo from another view lost the origin or sibling selection");take(other_editor.redo());check(take(editor.state()).cursor_position==3&&take(other_editor.state()).selection==gui::TextRange{6,5},"Shared redo did not restore per-view state");}
+        else if(name=="fanout_view"){auto result=editor.replace_selection("X");check(!result&&take(editor.state()).document_revision==take(model->state()).document_revision&&take(editor.state()).cursor_position==1&&take(editor.root().text_content({0,1})).text=="X","Subscriber failure starved the retained editor or caused a duplicate edit");}
+        else if(name=="provider"){auto s=take(editor.root().snapshot());check(s.text.empty()&&s.text_input&&s.multiline&&s.text_length==16&&s.caret_bounds.y>=s.bounds.y,"Native IME received a full snapshot string or invalid caret");check(take(editor.root().text_content({2,6})).text=="pha\nbe","Native range reader lost document positions");}
+        else if(name=="retirement"){auto old=editor;good(host.unmount_widgets());auto s=old.state();check(!s&&s.error().code==core::ErrorCode::closed,"Retired editor addressed a new widget generation");}
+        else if(name=="owner"){bool rejected=false;std::thread worker([&]{auto s=editor.state();rejected=!s&&s.error().code==core::ErrorCode::wrong_executor;});worker.join();check(rejected,"Editor view state crossed its owner thread");}
+        else if(name=="invalid"){auto o=take(editor.options());o.tab_stop_distance=0;check(!editor.set_options(o),"Invalid tab geometry accepted");take(editor.set_text("A😀Z"));check(!editor.set_cursor_position(2),"Scalar-splitting cursor position accepted");}
+        else if(name=="options"){take(editor.select(1,3));auto o=take(editor.options());o.editor_height=400;o.snippet_language="C++";o.text_color={0,1,0,1};good(editor.set_options(o));check(take(editor.state()).selection==gui::TextRange{1,2}&&take(editor.root().snapshot()).bounds.height==400,"Style/resize update reconstructed document view state");}
+        else if(name=="focus_policy"){auto s=take(editor.root().snapshot());good(mount.dispatch_input({.kind=gui::WidgetInputKind::pointer_down,.x=s.bounds.x+20,.y=s.bounds.y+80}));check(!take(editor.root().snapshot()).focused,"CodeEditor ignored autoFocusOnPress=false");}
+        else if(name=="focus_lifetime"){const auto before=loop.stats().pending;good(editor.force_editor_focus());check(loop.stats().pending>before,"Focused cursor has no Core-owned timer");good(other.focus());check(loop.stats().pending==before,"Blur retained an idle cursor timer");}
+        else if(name=="notification"){take(editor.replace_selection("X"));check(reentry&&edits==1,"Committed edit notification accepted recursive storage mutation");}
+        else throw std::runtime_error("Unknown code editor case");
+        good(host.request_close());
+    }}));
+}
+}
+int main(int argc,char** argv){try{run(argc>1?argv[1]:"defaults");std::cout<<"CODE_EDITOR_OK\n";}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

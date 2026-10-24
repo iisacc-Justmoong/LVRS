@@ -1,0 +1,23 @@
+import vm TooltipBackend
+ApplicationWindow(title: "LVRS · native Tooltip", width: 760, height: 520) {
+ VStack(id: "root", padding: 24, spacing: 20, alignment: .leading) {
+  AppHeader(title: "Native Tooltip", subtitle: "Own C++ bubble · PanelMaterial · iiSDKCore", compact: true, width: vm.width) {
+   LabelButton(id: "close", text: "Close", onClick: vm.close)
+  }
+  Label(id: "status", text: vm.status)
+  Label(text: "Hover or focus either origin. Clicking the origin still reaches its action.")
+  HStack(spacing: 24) {
+   LabelButton(id: "origin", text: "Interactive help", onClick: vm.origin)
+   LabelButton(id: "secondary", text: "Plain text help")
+  }
+  Label(id: "background", text: vm.background)
+  Tooltip(id: "helpBubble", targetId: "origin", text: vm.help, preferredPlacement: vm.side, maximumWidth: vm.maximum, delay: vm.delay, timeout: 0, availableRect: vm.area, onOpened: vm.opened, onClosed: vm.closed) {
+   VStack(spacing: 8, alignment: .leading) {
+    Label(id: "bubbleTitle", text: vm.help)
+    Label(id: "bubbleDetail", text: vm.detail, style: .caption)
+    LabelButton(id: "bubbleAction", text: "Retained action", onClick: vm.action)
+   }
+  }
+  Tooltip(id: "plainBubble", targetId: "secondary", text: "Native fonts wrap this text inside a scrollable bubble. The painted tail leaves input to the origin.", preferredPlacement: .RightSide)
+ }
+}

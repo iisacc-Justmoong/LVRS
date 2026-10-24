@@ -1,0 +1,19 @@
+import vm CodeEditorBackend
+ApplicationWindow(title: "LVRS · native CodeEditor", width: 920, height: 640) {
+ VStack(id: "root", padding: 24, spacing: 16, alignment: .leading) {
+  AppHeader(title: "Native CodeEditor", subtitle: "Own C++ widgets · native fonts · iiSDKCore", compact: true, width: 860) {
+   LabelButton(id: "undo", text: "Undo", onClick: vm.undo)
+   LabelButton(id: "redo", text: "Redo", onClick: vm.redo)
+   LabelButton(id: "lock", text: "Read-only", onClick: vm.toggle_lock)
+   LabelButton(id: "save", text: "Save", onClick: vm.save)
+   LabelButton(id: "close", text: "Close", onClick: vm.close)
+  }
+  Label(id: "status", text: vm.status, style: .caption)
+  HStack(spacing: 16, alignment: .leading) {
+   CodeEditor(id: "editor", model: vm.document, snippetTitle: vm.title, snippetLanguage: "C++23", width: vm.editorWidth, editorHeight: vm.editorHeight, readOnly: vm.locked, onDocumentEdited: vm.changed)
+   CodeEditor(id: "sharedEditor", model: vm.document, snippetTitle: "Shared view", snippetLanguage: "Independent selection", width: vm.editorWidth, editorHeight: vm.editorHeight, readOnly: vm.locked)
+  }
+  Label(text: "Shared document · independent selections · undo/redo · native IME · explicit Save", style: .caption)
+  Label(id: "background", text: vm.background)
+ }
+}

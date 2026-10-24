@@ -14,7 +14,7 @@
 | SvgManager | nonvisual | pending | — | 10 |
 | WindowNoiseTexture | view | pending | — | 5 |
 | Backend | nonvisual | pending | — | 41 |
-| HierarchyModel | nonvisual | pending | — | 30 |
+| HierarchyModel | nonvisual | partial | lvrs::HierarchyModel / HierarchyProjection | 30 |
 | ModelSource | nonvisual | pending | — | 12 |
 | ModelUndoStack | nonvisual | pending | — | 9 |
 | ProgressModel | nonvisual | pending | — | 24 |
@@ -39,8 +39,8 @@
 | StateModel | nonvisual | pending | — | 12 |
 | ViewModel | nonvisual | pending | — | 8 |
 | ViewModels | nonvisual | partial | LVUI scoped C++ backends / Core Observable | 24 |
-| TextDocumentModel | nonvisual | pending | — | 45 |
-| TextMarkup | nonvisual | pending | — | 3 |
+| TextDocumentModel | nonvisual | partial | lvrs::TextDocumentModel / TextDocumentStorage | 45 |
+| TextMarkup | nonvisual | partial | lvrs::TextMarkup | 3 |
 | AppBootstrapWindow | view | pending | — | 0 |
 | AppShell | view | pending | — | 0 |
 | ApplicationWindow | view | partial | Core Application + iiGUI Host | 174 |
@@ -66,7 +66,7 @@
 | CheckBox | view | partial | lvrs::Widgets::check_box | 37 |
 | RadioButton | view | partial | lvrs::Widgets::radio_button | 14 |
 | ToggleSwitch | view | partial | lvrs::Widgets::toggle_switch | 33 |
-| Avatar | view | pending | — | 8 |
+| Avatar | view | partial | lvrs::Avatar / Widgets::avatar / LVUI AOT | 8 |
 | Label | view | partial | lvrs::Widgets::label | 36 |
 | ProgressBar | view | partial | lvrs::Widgets::progress | 40 |
 | Table | view | partial | lvrs::Table / Widgets::table / AOT | 227 |
@@ -74,7 +74,7 @@
 | TableHeader | view | partial | lvrs::TableHeader / Widgets::table_header / AOT | 32 |
 | TableRow | view | partial | lvrs::TableRow / Widgets::table_row / AOT | 16 |
 | AbstractInputBar | view | pending | — | 93 |
-| CodeEditor | view | pending | — | 99 |
+| CodeEditor | view | partial | lvrs::CodeEditor / Widgets::code_editor / LVUI AOT | 99 |
 | ColorPicker | view | partial | lvrs::ColorPicker / Widgets::color_picker | 23 |
 | ColorInput | view (internal) | pending | — | 4 |
 | Swatch | view (internal) | pending | — | 3 |
@@ -145,17 +145,17 @@
 | Alert | view | partial | lvrs::Alert / Widgets::alert / AOT methods | 62 |
 | AlertButton | view | partial | lvrs::AlertButton / Widgets::alert_button / AOT methods | 3 |
 | AppCard | view | partial | lvrs::AppCard / Widgets::app_card / AOT | 13 |
-| Card | view | pending | — | 50 |
+| Card | view | partial | lvrs::Card / Widgets::card / LVUI AOT | 50 |
 | CardImageContent | view (internal) | pending | — | 8 |
 | CardInformationContent | view (internal) | pending | — | 1 |
 | DetailRow | view (internal) | pending | — | 3 |
-| MaterialSurface | view | pending | — | 35 |
-| RadialLayer | view (internal) | pending | — | 5 |
+| MaterialSurface | view | partial | lvrs::MaterialSurface / Widgets::material_surface / LVUI AOT | 35 |
+| RadialLayer | view (internal) | partial | lvrs::material_detail native gradient raster | 5 |
 | Modal | view | partial | lvrs::Modal / Widgets::modal / AOT activation content | 59 |
-| PanelMaterial | view | pending | — | 0 |
+| PanelMaterial | view | partial | lvrs::PanelMaterial / Widgets::panel_material / LVUI AOT | 0 |
 | Popover | view | partial | lvrs::Widgets::popover / iiGUI native overlay | 8 |
 | Sheet | view | partial | lvrs::Sheet / Widgets::sheet / AOT retained content | 43 |
-| Tooltip | view | pending | — | 58 |
-| WindowMaterial | view | pending | — | 0 |
+| Tooltip | view | partial | lvrs::Tooltip / TooltipLayout / Widgets::tooltip / LVUI AOT | 58 |
+| WindowMaterial | view | partial | lvrs::WindowMaterial / Widgets::window_material / LVUI AOT | 0 |
 
 각 항목의 원본 위치·직접 노출 멤버·지원 입력·남은 기능은 `catalog/native/parity.json`에 기록한다. 상속 API, 동작, 렌더링 품질과 플랫폼 검증을 모두 충족하기 전에는 `complete`로 바꾸지 않는다.

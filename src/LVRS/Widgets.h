@@ -10,10 +10,17 @@
 #include "TableRow.h"
 #include "TableHeader.h"
 #include "Table.h"
+#include "CodeEditor.h"
 #include "List.h"
 #include "PageRouter.h"
 #include "Link.h"
 #include "AppHeader.h"
+#include "Avatar.h"
+#include "Card.h"
+#include "MaterialSurface.h"
+#include "PanelMaterial.h"
+#include "Tooltip.h"
+#include "WindowMaterial.h"
 #include "HierarchyToolbar.h"
 #include "ListToolbar.h"
 #include "ListFooter.h"
@@ -35,6 +42,8 @@ public:
     [[nodiscard]] Result<Widget> table_row(Widget,std::string_view,TableRowOptions={},TableRowEvents={});
     [[nodiscard]] Result<Widget> table_header(Widget,std::string_view,TableHeaderOptions={},TableHeaderEvents={});
     [[nodiscard]] Result<Widget> table(Widget,std::string_view,TableOptions={},TableEvents={});
+    [[nodiscard]] Result<Widget> code_editor(Widget,std::string_view,CodeEditorOptions={},CodeEditorEvents={});
+    [[nodiscard]] Result<Widget> tooltip(Widget,std::string_view,TooltipOptions={},TooltipEvents={},TooltipContentFactory={});
     [[nodiscard]] Result<Widget> list(Widget,std::string_view,ListOptions={},ListEvents={});
     [[nodiscard]] Result<Widget> hierarchy(Widget,std::string_view,ListOptions={},ListEvents={});
     [[nodiscard]] Result<Widget> page_router(Widget,std::string_view,const std::shared_ptr<PageRouter>&,ii::gui::Size={640,400});
@@ -44,6 +53,11 @@ public:
     [[nodiscard]] Result<Widget> hierarchy_toolbar(Widget,std::string_view,HierarchyToolbarOptions={},std::vector<HierarchyToolbarEntry> = {},HierarchyToolbarEvents={});
     [[nodiscard]] Result<Widget> list_toolbar(Widget,std::string_view,ListToolbarOptions={},ListToolbarEvents={});
     [[nodiscard]] Result<Widget> list_footer(Widget,std::string_view,ListFooterOptions={},ListFooterEvents={});
+    [[nodiscard]] Result<Widget> material_surface(Widget,std::string_view,MaterialOptions={});
+    [[nodiscard]] Result<Widget> panel_material(Widget,std::string_view,MaterialOptions={});
+    [[nodiscard]] Result<Widget> window_material(Widget,std::string_view,MaterialOptions={});
+    [[nodiscard]] Result<Widget> avatar(Widget,std::string_view,AvatarOptions={});
+    [[nodiscard]] Result<Widget> card(Widget,std::string_view,CardOptions={},CardEvents={},CardContent={});
     [[nodiscard]] Result<Widget> app_card(Widget,std::string_view,AppCardOptions={});
     [[nodiscard]] Result<Widget> app_header(Widget,std::string_view,AppHeaderOptions={},AppHeaderEvents={});
     [[nodiscard]] Result<Widget> event_listener(Widget,std::string_view,ii::gui::Size,ii::gui::WidgetInputHandler={},std::function<void(ii::gui::Rect)> = {});

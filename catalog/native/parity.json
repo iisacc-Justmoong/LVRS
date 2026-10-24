@@ -897,12 +897,56 @@
       "sha256": "a10788ddb607f9b5e89122661aa4bed8fd5c7602b7f9a2ae1fcf3f6a2797e931"
     },
     {
+      "path": "src/LVRS/Avatar.cpp",
+      "sha256": "86af73d0fcadf5b509f6ca14b92ca2f0778cb5ace2025f1af16d1d4ec567c290"
+    },
+    {
+      "path": "src/LVRS/Avatar.h",
+      "sha256": "26130b5824bd0c17009869eb18ca97da49ceab73f9007062042f07ee8e1422f5"
+    },
+    {
       "path": "src/LVRS/ButtonMethod.cpp",
       "sha256": "c5ae3ed292010a069c1aef5a4e5c7d2cd2ce762976d74db3b6bef87ecd93cae0"
     },
     {
       "path": "src/LVRS/ButtonMethod.h",
       "sha256": "ebc668214cc831ee60c62eac49809427ea5df828a4018458a86594432daef3f0"
+    },
+    {
+      "path": "src/LVRS/Card.cpp",
+      "sha256": "0506ccecf845237bf4ca824339bb487c862be5b2cadbe267b236823392be1d2f"
+    },
+    {
+      "path": "src/LVRS/Card.h",
+      "sha256": "0135824deb7f59fe49b61278e846774527f69114effb23074261b7514c2c0fd6"
+    },
+    {
+      "path": "src/LVRS/CardAssets.cpp",
+      "sha256": "fd050bec9c1c8098ad88421edf26c6e7a98299756daaf519e8366d825343ee6a"
+    },
+    {
+      "path": "src/LVRS/CardDetail.cpp",
+      "sha256": "72bbe731a09a667d4a3dcbe3cd5fc5c3cd9276af944a5bc82561c6fbe7316946"
+    },
+    {
+      "path": "src/LVRS/CardDetail.h",
+      "sha256": "3f9a85944bfc41269a0c02be503ef6a6a4f3aa78c3833f38dc4d2c59bfab6c30"
+    },
+    {
+      "path": "src/LVRS/CodeEditor.cpp",
+      "sha256": "2da98a11629b10719903c1076026cd807b3ade19aaa5953e9be84e0be4f673fc"
+    },
+    {
+      "path": "src/LVRS/CodeEditor.h",
+      "sha256": "91985c6be7855676ba5d31c904b42c52d5b9f494c7f1568c5491cd1208be36e7"
+    },
+    {
+      "path": "src/LVRS/CodeEditorDetail.cpp",
+      "sha256": "0a0ab051e0254dcde5b1d74d85fbea7bec71979d114d3205d92bd05406c0a51b"
+    },
+    {
+      "path": "src/LVRS/CodeEditorDetail.h",
+      "sha256": "82964da86b7a599af6c5035605e945927ac46645bbc554ce6ba7cef757eb9e65"
     },
     {
       "path": "src/LVRS/ColorPicker.cpp",
@@ -921,12 +965,36 @@
       "sha256": "f436074e6a3302abb2e46933f84ae17a7d4a1a8720f1f812b3d026e5c1e15178"
     },
     {
+      "path": "src/LVRS/HierarchyModel.cpp",
+      "sha256": "713b739aaf1bd0fbbd436515306d0fbc16d755aa58d1d0171932dac98e8e99ee"
+    },
+    {
+      "path": "src/LVRS/HierarchyModel.h",
+      "sha256": "74f37af576adb6872473a30e1e603f38bddbe7a96cc5a524da898816bafdc277"
+    },
+    {
+      "path": "src/LVRS/HierarchyProjection.cpp",
+      "sha256": "88ebcc0bab46d137d66d56313c1a36d044408266fe7c9121ab1b8eac27394d82"
+    },
+    {
+      "path": "src/LVRS/HierarchyProjection.h",
+      "sha256": "7b283669e1bb65257298053a0ffed3418bee54ab9e675a48fefeb6f9e99b9951"
+    },
+    {
       "path": "src/LVRS/HierarchyToolbar.cpp",
       "sha256": "287e33d11b45245324a10be7f90b87af476dbc974c3cf5775b6303c342bca078"
     },
     {
       "path": "src/LVRS/HierarchyToolbar.h",
       "sha256": "c926dfd4d9bfa1735312198d4d2abc70e5a759268ab6272e38e0a9ab8dbdf1f9"
+    },
+    {
+      "path": "src/LVRS/HierarchyVisibility.cpp",
+      "sha256": "12f24408ca8e3b374a5f02b452dd6333f49ca63ff0a1332ea868ff146a48decf"
+    },
+    {
+      "path": "src/LVRS/HierarchyVisibility.h",
+      "sha256": "e1bb206c24db6637e6263f9466bb37bc88ed81467c3b80bfb58c90ef0b9ece77"
     },
     {
       "path": "src/LVRS/Icons.cpp",
@@ -975,6 +1043,22 @@
     {
       "path": "src/LVRS/ListToolbar.h",
       "sha256": "ceb10066b95c4240b0e8bbd53bbf320bb5dd4d0e1d37d7bbc68f40197604b6ea"
+    },
+    {
+      "path": "src/LVRS/MaterialDetail.cpp",
+      "sha256": "fdec7ee635707785dc2e00f38a75efef35dc9222149d31bda55785757ee9b07b"
+    },
+    {
+      "path": "src/LVRS/MaterialDetail.h",
+      "sha256": "92eb4e278f84314d9485beae54e9e55f1299d6bcfd7618f6223e509b14d02fbd"
+    },
+    {
+      "path": "src/LVRS/MaterialSurface.cpp",
+      "sha256": "5ef0f32937748f0304de1a89f41c07526e1899ef638a0ed9bb0d6c8f96e4a410"
+    },
+    {
+      "path": "src/LVRS/MaterialSurface.h",
+      "sha256": "15057f963c2dff72282eba248cf3944ca6f61855b663ba704a99a541f8def1c9"
     },
     {
       "path": "src/LVRS/Modal.cpp",
@@ -1031,6 +1115,14 @@
     {
       "path": "src/LVRS/PageRouter.h",
       "sha256": "742a80fe7921c6e0d828e1cbd5333a7431fb687c463ec0021b522b85896d5f2c"
+    },
+    {
+      "path": "src/LVRS/PanelMaterial.cpp",
+      "sha256": "d46c59859187c4ed9dc7b910a6abc6d47481bdc338abea5ad2b5f4716d6b5930"
+    },
+    {
+      "path": "src/LVRS/PanelMaterial.h",
+      "sha256": "d6cd29d4b6b666e7d394c5ccce7649de83fef7cc9c82e5323a1f66a1c33517d3"
     },
     {
       "path": "src/LVRS/RouteMatcher.cpp",
@@ -1145,6 +1237,46 @@
       "sha256": "168cd6c4301d76f4e1c8b9ffb7f6d4d4f659fec8a11d43b23c3cf0551fc5dbf0"
     },
     {
+      "path": "src/LVRS/TextDocumentDetail.cpp",
+      "sha256": "61e92e8b7a020ffff1785414eb1642c68fb65119be4c7ca51a34dd21651cf44a"
+    },
+    {
+      "path": "src/LVRS/TextDocumentDetail.h",
+      "sha256": "93a64151fbf7c7c0e77c20d92b12feb9893e7d0cf59b64cc515ff40315b6aa2e"
+    },
+    {
+      "path": "src/LVRS/TextDocumentEdit.cpp",
+      "sha256": "4e2b651ac2392f22af716dfa876129d26bca225b8ba3bf4f79dfb5bb8b98ccc8"
+    },
+    {
+      "path": "src/LVRS/TextDocumentEdit.h",
+      "sha256": "668953b5af7ab2f991a4973d483e218f097f01d03524f45b272229131159c27c"
+    },
+    {
+      "path": "src/LVRS/TextDocumentModel.cpp",
+      "sha256": "35f1492151bff9751d488b08f1de375285e370a30c338a219c926cc8a0d4799b"
+    },
+    {
+      "path": "src/LVRS/TextDocumentModel.h",
+      "sha256": "b4cfdba8c2e243df37a663c895dc71c00df79273538e0755bde8ca53376a1dc2"
+    },
+    {
+      "path": "src/LVRS/TextDocumentStorage.cpp",
+      "sha256": "fe76db4c0d72843451ff404e4fec0d9a2951c860cdedf2da3803b0df8ecba5b5"
+    },
+    {
+      "path": "src/LVRS/TextDocumentStorage.h",
+      "sha256": "e738c742057ce3f2d3528c973d22ba1bbc69601277f6f048834a352a51c154c8"
+    },
+    {
+      "path": "src/LVRS/TextMarkup.cpp",
+      "sha256": "edc7de4522554812567b852795af36232fbe46c5449e46b0ca9b7182bb4a5e74"
+    },
+    {
+      "path": "src/LVRS/TextMarkup.h",
+      "sha256": "32b7f52dd5137b333f7faaaca5679e5c06ffc089fe9852bd0bf9c42609897fc5"
+    },
+    {
       "path": "src/LVRS/Theme.cpp",
       "sha256": "0147244cf835021edb091a66fa83faca1afc50d4c06835a405c26add725da4f2"
     },
@@ -1169,6 +1301,22 @@
       "sha256": "fb43bdab37dad0e06eb09506ebb0a2ca9d8fb974a903ebd2f6cc4632fdc82369"
     },
     {
+      "path": "src/LVRS/Tooltip.cpp",
+      "sha256": "10c3db0d56b3f83b6c5008bfc192bca87c2a92370e222d729d726b7c35ab6af4"
+    },
+    {
+      "path": "src/LVRS/Tooltip.h",
+      "sha256": "5af194ed27e51475934a4148574ec19fc8be589604395c806e134d8f4fff5806"
+    },
+    {
+      "path": "src/LVRS/TooltipLayout.cpp",
+      "sha256": "2625d8440d7c6813bfcded6ee304074921cc736b1c6dba18dcd10c9f9674e523"
+    },
+    {
+      "path": "src/LVRS/TooltipLayout.h",
+      "sha256": "71b800d5e500f85477c7dcf95395bdd3fb9fb2220956b5f98174cdfb05b221aa"
+    },
+    {
       "path": "src/LVRS/TrackingDetail.cpp",
       "sha256": "67b5835e4a7438d296b362def0c954fa5e12a5cfa8ac6c13e1d6cf50ef3aa8c1"
     },
@@ -1186,17 +1334,25 @@
     },
     {
       "path": "src/LVRS/Widgets.cpp",
-      "sha256": "9974222c20e68537e9a9e2d6318de6c4166aa8bf06a8bf4b5129631c4656aa9d"
+      "sha256": "663bac50a4d0a39768a40961d7909e37d65a8f7fb83b7bda9c460786ef2142dc"
     },
     {
       "path": "src/LVRS/Widgets.h",
-      "sha256": "d1f7e123d80e6acc6279ab3d972b08db512de23cd9a9a6af8a52d14053c607fc"
+      "sha256": "b15e0d12419bd843c178826a884f61e18201108cbbcb4e54a69c6e3842ccf6a5"
+    },
+    {
+      "path": "src/LVRS/WindowMaterial.cpp",
+      "sha256": "218dc37b456bd7563d9773e5e59ae476c7f81c1f50e29ddb2885e7acc9398b98"
+    },
+    {
+      "path": "src/LVRS/WindowMaterial.h",
+      "sha256": "5a9dc92f237374b97750dd4308e787bed068c482992b5cd490157b3c42f26b9e"
     }
   ],
   "counts": {
     "declarations": 149,
-    "partial": 70,
-    "pending": 79,
+    "partial": 81,
+    "pending": 68,
     "complete": 0
   },
   "components": [
@@ -1910,13 +2066,24 @@
           "line": 120
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::HierarchyModel / HierarchyProjection",
+      "supported_inputs": [
+        "typed UTF-8 preorder rows, owned key/ID indexes and validated source admission",
+        "linear topology preparation and bounded on-demand paths/children, without eager per-row descendant scans",
+        "view-local range visibility, variable-height rank and eligible navigation queries",
+        "subtree-excluding drop plans without copying remaining rows during pointer updates, revision-checked structural commit",
+        "weak Core notifications, owner/reentry/retirement boundaries; runtime execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All normal/sanitizer/installed-consumer runtime verification at final whole-goal batch",
+        "Actual HierarchyItem/HierarchyList viewport, retained manual delegates, keyboard/drag/touch integration and LVUI AOT remain pending",
+        "QVariant/QJSValue/QAbstractItemModel role/column/source adapters, complete source writes and signal ordering",
+        "Native validation intentionally rejects duplicate keys and malformed preorder depths; complete original normalization compatibility remains pending",
+        "Range-index operations have algorithmic bounds, not measured latency/RSS evidence; native platform and visual verification remain pending"
       ]
     },
     {
@@ -5233,13 +5400,23 @@
           "line": 105
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::TextDocumentModel / TextDocumentStorage",
+      "supported_inputs": [
+        "owner-thread C++23 model / UTF-8 data and native UTF-16 positions / extended grapheme and Unicode word movement",
+        "Core-owned bounded chunk loading, cancellation, missing attached files, progress and errors",
+        "retained file-offset lines / copy-on-write sequence index / bounded decoded-line cache / range-only promotion",
+        "range edits / cursor navigation without content mutation / bounded undo-redo with clean checkpoints",
+        "iiFileProvider Native staged streaming publication / retained Windows and POSIX source handles",
+        "weak typed Core notifications with operation paths, reentrancy and retirement boundaries; execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Complete Qt model-role/signal and malformed UTF-8/tag/delimiter edge parity",
+        "Native RichText TextEditor and complete CodeEditor source, IME and platform editing parity"
       ]
     },
     {
@@ -5267,13 +5444,20 @@
           "line": 19
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::TextMarkup",
+      "supported_inputs": [
+        "UTF-8 newline / br-p / strong-b / em-i / code normalization and unsupported-tag removal",
+        "escaped inline HTML / protected code spans / legacy plain output retaining markers",
+        "bounded iterative parsing / literal code-placeholder collision prevention; execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Complete Qt model-role/signal and malformed UTF-8/tag/delimiter edge parity",
+        "Native RichText TextEditor and complete CodeEditor source, IME and platform editing parity"
       ]
     },
     {
@@ -10748,13 +10932,21 @@
           "line": 21
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::Avatar / Widgets::avatar / LVUI AOT",
+      "supported_inputs": [
+        "24/40/64 authored sizes / centered circular cover",
+        "immutable prepared RasterImage / empty-ready status and progress",
+        "owner-thread source and geometry mutation / Core bindings / generation lifetime"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "URL/resource-provider loader, asynchronous loading/error states and cache adapters",
+        "Rounded clipping of arbitrary custom preview subtrees and final-line multiline ellipsis",
+        "Complete inherited API, signals/motion, live global Theme and all platform AX/input parity"
       ]
     },
     {
@@ -13895,13 +14087,26 @@
           "line": 169
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::CodeEditor / Widgets::code_editor / LVUI AOT",
+      "supported_inputs": [
+        "self-rendered native PlainText/NoWrap viewport / authored Theme metrics, surfaces, snippet header and explicit font styles",
+        "bounded visible-line shaping / stable line identities / native RGB and color-font palette cache / independent opacity and crop",
+        "independent UTF-16 cursor, Unicode navigation, range selection, overwrite, clipboard and model undo-redo / bounded per-view selection restoration and external-edit rebasing",
+        "virtual IME preedit projection with bounded native surrounding-text, selection and caret bridge; explicit commit/cancel",
+        "Core-owned focus-scoped caret timer / weak generation lifetime / typed model callbacks and same-instance AOT bindings",
+        "standalone Core application gallery / private normal-sanitizer and installed-consumer build; execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Complete inherited TextEdit API, implicit content-width sizing, custom cursor delegates, font style/letter spacing and motion",
+        "Double/triple click and full bidi caret affinity; per-view undo selection and rebasing runtime checks remain deferred",
+        "Native RGB/palette and opacity runtime checks on actual color fonts across platforms",
+        "Mobile text interaction/input hints, native inline Linux preedit, inertia, advanced AX/UIA/AT-SPI and every platform presentation",
+        "Exact all-file horizontal extent beyond lazily observed line widths and explicit paragraph/cache admission limits"
       ]
     },
     {
@@ -24470,13 +24675,24 @@
           "line": 99
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::Card / Widgets::card / LVUI AOT",
+      "supported_inputs": [
+        "eight authored variants / file size and detail states",
+        "retained native action/check state / independent menu-action buttons",
+        "metadata / typed rows / progress / colors / AX description",
+        "immutable image center crop / rounded mask / caption scrim / selection marker",
+        "native preview/icon factories / inline child slot / Core observable bindings",
+        "original embedded SVGs / dependency-keyed paint and bounded icon caches"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "URL/resource-provider loader, asynchronous loading/error states and cache adapters",
+        "Rounded clipping of arbitrary custom preview subtrees and final-line multiline ellipsis",
+        "Complete inherited API, signals/motion, live global Theme and all platform AX/input parity"
       ]
     },
     {
@@ -24781,13 +24997,21 @@
           "line": 84
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::MaterialSurface / Widgets::material_surface / LVUI AOT",
+      "supported_inputs": [
+        "density-dependent native tint, Gaussian blur, rounded or static SVG silhouette, inner highlight and shared-mask shadow",
+        "eight authored elliptical accent gradients with dependency-keyed alpha raster and GPU RGB tint",
+        "explicit capture domains or standalone premultiplied input / Core 130ms OutCubic color transitions",
+        "ordinary retained content, weak generation lifetime, same-instance typed Core bindings; execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Arbitrary separate Item backdropSource/backdropBackground capture and live global Theme profile changes",
+        "Full inherited/reactive API, complete signal order, complex transformed-outline pixel parity and every platform execution"
       ]
     },
     {
@@ -24825,13 +25049,19 @@
           "line": 101
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::material_detail native gradient raster",
+      "supported_inputs": [
+        "eight original elliptical spots / four original alpha stops / fixed edge and centered layout",
+        "preblur composition / shared immutable alpha inputs and GPU color tint"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Arbitrary separate Item backdropSource/backdropBackground capture and live global Theme profile changes",
+        "Full inherited/reactive API, complete signal order, complex transformed-outline pixel parity and every platform execution"
       ]
     },
     {
@@ -25171,13 +25401,18 @@
       "kind": "view",
       "internal": false,
       "declared_members": [],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::PanelMaterial / Widgets::panel_material / LVUI AOT",
+      "supported_inputs": [
+        "original glass defaults / 380x204 / shared native MaterialSurface implementation"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Arbitrary separate Item backdropSource/backdropBackground capture and live global Theme profile changes",
+        "Full inherited/reactive API, complete signal order, complex transformed-outline pixel parity and every platform execution"
       ]
     },
     {
@@ -25795,13 +26030,23 @@
           "line": 315
         }
       ],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::Tooltip / TooltipLayout / Widgets::tooltip / LVUI AOT",
+      "supported_inputs": [
+        "original side-order, preferred placement and maximal-area fallback / rounded SVG tail / native PanelMaterial",
+        "retained native wrapped text or arbitrary C++ content / scroll viewport / reset on reopen",
+        "independent weak target/body interaction observers / no focus steal or origin capture cancellation / body-only input region",
+        "Core-owned show, hide, expiry and dismissal guard / same-instance options preserve suppression and expiry",
+        "forward scoped target IDs / typed target, geometry, color and checked millisecond bindings / standalone Core gallery; execution deferred"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Automatic OS safe-area and physical-screen intersection, all inherited Popup/ToolTip API and AX/input parity",
+        "Separate source opacity/scale timing, exact transformed-tail/material pixels and all platform presentation",
+        "Live contentComponent replacement, isolated loader backends and AOT initial open/visible or cross-content-scope target IDs"
       ]
     },
     {
@@ -25813,13 +26058,18 @@
       "kind": "view",
       "internal": false,
       "declared_members": [],
-      "status": "pending",
-      "native_api": null,
-      "supported_inputs": [],
+      "status": "partial",
+      "native_api": "lvrs::WindowMaterial / Widgets::window_material / LVUI AOT",
+      "supported_inputs": [
+        "original dense window defaults / 500x272 / creation-time window accent / native MaterialSurface"
+      ],
       "pending": [
         "Complete declared and inherited API parity",
         "Full LVRS visuals, states and motion",
-        "Windows/Linux/mobile/WASM input and presentation verification"
+        "Windows/Linux/mobile/WASM input and presentation verification",
+        "All source/sanitizer/installed-consumer and gallery runtime verification at final whole-goal batch",
+        "Arbitrary separate Item backdropSource/backdropBackground capture and live global Theme profile changes",
+        "Full inherited/reactive API, complete signal order, complex transformed-outline pixel parity and every platform execution"
       ]
     }
   ]

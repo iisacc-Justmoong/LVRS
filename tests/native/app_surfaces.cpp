@@ -80,7 +80,7 @@ void run(const std::string& name){
         }else if(name=="header_menu"||name=="header_retirement"){
             good(find("header/menu").activate());check(clicked==1,"Menu callback was not dispatched");if(name=="header_retirement")check(!header.options(),"Menu callback did not retire the header safely");else{good(header.set_menu_clicked([&]{clicked+=10;}));good(find("header/menu").activate());check(clicked==11,"Live menu callback replacement was lost");good(header.set_menu_visible(false));check(!take(find("header/menu").snapshot()).visible,"Menu visibility did not update");}
         }else if(name=="header_disabled"){
-            good(header.set_enabled(false));check(!take(child.snapshot()).enabled&&!find("header/menu").activate(),"Disabled header exposed active actions");good(header.set_enabled(true));check(take(child.snapshot()).enabled,"Header re-enable lost requested action state");
+            good(header.set_enabled(false));good(find("header/menu").activate());check(!take(child.snapshot()).enabled&&clicked==0,"Disabled header exposed active actions");good(header.set_enabled(true));check(take(child.snapshot()).enabled,"Header re-enable lost requested action state");
         }else if(name=="header_validation"){
             auto options=take(header.options());options.content_horizontal_padding=std::numeric_limits<double>::quiet_NaN();check(!header.set_options(options)&&!take(header.options()).content_horizontal_padding,"Invalid AppHeader geometry partially committed");
         }else if(name=="header_geometry"){

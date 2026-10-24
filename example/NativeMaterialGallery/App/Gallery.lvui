@@ -1,0 +1,46 @@
+import vm MaterialBackend
+ApplicationWindow(title: "LVRS · native materials", width: 960, height: 720) {
+ VStack(id: "root", spacing: 16, padding: 24, alignment: .leading) {
+  AppHeader(title: "Native material surfaces", subtitle: "Masked blur · shared Core frames", compact: true, width: 900) {
+   LabelButton(id: "accent", text: "Accent", onClick: vm.change_accent)
+   LabelButton(id: "density", text: "Density", onClick: vm.change_density)
+   LabelButton(id: "blur", text: "Blur", onClick: vm.change_blur)
+   LabelButton(id: "close", text: "Close", onClick: vm.close)
+  }
+  HStack(spacing: 20, alignment: .leading) {
+   PanelMaterial(id: "panel", width: vm.width, height: 220, primaryColor: vm.accent,
+                 density: vm.density, blurEnabled: vm.blur, backdrop: .PreviousLayers, motion: vm.motion) {
+    VStack(padding: 20, spacing: 12) {
+     Label(text: "PanelMaterial · captured backdrop", style: .header2)
+     InputField(id: "editor", text: "Retained native editor", width: 280)
+     Label(text: "Eight accent gradients and inner highlight", style: .body)
+    }
+   }
+   WindowMaterial(id: "window", width: vm.width, height: 220, primaryColor: vm.accent,
+                  blurEnabled: vm.blur, backdrop: .PreviousLayers, motion: vm.motion) {
+    VStack(padding: 20, spacing: 12) {
+     Label(text: "WindowMaterial · dense surface", style: .header2)
+     Label(text: "The native host supplies the default accent.", style: .body)
+    }
+   }
+  }
+  HStack(spacing: 20, alignment: .leading) {
+   MaterialSurface(id: "outline", width: vm.width, height: 190, primaryColor: vm.accent, backdrop: .PreviousLayers,
+                   outlinePath: "M 20 0 H 400 Q 420 0 420 20 V 150 Q 420 170 400 170 H 230 L 210 190 L 190 170 H 20 Q 0 170 0 150 V 20 Q 0 0 20 0 Z",
+                   blurEnabled: vm.blur, motion: vm.motion) {
+    VStack(padding: 20, spacing: 12) {
+     Label(text: "One silhouette · blur, border and shadow", style: .header2)
+     Label(text: "Custom SVG outline with a tail", style: .body)
+    }
+   }
+   PanelMaterial(id: "standalone", width: vm.width, height: 190, primaryColor: vm.accent,
+                 backdrop: .None, blurEnabled: vm.blur, motion: vm.motion) {
+    VStack(padding: 20, spacing: 12) {
+     Label(text: "Standalone · no backdrop capture", style: .header2)
+     Label(text: "Premultiplied transparency is retained.", style: .body)
+    }
+   }
+  }
+  Label(id: "status", text: vm.status)
+ }
+}

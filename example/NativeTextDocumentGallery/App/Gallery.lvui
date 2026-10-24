@@ -1,0 +1,23 @@
+import vm TextDocumentBackend
+ApplicationWindow(title: "LVRS · native text document model", width: 920, height: 620) {
+ VStack(id: "root", padding: 24, spacing: 16, alignment: .leading) {
+  AppHeader(title: "Text document model", subtitle: "Native storage · Unicode · Core ownership", compact: true, width: 860) {
+   LabelButton(id: "next", text: "Next line", onClick: vm.next_line)
+   LabelButton(id: "insert", text: "Insert", onClick: vm.insert)
+   LabelButton(id: "undo", text: "Undo", onClick: vm.undo)
+   LabelButton(id: "save", text: "Save", onClick: vm.save)
+   LabelButton(id: "reload", text: "Reload", onClick: vm.reload)
+   LabelButton(id: "close", text: "Close", onClick: vm.close)
+  }
+  AppCard(title: "Document model explorer", subtitle: "One retained line at a time", width: 860, height: 340) {
+   VStack(padding: 20, spacing: 16, alignment: .leading) {
+    Label(id: "status", text: vm.status, style: .caption)
+    Label(text: "Current line", style: .header2)
+    Label(id: "preview", text: vm.preview, style: .body)
+    Label(text: "A view query leaves content, dirty state and edit history unchanged.", style: .caption)
+    Label(text: "See the CodeEditor gallery for the plain-text viewport; rich TextEditor remains pending.", style: .caption)
+   }
+  }
+  Label(id: "background", text: vm.background)
+ }
+}

@@ -48,11 +48,11 @@ void run(const std::string& name){
         }));
         if(name.starts_with("list_")){
             auto s=take(list.root().snapshot());check(near(s.implicit_size.width,90)&&near(s.implicit_size.height,30),"ListToolbar natural metrics changed");auto button=take(list.button_at(0));
-            if(name=="list_default")check(!take(button.snapshot()).enabled&&!button.activate(),"Blank icon slot remained actionable");
+            if(name=="list_default"){good(button.activate());check(!take(button.snapshot()).enabled&&clicks==0,"Blank icon slot remained actionable");}
             else if(name=="list_slots"){check(!list.button_at(-1)&&!list.button_at(3)&&take(list.resolved_icon(0))==lvrs::Icons::normalize("projectStructure"),"ListToolbar index/resolution contract changed");}
             else if(name=="list_update"){auto o=take(list.options());o.icons[0]="settings";o.button_size=28;good(list.set_options(o));check(near(take(button.snapshot()).bounds.width,28)&&take(list.resolved_icon(0))==lvrs::Icons::normalize("settings"),"ListToolbar update replaced its button or lost icon metrics");}
             else if(name=="list_invalid"){auto o=take(list.options());o.icons[2]="not-an-embedded-lvrs-icon";check(!list.set_options(o)&&take(list.options()).icons[2]=="settings","Invalid icon partially committed");o=take(list.options());o.button_size=-1;check(!list.set_options(o),"Negative ListToolbar size accepted");}
-            else if(name=="list_events"||name=="list_retirement"){good(button.activate());check(clicks==1,"ListToolbar event was not delivered");if(name=="list_retirement")check(!list.options(),"ListToolbar held a retired generation");else{auto o=take(list.options());o.interactive=false;good(list.set_options(o));check(!button.activate(),"Noninteractive ListToolbar remained actionable");}}
+            else if(name=="list_events"||name=="list_retirement"){good(button.activate());check(clicks==1,"ListToolbar event was not delivered");if(name=="list_retirement")check(!list.options(),"ListToolbar held a retired generation");else{auto o=take(list.options());o.interactive=false;good(list.set_options(o));good(button.activate());check(clicks==1&&!take(button.snapshot()).enabled,"Noninteractive ListToolbar remained actionable");}}
             else throw std::runtime_error("Unknown list toolbar case");
         }else if(name.starts_with("footer_")){
             auto s=take(footer.root().snapshot());check(near(s.implicit_size.width,88)&&near(s.implicit_size.height,26),"ListFooter default icon/menu metrics changed");auto button=take(footer.button_at(0));

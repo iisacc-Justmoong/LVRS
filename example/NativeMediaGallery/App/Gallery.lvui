@@ -1,0 +1,41 @@
+import vm MediaBackend
+ApplicationWindow(title: "LVRS · native Card and Avatar", width: 1160, height: 940) {
+ VStack(id: "root", spacing: 14, padding: 24, alignment: .leading) {
+  AppHeader(title: "Native media surfaces", subtitle: "LVUI AOT · iiGUI · iiSDKCore", compact: true, width: 1100) {
+   LabelButton(id: "update", text: "Update data", onClick: vm.update)
+   LabelButton(id: "close", text: "Close", onClick: vm.close)
+  }
+  HStack(spacing: 16) {
+   Avatar(id: "avatarSmall", size: .Small, source: vm.image)
+   Avatar(id: "avatarMedium", size: .Medium, source: vm.image)
+   Avatar(id: "avatarLarge", source: vm.image)
+   Label(text: "One immutable source · centered crop and circular mask", style: .body)
+  }
+  HStack(spacing: 16, alignment: .leading) {
+   Card(id: "file", type: .File, size: .Small, title: vm.title, selected: vm.selected,
+        previewSource: vm.image, metadata: "RAW · immutable pixels", onSelectedChanged: vm.select, width: 256, height: 280)
+   Card(id: "preview", type: .FilePreview, previewSource: vm.image, width: vm.preview_width, height: 280)
+   Card(id: "folder", type: .Folder, title: "Workspace", description: "Organized native assets", rows: vm.rows,
+        statusText: "Ready", footnote: "Updated today", onMenuRequested: vm.menu, onActionTriggered: vm.action)
+   Card(id: "project", type: .Project, title: "Native project", description: "Shared C++23 runtime", progress: vm.progress,
+        progressText: "Milestones", rows: vm.rows, onMenuRequested: vm.menu, onActionTriggered: vm.action)
+  }
+  HStack(spacing: 16, alignment: .leading) {
+   Card(id: "device", type: .Device, title: "Storage", statusText: "Connected", progress: vm.progress, progressText: "42 GB / 100 GB",
+        rows: vm.rows, onMenuRequested: vm.menu, onActionTriggered: vm.action)
+   Card(id: "model", type: .Model, title: "Local model", statusText: "Ready", rows: vm.rows,
+        iconComponent: vm.icon, onMenuRequested: vm.menu, onActionTriggered: vm.action)
+   Card(id: "member", type: .Member, title: "Creator", statusText: "Online", description: "Independent native UI", rows: vm.rows,
+        onMenuRequested: vm.menu, onActionTriggered: vm.action)
+   Card(id: "link", type: .Link, title: "iisacc", domain: "iisacc.com", previewTitle: "Native creative software", footnote: "HTTPS",
+        onMenuRequested: vm.menu, onActionTriggered: vm.action)
+  }
+  HStack(spacing: 16) {
+   Card(id: "custom", type: .FilePreview, width: 256, height: 100, previewComponent: vm.preview)
+   Card(id: "inline", type: .FilePreview, width: 256, height: 100) {
+    InputField(id: "retained", text: "Retained inline native View", width: 230)
+   }
+   Label(id: "status", text: vm.status)
+  }
+ }
+}
