@@ -173,7 +173,7 @@ inventory=subprocess.check_output(['git','-C',str(root),'ls-files','-z','--cache
 current={p for p in inventory if p and not p.startswith('src/LVRS/')}
 expected={x['path'] for x in source_files}
 if current!=expected: raise SystemExit('Legacy source inventory changed; refresh the audited baseline: '+str(sorted(current^expected)[:20]))
-api_files=[{'path':str(p.relative_to(root)),'sha256':digest(p)} for p in sorted((root/'src/LVRS').glob('*')) if p.suffix in {'.h','.cpp'}]
+api_files=[{'path':p.relative_to(root).as_posix(),'sha256':digest(p)} for p in sorted((root/'src/LVRS').glob('*'),key=lambda p:p.relative_to(root).as_posix()) if p.suffix in {'.h','.cpp'}]
 result={'schema':1,'source_revision':baseline['source_revision'],'renderer':'iiGUI self-rendered C++ widgets','runtime':'iiSDKCore',
         'remaining_global_contracts':['Read-only AX value-attribute metadata for virtual peers','Full IME replacement ranges, selection, copy/cut and validators','Glyph/icon atlas, damage tracking and large-view performance parity','All platform input/presentation adapters and original LVRS behavior'],
         'legacy_source_files':source_files,'native_api_files':api_files,
@@ -184,5 +184,7 @@ rows+=['','각 항목의 원본 위치·직접 노출 멤버·지원 입력·남
 for p,content in [(root/'catalog/native/parity.json',json.dumps(result,indent=2,ensure_ascii=False)+'\n'),(root/'docs/native/Parity.md','\n'.join(rows))]:
     if args.check:
         if not p.exists() or p.read_text()!=content: raise SystemExit('Stale native parity ledger: '+str(p))
-    else: p.write_text(content)
+    else:
+        newline='\r\n' if p.exists() and b'\r\n' in p.read_bytes() else '\n'
+        with p.open('w',encoding='utf-8',newline=newline) as output: output.write(content)
 print(json.dumps(result['counts']))
