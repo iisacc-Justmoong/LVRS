@@ -1,0 +1,107 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:0e677c60c4789861a7ef4cdf337bd364d8a2137975300f4e942fb4bb56717caa",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeTooltipGallery/README.md",
+    "sha256": "f72154b70a5c8ea2ebd7689490e22f0d888f722f7f592db608c4d8fffc3e2ea1",
+    "bytes": 822,
+    "line_count": 7,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native Tooltip Gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native Tooltip Gallery\n",
+      "level": 1,
+      "title": "Native Tooltip Gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "A C++23 LVUI application using iiGUI's own retained bubble widgets, native fonts, PanelMaterial and an iiSDKCore application entry point. No OS tooltip or Qt control is created.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "Hover or focus either origin. The first bubble contains live labels and an interactive child; the second uses wrapped text. The origin keeps its own click behavior. Available-area, text, placement and delay inputs bind to one retained backend. Core owns background work and all tooltip deadlines.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "Build and privately install with ./install.sh, passing the staged SDK package locations. [Usage and verification scope](docs/Usage.md) explains the runtime contract. Installation only compiles and copies artifacts. Applications, tests and the registered self-test remain deferred to the final whole-goal runtime batch.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native Tooltip Gallery",
+      "anchor": "native-tooltip-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Usage and verification scope",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 7
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

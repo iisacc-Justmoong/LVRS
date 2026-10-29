@@ -1,0 +1,71 @@
+cmake_minimum_required(VERSION 3.31)
+project(LVRSPresentationConsumer LANGUAGES CXX)
+find_package(LVRS CONFIG REQUIRED)
+find_package(LVUI CONFIG REQUIRED COMPONENTS Native Compiler)
+lvui_generate(NAME InstalledPresentation SOURCE Presentation.lvui FRAMEWORK LVRS
+    INCLUDES NativePresentationFixture.h OUTPUT_VARIABLE _presentation)
+lvui_generate(NAME InstalledScopedPresentation SOURCE Scoped.lvui FRAMEWORK LVRS
+    INCLUDES NativePresentationFixture.h OUTPUT_VARIABLE _scoped)
+set(_progress)
+foreach(_view Progress ProgressScoped ProgressForwarded)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeProgressFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _progress "${_generated}")
+endforeach()
+set(_history)
+foreach(_view History HistoryScoped)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeHistoryFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _history "${_generated}")
+endforeach()
+set(_registry)
+foreach(_view Registry RegistryScoped)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeRegistryFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _registry "${_generated}")
+endforeach()
+lvui_generate(NAME InstalledRouteRegistry SOURCE RouteRegistry.lvui FRAMEWORK LVRS
+    INCLUDES NativeRouteRegistryFixture.h OUTPUT_VARIABLE _route_registry)
+set(_hierarchy)
+foreach(_view HierarchyList HierarchyItem HierarchyCount HierarchyDelegate)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeHierarchyFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _hierarchy "${_generated}")
+endforeach()
+lvui_generate(NAME InstalledOpacity SOURCE Opacity.lvui FRAMEWORK LVRS
+    INCLUDES NativeOpacityFixture.h OUTPUT_VARIABLE _opacity)
+set(_platform)
+foreach(_view Platform PlatformSelection)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativePlatformFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _platform "${_generated}")
+endforeach()
+set(_model_sources)
+foreach(_view ModelSource ModelSourceSelection)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeModelSourceFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _model_sources "${_generated}")
+endforeach()
+set(_fonts)
+foreach(_view Font FontSelection)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeFontFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _fonts "${_generated}")
+endforeach()
+set(_svg)
+foreach(_view Svg SvgSelection)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeSvgFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _svg "${_generated}")
+endforeach()
+set(_render)
+foreach(_view Render RenderSelection)
+    lvui_generate(NAME Installed${_view} SOURCE ${_view}.lvui FRAMEWORK LVRS
+        INCLUDES NativeRenderFixture.h OUTPUT_VARIABLE _generated)
+    list(APPEND _render "${_generated}")
+endforeach()
+add_executable(presentation_consumer main.cpp ${_presentation} ${_scoped} ${_progress} ${_history} ${_registry} ${_route_registry} ${_hierarchy} ${_opacity} ${_platform} ${_model_sources} ${_fonts} ${_svg} ${_render})
+target_compile_features(presentation_consumer PRIVATE cxx_std_23)
+target_include_directories(presentation_consumer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(presentation_consumer PRIVATE LVRS::LVRS LVUI::Native)
+set_target_properties(presentation_consumer PROPERTIES CXX_EXTENSIONS OFF)

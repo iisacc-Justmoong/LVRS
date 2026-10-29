@@ -1,0 +1,1049 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2a7a927ee6a62ed581f67ebe1b599b86a04e90ac994ca42724bbe91c8f5cf5c2",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/PageRouter.md",
+    "sha256": "1d21e071a7ee04d134462cb9bf6a1c6dea1d8c3cb2d7ca85a2cda864e2b87a96",
+    "bytes": 6683,
+    "line_count": 158,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "PageRouter",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# PageRouter\n",
+      "level": 1,
+      "title": "PageRouter"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "현재 C++23 자체 위젯 경로는 [네이티브 PageRouter](../../native/PageRouter.md)를\n참조한다. 아래는 보존한 기존 Qt/QML 구현의 전체 비교 계약이며, 네이티브의\n구현 완료 목록이 아니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "위치: `src/qml/components/navigation/PageRouter.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`PageRouter`는 `StackView` + `RouteResolver`를 기반으로 구축된 LVRS 스택 탐색 엔진입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 15,
+      "end_line": 17,
+      "raw": "- 페이지 대상(`component`/`source`)에 대한 경로 경로를 확인합니다.\n- 경로 스택 메타데이터를 시각적 스택 작업과 동기화합니다.\n- 옵션 ViewModel/ViewState 추적 후크를 통합합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "페이지 대상(`component`/`source`)에 대한 경로 경로를 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경로 스택 메타데이터를 시각적 스택 작업과 동기화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "옵션 ViewModel/ViewState 추적 후크를 통합합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "경로 구성:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "- `routes`\n- `initialPath`\n- `notFoundComponent`, `notFoundSource`\n- `routeResolveCacheCapacity`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`routes`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`initialPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`notFoundComponent`, `notFoundSource`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`routeResolveCacheCapacity`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "스택 및 경로 상태:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 45,
+      "raw": "- `path`(SwiftUI와 유사한 스택 항목)\n- `currentPath`, `currentParams`\n- `depth`, `canGoBack`, `currentPageItem`\n- 대화형 전환 상태:\n  - `interactiveTransitionActive`\n  - `interactiveTransitionProgress`\n  - `interactiveTransitionDirection`\n  - `interactiveTransitionOperation`\n  - `interactiveTransitionFromPath`, `interactiveTransitionToPath`\n  - `interactiveTransitionFromParams`, `interactiveTransitionToParams`\n  - `interactiveTransitionVelocityX`, `interactiveTransitionVelocityY`\n  - `interactiveTransitionMeta`\n  - `interactiveTransitionPreviewItem`\n  - `interactiveTransitionCanCommit`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`path`(SwiftUI와 유사한 스택 항목)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentPath`, `currentParams`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`depth`, `canGoBack`, `currentPageItem`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 전환 상태:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionProgress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionOperation`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionFromPath`, `interactiveTransitionToPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionFromParams`, `interactiveTransitionToParams`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionVelocityX`, `interactiveTransitionVelocityY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionMeta`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionPreviewItem`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionCanCommit`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "프리젠테이션 플래그:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 49,
+      "end_line": 57,
+      "raw": "- `enforcePageViewport`\n- `isolateInactivePages`\n- `retainInactivePageCount`\n- `interactiveTransitionsEnabled`\n- `interactiveTransitionSettleDuration`(기본값: `0`)\n- `interactiveTransitionCommitProgress`\n- `interactiveTransitionVelocityThreshold`\n- `interactiveTransitionOutgoingParallaxFactor`\n- `interactiveTransitionIncomingPreviewFactor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`enforcePageViewport`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isolateInactivePages`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`retainInactivePageCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionsEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionSettleDuration`(기본값: `0`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionCommitProgress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionVelocityThreshold`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionOutgoingParallaxFactor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionIncomingPreviewFactor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "글로벌 등록:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "- `registerAsGlobalNavigator`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`registerAsGlobalNavigator`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 65,
+      "end_line": 72,
+      "raw": "- `navigated(path, params)`\n- `navigationFailed(path)`\n- `componentNavigated(component)`\n- `interactiveTransitionStarted(state)`\n- `interactiveTransitionUpdated(state)`\n- `interactiveTransitionCommitted(state)`\n- `interactiveTransitionCancelled(state)`\n- `interactiveTransitionRejected(reason, state)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`navigated(path, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`navigationFailed(path)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`componentNavigated(component)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionStarted(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionUpdated(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionCommitted(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionCancelled(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionRejected(reason, state)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "탐색 방법:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 76,
+      "end_line": 91,
+      "raw": "- 경로 기반: `go`, `push`, `replace`, `setRoot`, `back`, `pop`, `popToRoot`\n- 구성요소 기반: `goTo`, `replaceWith`, `setRootComponent`\n- 대화형:\n  - `beginInteractiveTransition(spec)`\n  - `beginInteractiveBack(meta?)`\n  - `beginInteractivePush(path, params?, meta?)`\n  - `beginInteractiveReplace(path, params?, meta?)`\n  - `beginInteractiveSetRoot(path, params?, meta?)`\n  - `beginInteractivePushComponent(component, params?, meta?)`\n  - `beginInteractiveReplaceComponent(component, params?, meta?)`\n  - `beginInteractiveSetRootComponent(component, params?, meta?)`\n  - `updateInteractiveTransition(progress, details?)`\n  - `shouldCommitInteractiveTransition(progress?, velocityX?, velocityY?)`\n  - `finishInteractiveTransition(commit?)`\n  - `cancelInteractiveTransition()`\n  - `interactiveTransitionState()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "경로 기반: `go`, `push`, `replace`, `setRoot`, `back`, `pop`, `popToRoot`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구성요소 기반: `goTo`, `replaceWith`, `setRootComponent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveTransition(spec)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveBack(meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractivePush(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveReplace(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveSetRoot(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractivePushComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveReplaceComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveSetRootComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updateInteractiveTransition(progress, details?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shouldCommitInteractiveTransition(progress?, velocityX?, velocityY?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`finishInteractiveTransition(commit?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancelInteractiveTransition()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionState()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "<a id=\"route-grammar\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "## 경로 문법\n",
+      "level": 2,
+      "title": "경로 문법"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 97,
+      "end_line": 99,
+      "raw": "- 정적: `/reports`\n- 매개변수: `/runs/[id]`\n- 나머지: `/logs/[...path]`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "정적: `/reports`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "매개변수: `/runs/[id]`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "나머지: `/logs/[...path]`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 105,
+      "end_line": 119,
+      "raw": "- 커밋된 경로 스택 돌연변이는 C++ `NavigationStackModel`에 위임됩니다.\n- 경로 확인은 내부 `RouteResolver`와 `routeResolveCacheCapacity`의 캐시 용량을 사용합니다.\n- `navigate(...)`는 확인된 매개변수를 호출자 매개변수와 병합합니다.\n- 누락된 경로는 구성 시 찾을 수 없는 대상으로 대체됩니다. 그렇지 않으면 `navigationFailed`를 내보냅니다.\n- `initialPath`는 초기 `path` 스택이 없거나 기존 스택 항목이 이미 있는 경우에만 사용됩니다. `path: [...]`가 있는 라우터는 `Component.onCompleted` 중에 기본 `initialPath: \"/\"`로 재설정되지 않습니다.\n- `applyPageViewportContract` 및 `applySingleChildViewportContract`는 뷰포트 안전 페이지 크기 조정을 적용합니다.\n- `isolateInactivePages == true`인 경우 보유되지 않은 스택 항목은 숨겨지거나 비활성화되거나 불투명도가0입니다.\n- 라우터는 가능한 경우 `ViewModels`와 바인딩을 동기화하고 `ViewStateTracker`와 스냅샷을 동기화할 수 있습니다.\n- 대화형 전환 오케스트레이션은 내부 드라이버 개체에 위임되므로 `PageRouter`는 커밋된 스택 정보의 소스로 유지됩니다.\n- 대화형 전환은 `finishInteractiveTransition(true)`가 커밋될 때까지 `path` 또는 `currentPath`를 변경하지 않습니다.\n- 역방향 대화형 전환은 이전 스택 항목을 미리보기 화면으로 재사용합니다.\n- 정방향 대화형 전환은 스택 위에 실시간 미리 보기 항목을 인스턴스화합니다. 따라서 미리보기 페이지는 커밋하기 전에 일반 QML 라이프사이클 코드를 실행합니다.\n- 대화형 전환 커밋은 내장된 `StackView` 푸시/팝 애니메이션을 억제하고 스택 변형을 즉시 적용하므로 사용자 중심 드래그가 눈에 보이는 유일한 동작으로 유지됩니다.\n- `interactiveTransitionSettleDuration`의 기본값은 `0`이므로 대화형 제스처를 놓으면 호스트가 명시적으로 선택하지 않는 한 추가 릴리스 후 정착 애니메이션이 재생되지 않습니다.\n- 경쟁하는 비대화형 탐색 호출은 활성 대화형 전환을 먼저 중단합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "커밋된 경로 스택 돌연변이는 C++ `NavigationStackModel`에 위임됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경로 확인은 내부 `RouteResolver`와 `routeResolveCacheCapacity`의 캐시 용량을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`navigate(...)`는 확인된 매개변수를 호출자 매개변수와 병합합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "누락된 경로는 구성 시 찾을 수 없는 대상으로 대체됩니다. 그렇지 않으면 `navigationFailed`를 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`initialPath`는 초기 `path` 스택이 없거나 기존 스택 항목이 이미 있는 경우에만 사용됩니다. `path: [...]`가 있는 라우터는 `Component.onCompleted` 중에 기본 `initialPath: \"/\"`로 재설정되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyPageViewportContract` 및 `applySingleChildViewportContract`는 뷰포트 안전 페이지 크기 조정을 적용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isolateInactivePages == true`인 경우 보유되지 않은 스택 항목은 숨겨지거나 비활성화되거나 불투명도가0입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라우터는 가능한 경우 `ViewModels`와 바인딩을 동기화하고 `ViewStateTracker`와 스냅샷을 동기화할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 전환 오케스트레이션은 내부 드라이버 개체에 위임되므로 `PageRouter`는 커밋된 스택 정보의 소스로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 전환은 `finishInteractiveTransition(true)`가 커밋될 때까지 `path` 또는 `currentPath`를 변경하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "역방향 대화형 전환은 이전 스택 항목을 미리보기 화면으로 재사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정방향 대화형 전환은 스택 위에 실시간 미리 보기 항목을 인스턴스화합니다. 따라서 미리보기 페이지는 커밋하기 전에 일반 QML 라이프사이클 코드를 실행합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 전환 커밋은 내장된 `StackView` 푸시/팝 애니메이션을 억제하고 스택 변형을 즉시 적용하므로 사용자 중심 드래그가 눈에 보이는 유일한 동작으로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionSettleDuration`의 기본값은 `0`이므로 대화형 제스처를 놓으면 호스트가 명시적으로 선택하지 않는 한 추가 릴리스 후 정착 애니메이션이 재생되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경쟁하는 비대화형 탐색 호출은 활성 대화형 전환을 먼저 중단합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "<a id=\"backend-model\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "## 백엔드 모델\n",
+      "level": 2,
+      "title": "백엔드 모델"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "`NavigationStackModel`는 정규화된 경로 항목, 구성 요소 스택 항목, 푸시/교체/루트 설정/팝 스택 결과, `currentPath`, `currentParams` 및 뷰 추적 설명자를 소유합니다. `PageRouter.qml`는 계속해서 경로 확인, `StackView` 항목 작업 및 대화형 전환 제어를 담당합니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "fenced_code",
+      "start_line": 131,
+      "end_line": 142,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.PageRouter {\n    id: router\n    routes: [\n        { path: \"/\", component: homePage },\n        { path: \"/runs/[id]\", component: runPage }\n    ]\n    initialPath: \"/\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.PageRouter {\n    id: router\n    routes: [\n        { path: \"/\", component: homePage },\n        { path: \"/runs/[id]\", component: runPage }\n    ]\n    initialPath: \"/\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "대화형 뒤로 스와이프:\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "fenced_code",
+      "start_line": 146,
+      "end_line": 152,
+      "raw": "```qml\nif (!router.interactiveTransitionActive)\n    router.beginInteractiveBack({ source: \"edge-pan\" })\n\nrouter.updateInteractiveTransition(progress, { velocityX: velocityX })\nrouter.finishInteractiveTransition()\n```\n",
+      "language": "qml",
+      "code": "if (!router.interactiveTransitionActive)\n    router.beginInteractiveBack({ source: \"edge-pan\" })\n\nrouter.updateInteractiveTransition(progress, { velocityX: velocityX })\nrouter.finishInteractiveTransition()\n",
+      "closed": true
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "html",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "heading",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "새 페이지는 적당한 규모 변화로 안정됩니다. 대화형 제스처는 직접 추적하고 릴리스를 결정합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "PageRouter",
+      "anchor": "pagerouter",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 13
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 21
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "경로 문법",
+      "anchor": "경로-문법",
+      "start_line": 95
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 103
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "백엔드 모델",
+      "anchor": "백엔드-모델",
+      "start_line": 123
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 129
+    },
+    {
+      "block_id": "b000073",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 156
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000003",
+        "label": "네이티브 PageRouter",
+        "target": "../../native/PageRouter.md",
+        "kind": "relative",
+        "line": 3
+      },
+      {
+        "block_id": "b000075",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 158
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

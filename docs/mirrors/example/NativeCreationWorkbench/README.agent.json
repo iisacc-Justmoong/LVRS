@@ -1,0 +1,114 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2cb82c5d93757286499a2017768b92333fb7c1d84d4fc5d6ed3b73dbf6722765",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeCreationWorkbench/README.md",
+    "sha256": "2fde93f09b841a5d53f16f7a70a25c7ea17f82e8852975b7c5b0861037cc976f",
+    "bytes": 791,
+    "line_count": 13,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native Creation Workbench",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native Creation Workbench\n",
+      "level": 1,
+      "title": "Native Creation Workbench"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "A Qt-free LVUI/iiGUI authoring probe for a creation workspace: native parameter\ncontrols, C++ canvas and timeline sources, captured pointer input, asynchronous\nprocedural RGBA generation, keyed result rows, selection and retained frame playback.\nIt demonstrates SDK view capabilities; it does not migrate Dreamscapes or run an AI model.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 11,
+      "raw": "Build with CMake in `build/`, using installed native LVRS/LVUI/iiGUI packages.\nRun normally for interactive use, or use `--self-test` during the final verification batch.\nThe self-test verifies GPU frame pixels, view-only pan/seek, result selection,\nresponsive layout, retained input, display-frame callbacks and backend retirement.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "See [the behavior contract](docs/Behavior.md) and [the usage example](example/README.md).\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native Creation Workbench",
+      "anchor": "native-creation-workbench",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "the behavior contract",
+        "target": "docs/Behavior.md",
+        "kind": "relative",
+        "line": 13
+      },
+      {
+        "block_id": "b000007",
+        "label": "the usage example",
+        "target": "example/README.md",
+        "kind": "relative",
+        "line": 13
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

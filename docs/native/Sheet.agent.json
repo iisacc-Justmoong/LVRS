@@ -1,0 +1,336 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7b0ef5fc5902ea624d919dd2725e84c11e29c4e853cfadb78ee6357e18112e43",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Sheet.md",
+    "sha256": "fba6034ff0b0fceaa9acf1c9c89acb5b208d886f3085f306449bc13f7225faa4",
+    "bytes": 5580,
+    "line_count": 77,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 Sheet",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 Sheet\n",
+      "level": 1,
+      "title": "네이티브 Sheet"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 8,
+      "raw": "`lvrs::Sheet`와 `Widgets::sheet`는 원본 `src/qml/components/surfaces/Sheet.qml`의\n중앙/하단 모달 표면을 iiGUI C++ 위젯으로 구성한다. 제목·설명·닫기 버튼·grabber·본문은\n부모 마운트의 수명을 가지며, 닫을 때 본문을 해제하지 않는다. 원본 Loader의\n`active: contentComponent !== null` 계약을 따르며 Modal의 열림 단위 본문과 다르다.\n`SheetContentFactory`는 생성 시 한 번 호출한다. 같은 본문의 편집 값은 다시 열어도\n유지하고, 재개방은 스크롤과 드래그 위치만 초기화한다. 전체 마운트 해제 시 회수한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "## 배치와 스타일\n",
+      "level": 2,
+      "title": "배치와 스타일"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "list",
+      "start_line": 12,
+      "end_line": 26,
+      "raw": "- presentation은 `automatic`, `mobile`, `desktop`이다. 자동은 컴파일 대상의 모바일\n  플랫폼 여부를 사용하며 창 폭만으로 바꾸지 않는다. macOS에서도 mobile을 지정해\n  같은 C++ 배치를 실행할 수 있으나 iOS/Android 장치 실행 증거를 뜻하지 않는다.\n- 데스크톱 너비는 기본 560과 양쪽 24 여백으로 제한한 뷰포트 너비 중 작은 값이다.\n  높이는 고정 외곽 높이와 preferredHeight(기본 420) 중 큰 값을 같은 여백 안으로\n  제한하며 중앙에 둔다.\n- 모바일은 전체 너비와 하단 정렬을 사용한다. fit은 본문과 외곽의 자연 높이,\n  medium은 화면 높이의 57%, large는 90%를 반올림한다. 최대 높이는 화면 높이에서\n  `max(24, topSafeInset)`을 뺀 값이다. 하단 안전 여백은 본문 아래에 포함한다.\n- 원본의 기본 radius는 모바일 24, 데스크톱 16이며 현재 표면의 반너비/반높이로\n  제한한다. surfaceColor와 backdropColor는 RGBA를 받으며 GPU의 선형 색 공간에서\n  합성한다. 기본 backdrop은 검정 48%이다.\n- showHeader·showDescription·showCloseButton·showGrabber, 20 기본 contentPadding,\n  preferredWidth/Height·desktopMargin과 top/bottomSafeInset을 C++ `set_options`로\n  바꾸어도 본문을 재생성하지 않는다. 안전 여백의 OS 자동 관찰은 아직 연결하지 않는다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "presentation은 `automatic`, `mobile`, `desktop`이다. 자동은 컴파일 대상의 모바일",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱 너비는 기본 560과 양쪽 24 여백으로 제한한 뷰포트 너비 중 작은 값이다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일은 전체 너비와 하단 정렬을 사용한다. fit은 본문과 외곽의 자연 높이,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원본의 기본 radius는 모바일 24, 데스크톱 16이며 현재 표면의 반너비/반높이로",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "showHeader·showDescription·showCloseButton·showGrabber, 20 기본 contentPadding,",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 32,
+      "raw": "고정 헤더는 본문 스크롤에 참여하지 않는다. 본문은 [iiGUI 스크롤 계약](../../../iiGUI/docs/ScrollViews.md)을\n사용하며 휠·트랙패드·자식 포커스 노출·중첩 clip·표시기를 제공한다. scrollContent가\nfalse이면 본문 높이를 뷰포트 높이에 맞추고 넘친 픽셀을 자른다. 모바일 grabber만 아래로\n드래그할 수 있으며 `min(120, height * 0.2)` 이상에서 닫는다. 그보다 짧은 드래그는\nOutBack으로 복귀한다. 본문의 터치 관성 스크롤과 스크롤바 드래그는 남아 있다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## 프레임·입력·수명\n",
+      "level": 2,
+      "title": "프레임·입력·수명"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 41,
+      "raw": "enter는 OutBack, exit는 InCubic이며 양쪽 모두 원본 animationDuration(기본 420ms)을\n사용한다. 모바일은 높이에 따른 수직 이동, 데스크톱은 0.94→1 배율과 투명도이다.\n드래그 복귀도 같은 공유 모션 설정을 따른다. Core의 unscaled 프레임을 사용하므로\n게임 정지 중에도 진행한다. 모션 감소·속도·로컬 motionEnabled는 실제 실행 중 적용한다.\n이동 합성은 Metal이 기존 글자·이미지 텍스처를 재사용한다. D3D11/Vulkan의 비항등\n변환 요청은 현재 명시적으로 미지원이며 타이머로 동기화를 흉내 내지 않는다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 47,
+      "raw": "dismissOnBackground·dismissOnEscape·dismissOnDrag는 각각 별도 정책이다. 닫기 버튼은\n명시적으로 닫으며 자식의 일반 액션에는 자동 닫기를 넣지 않는다. 모달 배경 클릭을\n소비하고 이전 유효 포커스를 복원한다. 현재 opened/closed 통지와 논리적 입력 해제·포커스\n복귀는 iiGUI의 즉시 전환 계약이다. 원본 Qt Popup의 전환 완료 시점 신호·상속 API 전체와\n완전히 같은 타이밍으로 검증한 것은 아니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 51,
+      "raw": "`root()`, `viewport()`, `content_item()`은 약한 세대별 핸들이다. `content_item()`은\n보관한 콘텐츠 슬롯이며 원본 Loader의 item 객체를 그대로 노출한다는 뜻은 아니다.\n네이티브 함수에서 잘못된 문자열·지오메트리·색상·열거형·시간 값은 오류로 반환한다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "## LVUI와 검증\n",
+      "level": 2,
+      "title": "LVUI와 검증"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 55,
+      "end_line": 66,
+      "raw": "```lvui\nimport vm ExportBackend\nApplicationWindow {\n    Sheet(id: \"export\", title: \"Export\", presentation: .desktop,\n          motion: vm.motion, onOpened: vm.opened, onClosed: vm.closed) {\n        VStack(spacing: 12) {\n            InputField(id: \"filename\", text: \"Untitled\", onEdited: vm.edited)\n            LabelButton(text: \"Export\", onClick: vm.exportFile)\n        }\n    }\n}\n```\n",
+      "language": "lvui",
+      "code": "import vm ExportBackend\nApplicationWindow {\n    Sheet(id: \"export\", title: \"Export\", presentation: .desktop,\n          motion: vm.motion, onOpened: vm.opened, onClosed: vm.closed) {\n        VStack(spacing: 12) {\n            InputField(id: \"filename\", text: \"Untitled\", onEdited: vm.edited)\n            LabelButton(text: \"Export\", onClick: vm.exportFile)\n        }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 72,
+      "raw": "`FRAMEWORK LVRS`에서 정적 옵션과 deferred C++ 메서드 참조를 코드 생성한다. 본문의\n여러 View는 원본 inline Item처럼 같은 콘텐츠 슬롯을 공유하며 필요하면 스택으로 묶는다.\nSheet 본문의 ID는 마운트 전체에서 유일해야 한다. 부모 C++ backend를 다시 생성하지\n않는다. 일반 반응형 값 바인딩·실행 중 contentComponent 교체·별도 자식 backend import·\n처음부터 열린 중첩 팝업·모든 모바일/데스크톱 입력과 RHI 동등성은 남아 있다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 77,
+      "raw": "`tests/native/sheet.cpp`는 실제 macOS 창에서 배치·수명·스크롤·정책·드래그·모션·GPU를\n검사한다. `examples/NativeSheetGallery`는 두 프레젠테이션을 같은 LVUI 소스에 포함하며\nCore 작업자 결과·프레임·크기 변경·본문 보존·공유 모션·정상 종료를 검증한다. 전체 LVRS의\n완료를 뜻하지 않으며 [대응표](Parity.md)의 Sheet는 부분 구현 상태이다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 Sheet",
+      "anchor": "네이티브-sheet",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "배치와 스타일",
+      "anchor": "배치와-스타일",
+      "start_line": 10
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "프레임·입력·수명",
+      "anchor": "프레임입력수명",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVUI와 검증",
+      "anchor": "lvui와-검증",
+      "start_line": 53
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "부모 마운트의 수명을 가지며, 닫을 때 본문을 해제하지 않는다. 원본 Loader의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 14,
+        "text": "같은 C++ 배치를 실행할 수 있으나 iOS/Android 장치 실행 증거를 뜻하지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000007",
+        "line": 26,
+        "text": "바꾸어도 본문을 재생성하지 않는다. 안전 여백의 OS 자동 관찰은 아직 연결하지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000009",
+        "line": 28,
+        "text": "고정 헤더는 본문 스크롤에 참여하지 않는다. 본문은 [iiGUI 스크롤 계약](../../../iiGUI/docs/ScrollViews.md)을",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 70,
+        "text": "Sheet 본문의 ID는 마운트 전체에서 유일해야 한다. 부모 C++ backend를 다시 생성하지",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000009",
+        "label": "iiGUI 스크롤 계약",
+        "target": "../../../iiGUI/docs/ScrollViews.md",
+        "kind": "relative",
+        "line": 28
+      },
+      {
+        "block_id": "b000025",
+        "label": "대응표",
+        "target": "Parity.md",
+        "kind": "relative",
+        "line": 77
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

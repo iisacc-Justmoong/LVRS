@@ -1,0 +1,549 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:3fab7e40026a2cbf59fe7209d0e5da3388ca22bcc347cb7b4201d20c7fb98434",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/StateModel.md",
+    "sha256": "c3e75071bf87ebad8c471992e9edb1138e18a70bd568889a84ff613038538086",
+    "bytes": 2566,
+    "line_count": 81,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "StateModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# StateModel\n",
+      "level": 1,
+      "title": "StateModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`StateModel`는 백엔드 기반 LVRS 구성 요소를 위한 최초의 구체적인 C++ 상태 컨테이너입니다. `ViewModel`에서 파생되므로 `ViewModels`를 통해 등록하고 동일한 소유권 규칙을 사용하여 뷰에 바인딩할 수 있습니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- 구성 요소 상태를 QML에서 C++ QObject로 이동합니다.\n- 증분 구성 요소 마이그레이션을 위한 작은 키-값 상태 표면을 제공합니다.\n- `revision`, `valuesChanged` 및 `valueChanged`를 통해 결정적 변경 알림을 노출합니다.\n- 상태 개체를 `ViewModels` 설명자 및 소유권 게이트와 호환되게 유지하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "구성 요소 상태를 QML에서 C++ QObject로 이동합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "증분 구성 요소 마이그레이션을 위한 작은 키-값 상태 표면을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision`, `valuesChanged` 및 `valueChanged`를 통해 결정적 변경 알림을 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태 개체를 `ViewModels` 설명자 및 소유권 게이트와 호환되게 유지하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "속성:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 23,
+      "raw": "- `values: map`\n- `stateKeys: stringList`\n- `revision: int`\n- `empty: bool`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`values: map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateKeys: stringList`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision: int`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`empty: bool`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 34,
+      "raw": "- `value(key, fallbackValue = undefined)`\n- `valueOr(key, fallbackValue)`\n- `hasValue(key)`\n- `setValue(key, value)`\n- `removeValue(key)`\n- `applyPatch(patch)`\n- `clearValues()`\n- `stateSnapshot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`value(key, fallbackValue = undefined)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueOr(key, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasValue(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setValue(key, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`removeValue(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyPatch(patch)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearValues()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateSnapshot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 41,
+      "raw": "- `valuesChanged()`\n- `stateKeysChanged()`\n- `revisionChanged()`\n- `valueChanged(key, value, previousValue)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`valuesChanged()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateKeysChanged()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revisionChanged()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueChanged(key, value, previousValue)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 47,
+      "end_line": 53,
+      "raw": "- 키는 트림 정규화됩니다.\n- 빈 키는 거부되고 `error`를 `Empty state key`로 설정합니다.\n- `setValue()`는 하나의 키를 변경하고 값이 실제로 변경될 때만 `revision`를 증가시킵니다.\n- `applyPatch()`는 비어 있지 않은 패치 키를 현재 상태로 병합합니다.\n- `clearValues()`는 모든 상태를 제거하고 키별 `valueChanged` 알림을 내보냅니다.\n- `stateSnapshot()`에는 기본 `ViewModel` 스냅샷과 `values`, `stateKeys`, `revision` 및 `empty`가 포함됩니다.\n- `ViewModels.descriptor(key)`는 등록된 인스턴스를 `stateModel=true`로 표시하고 현재 상태 필드를 포함합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "키는 트림 정규화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 키는 거부되고 `error`를 `Empty state key`로 설정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setValue()`는 하나의 키를 변경하고 값이 실제로 변경될 때만 `revision`를 증가시킵니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyPatch()`는 비어 있지 않은 패치 키를 현재 상태로 병합합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearValues()`는 모든 상태를 제거하고 키별 `valueChanged` 알림을 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateSnapshot()`에는 기본 `ViewModel` 스냅샷과 `values`, `stateKeys`, `revision` 및 `empty`가 포함됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModels.descriptor(key)`는 등록된 인스턴스를 `stateModel=true`로 표시하고 현재 상태 필드를 포함합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "fenced_code",
+      "start_line": 59,
+      "end_line": 75,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.StateModel {\n    id: progressState\n    values: ({\n        minimumValue: 0,\n        maximumValue: 100,\n        startValue: 0,\n        currentValue: 64\n    })\n}\n\nLV.ProgressBar {\n    stateModel: progressState\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.StateModel {\n    id: progressState\n    values: ({\n        minimumValue: 0,\n        maximumValue: 100,\n        startValue: 0,\n        currentValue: 64\n    })\n}\n\nLV.ProgressBar {\n    stateModel: progressState\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"migration-policy\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## 마이그레이션 정책\n",
+      "level": 2,
+      "title": "마이그레이션 정책"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "아직 도메인별 `ViewModel` 하위 클래스를 사용할 자격이 없는 구성 요소 상태에는 `StateModel`를 사용하세요. 동작이 도메인별로 이루어지면 키-값 상태에서 명시적인 `Q_PROPERTY` 필드 및 명령을 사용하여 입력된 C++ `ViewModel`로 이동합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "StateModel",
+      "anchor": "statemodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 45
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 57
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "마이그레이션 정책",
+      "anchor": "마이그레이션-정책",
+      "start_line": 79
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

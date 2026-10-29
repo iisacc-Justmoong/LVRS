@@ -1,0 +1,529 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:233ad1a8f994136d87141e196de79cd637494b5d48a553d96d4d3f54ab0bf97f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/ProgressModel.md",
+    "sha256": "3cf90a243eed1e3a502bdafe4480d24834cdd6708a3508f244d85da7925158d4",
+    "bytes": 2107,
+    "line_count": 66,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ProgressModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ProgressModel\n",
+      "level": 1,
+      "title": "ProgressModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/model/progressmodel.h`, `src/backend/model/progressmodel.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ProgressModel`는 `ProgressBar.qml`에 대한 숫자 범위 정규화를 소유합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- QML에서 진행 범위 상태 및 세그먼트 수학을 유지합니다.\n- 최소, 최대, 시작 및 현재 값에 대한 선택적 `StateModel` 값을 읽으십시오.\n- 렌더링을 위해 고정된 정규화된 값을 제공합니다.\n- 둥근 직사각형과 원통형 진행 모양에 대한 반경 선택을 중앙 집중화합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "QML에서 진행 범위 상태 및 세그먼트 수학을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최소, 최대, 시작 및 현재 값에 대한 선택적 `StateModel` 값을 읽으십시오.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링을 위해 고정된 정규화된 값을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "둥근 직사각형과 원통형 진행 모양에 대한 반경 선택을 중앙 집중화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "입력:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 28,
+      "raw": "- `minimumValue`\n- `maximumValue`\n- `startValue`\n- `currentValue`\n- `stateModel`\n- `minimumValueStateKey`\n- `maximumValueStateKey`\n- `startValueStateKey`\n- `currentValueStateKey`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`minimumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`maximumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minimumValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`maximumValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentValueStateKey`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "읽기 전용:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 43,
+      "raw": "- `usingStateModel`\n- `stateRevision`\n- `effectiveMinimumValue`\n- `effectiveMaximumValue`\n- `effectiveStartValue`\n- `effectiveCurrentValue`\n- `valueRange`\n- `normalizedStart`\n- `normalizedCurrent`\n- `fillStart`\n- `fillProgress`\n- `progress`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`usingStateModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateRevision`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveMinimumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveMaximumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveStartValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveCurrentValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueRange`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedStart`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedCurrent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillStart`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillProgress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`progress`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 47,
+      "end_line": 49,
+      "raw": "- `stateNumber(key, fallbackValue)`\n- `normalizedValue(value)`\n- `radiusFor(shapeStyle, cornerRadius, rectWidth, rectHeight)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`stateNumber(key, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedValue(value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`radiusFor(shapeStyle, cornerRadius, rectWidth, rectHeight)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 55,
+      "end_line": 60,
+      "raw": "- Direct QML 속성은 항상 대체 항목으로 유지됩니다.\n- `stateModel`가 있는 경우 `StateModel::valueOr`를 통해 유효한 값을 읽습니다.\n- 숫자가 아니거나 유한하지 않은 상태 값은 직접 속성 값으로 대체됩니다.\n- `normalizedValue`는 `0..1`에 고정됩니다.\n- 0에 가까운 범위는 이진 진행으로 렌더링됩니다. 최대값 이상의 현재 값은 `1`가 되고, 그렇지 않으면 `0`가 됩니다.\n- `fillStart`는 정규화된 시작/전류 중 더 낮은 값이고 `fillProgress`는 절대 거리입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Direct QML 속성은 항상 대체 항목으로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateModel`가 있는 경우 `StateModel::valueOr`를 통해 유효한 값을 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "숫자가 아니거나 유한하지 않은 상태 값은 직접 속성 값으로 대체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedValue`는 `0..1`에 고정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "0에 가까운 범위는 이진 진행으로 렌더링됩니다. 최대값 이상의 현재 값은 `1`가 되고, 그렇지 않으면 `0`가 됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillStart`는 정규화된 시작/전류 중 더 낮은 값이고 `fillProgress`는 절대 거리입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "<a id=\"qml-boundary\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "## QML 경계\n",
+      "level": 2,
+      "title": "QML 경계"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "`ProgressBar.qml`는 시각적 입력을 `ProgressModel`에 바인딩하고 추적/채우기 직사각형만 렌더링합니다. 수치 상태 분해능, 범위 강제 변환, 정규화된 진행, 세그먼트 계산 및 모양 반경 선택은 `ProgressModel`에 속합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ProgressModel",
+      "anchor": "progressmodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 53
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML 경계",
+      "anchor": "qml-경계",
+      "start_line": 64
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

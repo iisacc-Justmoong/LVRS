@@ -1,0 +1,130 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7cc03d8c87c52ad6469d7783829f9ccff6149af1c74f24ae3e7a312154485c26",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/VisualCatalog/assets/cards/README.md",
+    "sha256": "221ddfaf1425ad8122be1a9f3ce877ca376efcac33ed432bd7cfdbd9dc0d6527",
+    "bytes": 589,
+    "line_count": 14,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Card preview assets",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Card preview assets\n",
+      "level": 1,
+      "title": "Card preview assets"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Exact PNG bytes downloaded from Figma FilePreview `852:993` on 2026-09-11:\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "list",
+      "start_line": 5,
+      "end_line": 7,
+      "raw": "- `architecture.png`: Content=Architecture `852:994`.\n- `landscape.png`: Content=Landscape `852:995`.\n- `document.png`: Content=Document `852:996`.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`architecture.png`: Content=Architecture `852:994`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`landscape.png`: Content=Landscape `852:995`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`document.png`: Content=Document `852:996`.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "Source: https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-id=852-993\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "These are sample data for VisualCatalog and the rendering regression test, not\ndefault artwork embedded in the LVRS framework. The source images were authored\nfor this LVRS Figma design. Card accepts arbitrary previewSource URLs or a\npreviewComponent replacement.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Card preview assets",
+      "anchor": "card-preview-assets",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

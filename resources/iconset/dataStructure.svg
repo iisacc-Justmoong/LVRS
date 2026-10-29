@@ -1,10 +1,10 @@
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-1 -1.5 18 18" preserveAspectRatio="xMidYMid meet">
 <path d="M1.5 10.5V14.5H6.5V10.5H1.5Z" stroke="#00C7DD" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M9.5 10.5V14.5H14.5V10.5H9.5Z" stroke="#CED0D6" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M5.5 4.5V0.5H10.5V4.5H5.5Z" stroke="#CED0D6" stroke-linejoin="round"/>
-<path d="M8 5V7" stroke="#CED0D6" stroke-linejoin="round"/>
-<path d="M4.5 10V7.5H8H11.5V10" stroke="#CED0D6" stroke-linejoin="round"/>
-<rect x="2" y="11" width="4" height="3" fill="#43454A"/>
-<rect x="10" y="11" width="4" height="3" fill="#43454A"/>
-<rect x="6" y="1" width="4" height="3" fill="#43454A"/>
+<path d="M9.5 10.5V14.5H14.5V10.5H9.5Z" stroke="#B6BBC2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.5 4.5V0.5H10.5V4.5H5.5Z" stroke="#B6BBC2" stroke-linejoin="round"/>
+<path d="M8 5V7" stroke="#B6BBC2" stroke-linejoin="round"/>
+<path d="M4.5 10V7.5H8H11.5V10" stroke="#B6BBC2" stroke-linejoin="round"/>
+<rect x="2" y="11" width="4" height="3" fill="#464B50"/>
+<rect x="10" y="11" width="4" height="3" fill="#464B50"/>
+<rect x="6" y="1" width="4" height="3" fill="#464B50"/>
 </svg>

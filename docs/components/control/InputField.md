@@ -19,7 +19,7 @@
 
 모드:
 
-- `defaultMode`, `searchMode`, `mode`
+- `textMode`, `searchMode`, `passwordMode`, `mode` (`defaultMode`는 `textMode`의 호환 별칭)
 - `search`(`mode == searchMode`용 간편 바인딩)
 - `searchIconVisible`
 - `clearButtonVisible`, `showClearButton`(읽기 전용)
@@ -35,7 +35,7 @@
 - `fieldMinHeight`: 기본값은 `Theme.controlHeightSm`(`22` 논리 픽셀)입니다.
 - `insetVertical`: 분수 패딩, 기본값 `(fieldMinHeight - centeredTextHeight) / 2`, 0으로 고정됩니다.
 - `centeredTextHeight`: 본체 `13`; 상속된 `centeredTextY`는 절반 픽셀 위치를 유지합니다.
-- `placeholderColor`, `placeholderColorDisabled`: 둘 다 비활성화된 토큰인 `Theme.disabledColor`가 기본값입니다.
+- `placeholderColor`의 기본값은 `Theme.titleHeaderColor`, 비활성 상태의 `placeholderColorDisabled`는 `Theme.disabledColor`이다.
 
 재료:
 
@@ -68,8 +68,9 @@ The 2026-09-10 LVRS 조정은 모든 3 스타일과 모든 상호작용 상태�
 |텍스트/자리 표시자 위쪽 및 아래쪽 삽입| `4.5` | `4.5` |
 |상단 및 하단 삽입 검색/삭제| `5` | `5` |
 |검색/프레임 지우기| `12 × 12` | `12 × 12` |
-|둥근 반경| `8` | `8` |
-|실린더/인라인 반경| `11` | `11` |
+|둥근 반경| `6` | `6` |
+|인라인 사각형 반경| `0` | `0` |
+|실린더 반경| `11` | `11` |
 |검색/텍스트/공백 지우기| `2` | `2` |
 |본문 글꼴 및 라인 상자| `13 / 13` | `13 / 13` |
 
@@ -85,11 +86,12 @@ Figma 의 활성, 선택 및 검색 인스턴스는 `205px` 를 보고하며 기
 
 ## 행동 계약
 
-- `style: roundedStyle` 는 `8px` 반지름을 가진 함몰 유리 재료를 사용하여 LVRS 버튼과 일치합니다. 기본 (`114:176`), 비활성화 (`114:174`), 커서 활성 (`114:175`), 선택 (`114:177`), 검색 (`323:9164`), 및 활성 (`114:178`)) 인스턴스인 Figma 라운드 모두 이 반지름을 사용합니다.
+- `style: roundedStyle`은 `6px` 반지름을 가진 함몰 유리 재료를 사용한다.
 - `style: cylinderStyle`는 높이 반경이 절반인 동일한 재료를 사용합니다.
-- `style: inlineStyle`는 동일한 삽입 및 어포던스로 더 가벼운 반투명 소재와 더 얕은 삽입 조명을 사용합니다.
+- `style: inlineStyle`은 반지름이 없는 사각형이며 더 가벼운 반투명 소재와 더 얕은 삽입 조명을 사용한다.
+- `mode: passwordMode`는 네이티브 `TextInput.Password`를 사용하며 검색 아이콘을 숨긴다. 기존 `echoMode` 직접 설정도 가능하다.
 - 비활성화된 텍스트는 `Theme.disabledColor`를 사용합니다. 기본/활성 텍스트는 `Theme.titleHeaderColor`를 사용합니다.
-- 빈 필드 자리 표시자는 활성화 및 비활성화 상태에서 `Theme.disabledColor`를 사용합니다. 입력한 텍스트는 자체 텍스트-색상 계약을 유지합니다.
+- 빈 필드 자리 표시자는 활성화 시 `Theme.titleHeaderColor`, 비활성화 시 `Theme.disabledColor`를 사용한다.
 - 선택 항목은 `Theme.accent`를 사용하고 선택한 텍스트는 `Theme.titleHeaderColor`로 유지됩니다.
 - 검색에서는 일반 `16 × 16` 아이콘을 확장하는 대신 Figma `12 × 12` 벡터에서 측정된 구성 요소별 `inputFieldSearch.svg`를 사용합니다.
 - 클리어는 `clearButtonVisible && enabled && !readOnly && text.length > 0`인 경우에만 표시됩니다. 클릭하면 필드가 비워지고 입력 포커스가 복원됩니다.
@@ -161,6 +163,16 @@ LV.InputField {
     text: "Editable value"
 }
 ```
+
+```qml
+LV.InputField {
+    style: roundedStyle
+    mode: passwordMode
+    placeholderText: "Password"
+}
+```
+
+세 모드와 세 모양은 비활성화, 활성화, 커서 활성화, 입력, 선택 드래그, 키보드 포커스 상태에서 같은 편집기를 사용한다. 상태는 별도 시각 모드 지정이 아니라 실제 입력과 포커스에 따라 결정된다.
 
 <a id="shared-motion"></a>
 

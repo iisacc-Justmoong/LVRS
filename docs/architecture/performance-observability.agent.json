@@ -1,0 +1,1037 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:3d69529d09cdab55fd5e619c9e068f4d5f9959bd494fbdef1e723b4810ce8cec",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/architecture/performance-observability.md",
+    "sha256": "4b1b8f9adf5929d81ffe51a7434c9da14019643a15d12ae9786beda49c485475",
+    "bytes": 3578,
+    "line_count": 130,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "성능 관찰성(P0)",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"performance-observability-p0\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 성능 관찰성(P0)\n",
+      "level": 1,
+      "title": "성능 관찰성(P0)"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/backend/io/backend.*` / `src/backend/runtime/renderingmonitor.*`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "이 문서는 LVRS에서 사용하는 P0 성능 원격 측정 계약을 정의합니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- CPU/GPU 인접 런타임 원격 측정에 대한 하나의 공유 지표 스키마를 설정합니다.\n- 대기열/시작/종료 분석을 위해 요청별 비동기 타임라인 추적을 제공합니다.\n- 샘플링 오버헤드 한계가 설정된를 유지하고 디버그 빌드에 대해 예측 가능합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "CPU/GPU 인접 런타임 원격 측정에 대한 하나의 공유 지표 스키마를 설정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대기열/시작/종료 분석을 위해 요청별 비동기 타임라인 추적을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "샘플링 오버헤드 한계가 설정된를 유지하고 디버그 빌드에 대해 예측 가능합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"schemas\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 스키마\n",
+      "level": 2,
+      "title": "스키마"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "<a id=\"1-snapshot-schema-lvrsperformancev1\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "### 1) 스냅샷 스키마: `lvrs.performance.v1`\n",
+      "level": 3,
+      "title": "1) 스냅샷 스키마: `lvrs.performance.v1`"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "사용처:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 28,
+      "raw": "- `Backend.performanceMetrics()`\n- `RenderMonitor.performanceSnapshot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Backend.performanceMetrics()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RenderMonitor.performanceSnapshot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "공통 필수 필드:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 34,
+      "raw": "- `schema`\n- `component`\n- `epochMs`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`schema`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`component`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`epochMs`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "백엔드 관련 필드:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 56,
+      "raw": "- `asyncJobsInFlight`\n- `asyncMaxConcurrency`\n- `asyncIoMaxConcurrency`\n- `asyncUtilityMaxConcurrency`\n- `asyncRenderMaxConcurrency`\n- `asyncQueueDepth`\n- `asyncQueuePeakDepth`\n- `asyncQueueDepthLimit`\n- `asyncBackpressureDropCount`\n- `asyncMergedRequestCount`\n- `asyncCanceledRequestCount`\n- `performanceTraceCount`\n- `performanceTraceCapacity`\n- `readTextCacheTtlMs`\n- `readTextCacheCapacityBytes`\n- `readTextCacheBytes`\n- `readTextCacheEntryCount`\n- `asyncLaneMetrics`\n- `asyncLatencyByOperation` (`avg/p50/p95/p99/max/failureRate`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`asyncJobsInFlight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncMaxConcurrency`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncIoMaxConcurrency`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncUtilityMaxConcurrency`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncRenderMaxConcurrency`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncQueueDepth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncQueuePeakDepth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncQueueDepthLimit`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncBackpressureDropCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncMergedRequestCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncCanceledRequestCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`performanceTraceCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`performanceTraceCapacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readTextCacheTtlMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readTextCacheCapacityBytes`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readTextCacheBytes`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readTextCacheEntryCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncLaneMetrics`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`asyncLatencyByOperation` (`avg/p50/p95/p99/max/failureRate`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "RenderMonitor 관련 필드:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 60,
+      "end_line": 70,
+      "raw": "- `active`\n- `fps`\n- `lastFrameMs`\n- `avgFrameMs`\n- `p95FrameMs`\n- `p99FrameMs`\n- `frameCount`\n- `droppedFrameCount`\n- `droppedFrameThresholdMs`\n- `recentSampleCount`\n- `frameSampleCapacity`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`active`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fps`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastFrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`avgFrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`p95FrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`p99FrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`droppedFrameCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`droppedFrameThresholdMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`recentSampleCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameSampleCapacity`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "<a id=\"2-timeline-trace-schema-lvrsperformancetracev1\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "### 2) 타임라인 추적 스키마: `lvrs.performance.trace.v1`\n",
+      "level": 3,
+      "title": "2) 타임라인 추적 스키마: `lvrs.performance.trace.v1`"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "사용처:\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "list",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "- `Backend.recentPerformanceTrace()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Backend.recentPerformanceTrace()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "필수 입력 사항:\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 82,
+      "end_line": 89,
+      "raw": "- `schema`\n- `sequence`(단조 진행 중)\n- `epochMs`\n- `phase` (`queued`, `started`, `finished`, `canceled`)\n- `requestId`\n- `operation`\n- `subject`\n- `detail`(단계별 맵)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`schema`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sequence`(단조 진행 중)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`epochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`phase` (`queued`, `started`, `finished`, `canceled`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`requestId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`operation`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`subject`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`detail`(단계별 맵)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "<a id=\"timeline-semantics\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "## 타임라인 의미론\n",
+      "level": 2,
+      "title": "타임라인 의미론"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 95,
+      "end_line": 98,
+      "raw": "- `queued`: 요청이 승인되고 `requestId`가 할당되었습니다.\n- `started`: 작업자 스레드가 실제 작업 본문을 시작했습니다.\n- `finished`: 작업이 완료되고 완료 신호가 발생했습니다.\n- `canceled`: 취소 토큰이 요청되었습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`queued`: 요청이 승인되고 `requestId`가 할당되었습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`started`: 작업자 스레드가 실제 작업 본문을 시작했습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`finished`: 작업이 완료되고 완료 신호가 발생했습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canceled`: 취소 토큰이 요청되었습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "요청당 예상 순서:\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 102,
+      "end_line": 104,
+      "raw": "1. `queued`\n2. `started`(즉각적 빠른 경로에는 없을 수 있음)\n3. `finished`\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`queued`",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`started`(즉각적 빠른 경로에는 없을 수 있음)",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`finished`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "<a id=\"overhead-policy\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "## 간접비 정책\n",
+      "level": 2,
+      "title": "간접비 정책"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 110,
+      "end_line": 112,
+      "raw": "- 추적 보존은 `performanceTraceCapacity`의 한계가 설정된입니다.\n- 대기 시간 샘플은 작업당 한계가 설정된(`m_asyncLatencySampleCapacity`)입니다.\n- 렌더링 백분위수는 롤링 샘플 용량(`frameSampleCapacity`)을 기준으로 한계가 설정된입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "추적 보존은 `performanceTraceCapacity`의 한계가 설정된입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대기 시간 샘플은 작업당 한계가 설정된(`m_asyncLatencySampleCapacity`)입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링 백분위수는 롤링 샘플 용량(`frameSampleCapacity`)을 기준으로 한계가 설정된입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "<a id=\"operational-usage\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "## 운영 사용량\n",
+      "level": 2,
+      "title": "운영 사용량"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "list",
+      "start_line": 118,
+      "end_line": 120,
+      "raw": "1. 측정 창을 위해 `Backend.performanceMetrics()` 및 `RenderMonitor.performanceSnapshot()`를 함께 캡처합니다.\n2. 대기열/대기 병목 현상 분석을 위해 `Backend.recentPerformanceTrace()`를 내보냅니다.\n3. 평균뿐만 아니라 개정판 전체에서 p95/p99를 비교하십시오.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "측정 창을 위해 `Backend.performanceMetrics()` 및 `RenderMonitor.performanceSnapshot()`를 함께 캡처합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "대기열/대기 병목 현상 분석을 위해 `Backend.recentPerformanceTrace()`를 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "평균뿐만 아니라 개정판 전체에서 p95/p99를 비교하십시오.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "html",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "<a id=\"p4-quality-gate-integration\"></a>\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "## P4 품질 게이트 통합\n",
+      "level": 2,
+      "title": "P4 품질 게이트 통합"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "paragraph",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "P4 자동화된 품질 게이트는 다음을 통해 이 스키마를 사용합니다.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "list",
+      "start_line": 128,
+      "end_line": 130,
+      "raw": "- `tests/tst_performance_gate.cpp`(p95/p99 회귀 확인),\n- `tests/ci/run_p4_quality.sh`(PR 게이트 진입점),\n- `tests/ci/run_p4_sanitizers.sh`(동일한 메트릭 계약을 가진 살균제 매트릭스).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`tests/tst_performance_gate.cpp`(p95/p99 회귀 확인),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tests/ci/run_p4_quality.sh`(PR 게이트 진입점),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tests/ci/run_p4_sanitizers.sh`(동일한 메트릭 계약을 가진 살균제 매트릭스).",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "성능 관찰성(P0)",
+      "anchor": "성능-관찰성p0",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스키마",
+      "anchor": "스키마",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "1) 스냅샷 스키마: `lvrs.performance.v1`",
+      "anchor": "1-스냅샷-스키마-lvrsperformancev1",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "2) 타임라인 추적 스키마: `lvrs.performance.trace.v1`",
+      "anchor": "2-타임라인-추적-스키마-lvrsperformancetracev1",
+      "start_line": 74
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "타임라인 의미론",
+      "anchor": "타임라인-의미론",
+      "start_line": 93
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "간접비 정책",
+      "anchor": "간접비-정책",
+      "start_line": 108
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "운영 사용량",
+      "anchor": "운영-사용량",
+      "start_line": 116
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "P4 품질 게이트 통합",
+      "anchor": "p4-품질-게이트-통합",
+      "start_line": 124
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000027",
+        "line": 30,
+        "text": "공통 필수 필드:",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000047",
+        "line": 80,
+        "text": "필수 입력 사항:",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

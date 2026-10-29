@@ -1,0 +1,382 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:e184b25e5fac33a3a407fb69f5a39f163c2801245a74a73e3bb72839939bbd20",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/ModelUndoStack.md",
+    "sha256": "1c4dbe74f81c647d028798ef9ac9d0091eda89229b8c1cf7e1db157418ced2ec",
+    "bytes": 4787,
+    "line_count": 64,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 스냅샷 이력",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 스냅샷 이력\n",
+      "level": 1,
+      "title": "네이티브 스냅샷 이력"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "원본 `src/backend/model/modelundostack.*`를 기준으로 한 C++ API이다.\n`ModelUndoStack.h/.cpp`는 Qt, QML, 파일 저장, 생성 엔진과 독립적이다.\n이력 저장과 이동은 네이티브 모델이 수행하며 뷰는 깊이와 실행 가능 여부를 관측한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 값과 명령\n",
+      "level": 2,
+      "title": "값과 명령"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 11,
+      "raw": "스냅샷은 소유된 `ii::core::Value`이다. `std::nullopt`는 없는 스냅샷이며,\n`Value{}`는 명시적인 null 데이터로 저장할 수 있다. 원본 QVariant의 전체 메타타입이나\n숫자 간 묵시적 비교를 재현하지 않고 Core의 엄격한 값·비교 계약을 사용한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 18,
+      "raw": "- 기본 한도는 128이다. 1 미만은 1로 제한하며, 32비트 정수 범위를 넘는 한도는 거부한다.\n- `push_snapshot`은 없는 값과 연속 중복을 무시한다. 중복 push는 redo를 지우지 않는다.\n- 새로운 스냅샷은 redo를 지운다. 한도를 넘으면 가장 오래된 undo부터 제거한다.\n- `take_undo_snapshot(current)`는 마지막 undo를 반환하고 유효한 current를 redo로 이동한다.\n- `take_redo_snapshot(current)`는 마지막 redo를 반환하고 유효한 current를 undo로 이동한다.\n- 빈 이력은 빈 이동 결과이다. `clear`는 두 스택을 비우며 빈 상태에서는 알리지 않는다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "기본 한도는 128이다. 1 미만은 1로 제한하며, 32비트 정수 범위를 넘는 한도는 거부한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`push_snapshot`은 없는 값과 연속 중복을 무시한다. 중복 push는 redo를 지우지 않는다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "새로운 스냅샷은 redo를 지운다. 한도를 넘으면 가장 오래된 undo부터 제거한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`take_undo_snapshot(current)`는 마지막 undo를 반환하고 유효한 current를 redo로 이동한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`take_redo_snapshot(current)`는 마지막 redo를 반환하고 유효한 current를 undo로 이동한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 이력은 빈 이동 결과이다. `clear`는 두 스택을 비우며 빈 상태에서는 알리지 않는다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 21,
+      "raw": "선두 제거에 나머지 스냅샷을 이동하지 않는 deque를 사용한다. 깊이와 실행 가능 여부의\n조회는 전체 스냅샷을 복사하거나 직렬화하지 않는다. 수치 성능 개선률을 주장하지 않는다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## 반영과 오류\n",
+      "level": 2,
+      "title": "반영과 오류"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "반환한 `SnapshotTransfer`는 이동된 `snapshot`과 `observation_error`를 분리한다.\n외부 Result 오류는 이동 반영 이전의 실패이다. 이동 이후 수신자가 실패해도 옮긴\n스냅샷을 버리지 않으며, 호출자는 데이터를 적용하고 알림 오류도 처리할 수 있다.\n동기 변경 수신자 한 개의 실패는 나머지 수신자에게 전달하는 것을 중단하지 않는다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 32,
+      "raw": "일반 push·clear·limit 변경의 알림 오류는 이미 반영된 변경에 대한 Result 오류이다.\n이 경우 모델을 읽어 반영된 상태를 확인하며 파일 트랜잭션의 롤백과 혼동하지 않는다.\n소유 스레드 밖의 쓰기는 wrong_executor, 읽기는 예외로 거부한다. 알림 중 재진입 쓰기는 busy이다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## 관측\n",
+      "level": 2,
+      "title": "관측"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 40,
+      "raw": "`limit`, `undo_depth`, `redo_depth`, `can_undo`, `can_redo`는 Core의 범위 관측에 연결한다.\nlimit와 stack 의존성은 분리한다. 한도를 줄여 실제 이력을 자르면 limit 다음에 stack도\n알린다. 이는 원본의 limitChanged만 발행하여 깊이 표시가 남을 수 있는 경우를 바로잡은\n명시적인 네이티브 동작이다. 이력을 자르지 않은 한도 변경은 깊이 독자를 무효화하지 않는다.\n수신자는 약하게 등록하며 수신 중 소유자가 제거되어도 진행 중 명령의 내부 상태만 보존한다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## LVUI와 검증 경계\n",
+      "level": 2,
+      "title": "LVUI와 검증 경계"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 46,
+      "raw": "`NativeHistory.lvui`는 C++ 백엔드의 기억·undo·redo·clear 메서드를 버튼에 연결한다.\n`NativeHistoryScoped.lvui`는 모델을 직접 가져와 깊이와 실행 가능 여부를 표시한다.\n두 뷰 모두 UI 검사가 파일 revision을 바꾸거나 생성 작업을 실행하지 않는다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 53,
+      "raw": "`tests/native/model_undo_stack.cpp`에는 값·분기·한도·관측·오류·수명 검사 12개를 준비한다.\n`tests/native/history_aot.cpp`에는 실제 생성 C++와 창 없는 위젯을 사용하는 버튼·외부 갱신·\n조회 비변경·퇴역·직접 import 검사 5개를 준비한다. 통합 소스 위치는\n`LVRS_LVUI_INTEGRATION_SOURCE`로 선택하며, 해당 fixture가 없는 독립 저장소에서는\n추가 AOT 통합 대상을 만들지 않는다. 설치 소비자는 공개 패키지를 재배치한 후 일곱 개의\n실제 LVUI 팩터리를 컴파일한다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 57,
+      "raw": "저장소 작업 지침에 따라 LVRS 실행 검증은 전체 목표의 마지막 일괄 단계에 남긴다.\n빌드와 테스트 등록을 실행 통과로 표시하지 않는다. QVariant 변환·전체 원본 신호 순서와\n플랫폼 실행 검증은 완료 감사 대상이다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 64,
+      "raw": "2026-10-27에는 일반·ASan/UBSan 구성에서 이력 모델 검사 실행 파일과 실제 생성 뷰의\n조작 검사 실행 파일을 컴파일·링크했다. LVUI 전체 팩터리 검사 대상 64개의 생성 코드는\n두 구성에서 동일하다. 일곱 팩터리를 포함하는 재배치 설치 소비자도 두 구성에서 링크했다.\n연관 LVRS 검사 55개는 등록 상태이며 아직 실행하지 않았다. 기록은 소스 저장소의\n`build/lvui-completion/snapshot-history/verification-20261027.json`이다. 동등성 감사표는\n이 시점에 partial 85개·pending 64개·complete 0개이다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 스냅샷 이력",
+      "anchor": "네이티브-스냅샷-이력",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "값과 명령",
+      "anchor": "값과-명령",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "반영과 오류",
+      "anchor": "반영과-오류",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "관측",
+      "anchor": "관측",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVUI와 검증 경계",
+      "anchor": "lvui와-검증-경계",
+      "start_line": 42
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 21,
+        "text": "조회는 전체 스냅샷을 복사하거나 직렬화하지 않는다. 수치 성능 개선률을 주장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 28,
+        "text": "동기 변경 수신자 한 개의 실패는 나머지 수신자에게 전달하는 것을 중단하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 31,
+        "text": "이 경우 모델을 읽어 반영된 상태를 확인하며 파일 트랜잭션의 롤백과 혼동하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 39,
+        "text": "명시적인 네이티브 동작이다. 이력을 자르지 않은 한도 변경은 깊이 독자를 무효화하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 46,
+        "text": "두 뷰 모두 UI 검사가 파일 revision을 바꾸거나 생성 작업을 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 56,
+        "text": "빌드와 테스트 등록을 실행 통과로 표시하지 않는다. QVariant 변환·전체 원본 신호 순서와",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

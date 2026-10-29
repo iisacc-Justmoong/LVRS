@@ -1,0 +1,799 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:da54e2d811b48ab62fc613ab7b94693c5e52b29631bd0dde21aae2eb9edb18a5",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/policies/debug.md",
+    "sha256": "a6388402bbc5a44f09955b9f79c6ba734925376c2b841dda7691a68a01e12c38",
+    "bytes": 3100,
+    "line_count": 87,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "디버그 정책",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"debug-policy\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 디버그 정책\n",
+      "level": 1,
+      "title": "디버그 정책"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "목표: 런타임 동작을 변경하거나 UX를 저하시키지 않고 중앙 집중식 진단을 제공합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"rule-1-route-application-logs-through-debug\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 규칙 1: `Debug`를 통해 애플리케이션 로그 라우팅\n",
+      "level": 2,
+      "title": "규칙 1: `Debug`를 통해 애플리케이션 로그 라우팅"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "선호하는 API:\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- `LV.Debug.log(component, event, data?)`\n- `LV.Debug.warn(component, event, data?)`\n- `LV.Debug.error(component, event, data?)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LV.Debug.log(component, event, data?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.warn(component, event, data?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.error(component, event, data?)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"rule-2-logging-is-opt-in\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 규칙 2: 로깅은 선택 사항입니다.\n",
+      "level": 2,
+      "title": "규칙 2: 로깅은 선택 사항입니다."
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "`Debug.enabled`의 기본값은 `false`입니다. 생산 흐름은 명시적으로 구성되지 않는 한 침묵을 유지해야 합니다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "html",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "<a id=\"rule-3-runtime-echo-is-rate-controlled\"></a>\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "## 규칙 3: 런타임 에코는 속도에 따라 제어됩니다.\n",
+      "level": 2,
+      "title": "규칙 3: 런타임 에코는 속도에 따라 제어됩니다."
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "런타임 에코가 활성화되면 다음을 준수하십시오.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 31,
+      "raw": "- 최소 에코 간격(`runtimeEchoMinIntervalMs`)\n- 제외 유형 목록(`runtimeEchoExcludeTypes`)\n- 표준 출력 임계값(`stdoutMinimumLevel`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "최소 에코 간격(`runtimeEchoMinIntervalMs`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제외 유형 목록(`runtimeEchoExcludeTypes`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "표준 출력 임계값(`stdoutMinimumLevel`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "이는 빈도가 높은 사건으로 인한 홍수를 방지합니다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "<a id=\"rule-4-logging-must-never-block-ui-paths\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## 규칙 4: 로깅은 UI 경로를 차단해서는 안 됩니다.\n",
+      "level": 2,
+      "title": "규칙 4: 로깅은 UI 경로를 차단해서는 안 됩니다."
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "로깅은 대화형 이벤트 처리기에서 동기 차단 작업을 도입해서는 안 됩니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "<a id=\"rule-5-filtering-belongs-in-logger-not-call-sites\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "## 규칙 5: 필터링은 호출 사이트가 아닌 로거에 속합니다.\n",
+      "level": 2,
+      "title": "규칙 5: 필터링은 호출 사이트가 아닌 로거에 속합니다."
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "UI 코드에서 조건부 로깅 로직을 분산시키는 대신 로거 필터(`levelFilter`, `componentFilter`, `textFilter`)를 사용하세요.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "<a id=\"rule-6-schema-stability-is-mandatory\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## 규칙 6: 스키마 안정성은 필수입니다.\n",
+      "level": 2,
+      "title": "규칙 6: 스키마 안정성은 필수입니다."
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "출력 필드 이름이나 항목 스키마가 변경되면 동일한 변경 세트에서 `docs/backend/DebugOutput.md`를 업데이트하세요.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "<a id=\"production-debug-strategy\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "## 생산 디버그 전략\n",
+      "level": 2,
+      "title": "생산 디버그 전략"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "권장 환경 분할:\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 59,
+      "end_line": 61,
+      "raw": "- local/dev: `Debug.enabled=true`, 선택적 런타임 캡처 켜기\n- 스테이징: 더 엄격한 필터와 속도 제한으로 캡처\n- 프로덕션: 기본값은 비활성화되어 있으며 인시던트 기간에만 활성화됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "local/dev: `Debug.enabled=true`, 선택적 런타임 캡처 켜기",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스테이징: 더 엄격한 필터와 속도 제한으로 캡처",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프로덕션: 기본값은 비활성화되어 있으며 인시던트 기간에만 활성화됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "<a id=\"incident-triage-workflow\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "## 사고 분류 워크플로\n",
+      "level": 2,
+      "title": "사고 분류 워크플로"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "런타임 사건을 조사할 때:\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 69,
+      "end_line": 73,
+      "raw": "1. 엄격한 필터로 로거를 활성화합니다(`WARN/ERROR` 먼저).\n2. 런타임 이벤트를 첨부하고,\n3. 한계가 설정된 항목 및 요약 스냅샷을 캡처합니다.\n4. 타임스탬프 및 시퀀스 ID와 함께 데이터 내보내기,\n5. 캡처 창이 닫힌 후 로거를 비활성화합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "엄격한 필터로 로거를 활성화합니다(`WARN/ERROR` 먼저).",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "런타임 이벤트를 첨부하고,",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "한계가 설정된 항목 및 요약 스냅샷을 캡처합니다.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "타임스탬프 및 시퀀스 ID와 함께 데이터 내보내기,",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "캡처 창이 닫힌 후 로거를 비활성화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "<a id=\"enforcement-note\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "## 시행 참고 사항\n",
+      "level": 2,
+      "title": "시행 참고 사항"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "정확성을 위해 로그가 필요한 모든 기능은 정책을 위반하는 것입니다. 로깅은 기능적 종속성이 아닌 진단적 종속성입니다.\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "html",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "<a id=\"audit-checklist\"></a>\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "heading",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "## 감사 체크리스트\n",
+      "level": 2,
+      "title": "감사 체크리스트"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "list",
+      "start_line": 85,
+      "end_line": 87,
+      "raw": "- 모든 런타임/UI 진단 로그는 `Debug`를 통해 내보내집니다.\n- 기능 흐름은 로그 부작용에 따라 달라지지 않습니다.\n- 속도 제한 및 필터는 대용량 환경에서 구성됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "모든 런타임/UI 진단 로그는 `Debug`를 통해 내보내집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기능 흐름은 로그 부작용에 따라 달라지지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "속도 제한 및 필터는 대용량 환경에서 구성됩니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "디버그 정책",
+      "anchor": "디버그-정책",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 1: `Debug`를 통해 애플리케이션 로그 라우팅",
+      "anchor": "규칙-1-debug를-통해-애플리케이션-로그-라우팅",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 2: 로깅은 선택 사항입니다.",
+      "anchor": "규칙-2-로깅은-선택-사항입니다",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 3: 런타임 에코는 속도에 따라 제어됩니다.",
+      "anchor": "규칙-3-런타임-에코는-속도에-따라-제어됩니다",
+      "start_line": 25
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 4: 로깅은 UI 경로를 차단해서는 안 됩니다.",
+      "anchor": "규칙-4-로깅은-ui-경로를-차단해서는-안-됩니다",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 5: 필터링은 호출 사이트가 아닌 로거에 속합니다.",
+      "anchor": "규칙-5-필터링은-호출-사이트가-아닌-로거에-속합니다",
+      "start_line": 43
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 6: 스키마 안정성은 필수입니다.",
+      "anchor": "규칙-6-스키마-안정성은-필수입니다",
+      "start_line": 49
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "생산 디버그 전략",
+      "anchor": "생산-디버그-전략",
+      "start_line": 55
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사고 분류 워크플로",
+      "anchor": "사고-분류-워크플로",
+      "start_line": 65
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "시행 참고 사항",
+      "anchor": "시행-참고-사항",
+      "start_line": 77
+    },
+    {
+      "block_id": "b000073",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "감사 체크리스트",
+      "anchor": "감사-체크리스트",
+      "start_line": 83
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000031",
+        "line": 35,
+        "text": "<a id=\"rule-4-logging-must-never-block-ui-paths\"></a>",
+        "basis": "lexical_match",
+        "context": "html"
+      },
+      {
+        "block_id": "b000033",
+        "line": 37,
+        "text": "## 규칙 4: 로깅은 UI 경로를 차단해서는 안 됩니다.",
+        "basis": "lexical_match",
+        "context": "heading"
+      },
+      {
+        "block_id": "b000035",
+        "line": 39,
+        "text": "로깅은 대화형 이벤트 처리기에서 동기 차단 작업을 도입해서는 안 됩니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000045",
+        "line": 49,
+        "text": "## 규칙 6: 스키마 안정성은 필수입니다.",
+        "basis": "lexical_match",
+        "context": "heading"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,733 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:a737cd41410c3f1a28788b855e43e62cea6057579379864237d34829caf7471b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/PageMonitor.md",
+    "sha256": "c85198585fda2237a68bcf983f4c523f6fa0e2867fab7c257d5c18fd45a7a022",
+    "bytes": 2216,
+    "line_count": 93,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "PageMonitor",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# PageMonitor\n",
+      "level": 1,
+      "title": "PageMonitor"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/navigation/pagemonitor.h` / `src/backend/navigation/pagemonitor.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`PageMonitor`는 간단한 실행 취소 의미 체계에 대한 경로 기록을 추적합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 주문된 경로 기록을 유지합니다.\n- 최신 항목을 제거하여 `undo()` 동작을 제공합니다.\n- 현재 경로를 노출하고 가용성을 실행 취소합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "주문된 경로 기록을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최신 항목을 제거하여 `undo()` 동작을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "현재 경로를 노출하고 가용성을 실행 취소합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"properties\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 속성\n",
+      "level": 2,
+      "title": "속성"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 22,
+      "raw": "- `history: stringList`\n- `count: int`\n- `current: string`\n- `canUndo: bool`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`history: stringList`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`count: int`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`current: string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canUndo: bool`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "<a id=\"methods\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "## 방법\n",
+      "level": 2,
+      "title": "방법"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 30,
+      "raw": "- `record(path): void`\n- `undo(): string`\n- `clear(): void`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`record(path): void`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`undo(): string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clear(): void`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "<a id=\"behavior\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## 행동\n",
+      "level": 2,
+      "title": "행동"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "`record(path)`:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 40,
+      "raw": "- 들어오는 경로를 다듬고,\n- 빈 값을 무시합니다.\n- 현재 꼬리와 다른 경우에만 추가됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "들어오는 경로를 다듬고,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 값을 무시합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "현재 꼬리와 다른 경우에만 추가됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "`undo()`:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 44,
+      "end_line": 45,
+      "raw": "- 기록 크기 <= 1인 경우 변형 없이 현재를 반환합니다.\n- 그렇지 않으면 마지막 항목을 제거하고 새 현재 항목을 반환합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "기록 크기 <= 1인 경우 변형 없이 현재를 반환합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "그렇지 않으면 마지막 항목을 제거하고 새 현재 항목을 반환합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "`clear()`:\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 49,
+      "end_line": 50,
+      "raw": "- 이미 비어 있으면 작동하지 않습니다.\n- 그렇지 않으면 기록을 지우고 변경 사항을 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이미 비어 있으면 작동하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "그렇지 않으면 기록을 지우고 변경 사항을 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "<a id=\"signal\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "## 신호\n",
+      "level": 2,
+      "title": "신호"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "list",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "- `historyChanged()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`historyChanged()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "<a id=\"usage-example\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "## 사용예\n",
+      "level": 2,
+      "title": "사용예"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 62,
+      "end_line": 75,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nfunction onRouteChanged(path) {\n    LV.PageMonitor.record(path)\n}\n\nfunction goBackIfPossible() {\n    if (!LV.PageMonitor.canUndo)\n        return\n    const target = LV.PageMonitor.undo()\n    LV.Navigator.replace(target)\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nfunction onRouteChanged(path) {\n    LV.PageMonitor.record(path)\n}\n\nfunction goBackIfPossible() {\n    if (!LV.PageMonitor.canUndo)\n        return\n    const target = LV.PageMonitor.undo()\n    LV.Navigator.replace(target)\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"integration-pattern-with-router\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## 라우터와의 통합 패턴\n",
+      "level": 2,
+      "title": "라우터와의 통합 패턴"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "일반적인 패턴은 `PageRouter.navigated`를 `PageMonitor.record`로 미러링하는 것입니다. 이는 UI 스택 외부에 경로 기록을 유지하고 독립적인 실행 취소 UI 제어를 가능하게 합니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "<a id=\"edge-cases\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "## 엣지 케이스\n",
+      "level": 2,
+      "title": "엣지 케이스"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 87,
+      "end_line": 89,
+      "raw": "- 중복된 연속 경로는 설계상 무시됩니다.\n- 비어 있거나 공백만 있는 입력은 무시됩니다.\n- 단일 항목 기록의 `undo()`는 멱등성을 갖습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "중복된 연속 경로는 설계상 무시됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "비어 있거나 공백만 있는 입력은 무시됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "단일 항목 기록의 `undo()`는 멱등성을 갖습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "Q. `PageMonitor`는 `PageRouter`와 자동으로 동기화됩니까?   A. 아니요. 동기화는 명시적입니다. 경로 변경은 통합 레이어에서 `record()`를 호출해야 합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "PageMonitor",
+      "anchor": "pagemonitor",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "속성",
+      "anchor": "속성",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "방법",
+      "anchor": "방법",
+      "start_line": 26
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동",
+      "anchor": "행동",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "신호",
+      "anchor": "신호",
+      "start_line": 54
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용예",
+      "anchor": "사용예",
+      "start_line": 60
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "라우터와의 통합 패턴",
+      "anchor": "라우터와의-통합-패턴",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "엣지 케이스",
+      "anchor": "엣지-케이스",
+      "start_line": 85
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 91
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

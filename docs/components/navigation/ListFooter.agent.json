@@ -1,0 +1,110 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:02e8226b68be10fc783485a26b5afb1ca7c4931ea48878f8673764423dd59f5b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/ListFooter.md",
+    "sha256": "902c2584ba44670e4c1b6e1abe61c4c76aba0dd257c83f5c5929aaed61473e5a",
+    "bytes": 885,
+    "line_count": 12,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ListFooter",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ListFooter\n",
+      "level": 1,
+      "title": "ListFooter"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "3 동작 슬롯은 기본값으로 Figma 에서 `209:9199` : 88 × 26px, 2px 외부 패딩, 22 / 22 / 40px 슬롯 너비입니다. 아이콘 동작은 2px 가로 패딩을 가지며, 메뉴 동작은 4px 왼쪽과 2px 오른쪽 패딩을 가집니다. 버튼 반지름은 8입니다. 슬롯 구성은 horizontalPadding, leftPadding, rightPadding 및 기타 기존 버튼 값에 대한 최상위 또는 중첩 속성을 지원하며, 명시적인 측면 값이 우선합니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "fenced_code",
+      "start_line": 5,
+      "end_line": 10,
+      "raw": "```qml\nimport LVRS as LV\nLV.ListFooter {\n    button3: ({ type: \"menu\", iconName: \"settings\", props: { leftPadding: 4 } })\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS as LV\nLV.ListFooter {\n    button3: ({ type: \"menu\", iconName: \"settings\", props: { leftPadding: 4 } })\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "Pressable 유형은 공유 AbstractButton 압축, 리바운드 및 키보드 활성화를 사용합니다. `Motion.reducedMotion`는 보간을 제거합니다. 소스 노드, 상태 값 및 검증 범위는 [Figma audit](../../figma-parity.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ListFooter",
+      "anchor": "listfooter",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Figma audit",
+        "target": "../../figma-parity.md",
+        "kind": "relative",
+        "line": 12
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

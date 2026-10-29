@@ -1,0 +1,781 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c75a700ca0099c09fd1c77fdbd72af83190928a3e0563a18aa5ba604e759f397",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/app/Window.md",
+    "sha256": "03a83eede78c5519eca48f2e5771ef333452e4629fcd95cc830945a47c531396",
+    "bytes": 5173,
+    "line_count": 131,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "창",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"window\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 창\n",
+      "level": 1,
+      "title": "창"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/Window.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Window`는 경량 LVRS 최상위 창입니다. `ApplicationWindow`가 제공하는 적응형 스캐폴드 없이 플랫폼 및 크기 클래스 메타데이터, 렌더링 품질 배선, 네이티브 솔리드 크롬, 네이티브 우선 이동/크기 조정 상호 작용을 제공합니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"core-properties\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 핵심 속성\n",
+      "level": 2,
+      "title": "핵심 속성"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "<a id=\"platform-and-layout\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "### 플랫폼 및 레이아웃\n",
+      "level": 3,
+      "title": "플랫폼 및 레이아웃"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 17,
+      "end_line": 22,
+      "raw": "- `platform`, `backendRuntimeProfile`, `canonicalPlatform`\n- `isMobilePlatform`, `isDesktopPlatform`, `backendMobilePlatform`\n- `widthClass`, `heightClass`, `isCompact`, `isExpanded`\n- `desktopMinWidth/Height`, `mobileMinWidth/Height`\n- `usePlatformSafeMargin`, `safeMargin`\n- `renderSurfaceBounds`, `layoutSafeAreaBounds`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`platform`, `backendRuntimeProfile`, `canonicalPlatform`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isMobilePlatform`, `isDesktopPlatform`, `backendMobilePlatform`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`widthClass`, `heightClass`, `isCompact`, `isExpanded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`desktopMinWidth/Height`, `mobileMinWidth/Height`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`usePlatformSafeMargin`, `safeMargin`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`renderSurfaceBounds`, `layoutSafeAreaBounds`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "<a id=\"native-chrome\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "### 네이티브 크롬\n",
+      "level": 3,
+      "title": "네이티브 크롬"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 31,
+      "raw": "- `windowColor`\n- `forceNativeDarkTitleBar`\n- `solidChrome`\n- `windowChromeInteractionsEnabled`: 기본값은 `solidChrome && isDesktopPlatform`입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`windowColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`forceNativeDarkTitleBar`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`solidChrome`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowChromeInteractionsEnabled`: 기본값은 `solidChrome && isDesktopPlatform`입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "`solidChrome`가 비활성화되면 네이티브 제목 표시줄이 이동 및 크기 조정 동작을 담당하며 LVRS 상호작용 계층은 기본적으로 비활성화된다. 다른 프레임 없는 창 전략을 사용하는 애플리케이션은 `windowChromeInteractionsEnabled: true`를 명시적으로 설정할 수 있다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "<a id=\"move-handle\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "### 핸들 이동\n",
+      "level": 3,
+      "title": "핸들 이동"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 39,
+      "end_line": 45,
+      "raw": "- `windowDragHandleEnabled`\n- `windowDragHandleHeight`\n- `windowDragHandleTopMargin`\n- `windowDragHandleLeftMargin`\n- `windowDragHandleRightMargin`\n- `windowDragExclusionItems`\n- `windowDragHandleItem`(읽기 전용 별칭)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`windowDragHandleEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragHandleHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragHandleTopMargin`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragHandleLeftMargin`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragHandleRightMargin`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragExclusionItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowDragHandleItem`(읽기 전용 별칭)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "스톡 핸들은 왼쪽 버튼을 눌러 `requestWindowMove()`를 호출합니다. `windowDragExclusionItems`에 나열된 항목은 대화형 상태를 유지하며 드래그 직사각형과 겹쳐도 이동 작업을 시작하지 않습니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "<a id=\"resize-handles\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "### 핸들 크기 조정\n",
+      "level": 3,
+      "title": "핸들 크기 조정"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 53,
+      "end_line": 56,
+      "raw": "- `windowResizeHandlesEnabled`\n- `windowResizeEdges`\n- `windowResizeBorderThickness`\n- `windowResizeCornerSize`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`windowResizeHandlesEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowResizeEdges`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowResizeBorderThickness`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowResizeCornerSize`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "스톡 레이어는 4 개의 엣지 히트 영역과 4 개의 코너 히트 영역을 제공합니다. `windowResizeEdges` 는 `Qt.LeftEdge` , `Qt.TopEdge` , `Qt.RightEdge` , 및 `Qt.BottomEdge` 의 마스크입니다. 코너는 인접한 두 엣지가 모두 활성화될 때만 활성화됩니다. 핸들은 창이 `Window.Windowed` 가시성 상태인 동안만 활성화되므로, 최대화 및 풀스크린 콘텐츠는 바깥쪽 히트 영역을 잃지 않습니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "<a id=\"interaction-layer\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "### 상호작용 레이어\n",
+      "level": 3,
+      "title": "상호작용 레이어"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 64,
+      "end_line": 69,
+      "raw": "- `windowChromeInteractionZ`\n- `windowChromeInteractionLayer`(읽기 전용 별칭)\n- `requestWindowMove()`\n- `requestWindowResize(edges)`\n- `windowMoveAttempted(started)`\n- `windowResizeAttempted(edges, started)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`windowChromeInteractionZ`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowChromeInteractionLayer`(읽기 전용 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`requestWindowMove()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`requestWindowResize(edges)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowMoveAttempted(started)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowResizeAttempted(edges, started)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "요청 메서드는 상호작용이 실제로 시작되었는지를 반환합니다. Resize 는 하나의 엣지 또는 2 개의 인접한 엣지만을 허용합니다. 네이티브 플랫폼 리사이즈는 여전히 선호되며, macOS 에서 Qt 6.8 Cocoa 가 `startSystemResize()` 를 거부하는 경우, LVRS 는 포인터를 추적하고 릴리스까지 제한된 창 기하학을 적용합니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"custom-title-bar-controls\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 사용자 정의 제목 표시줄 컨트롤\n",
+      "level": 2,
+      "title": "사용자 정의 제목 표시줄 컨트롤"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "스톡 드래그 영역을 유지하고 대화형 컨트롤을 제외합니다.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "fenced_code",
+      "start_line": 79,
+      "end_line": 98,
+      "raw": "```qml\nimport QtQuick\nimport LVRS as LV\n\nLV.Window {\n    id: settingsWindow\n    width: 480\n    height: 360\n    visible: true\n\n    windowDragExclusionItems: [closeButton]\n\n    LV.IconButton {\n        id: closeButton\n        anchors.top: parent.top\n        anchors.right: parent.right\n        onClicked: settingsWindow.close()\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport LVRS as LV\n\nLV.Window {\n    id: settingsWindow\n    width: 480\n    height: 360\n    visible: true\n\n    windowDragExclusionItems: [closeButton]\n\n    LV.IconButton {\n        id: closeButton\n        anchors.top: parent.top\n        anchors.right: parent.right\n        onClicked: settingsWindow.close()\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "또는 재고 이동 직사각형만 비활성화하고 애플리케이션 소유 제목 표시줄에서 동일한 시스템 API를 호출합니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "fenced_code",
+      "start_line": 102,
+      "end_line": 121,
+      "raw": "```qml\nLV.Window {\n    id: settingsWindow\n    windowDragHandleEnabled: false\n\n    Rectangle {\n        width: parent.width\n        height: 40\n\n        MouseArea {\n            anchors.fill: parent\n            acceptedButtons: Qt.LeftButton\n            onPressed: function (mouse) {\n                if (!settingsWindow.requestWindowMove())\n                    mouse.accepted = false\n            }\n        }\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "LV.Window {\n    id: settingsWindow\n    windowDragHandleEnabled: false\n\n    Rectangle {\n        width: parent.width\n        height: 40\n\n        MouseArea {\n            anchors.fill: parent\n            acceptedButtons: Qt.LeftButton\n            onPressed: function (mouse) {\n                if (!settingsWindow.requestWindowMove())\n                    mouse.accepted = false\n            }\n        }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "애플리케이션이 자체 엣지 히트 영역을 제공하는 경우 `windowResizeHandlesEnabled: false`를 설정합니다. 이러한 사용자 정의 영역은 코너에 대해 `requestWindowResize(Qt.LeftEdge | Qt.TopEdge)`를 호출할 수 있습니다.\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "<a id=\"notes\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "## 메모\n",
+      "level": 2,
+      "title": "메모"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "list",
+      "start_line": 129,
+      "end_line": 131,
+      "raw": "- `minimumWidth/Height`는 계속해서 LVRS 데스크톱/모바일 최소 속성을 따릅니다. 애플리케이션은 상속된 `maximumWidth/Height` 속성을 정상적으로 사용할 수 있습니다.\n- 고정 크기 또는 지원되지 않는 작업은 `false`를 반환합니다. macOS 크기 조정 대체 경로는 상속된 최소 및 최대 치수를 준수하지만 합성기 스냅 또는 타일링을 제공할 수 없습니다.\n- `WindowChromeInteraction`에는 재사용 가능한 포인터 레이어가 포함되어 있으며, `NativeWindowInteraction`는 Qt 6.5 이상의 `QWindow`에 요청을 연결합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`minimumWidth/Height`는 계속해서 LVRS 데스크톱/모바일 최소 속성을 따릅니다. 애플리케이션은 상속된 `maximumWidth/Height` 속성을 정상적으로 사용할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "고정 크기 또는 지원되지 않는 작업은 `false`를 반환합니다. macOS 크기 조정 대체 경로는 상속된 최소 및 최대 치수를 준수하지만 합성기 스냅 또는 타일링을 제공할 수 없습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`WindowChromeInteraction`에는 재사용 가능한 포인터 레이어가 포함되어 있으며, `NativeWindowInteraction`는 Qt 6.5 이상의 `QWindow`에 요청을 연결합니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "창",
+      "anchor": "창",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "핵심 속성",
+      "anchor": "핵심-속성",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000011",
+      "level": 3,
+      "title": "플랫폼 및 레이아웃",
+      "anchor": "플랫폼-및-레이아웃",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000011",
+      "level": 3,
+      "title": "네이티브 크롬",
+      "anchor": "네이티브-크롬",
+      "start_line": 26
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000011",
+      "level": 3,
+      "title": "핸들 이동",
+      "anchor": "핸들-이동",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000011",
+      "level": 3,
+      "title": "핸들 크기 조정",
+      "anchor": "핸들-크기-조정",
+      "start_line": 51
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000011",
+      "level": 3,
+      "title": "상호작용 레이어",
+      "anchor": "상호작용-레이어",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용자 정의 제목 표시줄 컨트롤",
+      "anchor": "사용자-정의-제목-표시줄-컨트롤",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "메모",
+      "anchor": "메모",
+      "start_line": 127
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

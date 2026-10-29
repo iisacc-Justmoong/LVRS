@@ -8,19 +8,19 @@
 
 | 선언 | 종류 | 상태 | 네이티브 API | 직접 노출 멤버 수 |
 |---|---|---|---|---:|
-| FontPolicy | nonvisual | pending | — | 11 |
+| FontPolicy | nonvisual | partial | lvrs::FontPolicy / iiGUI::FontDatabase / LVUI AOT | 11 |
 | ColorPickerModel | nonvisual | partial | lvrs::ColorPickerModel / iiGUI native model | 15 |
 | ColorPickerSurface | view | partial | lvrs::Widgets::color_surface | 2 |
-| SvgManager | nonvisual | pending | — | 10 |
+| SvgManager | nonvisual | partial | lvrs::SvgManager / SvgSource / lvrs::Image / LVUI AOT | 10 |
 | WindowNoiseTexture | view | pending | — | 5 |
 | Backend | nonvisual | pending | — | 41 |
 | HierarchyModel | nonvisual | partial | lvrs::HierarchyModel / HierarchyProjection | 30 |
-| ModelSource | nonvisual | pending | — | 12 |
-| ModelUndoStack | nonvisual | pending | — | 9 |
-| ProgressModel | nonvisual | pending | — | 24 |
+| ModelSource | nonvisual | partial | lvrs::ModelSource / ItemModel / ModelSequence / LVUI AOT | 12 |
+| ModelUndoStack | nonvisual | partial | lvrs::ModelUndoStack | 9 |
+| ProgressModel | nonvisual | partial | lvrs::ProgressModel | 24 |
 | TableHeaderModel | nonvisual | partial | lvrs::TableHeaderModel | 23 |
 | TableModel | nonvisual | partial | lvrs::TableModel | 106 |
-| ModelAdapter | nonvisual | pending | — | 3 |
+| ModelAdapter | nonvisual | partial | lvrs::ModelAdapter / ItemModel | 3 |
 | NavigationStackModel | nonvisual | partial | lvrs::NavigationStackModel | 21 |
 | PageMonitor | nonvisual | partial | lvrs::PageMonitor | 7 |
 | RouteMatcher | nonvisual | partial | lvrs::RouteMatcher | 2 |
@@ -28,17 +28,17 @@
 | ViewStateTracker | nonvisual | partial | lvrs::ViewStateTracker / Navigator tracking domain | 15 |
 | NativeWindowInteraction | nonvisual | pending | — | 4 |
 | NativeWindowStyle | nonvisual | pending | — | 8 |
-| Platform | nonvisual | pending | — | 27 |
+| Platform | nonvisual | partial | lvrs::PlatformInfo / iiSDKCore::PlatformProfile / LVUI AOT | 27 |
 | WindowSafeAreaObserver | nonvisual | pending | — | 8 |
 | Debug | nonvisual | pending | — | 29 |
 | GestureEvents | nonvisual | pending | — | 12 |
-| RenderMonitor | nonvisual | pending | — | 16 |
+| RenderMonitor | nonvisual | partial | lvrs::RenderMonitor / iiGUI::PresentationSource / LVUI AOT | 16 |
 | RenderQuality | nonvisual | pending | — | 49 |
 | RuntimeEvents | nonvisual | pending | — | 66 |
 | AppState | nonvisual | pending | — | 23 |
-| StateModel | nonvisual | pending | — | 12 |
-| ViewModel | nonvisual | pending | — | 8 |
-| ViewModels | nonvisual | partial | LVUI scoped C++ backends / Core Observable | 24 |
+| StateModel | nonvisual | partial | lvrs::StateModel / StateSource | 12 |
+| ViewModel | nonvisual | partial | lvrs::ViewModel | 8 |
+| ViewModels | nonvisual | partial | lvrs::ViewModelRegistry / ViewModels + ModelProperties | 24 |
 | TextDocumentModel | nonvisual | partial | lvrs::TextDocumentModel / TextDocumentStorage | 45 |
 | TextMarkup | nonvisual | partial | lvrs::TextMarkup | 3 |
 | AppBootstrapWindow | view | pending | — | 0 |
@@ -68,7 +68,7 @@
 | ToggleSwitch | view | partial | lvrs::Widgets::toggle_switch | 33 |
 | Avatar | view | partial | lvrs::Avatar / Widgets::avatar / LVUI AOT | 8 |
 | Label | view | partial | lvrs::Widgets::label | 36 |
-| ProgressBar | view | partial | lvrs::Widgets::progress | 40 |
+| ProgressBar | view | partial | lvrs::ProgressBar + lvrs::Widgets::progress_bar | 40 |
 | Table | view | partial | lvrs::Table / Widgets::table / AOT | 227 |
 | TableCellItem | view | partial | lvrs::TableCellItem / Widgets::table_cell_item / AOT | 45 |
 | TableHeader | view | partial | lvrs::TableHeader / Widgets::table_header / AOT | 32 |
@@ -103,8 +103,8 @@
 | ContextMenuDivider | view | partial | lvrs::Widgets::context_menu_divider | 0 |
 | ContextMenuItem | view | partial | lvrs::Widgets::context_menu_item | 0 |
 | Hierarchy | view | partial | lvrs::List / ListModel / Widgets::hierarchy / AOT | 56 |
-| HierarchyItem | view | pending | — | 205 |
-| HierarchyList | view | pending | — | 201 |
+| HierarchyItem | view | partial | lvrs::HierarchyItem / LVUI AOT | 205 |
+| HierarchyList | view | partial | lvrs::HierarchyList / HierarchyController / LVUI AOT | 201 |
 | HierarchyToolbar | view | partial | lvrs::HierarchyToolbar / Widgets::hierarchy_toolbar / AOT | 62 |
 | Link | view | partial | lvrs::Link / Widgets::link / LVUI AOT | 14 |
 | List | view | partial | lvrs::List / ListModel / Widgets::list / AOT | 57 |

@@ -1,0 +1,1092 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:9ce14b0e6df130b394ae4e01bfed416a4207d324e88e83ef09f42ebbc72e1c5d",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/Hierarchy.md",
+    "sha256": "7903fe0403fd7a0f3aac639f9c0d91c1ecd1cd325e42c1895e2c538f47af7db6",
+    "bytes": 6715,
+    "line_count": 176,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "계층 구조",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"hierarchy\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 계층 구조\n",
+      "level": 1,
+      "title": "계층 구조"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/navigation/Hierarchy.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Hierarchy`는 도구 모음 + 스크롤 가능한 깊이 인식 계층 목록으로 구성된 계층 패널 표면입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- 명시적인 확장/축소 컨트롤을 사용하여 깊이 배열/목록/모델 계층 구조 데이터를 렌더링합니다.\n- 호스트 기능에 대한 활성화 및 확장 콜백을 제공합니다.\n- 중첩된 스크롤 컨테이너 내에서 트리 탐색을 사용할 수 있도록 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "명시적인 확장/축소 컨트롤을 사용하여 깊이 배열/목록/모델 계층 구조 데이터를 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "호스트 기능에 대한 활성화 및 확장 콜백을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중첩된 스크롤 컨테이너 내에서 트리 탐색을 사용할 수 있도록 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "필수 입력:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 22,
+      "raw": "- 도구 모음 선언: `toolbarItems`(배열 모델) 또는 `toolbarButtons`(수동 `ToolbarButton` 하위)\n- 목록 모델 바인딩: `model` / `treeModel`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "도구 모음 선언: `toolbarItems`(배열 모델) 또는 `toolbarButtons`(수동 `ToolbarButton` 하위)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "목록 모델 바인딩: `model` / `treeModel`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "모델 및 선택 별칭:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 30,
+      "raw": "- `model` / `treeModel`\n- `modelColumn`\n- `activeListItem`\n- `activeListItemId`\n- `activeListItemKey`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`model` / `treeModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modelColumn`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeListItem`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeListItemId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeListItemKey`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "모델 역할 별칭:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 47,
+      "raw": "- `itemIdRole`\n- `itemKeyRole`\n- `labelRole`\n- `iconNameRole`\n- `iconSourceRole`\n- `iconGlyphRole`\n- `depthRole`\n- `countRole`\n- `enabledRole`\n- `expandedRole`\n- `selectedRole`\n- `activatableRole`\n- `draggableRole`\n- `showChevronRole`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemIdRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemKeyRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`labelRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconNameRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSourceRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconGlyphRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`depthRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`countRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabledRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`expandedRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectedRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activatableRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`draggableRole`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showChevronRole`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "도구 모음 별칭:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 55,
+      "raw": "- `toolbarButtons`\n- `toolbarItems`\n- `activeToolbarButton`\n- `activeToolbarButtonId`\n- `activeToolbarIndex`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`toolbarButtons`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`toolbarItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeToolbarButton`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeToolbarButtonId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeToolbarIndex`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "동작 별칭:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 59,
+      "end_line": 62,
+      "raw": "- `keyboardListNavigationEnabled`\n- `editable`\n- 목록 스크롤 물리학: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`\n- 읽기 전용 목록 뷰포트 정책: `listBoundsBehavior`, `listBoundsMovement`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`keyboardListNavigationEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`editable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "목록 스크롤 물리학: `listOvershootEnabled`, `listFlickDeceleration`, `listMaximumFlickVelocity`, `listReboundDuration`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "읽기 전용 목록 뷰포트 정책: `listBoundsBehavior`, `listBoundsMovement`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "선택적 바닥글:\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 66,
+      "end_line": 70,
+      "raw": "- `footerVisible`\n- `footerInteractive`\n- `footerButton1`\n- `footerButton2`\n- `footerButton3`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`footerVisible`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerInteractive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerButton1`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerButton2`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerButton3`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 74,
+      "end_line": 78,
+      "raw": "- `expandAll()`\n- `collapseAll(keepRootExpanded)`\n- `activateListItemById(itemId)`\n- `activateListItemByKey(itemKey)`\n- `triggerFooterButton(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`expandAll()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`collapseAll(keepRootExpanded)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activateListItemById(itemId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activateListItemByKey(itemKey)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`triggerFooterButton(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 82,
+      "end_line": 88,
+      "raw": "- `toolbarActivated(button, buttonId, index)`\n- `toolbarButtonTriggered(button, buttonId, index, item)`\n- `toolbarEventTriggered(eventName, payload, index, item, buttonId)`\n- `listItemActivated(item, itemId, index)`\n- `listItemExpanded(item, itemId, index, expanded)`\n- `listItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)`\n- `footerButtonTriggered(index, config)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`toolbarActivated(button, buttonId, index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`toolbarButtonTriggered(button, buttonId, index, item)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`toolbarEventTriggered(eventName, payload, index, item, buttonId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listItemActivated(item, itemId, index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listItemExpanded(item, itemId, index, expanded)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listItemMoved(item, itemId, itemKey, fromIndex, toIndex, depth)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerButtonTriggered(index, config)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "fenced_code",
+      "start_line": 94,
+      "end_line": 112,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Hierarchy {\n    countRole: \"counter\"\n    toolbarItems: [\n        { id: \"structure\", iconName: \"projectStructure\", eventName: \"hierarchy.structure\" },\n        { id: \"layers\", iconName: \"projectStructure\", events: [\"hierarchy.layers\", \"analytics.layers\"] }\n    ]\n    model: [\n        { key: \"root\", depth: 0, label: \"Root\", expanded: true, counter: 2 },\n        { key: \"child\", depth: 1, label: \"Child\", counter: 7 }\n    ]\n    footerVisible: true\n    footerButton1: ({ type: \"icon\", iconName: \"projectStructure\" })\n    footerButton2: ({ type: \"icon\", iconName: \"delete\" })\n    footerButton3: ({ type: \"menu\", iconName: \"viewMoreSymbolicDefault\" })\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Hierarchy {\n    countRole: \"counter\"\n    toolbarItems: [\n        { id: \"structure\", iconName: \"projectStructure\", eventName: \"hierarchy.structure\" },\n        { id: \"layers\", iconName: \"projectStructure\", events: [\"hierarchy.layers\", \"analytics.layers\"] }\n    ]\n    model: [\n        { key: \"root\", depth: 0, label: \"Root\", expanded: true, counter: 2 },\n        { key: \"child\", depth: 1, label: \"Child\", counter: 7 }\n    ]\n    footerVisible: true\n    footerButton1: ({ type: \"icon\", iconName: \"projectStructure\" })\n    footerButton2: ({ type: \"icon\", iconName: \"delete\" })\n    footerButton3: ({ type: \"menu\", iconName: \"viewMoreSymbolicDefault\" })\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "fenced_code",
+      "start_line": 114,
+      "end_line": 124,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Hierarchy {\n    model: backendHierarchyModel\n    itemKeyRole: \"key\"\n    labelRole: \"name\"\n    depthRole: \"depth\"\n    countRole: \"counter\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Hierarchy {\n    model: backendHierarchyModel\n    itemKeyRole: \"key\"\n    labelRole: \"name\"\n    depthRole: \"depth\"\n    countRole: \"counter\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "list",
+      "start_line": 130,
+      "end_line": 141,
+      "raw": "- Figma 패널(`180:1012`)은 `Theme.panelBackground05`를 사용하여 데스크톱 및 모바일에서 `200x530`입니다.\n- 해당 도구 모음은 상단 `26px`(`52px` 모바일)을 차지합니다. 목록은 바로 아래에서 시작하고 16개 행 참조 콘텐츠가 `320px`(`640px` 모바일)를 차지하므로 나머지 패널 높이를 스크롤 뷰포트에 사용할 수 있습니다.\n- 도구 모음과 목록은 명시적인 신호와 전달된 별칭을 통해 통신합니다.\n- `model`, `modelColumn` 및 역할 별칭은 내부 `HierarchyList`로 직접 전달되므로 어레이, QML `ListModel` 및 C++ `QAbstractItemModel` 소스를 패널 수준에서 삽입할 수 있습니다.\n- `ensureListItemVisible`는 목록이 가시성을 요청할 때 깜박일 수 있는 뷰포트를 조정합니다.\n- 중첩된 스크롤 블리드를 방지하기 위해 `WheelScrollGuard`가 설치되었습니다.\n- 옵션 `ListFooter`는 왼쪽 하단에 고정되어 있습니다. 표시되면 목록 뷰포트가 바닥글 상단에서 끝납니다.\n- `editable`는 생성된 `HierarchyItem` 행에서 항목 소유 드래그/드롭을 활성화합니다. 기본 모델은 객체 배열, QML `ListModel`/목록 유사 모델 또는 쓰기 가능한 깊이 역할 및 행 이동이 있는 C++ `QAbstractItemModel` 등 깊이 상태가 있는 변경 가능한 객체 행을 노출해야 합니다.\n- 모바일 대상 실행에서 편집 가능한 행 드래그에는 `HierarchyItem`가 드래그/드롭 모드로 들어가기 전에 `1000ms`를 길게 눌러야 하며, 이는 패널 `Flickable` 내에서 터치 스크롤 우선 순위를 유지합니다.\n- 모바일 대상 실행에서 행 활성화는 누르는 대신 놓기/클릭할 때도 커밋되므로 활성 행이 변경되기 전에 목록 스크롤 경로에 의해 수직 드래그가 계속 요구될 수 있습니다.\n- 이제 모바일 대상 목록 스크롤을 사용하면 가장자리에서 iOS와 유사한 관성 느낌을 위해 오버슈트 + 리바운드(`DragAndOvershootBounds`/`FollowBoundsBehavior`) 및 조정된 플릭 모멘텀(`listFlickDeceleration`, `listMaximumFlickVelocity`)이 가능합니다.\n- `listItemActivated`는 이미 활성화된 행에서 의도적인 반복 활성화 제스처를 미러링하므로 패널 호스트는 선택 항목을 변경하지 않고도 두 번째 탭/클릭을 작업 트리거로 처리할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 패널(`180:1012`)은 `Theme.panelBackground05`를 사용하여 데스크톱 및 모바일에서 `200x530`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해당 도구 모음은 상단 `26px`(`52px` 모바일)을 차지합니다. 목록은 바로 아래에서 시작하고 16개 행 참조 콘텐츠가 `320px`(`640px` 모바일)를 차지하므로 나머지 패널 높이를 스크롤 뷰포트에 사용할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "도구 모음과 목록은 명시적인 신호와 전달된 별칭을 통해 통신합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`model`, `modelColumn` 및 역할 별칭은 내부 `HierarchyList`로 직접 전달되므로 어레이, QML `ListModel` 및 C++ `QAbstractItemModel` 소스를 패널 수준에서 삽입할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ensureListItemVisible`는 목록이 가시성을 요청할 때 깜박일 수 있는 뷰포트를 조정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중첩된 스크롤 블리드를 방지하기 위해 `WheelScrollGuard`가 설치되었습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "옵션 `ListFooter`는 왼쪽 하단에 고정되어 있습니다. 표시되면 목록 뷰포트가 바닥글 상단에서 끝납니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`editable`는 생성된 `HierarchyItem` 행에서 항목 소유 드래그/드롭을 활성화합니다. 기본 모델은 객체 배열, QML `ListModel`/목록 유사 모델 또는 쓰기 가능한 깊이 역할 및 행 이동이 있는 C++ `QAbstractItemModel` 등 깊이 상태가 있는 변경 가능한 객체 행을 노출해야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 대상 실행에서 편집 가능한 행 드래그에는 `HierarchyItem`가 드래그/드롭 모드로 들어가기 전에 `1000ms`를 길게 눌러야 하며, 이는 패널 `Flickable` 내에서 터치 스크롤 우선 순위를 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 대상 실행에서 행 활성화는 누르는 대신 놓기/클릭할 때도 커밋되므로 활성 행이 변경되기 전에 목록 스크롤 경로에 의해 수직 드래그가 계속 요구될 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이제 모바일 대상 목록 스크롤을 사용하면 가장자리에서 iOS와 유사한 관성 느낌을 위해 오버슈트 + 리바운드(`DragAndOvershootBounds`/`FollowBoundsBehavior`) 및 조정된 플릭 모멘텀(`listFlickDeceleration`, `listMaximumFlickVelocity`)이 가능합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listItemActivated`는 이미 활성화된 행에서 의도적인 반복 활성화 제스처를 미러링하므로 패널 호스트는 선택 항목을 변경하지 않고도 두 번째 탭/클릭을 작업 트리거로 처리할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "html",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "<a id=\"advanced-usage-programmatic-activation\"></a>\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "## 고급 사용법: 프로그래밍 방식 활성화\n",
+      "level": 2,
+      "title": "고급 사용법: 프로그래밍 방식 활성화"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "fenced_code",
+      "start_line": 147,
+      "end_line": 157,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Hierarchy {\n    id: tree\n}\n\nfunction focusNodeByKey(key) {\n    tree.activateListItemByKey(key)\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Hierarchy {\n    id: tree\n}\n\nfunction focusNodeByKey(key) {\n    tree.activateListItemByKey(key)\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "html",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "<a id=\"operational-notes\"></a>\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 161,
+      "end_line": 161,
+      "raw": "## 운영 참고 사항\n",
+      "level": 2,
+      "title": "운영 참고 사항"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 162,
+      "end_line": 162,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 163,
+      "end_line": 164,
+      "raw": "- 안정적인 프로그래밍 방식 활성화를 위해 항목 ID/키를 안정적으로 유지하세요.\n- 온보딩 흐름에서 `expandAll()`와 `activate*()`를 결합하여 결정론적으로 딥 노드를 표시합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "안정적인 프로그래밍 방식 활성화를 위해 항목 ID/키를 안정적으로 유지하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "온보딩 흐름에서 `expandAll()`와 `activate*()`를 결합하여 결정론적으로 딥 노드를 표시합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "html",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "<a id=\"failure-pattern\"></a>\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "heading",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "## 실패 패턴\n",
+      "level": 2,
+      "title": "실패 패턴"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "형제 노드에 고유하지 않은 키를 사용하면 프로그래밍 방식 활성화 및 확장 추적이 중단됩니다. 각 논리 노드에 안정적인 고유 식별자를 할당합니다.\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "행이 리바운드되고, 공개 화살표가 회전하고, 오버스크롤된 콘텐츠가 공유된 타이밍으로 반환됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "계층 구조",
+      "anchor": "계층-구조",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 92
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 128
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "고급 사용법: 프로그래밍 방식 활성화",
+      "anchor": "고급-사용법-프로그래밍-방식-활성화",
+      "start_line": 145
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "운영 참고 사항",
+      "anchor": "운영-참고-사항",
+      "start_line": 161
+    },
+    {
+      "block_id": "b000077",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "실패 패턴",
+      "anchor": "실패-패턴",
+      "start_line": 168
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 174
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000017",
+        "line": 19,
+        "text": "필수 입력:",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000085",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 176
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

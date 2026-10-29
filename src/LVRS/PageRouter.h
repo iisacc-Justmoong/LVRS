@@ -6,6 +6,7 @@
 
 namespace lvrs {
 class Navigator;
+class ViewModelRegistry;
 using PageFactory=std::function<ii::core::Result<void>(ii::gui::WidgetBuilder&,ii::gui::Widget,const NavigationEntry&)>;
 // An already compiled C++ page constructor. No source parsing or evaluation.
 class PageComponent final {
@@ -16,7 +17,7 @@ public:
 private:
     PageFactory factory_;
 };
-struct PageRoute final {std::string path;PageComponentRef component;};
+struct PageRoute final {std::string path;PageComponentRef component;ii::core::Value::Object metadata;};
 struct PageRouterOptions final {
     std::vector<PageRoute> routes;
     std::string initial_path="/";
@@ -25,6 +26,9 @@ struct PageRouterOptions final {
     std::int64_t route_resolve_cache_capacity=256;
     std::shared_ptr<Navigator> navigator;
     bool register_as_global_navigator=true;
+    // Explicit model domain, shared with the owning backend. No hidden global
+    // registry or document storage is created by a page transition.
+    std::shared_ptr<ViewModelRegistry> view_models;
 };
 using PageRouterState=NavigationTargetState;
 using PageNavigationChange=NavigationTargetChange;

@@ -1,0 +1,441 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:ae9514cb1e5ee1628b63b892ff296d34cb8b91c1c1419a5d081d01410f7fd79a",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/figma-iconset-import.md",
+    "sha256": "0d42cf4ad44507d485f78dc4eee5ebe3afdfb3a6b900abe8239870eed22fc1cf",
+    "bytes": 7370,
+    "line_count": 68,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Figma Iconset SVG import",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"figma-iconset-svg-import\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# Figma Iconset SVG import\n",
+      "level": 1,
+      "title": "Figma Iconset SVG import"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "The 2026-10-12 [LVRS Iconset](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=1344-9163) snapshot contains 2,846 canonical icons: 2,844 component masters and two standalone vector studies, organized into 44 Figma categories. Resources remain flat in `resources/iconset/`; Figma category information, component keys, node IDs, dimensions, native export hashes, and packaged hashes are recorded in [figma-iconset-manifest.json](figma-iconset-manifest.json).\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 2026-10-29 색상 확인 범위\n",
+      "level": 2,
+      "title": "2026-10-29 색상 확인 범위"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 14,
+      "raw": "현재 Figma 원본 2,846개를 모두 확인했고 이 중 2,178개의 자산을 갱신했다. 일반적인\n항목은 레이어와 도형을 대조하여 SVG 페인트만 교체하며 기존 형상과 반응형 뷰포트를\n보존한다. 도형 경로의 내보내기 표현이 다른 경우에는 양쪽 경로를 래스터화하여 겹침을\n대조한다. 경로 대응이 불가능한 9개는 현재 Figma 벡터를 사용하며 기존 정사각형\n뷰포트는 유지한다. 기존에 이미지 기반이던 `smartSelect`와 `translateObject`는 마스크\n호환성을 위해 Figma 8배 PNG를 SVG에 내장한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 20,
+      "raw": "매니페스트의 `colorReadbackCoverage`는 확인 범위를, 각 `colorReadback`은 변수 ID와\n원본 해시 또는 경로 대조 근거를 기록한다. `scripts/reconcile_figma_icon_colors.py`는\n읽기 결과를 ID별로 대조하며, 현재 매니페스트와 다른 사용자 변경을 감지하면 중단한다.\n지원하지 않는 효과나 외부 참조가 있는 벡터는 별도 처리를 위해 남긴다. 부분 읽기를\n이어 처리할 때는 이전과 새로운 읽기 파일을 같은 입력 디렉터리에 유지한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "This snapshot includes the 177 panel icons added to Figma, the consolidation of 194 duplicate components, and the 113 component name changes. Canonical resource filenames use the current Figma names and are unique under Unicode normalization and case-insensitive comparison. Existing control-specific resources remain separate from the Figma catalog.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "The 892 formerly monochrome icons retain their Figma accents. Their selected vector, text, or original image silhouette uses the existing LVRS ThemeColors tokens: blue, cyan, teal, yellow, red, purple, green, palette orange, and palette pink. SVG exports resolve those bindings to their authored colors. The 2026-10-19 palette revision recolors the replaced accent paints and opacity composites; unrelated artwork remains as exported; no renderer tint or replacement glyph is introduced. Twelve Boolean-operation icons additionally bind their visible union fill or stroke to the same token: coloring a consumed child alone does not affect the exported union. Their node geometry, dimensions, and path data are preserved.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "## Authored accent revision — 2026-10-19\n",
+      "level": 2,
+      "title": "Authored accent revision — 2026-10-19"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "The ten swatches `1477:30..38`, `1477:40` replace the former accent palette. Canonical variables and seven compatibility palette aliases retain their IDs. Matching SVG paint values follow the new accents, including alpha stops and existing dark composites. Path data, root scaling, dimensions and opacity remain intact. The manifest's `accentPaletteUpdate` records source nodes, exact RGBA, display HEX and the color-update method. Five Alert/Card helper SVGs are also recolored and recorded under `additionalResources`. Each changed vector icon records `paletteGeometrySha256`, computed after removing only paint attributes, and a refreshed packaged `sha256`. Original native export hashes remain historical provenance unless an icon is exported again.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "The translation icon uses an embedded raster silhouette; its visible Cyan is verified separately from its unchanged per-pixel alpha. Native export provenance and packaged compatibility hashes remain distinct. Test coverage includes this raster exception as well as the vector palette migration.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## Importing a complete snapshot\n",
+      "level": 2,
+      "title": "Importing a complete snapshot"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "Export component masters and the two standalone vectors using the Figma Plugin API with `SVG_STRING`, outlined text, and simplified strokes. The import JSON contains each icon's `id`, `name`, `key`, `type`, `category`, `width`, `height`, complete `svg`, and `nativeSha256`. Icons that received an accent additionally record `accentVariableId`. A previous native export may be reused only after its complete SHA-256 matches the current live export.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "fenced_code",
+      "start_line": 36,
+      "end_line": 46,
+      "raw": "```sh\npython3 scripts/import_figma_iconset.py \\\n    --export /absolute/path/native-icons.json \\\n    --aliases /absolute/path/legacy-aliases.json \\\n    --captured-on 2026-10-12 \\\n    --expected-count 2846 \\\n    --compatibility-dir /absolute/path/compatible-svg\ncmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSNormalizeSvgIcons\n./build/tests/LVRSNormalizeSvgIcons .\n```\n",
+      "language": "sh",
+      "code": "python3 scripts/import_figma_iconset.py \\\n    --export /absolute/path/native-icons.json \\\n    --aliases /absolute/path/legacy-aliases.json \\\n    --captured-on 2026-10-12 \\\n    --expected-count 2846 \\\n    --compatibility-dir /absolute/path/compatible-svg\ncmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSNormalizeSvgIcons\n./build/tests/LVRSNormalizeSvgIcons .\n",
+      "closed": true
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "The importer validates completeness, unique node IDs, filename safety, XML, native hashes, and compatibility alias targets before replacing the previously managed SVG snapshot. It preserves the 14 stepper, checkbox, dropdown, and input-search control SVGs. Removing managed files before writing the new snapshot also fixes case-only filename changes on case-insensitive filesystems.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "Legacy filenames that were renamed or consolidated are packaged through `resources/figma_icon_aliases.qrc`. Each alias points to the current canonical SVG, so old QML resource URLs receive the current artwork and colors without retaining a second SVG file. Alias mappings are listed separately in the manifest.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## SVG and raster compatibility\n",
+      "level": 2,
+      "title": "SVG and raster compatibility"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "All 2,873 physical resource SVGs, including the 14 control variants and 13 image helpers, use `width=\"100%\"`, `height=\"100%\"`, `preserveAspectRatio=\"xMidYMid meet\"`, and a centered square `viewBox`. `scripts/normalize_svg_icons.cpp` samples visible alpha bounds at eight pixels per SVG unit, including stroke overflow and embedded images. It changes only root attributes and refreshes the manifest and Figma parity fixture hashes. Repeating normalization must report zero updated roots.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "The native `smartSelect` and `translateObject` exports contain embedded PNG artwork. Qt compatibility exports use direct SVG images rather than an indirect image pattern. The translation icon retains the original image alpha silhouette and the authored cyan accent. Vector path geometry and outlined glyphs remain unchanged. Native and compatibility hashes remain separately recorded.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "## Validation and installation\n",
+      "level": 2,
+      "title": "Validation and installation"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "fenced_code",
+      "start_line": 60,
+      "end_line": 66,
+      "raw": "```sh\npython3 tests/test_figma_iconset_import.py\ncmake --build build --target LVRSTests_svg_manager LVRSTests_figma_parity LVRSTests_import_api --parallel 4\nctest --test-dir build --output-on-failure \\\n    -R 'LVRSTests_(svg_manager|figma_parity|import_api|figma_iconset_import)$'\nlvrs install\n```\n",
+      "language": "sh",
+      "code": "python3 tests/test_figma_iconset_import.py\ncmake --build build --target LVRSTests_svg_manager LVRSTests_figma_parity LVRSTests_import_api --parallel 4\nctest --test-dir build --output-on-failure \\\n    -R 'LVRSTests_(svg_manager|figma_parity|import_api|figma_iconset_import)$'\nlvrs install\n",
+      "closed": true
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "The import regression checks reject incomplete or corrupted snapshots without replacing existing assets. SVG tests check every canonical icon's packaged hash and raster output, all 892 visible accents, current artwork at every legacy resource alias, retained control variants, and centering at 18, 36, 72, and 144 pixels. The default macOS installer rebuilds the installed macOS, iOS, Android, and WASM framework packages and refreshes the installed source snapshot. Consumer application bundles and already running processes have their own resource copies; SDK installation is verified separately from consumer rebuilds.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "Figma Iconset SVG import",
+      "anchor": "figma-iconset-svg-import",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "2026-10-29 색상 확인 범위",
+      "anchor": "2026-10-29-색상-확인-범위",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Authored accent revision — 2026-10-19",
+      "anchor": "authored-accent-revision--2026-10-19",
+      "start_line": 26
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Importing a complete snapshot",
+      "anchor": "importing-a-complete-snapshot",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "SVG and raster compatibility",
+      "anchor": "svg-and-raster-compatibility",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Validation and installation",
+      "anchor": "validation-and-installation",
+      "start_line": 58
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000035",
+        "line": 54,
+        "text": "All 2,873 physical resource SVGs, including the 14 control variants and 13 image helpers, use `width=\"100%\"`, `height=\"100%\"`, `preserveAspectRatio=\"xMidYMid meet\"`, and a centered square `viewBox`. `scripts/normalize_svg_icons.cpp` samples visible alpha bounds at eight pixels per SVG unit, including stroke overflow and embedded images. It changes only root attributes and refreshes the manifest and Figma parity fixture hashes. Repeating normalization must report zero updated roots.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000027",
+        "language": "sh",
+        "code": "python3 scripts/import_figma_iconset.py \\\n    --export /absolute/path/native-icons.json \\\n    --aliases /absolute/path/legacy-aliases.json \\\n    --captured-on 2026-10-12 \\\n    --expected-count 2846 \\\n    --compatibility-dir /absolute/path/compatible-svg\ncmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSNormalizeSvgIcons\n./build/tests/LVRSNormalizeSvgIcons .\n"
+      },
+      {
+        "block_id": "b000041",
+        "language": "sh",
+        "code": "python3 tests/test_figma_iconset_import.py\ncmake --build build --target LVRSTests_svg_manager LVRSTests_figma_parity LVRSTests_import_api --parallel 4\nctest --test-dir build --output-on-failure \\\n    -R 'LVRSTests_(svg_manager|figma_parity|import_api|figma_iconset_import)$'\nlvrs install\n"
+      }
+    ],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "LVRS Iconset",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=1344-9163",
+        "kind": "external",
+        "line": 5
+      },
+      {
+        "block_id": "b000005",
+        "label": "figma-iconset-manifest.json",
+        "target": "figma-iconset-manifest.json",
+        "kind": "relative",
+        "line": 5
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

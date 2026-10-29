@@ -1,0 +1,145 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:093d867cc8336b4439aae2197b6e33e80a03d254c2210dc531f10c95868f9a6a",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/ContextMenuItem.md",
+    "sha256": "ddd1de36f08d845cdea3d54f229aeec6dfe0155820f8dad073bbfc83b71d8887",
+    "bytes": 1613,
+    "line_count": 14,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ContextMenuItem",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ContextMenuItem\n",
+      "level": 1,
+      "title": "ContextMenuItem"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Figma 에서 `331:9282` 의 컴팩트 행이 141 × 18px, 가로 패딩 4, 세로 패딩 0, 반지름 0입니다. MenuItem 신호, 아이콘/단축키 레이아웃, 선택 및 서브메뉴 API 를 공유합니다. 레이블은 번들 Inter Regular 12 를 사용하며 단축키는 Pretendard SemiBold 12를 사용합니다. `hasChildItems` 기본값은 false 입니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "Figma의 `ContextMenuItem` 세트에는 이제 완전한 구성 요소 입력 상태 변형이 포함됩니다. 런타임는 하나의 소유된 `interaction` 개체와 읽기 전용 `interactionPhase`/`interactionInput`를 상속합니다. 외부 상호 작용 오버레이가 필요하지 않습니다. [구성 요소 인스턴스 상태](../../instance-states.md)를 참조하세요.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "fenced_code",
+      "start_line": 7,
+      "end_line": 10,
+      "raw": "```qml\nimport LVRS as LV\nLV.ContextMenuItem { label: \"Label\"; key: \"Key\" }\n```\n",
+      "language": "qml",
+      "code": "import LVRS as LV\nLV.ContextMenuItem { label: \"Label\"; key: \"Key\" }\n",
+      "closed": true
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "Pressable 유형은 공유 AbstractButton 압축, 리바운드 및 키보드 활성화를 사용합니다. `Motion.reducedMotion`는 보간을 제거합니다. 소스 노드, 상태 값 및 검증 범위는 [Figma audit](../../figma-parity.md)를 참조하세요.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "컴팩트 행은 MenuItem 기본/호버/누름/릴리스/초점 계약을 상속받습니다: 중립적 호버는 `Theme.surfaceAlt` , 중립적 누름은 `Theme.accentMuted` , 선택된 채우기는 Primary 를 유지하며 비활성화 상태는 활성화 또는 초점이 없습니다. 릴리스는 180ms 기하학적 OutBack 반환입니다. 키보드 링은 141 × 18 프레임 바깥에 3px 유지됩니다. 레이블 및 단축키 타이포그래피는 변경되지 않았습니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ContextMenuItem",
+      "anchor": "contextmenuitem",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "구성 요소 인스턴스 상태",
+        "target": "../../instance-states.md",
+        "kind": "relative",
+        "line": 5
+      },
+      {
+        "block_id": "b000009",
+        "label": "Figma audit",
+        "target": "../../figma-parity.md",
+        "kind": "relative",
+        "line": 12
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

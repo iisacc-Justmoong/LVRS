@@ -1,0 +1,637 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c722a13672394cefbaa5306094ed5106d89f9aea9e3957545ca2a5748116f5db",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/TableHeaderModel.md",
+    "sha256": "a305163b3bcd21c02f9392aad7950238a680dd94cf9c8e86a51636adef2b11a6",
+    "bytes": 2525,
+    "line_count": 81,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "TableHeaderModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# TableHeaderModel\n",
+      "level": 1,
+      "title": "TableHeaderModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/model/tableheadermodel.h`, `src/backend/model/tableheadermodel.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`TableHeaderModel`는 `TableHeader.qml`에 대한 헤더 행 소스 해상도와 형상을 소유합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- `cellItems` 및 레거시 `columns`를 형식화된 헤더 설명자로 확인합니다.\n- C++의 기본 및 개체 기반 헤더 항목을 정규화합니다.\n- 문자열, 정수, 부동 소수점 및 부울 헤더 값에서 열 값 유형을 추론합니다.\n- 렌더링을 위한 열 패딩, 너비 및 x 오프셋을 계산합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`cellItems` 및 레거시 `columns`를 형식화된 헤더 설명자로 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++의 기본 및 개체 기반 헤더 항목을 정규화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "문자열, 정수, 부동 소수점 및 부울 헤더 값에서 열 값 유형을 추론합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링을 위한 열 패딩, 너비 및 x 오프셋을 계산합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "입력:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 27,
+      "raw": "- `cellItems`\n- `columns`\n- `tableWidth`\n- `rowHeight`\n- `cellHorizontalPadding`\n- `columnWidths`\n- `fallbackCellWidth`\n- `minColumnWidth`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`cellItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columns`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tableWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellHorizontalPadding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnWidths`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fallbackCellWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minColumnWidth`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "읽기 전용:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 33,
+      "raw": "- `descriptors`\n- `columnCount`\n- `revision`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`descriptors`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 37,
+      "end_line": 48,
+      "raw": "- `resolvedColumnSource()`\n- `columnAt(index)`\n- `normalizeColumnType(value)`\n- `inferredColumnType(value)`\n- `columnType(index)`\n- `columnText(index)`\n- `columnPadding(index)`\n- `numericWidth(value, fallbackValue)`\n- `autoColumnWidth()`\n- `columnWidth(index)`\n- `columnX(index)`\n- `descriptorAt(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`resolvedColumnSource()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnAt(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizeColumnType(value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inferredColumnType(value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnType(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnText(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnPadding(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`numericWidth(value, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`autoColumnWidth()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnWidth(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnX(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descriptorAt(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "<a id=\"descriptor-contract\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## 설명자 계약\n",
+      "level": 2,
+      "title": "설명자 계약"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "각 설명자에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 56,
+      "end_line": 63,
+      "raw": "- `index`\n- `sourceData`\n- `text`\n- `valueType`\n- `x`\n- `width`\n- `height`\n- `padding`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`index`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sourceData`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueType`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`x`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`width`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`height`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`padding`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 69,
+      "end_line": 75,
+      "raw": "- `cellItems`는 `columns`보다 선호됩니다.\n- 객체 항목은 `label`, `text`, `title`, `value`에서 레이블 텍스트를 읽습니다.\n- 객체 항목은 `type`, `valueType`, `cellType`, `dataType`에서 유형 메타데이터를 읽습니다.\n- 기본 헤더 항목은 유형을 직접 추론합니다. 부울은 `bool`, 정수는 `int`, 비정수는 `float`, 그렇지 않으면 `string`입니다.\n- 열 너비는 명시적 `columnWidths[index]`를 사용한 다음 `fallbackCellWidth`를 사용한 다음 `tableWidth / columnCount`의 동일한 자동 너비를 사용합니다.\n- 너비는 `minColumnWidth`로 고정됩니다.\n- `descriptorAt(index)`는 현재 설명자 목록 외부의 음수가 아닌 인덱스에 대해 대체 경로 `\"Column\"` 설명자를 반환하므로 `TableHeader.qml`는 여전히 1열 빈 상태 대체 경로를 렌더링할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`cellItems`는 `columns`보다 선호됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체 항목은 `label`, `text`, `title`, `value`에서 레이블 텍스트를 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체 항목은 `type`, `valueType`, `cellType`, `dataType`에서 유형 메타데이터를 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 헤더 항목은 유형을 직접 추론합니다. 부울은 `bool`, 정수는 `int`, 비정수는 `float`, 그렇지 않으면 `string`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "열 너비는 명시적 `columnWidths[index]`를 사용한 다음 `fallbackCellWidth`를 사용한 다음 `tableWidth / columnCount`의 동일한 자동 너비를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "너비는 `minColumnWidth`로 고정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descriptorAt(index)`는 현재 설명자 목록 외부의 음수가 아닌 인덱스에 대해 대체 경로 `\"Column\"` 설명자를 반환하므로 `TableHeader.qml`는 여전히 1열 빈 상태 대체 경로를 렌더링할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"qml-boundary\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## QML 경계\n",
+      "level": 2,
+      "title": "QML 경계"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "`TableHeader.qml`는 `descriptors`를 렌더링하고 호환성 도우미 호출을 `TableHeaderModel`로 전달합니다. 헤더 텍스트 해상도, 유형 추론, 패딩, 너비 및 x 오프셋 계산은 모델 책임입니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "TableHeaderModel",
+      "anchor": "tableheadermodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "설명자 계약",
+      "anchor": "설명자-계약",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 67
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML 경계",
+      "anchor": "qml-경계",
+      "start_line": 79
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

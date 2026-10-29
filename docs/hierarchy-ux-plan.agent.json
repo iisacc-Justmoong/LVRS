@@ -1,0 +1,663 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:698a291f620ae57914e56265955356734d01c9d38fbf8b369858628ac948e85f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/hierarchy-ux-plan.md",
+    "sha256": "3ba3a244a834923ef52a5387724993477893643c43a678cc125c65775d619056",
+    "bytes": 1894,
+    "line_count": 62,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "계층 구조 UX 완료 계획(LVRS)",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"hierarchy-ux-completion-plan-lvrs\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 계층 구조 UX 완료 계획(LVRS)\n",
+      "level": 1,
+      "title": "계층 구조 UX 완료 계획(LVRS)"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"status\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 상태\n",
+      "level": 2,
+      "title": "상태"
+    },
+    {
+      "id": "b000008",
+      "kind": "list",
+      "start_line": 8,
+      "end_line": 9,
+      "raw": "- 시작됨: 2026-03-15\n- 모드: 증분, 계약 우선\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "시작됨: 2026-03-15",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모드: 증분, 계약 우선",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000009",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "html",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "<a id=\"stage-1-interaction-semantics-started\"></a>\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "heading",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "## 스테이지 1. 상호작용 의미론(시작됨)\n",
+      "level": 2,
+      "title": "스테이지 1. 상호작용 의미론(시작됨)"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 14,
+      "end_line": 15,
+      "raw": "- `HierarchyDropMode` 추가: 이전/이후/하위/루트\n- `HierarchyMoveIntent` 계약 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`HierarchyDropMode` 추가: 이전/이후/하위/루트",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`HierarchyMoveIntent` 계약 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"stage-2-structural-operations-started\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 스테이지 2. 구조적 작업(시작)\n",
+      "level": 2,
+      "title": "스테이지 2. 구조적 작업(시작)"
+    },
+    {
+      "id": "b000018",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 21,
+      "raw": "- 의도에 따른 결정적 이동 애플리케이션 추가\n- 형제 순서를 유지하고 순환을 방지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "의도에 따른 결정적 이동 애플리케이션 추가",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "형제 순서를 유지하고 순환을 방지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000019",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "html",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "<a id=\"stage-3-visibility-engine-started\"></a>\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "heading",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "## 스테이지 3. 가시성 엔진(시작됨)\n",
+      "level": 2,
+      "title": "스테이지 3. 가시성 엔진(시작됨)"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "- 노드 + 확장 상태에서 표시되는 행 투영 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "노드 + 확장 상태에서 표시되는 행 투영 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "<a id=\"stage-4-selectionfocus-state-started\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "## 스테이지 4. 선택/초점 상태(시작됨)\n",
+      "level": 2,
+      "title": "스테이지 4. 선택/초점 상태(시작됨)"
+    },
+    {
+      "id": "b000028",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "- `HierarchySelectionState` 계약 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`HierarchySelectionState` 계약 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000029",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "html",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "<a id=\"stage-5-keyboardinline-edit-contract-planned\"></a>\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "heading",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "## 스테이지 5. 키보드/인라인 편집 계약(예정)\n",
+      "level": 2,
+      "title": "스테이지 5. 키보드/인라인 편집 계약(예정)"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "- 작업 열거형 및 상태 전환 정의\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "작업 열거형 및 상태 전환 정의",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "<a id=\"stage-6-transactionundo-redo-started\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## 스테이지 6. 트랜잭션/실행 취소-다시 실행(시작됨)\n",
+      "level": 2,
+      "title": "스테이지 6. 트랜잭션/실행 취소-다시 실행(시작됨)"
+    },
+    {
+      "id": "b000038",
+      "kind": "list",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "- 이동 의도를 위한 명령 스택 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이동 의도를 위한 명령 스택 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000039",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "html",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "<a id=\"stage-7-syncconflict-baseline-planned\"></a>\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "heading",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "## 스테이지 7. 동기화/충돌 기준(예정)\n",
+      "level": 2,
+      "title": "스테이지 7. 동기화/충돌 기준(예정)"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "- 버전 메타데이터 계약 및 충돌 표시 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "버전 메타데이터 계약 및 충돌 표시 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "<a id=\"stage-8-performance-gate-planned\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "## 스테이지 8. 퍼포먼스 게이트(예정)\n",
+      "level": 2,
+      "title": "스테이지 8. 퍼포먼스 게이트(예정)"
+    },
+    {
+      "id": "b000048",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "- 기준 성능 테스트 대상 추가(10,000개 노드)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "기준 성능 테스트 대상 추가(10,000개 노드)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000049",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "html",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "<a id=\"stage-9-quality-lock-started\"></a>\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "heading",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "## 스테이지 9. 품질 잠금(시작됨)\n",
+      "level": 2,
+      "title": "스테이지 9. 품질 잠금(시작됨)"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "- 이동/가시성/실행 취소 경로에 대한 단위 테스트 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이동/가시성/실행 취소 경로에 대한 단위 테스트 추가",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "<a id=\"stage-10-consumer-api--sample-planned\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "## 스테이지 10. 컨슈머 API + 샘플(예정)\n",
+      "level": 2,
+      "title": "스테이지 10. 컨슈머 API + 샘플(예정)"
+    },
+    {
+      "id": "b000058",
+      "kind": "list",
+      "start_line": 61,
+      "end_line": 62,
+      "raw": "- 백엔드 API에 컨트롤러 노출\n- 최소한의 소비자 예시 추가\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "백엔드 API에 컨트롤러 노출",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최소한의 소비자 예시 추가",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "계층 구조 UX 완료 계획(LVRS)",
+      "anchor": "계층-구조-ux-완료-계획lvrs",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "상태",
+      "anchor": "상태",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000012",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 1. 상호작용 의미론(시작됨)",
+      "anchor": "스테이지-1-상호작용-의미론시작됨",
+      "start_line": 13
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 2. 구조적 작업(시작)",
+      "anchor": "스테이지-2-구조적-작업시작",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000022",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 3. 가시성 엔진(시작됨)",
+      "anchor": "스테이지-3-가시성-엔진시작됨",
+      "start_line": 25
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 4. 선택/초점 상태(시작됨)",
+      "anchor": "스테이지-4-선택초점-상태시작됨",
+      "start_line": 30
+    },
+    {
+      "block_id": "b000032",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 5. 키보드/인라인 편집 계약(예정)",
+      "anchor": "스테이지-5-키보드인라인-편집-계약예정",
+      "start_line": 35
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 6. 트랜잭션/실행 취소-다시 실행(시작됨)",
+      "anchor": "스테이지-6-트랜잭션실행-취소-다시-실행시작됨",
+      "start_line": 40
+    },
+    {
+      "block_id": "b000042",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 7. 동기화/충돌 기준(예정)",
+      "anchor": "스테이지-7-동기화충돌-기준예정",
+      "start_line": 45
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 8. 퍼포먼스 게이트(예정)",
+      "anchor": "스테이지-8-퍼포먼스-게이트예정",
+      "start_line": 50
+    },
+    {
+      "block_id": "b000052",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 9. 품질 잠금(시작됨)",
+      "anchor": "스테이지-9-품질-잠금시작됨",
+      "start_line": 55
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스테이지 10. 컨슈머 API + 샘플(예정)",
+      "anchor": "스테이지-10-컨슈머-api--샘플예정",
+      "start_line": 60
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

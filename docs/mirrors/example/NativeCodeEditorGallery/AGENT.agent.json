@@ -1,0 +1,79 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:8f5e7df14045131848661f10f340c3698c1d205bf8a2dfd08f0a876b96a383f0",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeCodeEditorGallery/AGENT.md",
+    "sha256": "3998493fae27f2dcc39407c99e7cf9df13f2bbfa48b37bab0b7e4ac5fd86ac9d",
+    "bytes": 441,
+    "line_count": 5,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 코드 편집기 지침",
+    "role": "instructions",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 코드 편집기 지침\n",
+      "level": 1,
+      "title": "네이티브 코드 편집기 지침"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "앱 소스는 App/, 출력은 build/에 둔다. iiSDKCore 진입점과 LVUI AOT·iiGUI 자체 위젯을 사용한다.\n파일 생성·쓰기는 iiFileProvider를 통한다. 테스트·self-test·앱은 전체 목표 마지막까지 실행하지 않는다.\nCodeEditor는 PlainText/NoWrap이며 RichText TextEditor와 구분한다. 서식과 전체 원본 API 동등성은 아직 완료되지 않았다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 코드 편집기 지침",
+      "anchor": "네이티브-코드-편집기-지침",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 4,
+        "text": "파일 생성·쓰기는 iiFileProvider를 통한다. 테스트·self-test·앱은 전체 목표 마지막까지 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

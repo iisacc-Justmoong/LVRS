@@ -1,0 +1,1275 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:b159c1661a084c8370f77f7327f2202f0abe8114040b94ecda5bedf8102d36ea",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/mvvm.md",
+    "sha256": "19fd2fe65b43de2a189d13831b816a42a5766e1403919b5556022b218ca50393",
+    "bytes": 6510,
+    "line_count": 178,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "MVVM",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# MVVM\n",
+      "level": 1,
+      "title": "MVVM"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "LVRS MVVM는 C++ ViewModel 클래스, 재사용 가능한 구성 요소 상태를 위한 `StateModel`, `ViewModels`(`ViewModelRegistry`) 싱글턴 및 경로/보기를 중심으로 합니다. `PageRouter`에서 내보낸 바인딩 메타데이터입니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 9,
+      "end_line": 13,
+      "raw": "- 논리 키로 뷰 모델 인스턴스를 등록합니다.\n- 재사용 가능한 구성요소 상태를 C++ 상태 객체로 이동합니다.\n- 구체적인 뷰 ID(`viewId`)를 모델 키에 바인딩합니다.\n- 한 번에 하나의 뷰만 하나의 모델 키를 변경할 수 있도록 쓰기 소유권을 명시적으로 제어합니다.\n- C++ 부트스트랩 코드에서 ViewModel 수명, 진단 및 등록 정책을 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "논리 키로 뷰 모델 인스턴스를 등록합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "재사용 가능한 구성요소 상태를 C++ 상태 객체로 이동합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구체적인 뷰 ID(`viewId`)를 모델 키에 바인딩합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "한 번에 하나의 뷰만 하나의 모델 키를 변경할 수 있도록 쓰기 소유권을 명시적으로 제어합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++ 부트스트랩 코드에서 ViewModel 수명, 진단 및 등록 정책을 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"viewmodel-shape\"></a>\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## ViewModel 모양\n",
+      "level": 2,
+      "title": "ViewModel 모양"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "전용 앱 ViewModels는 `ViewModel`(`src/backend/state/viewmodel.h`)에서 파생되어야 하며 도메인별 Q_PROPERTY 상태 및 호출 가능한 명령을 추가해야 합니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "기본 클래스는 다음을 제공합니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 29,
+      "raw": "- `key`\n- `displayName`\n- `busy`\n- `error`\n- `hasError`\n- `metadata`\n- `snapshot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`key`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`displayName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`busy`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`error`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasError`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`metadata`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`snapshot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "기본 유형은 QML에서 생성할 수 없습니다. QML는 `ViewModels`를 통해 앱에서 생성된 인스턴스를 받습니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "`StateModel`(`src/backend/state/statemodel.h`)는 `ViewModel`에서 파생되며 `revision` 및 키별 변경 신호가 포함된 키-값 상태 맵(`values`)을 제공합니다. 전용 유형의 ViewModel가 존재하기 전에 QML에서 일반 구성요소 상태를 마이그레이션할 때 이를 사용하십시오.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "<a id=\"core-api-viewmodels\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## 코어 API (`ViewModels`)\n",
+      "level": 2,
+      "title": "코어 API (`ViewModels`)"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "위치: `src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "등록 수명주기:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 43,
+      "end_line": 47,
+      "raw": "- `set(key, object)`\n- `registerViewModel(object, fallbackKey?)`\n- `get(key)`\n- `remove(key)`\n- `clear()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`set(key, object)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`registerViewModel(object, fallbackKey?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`get(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`remove(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clear()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "바인딩 및 소유권:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 56,
+      "raw": "- `bindView(viewId, key, writable)`\n- `unbindView(viewId)`\n- `claimOwnership(viewId, key)`\n- `releaseOwnership(viewId, key?)`\n- `canWrite(viewId, key?)`\n- `ownerOf(key)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`bindView(viewId, key, writable)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`unbindView(viewId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`claimOwnership(viewId, key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`releaseOwnership(viewId, key?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canWrite(viewId, key?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ownerOf(key)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "데이터 액세스 도우미:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 60,
+      "end_line": 62,
+      "raw": "- `updateProperty(viewId, property, value)`\n- `updatePropertyByKey(viewId, key, property, value)`\n- `readProperty(viewId, property)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`updateProperty(viewId, property, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updatePropertyByKey(viewId, key, property, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readProperty(viewId, property)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "상태/진단:\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "list",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "- `keys`, `views`, `bindings`, `owners`, `descriptors`, `lastError`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`keys`, `views`, `bindings`, `owners`, `descriptors`, `lastError`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "`set()`는 수동 또는 호환 배선에 계속 사용할 수 있습니다. 새로운 C++ 부트스트랩 코드는 `registerViewModel()` 또는 `QmlContextBinder`를 선호해야 합니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "<a id=\"binding-from-router-metadata\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "## 라우터 메타데이터에서 바인딩\n",
+      "level": 2,
+      "title": "라우터 메타데이터에서 바인딩"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "`PageRouter`는 경로 메타데이터에 다음이 포함된 경우 자동으로 뷰를 바인딩할 수 있습니다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 76,
+      "end_line": 78,
+      "raw": "- `viewModelKey` 또는 `modelKey`\n- `viewId`(선택 사항, 기본값은 경로 경로 또는 생성된 ID)\n- `writable` 또는 `modelWritable`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`viewModelKey` 또는 `modelKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`viewId`(선택 사항, 기본값은 경로 경로 또는 생성된 ID)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`writable` 또는 `modelWritable`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "이를 통해 페이지별 상용구 없이 경로 수준 소유권 정책을 사용할 수 있습니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "<a id=\"write-ownership-rule\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "## 쓰기 소유권 규칙\n",
+      "level": 2,
+      "title": "쓰기 소유권 규칙"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "두 조건이 모두 true인 경우에만 쓰기 액세스가 허용됩니다.\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 88,
+      "end_line": 89,
+      "raw": "1. 뷰는 모델 키에 바인딩됩니다.\n2. 뷰는 해당 키의 현재 소유자입니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "뷰는 모델 키에 바인딩됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "뷰는 해당 키의 현재 소유자입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "소유권이 없거나 충돌하는 경우 API가 `false`를 반환하고 `lastError`를 설정하도록 작성하세요.\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "html",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "<a id=\"c-bootstrap-pattern\"></a>\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "## C++ 부트스트랩 패턴\n",
+      "level": 2,
+      "title": "C++ 부트스트랩 패턴"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "fenced_code",
+      "start_line": 97,
+      "end_line": 115,
+      "raw": "```cpp\nauto *sessionVm = new SessionViewModel(&engine);\nsessionVm->setKey(QStringLiteral(\"Session\"));\nsessionVm->setDisplayName(QStringLiteral(\"Session\"));\n\nlvrs::QmlContextBindPlan plan;\n\nlvrs::QmlViewModelBinding sessionBinding;\nsessionBinding.key = QStringLiteral(\"Session\");\nsessionBinding.object = sessionVm;\nsessionBinding.contextName = QStringLiteral(\"sessionViewModel\");\nsessionBinding.viewId = QStringLiteral(\"SessionPage\");\nsessionBinding.writable = true;\nplan.viewModels.append(sessionBinding);\n\nconst lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);\nif (!result.ok)\n    qWarning().noquote() << result.errorMessage();\n```\n",
+      "language": "cpp",
+      "code": "auto *sessionVm = new SessionViewModel(&engine);\nsessionVm->setKey(QStringLiteral(\"Session\"));\nsessionVm->setDisplayName(QStringLiteral(\"Session\"));\n\nlvrs::QmlContextBindPlan plan;\n\nlvrs::QmlViewModelBinding sessionBinding;\nsessionBinding.key = QStringLiteral(\"Session\");\nsessionBinding.object = sessionVm;\nsessionBinding.contextName = QStringLiteral(\"sessionViewModel\");\nsessionBinding.viewId = QStringLiteral(\"SessionPage\");\nsessionBinding.writable = true;\nplan.viewModels.append(sessionBinding);\n\nconst lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);\nif (!result.ok)\n    qWarning().noquote() << result.errorMessage();\n",
+      "closed": true
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "그런 다음 QML는 등록된 객체를 사용합니다.\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "fenced_code",
+      "start_line": 119,
+      "end_line": 123,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nproperty var vm: LV.ViewModels.getForView(\"SessionPage\")\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nproperty var vm: LV.ViewModels.getForView(\"SessionPage\")\n",
+      "closed": true
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "html",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "heading",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "list",
+      "start_line": 129,
+      "end_line": 133,
+      "raw": "- 키와 보기 ID는 트림 기반 토큰 정규화를 통해 정규화됩니다.\n- 키가 제거되면 소유권 맵(`key -> viewId`)이 정리됩니다.\n- `ViewModels` 에 의해 부모로 연결된 고아 모델 객체는 키 참조가 더 이상 남아있지 않을 때 자동으로 처분됩니다.\n- 바인딩 업데이트는 신호 기반(`viewsChanged`, `ownershipChanged`)이므로 QML 관찰자가 반응할 수 있습니다.\n- 설명자 업데이트는 신호 기반(`descriptorsChanged`)이므로 도구를 통해 C++ ViewModel 상태 및 현재 소유권을 검사할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "키와 보기 ID는 트림 기반 토큰 정규화를 통해 정규화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키가 제거되면 소유권 맵(`key -> viewId`)이 정리됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModels` 에 의해 부모로 연결된 고아 모델 객체는 키 참조가 더 이상 남아있지 않을 때 자동으로 처분됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "바인딩 업데이트는 신호 기반(`viewsChanged`, `ownershipChanged`)이므로 QML 관찰자가 반응할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "설명자 업데이트는 신호 기반(`descriptorsChanged`)이므로 도구를 통해 C++ ViewModel 상태 및 현재 소유권을 검사할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "html",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "<a id=\"failure-modes-to-handle\"></a>\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "heading",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "## 처리해야 할 실패 모드\n",
+      "level": 2,
+      "title": "처리해야 할 실패 모드"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "list",
+      "start_line": 139,
+      "end_line": 142,
+      "raw": "- `viewId` 또는 키가 비어 있습니다.\n- 알 수 없는 키에 바인딩 중입니다.\n- 다른 뷰가 키를 소유하고 있는 동안 쓰기 가능한 바인딩을 시도했습니다.\n- 속성이 바인딩되지 않은 뷰 또는 알 수 없는 속성 이름에 기록됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`viewId` 또는 키가 비어 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "알 수 없는 키에 바인딩 중입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "다른 뷰가 키를 소유하고 있는 동안 쓰기 가능한 바인딩을 시도했습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "속성이 바인딩되지 않은 뷰 또는 알 수 없는 속성 이름에 기록됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "html",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "<a id=\"advanced-scenario-read-only-detail--writable-editor\"></a>\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "heading",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "## 고급 시나리오: 읽기 전용 세부 정보 + 쓰기 가능한 편집기\n",
+      "level": 2,
+      "title": "고급 시나리오: 읽기 전용 세부 정보 + 쓰기 가능한 편집기"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "일반적인 패턴은 2 뷰가 동일한 모델 키에 바인딩되되 서로 다른 권한을 갖는 것입니다.\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "list",
+      "start_line": 150,
+      "end_line": 151,
+      "raw": "- 상세 페이지: `bindView(\"Detail\", \"RunVM\", false)`\n- 편집기 페이지: `bindView(\"Editor\", \"RunVM\", true)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "상세 페이지: `bindView(\"Detail\", \"RunVM\", false)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집기 페이지: `bindView(\"Editor\", \"RunVM\", true)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "이를 통해 읽기 전용 구성 요소는 하나의 편집기 표면만 모델 속성을 변경할 수 있는 동안 상태를 표시할 수 있습니다.\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "html",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "<a id=\"ownership-handover-pattern\"></a>\n"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "heading",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "## 소유권 이양 패턴\n",
+      "level": 2,
+      "title": "소유권 이양 패턴"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "paragraph",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "편집 가능한 표면을 전환하는 경우:\n"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "list",
+      "start_line": 161,
+      "end_line": 163,
+      "raw": "1. `releaseOwnership(previousViewId, key)`\n2. `claimOwnership(nextViewId, key)`\n3. 다음 보기에서만 쓰기 업데이트를 실행합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`releaseOwnership(previousViewId, key)`",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`claimOwnership(nextViewId, key)`",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "다음 보기에서만 쓰기 업데이트를 실행합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "paragraph",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "이 명시적 핸드오버는 자동 쓰기 거부를 방지하고 소유권 감사 가능성을 유지합니다.\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "html",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "<a id=\"debugging-write-failures\"></a>\n"
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "heading",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "## 쓰기 실패 디버깅\n",
+      "level": 2,
+      "title": "쓰기 실패 디버깅"
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "paragraph",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "`updateProperty*`가 `false`를 반환하면 순서대로 검사합니다.\n"
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "list",
+      "start_line": 173,
+      "end_line": 176,
+      "raw": "- `ViewModels.lastError`\n- `ViewModels.bindings`\n- `ViewModels.owners`\n- QObject에 대상 속성이 존재하는지 여부\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ViewModels.lastError`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModels.bindings`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModels.owners`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QObject에 대상 속성이 존재하는지 여부",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000118",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000119",
+      "kind": "paragraph",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "대부분의 런타임 오류는 소유권 누락이나 속성 이름의 오타로 인해 발생합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "MVVM",
+      "anchor": "mvvm",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "ViewModel 모양",
+      "anchor": "viewmodel-모양",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API (`ViewModels`)",
+      "anchor": "코어-api-viewmodels",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "라우터 메타데이터에서 바인딩",
+      "anchor": "라우터-메타데이터에서-바인딩",
+      "start_line": 72
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "쓰기 소유권 규칙",
+      "anchor": "쓰기-소유권-규칙",
+      "start_line": 84
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "C++ 부트스트랩 패턴",
+      "anchor": "c-부트스트랩-패턴",
+      "start_line": 95
+    },
+    {
+      "block_id": "b000081",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 127
+    },
+    {
+      "block_id": "b000087",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "처리해야 할 실패 모드",
+      "anchor": "처리해야-할-실패-모드",
+      "start_line": 137
+    },
+    {
+      "block_id": "b000093",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "고급 시나리오: 읽기 전용 세부 정보 + 쓰기 가능한 편집기",
+      "anchor": "고급-시나리오-읽기-전용-세부-정보--쓰기-가능한-편집기",
+      "start_line": 146
+    },
+    {
+      "block_id": "b000103",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "소유권 이양 패턴",
+      "anchor": "소유권-이양-패턴",
+      "start_line": 157
+    },
+    {
+      "block_id": "b000113",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "쓰기 실패 디버깅",
+      "anchor": "쓰기-실패-디버깅",
+      "start_line": 169
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

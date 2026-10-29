@@ -1,0 +1,602 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:0252bca94ce71958d7c20abdba47a17f955df3c38150aa5cb87339376d86f1d5",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/layout/HStack.md",
+    "sha256": "3c82079696ba8047d4c0f1f7fc39e201850394a5829b5e1006526e18366e31f1",
+    "bytes": 2568,
+    "line_count": 85,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "H스택",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"hstack\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# H스택\n",
+      "level": 1,
+      "title": "H스택"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/layout/HStack.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`HStack`는 `RowLayout`로 구현된 SwiftUI 스타일 수평 스택입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 14,
+      "raw": "- 선택적 이름 기반 정렬 의미 체계로 간단한 축 레이아웃을 제공합니다.\n- 공백 동작에 대해 관리되는 하위 항목에 자동 주석을 답니다(`stackAxis`).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "선택적 이름 기반 정렬 의미 체계로 간단한 축 레이아웃을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공백 동작에 대해 관리되는 하위 항목에 자동 주석을 답니다(`stackAxis`).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 18,
+      "end_line": 22,
+      "raw": "- `spacing`(`-1`는 기본 간격을 의미함)\n- `defaultSpacing`\n- `alignment`\n- `alignmentName` (`top | center | bottom`)\n- 기본 `content` 슬롯\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`spacing`(`-1`는 기본 간격을 의미함)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`defaultSpacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`alignment`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`alignmentName` (`top | center | bottom`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 `content` 슬롯",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "fenced_code",
+      "start_line": 28,
+      "end_line": 37,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.HStack {\n    alignmentName: \"bottom\"\n    spacing: 12\n    LV.LabelButton { text: \"Cancel\" }\n    LV.LabelButton { text: \"Save\"; tone: LV.AbstractButton.Primary }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.HStack {\n    alignmentName: \"bottom\"\n    spacing: 12\n    LV.LabelButton { text: \"Cancel\" }\n    LV.LabelButton { text: \"Save\"; tone: LV.AbstractButton.Primary }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 43,
+      "end_line": 45,
+      "raw": "- 이름 기반 정렬은 원시 `alignment` 플래그보다 우선순위가 높습니다.\n- 정렬 업데이트는 레이아웃 정렬이 변경되지 않은 관리되는 하위 항목에만 적용됩니다.\n- `stackAxis`를 노출하는 어린이는 `Spacer`와 협력하기 위해 `\"horizontal\"`를 받습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이름 기반 정렬은 원시 `alignment` 플래그보다 우선순위가 높습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정렬 업데이트는 레이아웃 정렬이 변경되지 않은 관리되는 하위 항목에만 적용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackAxis`를 노출하는 어린이는 `Spacer`와 협력하기 위해 `\"horizontal\"`를 받습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "<a id=\"advanced-example-mixed-managedcustom-alignment\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## 고급 예: 혼합 관리형/사용자 지정 정렬\n",
+      "level": 2,
+      "title": "고급 예: 혼합 관리형/사용자 지정 정렬"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "fenced_code",
+      "start_line": 51,
+      "end_line": 63,
+      "raw": "```qml\nimport QtQuick\nimport LVRS 1.0 as LV\n\nLV.HStack {\n    alignmentName: \"center\"\n    Rectangle { width: 32; height: 32 }\n    Rectangle {\n        width: 32; height: 48\n        Layout.alignment: Qt.AlignTop\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport LVRS 1.0 as LV\n\nLV.HStack {\n    alignmentName: \"center\"\n    Rectangle { width: 32; height: 32 }\n    Rectangle {\n        width: 32; height: 48\n        Layout.alignment: Qt.AlignTop\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "이 경우 명시적으로 할당된 하위 정렬은 유지되고 자동 관리되는 하위 항목은 스택 정렬을 따릅니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "Q. 한 아이는 왜 `alignmentName`를 무시하나요?   A. 하위 항목에는 명시적인 `Layout.alignment` 세트가 있을 수 있으며 더 이상 스택에 의해 자동 관리되지 않습니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "Q. 음수 띄어쓰기가 허용되나요?   A. 계약은 모든 정수를 허용하지만 음수 공백은 중복을 유발하므로 의도적으로 사용해야 합니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"validation-checklist\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 검증 체크리스트\n",
+      "level": 2,
+      "title": "검증 체크리스트"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 77,
+      "end_line": 79,
+      "raw": "- 정렬 토큰은 예상되는 수직 배치로 확인됩니다.\n- 간격 계약은 응답 중단점 전체에서 일관됩니다.\n- 명시적/자동 하위 정렬이 혼합되어 의도한 대로 작동합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "정렬 토큰은 예상되는 수직 배치로 확인됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "간격 계약은 응답 중단점 전체에서 일관됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "명시적/자동 하위 정렬이 혼합되어 의도한 대로 작동합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "RowLayout 간격은 수직 스택과 동일한 타이밍으로 고정됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "H스택",
+      "anchor": "h스택",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 26
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 41
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "고급 예: 혼합 관리형/사용자 지정 정렬",
+      "anchor": "고급-예-혼합-관리형사용자-지정-정렬",
+      "start_line": 49
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 67
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증 체크리스트",
+      "anchor": "검증-체크리스트",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 83
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000055",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 85
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

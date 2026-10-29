@@ -141,6 +141,7 @@ Result<Layout> make_layout(const TableModelOptions& options) {
             return ii::core::fail(ErrorCode::invalid_argument, "Invalid table dimension override");
     for (const auto& column : options.columns)
         if (!valid_text(column.text) || !valid_text(column.value_type)
+            || !valid_text(column.leading_icon) || !valid_text(column.trailing_icon)
             || (column.padding && (!std::isfinite(*column.padding) || *column.padding < 0 || *column.padding > maximum_dimension)))
             return ii::core::fail(ErrorCode::invalid_argument, "Invalid table header");
     std::size_t total = 0;

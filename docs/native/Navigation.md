@@ -83,6 +83,10 @@ auto current = navigation.state();
 만들지 않는다. 이 이력은 앱의 화면 상태이며 파일·문서 수정 revision이나 undo 기록이 아니다.
 
 `stack_after_*`는 명시적인 복사본을 반환하는 미리보기이며 현재 모델을 바꾸지 않는다.
+`validate_entry_operation`과 `apply_entry_operation`은 `view_id`와 enabled/disabled를
+포함한 완전한 `NavigationEntry` 한 개를 검사·적용한다. PageRouter가 확정한 모델 연결 ID를
+이력에 보존할 때 사용한다. 기존 path/component 편의 함수와 같은 자원 예산과 변경 장벽을
+적용하며, 전체 스택 교체가 필요하지 않다.
 실제 push는 스택 전체를 복사하지 않고 새 엔트리와 추적 값만 추가한다. 저장 공간은
 기하급수적으로 늘리고, replace는 끝 엔트리만, pop은 제거하는 꼬리만 갱신한다.
 `set_path` 전체 교체와 명시적인 미리보기·스냅샷은 입력 크기에 비례한 작업이다.

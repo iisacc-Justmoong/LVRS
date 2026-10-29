@@ -1,0 +1,1068 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d8bde3ac420c387c2ca8d23938ecc7de6e61837fce7484abbd0145e93740de7d",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/TableHeader.md",
+    "sha256": "b9434a7b521f42d8efd492ea5304b5024330f0b03cb5da4ecc7ae4bda7c03515",
+    "bytes": 6581,
+    "line_count": 173,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "TableHeader",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# TableHeader\n",
+      "level": 1,
+      "title": "TableHeader"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/display/TableHeader.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`TableHeader`는 `Table`의 머리글 행을 렌더링합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 균일하거나 호출자가 제공한 열 너비로 열 레이블을 렌더링합니다.\n- 행 본문과 별개로 구분 기호 스타일을 제공합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "균일하거나 호출자가 제공한 열 너비로 열 레이블을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행 본문과 별개로 구분 기호 스타일을 제공합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 16,
+      "end_line": 30,
+      "raw": "- `cellItems`(선호됨, TableCellItem와 유사한 항목의 배열/목록 모델)\n- `columns`\n- `rowHeight`\n- `cellHorizontalPadding`\n- `columnWidths`\n- `fallbackCellWidth`\n- `minColumnWidth`\n- `textColor`\n- `defaultLeadingIcon`(기본 `generalchevronDown`), `defaultTrailingIcon`(기본 빈 문자열)\n- `iconSize`(18), `iconSpacing`(7)\n- `separatorHeight`\n- `separatorColor`\n- `cellDelegate`: 선택적 헤더별 셀 구성 요소 위임. 기본 대리자는 아이콘 슬롯과 텍스트 레이블을 렌더링한다.\n- `interactive`(기본값 `false`)\n- `sortColumn`(기본값 `-1`), `sortOrder`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`cellItems`(선호됨, TableCellItem와 유사한 항목의 배열/목록 모델)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columns`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellHorizontalPadding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnWidths`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fallbackCellWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minColumnWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`defaultLeadingIcon`(기본 `generalchevronDown`), `defaultTrailingIcon`(기본 빈 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSize`(18), `iconSpacing`(7)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`separatorHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`separatorColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellDelegate`: 선택적 헤더별 셀 구성 요소 위임. 기본 대리자는 아이콘 슬롯과 텍스트 레이블을 렌더링한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactive`(기본값 `false`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sortColumn`(기본값 `-1`), `sortOrder`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "- `columnClicked(columnIndex, columnData)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`columnClicked(columnIndex, columnData)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "도우미 방법:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 45,
+      "raw": "- `columnAt(index)`\n- `columnText(index)`\n- `columnType(index)`\n- `normalizeColumnType(value)`\n- `inferredColumnType(value)`\n- `columnPadding(index)`\n- `columnWidth(index)`\n- `columnX(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`columnAt(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnText(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnType(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizeColumnType(value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inferredColumnType(value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnPadding(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnWidth(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnX(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "계산됨:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 49,
+      "end_line": 50,
+      "raw": "- `resolvedColumnSource`\n- `resolvedColumnCount`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`resolvedColumnSource`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedColumnCount`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "fenced_code",
+      "start_line": 56,
+      "end_line": 67,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.TableHeader {\n    columnWidths: [160, 80, 120]\n    cellItems: [\n        { label: \"Name\", type: \"string\" },\n        { label: \"Count\", type: \"int\", leadingIcon: \"\", trailingIcon: \"generalchevronDown\" },\n        { label: \"Enabled\", type: \"bool\" }\n    ]\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.TableHeader {\n    columnWidths: [160, 80, 120]\n    cellItems: [\n        { label: \"Name\", type: \"string\" },\n        { label: \"Count\", type: \"int\", leadingIcon: \"\", trailingIcon: \"generalchevronDown\" },\n        { label: \"Enabled\", type: \"bool\" }\n    ]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 73,
+      "end_line": 84,
+      "raw": "- `TableHeader`는 소스 해상도, 입력 및 기하학을 C++ `TableHeaderModel`에 위임합니다.\n- `cellItems`가 기본 계약입니다. 레거시 `columns`는 대체 경로로 유지됩니다.\n- 열 텍스트는 기본 항목 또는 개체 항목(`label/text/title/value` 대체 경로)을 허용합니다.\n- 열 유형은 객체 키 `type`, `valueType`, `cellType` 또는 `dataType`를 허용합니다.\n- 기본 헤더 항목은 유형을 추론합니다: `string -> string`, 정수 -> `int`, 정수가 아닌 숫자 -> `float`, 부울 -> `bool`.\n- 선택적 열별 `contentSpacing`/`horizontalPadding` 재정의가 지원됩니다.\n- 각 열의 `leadingIcon`, `trailingIcon`으로 아이콘 이름이나 리소스 URL을 지정한다. 생략 시 각각 기본 아래 방향 Chevron과 아이콘 없음이 적용되며, 빈 문자열은 해당 슬롯을 숨긴다. 아이콘은 레이블에 7px 간격으로 붙고 좁은 열에서는 레이블이 말줄임된다.\n- 리피터 대리자는 제공된 경우 `columnWidths`를 사용하고, 그렇지 않으면 `fallbackCellWidth`를 사용하고, 그렇지 않으면 동일한 자동 너비를 사용합니다.\n- 렌더링된 모든 헤더 셀은 `cellDelegate`를 인스턴스화하고 하나의 `modelData` 개체를 주입합니다. 설명자에는 `index`, `descriptor`, `cellData`, `text`, `valueType`, `x`, `width`, `height`가 포함됩니다. `padding`.\n- `cellData` 및 `columnData`에는 원래 열 항목이 포함되어 있습니다. `sorted` 및 `sortOrder`를 사용하면 사용자 정의 대리자가 자체 정렬 표시기를 그릴 수 있습니다.\n- 사용자 지정 대리인은 `property var modelData`를 선언해야 합니다. 해당 루트 항목의 크기는 확인된 헤더 셀 경계에 맞게 조정됩니다.\n- 하단 구분 기호는 전용 직사각형으로 렌더링됩니다(`panelBackground10` 기본값).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`TableHeader`는 소스 해상도, 입력 및 기하학을 C++ `TableHeaderModel`에 위임합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellItems`가 기본 계약입니다. 레거시 `columns`는 대체 경로로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "열 텍스트는 기본 항목 또는 개체 항목(`label/text/title/value` 대체 경로)을 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "열 유형은 객체 키 `type`, `valueType`, `cellType` 또는 `dataType`를 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 헤더 항목은 유형을 추론합니다: `string -> string`, 정수 -> `int`, 정수가 아닌 숫자 -> `float`, 부울 -> `bool`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적 열별 `contentSpacing`/`horizontalPadding` 재정의가 지원됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 열의 `leadingIcon`, `trailingIcon`으로 아이콘 이름이나 리소스 URL을 지정한다. 생략 시 각각 기본 아래 방향 Chevron과 아이콘 없음이 적용되며, 빈 문자열은 해당 슬롯을 숨긴다. 아이콘은 레이블에 7px 간격으로 붙고 좁은 열에서는 레이블이 말줄임된다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "리피터 대리자는 제공된 경우 `columnWidths`를 사용하고, 그렇지 않으면 `fallbackCellWidth`를 사용하고, 그렇지 않으면 동일한 자동 너비를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링된 모든 헤더 셀은 `cellDelegate`를 인스턴스화하고 하나의 `modelData` 개체를 주입합니다. 설명자에는 `index`, `descriptor`, `cellData`, `text`, `valueType`, `x`, `width`, `height`가 포함됩니다. `padding`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellData` 및 `columnData`에는 원래 열 항목이 포함되어 있습니다. `sorted` 및 `sortOrder`를 사용하면 사용자 정의 대리자가 자체 정렬 표시기를 그릴 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자 지정 대리인은 `property var modelData`를 선언해야 합니다. 해당 루트 항목의 크기는 확인된 헤더 셀 경계에 맞게 조정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "하단 구분 기호는 전용 직사각형으로 렌더링됩니다(`panelBackground10` 기본값).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "<a id=\"backend-model\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "## 백엔드 모델\n",
+      "level": 2,
+      "title": "백엔드 모델"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "`TableHeaderModel`는 `resolvedColumnSource`, 열 설명자, 유형 정규화, 유형 추론, 패딩, 열 너비 및 x 오프셋 계산을 소유합니다. `TableHeader.qml`는 모델 설명자를 렌더링하고 레거시 도우미 메서드를 통과 API로 유지합니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "<a id=\"typed-header-contract\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "## 형식화된 헤더 계약\n",
+      "level": 2,
+      "title": "형식화된 헤더 계약"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "`columnType(index)`는 `string`, `int`, `float` 또는 `bool` 중 하나를 반환합니다. 의도적으로 헤더 전용 메타데이터입니다. `Table`는 본문 셀 편집 내용을 검증하기 위해 동일한 계약을 사용합니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "<a id=\"practical-tip\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 실용적인 팁\n",
+      "level": 2,
+      "title": "실용적인 팁"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "조밀한 12px 세미 볼드 텍스트는 컴팩트 메타데이터에 최적화되어 있으므로 헤더 레이블을 짧고 의미 있는 방식(필드 유형/범주)으로 유지하세요.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "<a id=\"extended-example-object-based-header-definition\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "## 확장된 예: 객체 기반 헤더 정의\n",
+      "level": 2,
+      "title": "확장된 예: 객체 기반 헤더 정의"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "fenced_code",
+      "start_line": 108,
+      "end_line": 118,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.TableHeader {\n    cellItems: [\n        { label: \"Service\", type: \"string\" },\n        { text: \"State\", type: \"bool\", contentSpacing: LV.Theme.gap8 },\n        { title: \"Latency\", type: \"float\" }\n    ]\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.TableHeader {\n    cellItems: [\n        { label: \"Service\", type: \"string\" },\n        { text: \"State\", type: \"bool\", contentSpacing: LV.Theme.gap8 },\n        { title: \"Latency\", type: \"float\" }\n    ]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "<a id=\"delegate-example\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "## 대리인 예\n",
+      "level": 2,
+      "title": "대리인 예"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "fenced_code",
+      "start_line": 124,
+      "end_line": 148,
+      "raw": "```qml\nComponent {\n    id: compactHeaderCell\n\n    Item {\n        property var modelData: ({})\n\n        LV.Label {\n            anchors.left: parent.left\n            anchors.leftMargin: modelData.padding || 0\n            anchors.verticalCenter: parent.verticalCenter\n            text: modelData.text\n        }\n    }\n}\n\nLV.TableHeader {\n    interactive: true\n    cellItems: [{ label: \"Name\" }, { label: \"Count\", type: \"int\" }]\n    cellDelegate: compactHeaderCell\n    onColumnClicked: function(columnIndex, columnData) {\n        console.log(\"sort\", columnIndex, columnData.label)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "Component {\n    id: compactHeaderCell\n\n    Item {\n        property var modelData: ({})\n\n        LV.Label {\n            anchors.left: parent.left\n            anchors.leftMargin: modelData.padding || 0\n            anchors.verticalCenter: parent.verticalCenter\n            text: modelData.text\n        }\n    }\n}\n\nLV.TableHeader {\n    interactive: true\n    cellItems: [{ label: \"Name\" }, { label: \"Count\", type: \"int\" }]\n    cellDelegate: compactHeaderCell\n    onColumnClicked: function(columnIndex, columnData) {\n        console.log(\"sort\", columnIndex, columnData.label)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "Q. `TableHeader`에서 열별 정렬을 직접 정의할 수 있나요?   A. 현재 계약은 균일한 왼쪽 정렬 헤더 텍스트를 유지합니다. 열별 레이아웃에는 사용자 정의 파생 구성 요소가 필요합니다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "html",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "<a id=\"validation-checklist\"></a>\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "heading",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "## 검증 체크리스트\n",
+      "level": 2,
+      "title": "검증 체크리스트"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "list",
+      "start_line": 158,
+      "end_line": 161,
+      "raw": "- 헤더 개수가 예상 열 개수와 일치합니다.\n- `columnType(index)`는 선언되거나 추론된 필드 유형과 일치합니다.\n- 분리막 두께/색상은 테마 계약을 준수하며,\n- 객체 기반 열 레이블은 대체 경로 키를 통해 확인됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "헤더 개수가 예상 열 개수와 일치합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnType(index)`는 선언되거나 추론된 필드 유형과 일치합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "분리막 두께/색상은 테마 계약을 준수하며,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체 기반 열 레이블은 대체 경로 키를 통해 확인됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 162,
+      "end_line": 162,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 163,
+      "end_line": 163,
+      "raw": "<a id=\"figma-contract\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "## Figma 계약\n",
+      "level": 2,
+      "title": "Figma 계약"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "노드 `203:3647`은 `717 × 25`이다. 각 기본 열은 너비 239, 좌우 패딩 8, 선행 아이콘 18, 아이콘 간격 7과 12/12 설명 텍스트를 사용한다. 후행 아이콘은 기본적으로 숨긴다.\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "html",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "heading",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "헤더 셀은 해당 대리자로부터 텍스트 입력 포커스와 선택 피드백을 상속합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "TableHeader",
+      "anchor": "tableheader",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 14
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 54
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "백엔드 모델",
+      "anchor": "백엔드-모델",
+      "start_line": 88
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "형식화된 헤더 계약",
+      "anchor": "형식화된-헤더-계약",
+      "start_line": 94
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "실용적인 팁",
+      "anchor": "실용적인-팁",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "확장된 예: 객체 기반 헤더 정의",
+      "anchor": "확장된-예-객체-기반-헤더-정의",
+      "start_line": 106
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "대리인 예",
+      "anchor": "대리인-예",
+      "start_line": 122
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 150
+    },
+    {
+      "block_id": "b000077",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 체크리스트",
+      "anchor": "검증-체크리스트",
+      "start_line": 156
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Figma 계약",
+      "anchor": "figma-계약",
+      "start_line": 165
+    },
+    {
+      "block_id": "b000089",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 171
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000091",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 173
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

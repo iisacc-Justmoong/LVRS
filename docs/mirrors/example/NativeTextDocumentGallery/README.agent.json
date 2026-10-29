@@ -1,0 +1,128 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:f9a5ed73c08ec6aa2772333ea2c233507c71db71a12cb772f31e4478a7d93389",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeTextDocumentGallery/README.md",
+    "sha256": "1115ed85ad40d7005d626d1f7d70973d7062f07f342d5ce95d060c74b1c71ddc",
+    "bytes": 1096,
+    "line_count": 17,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native Text Document Gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native Text Document Gallery\n",
+      "level": 1,
+      "title": "Native Text Document Gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "A Qt-free C++23 document-model explorer compiled from LVUI and painted by iiGUI.\niiSDKCore owns the application entry, event loop, workers, frames and view lifetime.\nThe model loads file-backed lines, edits one range and publishes through iiFileProvider Native.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 8,
+      "raw": "This example demonstrates the nonvisual foundation. The separate native CodeEditor\ngallery provides a PlainText viewport; RichText TextEditor and full IME/source parity remain pending.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 13,
+      "raw": "Configure against installed Core, LVUI, iiGUI, LVRS and iiFileProvider Native packages.\n`install.sh` builds and installs into its first argument (default `build/install`) without\nlaunching the app or tests. With no arguments the app keeps an in-memory sample.\n`--document PATH` opens or attaches a destination; Save publishes only on request.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 15,
+      "end_line": 17,
+      "raw": "All test and app execution is deferred to the final whole-goal batch. The registered\nself-test creates its fixture through iiFileProvider inside the supplied build directory.\nSee [usage](docs/Usage.md) and the [SDK document contract](../../docs/native/TextDocuments.md).\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native Text Document Gallery",
+      "anchor": "native-text-document-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000009",
+        "label": "usage",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 17
+      },
+      {
+        "block_id": "b000009",
+        "label": "SDK document contract",
+        "target": "../../docs/native/TextDocuments.md",
+        "kind": "relative",
+        "line": 17
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

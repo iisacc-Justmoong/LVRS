@@ -1,0 +1,101 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:193d677578750d86cb52cbffa9c60171fca9f74eec4c21d44d2b4ff37c932b08",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeMaterialGallery/README.md",
+    "sha256": "5c7999905ec0bf6bc10def2f01fc25435a0640669c35558dfe193c07078f4272",
+    "bytes": 581,
+    "line_count": 9,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native material gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native material gallery\n",
+      "level": 1,
+      "title": "Native material gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "Qt-free C++23 LVUI AOT example for MaterialSurface, PanelMaterial and WindowMaterial.\nShows captured and standalone blur, eight accent gradients, a custom silhouette, cached masks,\nshared Core frame motion, retained editor state and background-result delivery.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 9,
+      "raw": "Build using the installed Native LVRS package. `install.sh` stages into `build/install` by default\nand never runs tests or opens the app. Runtime validation remains deferred to the final whole-goal\nbatch. See [usage](docs/Usage.md) and the SDK material documentation for remaining contracts.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native material gallery",
+      "anchor": "native-material-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 8,
+        "text": "and never runs tests or opens the app. Runtime validation remains deferred to the final whole-goal",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "usage",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 9
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

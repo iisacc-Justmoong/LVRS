@@ -49,7 +49,7 @@ ApplicationWindow(title: "LVRS · iiGUI 자체 위젯", width: 980, height: 800,
         }
         InputField(id: "input", placeholder: "자체 입력란 · 한글/IME", width: 500, onEdited: vm.edited)
         Slider(id: "slider", from: 0, to: 100, value: 25, stepSize: 1, width: 500, onMoved: vm.moved)
-        ProgressBar(id: "progress", currentValue: 25, width: 500, height: 6)
+        ProgressBar(id: "progress", currentValue: vm.progress_value, width: 500, height: 6)
         Label(id: "status", text: "준비 완료 · OS 컨트롤 0개", style: .body)
         Label(id: "worker", text: "Background: waiting…", style: .description)
         Label(id: "timer", text: "Frame: 0 · display sync", style: .caption)

@@ -1,0 +1,1268 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:773fbad2226ca8bb934efabad804b5a7d608df834bb9ad7ebd2b5e82cb83a8de",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/InputField.md",
+    "sha256": "2a3dd9062dc986bff027a12f0c3f246b55f9c1d8e7f83e153f4e3006869d7526",
+    "bytes": 12814,
+    "line_count": 181,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "InputField",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# InputField\n",
+      "level": 1,
+      "title": "InputField"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/input/InputField.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`InputField`는 LVRS의 공개 단일 라인 `TextInput` 래퍼입니다. Qt의 네이티브 편집, IME, 선택, 클립보드 또는 접근성 동작을 대체하지 않고 노드 `114:179`에서 Figma `TextField` 구성 요소를 구현합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- `Rounded`, `Cylinder` 및 `Inline` 스타일로 안정적인 한 줄 텍스트 항목을 제공합니다.\n- 네이티브 `TextInput` 상태로 Figma의 기본, 비활성화, 커서 활성, 선택, 활성 및 검색 상태를 처리한다.\n- 데스크탑과 모바일에서 동일한 필드 지오메트리와 Body `13px / 13px` 타이포그래피를 사용하세요.\n- 측정된 검색 어포던스와 통합된 명확한 작업을 포함합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Rounded`, `Cylinder` 및 `Inline` 스타일로 안정적인 한 줄 텍스트 항목을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 `TextInput` 상태로 Figma의 기본, 비활성화, 커서 활성, 선택, 활성 및 검색 상태를 처리한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크탑과 모바일에서 동일한 필드 지오메트리와 Body `13px / 13px` 타이포그래피를 사용하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "측정된 검색 어포던스와 통합된 명확한 작업을 포함합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "모드:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 22,
+      "end_line": 25,
+      "raw": "- `textMode`, `searchMode`, `passwordMode`, `mode` (`defaultMode`는 `textMode`의 호환 별칭)\n- `search`(`mode == searchMode`용 간편 바인딩)\n- `searchIconVisible`\n- `clearButtonVisible`, `showClearButton`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`textMode`, `searchMode`, `passwordMode`, `mode` (`defaultMode`는 `textMode`의 호환 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`search`(`mode == searchMode`용 간편 바인딩)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`searchIconVisible`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearButtonVisible`, `showClearButton`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "스타일:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 31,
+      "raw": "- `roundedStyle`, `cylinderStyle`, `inlineStyle`\n- `filledStyle`(`roundedStyle`의 호환성 별칭)\n- `style`, `resolvedStyle`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`roundedStyle`, `cylinderStyle`, `inlineStyle`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`filledStyle`(`roundedStyle`의 호환성 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`style`, `resolvedStyle`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "형상 및 자리 표시자:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 35,
+      "end_line": 38,
+      "raw": "- `fieldMinHeight`: 기본값은 `Theme.controlHeightSm`(`22` 논리 픽셀)입니다.\n- `insetVertical`: 분수 패딩, 기본값 `(fieldMinHeight - centeredTextHeight) / 2`, 0으로 고정됩니다.\n- `centeredTextHeight`: 본체 `13`; 상속된 `centeredTextY`는 절반 픽셀 위치를 유지합니다.\n- `placeholderColor`의 기본값은 `Theme.titleHeaderColor`, 비활성 상태의 `placeholderColorDisabled`는 `Theme.disabledColor`이다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`fieldMinHeight`: 기본값은 `Theme.controlHeightSm`(`22` 논리 픽셀)입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`insetVertical`: 분수 패딩, 기본값 `(fieldMinHeight - centeredTextHeight) / 2`, 0으로 고정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`centeredTextHeight`: 본체 `13`; 상속된 `centeredTextY`는 절반 픽셀 위치를 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`placeholderColor`의 기본값은 `Theme.titleHeaderColor`, 비활성 상태의 `placeholderColorDisabled`는 `Theme.disabledColor`이다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "재료:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 42,
+      "end_line": 46,
+      "raw": "- `glassEnabled`(기본 `true`), `glassBlurRadius`(데스크톱 `8`, 인라인 `6`)\n- `backdropSource`: 기본값은 포함된 Controls/LVRS ApplicationWindow의 배경입니다.\n- `resolvedBackdropSource`, `glassActive`(읽기 전용)\n- 상속된 `backgroundColor` 및 상태 변형은 여전히 재질 색조를 재정의합니다.\n- 상속된 `backgroundComponent`는 입력 또는 슬롯 형상을 변경하지 않고 장식을 대체합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`glassEnabled`(기본 `true`), `glassBlurRadius`(데스크톱 `8`, 인라인 `6`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backdropSource`: 기본값은 포함된 Controls/LVRS ApplicationWindow의 배경입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedBackdropSource`, `glassActive`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상속된 `backgroundColor` 및 상태 변형은 여전히 재질 색조를 재정의합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상속된 `backgroundComponent`는 입력 또는 슬롯 형상을 변경하지 않고 장식을 대체합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "검색/지우기 영상:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 50,
+      "end_line": 53,
+      "raw": "- `searchIconSize`, `searchIconSource`\n- `clearIconSize`, `clearIconMarkLength`, `clearIconMarkThickness`\n- `clearIconBackgroundColor`, 호버/눌림/비활성화 변형\n- `clearIconForegroundColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`searchIconSize`, `searchIconSource`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearIconSize`, `clearIconMarkLength`, `clearIconMarkThickness`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearIconBackgroundColor`, 호버/눌림/비활성화 변형",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearIconForegroundColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "`AbstractInputBar`에서 상속된 텍스트/입력 API에는 `text`, `placeholderText`, `readOnly`, `validator`, `maximumLength`, `inputMethodHints`가 포함됩니다. `echoMode`, `renderType`, `inputItem`, 선택/커서 별칭, `accepted(text)` 및 `textEdited(text)`.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "<a id=\"geometry-contract\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## 기하학 계약\n",
+      "level": 2,
+      "title": "기하학 계약"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "The 2026-09-10 LVRS 조정은 모든 3 스타일과 모든 상호작용 상태에 걸쳐 `22px` 필드 높이와 Disabled 토큰을 사용합니다. 이는 원래 Figma 참조의 `19px` 프레임을 업데이트합니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "table",
+      "start_line": 63,
+      "end_line": 75,
+      "raw": "|미터법|데스크탑|모바일|\n| --- | ---: | ---: |\n|안정적인 필드 프레임| `206 × 22` | `206 × 22` |\n|왼쪽 삽입; 지우기 버튼이 없는 오른쪽 삽입| `7` | `7` |\n|지우기 버튼 오른쪽 삽입| `8` | `8` |\n|텍스트/자리 표시자 위쪽 및 아래쪽 삽입| `4.5` | `4.5` |\n|상단 및 하단 삽입 검색/삭제| `5` | `5` |\n|검색/프레임 지우기| `12 × 12` | `12 × 12` |\n|둥근 반경| `6` | `6` |\n|인라인 사각형 반경| `0` | `0` |\n|실린더 반경| `11` | `11` |\n|검색/텍스트/공백 지우기| `2` | `2` |\n|본문 글꼴 및 라인 상자| `13 / 13` | `13 / 13` |\n",
+      "columns": [
+        "미터법",
+        "데스크탑",
+        "모바일"
+      ],
+      "rows": [
+        [
+          "안정적인 필드 프레임",
+          "`206 × 22`",
+          "`206 × 22`"
+        ],
+        [
+          "왼쪽 삽입; 지우기 버튼이 없는 오른쪽 삽입",
+          "`7`",
+          "`7`"
+        ],
+        [
+          "지우기 버튼 오른쪽 삽입",
+          "`8`",
+          "`8`"
+        ],
+        [
+          "텍스트/자리 표시자 위쪽 및 아래쪽 삽입",
+          "`4.5`",
+          "`4.5`"
+        ],
+        [
+          "상단 및 하단 삽입 검색/삭제",
+          "`5`",
+          "`5`"
+        ],
+        [
+          "검색/프레임 지우기",
+          "`12 × 12`",
+          "`12 × 12`"
+        ],
+        [
+          "둥근 반경",
+          "`6`",
+          "`6`"
+        ],
+        [
+          "인라인 사각형 반경",
+          "`0`",
+          "`0`"
+        ],
+        [
+          "실린더 반경",
+          "`11`",
+          "`11`"
+        ],
+        [
+          "검색/텍스트/공백 지우기",
+          "`2`",
+          "`2`"
+        ],
+        [
+          "본문 글꼴 및 라인 상자",
+          "`13 / 13`",
+          "`13 / 13`"
+        ]
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "Figma 의 활성, 선택 및 검색 인스턴스는 `205px` 를 보고하며 기본 및 비활성 인스턴스는 `206px` 를 보고합니다; 그 차이는 변형별 로컬 자동 레이아웃 콘텐츠에서 비롯됩니다. 런타임 필드는 의도적으로 `206px` 로 유지되므로, 타이핑, 선택, 검색 및 클리어 버튼 표시가 항상 주변 레이아웃을 1 픽셀만큼 이동시키지 않습니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "모바일에서 프레임, 인셋, 반지름, 및 아이콘 프레임은 데스크톱과 일치합니다. 본문은 `13px / 13px` 로 유지되며, `22px` 프레임 내에서 `y = 4.5` 에 중앙 정렬됩니다. 검색 및 클리어 아이콘은 `y = 5` 에 중앙 정렬됩니다. `AbstractInputBar.insetVertical`, `centeredTextY`, 및 `contentBoxHeight` 는 실제 값을 사용하므로 홀수 줄 높이는 짝수 필드 높이에서 정확히 중앙에 위치합니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "명시적 `fieldMinHeight`, `height`, 및 인셋 오버라이드는 여전히 사용 가능합니다. 예를 들어 `fieldMinHeight` 를 `30` 로 증가시키면 `8.5px` 텍스트 패딩이 생성됩니다. 내장 TableCellItem 및 레거시 미니 ListItem 편집기는 명시적 라인 박스 및 0-인셋 오버라이드를 유지하며, 표준 InlineEdit 및 폼 입력 슬롯은 `22px` 기본값을 따릅니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "클리어 버튼 인셋은 명시적인 2026-09-06 LVRS 조정으로 Figma 참조에 적용됩니다. 클리어 버튼이 가시화될 때, 그 오른쪽 가장자리가 필드의 오른쪽 가장자리로부터 정확히 `8` 논리 픽셀 떨어져 있으며, 너비 또는 `insetHorizontal` 가 변경되더라도 마찬가지입니다. `AbstractInputBar.insetRight` 는 기본적으로 `insetHorizontal` 입니다; `InputField` 는 클리어 버튼 표시 시 `8` 에 이를 바인딩합니다. 후방 앵커 및 텍스트 예약은 모두 해당 오른쪽 인셋을 사용하여 텍스트와 버튼 간 간격 및 왼쪽/검색 레이아웃을 보존합니다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 89,
+      "end_line": 99,
+      "raw": "- `style: roundedStyle`은 `6px` 반지름을 가진 함몰 유리 재료를 사용한다.\n- `style: cylinderStyle`는 높이 반경이 절반인 동일한 재료를 사용합니다.\n- `style: inlineStyle`은 반지름이 없는 사각형이며 더 가벼운 반투명 소재와 더 얕은 삽입 조명을 사용한다.\n- `mode: passwordMode`는 네이티브 `TextInput.Password`를 사용하며 검색 아이콘을 숨긴다. 기존 `echoMode` 직접 설정도 가능하다.\n- 비활성화된 텍스트는 `Theme.disabledColor`를 사용합니다. 기본/활성 텍스트는 `Theme.titleHeaderColor`를 사용합니다.\n- 빈 필드 자리 표시자는 활성화 시 `Theme.titleHeaderColor`, 비활성화 시 `Theme.disabledColor`를 사용한다.\n- 선택 항목은 `Theme.accent`를 사용하고 선택한 텍스트는 `Theme.titleHeaderColor`로 유지됩니다.\n- 검색에서는 일반 `16 × 16` 아이콘을 확장하는 대신 Figma `12 × 12` 벡터에서 측정된 구성 요소별 `inputFieldSearch.svg`를 사용합니다.\n- 클리어는 `clearButtonVisible && enabled && !readOnly && text.length > 0`인 경우에만 표시됩니다. 클릭하면 필드가 비워지고 입력 포커스가 복원됩니다.\n- 선행 및 후행 고유 너비는 필드 또는 조상이 숨겨져 있는 동안에도 삽입 계약의 일부로 유지되어 뷰가 표시될 때 지연된 지오메트리 이동을 방지합니다.\n- iOS 대상에서 네이티브 `TextInput`는 여전히 `NativeRendering`를 사용하고 플랫폼 기반 키보드, IME, 선택 및 포인터 동작을 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`style: roundedStyle`은 `6px` 반지름을 가진 함몰 유리 재료를 사용한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`style: cylinderStyle`는 높이 반경이 절반인 동일한 재료를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`style: inlineStyle`은 반지름이 없는 사각형이며 더 가벼운 반투명 소재와 더 얕은 삽입 조명을 사용한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mode: passwordMode`는 네이티브 `TextInput.Password`를 사용하며 검색 아이콘을 숨긴다. 기존 `echoMode` 직접 설정도 가능하다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "비활성화된 텍스트는 `Theme.disabledColor`를 사용합니다. 기본/활성 텍스트는 `Theme.titleHeaderColor`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 필드 자리 표시자는 활성화 시 `Theme.titleHeaderColor`, 비활성화 시 `Theme.disabledColor`를 사용한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택 항목은 `Theme.accent`를 사용하고 선택한 텍스트는 `Theme.titleHeaderColor`로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "검색에서는 일반 `16 × 16` 아이콘을 확장하는 대신 Figma `12 × 12` 벡터에서 측정된 구성 요소별 `inputFieldSearch.svg`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "클리어는 `clearButtonVisible && enabled && !readOnly && text.length > 0`인 경우에만 표시됩니다. 클릭하면 필드가 비워지고 입력 포커스가 복원됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선행 및 후행 고유 너비는 필드 또는 조상이 숨겨져 있는 동안에도 삽입 계약의 일부로 유지되어 뷰가 표시될 때 지연된 지오메트리 이동을 방지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "iOS 대상에서 네이티브 `TextInput`는 여전히 `NativeRendering`를 사용하고 플랫폼 기반 키보드, IME, 선택 및 포인터 동작을 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "`LVRSTests_import_api::input_field_figma_contract_loads` 체크를 수행하여 `22px` 프레임, `4.5px` 텍스트 중앙 정렬, 및 `5px` 아이콘 중앙 정렬을 3 모든 스타일과 macOS , iOS , 및 Android 테마 설정의 검색 모드 전반에 걸쳐 확인합니다. 또한 사용자 정의 필드 높이/너비/내측 여백과 초점 복원 시 클릭 시 지우기 기능을 확인합니다. `input_field_material_rendering_contract` 는 18 스타일/상태 조합 전반에 대해 실제 플레이스홀더 색상, 가시성, 및 라인박스 정렬을 확인하며, 네이티브 입력, 선택, 및 마テリア렌더링과 함께 수행됩니다. 모바일 테마 확인은 호스트에서 실행되며 기기 테스트로 간주되지 않습니다.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "html",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "<a id=\"textfield-material\"></a>\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "## TextField 재질\n",
+      "level": 2,
+      "title": "TextField 재질"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "2026-09-06의 [Figma TextField](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=114-179)는 visionOS 재질과 안쪽 조명을 LVRS의 기존 작은 치수에 맞춘다. 활성화된 모든 상호작용 상태는 같은 재질을 공유하며 hover와 focus가 불투명 채우기로 대체하지 않는다. 비활성 상태는 흐림, 내부 그림자와 테두리를 제거한다.\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "table",
+      "start_line": 109,
+      "end_line": 117,
+      "raw": "|데스크탑 재질 값|둥근/원통|비활성화 둥근/원통|인라인|\n| --- | --- | --- | --- |\n|`panelBackground10` 틴트 알파| 64% | 36% | 16% |\n|흰색 반사 알파| 1.8% | 1.8% | 1.8% |\n|세로 그라데이션: 상단 검정색 / 52% 투명 / 하단 흰색| 20% / 0% / 3.5% | 4.5% / 0% / 1.5% | 6% / 0% / 1.5% |\n|배경 흐림 반경| 8 |꺼짐|6, 비활성화되면 꺼짐|\n|검정색 내부 그림자: x / y / 흐림 / 알파| 0.5 / 1.2 / 2 / 30% |꺼짐| 0 / 0.65 / 1 / 12% |\n|흰색 내부 그림자: x / y / 흐림 / 알파| 0 / -0.5 / 0.8 / 16% |꺼짐| 0 / -0.5 / 0.6 / 5.5% |\n|내부 가장자리| 0.5 |없음|없음|\n",
+      "columns": [
+        "데스크탑 재질 값",
+        "둥근/원통",
+        "비활성화 둥근/원통",
+        "인라인"
+      ],
+      "rows": [
+        [
+          "`panelBackground10` 틴트 알파",
+          "64%",
+          "36%",
+          "16%"
+        ],
+        [
+          "흰색 반사 알파",
+          "1.8%",
+          "1.8%",
+          "1.8%"
+        ],
+        [
+          "세로 그라데이션: 상단 검정색 / 52% 투명 / 하단 흰색",
+          "20% / 0% / 3.5%",
+          "4.5% / 0% / 1.5%",
+          "6% / 0% / 1.5%"
+        ],
+        [
+          "배경 흐림 반경",
+          "8",
+          "꺼짐",
+          "6, 비활성화되면 꺼짐"
+        ],
+        [
+          "검정색 내부 그림자: x / y / 흐림 / 알파",
+          "0.5 / 1.2 / 2 / 30%",
+          "꺼짐",
+          "0 / 0.65 / 1 / 12%"
+        ],
+        [
+          "흰색 내부 그림자: x / y / 흐림 / 알파",
+          "0 / -0.5 / 0.8 / 16%",
+          "꺼짐",
+          "0 / -0.5 / 0.6 / 5.5%"
+        ],
+        [
+          "내부 가장자리",
+          "0.5",
+          "없음",
+          "없음"
+        ]
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "내측 가장자리는 28% → 1.5% → 17% 에서 0%, 50%, 및 100%에 수직 검은색에서 흰색으로 이어지는 그라디언트를 사용합니다. 효과 거리와 색상 알파 값은 데스크톱과 모바일에서 동일합니다. 인라인은 비활성화 시 채우기를 유지하지만 내측 그림자를 제거합니다. Figma 페인트 스택은 반사된 오목한 그라디언트에서 시작하여 틴트로 이어지고, 그 후 내측 조명과 가장자리로 이어집니다.\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 122,
+      "raw": "`InputField.qml`는 전용 인라인 `MaterialSurface` 구성 요소에 장식을 유지합니다. 이는 기존의\n[Qt 퀉 MultiEffect](https://doc.qt.io/qt-6.8/qml-qtquick-effects-multieffect.html) 및 `ShaderEffectSource` 접근 방식은 알림에 사용되며, 새로운 패키지 의존성이 추가되지 않습니다. 캡처는 블러 패딩을 포함하며, 필드에 마스킹되고 가시화되고 활성화된 동안 라이브로 유지됩니다. 필드의 재배치 또는 스크롤은 캡처 영역을 업데이트합니다. 텍스트, 선택, 검색 및 클리어 컨트롤은 효과 바깥에 있습니다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "샘플링되려면 소스는 배경만 포함해야 합니다. 필드 뒤의 별도 패널 또는 이미지는 `backdropSource` 에 할당할 수 있으며, 필드, 하위 요소, 그리고 해당 필드를 포함하는 조상 요소는 캡처 피드백을 피하기 위해 거부됩니다. 평범한 `Window` 는 기본 소스가 없습니다. 소스가 없거나 `glassEnabled: false` 가 있거나 Qt 의 소프트웨어 렌더러에서는 틴트, 그라데이션, 내부 조명 및 내부 테두리가 가시화되며, 실제 배경 블러에는 Qt RHI 렌더러가 필요합니다.\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "paragraph",
+      "start_line": 126,
+      "end_line": 127,
+      "raw": "하위 픽셀 내부 조명 및 가장자리는 캐시된 장치 픽셀 비율 인식을 사용합니다.\n[Qt 캔버스](https://doc.qt.io/qt-6.8/qml-qtquick-context2d.html). 외형 또는 기하학적 변화만 다시 그립니다; 입력은 장식을 다시 래스터화하지 않습니다. `input_field_material_rendering_contract` 는 모든 18 스타일/상태 조합을 렌더링하며, 내측 대비와 외부 페인트 부재를 확인하고, 상세한 배경에 대한 실제 블러를 검증하며, 라이브 소스 변경, 이동된 조상, 안전하지 않은 소스, 숨김/비활성화 캡처, 틴트 오버라이드, 네이티브 입력, 선택 및 클리어 포커스를 처리합니다.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "html",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "heading",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "fenced_code",
+      "start_line": 133,
+      "end_line": 141,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Filter\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Filter\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "fenced_code",
+      "start_line": 143,
+      "end_line": 158,
+      "raw": "```qml\nItem {\n    Rectangle {\n        id: panelBackdrop\n        anchors.fill: parent\n        gradient: Gradient {\n            GradientStop { position: 0; color: \"#31425b\" }\n            GradientStop { position: 1; color: \"#252629\" }\n        }\n    }\n    LV.InputField {\n        backdropSource: panelBackdrop\n        placeholderText: \"Filter\"\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "Item {\n    Rectangle {\n        id: panelBackdrop\n        anchors.fill: parent\n        gradient: Gradient {\n            GradientStop { position: 0; color: \"#31425b\" }\n            GradientStop { position: 1; color: \"#252629\" }\n        }\n    }\n    LV.InputField {\n        backdropSource: panelBackdrop\n        placeholderText: \"Filter\"\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "fenced_code",
+      "start_line": 160,
+      "end_line": 165,
+      "raw": "```qml\nLV.InputField {\n    style: inlineStyle\n    text: \"Editable value\"\n}\n```\n",
+      "language": "qml",
+      "code": "LV.InputField {\n    style: inlineStyle\n    text: \"Editable value\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "fenced_code",
+      "start_line": 167,
+      "end_line": 173,
+      "raw": "```qml\nLV.InputField {\n    style: roundedStyle\n    mode: passwordMode\n    placeholderText: \"Password\"\n}\n```\n",
+      "language": "qml",
+      "code": "LV.InputField {\n    style: roundedStyle\n    mode: passwordMode\n    placeholderText: \"Password\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "세 모드와 세 모양은 비활성화, 활성화, 커서 활성화, 입력, 선택 드래그, 키보드 포커스 상태에서 같은 편집기를 사용한다. 상태는 별도 시각 모드 지정이 아니라 실제 입력과 포커스에 따라 결정된다.\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "html",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "heading",
+      "start_line": 179,
+      "end_line": 179,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 180,
+      "end_line": 180,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "초점 윤곽이 다시 나타납니다. 상속된 액세서리는 자체 버튼 피드백을 사용합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "InputField",
+      "anchor": "inputfield",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 18
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "기하학 계약",
+      "anchor": "기하학-계약",
+      "start_line": 59
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 87
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "TextField 재질",
+      "anchor": "textfield-재질",
+      "start_line": 105
+    },
+    {
+      "block_id": "b000081",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 131
+    },
+    {
+      "block_id": "b000095",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 179
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000067",
+        "line": 107,
+        "text": "2026-09-06의 [Figma TextField](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=114-179)는 visionOS 재질과 안쪽 조명을 LVRS의 기존 작은 치수에 맞춘다. 활성화된 모든 상호작용 상태는 같은 재질을 공유하며 hover와 focus가 불투명 채우기로 대체하지 않는다. 비활성 상태는 흐림, 내부 그림자와 테두리를 제거한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000067",
+        "label": "Figma TextField",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=114-179",
+        "kind": "external",
+        "line": 107
+      },
+      {
+        "block_id": "b000073",
+        "label": "Qt 퀉 MultiEffect",
+        "target": "https://doc.qt.io/qt-6.8/qml-qtquick-effects-multieffect.html",
+        "kind": "external",
+        "line": 122
+      },
+      {
+        "block_id": "b000077",
+        "label": "Qt 캔버스",
+        "target": "https://doc.qt.io/qt-6.8/qml-qtquick-context2d.html",
+        "kind": "external",
+        "line": 127
+      },
+      {
+        "block_id": "b000097",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 181
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000045",
+        "columns": [
+          "미터법",
+          "데스크탑",
+          "모바일"
+        ],
+        "rows": [
+          [
+            "안정적인 필드 프레임",
+            "`206 × 22`",
+            "`206 × 22`"
+          ],
+          [
+            "왼쪽 삽입; 지우기 버튼이 없는 오른쪽 삽입",
+            "`7`",
+            "`7`"
+          ],
+          [
+            "지우기 버튼 오른쪽 삽입",
+            "`8`",
+            "`8`"
+          ],
+          [
+            "텍스트/자리 표시자 위쪽 및 아래쪽 삽입",
+            "`4.5`",
+            "`4.5`"
+          ],
+          [
+            "상단 및 하단 삽입 검색/삭제",
+            "`5`",
+            "`5`"
+          ],
+          [
+            "검색/프레임 지우기",
+            "`12 × 12`",
+            "`12 × 12`"
+          ],
+          [
+            "둥근 반경",
+            "`6`",
+            "`6`"
+          ],
+          [
+            "인라인 사각형 반경",
+            "`0`",
+            "`0`"
+          ],
+          [
+            "실린더 반경",
+            "`11`",
+            "`11`"
+          ],
+          [
+            "검색/텍스트/공백 지우기",
+            "`2`",
+            "`2`"
+          ],
+          [
+            "본문 글꼴 및 라인 상자",
+            "`13 / 13`",
+            "`13 / 13`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000069",
+        "columns": [
+          "데스크탑 재질 값",
+          "둥근/원통",
+          "비활성화 둥근/원통",
+          "인라인"
+        ],
+        "rows": [
+          [
+            "`panelBackground10` 틴트 알파",
+            "64%",
+            "36%",
+            "16%"
+          ],
+          [
+            "흰색 반사 알파",
+            "1.8%",
+            "1.8%",
+            "1.8%"
+          ],
+          [
+            "세로 그라데이션: 상단 검정색 / 52% 투명 / 하단 흰색",
+            "20% / 0% / 3.5%",
+            "4.5% / 0% / 1.5%",
+            "6% / 0% / 1.5%"
+          ],
+          [
+            "배경 흐림 반경",
+            "8",
+            "꺼짐",
+            "6, 비활성화되면 꺼짐"
+          ],
+          [
+            "검정색 내부 그림자: x / y / 흐림 / 알파",
+            "0.5 / 1.2 / 2 / 30%",
+            "꺼짐",
+            "0 / 0.65 / 1 / 12%"
+          ],
+          [
+            "흰색 내부 그림자: x / y / 흐림 / 알파",
+            "0 / -0.5 / 0.8 / 16%",
+            "꺼짐",
+            "0 / -0.5 / 0.6 / 5.5%"
+          ],
+          [
+            "내부 가장자리",
+            "0.5",
+            "없음",
+            "없음"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

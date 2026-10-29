@@ -1,0 +1,110 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:73ec339c6b4a5842e0e7cbaa5094ed0922a309b4768f655b9bce0878cbbbcaeb",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/HelpButton.md",
+    "sha256": "b49a0b9895fcce624511c4d517d2e22aca6c247449d56d58e83be62d2a7437c9",
+    "bytes": 622,
+    "line_count": 10,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "HelpButton",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# HelpButton\n",
+      "level": 1,
+      "title": "HelpButton"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Figma `44:819`의 순환 도움말 작업입니다. 21 × 21px 설치 공간, 반경 100, 4/2px 패딩 및 SemiBold 12 물음표는 고정된 작성자 기본값입니다. `text`는 현지화될 수 있습니다. `Accessible.name`의 기본값은 도움말입니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "fenced_code",
+      "start_line": 5,
+      "end_line": 8,
+      "raw": "```qml\nimport LVRS as LV\nLV.HelpButton { onClicked: helpPopup.open() }\n```\n",
+      "language": "qml",
+      "code": "import LVRS as LV\nLV.HelpButton { onClicked: helpPopup.open() }\n",
+      "closed": true
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "Pressable 유형은 공유 AbstractButton 압축, 리바운드 및 키보드 활성화를 사용합니다. `Motion.reducedMotion`는 보간을 제거합니다. 소스 노드, 상태 값 및 검증 범위는 [Figma audit](../../figma-parity.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "HelpButton",
+      "anchor": "helpbutton",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Figma audit",
+        "target": "../../figma-parity.md",
+        "kind": "relative",
+        "line": 10
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

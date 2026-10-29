@@ -1,0 +1,483 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:5fa7414b4565b9fbbdade54788fd05f14740eafa16a46d3e6993353b1ee42f10",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/ProgressBar.md",
+    "sha256": "aa49ac24a66984899a712f68fb97469ecbeab8f6d760dab5268f6db819b361af",
+    "bytes": 6633,
+    "line_count": 89,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 ProgressBar",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 ProgressBar\n",
+      "level": 1,
+      "title": "네이티브 ProgressBar"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "원본은 `src/qml/components/control/display/ProgressBar.qml`이다. C++ API는\n`ProgressBar.h/.cpp`에 있으며 LVUI의 `FRAMEWORK LVRS`가 이 컨트롤을 생성한다.\n기존 `Widgets::progress`의 iiGUI 기본 막대는 호환 API로 유지한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 상태와 수명\n",
+      "level": 2,
+      "title": "상태와 수명"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 14,
+      "raw": "`ProgressBar::create`는 하나의 자체 C++ 위젯과 `ProgressModel`을 생성한다.\n`set_options`와 소스 모델 변경은 같은 위젯·모델을 갱신하며 파일이나 생성 작업을 변경하지 않는다.\n`root`, `options`, `state`, `model`, `drawing` 및 `state_number`, `normalized_value`,\n`resolved_radius`를 제공한다. `drawing(size)`는 주어진 배치 크기의 불변 네이티브 그리기\n명령을 반환하며, 동일 상태와 크기에는 캐시를 재사용한다. 수치 계약은\n[PresentationModels.md](PresentationModels.md)를 따른다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 19,
+      "raw": "상태 제공자는 교체 가능한 `StateSource` 인터페이스이며 약한 참조이다.\n`progress_source(owner, source)`는 shared/weak 제공자의 기존 수명을 사용하고,\n스코프에 직접 저장된 제공자는 복사하지 않고 소유 스코프를 차용한다. 전달하는 owner는\n해당 객체의 실제 수명을 포함해야 한다. 퇴역한 핸들은 새 세대의 컨트롤에 접근하지 못한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 23,
+      "raw": "`ProgressModel::set_configuration`은 직접 값 네 개·상태 키 네 개·제공자를 함께 검증하고\n계산한 뒤 한 번에 반영한다. 모든 알림 수신자는 반영된 전체 구성을 읽는다.\n같은 구성은 알리지 않으며, 반영 이후 수신자의 실패는 이미 반영된 구성을 롤백하지 않는다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "## 배치와 그리기\n",
+      "level": 2,
+      "title": "배치와 그리기"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 30,
+      "raw": "기본 크기는 100×6이며 regular 높이는 3이다. 명시적인 width·height는 실제 배치 크기를\n정하고, 암시적 크기는 100×bar_height로 유지한다. `large_height`, `regular_height`,\n`corner_radius`도 입력이다. 단위는 현재 네이티브 레이아웃 단위이며 전역 스케일 적용의\n전체 원본 동등성을 완료로 표시하지 않는다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 35,
+      "raw": "track·fill·1px outline을 iiGUI 패널 명령으로 그린다. 기본 track은 `#0D000000`,\nfill은 원본의 `Theme.accentBlue`, outline은 `#14000000`이다. 사용자 fill은 optional이며\n생략하면 기본값을 사용한다. sRGB 입력은 iiGUI의 선형 색상으로 변환한다.\n원통형 반경은 실제 사각형 변의 최솟값/2, 기본 반경 입력은 100이다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 39,
+      "raw": "실제 할당 크기에서 시작 위치와 길이를 원본 수식으로 제한한다. 수치 모델의 fill 값과\n화면용 displayed 값은 분리하며, `displayed_start`·`displayed_progress`를 해제하면\n자동 모델 바인딩으로 돌아간다. 화면용 값을 수치 모델로 다시 쓰지 않는다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "## 모션\n",
+      "level": 2,
+      "title": "모션"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 47,
+      "raw": "원본 `SpringBehavior`의 구현인 360ms OutBack, overshoot 1.45를 Core 타임라인으로 계산한다.\n컨트롤마다 스레드나 타이머를 만들지 않고 iiGUI 호스트의 공유 Core 프레임 소스를 사용한다.\n중간에 목표가 바뀌면 현재 표시값에서 다시 시작한다. 앱의 game pause·time scale과 분리된\n프레임 시간을 사용한다. 호스트의 Motion 또는 명시적인 공유 Motion을 사용하며,\nmotion 비활성·reduced motion 변경은 목표값으로 정착한다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 50,
+      "raw": "프레임 소스 접수 실패는 오류로 반환하고 이미 반영된 모델 값은 유지하되 표시를 목표값으로\n정착시킨다. 실패한 시점의 중간 값에 멈추지 않는다. 잘못된 스타일·크기 입력은 반영 전에 거부한다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## 검증 경계\n",
+      "level": 2,
+      "title": "검증 경계"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 57,
+      "raw": "`tests/native/progress_bar.cpp`에는 기본값·역범위·제공자 수명·크기·인스턴스 보존·잘못된\n입력·표시값 분리·퇴역·그리기·OutBack·목표 변경·프레임 접수 실패·스코프 차용 검사를 준비한다.\n이 검사는 OS 창을 만들지 않는다. 저장소 작업 지침에 따라 LVRS 테스트 실행은 전체 작업의\n마지막 일괄 단계에 남긴다. 생성 C++의 컴파일·링크를 실행 통과로 보고하지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 61,
+      "raw": "Qt Item의 전체 상속 API, 객체 ID를 통한 선언적 읽기 전용 속성 참조, 플랫폼별 실제\n그리기·입력 및 스케일 동등성은 남은 감사 항목이다. 이 컨트롤을 추가한 사실만으로 LVRS나\nLVUI 전체 완료를 주장하지 않는다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 68,
+      "raw": "2026-10-26 검증 기록은 소스 저장소의\n`build/lvui-completion/progress-bar/verification-20261026.json`이다. 일반·ASan/UBSan\n구성의 라이브러리·검사 실행 파일·재배치 설치 소비자를 컴파일하고 링크했다. LVUI 팩터리\n62개의 생성 코드가 두 구성에서 동일하며, 컴파일러 검사 34개씩 통과했다. LVRS 실행 검사\n38개는 각 구성에 등록되어 있으나 실행하지 않았다. 이 기록 시점의 동등성 현황은\npartial 84개, pending 65개, complete 0개이다. 이후 현황은 Parity 문서를 따른다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 최종 작업 공간 실행에서 보완한 그리기 경계\n",
+      "level": 2,
+      "title": "최종 작업 공간 실행에서 보완한 그리기 경계"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 76,
+      "raw": "원본의 cornerRadius 값은 유지하면서 실제 패널 반경은 배정된 너비·높이의 절반으로\n제한한다. 네이티브 렌더러의 유효 장면 기하 조건에 맞추는 조정이다. 기본 100\n반경과 높이 6 조합을 그대로 GPU에 넘기면 유효하지 않은 패널이 된다. 1px 테두리도\n아주 작은 배정에서는 같은 절반 한계로 줄인다. 기본·소수 픽셀 크기의 유효 장면을\npaint 회귀 검사에 추가하며 모델의 원래 수치 조회 계약은 변경하지 않는다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 80,
+      "raw": "진행 비율의 계산 결과는 부동소수점 오차를 고려한 엄격한 허용치로 비교한다. 크기 검사는\n호스트 전체를 채우는 세대 루트 대신 일반 스택의 자식으로 막대를 구성하여 명시·자연 높이\n계약을 확인한다. 호스트의 채우기 배치를 컨트롤의 높이 오류로 오인하지 않는다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "heading",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "## 곡선 검사의 시간 기준\n",
+      "level": 2,
+      "title": "곡선 검사의 시간 기준"
+    },
+    {
+      "id": "b000041",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "paragraph",
+      "start_line": 83,
+      "end_line": 88,
+      "raw": "OutBack 중간값 검사는 Core의 수동 프레임 시계를 알려진 시각에 고정한 뒤 다음 전환을\n시작한다. `set_options()` 이후에 읽은 실제 시계를 시작 시각으로 가정하면 스케줄링 지연을\n곡선 오차로 오인한다. 준비 전환을 완료하고 즉시 상태를 0으로 되돌린 뒤 동일한 프레임\n시각에서 360ms 전환을 시작하며, 180ms의 값을 원본 곡선과 1e-6 이내로 대조한다.\n실제 시간 대기나 애니메이션 구현의 완화는 추가하지 않는다. 이 검사 보정 후 두 구성의\nProgressBar 관련 13개 항목을 재시도 없이 별도로 빌드·실행해 확인한다.\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 ProgressBar",
+      "anchor": "네이티브-progressbar",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "상태와 수명",
+      "anchor": "상태와-수명",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "배치와 그리기",
+      "anchor": "배치와-그리기",
+      "start_line": 25
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "모션",
+      "anchor": "모션",
+      "start_line": 41
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 경계",
+      "anchor": "검증-경계",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "최종 작업 공간 실행에서 보완한 그리기 경계",
+      "anchor": "최종-작업-공간-실행에서-보완한-그리기-경계",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000040",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "곡선 검사의 시간 기준",
+      "anchor": "곡선-검사의-시간-기준",
+      "start_line": 81
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000007",
+        "line": 10,
+        "text": "`set_options`와 소스 모델 변경은 같은 위젯·모델을 갱신하며 파일이나 생성 작업을 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 19,
+        "text": "해당 객체의 실제 수명을 포함해야 한다. 퇴역한 핸들은 새 세대의 컨트롤에 접근하지 못한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 23,
+        "text": "같은 구성은 알리지 않으며, 반영 이후 수신자의 실패는 이미 반영된 구성을 롤백하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 30,
+        "text": "전체 원본 동등성을 완료로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 57,
+        "text": "마지막 일괄 단계에 남긴다. 생성 C++의 컴파일·링크를 실행 통과로 보고하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 61,
+        "text": "LVUI 전체 완료를 주장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000037",
+        "line": 76,
+        "text": "paint 회귀 검사에 추가하며 모델의 원래 수치 조회 계약은 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000039",
+        "line": 80,
+        "text": "계약을 확인한다. 호스트의 채우기 배치를 컨트롤의 높이 오류로 오인하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000042",
+        "line": 87,
+        "text": "실제 시간 대기나 애니메이션 구현의 완화는 추가하지 않는다. 이 검사 보정 후 두 구성의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "PresentationModels.md",
+        "target": "PresentationModels.md",
+        "kind": "relative",
+        "line": 14
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

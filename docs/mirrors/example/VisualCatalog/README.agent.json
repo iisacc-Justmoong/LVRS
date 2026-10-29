@@ -1,0 +1,657 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:e4a2671fc6450a2a762db340509de67891408f0eccaa37c4a99c12f107975396",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/VisualCatalog/README.md",
+    "sha256": "e7c530ce66827783061c66289da20010eda2329900b7a95fae30ad1bf8d8a31f",
+    "bytes": 5831,
+    "line_count": 71,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Visual Catalog Example",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Visual Catalog Example\n",
+      "level": 1,
+      "title": "Visual Catalog Example"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 4,
+      "raw": "This example is the LVRS visual documentation browser driven by `Main.qml`.\nThe left sidebar is a `Hierarchy` index of the public QML surface, and the right panel shows the selected type as a live reference page with preview, source path, related types, and usage snippet.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "## Run\n",
+      "level": 2,
+      "title": "Run"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "From repository root:\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "fenced_code",
+      "start_line": 10,
+      "end_line": 13,
+      "raw": "```bash\n./build.sh\n./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n```\n",
+      "language": "bash",
+      "code": "./build.sh\n./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n",
+      "closed": true
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "The checked-in launcher resolves the build-tree executable from `build/example/VisualCatalog/bin/LVRSExampleVisualCatalog` during in-repository development and a sibling snapshot runtime after install.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## Structure\n",
+      "level": 2,
+      "title": "Structure"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 21,
+      "raw": "- `qml/CatalogRegistry.qml` holds the catalog tree, component metadata, and sidebar model.\n- `qml/Main.qml` renders the application shell, hierarchy sidebar, and detail panels.\n- The catalog shell uses `layoutSafeAreaBounds` explicitly, and the Application section now includes `WindowSafeAreaObserver` as the safe-area reference entry.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`qml/CatalogRegistry.qml` holds the catalog tree, component metadata, and sidebar model.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`qml/Main.qml` renders the application shell, hierarchy sidebar, and detail panels.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "The catalog shell uses `layoutSafeAreaBounds` explicitly, and the Application section now includes `WindowSafeAreaObserver` as the safe-area reference entry.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## Intended Use\n",
+      "level": 2,
+      "title": "Intended Use"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "- Browse the library by domain instead of memorizing file paths.\n- Use section nodes for category overviews.\n- Use component nodes for concrete visual documentation and usage examples.\n- Use the hierarchy preview to validate flat depth-array reordering and parent reassignment by drag and drop.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Browse the library by domain instead of memorizing file paths.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Use section nodes for category overviews.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Use component nodes for concrete visual documentation and usage examples.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Use the hierarchy preview to validate flat depth-array reordering and parent reassignment by drag and drop.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "## Sheet gallery\n",
+      "level": 2,
+      "title": "Sheet gallery"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "Surfaces → Sheet includes mobile Fit/Medium/Large, desktop export using the same content Component, and a direct inline frame. The 28/55/0 radius controls are illustrative logical-pixel inputs, not measured specifications of named devices. Folder selection owns its ListView and fixed Save action. Use `LVRSTests_sheet` for the content, radius, layout and modal input contracts.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## ToggleSwitch motion\n",
+      "level": 2,
+      "title": "ToggleSwitch motion"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "Selection → ToggleSwitch has dedicated On/Off, slow (`640ms`), immediate (`0ms`), and disabled examples. Hold to squash the knob, tap or press Space to see its stretch and rebound, and click again during travel to check retargeting. Run `LVRSTests_toggle_switch` for the input and motion contracts.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "## Tooltip gallery\n",
+      "level": 2,
+      "title": "Tooltip gallery"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "Surfaces → Tooltip provides four display-corner launch points, a draggable origin, a reusable help view, a status view with interactive LVRS controls, and automatic hover/focus/hold text help. The frame bounds the bubbles and makes direction changes visible. Run `LVRSTests_tooltip` for placement, rendered tails, content lifecycle, scrolling, and input checks.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## App accent preview\n",
+      "level": 2,
+      "title": "App accent preview"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 47,
+      "raw": "The ApplicationWindow / shell preview includes LVRS blue, Purple, and Orange\nchoices. Each assigns the catalog root's `primaryColor`, updating the whole\ncatalog immediately. Choose LVRS blue to restore the default. The usage snippet\nshows the same app-root input for consumers.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## Standard materials\n",
+      "level": 2,
+      "title": "Standard materials"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "WindowMaterial, PanelMaterial, MaterialSurface and Popover share the interactive Material gallery. Its accent controls update the app theme, and its actions open a ContextMenu, Tooltip and Popover above the same window. The catalog contains 91 type entries. The host ApplicationWindow and standalone WindowMaterial show a uniform #0B0B0B fill at 50% without gradients, retaining native macOS frosted blur. The PanelMaterial preview keeps its Glass 25 radial treatment. Changing the accent updates controls and panel accents while the Window fill remains near black.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "## Component Studio\n",
+      "level": 2,
+      "title": "Component Studio"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "The window now combines a compact motion toolbar, searchable hierarchy and a responsive detail page. Each of the 91 indexed types has a live playground and a specific interaction recipe: Try it, Response, Look for and Behavior contract. Source, usage and related types remain available below the motion inspector. Supporting nonvisual types link to the real consumer that displays their behavior. InteractionState shows the button's owned phase and input modality in the motion playground; its [contract](../../docs/instance-states.md) maps the full Figma component variants to the runtime.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "Use 1×, 0.5× and 0.25× to change the whole engine's playback speed. Reduce motion makes states immediate. Reset preview recreates the selected example without resetting global motion preferences. The Motion playground includes buttons, selection, focus, sliders, progress, layout spacing and passive-layer opacity.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "`CatalogMotion.js` owns the explicit recipes; `MotionInspector.qml` renders them; `MotionLab.qml` demonstrates the common rhythm. `LVRSTests_catalog` checks QML inventory coverage, every preview, search and reset. See [motion policy](../../docs/motion.md).\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "Figma parity adds five detailed entries: HelpButton, ColorPickerButton, ContextMenuItem, ContextMenuDivider and Menu. Their live gallery compares authored sizes, compact/regular menu typography, focus, disabled state and shared elastic motion. See [audit](../../docs/figma-parity.md).\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "The material gallery now previews the user-directed menu coating: WindowMaterial, 12% tint, 64px blur, and 8% additional accent strength. Native A/B captures compare this with the earlier saturated menu treatment.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "## Tabs\n",
+      "level": 2,
+      "title": "Tabs"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "The Tabs gallery adds Tab, TabBar, MobileTab and MobileTabBar. It demonstrates the desktop states and width policies, floating iOS presentations and 3/4/5-destination Android bars. The controls share selection, keyboard, touch and reduced-motion behavior. See [Tabs API](../../docs/components/navigation/Tabs.md).\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "## LVRS mobile navigation\n",
+      "level": 2,
+      "title": "LVRS mobile navigation"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "MobileNavigationBar and MobileNavigationTab add two LVRS-styled types. The Tabs gallery starts with 1–5 destinations on iOS and Android profiles, optional text, optional independent Search, device radius overrides and a narrow scrollable example. Search is omitted by default; pass `search: ({})` to show it. The gallery compares both states. Tap destinations to inspect the 140 ms stretch and 280 ms settle. See [the Figma-first component contract](../../docs/components/navigation/MobileNavigationBar.md).\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Visual Catalog Example",
+      "anchor": "visual-catalog-example",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Run",
+      "anchor": "run",
+      "start_line": 6
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Structure",
+      "anchor": "structure",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Intended Use",
+      "anchor": "intended-use",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Sheet gallery",
+      "anchor": "sheet-gallery",
+      "start_line": 30
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "ToggleSwitch motion",
+      "anchor": "toggleswitch-motion",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Tooltip gallery",
+      "anchor": "tooltip-gallery",
+      "start_line": 38
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "App accent preview",
+      "anchor": "app-accent-preview",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Standard materials",
+      "anchor": "standard-materials",
+      "start_line": 49
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Component Studio",
+      "anchor": "component-studio",
+      "start_line": 53
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Tabs",
+      "anchor": "tabs",
+      "start_line": 65
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVRS mobile navigation",
+      "anchor": "lvrs-mobile-navigation",
+      "start_line": 69
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000009",
+        "language": "bash",
+        "code": "./build.sh\n./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n"
+      }
+    ],
+    "links": [
+      {
+        "block_id": "b000043",
+        "label": "contract",
+        "target": "../../docs/instance-states.md",
+        "kind": "relative",
+        "line": 55
+      },
+      {
+        "block_id": "b000047",
+        "label": "motion policy",
+        "target": "../../docs/motion.md",
+        "kind": "relative",
+        "line": 59
+      },
+      {
+        "block_id": "b000049",
+        "label": "audit",
+        "target": "../../docs/figma-parity.md",
+        "kind": "relative",
+        "line": 61
+      },
+      {
+        "block_id": "b000055",
+        "label": "Tabs API",
+        "target": "../../docs/components/navigation/Tabs.md",
+        "kind": "relative",
+        "line": 67
+      },
+      {
+        "block_id": "b000059",
+        "label": "the Figma-first component contract",
+        "target": "../../docs/components/navigation/MobileNavigationBar.md",
+        "kind": "relative",
+        "line": 71
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

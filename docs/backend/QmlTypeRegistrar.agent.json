@@ -1,0 +1,797 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4c305fbd87df38a850bf700b1de06ebcff9715b416081285724262ae051a64dc",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/QmlTypeRegistrar.md",
+    "sha256": "1ce61d8ae48a0fbcc60ef43dfd1cf0629f9518f9038bf6b20943f25268cf4009",
+    "bytes": 3911,
+    "line_count": 133,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "QmlTypeRegistrar",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# QmlTypeRegistrar\n",
+      "level": 1,
+      "title": "QmlTypeRegistrar"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/runtime/qmltyperegistrar.h` / `src/backend/runtime/qmltyperegistrar.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`QmlTypeRegistrar`는 선언된 C++ 매니페스트에서 앱 소유 QML 유형을 등록합니다. 이는 `qmlRegisterType(...)`, `qmlRegisterUncreatableType(...)` 또는 사용자 정의 싱글턴 등록 호출이 오랫동안 반복되는 하위 소비 측 앱을 위한 것입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- 유형 등록 순서를 명시적으로 유지하세요.\n- 하나의 보고서에 등록 진단을 집계합니다.\n- 반복되는 앱 부트스트랩 코드를 더 작게 만듭니다.\n- 앱에서 앱 도메인 유형을 유지합니다. LVRS는 등록 하네스만 소유합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "유형 등록 순서를 명시적으로 유지하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "하나의 보고서에 등록 진단을 집계합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "반복되는 앱 부트스트랩 코드를 더 작게 만듭니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "앱에서 앱 도메인 유형을 유지합니다. LVRS는 등록 하네스만 소유합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 18,
+      "end_line": 21,
+      "raw": "- `lvrs::qmlCreatableType<T>(uri, major, minor, qmlName, diagnosticName?, required?)`\n- `lvrs::qmlUncreatableType<T>(uri, major, minor, qmlName, reason, diagnosticName?, required?)`\n- `lvrs::qmlCustomTypeRegistration(uri, major, minor, qmlName, kind, callback, diagnosticName?, required?)`\n- `lvrs::registerQmlTypes(manifest) -> QmlTypeRegistrationReport`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`lvrs::qmlCreatableType<T>(uri, major, minor, qmlName, diagnosticName?, required?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::qmlUncreatableType<T>(uri, major, minor, qmlName, reason, diagnosticName?, required?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::qmlCustomTypeRegistration(uri, major, minor, qmlName, kind, callback, diagnosticName?, required?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::registerQmlTypes(manifest) -> QmlTypeRegistrationReport`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "핵심 구조체:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 25,
+      "end_line": 27,
+      "raw": "- `QmlTypeRegistration`\n- `QmlTypeRegistrationResult`\n- `QmlTypeRegistrationReport`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`QmlTypeRegistration`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`QmlTypeRegistrationResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`QmlTypeRegistrationReport`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "html",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "<a id=\"registration-kinds\"></a>\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "## 등록 종류\n",
+      "level": 2,
+      "title": "등록 종류"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 36,
+      "raw": "- `Creatable`: `qmlRegisterType<T>()`를 래핑합니다.\n- `Uncreatable`: `qmlRegisterUncreatableType<T>()`를 래핑합니다.\n- `Singleton`: 앱에서 제공하는 싱글턴 콜백을 위해 예약된 진단 종류입니다.\n- `Custom`: 앱 제공 콜백.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Creatable`: `qmlRegisterType<T>()`를 래핑합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Uncreatable`: `qmlRegisterUncreatableType<T>()`를 래핑합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Singleton`: 앱에서 제공하는 싱글턴 콜백을 위해 예약된 진단 종류입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Custom`: 앱 제공 콜백.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "앱별 구성이 필요한 등록(예: `qmlRegisterSingletonType(...)`, 싱글턴 인스턴스 등록 또는 플랫폼 기반 유형)에는 `qmlCustomTypeRegistration()`를 사용하세요.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "<a id=\"result\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## 결과\n",
+      "level": 2,
+      "title": "결과"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "`QmlTypeRegistrationReport`에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 50,
+      "raw": "- `ok`\n- `results`\n- `errors`\n- `errorMessage()`\n- `diagnostics()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ok`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`results`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errors`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errorMessage()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`diagnostics()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "각 결과에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 64,
+      "raw": "- `uri`\n- `majorVersion`\n- `minorVersion`\n- `qmlName`\n- `qualifiedName`\n- `diagnosticName`\n- `kind`\n- `typeId`\n- `ok`\n- `skipped`\n- `error`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`uri`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`majorVersion`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minorVersion`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`qmlName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`qualifiedName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`diagnosticName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`kind`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`typeId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ok`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`skipped`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`error`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "필수 오류는 `report.ok=false`를 설정합니다. 선택적 실패는 `skipped=true`로 표시되며 보고서에 실패하지 않습니다. 두 번째 콜백이 호출되기 전에 중복된 `(uri, version, qmlName)` 항목이 진단됩니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "fenced_code",
+      "start_line": 72,
+      "end_line": 93,
+      "raw": "```cpp\nconst QList<lvrs::QmlTypeRegistration> manifest = {\n    lvrs::qmlCreatableType<WorkspaceDocument>(\n        QStringLiteral(\"WhatSon.Internal\"),\n        1,\n        0,\n        QStringLiteral(\"WorkspaceDocument\"),\n        QStringLiteral(\"WorkspaceDocument\")),\n\n    lvrs::qmlUncreatableType<WorkspaceCommand>(\n        QStringLiteral(\"WhatSon.Internal\"),\n        1,\n        0,\n        QStringLiteral(\"WorkspaceCommand\"),\n        QStringLiteral(\"WorkspaceCommand is constructed by C++\"),\n        QStringLiteral(\"WorkspaceCommand\"))\n};\n\nconst lvrs::QmlTypeRegistrationReport report = lvrs::registerQmlTypes(manifest);\nif (!report.ok)\n    qWarning().noquote() << report.errorMessage();\n```\n",
+      "language": "cpp",
+      "code": "const QList<lvrs::QmlTypeRegistration> manifest = {\n    lvrs::qmlCreatableType<WorkspaceDocument>(\n        QStringLiteral(\"WhatSon.Internal\"),\n        1,\n        0,\n        QStringLiteral(\"WorkspaceDocument\"),\n        QStringLiteral(\"WorkspaceDocument\")),\n\n    lvrs::qmlUncreatableType<WorkspaceCommand>(\n        QStringLiteral(\"WhatSon.Internal\"),\n        1,\n        0,\n        QStringLiteral(\"WorkspaceCommand\"),\n        QStringLiteral(\"WorkspaceCommand is constructed by C++\"),\n        QStringLiteral(\"WorkspaceCommand\"))\n};\n\nconst lvrs::QmlTypeRegistrationReport report = lvrs::registerQmlTypes(manifest);\nif (!report.ok)\n    qWarning().noquote() << report.errorMessage();\n",
+      "closed": true
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "사용자 정의 싱글턴 예:\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 97,
+      "end_line": 115,
+      "raw": "```cpp\nauto singletonRegistration = lvrs::qmlCustomTypeRegistration(\n    QStringLiteral(\"WhatSon.Internal\"),\n    1,\n    0,\n    QStringLiteral(\"WorkspaceServices\"),\n    lvrs::QmlTypeRegistrationKind::Singleton,\n    []() {\n        return qmlRegisterSingletonType<WorkspaceServices>(\n            \"WhatSon.Internal\",\n            1,\n            0,\n            \"WorkspaceServices\",\n            [](QQmlEngine *, QJSEngine *) -> QObject * {\n                return WorkspaceServices::instance();\n            });\n    },\n    QStringLiteral(\"WorkspaceServices\"));\n```\n",
+      "language": "cpp",
+      "code": "auto singletonRegistration = lvrs::qmlCustomTypeRegistration(\n    QStringLiteral(\"WhatSon.Internal\"),\n    1,\n    0,\n    QStringLiteral(\"WorkspaceServices\"),\n    lvrs::QmlTypeRegistrationKind::Singleton,\n    []() {\n        return qmlRegisterSingletonType<WorkspaceServices>(\n            \"WhatSon.Internal\",\n            1,\n            0,\n            \"WorkspaceServices\",\n            [](QQmlEngine *, QJSEngine *) -> QObject * {\n                return WorkspaceServices::instance();\n            });\n    },\n    QStringLiteral(\"WorkspaceServices\"));\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "<a id=\"responsibility-boundary\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "## 책임 경계\n",
+      "level": 2,
+      "title": "책임 경계"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "LVRS 소유:\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 123,
+      "end_line": 126,
+      "raw": "- 매니페스트 검증,\n- 중복 감지,\n- 등록 콜백 실행,\n- 진단 및 오류 집계.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "매니페스트 검증,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중복 감지,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "등록 콜백 실행,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "진단 및 오류 집계.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "앱이 소유하는 것:\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 130,
+      "end_line": 133,
+      "raw": "- 유형 수업,\n- 모듈 URI 및 버전 정책,\n- 싱글턴 구성 의미론,\n- 플랫폼/도메인 게이팅.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "유형 수업,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모듈 URI 및 버전 정책,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "싱글턴 구성 의미론,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "플랫폼/도메인 게이팅.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "QmlTypeRegistrar",
+      "anchor": "qmltyperegistrar",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "등록 종류",
+      "anchor": "등록-종류",
+      "start_line": 31
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "결과",
+      "anchor": "결과",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "책임 경계",
+      "anchor": "책임-경계",
+      "start_line": 119
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000015",
+        "line": 18,
+        "text": "- `lvrs::qmlCreatableType<T>(uri, major, minor, qmlName, diagnosticName?, required?)`",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000015",
+        "line": 19,
+        "text": "- `lvrs::qmlUncreatableType<T>(uri, major, minor, qmlName, reason, diagnosticName?, required?)`",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000015",
+        "line": 20,
+        "text": "- `lvrs::qmlCustomTypeRegistration(uri, major, minor, qmlName, kind, callback, diagnosticName?, required?)`",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000041",
+        "line": 66,
+        "text": "필수 오류는 `report.ok=false`를 설정합니다. 선택적 실패는 `skipped=true`로 표시되며 보고서에 실패하지 않습니다. 두 번째 콜백이 호출되기 전에 중복된 `(uri, version, qmlName)` 항목이 진단됩니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

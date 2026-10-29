@@ -1,0 +1,531 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:57fa13b91bb448a0556688d937776de3a92a35b4c1a79e3a4c67767c19b6f050",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/RadioButton.md",
+    "sha256": "8a65cee4718f91bc16bd00e884f8a915be995ad79b58caa9c7211e29d548c5e0",
+    "bytes": 2565,
+    "line_count": 66,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "RadioButton",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# RadioButton\n",
+      "level": 1,
+      "title": "RadioButton"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/check/RadioButton.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`RadioButton`는 레거시 호환성 별칭을 갖춘 소형 원형 선택기입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 결정론적 무선 표시기 시각적 자료를 제공합니다.\n- 기존 API(`state`, `available`)를 표준 Qt 속성과 호환되게 유지하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "결정론적 무선 표시기 시각적 자료를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기존 API(`state`, `available`)를 표준 Qt 속성과 호환되게 유지하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "정식 상태:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "- `checked`, `enabled`, `text`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`checked`, `enabled`, `text`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "호환성 별칭:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 24,
+      "end_line": 25,
+      "raw": "- `state` <-> `checked`\n- `available` <-> `enabled`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`state` <-> `checked`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`available` <-> `enabled`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "시각적:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 34,
+      "raw": "- `indicatorSize`, `dotSize`\n- 해결된 반경: `indicatorRadius`, `dotRadius`\n- `onColor`, `offColor`\n- `onColorDisabled`, `offColorDisabled`\n- `dotColor`, `dotColorDisabled`\n- 해결됨: `indicatorColor`, `indicatorDotColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`indicatorSize`, `dotSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결된 반경: `indicatorRadius`, `dotRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`onColor`, `offColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`onColorDisabled`, `offColorDisabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dotColor`, `dotColorDisabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결됨: `indicatorColor`, `indicatorDotColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 40,
+      "end_line": 47,
+      "raw": "- 별칭 쌍은 양방향(`onStateChanged`, `onCheckedChanged`, `onAvailableChanged`, `onEnabledChanged`)으로 동기화됩니다.\n- Figma 구성 요소 세트(`44:630`)에는 4개의 `18 x 18` 변형이 포함되어 있습니다. On/Off와 Available True/False가 교차됩니다.\n- 상태에서는 `18 x 18` 표시기 내부의 `(5, 5)`에 `8 x 8` 점을 배치합니다. 외부 반경과 내부 반경은 각각 `9` 및 `4`입니다.\n- 4가지 상태 팔레트는 Figma 토큰으로 고정됩니다. 활성화된 On은 `TitleHeader` 도트가 있는 `Accent`를 사용하고, 활성화된 Off는 `TitleHeader`를 사용하고, 비활성화된 On은 `Caption` 도트가 있는 `PanelBackground12`를 사용하고, 비활성화된 Off는 사용합니다. `PanelBackground12`.\n- 데스크톱과 모바일은 `18 x 18` 표시기, `(5, 5)`의 `8 x 8` 점, 반경 `9` 및 `4`를 공유합니다.\n- 선택적 QML 레이블 확장은 `8px` 간격 및 본문 `13px/13px`를 사용하여 데스크톱 및 모바일에서 텍스트 `Label`에 대한 `59 x 18` 경계를 생성합니다.\n- 표시기 지오메트리는 명시적으로 배치되므로 런타임 대상 변경 사항은 암시적 크기를 결정론적으로 다시 계산합니다.\n- 구성 요소는 투명한 배경 정책(`tone: Borderless`)을 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "별칭 쌍은 양방향(`onStateChanged`, `onCheckedChanged`, `onAvailableChanged`, `onEnabledChanged`)으로 동기화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Figma 구성 요소 세트(`44:630`)에는 4개의 `18 x 18` 변형이 포함되어 있습니다. On/Off와 Available True/False가 교차됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태에서는 `18 x 18` 표시기 내부의 `(5, 5)`에 `8 x 8` 점을 배치합니다. 외부 반경과 내부 반경은 각각 `9` 및 `4`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "4가지 상태 팔레트는 Figma 토큰으로 고정됩니다. 활성화된 On은 `TitleHeader` 도트가 있는 `Accent`를 사용하고, 활성화된 Off는 `TitleHeader`를 사용하고, 비활성화된 On은 `Caption` 도트가 있는 `PanelBackground12`를 사용하고, 비활성화된 Off는 사용합니다. `PanelBackground12`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱과 모바일은 `18 x 18` 표시기, `(5, 5)`의 `8 x 8` 점, 반경 `9` 및 `4`를 공유합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적 QML 레이블 확장은 `8px` 간격 및 본문 `13px/13px`를 사용하여 데스크톱 및 모바일에서 텍스트 `Label`에 대한 `59 x 18` 경계를 생성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "표시기 지오메트리는 명시적으로 배치되므로 런타임 대상 변경 사항은 암시적 크기를 결정론적으로 다시 계산합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구성 요소는 투명한 배경 정책(`tone: Borderless`)을 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "fenced_code",
+      "start_line": 53,
+      "end_line": 60,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.RadioButton {\n    text: \"Choice A\"\n    checked: true\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.RadioButton {\n    text: \"Choice A\"\n    checked: true\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "내부 점은 체크된 채우기가 혼합되는 동안 공통 오버슈트가 있는 위치로 커집니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "RadioButton",
+      "anchor": "radiobutton",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 38
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 51
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 64
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000045",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 66
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

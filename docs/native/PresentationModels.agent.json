@@ -1,0 +1,456 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:92b317573ba6f437af45ea2bb0f019060caa6c987bfe8fbcfcfea9bb3c664440",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/PresentationModels.md",
+    "sha256": "6e4061624c3cbe2f3d6df1b6315c30db49237309b26c2a59dd5b17d0f0e00264",
+    "bytes": 5354,
+    "line_count": 73,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 ViewModel·StateModel·ProgressModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 ViewModel·StateModel·ProgressModel\n",
+      "level": 1,
+      "title": "네이티브 ViewModel·StateModel·ProgressModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "원본은 `src/backend/state/viewmodel.*`, `statemodel.*`와\n`src/backend/model/progressmodel.*`이다. 네이티브 API는 `src/LVRS/`에 같은 이름의\n헤더·소스 쌍으로 제공한다. Qt 객체·QML 엔진·JS 배열이나 OS 컨트롤을 사용하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 값과 실행 영역\n",
+      "level": 2,
+      "title": "값과 실행 영역"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 12,
+      "raw": "메타데이터와 상태는 `ii::core::Value` 및 `Value::Object`의 소유 값이다. 읽기 결과와\n스냅샷은 모델의 변경 가능한 내부 저장소를 차용하지 않는다. Core의 UTF-8·유한 수·\n엄격한 타입 계약을 사용하며 임의의 QObject/QVariant 메타타입을 복제하지 않는다.\n원본 QVariant와의 전체 변환·비교 동등성은 별도 감사 항목으로 남긴다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 17,
+      "raw": "모델은 생성된 소유 스레드에서 읽고 쓴다. 다른 스레드의 쓰기는 `wrong_executor`, 읽기는\n예외로 거부한다. 변경 명령 중 재진입 쓰기는 `busy`이다. Core 관측과 타입 지정 QueryPort\n알림을 사용하며, 알림 중 오류는 이미 반영된 값을 롤백하지 않고 다른 수신자에게 계속\n전달한 뒤 반환한다. 뷰 상태 변경은 앱의 파일 저장·생성 큐를 자동 호출하지 않는다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## ViewModel\n",
+      "level": 2,
+      "title": "ViewModel"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 24,
+      "raw": "`key`, `display_name`, `busy`, `error`, `has_error`, `metadata`와 `snapshot()`을 제공한다.\n텍스트 setter는 Unicode 공백을 제거하고, 같은 값에는 알림을 발행하지 않는다.\n`clear_error()`는 error 속성만 바꾼다. 각 속성의 Core 관측은 다른 속성과 분리된다.\n기존 QML 이름의 `displayName`, `hasError`는 스냅샷 키에 유지한다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "## StateModel\n",
+      "level": 2,
+      "title": "StateModel"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 29,
+      "raw": "ViewModel을 상속하며 `values`, `state_keys`, `revision`, `empty`, `value_or`, `has_value`,\n`set_value`, `remove_value`, `apply_patch`, `clear_values`, `state_snapshot`을 제공한다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 36,
+      "raw": "- 키는 Unicode 공백을 제거한다. 키 목록과 키별 알림 순서는 UTF-16 순서로 정렬한다.\n- 빈 키의 쓰기·삭제는 `false`와 `Empty state key` 오류 속성을 사용한다.\n- 같은 값의 `set_value`와 같은 내용의 `apply_patch`는 성공 `true`이며 revision은 유지한다.\n- 빈 patch는 `false`, 없는 키 삭제는 `false`, 존재하는 null은 없는 키와 구별한다.\n- 변경 후 revision → values → 필요한 keys → 정렬된 value 알림 순서를 유지한다.\n- 상태 스냅샷은 상속된 ViewModel 정보와 values·stateKeys·revision·empty를 포함한다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "키는 Unicode 공백을 제거한다. 키 목록과 키별 알림 순서는 UTF-16 순서로 정렬한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 키의 쓰기·삭제는 `false`와 `Empty state key` 오류 속성을 사용한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "같은 값의 `set_value`와 같은 내용의 `apply_patch`는 성공 `true`이며 revision은 유지한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 patch는 `false`, 없는 키 삭제는 `false`, 존재하는 null은 없는 키와 구별한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "변경 후 revision → values → 필요한 keys → 정렬된 value 알림 순서를 유지한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태 스냅샷은 상속된 ViewModel 정보와 values·stateKeys·revision·empty를 포함한다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 39,
+      "raw": "`StateSource`는 value-or-fallback과 revision 관측의 교체 가능한 C++ 인터페이스이다.\nProgressModel은 구체 StateModel에 의존하지 않고 이 인터페이스를 사용한다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "## ProgressModel\n",
+      "level": 2,
+      "title": "ProgressModel"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 45,
+      "raw": "직접 minimum·maximum·start·current 값과 상태 키 네 개를 유지한다. 상태 제공자가\n있으면 상태 값을 사용하고 숫자로 읽을 수 없으면 직접 값으로 돌아간다. 이 경계에서만\n원본의 숫자·bool·숫자 문자열 변환을 적용하며 Core::Value의 엄격한 변환 규칙은 바꾸지 않는다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 49,
+      "raw": "정방향·역방향 범위를 모두 처리한다. 절댓값 `0.000001` 미만 범위는 이진 진행이고,\n일반 정규화는 0..1로 제한한다. fill 시작은 두 정규화 값의 최솟값, 길이는 절대 차이다.\n원통형 반경과 직사각형 반경 계산도 원본 수식에 대응한다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 53,
+      "raw": "상태 제공자는 약한 참조이며 교체하면 이전 구독을 해제한다. 제공자 종료 시 직접 값으로\n돌아가도록 최종 관측 알림을 처리한다. 원본의 QPointer 무효화와 비교해 종료 알림은 명시적인\n네이티브 수명 계약이다. 제공자 내부의 임의 비동기 실행이나 임의 Qt 객체 호출은 수행하지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "## 검증 경계\n",
+      "level": 2,
+      "title": "검증 경계"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 63,
+      "raw": "`tests/native/presentation_models.cpp`에 기본값·정규화·patch·알림 순서·null·범위·\n상태 변환·교체·종료·스레드·재진입·수신자 실패·Core 관측 검사를 준비한다.\n현재 저장소 지침에 따라 LVRS 테스트 실행은 전체 목표의 최종 일괄 단계에 모은다.\n중간 C++ 구문 검사·컴파일·링크와 설치 헤더 검사를 실행 통과로 표시하지 않는다.\nProgressBar는 [네이티브 컨트롤](ProgressBar.md)에서 이 모델을 사용한다.\n`set_configuration`의 값·키·제공자 일괄 반영 검사도 추가한다. 플랫폼 실행과 전체 상태\n레지스트리는 여전히 완료 감사 대상이다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 68,
+      "raw": "2026-10-26에는 일반 구성과 ASan·UBSan 구성에서 네이티브 라이브러리, 모델 실행 검사\n23개를 담은 실행 파일, 재배치 설치 소비자의 컴파일·링크를 완료했다. 직접 scoped import와\n중첩 C++ 모델을 사용하는 LVUI 뷰 두 개도 각 구성에서 생성·컴파일했다. 설치 소비자는\n최종 실행 단계에서 별도 검사 1개로 등록되어 있으며, 이 시점에는 실행하지 않았다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 73,
+      "raw": "기록은 소스 저장소의 `build/lvui-completion/presentation/verification-20261026.json`이다.\n라이브러리 객체·공개 헤더의 설치 대조, 테스트 등록 목록, 원본과 제품 비변경 경계를 포함한다.\n`partial` 84개, `pending` 65개이며 `complete`는 0개이다. 실행을 수행하지 않은 컴파일\n결과나 C++ API 대응만으로 전체 원본 동등성 또는 전체 목표 완료를 주장하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 ViewModel·StateModel·ProgressModel",
+      "anchor": "네이티브-viewmodelstatemodelprogressmodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "값과 실행 영역",
+      "anchor": "값과-실행-영역",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "ViewModel",
+      "anchor": "viewmodel",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "StateModel",
+      "anchor": "statemodel",
+      "start_line": 26
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "ProgressModel",
+      "anchor": "progressmodel",
+      "start_line": 41
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 경계",
+      "anchor": "검증-경계",
+      "start_line": 55
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "헤더·소스 쌍으로 제공한다. Qt 객체·QML 엔진·JS 배열이나 OS 컨트롤을 사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 10,
+        "text": "스냅샷은 모델의 변경 가능한 내부 저장소를 차용하지 않는다. Core의 UTF-8·유한 수·",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 11,
+        "text": "엄격한 타입 계약을 사용하며 임의의 QObject/QVariant 메타타입을 복제하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 17,
+        "text": "전달한 뒤 반환한다. 뷰 상태 변경은 앱의 파일 저장·생성 큐를 자동 호출하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 22,
+        "text": "텍스트 setter는 Unicode 공백을 제거하고, 같은 값에는 알림을 발행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 53,
+        "text": "네이티브 수명 계약이다. 제공자 내부의 임의 비동기 실행이나 임의 Qt 객체 호출은 수행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 60,
+        "text": "중간 C++ 구문 검사·컴파일·링크와 설치 헤더 검사를 실행 통과로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000037",
+        "line": 73,
+        "text": "결과나 C++ API 대응만으로 전체 원본 동등성 또는 전체 목표 완료를 주장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000033",
+        "label": "네이티브 컨트롤",
+        "target": "ProgressBar.md",
+        "kind": "relative",
+        "line": 61
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

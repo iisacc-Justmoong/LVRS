@@ -1,0 +1,85 @@
+{
+  "original_sha256": {
+    "src/backend/fonts/fontpolicy.h": "da9af5f0d3f4fc068442f6b745931b193f91ead4df9e143bd5bf76017f534620",
+    "src/backend/fonts/fontpolicy.cpp": "1864d96c5ccba044fcf45c08212938ec26457c06188e91a90a31ecf665a53ab3"
+  },
+  "properties": [
+    "preferredFamily",
+    "systemFamily",
+    "effectiveFamily",
+    "pretendardAvailable",
+    "lastWarning"
+  ],
+  "methods": [
+    "enforceApplicationFallback",
+    "refresh",
+    "resolveFamily",
+    "weightForTextSize",
+    "styleNameForTextSize",
+    "isThemeTextStyleCompliant"
+  ],
+  "statics": [
+    "loadBundledFonts",
+    "installPretendardFallbacks",
+    "enforcePretendardFallback"
+  ],
+  "tokens": [
+    {
+      "pixels": 26,
+      "weight": 700,
+      "style": "Bold"
+    },
+    {
+      "pixels": 22,
+      "weight": 700,
+      "style": "Bold"
+    },
+    {
+      "pixels": 17,
+      "weight": 600,
+      "style": "SemiBold"
+    },
+    {
+      "pixels": 15,
+      "weight": 600,
+      "style": "SemiBold"
+    },
+    {
+      "pixels": 13,
+      "weight": 500,
+      "style": "Medium"
+    },
+    {
+      "pixels": 12,
+      "weight": 600,
+      "style": "SemiBold"
+    },
+    {
+      "pixels": 11,
+      "weight": 400,
+      "style": "Regular"
+    }
+  ],
+  "fonts": [
+    "Inter-Regular.ttf",
+    "Pretendard-Regular.ttf",
+    "Pretendard-Medium.ttf",
+    "Pretendard-SemiBold.ttf",
+    "Pretendard-Bold.ttf",
+    "Pretendard-Light.ttf",
+    "Pretendard-ExtraLight.ttf",
+    "Pretendard-Thin.ttf",
+    "Pretendard-ExtraBold.ttf",
+    "Pretendard-Black.ttf"
+  ],
+  "substitutions": [
+    "Arial",
+    "Helvetica",
+    "Sans Serif",
+    "Noto Sans",
+    "SF Pro Text",
+    "SF Pro Display",
+    "system-ui",
+    "sans-serif"
+  ]
+}

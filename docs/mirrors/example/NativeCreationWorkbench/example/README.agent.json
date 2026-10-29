@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:135d44db7013a5c41ea7c83fd124d2d76d5a5397ee687f022d78000898a14c01",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeCreationWorkbench/example/README.md",
+    "sha256": "da7a45b55355978601892abf884a3376b05f25d930563d7b25100d444efb622a",
+    "bytes": 329,
+    "line_count": 6,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Example workflow",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Example workflow\n",
+      "level": 1,
+      "title": "Example workflow"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "Build and open the workbench, enter valid dimensions and a seed, and choose\n**Render probe**. Select a result, drag the timeline to seek, drag the canvas to\npan, and use **Play / Pause** to preview the retained native frame sequence.\nResize the window while retaining the current prompt and preview surfaces.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Example workflow",
+      "anchor": "example-workflow",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

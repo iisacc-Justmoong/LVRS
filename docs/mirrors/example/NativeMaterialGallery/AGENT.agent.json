@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:082f6876aee3bb1fc9366ed1659792a040949feeebfea458912efdc25606d4cb",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeMaterialGallery/AGENT.md",
+    "sha256": "6010223387a02c0417912ee7f2aa51c796a2abb009a2df91d68fe3a7b32f2c00",
+    "bytes": 257,
+    "line_count": 4,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 머티리얼 예제",
+    "role": "instructions",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 머티리얼 예제\n",
+      "level": 1,
+      "title": "네이티브 머티리얼 예제"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 4,
+      "raw": "App/에 C++23·LVUI 소스를 둔다. build/에만 산출물을 생성한다. Qt나 OS 컨트롤을 추가하지\n않는다. 앱·테스트·self-test 실행은 전체 목표의 마지막 일괄 단계까지 보류한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 머티리얼 예제",
+      "anchor": "네이티브-머티리얼-예제",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

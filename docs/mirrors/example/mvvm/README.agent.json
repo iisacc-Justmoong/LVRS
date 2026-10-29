@@ -1,0 +1,1004 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:00a9a11a888c30f0db47b252d229007af5a73fd0d09f0619f0eb721d871c4726",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/mvvm/README.md",
+    "sha256": "75cba81de82a28a92635927eda0d511bd7d486a06e32d079c9aa8174d64fc9a5",
+    "bytes": 4419,
+    "line_count": 139,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "MVVM Example (Model → ViewModel → QML)",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# MVVM Example (Model → ViewModel → QML)\n",
+      "level": 1,
+      "title": "MVVM Example (Model → ViewModel → QML)"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "This example is buildable and runnable, and demonstrates the MVVM flow used in this repo:\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "list",
+      "start_line": 5,
+      "end_line": 8,
+      "raw": "- **Model (C++)** holds state and emits signals.\n- **ViewModel (C++)** exposes model state to QML and provides commands.\n- **View (QML)** binds to ViewModel and triggers commands.\n- **QmlContextBinder + ViewModelRegistry (C++)** register ViewModels and hand them to QML by key.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "**Model (C++)** holds state and emits signals.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**ViewModel (C++)** exposes model state to QML and provides commands.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**View (QML)** binds to ViewModel and triggers commands.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**QmlContextBinder + ViewModelRegistry (C++)** register ViewModels and hand them to QML by key.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "quote",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "> This folder is both a reference implementation and a runnable sample target.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "The sample shell now opts into the new layout contract explicitly: the window remains full-bleed and the card content is placed from `layoutSafeAreaBounds` rather than relying on automatic scaffold insets.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "## Run\n",
+      "level": 2,
+      "title": "Run"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "From repository root:\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "fenced_code",
+      "start_line": 18,
+      "end_line": 21,
+      "raw": "```bash\n./build.sh\n./example/mvvm/bin/LVRSExampleMVVM\n```\n",
+      "language": "bash",
+      "code": "./build.sh\n./example/mvvm/bin/LVRSExampleMVVM\n",
+      "closed": true
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "On macOS Finder, you can also click `example/run-mvvm.command`.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "thematic_break",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "## Plain-language explanation (non-developers)\n",
+      "level": 2,
+      "title": "Plain-language explanation (non-developers)"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "Think of the app like a restaurant:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "list",
+      "start_line": 30,
+      "end_line": 33,
+      "raw": "- **Model** is the kitchen (where the real data lives).\n- **ViewModel** is the waiter (it knows how to ask the kitchen and deliver answers).\n- **View (QML)** is the menu/table (what the user actually sees and clicks).\n- **ViewModels registry** is the host stand (it helps the table find the right waiter).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "**Model** is the kitchen (where the real data lives).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**ViewModel** is the waiter (it knows how to ask the kitchen and deliver answers).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**View (QML)** is the menu/table (what the user actually sees and clicks).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**ViewModels registry** is the host stand (it helps the table find the right waiter).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000025",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "paragraph",
+      "start_line": 35,
+      "end_line": 36,
+      "raw": "This example shows how data flows from the kitchen → waiter → table without the table\nneeding to walk into the kitchen.\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "thematic_break",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## Files\n",
+      "level": 2,
+      "title": "Files"
+    },
+    {
+      "id": "b000031",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "### `backend/ExampleModel.h` / `backend/ExampleModel.cpp`\n",
+      "level": 3,
+      "title": "`backend/ExampleModel.h` / `backend/ExampleModel.cpp`"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "A minimal QObject model with a single property:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "list",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "- `status` (QString)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`status` (QString)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000035",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "paragraph",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "It emits `statusChanged()` when the value updates.\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "### `backend/ExampleViewModel.h` / `backend/ExampleViewModel.cpp`\n",
+      "level": 3,
+      "title": "`backend/ExampleViewModel.h` / `backend/ExampleViewModel.cpp`"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "Wraps the model and exposes:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "list",
+      "start_line": 50,
+      "end_line": 51,
+      "raw": "- `status` (READ-only from the model)\n- `simulateWork()` (optional command example; view-level writes can also be used)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`status` (READ-only from the model)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`simulateWork()` (optional command example; view-level writes can also be used)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000041",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "It forwards `statusChanged()` to QML.\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "heading",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "### `backend/ExampleBootstrap.h` / `backend/ExampleBootstrap.cpp`\n",
+      "level": 3,
+      "title": "`backend/ExampleBootstrap.h` / `backend/ExampleBootstrap.cpp`"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "Builds a C++ ViewModel and registers it through `QmlContextBinder`:\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 58,
+      "end_line": 62,
+      "raw": "- Constructs `ExampleModel` and `ExampleViewModel`\n- Declares a `QmlViewModelBinding`\n- Stores the ViewModel by key: `\"Example\"`\n- Claims writable ownership for view id `\"ExampleView\"`\n- Optionally exposes the same object as the `exampleViewModel` context property\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Constructs `ExampleModel` and `ExampleViewModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Declares a `QmlViewModelBinding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Stores the ViewModel by key: `\"Example\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Claims writable ownership for view id `\"ExampleView\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Optionally exposes the same object as the `exampleViewModel` context property",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "### `qml/Main.qml`\n",
+      "level": 3,
+      "title": "`qml/Main.qml`"
+    },
+    {
+      "id": "b000050",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "Binds UI to the registered ViewModel:\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "list",
+      "start_line": 67,
+      "end_line": 70,
+      "raw": "- Uses the C++-declared view id: `\"ExampleView\"`\n- Fetches by view key: `LV.ViewModels.getForView(\"ExampleView\")`\n- Reads `vm.status`\n- Updates model through permission check: `LV.ViewModels.updateProperty(\"ExampleView\", \"status\", \"Working\")`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Uses the C++-declared view id: `\"ExampleView\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Fetches by view key: `LV.ViewModels.getForView(\"ExampleView\")`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Reads `vm.status`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Updates model through permission check: `LV.ViewModels.updateProperty(\"ExampleView\", \"status\", \"Working\")`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000053",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "thematic_break",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "heading",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "## Why a Registry?\n",
+      "level": 2,
+      "title": "Why a Registry?"
+    },
+    {
+      "id": "b000057",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "paragraph",
+      "start_line": 76,
+      "end_line": 77,
+      "raw": "In MVVM, QML should not construct C++ models directly. Instead, the app bootstraps the ViewModels once\nand the UI simply **requests them by key**.\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "`ViewModels` is the bridge that keeps the View layer clean and declarative:\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "list",
+      "start_line": 81,
+      "end_line": 82,
+      "raw": "- **C++** controls lifetime and wiring\n- **QML** only consumes\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "**C++** controls lifetime and wiring",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "**QML** only consumes",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000063",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "thematic_break",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "heading",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "## How to Wire It in a Real App (Pseudo-Flow)\n",
+      "level": 2,
+      "title": "How to Wire It in a Real App (Pseudo-Flow)"
+    },
+    {
+      "id": "b000067",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "list",
+      "start_line": 88,
+      "end_line": 90,
+      "raw": "1) Create the QML engine\n2) Register ViewModels through `QmlContextBinder`\n3) Load QML\n",
+      "items": [
+        {
+          "marker": "1)",
+          "text": "Create the QML engine",
+          "checked": null
+        },
+        {
+          "marker": "2)",
+          "text": "Register ViewModels through `QmlContextBinder`",
+          "checked": null
+        },
+        {
+          "marker": "3)",
+          "text": "Load QML",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000069",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "fenced_code",
+      "start_line": 92,
+      "end_line": 96,
+      "raw": "```cpp\nQQmlApplicationEngine engine;\nsetupExampleViewModel(&engine);\nengine.load(QUrl(\"qrc:/qt/qml/Example/Main.qml\"));\n```\n",
+      "language": "cpp",
+      "code": "QQmlApplicationEngine engine;\nsetupExampleViewModel(&engine);\nengine.load(QUrl(\"qrc:/qt/qml/Example/Main.qml\"));\n",
+      "closed": true
+    },
+    {
+      "id": "b000071",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "thematic_break",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## QML Usage Pattern\n",
+      "level": 2,
+      "title": "QML Usage Pattern"
+    },
+    {
+      "id": "b000075",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "fenced_code",
+      "start_line": 102,
+      "end_line": 119,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.ApplicationWindow {\n    property string viewId: \"ExampleView\"\n    property var vm: LV.ViewModels.getForView(viewId)\n\n    Column {\n        LV.Label { text: vm ? (\"Status: \" + vm.status) : \"No VM\" }\n        LV.LabelButton {\n            text: \"Toggle\"\n            tone: LV.AbstractButton.Primary\n            onClicked: LV.ViewModels.updateProperty(viewId, \"status\",\n                                                     vm.status === \"Idle\" ? \"Working\" : \"Idle\")\n        }\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.ApplicationWindow {\n    property string viewId: \"ExampleView\"\n    property var vm: LV.ViewModels.getForView(viewId)\n\n    Column {\n        LV.Label { text: vm ? (\"Status: \" + vm.status) : \"No VM\" }\n        LV.LabelButton {\n            text: \"Toggle\"\n            tone: LV.AbstractButton.Primary\n            onClicked: LV.ViewModels.updateProperty(viewId, \"status\",\n                                                     vm.status === \"Idle\" ? \"Working\" : \"Idle\")\n        }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000077",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "thematic_break",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "heading",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "## Notes / Constraints\n",
+      "level": 2,
+      "title": "Notes / Constraints"
+    },
+    {
+      "id": "b000081",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "list",
+      "start_line": 125,
+      "end_line": 128,
+      "raw": "- This is available as a build target.\n- The file paths use plain QObject classes for simplicity.\n- ViewModels derive from the LVRS C++ `ViewModel` base, then expose app-specific state and commands.\n- In real code, ViewModels can expose richer state and commands, but the binder registration pattern is the same.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "This is available as a build target.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "The file paths use plain QObject classes for simplicity.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "ViewModels derive from the LVRS C++ `ViewModel` base, then expose app-specific state and commands.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "In real code, ViewModels can expose richer state and commands, but the binder registration pattern is the same.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000083",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "thematic_break",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "---\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "blank",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "heading",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "## Quick Checklist for New ViewModels\n",
+      "level": 2,
+      "title": "Quick Checklist for New ViewModels"
+    },
+    {
+      "id": "b000087",
+      "kind": "blank",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "list",
+      "start_line": 134,
+      "end_line": 139,
+      "raw": "- [ ] Create a model with Q_PROPERTY + signals\n- [ ] Wrap it in a C++ class derived from `ViewModel`\n- [ ] Set `key`, `displayName`, and useful `metadata`\n- [ ] Register it via `QmlContextBinder` or `ViewModels.registerViewModel(vm, \"Key\")`\n- [ ] Bind view ownership via `ViewModels.bindView(\"ViewId\", \"Key\", true|false)`\n- [ ] Fetch in QML via `ViewModels.getForView(\"ViewId\")`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Create a model with Q_PROPERTY + signals",
+          "checked": false
+        },
+        {
+          "marker": "-",
+          "text": "Wrap it in a C++ class derived from `ViewModel`",
+          "checked": false
+        },
+        {
+          "marker": "-",
+          "text": "Set `key`, `displayName`, and useful `metadata`",
+          "checked": false
+        },
+        {
+          "marker": "-",
+          "text": "Register it via `QmlContextBinder` or `ViewModels.registerViewModel(vm, \"Key\")`",
+          "checked": false
+        },
+        {
+          "marker": "-",
+          "text": "Bind view ownership via `ViewModels.bindView(\"ViewId\", \"Key\", true|false)`",
+          "checked": false
+        },
+        {
+          "marker": "-",
+          "text": "Fetch in QML via `ViewModels.getForView(\"ViewId\")`",
+          "checked": false
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "MVVM Example (Model → ViewModel → QML)",
+      "anchor": "mvvm-example-model--viewmodel--qml",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Run",
+      "anchor": "run",
+      "start_line": 14
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Plain-language explanation (non-developers)",
+      "anchor": "plain-language-explanation-non-developers",
+      "start_line": 27
+    },
+    {
+      "block_id": "b000030",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Files",
+      "anchor": "files",
+      "start_line": 40
+    },
+    {
+      "block_id": "b000032",
+      "parent_id": "b000030",
+      "level": 3,
+      "title": "`backend/ExampleModel.h` / `backend/ExampleModel.cpp`",
+      "anchor": "backendexamplemodelh--backendexamplemodelcpp",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000038",
+      "parent_id": "b000030",
+      "level": 3,
+      "title": "`backend/ExampleViewModel.h` / `backend/ExampleViewModel.cpp`",
+      "anchor": "backendexampleviewmodelh--backendexampleviewmodelcpp",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000044",
+      "parent_id": "b000030",
+      "level": 3,
+      "title": "`backend/ExampleBootstrap.h` / `backend/ExampleBootstrap.cpp`",
+      "anchor": "backendexamplebootstraph--backendexamplebootstrapcpp",
+      "start_line": 55
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000030",
+      "level": 3,
+      "title": "`qml/Main.qml`",
+      "anchor": "qmlmainqml",
+      "start_line": 64
+    },
+    {
+      "block_id": "b000056",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Why a Registry?",
+      "anchor": "why-a-registry",
+      "start_line": 74
+    },
+    {
+      "block_id": "b000066",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "How to Wire It in a Real App (Pseudo-Flow)",
+      "anchor": "how-to-wire-it-in-a-real-app-pseudo-flow",
+      "start_line": 86
+    },
+    {
+      "block_id": "b000074",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML Usage Pattern",
+      "anchor": "qml-usage-pattern",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000080",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Notes / Constraints",
+      "anchor": "notes--constraints",
+      "start_line": 123
+    },
+    {
+      "block_id": "b000086",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Quick Checklist for New ViewModels",
+      "anchor": "quick-checklist-for-new-viewmodels",
+      "start_line": 132
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000058",
+        "line": 76,
+        "text": "In MVVM, QML should not construct C++ models directly. Instead, the app bootstraps the ViewModels once",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000015",
+        "language": "bash",
+        "code": "./build.sh\n./example/mvvm/bin/LVRSExampleMVVM\n"
+      }
+    ],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

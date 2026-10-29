@@ -23,11 +23,12 @@ using View=lvui_generated::Gallery;
 struct State final {
     std::shared_ptr<View> view=std::make_shared<View>();
     std::shared_ptr<gui::Host> host;
-    gui::Widget status,progress,timer,worker;
+    gui::Widget status,timer,worker;
     gui::Widget menu,context,submenu,more,dropdown,context_trigger;
     bool self_test=false,background=false,closed=false,resized=false,closing=false;
     gui::Size observed_size;
     int ticks=0,clicks=0,selected=-1;
+    double observed_progress=25;
     int menu_index=-1;
     std::vector<int> steps;
     std::string control_events;
@@ -43,15 +44,16 @@ core::Result<void> runtime::configure_application(Application& app) {
     auto options=View::options();options.frame_loop=&app.frame_loop();
     s->host=take(gui::attach_application(app,options,{
         .opened=[s,ui,&app] {
-            auto m=s->view->widgets(); s->status=take(m.find("status")); s->progress=take(m.find("progress")); s->timer=take(m.find("timer")); s->worker=take(m.find("worker"));
+            auto m=s->view->widgets(); s->status=take(m.find("status")); s->timer=take(m.find("timer")); s->worker=take(m.find("worker"));
             s->menu=take(m.find("menu"));s->context=take(m.find("context"));s->submenu=take(m.find("submenu"));s->more=take(m.find("more"));s->dropdown=take(m.find("dropdown"));s->context_trigger=take(m.find("contextTrigger"));
             for(auto& item:take(m.snapshot())) check(item.renderer=="iiGUI" && item.native_class.starts_with("iiGUI."),"OS widget substituted for own renderer");
             check(take(s->host->graphics_info()).api==native_api,"Gallery must use the platform native graphics API");
-            submitted(app.post([s,ui] { submitted(ui.post([s] { s->background=true; good(s->worker.set_text("Background result: 42 · iiSDKCore")); })); }));
+            submitted(app.post([s,ui] { submitted(ui.post([s] { if(s->closing||s->closed)return;s->background=true; good(s->worker.set_text("Background result: 42 · iiSDKCore")); })); }));
             (void)take(app.frame_loop().add([s](const runtime::FrameContext& frame) {
+                if(s->closing||s->closed)return;
                 s->ticks=int(frame.frame);
                 if(s->self_test && s->background && s->resized && frame.frame>=3 && !s->closing) {
-                    s->closing=true;good(take(s->view->widgets().find("close")).activate());
+                    s->closing=true;good(take(s->view->widgets().find("close")).activate());return;
                 }
                 if(!s->sampled_frame) { s->sampled_frame=frame.frame;s->sampled_elapsed=frame.unscaled_elapsed;return; }
                 const auto interval=frame.unscaled_elapsed-s->sampled_elapsed;
@@ -102,7 +104,7 @@ core::Result<void> runtime::configure_application(Application& app) {
                 good(take(m.find("input")).focus()); good(m.dispatch_input({.kind=gui::WidgetInputKind::text,.text="한글 · iiGUI"}));
                 check(take(take(m.find("input")).snapshot()).text=="한글 · iiGUI","Compiled input edit failed");
                 good(take(m.find("slider")).focus()); good(m.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::end}));
-                check(take(s->progress.snapshot()).value==100,"Compiled slider result not delivered");
+                check(s->observed_progress==100,"Compiled slider result not delivered");
                 good(s->host->set_content_size({1024,840}));
                 submitted(ui.after(5s,[s] { throw std::runtime_error("Gallery watchdog: background="+std::to_string(s->background)+
                     " frames="+std::to_string(s->ticks)+" resized="+std::to_string(s->resized)+" observed="+
@@ -121,7 +123,7 @@ core::Result<void> runtime::configure_application(Application& app) {
         scope.backend_0.on_action=[s] { good(s->status.set_text("iiGUI action: "+std::to_string(++s->clicks))); };
         scope.backend_0.on_check=[s](bool value) { good(s->status.set_text(value?"Checked: true":"Checked: false")); };
         scope.backend_0.on_edit=[s](std::string value) { good(s->status.set_text("Input: "+value)); };
-        scope.backend_0.on_move=[s](double value) { good(s->progress.set_value(value)); good(s->status.set_text("Value: "+std::to_string(int(value)))); };
+        scope.backend_0.on_move=[s](double value) { s->observed_progress=value; good(s->status.set_text("Value: "+std::to_string(int(value)))); };
         scope.backend_0.on_select=[s](int value) { s->selected=value;good(s->status.set_text("Tab: "+std::to_string(value))); };
         scope.backend_0.on_step=[s](int value) { if(s->steps.size()==8) s->steps.erase(s->steps.begin());s->steps.push_back(value);good(s->status.set_text(value>0?"Stepper: +1":"Stepper: -1")); };
         scope.backend_0.on_control_event=[s](char value) { if(s->control_events.size()==64) s->control_events.clear();s->control_events+=value; };

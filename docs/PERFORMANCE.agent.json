@@ -1,0 +1,141 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:36503e84c0b89baa3ac0ca7d261c5611e3f4b915ef751ebe77c77caa579df41e",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/PERFORMANCE.md",
+    "sha256": "8af55659c9e11cda68d3eb0632ec0ce40497aa29f2615eb375ab6d574d214551",
+    "bytes": 2520,
+    "line_count": 41,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Hierarchy projection",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Hierarchy projection\n",
+      "level": 1,
+      "title": "Hierarchy projection"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "`HierarchyVisibility::project` memoizes ancestor depth and expansion state within\none projection. Each ancestor is resolved once, replacing repeated walks of a\ndeep tree with expected O(nodes + parents) hash lookups. The cache is local to\nthe call, so changing parent relationships or expanded IDs takes effect on the\nnext projection without stale shared state.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 12,
+      "raw": "Input ordering, duplicate-ID depth lookup behavior, missing-parent depth,\nexpanded-state behavior and row order are preserved. Iterative traversal handles\ndeep trees without using the call stack. Cyclic branches are omitted instead of\nlooping indefinitely. Other hierarchy editing/validation APIs are unchanged.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 17,
+      "raw": "The hierarchy tests compare output against an independent traversal for\nshuffled forests, missing parents, duplicate IDs and expansion combinations,\nand cover deep chains and malformed cycles. Palette and rendering assets are\nnot involved in this optimization.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 26,
+      "raw": "`TableModel::visibleCells` computes row/column prefix geometry once and tracks\nonly merge spans that can cover the current row. It no longer rescans every\nearlier cell or adds all earlier row/column dimensions for each visible cell.\nOrdinary unmerged tables take linear layout work in the number of cells. Merged\ntables additionally inspect active spanning anchors; pathological overlapping\nspans can still cost more. Explicit merge markers, first-anchor behavior, row\norder and geometry rounding retain their existing semantics. All scratch state\nis local, including when rows originate from a QAbstractItemModel.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 34,
+      "raw": "Bulk text retrieval and saving reuse one provider-owned read handle for\nfile-backed lines. They avoid opening the same source once per line. Saving\ncloses that handle before the provider's atomic replacement on Windows. A\nmissing or shortened source now fails the save rather than silently publishing\nempty or partial lines. A successful save replaces internal line storage without\nresetting the list model: row identity, text roles and persistent indexes remain\nunchanged, and the existing storage/dirty/save notifications report the save.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 41,
+      "raw": "The SVG geometry test embeds the exact raw source SVG files as test-only\nresources. It still checks every original asset, original XML dimensions and\nall four raster sizes. Repeated external-storage opens and per-pixel rectangle\nunions are eliminated; the installed artwork and production resources are not\nrewritten by this test fixture. Source changes rebuild the fixture through RCC\ndependencies.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Hierarchy projection",
+      "anchor": "hierarchy-projection",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

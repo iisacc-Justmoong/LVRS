@@ -1,0 +1,609 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:81eca48abb17871415f404a91238319e019c51d85543b3d79273008d82423962",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/TableModel.md",
+    "sha256": "9246cf800adacb9557eb4df68348546353efa2af9980f0f3daa7626ca16c7e15",
+    "bytes": 12348,
+    "line_count": 163,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 TableModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 TableModel\n",
+      "level": 1,
+      "title": "네이티브 TableModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "`lvrs::TableModel`은 원본 `src/backend/model/tablemodel.*`의 값 소유 표 동작을\nC++23으로 옮긴 객체이다. 공개 헤더는 `LVRS/TableModel.h`이다. Qt, OS 위젯,\nLVUI 파서, GUI 이벤트 루프를 만들지 않는다. `TableValue`와 검증 계약도\n`TableValue.h/.cpp`로 분리해 셀 편집기와 모델이 같은 값을 사용한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 12,
+      "raw": "`TableLimits`의 공통 한도를 표 전송 코덱도 사용한다. 화면이 모델 통지 도중 해제되어\nresize 소유권을 반환할 때는 `request_end_resize`를 사용한다. 현재 통지가 끝난 뒤\nresize 상태를 끝내고 별도 상태 통지를 전달한다. 마지막 치수와 하나로 합친 undo 기록은\n유지한다. 일반적인 `end_resize`와 다른 데이터 변경은 통지 안에서 계속 busy이다.\n이 정리 요청만으로 다른 데이터 명령의 재진입을 허용하지 않는다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 18,
+      "raw": "현재는 모델의 구현·테스트 코드·빌드 단계이다. 아래 동작의 **실행 검증은 최종 일괄\n검증까지 유보**한다. 대응표의 `partial`은 기존 Table 화면과 완전히 연결했다는 뜻이\n아니다. `Table`의 화면 가상화, 선택·키보드 탐색·clipboard·resize hit 영역과 LVUI\n모델 바인딩은 원래 요구 범위에 남아 있다. [Table 화면](TableView.md)에 현재 추가한\n가상 viewport·선택·편집·정렬·AOT 연결과 아직 지원하지 않는 계약을 구분해 기록한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "## 데이터와 타입\n",
+      "level": 2,
+      "title": "데이터와 타입"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 25,
+      "raw": "`TableModelOptions`는 행, 열 헤더, 기본 텍스트, 입력 허용, 크기 override, 병합 범위를\n소유한다. 기본값은 4행·3열의 `Text`, 3개의 `Column` 헤더이다. 네이티브 표와 맞춰\n기본 table width는 717이며 행 높이 24, 최소 열 폭 32, 최소 행 높이 18이다.\n원본의 독립 QObject 모델은 width 0에서 시작하고 Table에서 실제 폭을 전달받았다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 31,
+      "raw": "셀은 `optional<TableValue>` 원본 값, optional text fallback, optional inputable을\n가진다. `TableValue`는 UTF-8 문자열, int64, 유한한 double, bool이다. 값이 없으면 text,\n둘 다 없으면 기본 셀 문구를 표시한다. 셀별 입력 override가 행별 값보다 우선하며\n행별 값이 없으면 모델의 inputable을 사용한다. 이 플래그는 사용자 편집 UI의 정책이며\n명시적인 모델 명령의 쓰기 권한을 제한하지 않는다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 34,
+      "raw": "`TableCellData`의 기본 원본 값은 원본과 같은 `Text`이다. text fallback만 가진 셀을\n만들 때에는 `{.value = std::nullopt, .text = \"표시 문구\"}`처럼 기본 값을 명시적으로 비운다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 41,
+      "raw": "헤더의 `value_type`은 string/int/float/bool로 정규화한다. integer, real, double, number,\ndecimal, boolean 별칭을 받으며 미지의 이름은 string이다. 문자열은 UTF-8과 NUL을\n검사한다. 정수는 범위를 벗어난 값을 거절하고 실수는 NaN·무한대를 거절한다.\nbool은 대소문자와 앞뒤 ASCII 공백을 정리해 true/false, 1/0, yes/no, on/off를 받는다.\n이는 standalone 셀에 직접 지정하는 `validate_table_value`의 엄격한 true/false/1/0\n규칙보다 넓은 모델 규칙이다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 49,
+      "raw": "Qt의 QVariant/JavaScript role alias 및 Number 변환 전체를 구현한 것은 아니다.\n정수는 원본 Qt int의 32비트 대신 int64를 보존하며 선행 0을 허용한다. 실수 표시는\nCore의 locale 독립 `format_decimal`을 사용하고 실수 입력도 `parse_decimal`로\n검사한다. 실수 입력은 최대 1,024바이트이며 유한 범위를 넘거나 0으로 손실되는 값은\n거절한다. 이는 구형 macOS에서 최신 실수 charconv 런타임에 의존하지 않기 위한 공통\n계약이다. 헤더의 임의 QVariant 값으로 타입을 추론하지 않으며\n호출자가 타입을 지정한다. 불균일한 행 길이와 빈 행의 헤더 개수 fallback은 유지한다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 51,
+      "end_line": 62,
+      "raw": "```cpp\n#include <LVRS/TableModel.h>\n\nlvrs::TableModel model;\nlvrs::TableModelOptions data;\ndata.columns = {{\"Asset\", \"string\"}, {\"Count\", \"int\"}};\ndata.rows = {{{{.value = std::string(\"Hello.lvui\")},\n               {.value = std::int64_t(12)}}}};\nauto loaded = model.set_options(std::move(data));\nauto edited = model.set_cell_value({0, 1}, std::string(\"42\"));\nauto restored = model.undo();\n```\n",
+      "language": "cpp",
+      "code": "#include <LVRS/TableModel.h>\n\nlvrs::TableModel model;\nlvrs::TableModelOptions data;\ndata.columns = {{\"Asset\", \"string\"}, {\"Count\", \"int\"}};\ndata.rows = {{{{.value = std::string(\"Hello.lvui\")},\n               {.value = std::int64_t(12)}}}};\nauto loaded = model.set_options(std::move(data));\nauto edited = model.set_cell_value({0, 1}, std::string(\"42\"));\nauto restored = model.undo();\n",
+      "closed": true
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "## 트랜잭션과 실행 취소\n",
+      "level": 2,
+      "title": "트랜잭션과 실행 취소"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 70,
+      "raw": "잘못된 옵션·색인·타입·범위는 데이터와 이력을 바꾸기 전에 오류로 반환한다.\n범위 붙여넣기는 모든 셀을 먼저 검증하고 한 명령으로 적용한다. 병합 영역의 anchor와\ncovered cell은 범위 붙여넣기에서 거절한다. 단일 명시적 셀 변경은 covered cell의 원본\n값도 보존·수정할 수 있으며 split 뒤 다시 드러난다. 같은 저장 값·옵션·기하의 설정은\n가능한 경우 false를 반환하고 revision/이력을 추가하지 않는다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 74,
+      "raw": "창·view 폭 변경에는 `set_table_width`를 사용한다. 자동 열 폭만 다시 계산하고 데이터와\nundo/redo를 보존한다. 구조 명령을 undo/redo해도 현재 viewport 폭을 과거 값으로 돌리지\n않는다. 전체 데이터를 바꾸는 `set_options`와 용도가 다르다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 76,
+      "end_line": 80,
+      "raw": "단일/범위 셀 편집 이력에는 바뀐 셀만 보관한다. 크기 변경 이력에는 해당 축의 한 값만\n보관한다. 한 드래그의 여러 갱신은 한 번의 undo/redo로 돌아간다. 첫 실제 변경 전에는\n이력을 만들지 않으며 resize 중에는 다른 변경 명령과 undo를 busy로 거절한다.\n끝났을 때 `end_resize()`로 상태를 해제한다. 포인터가 최소 크기를 지나면 최소값에\n고정하고 유한하지 않은 좌표나 한도 초과 크기는 거절한다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 82,
+      "end_line": 85,
+      "raw": "행·열 삽입/삭제, 정렬, 병합/split은 현재 전체 데이터·기하 상태를 명령 단위로 보관한다.\n이 연산의 이력 메모리와 비용은 표 크기에 비례한다. 셀 편집과 같은 비용이라고 주장하지\n않는다. 이력은 기본 128개이며 0으로 끄거나 최대 65,536개로 설정할 수 있다. 새 명령은\nredo 분기를 버린다. `set_options`는 새 데이터의 기준점이므로 이력과 context를 지운다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 92,
+      "raw": "행 삽입은 열 타입별 0/false/기본 문자열을 만들고 행 높이의 순서를 보존한다.\n열 삽입은 원본처럼 삽입 전 해당 열 타입으로 기본 셀을 만들고 새 헤더는 기본 string\n헤더로 만든다. 마지막 열은 삭제하지 못한다. 구조 변경과 정렬은 원본처럼 병합을\n풀어 좌표가 어긋난 병합 정보를 남기지 않으며 undo는 이전 병합까지 복구한다.\n새 열의 자동 폭은 변경 후 열 개수로 계산한다. QVariant override 목록의 유무에 따라\n자동 폭을 고정하던 원본의 일부 정규화 차이는 아직 대응하지 않는다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 98,
+      "raw": "정렬은 stable이며 숫자·bool 타입을 유지한다. int64를 double로 바꿔 비교하지 않는다.\n없는 값은 양방향 모두 마지막으로 이동하고 타입에 맞지 않는 기존 원본 값은 정상 값\n다음의 문자열 그룹으로 정렬한다. 문자열 비교는 결정적인 UTF-8 바이트 순서이다.\nQt localeAwareCompare와 동등한 로캘 collation은 아직 제공하지 않는다. 정렬 키는 행마다\n한 번 구하며 행 높이도 원래 행과 함께 이동한다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 기하, 병합과 viewport 조회\n",
+      "level": 2,
+      "title": "기하, 병합과 viewport 조회"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 105,
+      "raw": "축 크기는 정수 논리 픽셀로 반올림하며 nonpositive override는 기본/자동 크기를 쓴다.\n행·열 크기, 누적 좌표와 좌표→색인 탐색은 Fenwick 누적 인덱스를 사용한다. 한 축의\n크기 변경과 prefix 조회는 O(log N)이다. 셀 문자열 변경은 이 기하 인덱스를 재생성하지\n않는다. 전체 옵션/구조 교체와 병합 정보 교체에서는 인덱스를 다시 구성한다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 107,
+      "end_line": 111,
+      "raw": "`TableRange`는 시작 row/column과 row_count/column_count를 가진 반열린 범위이다.\n원본의 inclusive end 좌표를 직접 넣으면 안 된다. 병합은 모든 행에 실제로 존재하는\n셀만 포함할 수 있고, 새 병합과 겹치는 기존 병합은 전체를 먼저 푼다. split은 covered\n위치에서도 anchor를 찾아 원본 값을 그대로 복원한다. 가져온 병합의 중복/겹침은\n트랜잭션 전체를 거절한다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 113,
+      "end_line": 119,
+      "raw": "`visible_cells(top,bottom,left,right)`는 viewport와 교차하는 anchor만 반환한다.\n상단/좌측 밖에 시작한 병합도 실제 기하가 교차하면 포함하며 covered cell은 생략한다.\n첫 행·열은 누적 크기 인덱스로 찾고, 일반 셀은 화면에 해당하는 행·열만 순회한다.\n그 밖에 병합 목록을 검사하고 결과 anchor를 행·열 순으로 정렬한다. 각 descriptor는\n원본 noncovered 순번, 좌표·span, 데이터, 표시 텍스트·타입, 입력 허용을 포함한다.\n일반 셀의 반복에도 기하 prefix 조회가 포함되므로 viewport 전체가 O(1)인 것은 아니다.\n`cell_geometry`에 covered 위치를 주면 covered=true와 anchor의 기하를 반환한다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 125,
+      "raw": "`row_at_y`, `column_at_x`, `position_at`은 같은 누적 인덱스로 논리 좌표를 찾는다.\n끝 좌표는 반열린 경계라 표 밖이며 음수/표 밖은 빈 optional, NaN/무한대는 오류이다.\n`position_at`은 기본적으로 병합 anchor를 반환한다. resize처럼 실제 행·열이 필요한\n경우 resolve_merge=false로 원래 좌표의 셀을 받을 수 있다. 불균일한 행에서 존재하지\n않는 열은 빈 optional이다. 포인터 이동 때 앞선 모든 행을 다시 더하지 않는다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 127,
+      "end_line": 131,
+      "raw": "안전 한도는 1,000,000행, 65,536열, 16,000,000개 논리 셀, 한 축 크기 1e9이다.\n한 viewport 요청은 최대 1,000,000개 anchor이며 초과 시 일부를 조용히 생략하지 않고\nfull 오류를 반환한다. 데이터 모델 좌표는 iiGUI의 직접 그리기 좌표 한도와 독립적이다.\n이 모델이 대용량 데이터 조회를 제공한다고 해서 모든 셀을 현재 화면에 생성한다는\n뜻은 아니며, 실제 가상 위젯 풀은 후속 Table 이식에 필요하다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "## Core 변경 알림과 수명\n",
+      "level": 2,
+      "title": "Core 변경 알림과 수명"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 135,
+      "end_line": 138,
+      "raw": "모델은 생성한 스레드가 소유한다. Result를 반환하는 조회/변경은 wrong_executor를\n검사하며, noexcept count/span/reference 접근은 같은 소유 스레드에서 사용해야 한다.\nspan과 reference는 다음 변경 때 무효화되는 것으로 취급한다. 임의 작업자에서 모델에\n직접 쓰지 않고 Core 실행기를 통해 소유 스레드로 결과를 전달한다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 140,
+      "end_line": 146,
+      "raw": "`observe(shared_ptr<const TableChangePort>)`는 Core QueryPort를 약하게 보관한다.\n같은 포트의 중복 등록은 무시하고 만료된 포트는 회수한다. 동시에 최대 256개이다.\n소비자가 포트를 닫거나 해제하면 구독을 끝낼 수 있다. 변경 후 affected range와\ncells/geometry/structure/headers/history/context/resize_state/reset 플래그를 한 번 보낸다.\n알림에서 조회는 가능하지만 재귀 변경은 busy이다. 수신자가 실패하면 명령은 이미\n커밋되어 있으며 오류를 보고 같은 쓰기를 재시도하면 안 된다. 추가 수신자는 다음\n변경부터 통지받는다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 150,
+      "raw": "context 메뉴는 Delete row, divider, Delete column의 값 descriptor를 반환한다.\n이 모델 자체가 팝업을 열지는 않는다. 명령 성공으로 구조가 바뀌면 기존 context를\n지우며 실제 context 메뉴 표시와 선택 범위는 Table 화면의 책임이다.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "## 검증 상태와 남은 원본 계약\n",
+      "level": 2,
+      "title": "검증 상태와 남은 원본 계약"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 154,
+      "end_line": 158,
+      "raw": "`tests/native/table_model.cpp`에 값·타입, 범위 원자성, 기하, 병합, 안정 정렬, 구조,\nresize, 100,000행 viewport, undo 분기/한도, 약한 알림·오류·스레드 소유권, context,\n잘못된 입력의 12개 검사를 작성했다. 이번 단계는 이 테스트의 컴파일·링크까지만\n수행하며 실행 결과는 최종 일괄 단계에서 기록한다. 기존 정상 결과를 새 모델의 통과\n근거로 재사용하지 않는다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 160,
+      "end_line": 163,
+      "raw": "QAbstractItemModel/QObject/QJSValue 연결, 임의 role/delegate, 별도 ModelUndoStack의\n전체 공개 API, 로캘 문자열 정렬, 원본 변환의 모든 경계와 반응형 헤더 source 교체는\n아직 미지원이다. Table 화면 연결, LVUI AOT 모델 표현, 실제 입력/GPU/설치 소비자와\n모든 플랫폼 실행 검증도 남아 있다. 전체 LVRS 이식의 완료를 의미하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 TableModel",
+      "anchor": "네이티브-tablemodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "데이터와 타입",
+      "anchor": "데이터와-타입",
+      "start_line": 20
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "트랜잭션과 실행 취소",
+      "anchor": "트랜잭션과-실행-취소",
+      "start_line": 64
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "기하, 병합과 viewport 조회",
+      "anchor": "기하-병합과-viewport-조회",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Core 변경 알림과 수명",
+      "anchor": "core-변경-알림과-수명",
+      "start_line": 133
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 상태와 남은 원본 계약",
+      "anchor": "검증-상태와-남은-원본-계약",
+      "start_line": 152
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 12,
+        "text": "이 정리 요청만으로 다른 데이터 명령의 재진입을 허용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 31,
+        "text": "명시적인 모델 명령의 쓰기 권한을 제한하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 70,
+        "text": "가능한 경우 false를 반환하고 revision/이력을 추가하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 92,
+        "text": "자동 폭을 고정하던 원본의 일부 정규화 차이는 아직 대응하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000035",
+        "line": 94,
+        "text": "정렬은 stable이며 숫자·bool 타입을 유지한다. int64를 double로 바꿔 비교하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000035",
+        "line": 97,
+        "text": "Qt localeAwareCompare와 동등한 로캘 collation은 아직 제공하지 않는다. 정렬 키는 행마다",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000045",
+        "line": 125,
+        "text": "않는 열은 빈 optional이다. 포인터 이동 때 앞선 모든 행을 다시 더하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000051",
+        "line": 136,
+        "text": "검사하며, noexcept count/span/reference 접근은 같은 소유 스레드에서 사용해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000059",
+        "line": 158,
+        "text": "근거로 재사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000061",
+        "line": 163,
+        "text": "모든 플랫폼 실행 검증도 남아 있다. 전체 LVRS 이식의 완료를 의미하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Table 화면",
+        "target": "TableView.md",
+        "kind": "relative",
+        "line": 17
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

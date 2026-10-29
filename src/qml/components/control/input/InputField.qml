@@ -7,8 +7,10 @@ import LVRS 1.0
 AbstractInputBar {
     id: control
 
-    readonly property int defaultMode: 0
+    readonly property int textMode: 0
+    readonly property int defaultMode: textMode
     readonly property int searchMode: 1
+    readonly property int passwordMode: 2
     readonly property int roundedStyle: 0
     readonly property int filledStyle: roundedStyle
     readonly property int inlineStyle: 1
@@ -19,7 +21,7 @@ AbstractInputBar {
     property int style: filledStyle
     property alias placeholder: control.placeholderText
     property bool clearButtonVisible: true
-    readonly property bool searchIconVisible: search || mode === searchMode
+    readonly property bool searchIconVisible: mode !== passwordMode && (search || mode === searchMode)
     property color searchIconColor: Theme.accentGrayLight
     // Deprecated compatibility knob kept for older callers after the canvas icon removal.
     property real searchIconStrokeWidth: Theme.scaleRealMetric(1.5)
@@ -89,12 +91,13 @@ AbstractInputBar {
     insetVertical: Math.max(0, (fieldMinHeight - centeredTextHeight) / 2)
     sideSpacing: Theme.gap2
     centeredTextHeight: Theme.textBodyLineHeight
-    shapeStyle: resolvedStyle === roundedStyle ? shapeRoundRect : shapeCylinder
-    cornerRadius: Theme.radiusMd
+    shapeStyle: resolvedStyle === cylinderStyle ? shapeCylinder : shapeRoundRect
+    cornerRadius: resolvedStyle === inlineStyle ? 0 : Theme.radiusBase
+    echoMode: mode === passwordMode ? TextInput.Password : TextInput.Normal
 
     textColor: Theme.titleHeaderColor
     textColorDisabled: Theme.disabledColor
-    placeholderColor: Theme.disabledColor
+    placeholderColor: Theme.titleHeaderColor
     placeholderColorDisabled: Theme.disabledColor
     placeholderOpacity: 1.0
 

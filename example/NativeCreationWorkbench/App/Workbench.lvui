@@ -1,0 +1,50 @@
+import vm CreationBackend
+ApplicationWindow(title: "Native creation workbench · LVUI / iiGUI", width: 1320, height: 960) {
+    VStack(spacing: 8, padding: 12, alignment: .stretch) {
+        AppHeader(title: "Native creation workbench", subtitle: "LVUI AOT · C++ views · iiSDKCore") {
+            LabelButton(id: "render", text: "Render probe", onClick: vm.render)
+            LabelButton(id: "play", text: "Play / Pause", onClick: vm.play)
+            LabelButton(id: "close", text: "Close", onClick: vm.close)
+        }
+        HStack(spacing: 8, alignment: .leading) {
+            VStack(spacing: 8) {
+                NativeView(id: "canvas", source: vm.canvas, width: vm.view_width, height: 340)
+                HStack(spacing: 6) {
+                    LabelButton(id: "previous", text: "−1f", onClick: vm.previous)
+                    LabelButton(id: "next", text: "+1f", onClick: vm.next)
+                    Label(text: vm.frame_label)
+                    LabelButton(id: "fit", text: "Reset pan", onClick: vm.reset_pan)
+                }
+                NativeView(id: "timeline", source: vm.timeline, width: vm.view_width, height: 92)
+                Label(text: "Results · select a candidate", style: .header)
+                HStack(spacing: 8) {
+                    for (item in vm.results, key: item.id) {
+                        VStack(spacing: 4) {
+                            Image(source: item.image, width: 88, height: 72, fit: .Contain)
+                            LabelButton(id: "choose", text: item.label, onClick: item.select)
+                        }
+                    }
+                }
+            }
+            VStack(width: 240, spacing: 8, alignment: .stretch) {
+                Label(text: "Native parameters", style: .header)
+                InputField(id: "prompt", text: vm.prompt, width: 240, multiline: true, onEdited: vm.edit_prompt)
+                HStack(spacing: 6) {
+                    VStack(spacing: 4) { Label(text: "Width")
+                    InputField(id: "width", text: vm.width, width: 110, onEdited: vm.edit_width) }
+                    VStack(spacing: 4) { Label(text: "Height")
+                    InputField(id: "height", text: vm.height, width: 110, onEdited: vm.edit_height) }
+                }
+                Label(text: "Output count")
+                InputField(id: "count", text: vm.count, width: 240, onEdited: vm.edit_count)
+                Label(text: "Seed")
+                InputField(id: "seed", text: vm.seed, width: 240, onEdited: vm.edit_seed)
+                ProgressBar(currentValue: vm.progress, width: 240)
+                Label(text: vm.selected)
+                Label(text: "Canvas drag pans. Timeline drag seeks.")
+                Label(text: "This probe renders procedural pixels in C++.")
+            }
+        }
+        Label(id: "status", text: vm.status)
+    }
+}

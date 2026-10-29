@@ -1,6 +1,8 @@
 #include "PageRouter.h"
 #include "Navigator.h"
+#include "ViewModelRegistry.h"
 #include <algorithm>
+#include <map>
 #include <optional>
 #include <thread>
 
@@ -22,7 +24,21 @@ template<class Port,class Event>core::Result<void> notify_ports(std::vector<std:
 }
 }
 struct PageRouter::Impl final {
-    struct Target final {NavigationEntry entry;PageComponentRef component;};
+    struct Target final {
+        NavigationEntry entry;PageComponentRef component;
+        const PageRoute* route=nullptr;
+        bool bind_model=true;
+        RouteModelBinding binding;
+        Target(NavigationEntry value,PageComponentRef page,const PageRoute* declared=nullptr,bool bind=true):entry(std::move(value)),component(std::move(page)),route(declared),bind_model(bind){}
+    };
+    using References=std::map<std::string,std::size_t,std::less<>>;
+    struct TrackingPlan final {
+        std::size_t keep=0;
+        bool enabled=false,append=false;
+        std::string id;
+        References::node_type addition;
+        std::vector<std::string> removed;
+    };
     std::thread::id owner=std::this_thread::get_id();
     PageRouterOptions options;
     std::weak_ptr<PageRouter> self;
@@ -30,11 +46,14 @@ struct PageRouter::Impl final {
     RouteResolver resolver;
     gui::Widget host;
     PageComponentRef active_component;
-    bool mounted=false,changing=false,notifying=false;
+    bool mounted=false,changing=false,notifying=false,retired=false;
+    std::vector<std::string> tracked_ids;
+    References references;
     std::vector<std::weak_ptr<PageNavigationPort>> receivers;
     std::vector<std::weak_ptr<PageNavigationFailurePort>> failures;
     core::Result<void> ready(bool mutate=false,bool require_mount=false)const{
         if(owner!=std::this_thread::get_id())return core::fail(core::ErrorCode::wrong_executor,"Page router requires its owner thread");
+        if(retired)return core::fail(core::ErrorCode::closed,"Page router host retired");
         if((changing&&!notifying)||(mutate&&(changing||notifying)))return core::fail(core::ErrorCode::busy,"Page router is constructing or notifying another navigation");
         if(require_mount&&!mounted)return core::fail(core::ErrorCode::closed,"Page router is not mounted");
         if(mounted){auto snapshot=host.snapshot();if(!snapshot)return std::unexpected(snapshot.error());}
@@ -48,47 +67,111 @@ struct PageRouter::Impl final {
         core::Value::Object merged;
         for(const auto& [key,value]:(*resolution)->params)merged.emplace(key,core::Value{value});
         for(const auto& [key,value]:explicit_params->get())merged.insert_or_assign(key,value);
-        auto component=(*resolution)->matched?options.routes[std::size_t((*resolution)->index)].component:options.not_found_component;
+        const auto* route=(*resolution)->matched?&options.routes[std::size_t((*resolution)->index)]:nullptr;
+        auto component=route?route->component:options.not_found_component;
         if(!component||!*component)return core::fail(core::ErrorCode::not_found,"No compiled page matches this route");
-        return Target{{.path=std::move(*normalized),.params=core::Value{std::move(merged)}},std::move(component)};
+        return Target{{.path=std::move(*normalized),.params=core::Value{std::move(merged)}},std::move(component),route,bool(route)};
+    }
+    void identify(Target& target,std::size_t index){
+        static const core::Value::Object empty;
+        const auto* params=std::get_if<core::Value::Object>(&target.entry.params.storage());
+        target.binding=ViewModelRegistry::route_binding(target.entry.path,target.route?target.route->metadata:empty,params?*params:empty,std::ptrdiff_t(index));
+        target.entry.view_id=target.binding.view_id;
+    }
+    core::Result<TrackingPlan> plan_tracking(std::size_t keep,const std::string* id){
+        TrackingPlan plan{.keep=keep,.enabled=bool(options.view_models),.append=id!=nullptr};
+        if(!plan.enabled)return plan;
+        if(keep>tracked_ids.size())return core::fail(core::ErrorCode::failed,"Page model tracking does not match navigation history");
+        plan.removed.assign(tracked_ids.begin()+std::ptrdiff_t(keep),tracked_ids.end());
+        if(id){
+            plan.id=*id;
+            if(!references.contains(*id)){References node;node.emplace(*id,0);plan.addition=node.extract(node.begin());}
+            const auto needed=keep+1;
+            if(tracked_ids.capacity()<needed)tracked_ids.reserve(std::min(NavigationLimits::depth,std::max(needed,tracked_ids.capacity()?tracked_ids.capacity()*2:std::size_t(8))));
+        }
+        return plan;
+    }
+    void apply_tracking(TrackingPlan& plan){
+        if(!plan.enabled)return;
+        // All nodes, strings and vector capacity were prepared before building
+        // the page. No history or registry-wide snapshot is copied for a push.
+        if(plan.append){
+            auto found=references.find(plan.id);
+            if(found==references.end())found=references.insert(std::move(plan.addition)).position;
+            ++found->second;
+        }
+        for(const auto& id:plan.removed){auto found=references.find(id);if(--found->second==0)references.erase(found);}
+        tracked_ids.resize(plan.keep);if(plan.append)tracked_ids.push_back(std::move(plan.id));
+        std::erase_if(plan.removed,[&](const auto& id){return references.contains(id);});
+        std::sort(plan.removed.begin(),plan.removed.end());plan.removed.erase(std::unique(plan.removed.begin(),plan.removed.end()),plan.removed.end());
+    }
+    void retire()noexcept{
+        if(retired)return;retired=true;
+        auto removed=std::move(tracked_ids);references.clear();
+        if(!options.view_models)return;
+        try{std::sort(removed.begin(),removed.end());removed.erase(std::unique(removed.begin(),removed.end()),removed.end());(void)options.view_models->retire_views(removed);}catch(...){/* Closing a widget scope cannot throw. */}
     }
     core::Result<bool> reject(std::string path,core::Error error){
         Guard guard{notifying};(void)notify_ports(failures,PageNavigationFailure{std::move(path),error});return std::unexpected(std::move(error));
     }
-    core::Result<bool> publish(Target next,std::function<core::Result<bool>()> commit){
+    core::Result<bool> publish(Target next,std::function<core::Result<bool>()> commit,TrackingPlan plan){
         // Keep both component constructors alive across old-scope destruction.
         auto previous=active_component;bool changed=false;
         auto built=host.set_content([&](gui::WidgetBuilder& widgets){return next.component->build(widgets,{},next.entry);},[&]()->core::Result<void>{auto result=commit();if(!result)return std::unexpected(result.error());changed=*result;return {};});
         if(!built)return reject(next.entry.path,built.error());
         active_component=std::move(next.component);
+        apply_tracking(plan);
+        Guard guard{notifying};std::optional<core::Error> binding_failure;
+        if(options.view_models){
+            auto released=options.view_models->retire_views(plan.removed);if(!released)binding_failure=released.error();
+            if(!retired&&next.bind_model&&!next.binding.model_key.empty()){
+                auto bound=options.view_models->bind_view(next.binding.view_id,next.binding.model_key,next.binding.writable);
+                if(!bound&&!binding_failure)binding_failure=bound.error();
+                // A rejected model key or ownership claim is a registry business
+                // error, as in QML. It does not roll back a published page.
+                if(retired){
+                    // Clearing last_error may retire the host before bind_view
+                    // publishes this new ID. Repeat cleanup after that command.
+                    auto late=options.view_models->retire_views(std::span(&next.binding.view_id,1));if(!late&&!binding_failure)binding_failure=late.error();
+                }
+            }
+        }
         auto current=history.state();if(!current)return std::unexpected(current.error());
         auto snapshot=host.snapshot();if(!snapshot)return std::unexpected(snapshot.error());
-        Guard guard{notifying};auto sent=notify_ports(receivers,PageNavigationChange{std::move(*current),active_component,snapshot->content_generation});
-        if(!sent)return std::unexpected(sent.error());return changed;
+        auto sent=notify_ports(receivers,PageNavigationChange{std::move(*current),active_component,snapshot->content_generation});
+        if(binding_failure)return std::unexpected(*binding_failure);if(!sent)return std::unexpected(sent.error());return changed;
     }
     core::Result<bool> navigate(Target next,NavigationOperation operation){
-        const auto& entry=next.entry;
-        auto preflight=entry.component?history.validate_component_operation(entry.component,entry.params,operation):history.validate_path_operation(entry.path,entry.params,operation);
-        if(!preflight)return reject(entry.path,preflight.error());
         auto path=history.path_view();if(!path)return std::unexpected(path.error());
+        const bool root=path->empty()||operation==NavigationOperation::set_root;
+        const auto keep=root?0:operation==NavigationOperation::replace?path->size()-1:path->size();
+        identify(next,keep);
+        const auto& entry=next.entry;
+        if(options.view_models){auto admitted=options.view_models->validate_view_admission(entry.view_id);if(!admitted)return reject(entry.path,admitted.error());}
+        auto preflight=history.validate_entry_operation(entry,operation);
+        if(!preflight)return reject(entry.path,preflight.error());
         if(!path->empty()&&(operation==NavigationOperation::replace||(operation==NavigationOperation::set_root&&path->size()==1))&&path->back()==entry)return false;
+        auto tracking=plan_tracking(keep,&entry.view_id);if(!tracking)return reject(entry.path,tracking.error());
         // Only the single candidate is copied. Push never clones the old stack.
         const auto descriptor=next.entry;
-        return publish(std::move(next),[this,descriptor,operation]{return descriptor.component?history.apply_component_operation(descriptor.component,descriptor.params,operation):history.apply_path_operation(descriptor.path,descriptor.params,operation);});
+        return publish(std::move(next),[this,descriptor,operation]{return history.apply_entry_operation(descriptor,operation);},std::move(*tracking));
     }
     core::Result<bool> remove(bool root){
         auto path=history.path_view();if(!path)return std::unexpected(path.error());if(path->size()<=1)return false;
         const auto entry=(*path)[root?0:path->size()-2];
         core::Result<Target> next=entry.component?core::Result<Target>{Target{entry,std::static_pointer_cast<const PageComponent>(entry.component)}}:resolve(entry.path,entry.params);
         if(!next)return reject(entry.path,next.error());
-        return publish(std::move(*next),[this,root]{return root?history.pop_to_root():history.pop();});
+        const auto keep=root?1:path->size()-1;identify(*next,keep-1);
+        if(options.view_models){auto admitted=options.view_models->validate_view_admission(next->entry.view_id);if(!admitted)return reject(entry.path,admitted.error());}
+        auto tracking=plan_tracking(keep,nullptr);if(!tracking)return reject(entry.path,tracking.error());
+        return publish(std::move(*next),[this,root]{return root?history.pop_to_root():history.pop();},std::move(*tracking));
     }
 };
 core::Result<void> PageComponent::build(gui::WidgetBuilder& widgets,gui::Widget parent,const NavigationEntry& context)const{
     if(!factory_)return core::fail(core::ErrorCode::invalid_argument,"Compiled page has no constructor");return factory_(widgets,parent,context);
 }
 PageRouter::PageRouter():impl_(std::make_shared<Impl>()){}
-PageRouter::~PageRouter()=default;
+PageRouter::~PageRouter(){impl_->retire();}
 core::Result<std::shared_ptr<PageRouter>> PageRouter::create(PageRouterOptions options){
     auto result=std::shared_ptr<PageRouter>(new PageRouter);auto p=result->impl_;
     p->self=result;
@@ -104,6 +187,7 @@ core::Result<gui::Widget> PageRouter::mount(gui::WidgetBuilder& widgets,gui::Wid
     auto p=impl_;if(auto r=p->ready(true);!r)return std::unexpected(r.error());if(p->mounted)return core::fail(core::ErrorCode::already_exists,"Page router is already mounted");Guard guard{p->changing};
     auto target=p->resolve(p->options.initial_path,p->options.initial_params);if(!target)return std::unexpected(target.error());
     auto host=widgets.content_host(parent,id,size);if(!host)return std::unexpected(host.error());auto owner=p->self.lock();if(!owner)return core::fail(core::ErrorCode::closed,"Page router owner retired");if(auto retained=widgets.retain(owner);!retained)return std::unexpected(retained.error());
+    if(auto hook=widgets.on_retire([weak=std::weak_ptr(p)]{if(auto state=weak.lock())state->retire();});!hook)return std::unexpected(hook.error());
     p->host=*host;p->mounted=true;
     if(p->options.register_as_global_navigator){
         if(!p->options.navigator)p->options.navigator=Navigator::current();

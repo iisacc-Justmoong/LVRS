@@ -1,0 +1,271 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:b7c0c095a6d8a57d60c1b6cb6465496e80c5f1da85574b234b97f52c916795ed",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "src/rust-cli/README.md",
+    "sha256": "2c425b5f7534dbaff95a0af4becc0db47fdd08df5c418263a30bc949401ac7ba",
+    "bytes": 2174,
+    "line_count": 32,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "lvrs-cli",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# lvrs-cli\n",
+      "level": 1,
+      "title": "lvrs-cli"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "LVRS repository utility CLI bootstrap written in Rust.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "## Quick Start\n",
+      "level": 2,
+      "title": "Quick Start"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "fenced_code",
+      "start_line": 7,
+      "end_line": 10,
+      "raw": "```bash\ncd rust-cli\ncargo run -- doctor\n```\n",
+      "language": "bash",
+      "code": "cd rust-cli\ncargo run -- doctor\n",
+      "closed": true
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "## Commands\n",
+      "level": 2,
+      "title": "Commands"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 14,
+      "end_line": 18,
+      "raw": "- `install`: host-aware LVRS framework install flow with Linux dependency preflight and optional package-manager fixups. Outside the repository tree it can recover the checkout from installed source metadata, re-locate stale paths after upper-directory renames, treat `LVRS_ROOT`/`LVRS_PROJECT_ROOT` install-prefix values as `<prefix>/src/LVRS` hints, or reuse the installed source snapshot as a last resort.\n- `bootstrap`: run desktop/mobile all-platform bootstrap install flow with `src/main.cpp` Main-entry defaults.\n- `doctor`: host/bootstrap readiness checks. On Linux, `lvrs doctor --fix` can install missing distro packages before build, and `lvrs doctor --bootstrap` fails when the requested bootstrap matrix is not ready yet.\n- `platform`: prints runtime platform information.\n- `echo <message>`: simple plumbing check.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`install`: host-aware LVRS framework install flow with Linux dependency preflight and optional package-manager fixups. Outside the repository tree it can recover the checkout from installed source metadata, re-locate stale paths after upper-directory renames, treat `LVRS_ROOT`/`LVRS_PROJECT_ROOT` install-prefix values as `<prefix>/src/LVRS` hints, or reuse the installed source snapshot as a last resort.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap`: run desktop/mobile all-platform bootstrap install flow with `src/main.cpp` Main-entry defaults.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`doctor`: host/bootstrap readiness checks. On Linux, `lvrs doctor --fix` can install missing distro packages before build, and `lvrs doctor --bootstrap` fails when the requested bootstrap matrix is not ready yet.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`platform`: prints runtime platform information.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`echo <message>`: simple plumbing check.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "On macOS, `install` discovers the host Qt kit under `/Volumes/Storage/Qt` or an explicit `QT_VERSION_ROOT`, supplies the initial CMake package path, and keeps explicit Qt/CMake prefix overrides. A failed configure leaves the previous framework installation intact. Run the checkout's `./install.sh` after changing CLI sources to rebuild and replace the installed executable.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "Inside a checkout, an inherited `LVRS_ROOT`/`LVRS_PROJECT_ROOT` installation prefix is only a fallback: the current checkout takes priority over `<prefix>/src/LVRS`, including snapshots whose metadata refers to themselves. Setting either variable to an explicit source directory still overrides the current directory. The printed `Project root` identifies the source actually built. Installation completion does not imply that CTest or a device runtime was exercised; verify those separately.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "## Development\n",
+      "level": 2,
+      "title": "Development"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "fenced_code",
+      "start_line": 26,
+      "end_line": 30,
+      "raw": "```bash\ncargo fmt\ncargo check\ncargo test --locked --target-dir build\n```\n",
+      "language": "bash",
+      "code": "cargo fmt\ncargo check\ncargo test --locked --target-dir build\n",
+      "closed": true
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "The macOS `install_qt_discovery` integration tests invoke the CLI and real CMake with temporary Qt package fixtures, covering relocated kit discovery, explicit overrides, and preservation of an existing installation when configuration fails.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "lvrs-cli",
+      "anchor": "lvrs-cli",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Quick Start",
+      "anchor": "quick-start",
+      "start_line": 5
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Commands",
+      "anchor": "commands",
+      "start_line": 12
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Development",
+      "anchor": "development",
+      "start_line": 24
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000007",
+        "language": "bash",
+        "code": "cd rust-cli\ncargo run -- doctor\n"
+      },
+      {
+        "block_id": "b000019",
+        "language": "bash",
+        "code": "cargo fmt\ncargo check\ncargo test --locked --target-dir build\n"
+      }
+    ],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

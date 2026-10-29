@@ -1,0 +1,182 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:8bf9f1bdf0915e3f2eefb60c8d46b8b0e1dedd5094a9a9a7c7de9b465c19311e",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/AndroidHello/README.md",
+    "sha256": "a8f5ddce6b9ec565ed830d80ea7dfd15d272648d4be06469eed3c137da7bd222",
+    "bytes": 631,
+    "line_count": 19,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Android Hello Example",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Android Hello Example\n",
+      "level": 1,
+      "title": "Android Hello Example"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Minimal LVRS Android bootstrap example with:\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "list",
+      "start_line": 5,
+      "end_line": 8,
+      "raw": "- standard `QmlAppLaunchSpec` initial property seeding\n- a single-route `LV.ApplicationWindow` host\n- edge-to-edge rendering in the full Android window\n- explicit content reservation through `mobileSystemSafeAreaBounds` instead of automatic shell padding\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "standard `QmlAppLaunchSpec` initial property seeding",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "a single-route `LV.ApplicationWindow` host",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "edge-to-edge rendering in the full Android window",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "explicit content reservation through `mobileSystemSafeAreaBounds` instead of automatic shell padding",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "## Build Android bootstrap target\n",
+      "level": 2,
+      "title": "Build Android bootstrap target"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "From repository root:\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "fenced_code",
+      "start_line": 14,
+      "end_line": 17,
+      "raw": "```bash\ncmake -S . -B build-proof -DLVRS_BUILD_EXAMPLES=ON\ncmake --build build-proof --target bootstrap_LVRSExampleAndroidHello_android\n```\n",
+      "language": "bash",
+      "code": "cmake -S . -B build-proof -DLVRS_BUILD_EXAMPLES=ON\ncmake --build build-proof --target bootstrap_LVRSExampleAndroidHello_android\n",
+      "closed": true
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "If Android SDK/NDK and adb are configured, LVRS will build and deploy to an attached emulator or device.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Android Hello Example",
+      "anchor": "android-hello-example",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Build Android bootstrap target",
+      "anchor": "build-android-bootstrap-target",
+      "start_line": 10
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000011",
+        "language": "bash",
+        "code": "cmake -S . -B build-proof -DLVRS_BUILD_EXAMPLES=ON\ncmake --build build-proof --target bootstrap_LVRSExampleAndroidHello_android\n"
+      }
+    ],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

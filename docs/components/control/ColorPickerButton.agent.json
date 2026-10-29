@@ -1,0 +1,110 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:cf1a16ee24b52652fa8bfbc6189af67e405c3aacef917b7d3bc157449c0e1e0b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/ColorPickerButton.md",
+    "sha256": "6db72a38d81e45122fb7de8812fd4353dafc3252131e8664dc7fd49e083be0d0",
+    "bytes": 908,
+    "line_count": 14,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ColorPickerButton",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ColorPickerButton\n",
+      "level": 1,
+      "title": "ColorPickerButton"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "색상 액션은 Figma 에서 `892:62` 로 트리거됩니다. `buttonSize` 는 Small (22), Medium (28, 기본값), 또는 Large (36) 를 받습니다. `currentColor` 는 #874AFF 로 기본값이며, `showHueRing` 는 true 로 기본값입니다. 패딩은 4px, 반지름은 4, 선택된 테두리는 2px, 비활성화 불투명도는 0.32입니다. 링은 Figma 내보내기를 정확히 사용합니다. 호출자는 `onClicked` 에서 피커를 엽니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "fenced_code",
+      "start_line": 5,
+      "end_line": 12,
+      "raw": "```qml\nimport LVRS as LV\nLV.ColorPickerButton {\n    buttonSize: LV.ColorPickerButton.Small\n    currentColor: selectedColor\n    onClicked: colorPopup.open()\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS as LV\nLV.ColorPickerButton {\n    buttonSize: LV.ColorPickerButton.Small\n    currentColor: selectedColor\n    onClicked: colorPopup.open()\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "Pressable 유형은 공유 AbstractButton 압축, 리바운드 및 키보드 활성화를 사용합니다. `Motion.reducedMotion`는 보간을 제거합니다. 소스 노드, 상태 값 및 검증 범위는 [Figma audit](../../figma-parity.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ColorPickerButton",
+      "anchor": "colorpickerbutton",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Figma audit",
+        "target": "../../figma-parity.md",
+        "kind": "relative",
+        "line": 14
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

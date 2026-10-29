@@ -1,0 +1,1241 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:9472340c49dfc820a636fc914d10e102febcdfea7b775035c0a74b891015e74e",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/quality-automation-p4.md",
+    "sha256": "af5b690e7b7b016cff3c4f7e9dcc13f898d987e6b60f582c8213dac76cacdb28",
+    "bytes": 4470,
+    "line_count": 154,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "P4 품질 자동화 운영 가이드",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"p4-quality-automation-operations-guide\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# P4 품질 자동화 운영 가이드\n",
+      "level": 1,
+      "title": "P4 품질 자동화 운영 가이드"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `tests/` / `tests/ci/` / `CMakeLists.txt`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "이 문서는 P4에 도입된 성능, 시각적 및 안정성 자동화 프레임워크를 정의합니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"1-p4-status\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 1. P4 상태\n",
+      "level": 2,
+      "title": "1. P4 상태"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "table",
+      "start_line": 13,
+      "end_line": 18,
+      "raw": "| ID |품목|구현 상태|구현 위치|\n|---|---|---|---|\n| `P4-01` |성능 회귀 CI(p95/p99 임계값)|완료| `tests/tst_performance_gate.cpp`, `tests/ci/run_p4_quality.sh` |\n| `P4-02` |시각적 회귀(골든 이미지)|완료| `tests/tst_visual_regression.cpp`, `tests/golden/visual_baseline_scene.png` |\n| `P4-03` |TSAN/ASAN/UBSAN 파이프라인|완료| `CMakeLists.txt` (`LVRS_SANITIZER`), `tests/ci/run_p4_sanitizers.sh` |\n| `P4-04` |장기 담금 테스트 자동화|완료| `tests/tst_soak_runtime.cpp`, `tests/ci/run_p4_soak.sh` |\n",
+      "columns": [
+        "ID",
+        "품목",
+        "구현 상태",
+        "구현 위치"
+      ],
+      "rows": [
+        [
+          "`P4-01`",
+          "성능 회귀 CI(p95/p99 임계값)",
+          "완료",
+          "`tests/tst_performance_gate.cpp`, `tests/ci/run_p4_quality.sh`"
+        ],
+        [
+          "`P4-02`",
+          "시각적 회귀(골든 이미지)",
+          "완료",
+          "`tests/tst_visual_regression.cpp`, `tests/golden/visual_baseline_scene.png`"
+        ],
+        [
+          "`P4-03`",
+          "TSAN/ASAN/UBSAN 파이프라인",
+          "완료",
+          "`CMakeLists.txt` (`LVRS_SANITIZER`), `tests/ci/run_p4_sanitizers.sh`"
+        ],
+        [
+          "`P4-04`",
+          "장기 담금 테스트 자동화",
+          "완료",
+          "`tests/tst_soak_runtime.cpp`, `tests/ci/run_p4_soak.sh`"
+        ]
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "<a id=\"2-test-target-summary\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "## 2. 테스트 대상 요약\n",
+      "level": 2,
+      "title": "2. 테스트 대상 요약"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "### `LVRSTests_performance_gate`\n",
+      "level": 3,
+      "title": "`LVRSTests_performance_gate`"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 33,
+      "raw": "- 목적: p95/p99 임계값을 사용하여 `dispatchTask` 대기 시간 분포의 회귀를 차단합니다.\n- 방법: 여러 측정 라운드를 평가하고 중앙값(p95), 중앙값(p99)을 기준으로 게이트를 지정합니다.\n- 주요 환경 변수:\n  - `LVRS_PERF_GATE_ROUNDS`\n  - `LVRS_PERF_GATE_TASKS`\n  - `LVRS_PERF_GATE_WORK_MS`\n  - `LVRS_PERF_GATE_P95_MS`\n  - `LVRS_PERF_GATE_P99_MS`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "목적: p95/p99 임계값을 사용하여 `dispatchTask` 대기 시간 분포의 회귀를 차단합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방법: 여러 측정 라운드를 평가하고 중앙값(p95), 중앙값(p99)을 기준으로 게이트를 지정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주요 환경 변수:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_PERF_GATE_ROUNDS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_PERF_GATE_TASKS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_PERF_GATE_WORK_MS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_PERF_GATE_P95_MS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_PERF_GATE_P99_MS`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "### `LVRSTests_visual_regression`\n",
+      "level": 3,
+      "title": "`LVRSTests_visual_regression`"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 37,
+      "end_line": 42,
+      "raw": "- 목적: 기본 장면의 렌더링된 출력을 골든 이미지와 비교합니다.\n- 방법: 채널별 픽셀 허용오차를 사용하여 불일치 비율을 계산합니다.\n- 주요 환경 변수:\n  - `LVRS_VISUAL_DIFF_CHANNEL_TOLERANCE`\n  - `LVRS_VISUAL_DIFF_RATIO_MAX`\n  - `LVRS_UPDATE_GOLDEN=1`(골든 업데이트)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "목적: 기본 장면의 렌더링된 출력을 골든 이미지와 비교합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방법: 채널별 픽셀 허용오차를 사용하여 불일치 비율을 계산합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주요 환경 변수:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_VISUAL_DIFF_CHANNEL_TOLERANCE`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_VISUAL_DIFF_RATIO_MAX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_UPDATE_GOLDEN=1`(골든 업데이트)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "### `LVRSTests_soak_runtime`\n",
+      "level": 3,
+      "title": "`LVRSTests_soak_runtime`"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 52,
+      "raw": "- 목적: 반복되는 IO+비동기 로드에서 대기열 누수, 캐시 오버플로 및 대기 시간 저하를 모니터링합니다.\n- 방법: 반복 작업 후 대기열 배수, 배압 강하, p99 상한 및 캐시/추적 제한을 검증합니다.\n- 주요 환경 변수:\n  - `LVRS_SOAK_ITERATIONS`\n  - `LVRS_SOAK_WORK_MS`\n  - `LVRS_SOAK_TIMEOUT_MS`\n  - `LVRS_SOAK_P99_LIMIT_MS`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "목적: 반복되는 IO+비동기 로드에서 대기열 누수, 캐시 오버플로 및 대기 시간 저하를 모니터링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방법: 반복 작업 후 대기열 배수, 배압 강하, p99 상한 및 캐시/추적 제한을 검증합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주요 환경 변수:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_SOAK_ITERATIONS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_SOAK_WORK_MS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_SOAK_TIMEOUT_MS`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_SOAK_P99_LIMIT_MS`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "<a id=\"3-label-scheme\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "## 3. 라벨 구성표\n",
+      "level": 2,
+      "title": "3. 라벨 구성표"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "P4 테스트는 CTest 라벨로 분류됩니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 60,
+      "end_line": 66,
+      "raw": "- `p4`\n- `quality`\n- `ci`\n- `performance`\n- `visual`\n- `soak`\n- `long`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`p4`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`quality`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ci`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`performance`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visual`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`soak`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`long`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "권장 실행:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 70,
+      "end_line": 71,
+      "raw": "- PR/일반 게이트: `ctest -L p4 -LE long`\n- 주간 담그기: `ctest -L soak`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "PR/일반 게이트: `ctest -L p4 -LE long`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주간 담그기: `ctest -L soak`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"4-execution-scripts\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 4. 실행 스크립트\n",
+      "level": 2,
+      "title": "4. 실행 스크립트"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"41-pr-quality-gate\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "### 4.1 PR 품질 게이트\n",
+      "level": 3,
+      "title": "4.1 PR 품질 게이트"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 81,
+      "end_line": 83,
+      "raw": "```bash\n./tests/ci/run_p4_quality.sh\n```\n",
+      "language": "bash",
+      "code": "./tests/ci/run_p4_quality.sh\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "행동:\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 87,
+      "end_line": 89,
+      "raw": "1. 테스트 빌드를 구성합니다.\n2. P4 게이트 타겟을 구축하세요.\n3. `long`를 제외하고 `p4` 라벨 테스트를 실행합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "테스트 빌드를 구성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "P4 게이트 타겟을 구축하세요.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`long`를 제외하고 `p4` 라벨 테스트를 실행합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "<a id=\"42-sanitizer-matrix\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "### 4.2 살균제 매트릭스\n",
+      "level": 3,
+      "title": "4.2 살균제 매트릭스"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "fenced_code",
+      "start_line": 95,
+      "end_line": 99,
+      "raw": "```bash\n./tests/ci/run_p4_sanitizers.sh address\n./tests/ci/run_p4_sanitizers.sh undefined\n./tests/ci/run_p4_sanitizers.sh thread\n```\n",
+      "language": "bash",
+      "code": "./tests/ci/run_p4_sanitizers.sh address\n./tests/ci/run_p4_sanitizers.sh undefined\n./tests/ci/run_p4_sanitizers.sh thread\n",
+      "closed": true
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "행동:\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 103,
+      "end_line": 105,
+      "raw": "1. `LVRS_SANITIZER`를 사용하여 전용 빌드를 구성합니다.\n2. 코어 안정성/P4 테스트 타겟을 구축하세요.\n3. 소독제 런타임 옵션과 함께 CTest를 실행합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`LVRS_SANITIZER`를 사용하여 전용 빌드를 구성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "코어 안정성/P4 테스트 타겟을 구축하세요.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "소독제 런타임 옵션과 함께 CTest를 실행합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "<a id=\"43-soak-batch\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "### 4.3 담금 배치\n",
+      "level": 3,
+      "title": "4.3 담금 배치"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "fenced_code",
+      "start_line": 111,
+      "end_line": 113,
+      "raw": "```bash\nLVRS_SOAK_ITERATIONS=5000 ./tests/ci/run_p4_soak.sh\n```\n",
+      "language": "bash",
+      "code": "LVRS_SOAK_ITERATIONS=5000 ./tests/ci/run_p4_soak.sh\n",
+      "closed": true
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "행동:\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "list",
+      "start_line": 117,
+      "end_line": 119,
+      "raw": "1. 흡수 전용 빌드를 구성합니다.\n2. 흡수 테스트 대상을 구축합니다.\n3. `soak` 라벨로 테스트를 실행하세요.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "흡수 전용 빌드를 구성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "흡수 테스트 대상을 구축합니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`soak` 라벨로 테스트를 실행하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "html",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "<a id=\"5-cmake-sanitizer-option\"></a>\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "## 5. CMake 살균제 옵션\n",
+      "level": 2,
+      "title": "5. CMake 살균제 옵션"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "list",
+      "start_line": 125,
+      "end_line": 126,
+      "raw": "- 새로운 옵션: `LVRS_SANITIZER`\n- 허용되는 값: `none`, `address`, `thread`, `undefined`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "새로운 옵션: `LVRS_SANITIZER`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "허용되는 값: `none`, `address`, `thread`, `undefined`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "paragraph",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "예:\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "fenced_code",
+      "start_line": 130,
+      "end_line": 134,
+      "raw": "```bash\ncmake -S . -B build-asan -DLVRS_BUILD_TESTS=ON -DLVRS_SANITIZER=address\ncmake --build build-asan --target LVRSTests_backend_io\nctest --test-dir build-asan --output-on-failure -R LVRSTests_backend_io\n```\n",
+      "language": "bash",
+      "code": "cmake -S . -B build-asan -DLVRS_BUILD_TESTS=ON -DLVRS_SANITIZER=address\ncmake --build build-asan --target LVRSTests_backend_io\nctest --test-dir build-asan --output-on-failure -R LVRSTests_backend_io\n",
+      "closed": true
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "html",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "<a id=\"6-golden-image-operation-rules\"></a>\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "heading",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "## 6. 골든 이미지 운영 규칙\n",
+      "level": 2,
+      "title": "6. 골든 이미지 운영 규칙"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "list",
+      "start_line": 140,
+      "end_line": 142,
+      "raw": "- 골든 파일 경로: `tests/golden/visual_baseline_scene.png`\n- UI 변경이 의도적인 경우에만 `LVRS_UPDATE_GOLDEN=1`로 업데이트하세요.\n- 골든 이미지를 업데이트하는 PR에는 차이점에 대한 이유/증거가 포함되어야 합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "골든 파일 경로: `tests/golden/visual_baseline_scene.png`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "UI 변경이 의도적인 경우에만 `LVRS_UPDATE_GOLDEN=1`로 업데이트하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "골든 이미지를 업데이트하는 PR에는 차이점에 대한 이유/증거가 포함되어야 합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "html",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "<a id=\"7-definition-of-done\"></a>\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "heading",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "## 7. 완료의 정의\n",
+      "level": 2,
+      "title": "7. 완료의 정의"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "P4는 다음이 모두 통과된 경우에만 완료된 것으로 간주됩니다.\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "list",
+      "start_line": 150,
+      "end_line": 154,
+      "raw": "1. `run_p4_quality.sh`\n2. `run_p4_sanitizers.sh address`\n3. `run_p4_sanitizers.sh undefined`\n4. `run_p4_soak.sh`(정책에 정의된 반복 횟수 미만)\n5. 0 골드 이미지 비교 실패\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`run_p4_quality.sh`",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`run_p4_sanitizers.sh address`",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`run_p4_sanitizers.sh undefined`",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "`run_p4_soak.sh`(정책에 정의된 반복 횟수 미만)",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "0 골드 이미지 비교 실패",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "P4 품질 자동화 운영 가이드",
+      "anchor": "p4-품질-자동화-운영-가이드",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "1. P4 상태",
+      "anchor": "1-p4-상태",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "2. 테스트 대상 요약",
+      "anchor": "2-테스트-대상-요약",
+      "start_line": 22
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "`LVRSTests_performance_gate`",
+      "anchor": "lvrstests_performance_gate",
+      "start_line": 24
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "`LVRSTests_visual_regression`",
+      "anchor": "lvrstests_visual_regression",
+      "start_line": 35
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "`LVRSTests_soak_runtime`",
+      "anchor": "lvrstests_soak_runtime",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "3. 라벨 구성표",
+      "anchor": "3-라벨-구성표",
+      "start_line": 56
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "4. 실행 스크립트",
+      "anchor": "4-실행-스크립트",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000045",
+      "level": 3,
+      "title": "4.1 PR 품질 게이트",
+      "anchor": "41-pr-품질-게이트",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000045",
+      "level": 3,
+      "title": "4.2 살균제 매트릭스",
+      "anchor": "42-살균제-매트릭스",
+      "start_line": 93
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000045",
+      "level": 3,
+      "title": "4.3 담금 배치",
+      "anchor": "43-담금-배치",
+      "start_line": 109
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "5. CMake 살균제 옵션",
+      "anchor": "5-cmake-살균제-옵션",
+      "start_line": 123
+    },
+    {
+      "block_id": "b000089",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "6. 골든 이미지 운영 규칙",
+      "anchor": "6-골든-이미지-운영-규칙",
+      "start_line": 138
+    },
+    {
+      "block_id": "b000095",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "7. 완료의 정의",
+      "anchor": "7-완료의-정의",
+      "start_line": 146
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000051",
+        "language": "bash",
+        "code": "./tests/ci/run_p4_quality.sh\n"
+      },
+      {
+        "block_id": "b000061",
+        "language": "bash",
+        "code": "./tests/ci/run_p4_sanitizers.sh address\n./tests/ci/run_p4_sanitizers.sh undefined\n./tests/ci/run_p4_sanitizers.sh thread\n"
+      },
+      {
+        "block_id": "b000071",
+        "language": "bash",
+        "code": "LVRS_SOAK_ITERATIONS=5000 ./tests/ci/run_p4_soak.sh\n"
+      },
+      {
+        "block_id": "b000085",
+        "language": "bash",
+        "code": "cmake -S . -B build-asan -DLVRS_BUILD_TESTS=ON -DLVRS_SANITIZER=address\ncmake --build build-asan --target LVRSTests_backend_io\nctest --test-dir build-asan --output-on-failure -R LVRSTests_backend_io\n"
+      }
+    ],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000013",
+        "columns": [
+          "ID",
+          "품목",
+          "구현 상태",
+          "구현 위치"
+        ],
+        "rows": [
+          [
+            "`P4-01`",
+            "성능 회귀 CI(p95/p99 임계값)",
+            "완료",
+            "`tests/tst_performance_gate.cpp`, `tests/ci/run_p4_quality.sh`"
+          ],
+          [
+            "`P4-02`",
+            "시각적 회귀(골든 이미지)",
+            "완료",
+            "`tests/tst_visual_regression.cpp`, `tests/golden/visual_baseline_scene.png`"
+          ],
+          [
+            "`P4-03`",
+            "TSAN/ASAN/UBSAN 파이프라인",
+            "완료",
+            "`CMakeLists.txt` (`LVRS_SANITIZER`), `tests/ci/run_p4_sanitizers.sh`"
+          ],
+          [
+            "`P4-04`",
+            "장기 담금 테스트 자동화",
+            "완료",
+            "`tests/tst_soak_runtime.cpp`, `tests/ci/run_p4_soak.sh`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

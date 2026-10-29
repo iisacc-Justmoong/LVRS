@@ -1,0 +1,671 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:3d9d3877675eb2858e907e9e166a57a49d8562f6f5e1ed8ca92de14c273aa1a8",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/TextDocumentModel.md",
+    "sha256": "5eb5b36ae0e6c0e23a3ff1001137c9c47b70e3ebc6103314153dfc4c5890d9c1",
+    "bytes": 5510,
+    "line_count": 90,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "TextDocumentModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# TextDocumentModel\n",
+      "level": 1,
+      "title": "TextDocumentModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/text/textdocumentmodel.h`, `src/backend/text/textdocumentmodel.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`TextDocumentModel`는 `LV.TextEditor` 뒤에 있는 내부 C++ 문서 엔진입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- 연결된 `filePath`, 문서 줄 인덱스, 커서 위치, 더티 상태, 지연 로드 상태 및 파일 오류를 소유합니다.\n- 가상화된 QML 뷰포트에 대해 문서 줄을 `QAbstractListModel`로 노출합니다.\n- 파일을 바이트 청크 단위로 점진적으로 로드하고 `QString` 라인 스토리지를 유지하는 대신 깨끗한 파일 라인을 파일 오프셋 레코드로 유지합니다.\n- QML를 문서 저장 역할에서 제외하세요. QML는 입력만 렌더링하고 전달합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "연결된 `filePath`, 문서 줄 인덱스, 커서 위치, 더티 상태, 지연 로드 상태 및 파일 오류를 소유합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "가상화된 QML 뷰포트에 대해 문서 줄을 `QAbstractListModel`로 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "파일을 바이트 청크 단위로 점진적으로 로드하고 `QString` 라인 스토리지를 유지하는 대신 깨끗한 파일 라인을 파일 오프셋 레코드로 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QML를 문서 저장 역할에서 제외하세요. QML는 입력만 렌더링하고 전달합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "속성:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 29,
+      "raw": "- `filePath`, `hasFilePath`\n- `text`, `characterCount`\n- `lineCount`\n- `fileBackedLineCount`, `memoryLineCount`\n- `cursorLine`, `cursorColumn`, `cursorPosition`\n- `dirty`\n- `lastError`\n- `loading`\n- `loadedByteCount`, `totalByteCount`, `loadProgress`\n- `loadChunkSize`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`filePath`, `hasFilePath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`, `characterCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lineCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fileBackedLineCount`, `memoryLineCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cursorLine`, `cursorColumn`, `cursorPosition`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dirty`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastError`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loading`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadedByteCount`, `totalByteCount`, `loadProgress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadChunkSize`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "모델 역할:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 36,
+      "raw": "- `lineIndex`\n- `lineNumber`\n- `text`\n- `length`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`lineIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lineNumber`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`length`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 40,
+      "end_line": 52,
+      "raw": "- `lineText(line)`, `lineLength(line)`\n- `textRange(start, end)`\n- `positionForLineColumn(line, column)`\n- `previousWordBoundaryPosition(position)`, `nextWordBoundaryPosition(position)`\n- `loadFile(path?)`, `reloadFile()`, `saveFile(path?)`, `cancelLoad()`\n- `markClean()`, `clear()`\n- `moveCursor(line, column)`, `moveCursorLeft()`, `moveCursorRight()`, `moveCursorUp()`, `moveCursorDown()`\n- `moveCursorLineStart()`, `moveCursorLineEnd()`\n- `moveCursorDocumentStart()`, `moveCursorDocumentEnd()`\n- `moveCursorWordLeft()`, `moveCursorWordRight()`\n- `insertText(value)`, `insertNewline()`\n- `replaceRange(start, end, value)`\n- `removePreviousCharacter()`, `removeNextCharacter()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`lineText(line)`, `lineLength(line)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textRange(start, end)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`positionForLineColumn(line, column)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`previousWordBoundaryPosition(position)`, `nextWordBoundaryPosition(position)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadFile(path?)`, `reloadFile()`, `saveFile(path?)`, `cancelLoad()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`markClean()`, `clear()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveCursor(line, column)`, `moveCursorLeft()`, `moveCursorRight()`, `moveCursorUp()`, `moveCursorDown()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveCursorLineStart()`, `moveCursorLineEnd()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveCursorDocumentStart()`, `moveCursorDocumentEnd()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveCursorWordLeft()`, `moveCursorWordRight()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`insertText(value)`, `insertNewline()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`replaceRange(start, end, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`removePreviousCharacter()`, `removeNextCharacter()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 56,
+      "end_line": 58,
+      "raw": "- `fileLoaded(path, length)`, `fileLoadFailed(path, error)`\n- `fileLoadProgress(path, loadedBytes, totalBytes)`\n- `fileSaved(path, length)`, `fileSaveFailed(path, error)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`fileLoaded(path, length)`, `fileLoadFailed(path, error)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fileLoadProgress(path, loadedBytes, totalBytes)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fileSaved(path, length)`, `fileSaveFailed(path, error)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 64,
+      "end_line": 83,
+      "raw": "- 파일은 UTF-8 텍스트로 읽혀집니다.\n- `loadFile()`는 대상 파일을 열고 청크 로드를 예약한 후 반환합니다. 하나의 전체 문서 `QString`를 미리 작성하지 않습니다.\n- `loadFile()`는 존재하지 않는 대상 경로를 빈 연결된 문서로 처리하므로 `LV.TextEditor`는 첫 번째 편집 시 파일을 생성할 수 있습니다.\n- 로드는 이벤트 루프 턴당 최대 `loadChunkSize` 바이트를 읽고 청크가 도착할 때 디코딩된 라인을 목록 모델에 추가합니다.\n- 깔끔하게 로드된 라인은 `(byteOffset, byteLength, length)` 레코드로 저장되며 `lineText()`, 모델 대표 또는 `text`가 콘텐츠를 요청할 때만 디코딩됩니다.\n- 편집은 터치된 라인 레코드만 메모리 지원 텍스트 레코드로 승격시킵니다. 손대지 않은 파일 기반 라인은 소스 파일에 연결된 상태로 유지됩니다.\n- `loading`는 최종 청크가 디코딩되거나 `cancelLoad()`/failure가 스트림을 중지할 때까지 true입니다.\n- `loadedByteCount`, `totalByteCount` 및 `loadProgress`는 바이트 수준 로드 진행 상황을 보고합니다.\n- `text` 속성은 내부 엔진 표면이며 읽을 때 로드된 모든 라인을 구체화합니다. 대용량 문서 UI는 모델 행, `lineText(line)` 및 진행/저장 속성을 선호해야 합니다.\n- 저장은 `QSaveFile`를 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.\n- 뉴라인은 모델 내부에서 `\\n`로 정규화됩니다.\n- 빈 문서인 경우에도 모델에는 항상 최소한 한 줄이 포함됩니다.\n- 편집 작업은 라인 스토리지를 변경하고 `dirty`를 설정합니다.\n- `replaceRange()`는 `LV.TextEditor` 선택 및 IME 커밋 처리에 사용됩니다. 가능한 경우 손대지 않은 라인 레코드를 보존하고 변경된 범위만 메모리 지원 레코드로 승격합니다.\n- `textRange()`는 관련 없는 문서 텍스트를 구체화하지 않고 모델 기반 클립보드 복사에 사용됩니다.\n- 단어 경계 이동은 한글 음절을 포함한 Unicode 문자와 숫자를 단어 문자로 취급하고, 문서 전체를 구체화하는 대신 라인 레코드를 통해 경계를 해결합니다.\n- 단일 문자 이동 및 삭제는 Unicode 문자소 경계를 사용하므로 대리 쌍 문자는 커서 이동, 백스페이스 또는 삭제로 인해 분할되지 않습니다.\n- `loadFile()`는 라인 스토리지를 재설정하고, 커서를 문서 시작으로 재설정하고, `dirty`를 지우고, 파일 콘텐츠를 행으로 스트리밍하고, 스트림이 완료되면 `fileLoaded`를 내보냅니다.\n- 편집 작업은 로드된 텍스트를 변경하기 전에 `cancelLoad()`를 호출합니다. 부분 문서를 작성하는 대신 `loading`가 실패하는 동안 저장이 실패합니다.\n- `saveFile()`는 현재 라인 레코드를 `QSaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "파일은 UTF-8 텍스트로 읽혀집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadFile()`는 대상 파일을 열고 청크 로드를 예약한 후 반환합니다. 하나의 전체 문서 `QString`를 미리 작성하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadFile()`는 존재하지 않는 대상 경로를 빈 연결된 문서로 처리하므로 `LV.TextEditor`는 첫 번째 편집 시 파일을 생성할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "로드는 이벤트 루프 턴당 최대 `loadChunkSize` 바이트를 읽고 청크가 도착할 때 디코딩된 라인을 목록 모델에 추가합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "깔끔하게 로드된 라인은 `(byteOffset, byteLength, length)` 레코드로 저장되며 `lineText()`, 모델 대표 또는 `text`가 콘텐츠를 요청할 때만 디코딩됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집은 터치된 라인 레코드만 메모리 지원 텍스트 레코드로 승격시킵니다. 손대지 않은 파일 기반 라인은 소스 파일에 연결된 상태로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loading`는 최종 청크가 디코딩되거나 `cancelLoad()`/failure가 스트림을 중지할 때까지 true입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadedByteCount`, `totalByteCount` 및 `loadProgress`는 바이트 수준 로드 진행 상황을 보고합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text` 속성은 내부 엔진 표면이며 읽을 때 로드된 모든 라인을 구체화합니다. 대용량 문서 UI는 모델 행, `lineText(line)` 및 진행/저장 속성을 선호해야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "저장은 `QSaveFile`를 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "뉴라인은 모델 내부에서 `\\n`로 정규화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 문서인 경우에도 모델에는 항상 최소한 한 줄이 포함됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 작업은 라인 스토리지를 변경하고 `dirty`를 설정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`replaceRange()`는 `LV.TextEditor` 선택 및 IME 커밋 처리에 사용됩니다. 가능한 경우 손대지 않은 라인 레코드를 보존하고 변경된 범위만 메모리 지원 레코드로 승격합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textRange()`는 관련 없는 문서 텍스트를 구체화하지 않고 모델 기반 클립보드 복사에 사용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "단어 경계 이동은 한글 음절을 포함한 Unicode 문자와 숫자를 단어 문자로 취급하고, 문서 전체를 구체화하는 대신 라인 레코드를 통해 경계를 해결합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "단일 문자 이동 및 삭제는 Unicode 문자소 경계를 사용하므로 대리 쌍 문자는 커서 이동, 백스페이스 또는 삭제로 인해 분할되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`loadFile()`는 라인 스토리지를 재설정하고, 커서를 문서 시작으로 재설정하고, `dirty`를 지우고, 파일 콘텐츠를 행으로 스트리밍하고, 스트림이 완료되면 `fileLoaded`를 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 작업은 로드된 텍스트를 변경하기 전에 `cancelLoad()`를 호출합니다. 부분 문서를 작성하는 대신 `loading`가 실패하는 동안 저장이 실패합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`saveFile()`는 현재 라인 레코드를 `QSaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "<a id=\"consumer\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "## 소비자\n",
+      "level": 2,
+      "title": "소비자"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 89,
+      "end_line": 90,
+      "raw": "- `LV.TextEditor`는 하나의 `TextDocumentModel` 인스턴스를 소유하고 이를 QML `ListView`의 지원 모델로 사용합니다.\n- 애플리케이션 코드는 이 모델에 연결하는 대신 더 작은 `LV.TextEditor` 파일 API(`filePath`, 선택적 `read()`, 자동 동기화 신호)를 사용해야 합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LV.TextEditor`는 하나의 `TextDocumentModel` 인스턴스를 소유하고 이를 QML `ListView`의 지원 모델로 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "애플리케이션 코드는 이 모델에 연결하는 대신 더 작은 `LV.TextEditor` 파일 API(`filePath`, 선택적 `read()`, 자동 동기화 신호)를 사용해야 합니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "TextDocumentModel",
+      "anchor": "textdocumentmodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "소비자",
+      "anchor": "소비자",
+      "start_line": 87
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

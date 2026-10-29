@@ -9,6 +9,8 @@ namespace lvrs {
 struct TableHeaderColumn final {
     std::string text="Column",value_type="string";
     std::optional<double> padding;
+    // Empty names hide a slot. Each column can select any embedded LVRS icon.
+    std::string leading_icon="generalchevronDown",trailing_icon;
     friend bool operator==(const TableHeaderColumn&,const TableHeaderColumn&)=default;
 };
 struct TableHeaderModelOptions final {

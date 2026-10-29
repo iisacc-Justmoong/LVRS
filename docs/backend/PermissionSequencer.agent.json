@@ -1,0 +1,1009 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:3dec75dfb690d38958ec2f85587c92732ae6e0257c565733e5aa65efa0d54109",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/PermissionSequencer.md",
+    "sha256": "332d7f7813e506bab0e4632ab3530eaa15e78c9da3523833082a5a2312dd1e02",
+    "bytes": 4766,
+    "line_count": 165,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "PermissionSequencer",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# PermissionSequencer\n",
+      "level": 1,
+      "title": "PermissionSequencer"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/runtime/permissionsequencer.h` / `src/backend/runtime/permissionsequencer.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`PermissionSequencer`는 앱 정의 권한 요청 단계를 순차적으로 실행하고 요청 기록을 저장합니다. 의도적으로 일반적입니다. LVRS는 전체 디스크 액세스, 사진 라이브러리 액세스, 문서 폴더 또는 플랫폼 브리지 API에 대해 알지 못합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 15,
+      "raw": "- 결정적인 우선순위에 따라 권한 요청 단계를 실행합니다.\n- 기본적으로 필수 오류가 발생하면 중지됩니다.\n- 진단을 위해 메모리 내 요청 기록을 유지합니다.\n- 승인/거부/건너뛰기/사용할 수 없음/실패 수를 집계합니다.\n- 개발자 도구 및 로그에 대한 구조화된 결과 맵을 제공합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "결정적인 우선순위에 따라 권한 요청 단계를 실행합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본적으로 필수 오류가 발생하면 중지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "진단을 위해 메모리 내 요청 기록을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "승인/거부/건너뛰기/사용할 수 없음/실패 수를 집계합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "개발자 도구 및 로그에 대한 구조화된 결과 맵을 제공합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 21,
+      "raw": "- `PermissionRequestSequencer::run(steps, options) -> PermissionRequestRunResult`\n- `PermissionRequestSequencer::history()`\n- `PermissionRequestSequencer::clearHistory()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`PermissionRequestSequencer::run(steps, options) -> PermissionRequestRunResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestSequencer::history()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestSequencer::clearHistory()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "핵심 구조체:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 25,
+      "end_line": 29,
+      "raw": "- `PermissionRequestStepContext`\n- `PermissionRequestStep`\n- `PermissionRequestStepResult`\n- `PermissionRequestRunOptions`\n- `PermissionRequestRunResult`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`PermissionRequestStepContext`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestStep`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestStepResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestRunOptions`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`PermissionRequestRunResult`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "상태 열거:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 37,
+      "raw": "- `Granted`\n- `Denied`\n- `Skipped`\n- `Unavailable`\n- `Failed`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Granted`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Denied`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Skipped`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Unavailable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Failed`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "<a id=\"step-contract\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "## 단계 계약\n",
+      "level": 2,
+      "title": "단계 계약"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "`PermissionRequestStep` 필드:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 45,
+      "end_line": 49,
+      "raw": "- `name`\n- `priority`\n- `required`\n- `metadata`\n- `request(context, details, errorMessage)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`name`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`priority`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`required`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`metadata`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`request(context, details, errorMessage)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "콜백은 플랫폼/도메인 동작을 소유합니다. 네이티브 API를 호출하고, 앱 UI를 표시하고, 앱 상태를 검사하고, 관련이 없는 경우 권한을 건너뛸 수 있습니다. LVRS는 반환된 상태와 세부정보만 기록합니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "필수 단계가 `Denied`, `Unavailable` 또는 `Failed`를 반환하면 실행이 실패합니다. 해당 상태의 선택적 단계가 기록되지만 실행이 실패하지는 않습니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "<a id=\"options\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "## 옵션\n",
+      "level": 2,
+      "title": "옵션"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "`PermissionRequestRunOptions` 필드:\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 61,
+      "end_line": 64,
+      "raw": "- `stopOnRequiredFailure`: 기본 `true`.\n- `appendHistory`: 기본 `true`.\n- `logDiagnostics`: 기본 `true`, `LVRS bootstrap.permission.*` 라인을 내보냅니다.\n- `metadata`: 모든 단계 컨텍스트에 복사되었습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`stopOnRequiredFailure`: 기본 `true`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`appendHistory`: 기본 `true`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`logDiagnostics`: 기본 `true`, `LVRS bootstrap.permission.*` 라인을 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`metadata`: 모든 단계 컨텍스트에 복사되었습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "<a id=\"result\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "## 결과\n",
+      "level": 2,
+      "title": "결과"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "`PermissionRequestRunResult`에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "list",
+      "start_line": 72,
+      "end_line": 86,
+      "raw": "- `ok`\n- `runId`\n- `stoppedEarly`\n- `stepResults`\n- `errors`\n- `elapsedMs`\n- `completedCount`\n- `grantedCount`\n- `deniedCount`\n- `skippedCount`\n- `unavailableCount`\n- `failedCount`\n- `requiredFailure()`\n- `errorMessage()`\n- `diagnostics()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ok`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stoppedEarly`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stepResults`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errors`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`elapsedMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`completedCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`grantedCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deniedCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`skippedCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`unavailableCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`failedCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`requiredFailure()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errorMessage()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`diagnostics()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "각 단계 결과에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 90,
+      "end_line": 96,
+      "raw": "- `name`, `index`, `priority`, `runId`\n- `required`, `ok`, `status`\n- `granted`, `terminalFailure`\n- `errorMessage`\n- `metadata`\n- `details`\n- `elapsedMs`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`name`, `index`, `priority`, `runId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`required`, `ok`, `status`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`granted`, `terminalFailure`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errorMessage`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`metadata`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`details`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`elapsedMs`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "fenced_code",
+      "start_line": 102,
+      "end_line": 131,
+      "raw": "```cpp\nlvrs::PermissionRequestSequencer sequencer;\n\nlvrs::PermissionRequestStep fullDisk;\nfullDisk.name = QStringLiteral(\"full-disk-access\");\nfullDisk.priority = 10;\nfullDisk.required = true;\nfullDisk.request = [](const lvrs::PermissionRequestStepContext &, QVariantMap *details, QString *errorMessage) {\n    const auto status = requestFullDiskAccessThroughAppBridge();\n    if (details)\n        details->insert(QStringLiteral(\"bridge\"), QStringLiteral(\"macos\"));\n    if (status == AppPermissionStatus::Granted)\n        return lvrs::PermissionRequestStatus::Granted;\n    if (errorMessage)\n        *errorMessage = QStringLiteral(\"Full disk access was not granted\");\n    return lvrs::PermissionRequestStatus::Denied;\n};\n\nlvrs::PermissionRequestStep photos;\nphotos.name = QStringLiteral(\"photo-library\");\nphotos.priority = 20;\nphotos.required = false;\nphotos.request = [](const lvrs::PermissionRequestStepContext &, QVariantMap *, QString *) {\n    return lvrs::PermissionRequestStatus::Skipped;\n};\n\nconst lvrs::PermissionRequestRunResult result = sequencer.run({fullDisk, photos});\nif (!result.ok)\n    qWarning().noquote() << result.errorMessage();\n```\n",
+      "language": "cpp",
+      "code": "lvrs::PermissionRequestSequencer sequencer;\n\nlvrs::PermissionRequestStep fullDisk;\nfullDisk.name = QStringLiteral(\"full-disk-access\");\nfullDisk.priority = 10;\nfullDisk.required = true;\nfullDisk.request = [](const lvrs::PermissionRequestStepContext &, QVariantMap *details, QString *errorMessage) {\n    const auto status = requestFullDiskAccessThroughAppBridge();\n    if (details)\n        details->insert(QStringLiteral(\"bridge\"), QStringLiteral(\"macos\"));\n    if (status == AppPermissionStatus::Granted)\n        return lvrs::PermissionRequestStatus::Granted;\n    if (errorMessage)\n        *errorMessage = QStringLiteral(\"Full disk access was not granted\");\n    return lvrs::PermissionRequestStatus::Denied;\n};\n\nlvrs::PermissionRequestStep photos;\nphotos.name = QStringLiteral(\"photo-library\");\nphotos.priority = 20;\nphotos.required = false;\nphotos.request = [](const lvrs::PermissionRequestStepContext &, QVariantMap *, QString *) {\n    return lvrs::PermissionRequestStatus::Skipped;\n};\n\nconst lvrs::PermissionRequestRunResult result = sequencer.run({fullDisk, photos});\nif (!result.ok)\n    qWarning().noquote() << result.errorMessage();\n",
+      "closed": true
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "포그라운드 서비스 예:\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "fenced_code",
+      "start_line": 135,
+      "end_line": 145,
+      "raw": "```cpp\nlvrs::ForegroundServiceTask permissionBootstrap;\npermissionBootstrap.name = QStringLiteral(\"permission-bootstrap\");\npermissionBootstrap.start = [&sequencer](const lvrs::ForegroundServiceStartContext &, QString *errorMessage) {\n    const lvrs::PermissionRequestRunResult result =\n        sequencer.run(buildPermissionStepsForCurrentPlatform());\n    if (!result.ok && errorMessage)\n        *errorMessage = result.errorMessage();\n    return result.ok;\n};\n```\n",
+      "language": "cpp",
+      "code": "lvrs::ForegroundServiceTask permissionBootstrap;\npermissionBootstrap.name = QStringLiteral(\"permission-bootstrap\");\npermissionBootstrap.start = [&sequencer](const lvrs::ForegroundServiceStartContext &, QString *errorMessage) {\n    const lvrs::PermissionRequestRunResult result =\n        sequencer.run(buildPermissionStepsForCurrentPlatform());\n    if (!result.ok && errorMessage)\n        *errorMessage = result.errorMessage();\n    return result.ok;\n};\n",
+      "closed": true
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "<a id=\"responsibility-boundary\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "## 책임 경계\n",
+      "level": 2,
+      "title": "책임 경계"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "LVRS 소유:\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 153,
+      "end_line": 157,
+      "raw": "- 단계 주문,\n- 순차적 실행,\n- 역사 저장,\n- 상태/카운트 집계,\n- 일반 진단.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "단계 주문,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "순차적 실행,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "역사 저장,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태/카운트 집계,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "일반 진단.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "앱이 소유하는 것:\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "list",
+      "start_line": 161,
+      "end_line": 165,
+      "raw": "- 권한 이름,\n- 네이티브 권한 호출,\n- 프롬프트 UI,\n- 플랫폼 교량 기능,\n- 앱별 권한이 필요한지 여부.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "권한 이름,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 권한 호출,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프롬프트 UI,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "플랫폼 교량 기능,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "앱별 권한이 필요한지 여부.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "PermissionSequencer",
+      "anchor": "permissionsequencer",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "단계 계약",
+      "anchor": "단계-계약",
+      "start_line": 41
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "옵션",
+      "anchor": "옵션",
+      "start_line": 57
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "결과",
+      "anchor": "결과",
+      "start_line": 68
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "책임 경계",
+      "anchor": "책임-경계",
+      "start_line": 149
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 12,
+        "text": "- 기본적으로 필수 오류가 발생하면 중지됩니다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000031",
+        "line": 47,
+        "text": "- `required`",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000035",
+        "line": 53,
+        "text": "필수 단계가 `Denied`, `Unavailable` 또는 `Failed`를 반환하면 실행이 실패합니다. 해당 상태의 선택적 단계가 기록되지만 실행이 실패하지는 않습니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000055",
+        "line": 91,
+        "text": "- `required`, `ok`, `status`",
+        "basis": "lexical_match",
+        "context": "list"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

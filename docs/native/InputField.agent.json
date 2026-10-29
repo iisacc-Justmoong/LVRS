@@ -1,0 +1,145 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:85882fb72b33b639c27886b5f78eab9b1c503b95a05f978cd10ac080da6306ef",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/InputField.md",
+    "sha256": "bb2b315feae116df4831b3f2c678e10fe66a335ee292c54b9e0b58f896dad338",
+    "bytes": 1990,
+    "line_count": 29,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 InputField",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 InputField\n",
+      "level": 1,
+      "title": "네이티브 InputField"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "`lvrs::InputField`는 iiGUI의 텍스트 편집기를 보존하면서 LVRS의 22px 입력 형상과\n텍스트·검색·비밀번호 모드를 제공한다. `InputFieldShape`는 `inline_rectangle`(반경 0),\n`rounded`(6), `cylinder`(11)이고 `InputFieldMode`는 `text`, `search`, `password`이다.\n검색 모드는 왼쪽 12px 검색 아이콘을 표시하고, 비밀번호 모드는 iiGUI의 비밀번호 입력을\n사용한다. 비어 있지 않은 활성 편집기에는 지우기 버튼을 표시한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "fenced_code",
+      "start_line": 9,
+      "end_line": 15,
+      "raw": "```cpp\nlvrs::InputFieldOptions options;\noptions.mode = lvrs::InputFieldMode::password;\noptions.shape = lvrs::InputFieldShape::rounded;\noptions.input.placeholder = \"Password\";\nauto field = lvrs::InputField::create(builder, parent, \"password\", options);\n```\n",
+      "language": "cpp",
+      "code": "lvrs::InputFieldOptions options;\noptions.mode = lvrs::InputFieldMode::password;\noptions.shape = lvrs::InputFieldShape::rounded;\noptions.input.placeholder = \"Password\";\nauto field = lvrs::InputField::create(builder, parent, \"password\", options);\n",
+      "closed": true
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 20,
+      "raw": "`editor()`는 네이티브 편집기 핸들이고 `root()`는 배치 핸들이다. `set_options`는 동일한\n위젯에 새 옵션과 텍스트를 적용한다. `set_text`는 사용자 편집 이벤트를 내지 않는다.\n사용자 편집과 지우기 버튼은 `edited`, 제출은 `submitted`로 전달된다. 수명과 접근은\niiGUI의 소유 스레드 및 위젯 세대 규칙을 따른다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 24,
+      "raw": "기존 `Widgets::input_field`도 별도 스타일을 지정하지 않으면 둥근 22px 기본값을 사용한다.\n호출자가 `InputOptions::style`을 제공한 경우에는 그 설정을 유지한다. 세 모양·모드와\n검색·지우기 슬롯이 필요할 때는 `InputField::create`를 사용한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 29,
+      "raw": "현재 구현은 색조와 크기를 적용하며, QML 재질의 배경 흐림·입체 조명과 완전히 동일한\n네이티브 렌더링은 아직 제공하지 않는다. 네이티브 iiGUI 자리 표시자 색상 및 검색 모드의\n오른쪽 내측 여백도 QML 원본과 완전 일치하지 않으므로 전체 시각 상태 이식으로 표시하지 않는다.\n`tests/native/input_field.cpp`는 모드 전환, 편집, 비밀번호, 지우기와 비활성·수명을 검사한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 InputField",
+      "anchor": "네이티브-inputfield",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 27,
+        "text": "네이티브 렌더링은 아직 제공하지 않는다. 네이티브 iiGUI 자리 표시자 색상 및 검색 모드의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 28,
+        "text": "오른쪽 내측 여백도 QML 원본과 완전 일치하지 않으므로 전체 시각 상태 이식으로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

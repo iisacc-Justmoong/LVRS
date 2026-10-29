@@ -28,6 +28,10 @@ void run(std::string name){
         auto r=take(cell.root().snapshot()).bounds,e=take(cell.editor().snapshot()).bounds;check(r.width==234&&r.height==24&&e.x==r.x+9&&e.y==r.y+5.5&&e.height==13,"Native cell metrics differ");
         auto a=take(take(row.cell(0)).root().snapshot()).bounds,c=take(take(row.cell(2)).root().snapshot()).bounds;check(a.width==234&&std::abs(c.x-a.x-483)<.01,"Row spacing differs");
         check(take(header.root().snapshot()).bounds.height==25&&take(take(header.column(1)).snapshot()).bounds.width==239,"Header metrics differ");
+        auto leading=take(take(mount.find("header.leading0")).snapshot());
+        auto trailing=take(take(mount.find("header.trailing0")).snapshot());
+        auto label=take(take(mount.find("header.label0")).snapshot());
+        check(leading.visible&&leading.bounds.width==18&&leading.bounds.x-take(header.root().snapshot()).bounds.x==8&&!trailing.visible&&label.bounds.x-leading.bounds.x==25,"Header default icon slots differ from Figma");
     }else if(name=="editing"){
         good(cell.editor().focus());good(mount.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::select_all}));good(mount.dispatch_input({.kind=gui::WidgetInputKind::text,.text="45"}));good(mount.dispatch_input({.kind=gui::WidgetInputKind::key_down,.key=gui::WidgetKey::enter}));
         check(edited==1&&submitted==1&&value=="45"&&std::get<std::int64_t>(take(cell.snapshot()).typed_value)==45,"Typed cell edit/submit failed");
@@ -42,6 +46,10 @@ void run(std::string name){
         auto old=take(take(row.cell(1)).editor().snapshot()).id;lvrs::TableRowOptions o{.width=600,.cell_width=200,.inputable=true};o.cells[1].text="Replacement";good(row.set_options(o));check(take(take(row.cell(1)).editor().snapshot()).id==old&&take(take(row.cell(1)).snapshot()).input_result=="Replacement"&&edited==0,"Row replacement rebuilt handles or emitted edit");
         o.width=570;o.cells[2].text=std::string("bad\0text",8);check(!row.set_options(o)&&take(row.root().snapshot()).bounds.width==600,"Invalid last cell partially changed row geometry");
         lvrs::TableHeaderOptions h{.interactive=true};h.layout.columns[1].text="Updated";h.layout.column_widths={180,200,240};good(header.set_options(h));check(take(take(header.column(1)).snapshot()).accessibility_name=="Updated"&&take(take(header.column(2)).snapshot()).bounds.x-take(header.root().snapshot()).bounds.x==380,"Header geometry/accessible name not updated");
+        h.layout.columns[1].leading_icon="";h.layout.columns[1].trailing_icon="generalchevronDown";good(header.set_options(h));
+        auto lead=take(take(mount.find("header.leading1")).snapshot());auto tail=take(take(mount.find("header.trailing1")).snapshot());auto label=take(take(mount.find("header.label1")).snapshot());
+        check(!lead.visible&&tail.visible&&tail.bounds.x-label.bounds.x-label.bounds.width==7,"Per-column icon replacement or spacing failed");
+        h.layout.columns[1].trailing_icon="unknown-icon";check(!header.set_options(h)&&take(take(mount.find("header.trailing1")).snapshot()).visible,"Invalid icon partially changed the header");
     }else if(name=="validator_lifetime"){
         lvrs::TableCellOptions o{.text="12",.inputable=true};o.validator=[&](std::string_view value,std::string_view type){auto nested=cell.apply_input_result(value);check(!nested&&nested.error().code==core::ErrorCode::busy,"Recursive validation not rejected");return lvrs::validate_table_value(value,type);};good(cell.set_options(o));check(take(cell.apply_input_result("42"))=="42","Validator did not recover after reentry rejection");
         o.validator=[&](std::string_view value,std::string_view){good(host.unmount_widgets());return lvrs::TableValidation{true,std::string(value),std::string(value)};};good(cell.set_options(o));auto r=cell.apply_input_result("45");check(!r&&r.error().code==core::ErrorCode::closed&&retired.expired(),"Validator removal retained or mutated detached cell");

@@ -1,0 +1,1074 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:72fe6e36438c4bf767282de493542a786aa70ae1b8f14fe24cf53408055d4c02",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/HierarchyToolbar.md",
+    "sha256": "eab5e37e96fff477355946e5741222bce652d5f1f84b1d7bf2fcbbdb60f7dc78",
+    "bytes": 5553,
+    "line_count": 160,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "HierarchyToolbar",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# HierarchyToolbar\n",
+      "level": 1,
+      "title": "HierarchyToolbar"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/navigation/HierarchyToolbar.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`HierarchyToolbar`는 `IconButton` 배열로 렌더링되는 계층 구조 패널의 상단 도구 모음입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 외부 배열 모델에서 도구 모음 버튼을 렌더링합니다.\n- 활성 슬롯 선택을 결정적으로 유지합니다(`activeIndex`, `activeButtonId`).\n- 각 도구 모음 슬롯에서 ID 기반 및 이벤트 기반 작업을 전달합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "외부 배열 모델에서 도구 모음 버튼을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "활성 슬롯 선택을 결정적으로 유지합니다(`activeIndex`, `activeButtonId`).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 도구 모음 슬롯에서 ID 기반 및 이벤트 기반 작업을 전달합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "모델 및 상태:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 24,
+      "raw": "- `buttonItems`(어레이 또는 모델)\n- `itemCount`\n- `buttonCount`\n- `activeButton`\n- `activeButtonId`\n- `activeIndex`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`buttonItems`(어레이 또는 모델)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeButton`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeButtonId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeIndex`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "레이아웃 및 모양:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 37,
+      "raw": "- `minimumToolbarWidth`\n- `horizontalPadding`\n- `verticalPadding`\n- `spacing`\n- `slotSize`\n- `distributeSpacing`\n- `backgroundColor`\n- `backgroundOpacity`\n- `visibleButtonCount`\n- `distributedSpacing`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`minimumToolbarWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`horizontalPadding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`verticalPadding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`spacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`slotSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distributeSpacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backgroundColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backgroundOpacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleButtonCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distributedSpacing`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 41,
+      "end_line": 43,
+      "raw": "- `activeChanged(button, buttonId, index)`\n- `buttonTriggered(button, buttonId, index, item)`\n- `buttonEventTriggered(eventName, payload, index, item, buttonId)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`activeChanged(button, buttonId, index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonTriggered(button, buttonId, index, item)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonEventTriggered(eventName, payload, index, item, buttonId)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 47,
+      "end_line": 49,
+      "raw": "- `triggerIndex(index)`\n- `buttonAt(index)`\n- `collectButtons()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`triggerIndex(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonAt(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`collectButtons()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "호환성:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 53,
+      "end_line": 55,
+      "raw": "- `buttons` 기본 속성 별칭은 수동 하위 항목에 대해 유지됩니다.\n- 수동 `IconButton` 선언은 도구 모음 슬롯으로 처리됩니다. 선언된 개수는 도구 모음 버튼 개수와 같습니다.\n- 수동 `IconButton` 클릭은 도구 모음 활성화에 자동으로 연결되고 기본/경계 없는 활성 톤 전환을 수신합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`buttons` 기본 속성 별칭은 수동 하위 항목에 대해 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "수동 `IconButton` 선언은 도구 모음 슬롯으로 처리됩니다. 선언된 개수는 도구 모음 버튼 개수와 같습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "수동 `IconButton` 클릭은 도구 모음 활성화에 자동으로 연결되고 기본/경계 없는 활성 톤 전환을 수신합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "<a id=\"figma-layout-baseline\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## Figma 레이아웃 기준선\n",
+      "level": 2,
+      "title": "Figma 레이아웃 기준선"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "기본 레이아웃은 Figma(`Layerd Visual Render System`, 노드 `180:1011`)의 `HierarchyToolbar`를 따릅니다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 63,
+      "end_line": 70,
+      "raw": "- 도구 모음에는 데스크탑 및 모바일의 `200 x 26` 기준선이 있습니다.\n- `minimumToolbarWidth`의 기본값은 데스크톱에서는 `200`이고 모바일에서는 `400`입니다.\n- 기본 패딩은 데스크톱에서 수평 `8px` 및 수직 `2px`입니다(모바일에서는 `16px` 및 `4px`).\n- 각 도구 모음 슬롯은 상속된 버튼 프레임(데스크톱의 경우 `22 x 22`, 모바일의 경우 `44 x 44`)을 따릅니다.\n- 각 주식 아이콘은 데스크톱에서 `Theme.iconSm`: `18 x 18`를 사용하고 모바일에서는 `36 x 36`를 사용합니다.\n- 항목은 간격 없이 선행 삽입과 인접해 있습니다. 4개의 참조 슬롯은 데스크탑 x 위치 `8`, `30`, `52` 및 `74`에서 시작됩니다.\n- `distributeSpacing`의 기본값은 `false`입니다. 호스트에 의도적으로 분산 슬롯이 필요한 경우에만 `true`로 설정하세요.\n- 기본 배경은 투명합니다(`backgroundOpacity = 0`).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "도구 모음에는 데스크탑 및 모바일의 `200 x 26` 기준선이 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minimumToolbarWidth`의 기본값은 데스크톱에서는 `200`이고 모바일에서는 `400`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 패딩은 데스크톱에서 수평 `8px` 및 수직 `2px`입니다(모바일에서는 `16px` 및 `4px`).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 도구 모음 슬롯은 상속된 버튼 프레임(데스크톱의 경우 `22 x 22`, 모바일의 경우 `44 x 44`)을 따릅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 주식 아이콘은 데스크톱에서 `Theme.iconSm`: `18 x 18`를 사용하고 모바일에서는 `36 x 36`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "항목은 간격 없이 선행 삽입과 인접해 있습니다. 4개의 참조 슬롯은 데스크탑 x 위치 `8`, `30`, `52` 및 `74`에서 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distributeSpacing`의 기본값은 `false`입니다. 호스트에 의도적으로 분산 슬롯이 필요한 경우에만 `true`로 설정하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 배경은 투명합니다(`backgroundOpacity = 0`).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "사용자 지정 고정 간격의 경우 `distributeSpacing: false`를 유지하고 `spacing`를 명시적으로 설정합니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "<a id=\"item-model-contract\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "## 아이템 모델 계약\n",
+      "level": 2,
+      "title": "아이템 모델 계약"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "각 항목은 객체 또는 문자열일 수 있습니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "개체 필드:\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 82,
+      "end_line": 91,
+      "raw": "- `id` / `buttonId` / `key`\n- `iconName` / `icon` (svg 아이콘 이름)\n- `iconSource` / `source` / `url`(직접 소스 옵션)\n- `enabled`\n- `visible`\n- `selected` / `active`\n- `eventName` / `event` / `action`\n- `eventPayload` / `payload`\n- `events`(문자열 또는 이벤트 객체의 배열)\n- `onTriggered` / `onClicked` / `handler`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`id` / `buttonId` / `key`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconName` / `icon` (svg 아이콘 이름)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSource` / `source` / `url`(직접 소스 옵션)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visible`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selected` / `active`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`eventName` / `event` / `action`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`eventPayload` / `payload`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`events`(문자열 또는 이벤트 객체의 배열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`onTriggered` / `onClicked` / `handler`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "문자열 항목:\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "list",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "- `iconName`로 취급\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`iconName`로 취급",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "<a id=\"callback-context\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "## 콜백 컨텍스트\n",
+      "level": 2,
+      "title": "콜백 컨텍스트"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "콜백이 존재하면 툴바는 다음을 사용하여 콜백을 호출합니다.\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 103,
+      "end_line": 111,
+      "raw": "- `index`\n- `item`\n- `button`\n- `buttonId`\n- `toolbar`\n- `eventName`\n- `payload`\n- `emit(eventName, payload)`\n- `activate(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`index`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`item`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`button`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`toolbar`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`eventName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`payload`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`emit(eventName, payload)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activate(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "fenced_code",
+      "start_line": 117,
+      "end_line": 142,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.HierarchyToolbar {\n    id: toolbar\n    buttonItems: [\n        {\n            id: \"structure\",\n            iconName: \"projectStructure\",\n            selected: true,\n            eventName: \"hierarchy.structure\"\n        },\n        {\n            id: \"layers\",\n            iconName: \"projectStructure\",\n            events: [\n                \"hierarchy.layers\",\n                { name: \"analytics.hierarchy.layers\", payload: ({ source: \"toolbar\" }) }\n            ],\n            onClicked: function(ctx) {\n                ctx.emit(\"hierarchy.layers.clicked\", ({ id: ctx.buttonId }))\n            }\n        }\n    ]\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.HierarchyToolbar {\n    id: toolbar\n    buttonItems: [\n        {\n            id: \"structure\",\n            iconName: \"projectStructure\",\n            selected: true,\n            eventName: \"hierarchy.structure\"\n        },\n        {\n            id: \"layers\",\n            iconName: \"projectStructure\",\n            events: [\n                \"hierarchy.layers\",\n                { name: \"analytics.hierarchy.layers\", payload: ({ source: \"toolbar\" }) }\n            ],\n            onClicked: function(ctx) {\n                ctx.emit(\"hierarchy.layers.clicked\", ({ id: ctx.buttonId }))\n            }\n        }\n    ]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "html",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "<a id=\"failure-pattern\"></a>\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "## 실패 패턴\n",
+      "level": 2,
+      "title": "실패 패턴"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "`buttonItems` 객체 항목이 `iconName` 및 `iconSource`를 모두 생략하는 경우 슬롯은 `IconButton`의 대체 경로 아이콘 동작으로 렌더링됩니다. 예측 가능한 시각적 개체에는 항상 명시적인 아이콘 이름을 제공하세요.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "html",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "<a id=\"empty-and-stable-selection\"></a>\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "heading",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "## 비어 있고 안정적인 선택\n",
+      "level": 2,
+      "title": "비어 있고 안정적인 선택"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "paragraph",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "빈 툴바는 `activeButton: null`, `activeButtonId: -1`, 및 `activeIndex: -1` 에 정착합니다. 변경되지 않은 선택을 정규화하면 또 다른 ID 변경을 발생시키거나 또 다른 이벤트 루프 패스를 예약하지 않습니다. Qt QML 에서 숫자 `var` 를 재할당하는 경우 값이 같아도 통지를 보낼 수 있으므로, 빈 계층 구조 패널이 반응형이 되도록 해당 할당을 보호하십시오. `hierarchy_toolbar_empty_state_does_not_reschedule` 경우 `LVRSTests_import_api` 에서 통지 및 정착된 큐를 모두 확인합니다.\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "html",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "heading",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "각 ToolbarButton는 도구 모음의 크기를 조정하거나 이동하지 않고도 로컬로 반응합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "HierarchyToolbar",
+      "anchor": "hierarchytoolbar",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Figma 레이아웃 기준선",
+      "anchor": "figma-레이아웃-기준선",
+      "start_line": 59
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "아이템 모델 계약",
+      "anchor": "아이템-모델-계약",
+      "start_line": 76
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "콜백 컨텍스트",
+      "anchor": "콜백-컨텍스트",
+      "start_line": 99
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 115
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "실패 패턴",
+      "anchor": "실패-패턴",
+      "start_line": 146
+    },
+    {
+      "block_id": "b000081",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "비어 있고 안정적인 선택",
+      "anchor": "비어-있고-안정적인-선택",
+      "start_line": 152
+    },
+    {
+      "block_id": "b000087",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 158
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000089",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 160
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

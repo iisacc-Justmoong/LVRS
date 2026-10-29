@@ -1,6 +1,8 @@
 #include "Table.h"
 #include "TableDetail.h"
+#include "Icons.h"
 #include <iiGUI/Desktop.h>
+#include <iiGUI/Text.h>
 #include <algorithm>
 #include <cmath>
 #include <type_traits>
@@ -30,11 +32,21 @@ void fill(gui::WidgetDrawing& drawing,double x,double y,double width,double heig
     if(right<=x||bottom<=y||color.alpha<=0)return;
     const auto value=ink(color);drawing.panels.push_back({{float(x),float(y),float(right-x),float(bottom-y)},value,value});
 }
-void label(gui::WidgetDrawing& drawing,double x,double y,double width,double size,std::string text,gui::WidgetColor color,const std::string& font,double view_width,double view_height,bool elide){
+void label(gui::WidgetDrawing& drawing,double x,double y,double width,double size,std::string text,gui::WidgetColor color,const std::string& font,double view_width,double view_height,bool elide,unsigned weight=400){
     width=std::min(8192.,width);
     if(text.empty()||width<=0||x>=view_width||x+width<=0||y>=view_height||y+size<=0)return;
-    drawing.texts.push_back({.bounds={float(x),float(y),float(width),float(size)},.text=std::move(text),.color=ink(color),.font_size=float(size),.font_family=font,.line_height=float(size),.elide_right=elide,
+    drawing.texts.push_back({.bounds={float(x),float(y),float(width),float(size)},.text=std::move(text),.color=ink(color),.font_size=float(size),.font_weight=weight,.font_family=font,.line_height=float(size),.elide_right=elide,
         .clip=gui::Rect{0,0,float(view_width),float(view_height)}});
+}
+void icon(gui::WidgetDrawing& drawing,std::string_view name,double x,double y,double size,
+          double column_x,double column_width,double view_width,double view_height){
+    if(name.empty()||size<=0)return;
+    const auto left=std::max({0.,column_x,x}),right=std::min({view_width,column_x+column_width,x+size});
+    const auto top=std::max(0.,y),bottom=std::min(view_height,y+size);
+    if(right<=left||bottom<=top)return;
+    auto image=take(Icons::image(name));
+    drawing.images.push_back({.bounds={float(left),float(top),float(right-left),float(bottom-top)},
+        .image=std::move(image),.source={float((left-x)/size),float((top-y)/size),float((right-left)/size),float((bottom-top)/size)}});
 }
 struct ResizeTarget final{bool column=false;std::size_t index=0;friend bool operator==(const ResizeTarget&,const ResizeTarget&)=default;};
 }
@@ -109,8 +121,19 @@ struct Table::Impl final {
         double x=first_column?take(model->column_x(*first_column))-value.horizontal_scroll_offset:width;
         for(std::size_t column=first_column.value_or(model->column_count());column<model->column_count()&&x<width;++column){
             const auto cell_width=take(model->column_width(column));
-            const auto& columns=model->options().columns;const auto padding=column<columns.size()?columns[column].padding.value_or(8):8.;
-            label(heading,x+padding,(header_height-12)/2,cell_width-padding*2,12,column<columns.size()?columns[column].text:model->options().default_header_text,options.header_text,font,width,header_height,true);
+            const auto& columns=model->options().columns;
+            const auto item=column<columns.size()?columns[column]:TableHeaderColumn{.text=model->options().default_header_text};
+            const auto padding=item.padding.value_or(8),available=std::max(0.,cell_width-2*padding);
+            const double lead=item.leading_icon.empty()?0:std::min(18.,available);
+            const double lead_gap=lead>0?std::min(7.,std::max(0.,available-lead)):0;
+            const double tail=item.trailing_icon.empty()?0:std::min(18.,std::max(0.,available-lead-lead_gap));
+            const double tail_gap=tail>0?std::min(7.,std::max(0.,available-lead-lead_gap-tail)):0;
+            const auto measured=take(gui::measure_text_layout({.text=item.text,.font_size=12,.font_weight=600,.font_family=font,.line_height=12}));
+            const auto label_width=std::min(measured.width,std::max(0.,available-lead-lead_gap-tail-tail_gap));
+            const auto left=x+padding;
+            icon(heading,item.leading_icon,left,(header_height-lead)/2,lead,x,cell_width,width,header_height);
+            label(heading,left+lead+lead_gap,(header_height-12)/2,label_width,12,item.text,options.header_text,font,width,header_height,true,600);
+            icon(heading,item.trailing_icon,left+lead+lead_gap+label_width+tail_gap,(header_height-tail)/2,tail,x,cell_width,width,header_height);
             x+=cell_width;
         }
         fill(heading,0,header_height,width,1,options.divider,width,header_height+1);

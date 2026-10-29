@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4eea0cb553b2c09a97adf7961c0d8c12a987227e2afa88bb4c0d94c1d85d6582",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativePageRouterGallery/AGENT.md",
+    "sha256": "459412b6ca5e42a23ae801a9e00fd395cc0a2a09fbf53801019705801e2f06af",
+    "bytes": 337,
+    "line_count": 5,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "예제 작업 지침",
+    "role": "instructions",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 예제 작업 지침\n",
+      "level": 1,
+      "title": "예제 작업 지침"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "C++23, LVUI AOT, LVRS 자체 위젯, iiGUI, iiSDKCore만 사용한다. 앱 소스와 헤더는\nApp/에서 함께 유지하며 docs/는 한국어로 작성한다. 빌드 디렉터리는 build/이다.\n사용자의 최신 지시에 따라 앱·테스트·self-test 실행은 전체 작업의 마지막에 모은다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "예제 작업 지침",
+      "anchor": "예제-작업-지침",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

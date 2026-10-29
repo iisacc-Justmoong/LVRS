@@ -1,7 +1,8 @@
 # 네이티브 Hierarchy 데이터와 뷰 투영
 
-2026-10-24 사용자 지시로 이번 작업은 아래 데이터 계층의 빌드·패키지·정적 검증까지
-완료하고 종료한다. 실제 위젯과 LVUI 연결 및 실행 검증은 후속 요청 범위로 남긴다.
+2026-10-24의 데이터 계층 단계는 빌드·패키지·정적 검증까지 기록했다. 이후 LVUI 전체
+완성 목표에 따라 [컨트롤러](HierarchyController.md)와 [실제 위젯](HierarchyViews.md)을
+추가하고 있으며, 아래 데이터 단계의 이력과 전체 위젯 완성 여부를 구분한다.
 
 원본 backend/model/hierarchymodel 및 HierarchyItem.qml·HierarchyList.qml의 계약을
 기준으로 Qt 없는 C++23 데이터 계층을 추가했다. 현재 범위는 HierarchyModel과

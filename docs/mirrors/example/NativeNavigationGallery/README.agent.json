@@ -1,0 +1,107 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:eec0b9ae5fed74ef4a92b2273ab310ac06fc1dc9abecf739570df814f50f11b4",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeNavigationGallery/README.md",
+    "sha256": "e35fad68f10aa677f3b98561390318084ab8a5f1a56444b71301e49a8ebfaaf3",
+    "bytes": 791,
+    "line_count": 14,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native navigation model gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native navigation model gallery\n",
+      "level": 1,
+      "title": "Native navigation model gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "This C++23 example compiles LVUI through AOT and connects native route matching,\nresolution and presentation history to iiGUI labels and buttons. The application\nentry, background work, frame loop and shutdown belong to iiSDKCore.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 9,
+      "raw": "Application sources live in `App/`. This is a navigation-model integration\nexample, not a completed routed-page host. Per-page creation, scope retirement,\npage transitions and the full PageRouter/Navigator/Link surface remain pending.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "Build with the installed LVRS native CMake package and its native dependencies.\nUse a `build/` output directory. `--self-test` is registered for the final\nverification batch; it must not be launched during the current implementation\nphase, in accordance with the user's execution policy.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native navigation model gallery",
+      "anchor": "native-navigation-model-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000007",
+        "line": 13,
+        "text": "verification batch; it must not be launched during the current implementation",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

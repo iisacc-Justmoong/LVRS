@@ -1,0 +1,639 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:12eef3d698b1c05948f587fdc5b377746d34916b41435456bc57fcddf5824fdb",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/PageTransitionController.md",
+    "sha256": "90afc718eba9700640bbdd4f1cf63369162fa65dab9a21daf2a0133cc5ea8123",
+    "bytes": 2352,
+    "line_count": 89,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "PageTransitionController",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# PageTransitionController\n",
+      "level": 1,
+      "title": "PageTransitionController"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/navigation/PageTransitionController.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`PageTransitionController`는 라우터 내부에 커밋된 경로 상태를 유지하면서 `PageRouter` 대화형 전환을 구동하는 비시각적 프록시입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- `PageRouter` 위에 컨트롤러 모양의 표면을 제공합니다.\n- 특정 라우터에 바인딩하거나 `Navigator.router`를 따릅니다.\n- 전환 수명 주기 신호를 전용 객체로 전달합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`PageRouter` 위에 컨트롤러 모양의 표면을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "특정 라우터에 바인딩하거나 `Navigator.router`를 따릅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전환 수명 주기 신호를 전용 객체로 전달합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"properties\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 속성\n",
+      "level": 2,
+      "title": "속성"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 26,
+      "raw": "- `router`\n- `active`\n- `progress`\n- `direction`\n- `operation`\n- `fromPath`, `toPath`\n- `fromParams`, `toParams`\n- `canCommit`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`router`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`active`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`progress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`direction`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`operation`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fromPath`, `toPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fromParams`, `toParams`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canCommit`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "<a id=\"signals\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "## 신호\n",
+      "level": 2,
+      "title": "신호"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 36,
+      "raw": "- `started(state)`\n- `updated(state)`\n- `committed(state)`\n- `cancelled(state)`\n- `rejected(reason, state)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`started(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updated(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`committed(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancelled(state)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rejected(reason, state)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "<a id=\"methods\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## 방법\n",
+      "level": 2,
+      "title": "방법"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 42,
+      "end_line": 54,
+      "raw": "- `canControl()`\n- `begin(spec)`\n- `beginBack(meta?)`\n- `beginPush(path, params?, meta?)`\n- `beginReplace(path, params?, meta?)`\n- `beginSetRoot(path, params?, meta?)`\n- `beginPushComponent(component, params?, meta?)`\n- `beginReplaceComponent(component, params?, meta?)`\n- `beginSetRootComponent(component, params?, meta?)`\n- `update(progress, details?)`\n- `finish(commit?)`\n- `cancel()`\n- `shouldCommit(progress?, velocityX?, velocityY?)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`canControl()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`begin(spec)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginBack(meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginPush(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginReplace(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginSetRoot(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginPushComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginReplaceComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginSetRootComponent(component, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`update(progress, details?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`finish(commit?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancel()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shouldCommit(progress?, velocityX?, velocityY?)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 60,
+      "end_line": 62,
+      "raw": "- 컨트롤러는 `PageRouter.path`를 직접적으로 변경하지 않습니다. 커밋과 취소는 여전히 라우터 내부에서 발생합니다.\n- `router`가 설정되지 않은 경우 기본 바인딩은 `Navigator.router`를 따릅니다.\n- 명시적인 부울이 없는 `finish()`는 라우터의 커밋 휴리스틱을 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "컨트롤러는 `PageRouter.path`를 직접적으로 변경하지 않습니다. 커밋과 취소는 여전히 라우터 내부에서 발생합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`router`가 설정되지 않은 경우 기본 바인딩은 `Navigator.router`를 따릅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "명시적인 부울이 없는 `finish()`는 라우터의 커밋 휴리스틱을 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "fenced_code",
+      "start_line": 68,
+      "end_line": 81,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.PageTransitionController {\n    id: transitions\n    router: router\n\n    function driveBackSwipe(progress, velocityX) {\n        if (!active)\n            beginBack({ source: \"edge-pan\" })\n        update(progress, { velocityX: velocityX })\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.PageTransitionController {\n    id: transitions\n    router: router\n\n    function driveBackSwipe(progress, velocityX) {\n        if (!active)\n            beginBack({ source: \"edge-pan\" })\n        update(progress, { velocityX: velocityX })\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 87,
+      "end_line": 89,
+      "raw": "- 읽기 전용 상태는 바인딩된 라우터의 대화형 전환 속성에서 미러링됩니다.\n- 수명주기 신호는 `Connections`를 통해 전달됩니다.\n- 이렇게 하면 동작 정책과 전환 정책이 커밋된 라우팅 상태에서 분리된 상태로 유지됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "읽기 전용 상태는 바인딩된 라우터의 대화형 전환 속성에서 미러링됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "수명주기 신호는 `Connections`를 통해 전달됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이렇게 하면 동작 정책과 전환 정책이 커밋된 라우팅 상태에서 분리된 상태로 유지됩니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "PageTransitionController",
+      "anchor": "pagetransitioncontroller",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "속성",
+      "anchor": "속성",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "신호",
+      "anchor": "신호",
+      "start_line": 30
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "방법",
+      "anchor": "방법",
+      "start_line": 40
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 58
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 66
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 85
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

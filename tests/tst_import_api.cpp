@@ -5146,9 +5146,10 @@ Item {
 
     LV.InputField {
         id: passwordField
+        objectName: "figmaPasswordField"
         visible: false
         placeholderText: "Password"
-        echoMode: TextInput.Password
+        mode: passwordMode
         text: "secret"
     }
 
@@ -5195,6 +5196,29 @@ Item {
         placeholderText: "Cylinder"
     }
 
+    Repeater {
+        model: 18
+        LV.InputField {
+            required property int index
+            objectName: "inputCombination" + index
+            visible: false
+            width: 206
+            height: 22
+            style: Math.floor(index / 6)
+            mode: Math.floor((index % 6) / 2)
+            enabled: index % 2 === 0
+            text: "secret"
+            readonly property bool comboReady:
+                (style === roundedStyle ? resolvedCornerRadius === 6
+                    : style === inlineStyle ? resolvedCornerRadius === 0
+                    : resolvedCornerRadius === 11)
+                && (mode === passwordMode ? echoMode === TextInput.Password && displayText !== text
+                    : echoMode === TextInput.Normal)
+                && searchIconVisible === (mode === searchMode)
+                && showClearButton === enabled
+        }
+    }
+
     property string figmaInputFieldDiagnostics:
         "target=" + LV.Theme.effectiveTarget
         + " default=" + defaultField.implicitWidth + "x" + defaultField.implicitHeight
@@ -5205,7 +5229,7 @@ Item {
         + " inset=" + defaultField.leftInset + "/" + defaultField.rightInset
         + " y=" + defaultField.centeredTextY
         + " radius=" + defaultField.cornerRadius
-        + "/token=" + LV.Theme.radiusMd
+        + "/token=" + LV.Theme.radiusBase
         + " style=" + defaultField.resolvedStyle + "/" + defaultField.shapeStyle
         + " inline=" + inlineField.resolvedStyle + "/" + inlineField.shapeStyle
         + " cylinder=" + cylinderField.resolvedStyle + "/" + cylinderField.shapeStyle
@@ -5214,7 +5238,8 @@ Item {
         + "/" + searchField.leftInset + "/" + searchField.rightInset
 
     property bool figmaInputFieldReady:
-        defaultField.roundedStyle === defaultField.filledStyle
+        defaultField.textMode === defaultField.defaultMode
+        && defaultField.roundedStyle === defaultField.filledStyle
         && defaultField.resolvedStyle === defaultField.roundedStyle
         && defaultField.shapeStyle === defaultField.shapeRoundRect
         && defaultField.backgroundColor === LV.Theme.inputFieldGlassTint
@@ -5231,7 +5256,7 @@ Item {
         && defaultField.insetHorizontal === 7 * expectedScale
         && defaultField.insetVertical === 4.5 * expectedScale
         && defaultField.sideSpacing === 2 * expectedScale
-        && defaultField.cornerRadius === 8 * expectedScale
+        && defaultField.cornerRadius === 6 * expectedScale
         && defaultField.centeredTextHeight === 13
         && defaultField.textLineBoxHeight === 13
         && defaultField.inputItem.height === 13
@@ -5242,7 +5267,7 @@ Item {
         && defaultField.centeredTextY === 4.5
         && defaultField.textColor === LV.Theme.titleHeaderColor
         && defaultField.textColorDisabled === LV.Theme.disabledColor
-        && defaultField.placeholderColor === LV.Theme.disabledColor
+        && defaultField.placeholderColor === LV.Theme.titleHeaderColor
         && defaultField.placeholderColorDisabled === LV.Theme.disabledColor
         && Math.abs(defaultField.placeholderOpacity - 1.0) < 0.001
         && defaultField.searchIconColor === LV.Theme.accentGrayLight
@@ -5251,7 +5276,8 @@ Item {
         && defaultField.clearIconForegroundColor === LV.Theme.panelBackground10
         && inlineField.style === inlineField.inlineStyle
         && inlineField.resolvedStyle === inlineField.inlineStyle
-        && inlineField.shapeStyle === inlineField.shapeCylinder
+        && inlineField.shapeStyle === inlineField.shapeRoundRect
+        && inlineField.resolvedCornerRadius === 0
         && inlineField.implicitWidth === 206 * expectedScale
         && inlineField.implicitHeight === 22 * expectedScale
         && inlineField.backgroundColor === LV.Theme.inputFieldGlassTintInline
@@ -5285,11 +5311,13 @@ Item {
         && legacySearchField.search
         && legacySearchField.searchIconVisible
         && passwordField.echoMode === TextInput.Password
+        && passwordField.displayText !== passwordField.text
+        && !passwordField.searchIconVisible
         && passwordField.height === 22
         && readOnlyField.readOnly
         && readOnlyField.height === 22
         && inlineDisabledField.height === 22
-        && inlineDisabledField.placeholderColor === LV.Theme.disabledColor
+        && inlineDisabledField.placeholderColorDisabled === LV.Theme.disabledColor
         && !readOnlyField.showClearButton
 }
 )";
@@ -5310,6 +5338,11 @@ Item {
     QVERIFY(cylinderItem);
     QVERIFY(inlineItem);
     QVERIFY(searchItem);
+    for (int index = 0; index < 18; ++index) {
+        auto *combination = root->findChild<QObject *>(QStringLiteral("inputCombination%1").arg(index));
+        QVERIFY(combination);
+        QTRY_VERIFY2(combination->property("comboReady").toBool(), qPrintable(combination->objectName()));
+    }
 
     const auto verifyClearPadding = [](QQuickItem *field) {
         auto *clear = field->findChild<QQuickItem *>(field->objectName() + "_clearButton");
@@ -5346,6 +5379,15 @@ Item {
         QCOMPARE(searchIcon->mapToItem(searchItem, QPointF()).y(), 5.0);
         QCOMPARE(searchIcon->height(), 12.0);
     }
+    auto *passwordItem = root->findChild<QObject *>(QStringLiteral("figmaPasswordField"));
+    QVERIFY(passwordItem);
+    const int passwordEchoMode = passwordItem->property("echoMode").toInt();
+    QVERIFY(passwordItem->setProperty("mode", passwordItem->property("searchMode")));
+    QTRY_VERIFY(passwordItem->property("searchIconVisible").toBool());
+    QVERIFY(passwordItem->property("echoMode").toInt() != passwordEchoMode);
+    QVERIFY(passwordItem->setProperty("mode", passwordItem->property("passwordMode")));
+    QTRY_VERIFY(!passwordItem->property("searchIconVisible").toBool());
+    QCOMPARE(passwordItem->property("echoMode").toInt(), passwordEchoMode);
 
     // Fractional padding follows an explicit minimum height without clipping the line box.
     QVERIFY(roundedItem->setProperty("fieldMinHeight", 30));
@@ -5455,7 +5497,8 @@ Controls.ApplicationWindow {
     property bool detailedBackdrop: false
     property real contentOffset: 0
     property color stripeColor: "#f0d189"
-    readonly property color expectedPlaceholderColor: LV.Theme.disabledColor
+    readonly property color expectedPlaceholderColor: LV.Theme.titleHeaderColor
+    readonly property color expectedDisabledPlaceholderColor: LV.Theme.disabledColor
     Component.onCompleted: LV.Theme.targetOverride = "macos"
     Component.onDestruction: LV.Theme.targetOverride = ""
     background: Rectangle {
@@ -5525,7 +5568,7 @@ Controls.ApplicationWindow {
         QCOMPARE(placeholder->y(), input->y());
         QCOMPARE(placeholder->height(), input->height());
         QCOMPARE(placeholder->property("color").value<QColor>().rgba(),
-                 root->property("expectedPlaceholderColor").value<QColor>().rgba());
+                 root->property(i % 6 == 1 ? "expectedDisabledPlaceholderColor" : "expectedPlaceholderColor").value<QColor>().rgba());
         QCOMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
         QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
     }
@@ -8492,6 +8535,11 @@ Item {
         width: implicitWidth
         height: implicitHeight
         opacity: 0
+        cellItems: [
+            { label: "Column" },
+            { label: "No leading", leadingIcon: "", trailingIcon: "generalchevronDown" },
+            { label: "Both", leadingIcon: "generalchevronDown", trailingIcon: "generalchevronDown" }
+        ]
     }
 
     LV.TableRow {
@@ -8636,7 +8684,27 @@ Item {
                                 .arg(expected.width()).arg(expected.height())));
     };
 
-    verifyBounds(boundsIn(headerLabel, header), QRectF(8.0, 6.0, 223.0, 12.0));
+    auto *headerLeading = visualChildByObjectName(
+        header, QStringLiteral("figmaHeader_cell_0_leadingIcon"));
+    auto *headerTrailing = visualChildByObjectName(
+        header, QStringLiteral("figmaHeader_cell_0_trailingIcon"));
+    QVERIFY(headerLeading);
+    QVERIFY(headerTrailing);
+    verifyBounds(boundsIn(headerLeading, header), QRectF(8.0, 3.0, 18.0, 18.0));
+    QCOMPARE(headerLeading->property("source").toUrl().fileName(), QStringLiteral("generalchevronDown.svg"));
+    QVERIFY(!headerTrailing->isVisible());
+    QCOMPARE(boundsIn(headerLabel, header).x(), 33.0);
+    QCOMPARE(boundsIn(headerLabel, header).y(), 6.0);
+    auto *secondLeading = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_leadingIcon"));
+    auto *secondTrailing = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_trailingIcon"));
+    auto *secondLabel = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_label"));
+    QVERIFY(secondLeading);
+    QVERIFY(secondTrailing);
+    QVERIFY(secondLabel);
+    QVERIFY(!secondLeading->isVisible());
+    QVERIFY(secondTrailing->isVisible());
+    QCOMPARE(boundsIn(secondLabel, header).x(), 247.0);
+    QCOMPARE(boundsIn(secondTrailing, header).x(), boundsIn(secondLabel, header).right() + 7.0);
     verifyBounds(boundsIn(headerSeparator, header), QRectF(0.0, 24.0, 717.0, 1.0));
     verifyBounds(boundsIn(cellDivider, cell), QRectF(0.0, 0.0, 1.0, 24.0));
     verifyBounds(boundsIn(cellContent, cell), QRectF(9.0, 5.5, 225.0, 13.0));

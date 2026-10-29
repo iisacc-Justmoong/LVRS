@@ -1,0 +1,449 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:e3798ea6e0efc9b1abd92444e2a7046322582167be5ef8d62ee58b9cf27426ff",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/ModelUndoStack.md",
+    "sha256": "a9722dfb4bb16c19137c67d156857f24c70c4f3d79e68e1a74a5c5bff0a28754",
+    "bytes": 1611,
+    "line_count": 50,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ModelUndoStack",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ModelUndoStack\n",
+      "level": 1,
+      "title": "ModelUndoStack"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/model/modelundostack.h`, `src/backend/model/modelundostack.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ModelUndoStack`는 모델 돌연변이를 위한 한계가 설정된 C++ 스냅샷 스택입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- QML 보기 코드 외부에서 실행 취소/다시 실행 기록을 유지합니다.\n- 파괴적이거나 입력된 편집 전에 모델 스냅샷을 저장합니다.\n- 자체 스냅샷을 복원하는 모델 컨트롤러에 재사용 가능한 스택을 제공합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "QML 보기 코드 외부에서 실행 취소/다시 실행 기록을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "파괴적이거나 입력된 편집 전에 모델 스냅샷을 저장합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "자체 스냅샷을 복원하는 모델 컨트롤러에 재사용 가능한 스택을 제공합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "속성:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 23,
+      "raw": "- `limit`\n- `undoDepth`(읽기 전용)\n- `redoDepth`(읽기 전용)\n- `canUndo`(읽기 전용)\n- `canRedo`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`limit`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`undoDepth`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`redoDepth`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canUndo`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canRedo`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 30,
+      "raw": "- `pushSnapshot(snapshot)`\n- `takeUndoSnapshot(currentSnapshot)`\n- `takeRedoSnapshot(currentSnapshot)`\n- `clear()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`pushSnapshot(snapshot)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`takeUndoSnapshot(currentSnapshot)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`takeRedoSnapshot(currentSnapshot)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clear()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 35,
+      "raw": "- `limitChanged()`\n- `stackChanged()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`limitChanged()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackChanged()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 41,
+      "end_line": 44,
+      "raw": "- `pushSnapshot(...)`는 실행 취소 스냅샷을 추가하고 다시 실행 기록을 지웁니다.\n- `takeUndoSnapshot(current)`는 이전 스냅샷을 반환하고 `current`를 다시 실행하도록 푸시합니다.\n- `takeRedoSnapshot(current)`는 다시 실행 스냅샷을 반환하고 `current`를 실행 취소로 푸시합니다.\n- `limit`는 최소 `1`에 고정됩니다. 한도를 초과하면 이전 스냅샷이 잘립니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`pushSnapshot(...)`는 실행 취소 스냅샷을 추가하고 다시 실행 기록을 지웁니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`takeUndoSnapshot(current)`는 이전 스냅샷을 반환하고 `current`를 다시 실행하도록 푸시합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`takeRedoSnapshot(current)`는 다시 실행 스냅샷을 반환하고 `current`를 실행 취소로 푸시합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`limit`는 최소 `1`에 고정됩니다. 한도를 초과하면 이전 스냅샷이 잘립니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "<a id=\"consumers\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## 소비자\n",
+      "level": 2,
+      "title": "소비자"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "`TableModel`는 셀 편집, 병합/분할, 행/열 구조 편집 및 행/열 크기 조정 편집을 위해 내부적으로 `ModelUndoStack`를 사용합니다. `Table.qml`는 결과 `undo()`, `redo()`, `canUndo` 및 `canRedo` API를 노출합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ModelUndoStack",
+      "anchor": "modelundostack",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 39
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "소비자",
+      "anchor": "소비자",
+      "start_line": 48
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

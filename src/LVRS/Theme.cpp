@@ -1,4 +1,6 @@
 #include "Theme.h"
+#include "FontPolicy.h"
+#include <iiSDKCore/Core/Property/ObservableReadScope.h>
 #include <cmath>
 #include <stdexcept>
 
@@ -23,7 +25,15 @@ ii::gui::WidgetColor Theme::accent_color(Accent accent) {
     return palette[index];
 }
 ii::gui::WidgetAppearance Theme::appearance() const {
+    static thread_local const bool fonts_ready=ii::core::ObservableReadScope::pause([]{FontPolicy policy;return true;});
+    (void)fonts_ready;
     auto result=ii::gui::lvrs_appearance(); result.primary=accent_color(accent_);
+    const auto fonts=ii::gui::FontDatabase::application();
+    if(fonts->family_available("Pretendard"))result.font_family="Pretendard";
+    else {
+        bool found=false;for(const auto& family:fonts->families())if(ii::gui::FontDatabase::fold_name(family).find("pretendard")!=std::string::npos){result.font_family=family;found=true;break;}
+        if(!found){const auto application=fonts->application_font();result.font_family=application?application->family:fonts->system_family();}
+    }
     const auto c=result.primary;
     const auto mix=[](double v) { return std::round((20.0*.98+v*255*.02))/255; };
     result.window={mix(c.red),mix(c.green),mix(c.blue),1};

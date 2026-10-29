@@ -1,0 +1,314 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:85d1dc134b6a76278868237013f02cfe5c3b13cb5023d1b3a5cdec9c1361c8a2",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/app/WindowChromeInteraction.md",
+    "sha256": "b7a1435007c15b2ac3217aa4e5fd09a7200c2068633b6e51dc6ce508a47e2cd2",
+    "bytes": 2703,
+    "line_count": 55,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "WindowChromeInteraction",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# WindowChromeInteraction\n",
+      "level": 1,
+      "title": "WindowChromeInteraction"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/WindowChromeInteraction.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`WindowChromeInteraction`는 `LV.Window` 및 `LV.ApplicationWindow` 뒤에 있는 재사용 가능한 포인터 레이어입니다. 대부분의 애플리케이션은 이 구성 요소를 직접 인스턴스화하는 대신 해당 루트 유형에 의해 노출되는 속성을 구성해야 합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 9,
+      "end_line": 17,
+      "raw": "- 대상: `targetWindow`\n- 마스터 스위치: `interactionEnabled`\n- 지역 이동: `moveHandleEnabled`, `moveHandleHeight`, `moveHandleTopMargin`, `moveHandleLeftMargin`, `moveHandleRightMargin`\n- 이동 제외: `moveExclusionItems`\n- 영역 크기 조정: `resizeHandlesEnabled`, `resizeEdges`, `resizeBorderThickness`, `resizeCornerSize`\n- 계산된 형상: `effectiveResizeBorderThickness`, `effectiveResizeCornerSize`\n- 이동 핸들 별칭: `moveHandleItem`\n- 방법: `requestMove()`, `requestResize(edges)`, `isResizeEdgeEnabled(edge)`\n- 신호: `moveAttempted(started)`, `resizeAttempted(edges, started)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "대상: `targetWindow`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "마스터 스위치: `interactionEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "지역 이동: `moveHandleEnabled`, `moveHandleHeight`, `moveHandleTopMargin`, `moveHandleLeftMargin`, `moveHandleRightMargin`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이동 제외: `moveExclusionItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "영역 크기 조정: `resizeHandlesEnabled`, `resizeEdges`, `resizeBorderThickness`, `resizeCornerSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "계산된 형상: `effectiveResizeBorderThickness`, `effectiveResizeCornerSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이동 핸들 별칭: `moveHandleItem`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방법: `requestMove()`, `requestResize(edges)`, `isResizeEdgeEnabled(edge)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "신호: `moveAttempted(started)`, `resizeAttempted(edges, started)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "html",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "<a id=\"behavior\"></a>\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "## 행동\n",
+      "level": 2,
+      "title": "행동"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 29,
+      "raw": "- 최소화된 창과 전체 화면 창에서는 이동 핸들이 비활성화됩니다.\n- 이동 히트 영역은 `moveHandleTopMargin + moveHandleHeight`에서 끝납니다. 솔리드 macOS 크롬은 AppKit 배경 이동을 비활성화하므로 이 영역 외부의 드래그는 LVRS 핸들러 또는 해당 제외를 우회할 수 없습니다.\n- 크기 조정 핸들은 보이는 창 대상에 대해서만 활성화됩니다.\n- 모서리 핸들은 가장자리 핸들 위에 있고 모든 크기 조정 핸들은 이동 핸들 위에 있습니다.\n- 크기 조정 프레스는 작업을 요청하기 전에 `MouseArea` 위치를 전역 좌표에 매핑합니다. 이렇게 하면 원격, 태블릿 또는 합성 입력 소스가 `QCursor::pos()`를 동기화하지 않은 경우에도 macOS 대체 경로를 시작한 이벤트에 고정된 상태로 유지됩니다.\n- 네이티브 크기 조정 또는 macOS 매뉴얼 대체 경로가 시작되면 크기 조정 누르기가 계속 허용됩니다. 두 경로 모두에서 요청이 거부되면 `MouseArea` 프레스가 해제되어 아래 항목이 계속 처리될 수 있습니다.\n- 제외 좌표는 대상 창 항목 트리 전체에 매핑되므로 컨트롤은 크기가 조정되거나 중첩된 콘텐츠에 있을 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "최소화된 창과 전체 화면 창에서는 이동 핸들이 비활성화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이동 히트 영역은 `moveHandleTopMargin + moveHandleHeight`에서 끝납니다. 솔리드 macOS 크롬은 AppKit 배경 이동을 비활성화하므로 이 영역 외부의 드래그는 LVRS 핸들러 또는 해당 제외를 우회할 수 없습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "크기 조정 핸들은 보이는 창 대상에 대해서만 활성화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모서리 핸들은 가장자리 핸들 위에 있고 모든 크기 조정 핸들은 이동 핸들 위에 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "크기 조정 프레스는 작업을 요청하기 전에 `MouseArea` 위치를 전역 좌표에 매핑합니다. 이렇게 하면 원격, 태블릿 또는 합성 입력 소스가 `QCursor::pos()`를 동기화하지 않은 경우에도 macOS 대체 경로를 시작한 이벤트에 고정된 상태로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 크기 조정 또는 macOS 매뉴얼 대체 경로가 시작되면 크기 조정 누르기가 계속 허용됩니다. 두 경로 모두에서 요청이 거부되면 `MouseArea` 프레스가 해제되어 아래 항목이 계속 처리될 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제외 좌표는 대상 창 항목 트리 전체에 매핑되므로 컨트롤은 크기가 조정되거나 중첩된 콘텐츠에 있을 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "<a id=\"direct-use\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "## 직접 사용\n",
+      "level": 2,
+      "title": "직접 사용"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 35,
+      "end_line": 55,
+      "raw": "```qml\nimport QtQuick\nimport QtQuick.Controls\nimport LVRS as LV\n\nApplicationWindow {\n    id: root\n    visible: true\n\n    LV.WindowChromeInteraction {\n        anchors.fill: parent\n        targetWindow: root\n        moveExclusionItems: [menuButton]\n    }\n\n    Button {\n        id: menuButton\n        text: \"Menu\"\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport QtQuick.Controls\nimport LVRS as LV\n\nApplicationWindow {\n    id: root\n    visible: true\n\n    LV.WindowChromeInteraction {\n        anchors.fill: parent\n        targetWindow: root\n        moveExclusionItems: [menuButton]\n    }\n\n    Button {\n        id: menuButton\n        text: \"Menu\"\n    }\n}\n",
+      "closed": true
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "WindowChromeInteraction",
+      "anchor": "windowchromeinteraction",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동",
+      "anchor": "행동",
+      "start_line": 21
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "직접 사용",
+      "anchor": "직접-사용",
+      "start_line": 33
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

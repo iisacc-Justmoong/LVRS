@@ -1,0 +1,780 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:ce16aa1a052c1d6f59f0207ecdc55e29f327c346598292fc2bb4eb1fd0f90f84",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/Stepper.md",
+    "sha256": "eb2cb33fd1ad131ee40dddf973847d12888b2f5d97a09b1edac3b02bc73a3a85",
+    "bytes": 4624,
+    "line_count": 108,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "스테퍼",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"stepper\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 스테퍼\n",
+      "level": 1,
+      "title": "스테퍼"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/control/buttons/Stepper.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Stepper`는 정사각형 `Theme.iconSm` 프레임(데스크톱의 경우 `18 x 18`, 모바일의 경우 `36 x 36`)과 `Up`, `Down` 및 `UpDown` 화살표 모드를 갖춘 소형 독립형 방향 제어 장치입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 14,
+      "raw": "- 조밀한 제어 행에 대해 최소 증가/감소 트리거 모양을 제공합니다.\n- `Primary` 및 `Borderless` 톤 전체에서 상호 작용 상태를 결정적으로 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "조밀한 제어 행에 대해 최소 증가/감소 트리거 모양을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Primary` 및 `Borderless` 톤 전체에서 상호 작용 상태를 결정적으로 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 25,
+      "raw": "- `tone`(기본값: `AbstractButton.Primary`)\n- `arrow`(기본값: `Stepper.UpDown`)\n  - `Stepper.UpDown`\n  - `Stepper.Up`\n  - `Stepper.Down`\n- `stepped(direction)`는 포인터 클릭 후 증가의 경우 `1`를 내보내고 감소의 경우 `-1`를 내보냅니다. `UpDown`는 상/하반을 사용합니다. `Up` 및 `Down`는 항상 표시된 방향을 방출합니다. 비활성화된 컨트롤은 `clicked` 또는 `stepped`를 방출하지 않습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`tone`(기본값: `AbstractButton.Primary`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`arrow`(기본값: `Stepper.UpDown`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.UpDown`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.Up`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.Down`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stepped(direction)`는 포인터 클릭 후 증가의 경우 `1`를 내보내고 감소의 경우 `-1`를 내보냅니다. `UpDown`는 상/하반을 사용합니다. `Up` 및 `Down`는 항상 표시된 방향을 방출합니다. 비활성화된 컨트롤은 `clicked` 또는 `stepped`를 방출하지 않습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "계산된 속성:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 35,
+      "raw": "- `iconWidth`, `iconHeight`(모드 종속 시각적 계약)\n- `iconBounds`(정사각형 버튼 내부의 실제 중심 아이콘 아트워크 경계)\n- `renderedBackgroundColor`(렌더링된 프레임에 바인딩된 색상)\n- `resolvedIconColor`(활성화 인식 화살표 색상)\n- `resolvedIconName`(`tone` + `arrow` 변형에 대한 호환성 이름)\n- `resolvedIconAssetName`(실제 공유 Figma SVG 자산)\n- `iconRotation`(`Up`의 경우 `180`, 그렇지 않은 경우 `0`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`iconWidth`, `iconHeight`(모드 종속 시각적 계약)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconBounds`(정사각형 버튼 내부의 실제 중심 아이콘 아트워크 경계)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`renderedBackgroundColor`(렌더링된 프레임에 바인딩된 색상)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedIconColor`(활성화 인식 화살표 색상)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedIconName`(`tone` + `arrow` 변형에 대한 호환성 이름)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedIconAssetName`(실제 공유 Figma SVG 자산)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconRotation`(`Up`의 경우 `180`, 그렇지 않은 경우 `0`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "주입된 방법:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 39,
+      "end_line": 44,
+      "raw": "- `method`: 스테퍼에 직접 주입되는 호출 가능 항목 1개\n- `methods`: 콜러블 또는 명령 객체의 배열\n- `hasInjectedMethods`(읽기 전용)\n- `createMethodEvent(triggerName)`\n- `invokeMethod(candidate, eventData)`\n- `invokeMethods(eventData)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`method`: 스테퍼에 직접 주입되는 호출 가능 항목 1개",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`methods`: 콜러블 또는 명령 객체의 배열",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasInjectedMethods`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`createMethodEvent(triggerName)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`invokeMethod(candidate, eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`invokeMethods(eventData)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "<a id=\"visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## 시각적 계약\n",
+      "level": 2,
+      "title": "시각적 계약"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 50,
+      "end_line": 62,
+      "raw": "- 고정 프레임: `Theme.iconSm`(데스크톱에서는 `18 x 18`, 모바일에서는 `36 x 36`)\n- 코너 반경: `Theme.radiusSm`(데스크톱에서는 `4`, 모바일에서는 `8`)\n- 기본 톤:\n  - 배경: `Theme.primary`\n  - 아이콘: `Theme.accentWhite`\n- 경계 없는 톤:\n  - 배경: 투명\n  - 아이콘: `Theme.accentWhite`\n  - 마우스를 올리거나 누른 배경은 테두리 없는 버튼 정책을 따릅니다.\n- 데스크탑 기준선의 화살표 아트워크:\n  - `Up` / `Down`: `10 x 6`\n  - `UpDown`: `6.43604 x 11.1455`\n- 데스크톱과 모바일은 동일한 비율과 `18 x 18` `Theme.iconSm` 프레임을 공유합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "고정 프레임: `Theme.iconSm`(데스크톱에서는 `18 x 18`, 모바일에서는 `36 x 36`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "코너 반경: `Theme.radiusSm`(데스크톱에서는 `4`, 모바일에서는 `8`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 톤:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "배경: `Theme.primary`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘: `Theme.accentWhite`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경계 없는 톤:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "배경: 투명",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘: `Theme.accentWhite`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "마우스를 올리거나 누른 배경은 테두리 없는 버튼 정책을 따릅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크탑 기준선의 화살표 아트워크:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Up` / `Down`: `10 x 6`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`UpDown`: `6.43604 x 11.1455`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱과 모바일은 동일한 비율과 `18 x 18` `Theme.iconSm` 프레임을 공유합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "fenced_code",
+      "start_line": 68,
+      "end_line": 76,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Stepper {\n    tone: LV.AbstractButton.Borderless\n    arrow: LV.Stepper.Up\n    method: function(eventData) { increment() }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Stepper {\n    tone: LV.AbstractButton.Borderless\n    arrow: LV.Stepper.Up\n    method: function(eventData) { increment() }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "fenced_code",
+      "start_line": 78,
+      "end_line": 83,
+      "raw": "```qml\nLV.Stepper {\n    arrow: LV.Stepper.UpDown\n    onStepped: function(direction) { quantity += direction }\n}\n```\n",
+      "language": "qml",
+      "code": "LV.Stepper {\n    arrow: LV.Stepper.UpDown\n    onStepped: function(direction) { quantity += direction }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "`ListItem`는 이 이벤트를 범위 고정 수량 상태 및 키보드 Up/Down과 결합합니다. 방향 포인터 동작은 기존 Stepper 시각적 계약 외에도 `LVRSTests_list_composites`에서 다룹니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 91,
+      "end_line": 95,
+      "raw": "- `StepperChevron.svg` 및 `StepperUpDownChevron.svg`에서 정확한 Figma 내보내기를 해결합니다. `Up`는 공유 단일 갈매기형 자산을 `180`도만큼 회전합니다.\n- `RenderQuality.effectiveSupersampleScaleValue` 및 `Screen.devicePixelRatio`에서 슈퍼샘플링된 `Image.sourceSize`를 요청하므로 정적 SVG가 HiDPI 대상에서 선명하게 유지됩니다.\n- 정수 픽셀 스냅 없이 현재 Figma 노드 `254:506` 아트웍을 중앙에 배치합니다. 따라서 데스크톱 18px 기준선에서 `iconWidth`, `iconHeight` 및 `iconBounds`는 정확하게 내보낸 분수 형상을 유지합니다.\n- 렌더링된 아트워크는 미리 추출된 SVG 리소스에서 가져오는 동안 가리키기/누르기/비활성화된 마우스 파이프라인을 구성 요소에 로컬로 유지합니다.\n- `clicked()`가 생성될 때마다 공유 버튼 메서드 레지스트리를 통해 주입된 `method` 및 `methods`를 실행합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`StepperChevron.svg` 및 `StepperUpDownChevron.svg`에서 정확한 Figma 내보내기를 해결합니다. `Up`는 공유 단일 갈매기형 자산을 `180`도만큼 회전합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RenderQuality.effectiveSupersampleScaleValue` 및 `Screen.devicePixelRatio`에서 슈퍼샘플링된 `Image.sourceSize`를 요청하므로 정적 SVG가 HiDPI 대상에서 선명하게 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정수 픽셀 스냅 없이 현재 Figma 노드 `254:506` 아트웍을 중앙에 배치합니다. 따라서 데스크톱 18px 기준선에서 `iconWidth`, `iconHeight` 및 `iconBounds`는 정확하게 내보낸 분수 형상을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링된 아트워크는 미리 추출된 SVG 리소스에서 가져오는 동안 가리키기/누르기/비활성화된 마우스 파이프라인을 구성 요소에 로컬로 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clicked()`가 생성될 때마다 공유 버튼 메서드 레지스트리를 통해 주입된 `method` 및 `methods`를 실행합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "<a id=\"practical-notes\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "## 실용적인 참고 사항\n",
+      "level": 2,
+      "title": "실용적인 참고 사항"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 101,
+      "end_line": 102,
+      "raw": "- 일반 스피너 어포던스에는 `Stepper.UpDown`를 사용하세요.\n- 별도의 제어가 필요한 경우 `Stepper.Up`/`Stepper.Down`를 사용하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "일반 스피너 어포던스에는 `Stepper.UpDown`를 사용하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "별도의 제어가 필요한 경우 `Stepper.Up`/`Stepper.Down`를 사용하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "각 프레스가 리바운드됩니다. stepped는 실제 클릭 하프에 따라 +1 또는 -1를 전달합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "스테퍼",
+      "anchor": "스테퍼",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 18
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "시각적 계약",
+      "anchor": "시각적-계약",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 66
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 89
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "실용적인 참고 사항",
+      "anchor": "실용적인-참고-사항",
+      "start_line": 99
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 106
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000061",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 108
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,1247 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:e2d172609c44b4e496c251686c5ddf550d91621dce5e8552db5c8a46d38690f7",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/RenderQuality.md",
+    "sha256": "6bad4a68a833347a84090bb2145ab1f6600ebcca84081c61e4ab1a95dfa3bc0e",
+    "bytes": 7318,
+    "line_count": 146,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "RenderQuality",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# RenderQuality\n",
+      "level": 1,
+      "title": "RenderQuality"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/runtime/renderquality.h` / `src/backend/runtime/renderquality.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`RenderQuality`는 LVRS 런타임 렌더링 품질, GPU 비용, 전력/성능 균형 정책을 담당하는 QML 싱글턴입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"1-responsibility-scope\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 1. 책임범위\n",
+      "level": 2,
+      "title": "1. 책임범위"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "`RenderQuality`는 다음을 직접 관리합니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 20,
+      "raw": "- 장면 슈퍼샘플링 활성화/비활성화 결정\n- 장면 슈퍼샘플링 스케일 창 픽셀 예산에 따른 클램핑(가능한 경우 텍스트 보정 유지)\n- MSAA, 전송 중인 프레임, 부분 업데이트 및 배치 렌더러에 대한 기본 정책\n- 창이 비활성화된 경우 다운그레이드(절전) 정책 렌더링\n- PSO(파이프라인 상태 개체) 캐시 정책\n- 압축된 텍스처 후보 선택 및 밉맵 사용 정책\n- DRS(동적 해상도 스케일링) 컨트롤러\n- 명시적인 하위 소비 측 재정의를 위한 선택적 장치 계층 사전 설정(낮음/균형/높음/울트라)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "장면 슈퍼샘플링 활성화/비활성화 결정",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "장면 슈퍼샘플링 스케일 창 픽셀 예산에 따른 클램핑(가능한 경우 텍스트 보정 유지)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "MSAA, 전송 중인 프레임, 부분 업데이트 및 배치 렌더러에 대한 기본 정책",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "창이 비활성화된 경우 다운그레이드(절전) 정책 렌더링",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "PSO(파이프라인 상태 개체) 캐시 정책",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "압축된 텍스처 후보 선택 및 밉맵 사용 정책",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "DRS(동적 해상도 스케일링) 컨트롤러",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "명시적인 하위 소비 측 재정의를 위한 선택적 장치 계층 사전 설정(낮음/균형/높음/울트라)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "<a id=\"2-p3-implementation-mapping\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "## 2. P3 구현 매핑\n",
+      "level": 2,
+      "title": "2. P3 구현 매핑"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "table",
+      "start_line": 26,
+      "end_line": 32,
+      "raw": "| P3 ID |구현 위치|행동|\n|---|---|---|\n| `P3-01` | `applyGraphicsConfiguration`, `configureGlobalDefaults` |자동 파이프라인 캐시 적용 + `QQuickGraphicsConfiguration`에 파일 로드/저장 및 전역 `QSG_RHI_PIPELINE_CACHE_LOAD/SAVE` 기본값 설정|\n| `P3-02` |`resolveTextureSource`, QML `Image.mipmap` 바인딩|동일한 경로에서 압축된 텍스처(`ktx2/ktx/dds`) 자동 선택 및 밉맵 정책 통합 레이어/아이콘용|\n| `P3-03` | `applyGraphicsConfiguration` |2D 패스 상태 전이 오버헤드를 줄이고  `depthBufferFor2D` 와 디버그/타임스탬프 비활성화 정책을 적용합니다.|\n| `P3-04` |`sampleFrameTime`, `frameSwapped` 연결|히스테리시스 기반 DRS 스케일 업/다운 제어|\n| `P3-05` | `detectDeviceTierForSystem`, `applyDeviceTierPreset` |CPU-스레드 기반 계층 추정 + 로우/밸런스/하이 프리셋 애플리케이션|\n",
+      "columns": [
+        "P3 ID",
+        "구현 위치",
+        "행동"
+      ],
+      "rows": [
+        [
+          "`P3-01`",
+          "`applyGraphicsConfiguration`, `configureGlobalDefaults`",
+          "자동 파이프라인 캐시 적용 + `QQuickGraphicsConfiguration`에 파일 로드/저장 및 전역 `QSG_RHI_PIPELINE_CACHE_LOAD/SAVE` 기본값 설정"
+        ],
+        [
+          "`P3-02`",
+          "`resolveTextureSource`, QML `Image.mipmap` 바인딩",
+          "동일한 경로에서 압축된 텍스처(`ktx2/ktx/dds`) 자동 선택 및 밉맵 정책 통합 레이어/아이콘용"
+        ],
+        [
+          "`P3-03`",
+          "`applyGraphicsConfiguration`",
+          "2D 패스 상태 전이 오버헤드를 줄이고  `depthBufferFor2D` 와 디버그/타임스탬프 비활성화 정책을 적용합니다."
+        ],
+        [
+          "`P3-04`",
+          "`sampleFrameTime`, `frameSwapped` 연결",
+          "히스테리시스 기반 DRS 스케일 업/다운 제어"
+        ],
+        [
+          "`P3-05`",
+          "`detectDeviceTierForSystem`, `applyDeviceTierPreset`",
+          "CPU-스레드 기반 계층 추정 + 로우/밸런스/하이 프리셋 애플리케이션"
+        ]
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "html",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "<a id=\"3-core-property-contracts\"></a>\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "## 3. 핵심 속성 계약\n",
+      "level": 2,
+      "title": "3. 핵심 속성 계약"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "<a id=\"31-gpu-cachepipeline\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "### 3.1 GPU 캐시/파이프라인\n",
+      "level": 3,
+      "title": "3.1 GPU 캐시/파이프라인"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 42,
+      "end_line": 46,
+      "raw": "- `psoCacheEnabled`\n- `psoCacheLoadEnabled`\n- `psoCacheSaveEnabled`\n- `psoCacheFile`\n- `depthBufferFor2D`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`psoCacheEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`psoCacheLoadEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`psoCacheSaveEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`psoCacheFile`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`depthBufferFor2D`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "`applyWindow()` 가 네이티브 창이 생성/표시되기 전에 호출되면, 위의 값들이 `QQuickWindow::graphicsConfiguration()` 에 적용됩니다. iOS 에서, 네이티브 창이 존재하면 LVRS 는 현재 Metal 표면 구성을 안정적으로 유지하고, 원래는 스왑체인 변경을 강요할 수 있는 후기 그래픽 구성 재작성을 건너뛰면서, `4x` MSAA 및 `2.0x+` 동적 오버샘플링에 대한 iOS 품질 하한을 보존합니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "<a id=\"32-texture-policy\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "### 3.2 텍스처 정책\n",
+      "level": 3,
+      "title": "3.2 텍스처 정책"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 57,
+      "raw": "- `mipmapEnabled`\n- `textureCompressionEnabled`\n- `compressedTextureExtensions`(기본값: `ktx2`, `ktx`, `dds`)\n- `resolveTextureSource(source)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`mipmapEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textureCompressionEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`compressedTextureExtensions`(기본값: `ktx2`, `ktx`, `dds`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolveTextureSource(source)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "`resolveTextureSource()`는 압축된 확장 파일이 로컬 파일/qrc 경로에 실제로 존재하는 경우에만 후보를 대체합니다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "### 3.3 DRS\n",
+      "level": 3,
+      "title": "3.3 DRS"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 63,
+      "end_line": 69,
+      "raw": "- `dynamicResolutionEnabled`\n- `dynamicResolutionScale`\n- `dynamicResolutionMinScale`\n- `dynamicResolutionMaxScale`\n- `dynamicResolutionStep`\n- `dynamicResolutionTargetFrameMs`\n- `dynamicResolutionHysteresisMs`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionScale`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionMinScale`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionMaxScale`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionStep`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionTargetFrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dynamicResolutionHysteresisMs`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "`effectiveSupersampleScaleValue`는 DRS가 활성화되고 `NOTIFY` 신호를 사용하여 QML 바인딩을 업데이트할 때 동적으로 변경됩니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"34-scene-supersampling-budget-behavior\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "### 3.4 장면 슈퍼샘플링 예산 동작\n",
+      "level": 3,
+      "title": "3.4 장면 슈퍼샘플링 예산 동작"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "list",
+      "start_line": 77,
+      "end_line": 80,
+      "raw": "- 요청된 슈퍼샘플 스케일은 `effectiveSupersampleScaleValue`부터 시작됩니다.\n- 런타임는 정상 범위에서 바이너리 완전 켜짐/완전 꺼짐 대신 창 크기당 예산 적합 규모를 계산합니다.\n- 예산이 최소 `1.0x`를 유지할 수 없는 경우 해당 크기에 대해 장면 슈퍼샘플링이 비활성화됩니다.\n- 프레임워크는 픽셀 예산이 허용할 때마다 기본 텍스트 보상 하한선(`1.2x`)을 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "요청된 슈퍼샘플 스케일은 `effectiveSupersampleScaleValue`부터 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "런타임는 정상 범위에서 바이너리 완전 켜짐/완전 꺼짐 대신 창 크기당 예산 적합 규모를 계산합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "예산이 최소 `1.0x`를 유지할 수 없는 경우 해당 크기에 대해 장면 슈퍼샘플링이 비활성화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프레임워크는 픽셀 예산이 허용할 때마다 기본 텍스트 보상 하한선(`1.2x`)을 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "<a id=\"35-device-presets\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "### 3.5 장치 사전 설정\n",
+      "level": 3,
+      "title": "3.5 장치 사전 설정"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "list",
+      "start_line": 86,
+      "end_line": 88,
+      "raw": "- `detectedDeviceTier`(상수)\n- `activeDeviceTier`\n- `applyDeviceTierPreset(tier = -1)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`detectedDeviceTier`(상수)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeDeviceTier`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyDeviceTierPreset(tier = -1)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "`tier=-1`인 경우 자동으로 감지된 장치 계층이 적용됩니다. Stock LVRS 쉘은 더 이상 시작 시 이를 자동 적용하지 않습니다. 장치 계층 사전 설정은 이제 런타임 직접 품질 경로 위에 명시적인 옵트인 재정의입니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "<a id=\"4-drs-behavior-rules\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "## 4. DRS 행동 규칙\n",
+      "level": 2,
+      "title": "4. DRS 행동 규칙"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 96,
+      "end_line": 100,
+      "raw": "1. `frameSwapped` 타이밍의 샘플 프레임 간격(ms)입니다.\n2. `target + hysteresis` 이상의 프레임이 누적되면 축소됩니다.\n3. `target - hysteresis` 미만의 프레임이 충분히 누적되면 확장하세요.\n4. 축척 변경은 `[dynamicResolutionMinScale, dynamicResolutionMaxScale]`로 제한됩니다.\n5. 창이 절전 상태인 동안 DRS 샘플링을 중지합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`frameSwapped` 타이밍의 샘플 프레임 간격(ms)입니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`target + hysteresis` 이상의 프레임이 누적되면 축소됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`target - hysteresis` 미만의 프레임이 충분히 누적되면 확장하세요.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "축척 변경은 `[dynamicResolutionMinScale, dynamicResolutionMaxScale]`로 제한됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "창이 절전 상태인 동안 DRS 샘플링을 중지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "<a id=\"5-preset-standards\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "## 5. 사전 설정된 표준\n",
+      "level": 2,
+      "title": "5. 사전 설정된 표준"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "table",
+      "start_line": 106,
+      "end_line": 111,
+      "raw": "|사전 설정|의도|기본 요약|\n|---|---|---|\n| `LowTier` |로우엔드 안정성을 우선시합니다.| `MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off` |\n| `BalancedTier` |기본 밸런스 모드| `MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on` |\n| `HighTier` |이미지 품질 우선| `MSAA=12`, `framesInFlight=3`, `DRS off`, `mipmap on`, `textureCompression off` |\n| `UltraTier` |최대 시각적 충실도 기준| `MSAA=16`, `framesInFlight=3`, `DRS off`, `mipmap on`, `depthBufferFor2D on`, `textureCompression off`, `inactive downgrade off` |\n",
+      "columns": [
+        "사전 설정",
+        "의도",
+        "기본 요약"
+      ],
+      "rows": [
+        [
+          "`LowTier`",
+          "로우엔드 안정성을 우선시합니다.",
+          "`MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off`"
+        ],
+        [
+          "`BalancedTier`",
+          "기본 밸런스 모드",
+          "`MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on`"
+        ],
+        [
+          "`HighTier`",
+          "이미지 품질 우선",
+          "`MSAA=12`, `framesInFlight=3`, `DRS off`, `mipmap on`, `textureCompression off`"
+        ],
+        [
+          "`UltraTier`",
+          "최대 시각적 충실도 기준",
+          "`MSAA=16`, `framesInFlight=3`, `DRS off`, `mipmap on`, `depthBufferFor2D on`, `textureCompression off`, `inactive downgrade off`"
+        ]
+      ]
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "html",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "<a id=\"6-qml-integration-points\"></a>\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "## 6. QML 통합 포인트\n",
+      "level": 2,
+      "title": "6. QML 통합 포인트"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "list",
+      "start_line": 117,
+      "end_line": 122,
+      "raw": "- `src/qml/ApplicationWindow.qml`\n- `src/qml/Window.qml`\n- 주요 아이콘/이미지 구성 요소(`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)\n- 슈퍼샘플링된 `Image.sourceSize`를 통한 스냅샷 기반 제어 아이콘(`Stepper`, `InputField` 검색 아이콘)\n- 축당 천장 반올림 기능이 있는 슈퍼샘플링된 `canvasSize`를 통한 `Canvas` 기반 제어 아이콘(`CheckBox`) `ToggleSwitch`는 래스터 캔버스 대신 장면 그래프 벡터 손잡이를 사용합니다.\n- `SvgManager.icon(...)`는 호출자가 `logicalSize`를 생략할 때 `18 x 18` 논리적 기본값을 사용합니다. 래스터 출력은 정사각형으로 유지되고 SVG 콘텐츠는 종횡비를 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`src/qml/ApplicationWindow.qml`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/qml/Window.qml`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주요 아이콘/이미지 구성 요소(`IconButton`, `IconMenuButton`, `LabelMenuButton`, `MenuItem`, `HierarchyItem`, `ListToolbar`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "슈퍼샘플링된 `Image.sourceSize`를 통한 스냅샷 기반 제어 아이콘(`Stepper`, `InputField` 검색 아이콘)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "축당 천장 반올림 기능이 있는 슈퍼샘플링된 `canvasSize`를 통한 `Canvas` 기반 제어 아이콘(`CheckBox`) `ToggleSwitch`는 래스터 캔버스 대신 장면 그래프 벡터 손잡이를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`SvgManager.icon(...)`는 호출자가 `logicalSize`를 생략할 때 `18 x 18` 논리적 기본값을 사용합니다. 래스터 출력은 정사각형으로 유지되고 SVG 콘텐츠는 종횡비를 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "적용된 동작:\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "list",
+      "start_line": 126,
+      "end_line": 129,
+      "raw": "- 층: `layer.mipmap: RenderQuality.mipmapEnabled`\n- 이미지 출처: `source: RenderQuality.resolveTextureSource(...)`\n- 시작 창 연결: `RenderQuality.applyWindow(...)`\n- 셸 기본값은 `ApplicationWindow` 및 `Window`에서 `autoApplyDeviceTierPreset: false` 및 `forcedDeviceTierPreset: -1`를 유지하므로 런타임 직접 슈퍼샘플링/MSAA 기본값은 하위 소비 측 앱이 명시적으로 장치 계층 사전 설정을 선택하지 않는 한 활성 상태를 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "층: `layer.mipmap: RenderQuality.mipmapEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이미지 출처: `source: RenderQuality.resolveTextureSource(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "시작 창 연결: `RenderQuality.applyWindow(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "셸 기본값은 `ApplicationWindow` 및 `Window`에서 `autoApplyDeviceTierPreset: false` 및 `forcedDeviceTierPreset: -1`를 유지하므로 런타임 직접 슈퍼샘플링/MSAA 기본값은 하위 소비 측 앱이 명시적으로 장치 계층 사전 설정을 선택하지 않는 한 활성 상태를 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "html",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "<a id=\"7-verification-commands\"></a>\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "heading",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "## 7. 확인 명령\n",
+      "level": 2,
+      "title": "7. 확인 명령"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "list",
+      "start_line": 135,
+      "end_line": 136,
+      "raw": "- `cmake --build build-codex --target LVRSTests_render_quality`\n- `./build-codex/tests/LVRSTests_render_quality -txt`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`cmake --build build-codex --target LVRSTests_render_quality`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`./build-codex/tests/LVRSTests_render_quality -txt`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "P3 회귀 검증 테스트: `render_quality_gpu_policy_pso_texture_and_drs_contract()`\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "html",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "<a id=\"8-related-documents\"></a>\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "heading",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "## 8. 관련 문서\n",
+      "level": 2,
+      "title": "8. 관련 문서"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "list",
+      "start_line": 144,
+      "end_line": 146,
+      "raw": "- `docs/components/app/ApplicationWindow.md`\n- `docs/architecture/rendering-backend.md`\n- `docs/quality-automation-p4.md`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`docs/components/app/ApplicationWindow.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/architecture/rendering-backend.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/quality-automation-p4.md`",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "RenderQuality",
+      "anchor": "renderquality",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "1. 책임범위",
+      "anchor": "1-책임범위",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2. P3 구현 매핑",
+      "anchor": "2-p3-구현-매핑",
+      "start_line": 24
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "3. 핵심 속성 계약",
+      "anchor": "3-핵심-속성-계약",
+      "start_line": 36
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000023",
+      "level": 3,
+      "title": "3.1 GPU 캐시/파이프라인",
+      "anchor": "31-gpu-캐시파이프라인",
+      "start_line": 40
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000023",
+      "level": 3,
+      "title": "3.2 텍스처 정책",
+      "anchor": "32-텍스처-정책",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000023",
+      "level": 3,
+      "title": "3.3 DRS",
+      "anchor": "33-drs",
+      "start_line": 61
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000023",
+      "level": 3,
+      "title": "3.4 장면 슈퍼샘플링 예산 동작",
+      "anchor": "34-장면-슈퍼샘플링-예산-동작",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000023",
+      "level": 3,
+      "title": "3.5 장치 사전 설정",
+      "anchor": "35-장치-사전-설정",
+      "start_line": 84
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "4. DRS 행동 규칙",
+      "anchor": "4-drs-행동-규칙",
+      "start_line": 94
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "5. 사전 설정된 표준",
+      "anchor": "5-사전-설정된-표준",
+      "start_line": 104
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "6. QML 통합 포인트",
+      "anchor": "6-qml-통합-포인트",
+      "start_line": 115
+    },
+    {
+      "block_id": "b000085",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "7. 확인 명령",
+      "anchor": "7-확인-명령",
+      "start_line": 133
+    },
+    {
+      "block_id": "b000093",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "8. 관련 문서",
+      "anchor": "8-관련-문서",
+      "start_line": 142
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000019",
+        "columns": [
+          "P3 ID",
+          "구현 위치",
+          "행동"
+        ],
+        "rows": [
+          [
+            "`P3-01`",
+            "`applyGraphicsConfiguration`, `configureGlobalDefaults`",
+            "자동 파이프라인 캐시 적용 + `QQuickGraphicsConfiguration`에 파일 로드/저장 및 전역 `QSG_RHI_PIPELINE_CACHE_LOAD/SAVE` 기본값 설정"
+          ],
+          [
+            "`P3-02`",
+            "`resolveTextureSource`, QML `Image.mipmap` 바인딩",
+            "동일한 경로에서 압축된 텍스처(`ktx2/ktx/dds`) 자동 선택 및 밉맵 정책 통합 레이어/아이콘용"
+          ],
+          [
+            "`P3-03`",
+            "`applyGraphicsConfiguration`",
+            "2D 패스 상태 전이 오버헤드를 줄이고  `depthBufferFor2D` 와 디버그/타임스탬프 비활성화 정책을 적용합니다."
+          ],
+          [
+            "`P3-04`",
+            "`sampleFrameTime`, `frameSwapped` 연결",
+            "히스테리시스 기반 DRS 스케일 업/다운 제어"
+          ],
+          [
+            "`P3-05`",
+            "`detectDeviceTierForSystem`, `applyDeviceTierPreset`",
+            "CPU-스레드 기반 계층 추정 + 로우/밸런스/하이 프리셋 애플리케이션"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000071",
+        "columns": [
+          "사전 설정",
+          "의도",
+          "기본 요약"
+        ],
+        "rows": [
+          [
+            "`LowTier`",
+            "로우엔드 안정성을 우선시합니다.",
+            "`MSAA=2`, `framesInFlight=1`, `DRS on`, `mipmap off`"
+          ],
+          [
+            "`BalancedTier`",
+            "기본 밸런스 모드",
+            "`MSAA=4`, `framesInFlight=2`, `DRS on`, `mipmap on`"
+          ],
+          [
+            "`HighTier`",
+            "이미지 품질 우선",
+            "`MSAA=12`, `framesInFlight=3`, `DRS off`, `mipmap on`, `textureCompression off`"
+          ],
+          [
+            "`UltraTier`",
+            "최대 시각적 충실도 기준",
+            "`MSAA=16`, `framesInFlight=3`, `DRS off`, `mipmap on`, `depthBufferFor2D on`, `textureCompression off`, `inactive downgrade off`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

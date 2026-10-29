@@ -1,0 +1,676 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:57c5c571c2439765ce26d9a45810ddbc8a5ac12a7446a54367c43a71b27ad7fd",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/ComboBox.md",
+    "sha256": "9756fbf3d84affef9a6e12d497677d5f27894da9714202dd3ac97ef87ec40117",
+    "bytes": 3689,
+    "line_count": 92,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ComboBox",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ComboBox\n",
+      "level": 1,
+      "title": "ComboBox"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/buttons/ComboBox.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ComboBox`는 Figma 계약(`97x20`)을 따르고 `Stepper`를 후행 표시기로 사용하는 간단한 컨텍스트 메뉴 트리거 행입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 메뉴와 같은 팝업을 열고 닫을 수 있는 경량 선택기 트리거를 제공합니다.\n- 속성 API 를 2 개의 Figma -정의된 속성으로만 최소화하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "메뉴와 같은 팝업을 열고 닫을 수 있는 경량 선택기 트리거를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "속성 API 를 2 개의 Figma -정의된 속성으로만 최소화하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 18,
+      "end_line": 25,
+      "raw": "- `text`(기본값: `\"Label\"`)\n- `tone`(기본값: `ComboBox.Primary`)\n  - `ComboBox.Primary`\n  - `ComboBox.Borderless`\n- `arrow`(기본값: `Stepper.UpDown`)\n  - `Stepper.UpDown`\n  - `Stepper.Up`\n  - `Stepper.Down`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`text`(기본값: `\"Label\"`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tone`(기본값: `ComboBox.Primary`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ComboBox.Primary`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ComboBox.Borderless`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`arrow`(기본값: `Stepper.UpDown`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.UpDown`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.Up`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Stepper.Down`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 32,
+      "raw": "- `clicked()`\n- `pressed()`\n- `released()`\n- `canceled()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`clicked()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressed()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`released()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canceled()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "주입된 방법:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 36,
+      "end_line": 41,
+      "raw": "- `method`: 하나의 호출 가능 항목이 콤보 트리거에 직접 삽입됩니다.\n- `methods`: 콜러블 또는 명령 객체의 배열\n- `hasInjectedMethods`(읽기 전용)\n- `createMethodEvent(triggerName)`\n- `invokeMethod(candidate, eventData)`\n- `invokeMethods(eventData)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`method`: 하나의 호출 가능 항목이 콤보 트리거에 직접 삽입됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`methods`: 콜러블 또는 명령 객체의 배열",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasInjectedMethods`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`createMethodEvent(triggerName)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`invokeMethod(candidate, eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`invokeMethods(eventData)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "<a id=\"visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "## 시각적 계약\n",
+      "level": 2,
+      "title": "시각적 계약"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 47,
+      "end_line": 61,
+      "raw": "- 데스크탑 논리 프레임: `97 x 20`\n- 모바일 프레임이 데스크탑과 일치함: `97 x 20`\n- 컨테이너 패딩: 왼쪽 `8`, 오른쪽 `1`, 상단/하단 `1`\n- 반경: `Theme.radiusControl` (`5`)\n- 컨테이너 베이스/호버/누름 색상:\n  - `Theme.panelBackground10`\n  - `Theme.panelBackground11`\n  - `Theme.panelBackground12`\n- 레이블 텍스트의 기본값은 `\"Label\"`이고 고정된 본문 `13px / 13px` 타이포그래피를 흰색으로 렌더링하며 콤보 프레임 내에서 삭제됩니다.\n- 후행 표시기는 항상 `Stepper`이며 콤보 톤에서 톤이 매핑됩니다.\n- 라벨 영역과 표시기 슬롯은 명시적으로 배치됩니다.\n  - 라벨 슬롯: `x=8`, `y=3.5`, `width=70`, `height=13`\n  - Figma의 기본 `\"Label\"` 텍스트 노드는 `x=8`, `y=3.5`, `width=33`, `height=13`를 차지합니다. 더 넓은 프로덕션 슬롯으로 동적 텍스트의 제거가 유지됩니다.\n  - 스테퍼 프레임: `x=78`, `y=1`, `size=18`\n- 소스 구성요소 세트: Figma 노드 `254:889`; 6개의 `Tone × Arrow` 변형은 모두 동일한 프레임 형상을 공유합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "데스크탑 논리 프레임: `97 x 20`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 프레임이 데스크탑과 일치함: `97 x 20`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨테이너 패딩: 왼쪽 `8`, 오른쪽 `1`, 상단/하단 `1`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "반경: `Theme.radiusControl` (`5`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨테이너 베이스/호버/누름 색상:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Theme.panelBackground10`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Theme.panelBackground11`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Theme.panelBackground12`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이블 텍스트의 기본값은 `\"Label\"`이고 고정된 본문 `13px / 13px` 타이포그래피를 흰색으로 렌더링하며 콤보 프레임 내에서 삭제됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "후행 표시기는 항상 `Stepper`이며 콤보 톤에서 톤이 매핑됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라벨 영역과 표시기 슬롯은 명시적으로 배치됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라벨 슬롯: `x=8`, `y=3.5`, `width=70`, `height=13`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Figma의 기본 `\"Label\"` 텍스트 노드는 `x=8`, `y=3.5`, `width=33`, `height=13`를 차지합니다. 더 넓은 프로덕션 슬롯으로 동적 텍스트의 제거가 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스테퍼 프레임: `x=78`, `y=1`, `size=18`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "소스 구성요소 세트: Figma 노드 `254:889`; 6개의 `Tone × Arrow` 변형은 모두 동일한 프레임 형상을 공유합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "fenced_code",
+      "start_line": 67,
+      "end_line": 76,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.ComboBox {\n    text: \"Control\"\n    tone: LV.ComboBox.Borderless\n    arrow: LV.Stepper.Down\n    method: function(eventData) { menu.open() }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.ComboBox {\n    text: \"Control\"\n    tone: LV.ComboBox.Borderless\n    arrow: LV.Stepper.Down\n    method: function(eventData) { menu.open() }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "<a id=\"practical-notes\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "## 실용적인 참고 사항\n",
+      "level": 2,
+      "title": "실용적인 참고 사항"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 82,
+      "end_line": 86,
+      "raw": "- `tone`는 `Stepper` 모양에만 영향을 미칩니다(`Primary` 파란색 / `Borderless` 투명).\n- `arrow`는 열린 방향 상태(`Up`, `Down`, `UpDown`)를 표현합니다.\n- `clicked()`에서 주입된 `method` 및 `methods`는 신호 발송의 일부로 순서대로 실행됩니다.\n- 구성 요소는 표시기 슬롯에 대해 `RowLayout`를 사용하지 않으므로 다른 레이아웃 컨테이너 내부에서 사용될 때 스테퍼가 늘어나거나 접힐 수 없습니다.\n- `ContextMenu`와 페어링되면 팝업 크기 조정은 고정 `ComboBox` 프레임과 독립적으로 유지됩니다. 콘텐츠 또는 명시적 팝업 너비가 필요한 경우 메뉴가 트리거 너비 이상으로 확장될 수 있으며, 좁은 트리거 너비 바인딩은 더 이상 팝업을 암시적 콘텐츠 너비 아래로 고정하지 않습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`tone`는 `Stepper` 모양에만 영향을 미칩니다(`Primary` 파란색 / `Borderless` 투명).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`arrow`는 열린 방향 상태(`Up`, `Down`, `UpDown`)를 표현합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clicked()`에서 주입된 `method` 및 `methods`는 신호 발송의 일부로 순서대로 실행됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구성 요소는 표시기 슬롯에 대해 `RowLayout`를 사용하지 않으므로 다른 레이아웃 컨테이너 내부에서 사용될 때 스테퍼가 늘어나거나 접힐 수 없습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ContextMenu`와 페어링되면 팝업 크기 조정은 고정 `ComboBox` 프레임과 독립적으로 유지됩니다. 콘텐츠 또는 명시적 팝업 너비가 필요한 경우 메뉴가 트리거 너비 이상으로 확장될 수 있으며, 좁은 트리거 너비 바인딩은 더 이상 팝업을 암시적 콘텐츠 너비 아래로 고정하지 않습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "컴팩트한 합성는 하나의 장치로 변환됩니다. 클릭된 신호는 즉시 유지됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ComboBox",
+      "anchor": "combobox",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "시각적 계약",
+      "anchor": "시각적-계약",
+      "start_line": 45
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 65
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "실용적인 참고 사항",
+      "anchor": "실용적인-참고-사항",
+      "start_line": 80
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 90
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000049",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 92
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

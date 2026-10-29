@@ -1,0 +1,566 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:49aa2eaf5c39d5d64d3b6a0800af9f86d2681efefef784f92f2a8be10b3c0da2",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Alert.md",
+    "sha256": "63d8a0ed4a3b538b4afcd25335de56ee3aad8eb3643681a9074ed8ca471bc2dd",
+    "bytes": 10311,
+    "line_count": 134,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 Alert와 AlertButton",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 Alert와 AlertButton\n",
+      "level": 1,
+      "title": "네이티브 Alert와 AlertButton"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "`lvrs::Alert`, `Widgets::alert`와 LVUI `Alert`은 원본\n`src/qml/components/surfaces/Alert.qml`을 iiGUI 자체 C++ 위젯으로 조합한 구현이다.\n`AlertButton`도 독립적인 C++ 타입과 AOT 예약어로 제공한다. 창·입력·가상 접근성 경계는\niiGUI, 앱 진입점·작업자·프레임·최종 리소스 부착은 iiSDKCore가 소유한다.\nNSButton·NSPanel·NSPopover나 Qt 런타임을 사용하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 원본 배치와 액션\n",
+      "level": 2,
+      "title": "원본 배치와 액션"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 16,
+      "raw": "카드 폭은 `max(0, min(창 폭 - 2×sidePadding, maxWidth, max(minWidth, preferredWidth)))`이다.\n기본값은 24·500·280·500이며, 창이 좁으면 원본처럼 최소 폭 아래까지 줄어든다.\n카드는 중앙에 놓이고 기본 반경은 `min(36, 짧은 변×0.4)`이다.\n`.cylinder`는 짧은 변의 절반을 사용한다. 위 콘텐츠 패딩 46·아래 36, 아이콘과 텍스트 간격\n28, 텍스트 좌우 패딩 24·제목/본문 간격 14를 적용한다. 제목은 26단위 Bold·줄 높이 26,\n본문은 13단위 Medium·줄 높이 13이며 지정 폭에 맞춰 줄바꿈한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 21,
+      "raw": "`buttonCount`는 2와 3만 명시적 개수이다. 그 외 정수는 3차 텍스트가 있으면 3개,\n2차 텍스트가 있으면 2개, 나머지는 1개를 선택한다. 표시할 액션의 빈 텍스트는 `Button`이다.\n`description`은 `message`, `button1Text/2Text/3Text`는 기본/2차/3차 텍스트의 별칭이다.\n동일 속성과 별칭을 함께 지정하면 AOT 오류이다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 25,
+      "raw": "- 한 개: 좌우 24, 위 28·아래 32, 높이 56의 기본 액션이다.\n- 두 개: 같은 여백에 간격 14, 왼쪽 2차·오른쪽 기본 액션이며 각각 높이 56이다.\n- 세 개: 좌우 24·상하 18, 간격 12로 기본·2차·3차를 세로 배치하며 높이는 56·56·44이다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "한 개: 좌우 24, 위 28·아래 32, 높이 56의 기본 액션이다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "두 개: 같은 여백에 간격 14, 왼쪽 2차·오른쪽 기본 액션이며 각각 높이 56이다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "세 개: 좌우 24·상하 18, 간격 12로 기본·2차·3차를 세로 배치하며 높이는 56·56·44이다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 30,
+      "raw": "일반 2차 액션에는 투명 배경과 `#596168` 테두리가 있고, 세 액션의 2차 글자는 기본적으로\n원본 destructive 색상이다. `secondaryDestructive`로 명시할 수 있다. 2줄 본문·기본 제목과\n아이콘에서 두 액션은 500×379, 세 액션은 500×479이다. 텍스트·아이콘 표시·개수 변경은\n같은 위젯의 크기를 갱신하며 포커스 액션 역할도 가능한 범위에서 유지한다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## 버튼 메서드와 수명\n",
+      "level": 2,
+      "title": "버튼 메서드와 수명"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 38,
+      "raw": "`button1Method/2Method/3Method`에는 `vm.method` 형태의 지연 C++ 메서드 참조를 지정한다.\n생성 코드는 `const lvrs::ButtonEvent&`를 받는 메서드를 우선 선택하고, 해당 호출이 없으면\n인자 없는 메서드를 호출한다. 이벤트에는 실제 소스 `Widget`과 `trigger == \"clicked\"`가 있다.\n메서드를 실행한 다음 대응하는 `onPrimaryClicked/onSecondaryClicked/onTertiaryClicked`를 호출한다.\n문자열 메서드 조회나 실행 시 LVUI 해석기를 넣지 않는다. `vm.method()`는 이 입력에서 오류이다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 44,
+      "raw": "액션은 자동으로 닫지 않는다. 소유자가 `root().close_popup()` 또는 `Alert::close()`를 호출한다.\n`dismiss()`·`cancel_popup()`은 일반 닫기와 구분하여 `dismissed`를 한 번 통지한다.\n배경 입력은 항상 차단하며 기본 외부 클릭과 Escape는 닫지 않는다. `dismissOnBackground`와\n선택적인 네이티브 확장 `closeOnEscape`를 켰을 때만 해당 취소 경로를 사용한다.\nTab과 이전 포커스 복귀는 iiGUI 팝업 정책을 따른다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 46,
+      "end_line": 50,
+      "raw": "Alert은 닫혀 있을 때도 자체 정적 위젯을 유지한다. 다시 열면 같은 액션 핸들을 사용한다.\n이는 열림마다 자식 콘텐츠를 새로 만드는 [Modal](Modal.md)과 다른 원본 수명이다.\n부모 View를 해제하면 Alert·AlertButton과 콜백을 해제하며 이전 핸들은 무효가 된다.\n활성 메서드를 교체해도 실행 중 캡처는 반환 뒤 해제한다. 메서드가 소유 트리를 제거한 경우\n이전 세대의 후속 클릭 통지는 전달하지 않는다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 56,
+      "raw": "독립 AlertButton은 기본 높이 20·좌우 여백 8·반경 4이다. `dialogStyle`은 좌우 여백 16·반경\n16과 원본 대화 상자 색상을 선택하며 높이 56을 강제하지 않는다. Alert이 액션별 높이를 지정한다.\n다섯 톤, enabled, 선택적 높이·여백·반경·텍스트/primary 색상과 누름·해제·취소 이벤트를 지원한다.\n포커스 테두리는 버튼 반경을 따르는 1.5단위 GPU 선이다. 입력 수단에 따른 표시 정책과\n전체 상속 focusRing 옵션·모션은 아직 부분 구현이다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "## 원본 이미지와 실제 유리 재질\n",
+      "level": 2,
+      "title": "원본 이미지와 실제 유리 재질"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 65,
+      "raw": "원본 `alert-adjustments.svg`·`alert-file-text.svg`를 변경 없이 바이너리에 내장한다.\n비정사각 이미지는 비율을 유지하여 중앙에 맞춘다. 기본 1/2개 액션은 64단위 adjustments, 세 액션은 56단위 file-text이며 프레임은 86·반경 28이다.\n`alert_icon_source`로 원본 SVG를 조회할 수 있고 원본 라이선스 고지를 함께 설치한다.\n`imageSource/appIconSource`는 알려진 내장 자산 문자열 또는 가져온 C++ 객체의\n`std::shared_ptr<const ii::gui::RasterImage>` 멤버 참조이다. 빈 문자열은 원본 작은 사각형\n대체 표시이다. 임의 파일·URL을 암묵적으로 읽지 않는다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 72,
+      "raw": "macOS Metal에서는 카드 아래의 앱 콘텐츠를 실제 GPU Gaussian blur로 흐린다.\ndim·이전 팝업·카드 글자는 원본 캡처에서 제외하고 반투명 tint와 흰색 20% 테두리를 합성한다.\nblur 반경은 원본처럼 2~64로 제한하며 기본 28이다. `glassEnabled: false`에서는 아래 레이어의\n선명한 픽셀 위에 반투명 tint를 유지한다. 같은 배경에서 카드 글자나 버튼만 바뀌면 기존 blur를\n재사용한다. [iiGUI 재질 계약](../../../iiGUI/docs/BackdropMaterials.md)에 ROI·64 MiB 작업 텍스처\n한도·선형 색 공간·지원 백엔드와 계측 범위를 명시한다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 77,
+      "raw": "원본의 아래 16·blur 32·검정 28% 그림자도 실제 GPU 마스크로 합성한다. 위치·색상만\n바뀌면 같은 R8/R16Float 마스크를 재사용한다. `shadowEnabled` 또는 C++의\n`set_shadow_enabled`로 표시를 바꿀 수 있고 offset/blur/color를 명시할 수 있다.\n[그림자 계약](../../../iiGUI/docs/Shadows.md)에 검증 범위와 공유 메모리 한도를 명시한다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## 프레임 모션\n",
+      "level": 2,
+      "title": "프레임 모션"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 85,
+      "raw": "기본 열림은 원본 `Motion.surface` 420ms·OutBack·overshoot 1.45이고 닫힘은 150ms·InCubic이다.\n카드 scale은 `0.92 + 0.08 × revealProgress`, opacity와 dim은 진행 값을 0~1로 제한한다.\n그림자와 유리는 원본처럼 scale/opacity를 적용하지 않는 형제이며, 유리는 닫는 즉시\n비활성화한다. 카드와 정적 자식의 exit 픽셀만 유지하고 입력은 즉시 차단한다.\n도중 다시 열면 현재 표시 값에서 새 곡선을 시작한다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 93,
+      "raw": "`lvrs::Motion`은 iiGUI의 실제 C++ 모션 설정 객체이다. `MotionTokens`에 원본\n90·160·360·180·420·150·130ms와 overshoot를 제공한다. Alert의 `motion`에는 명시적인\n`std::shared_ptr<lvrs::Motion>`을 전달할 수 있다. 생략하면 같은 호스트의 설정을 공유한다.\nLVUI의 `motion: vm.motion`은 스코프 소유 C++ 멤버 참조로 컴파일한다.\n`motionEnabled: false` 또는 `set_motion_enabled(false)`는 로컬 모션을 끈다.\n공유 객체의 `set_reduced_motion(true)`/`set_enabled(false)`는 실행 중에도 즉시 목표 값으로\n이동한다. `set_speed`는 0.1~4배 기준으로 시간을 바꾸며, 게임 일시 정지와 독립적이다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 95,
+      "end_line": 98,
+      "raw": "실제 디스플레이 콜백→Core update→GPU present로 구동하며 16ms 타이머를 사용하지 않는다.\n모션만 바뀌면 글자·이미지·그림자 마스크·같은 배경의 blur를 재사용한다.\n[iiGUI 모션 계약](../../../iiGUI/docs/NativeMotion.md)에 지원 백엔드와 한도를 명시한다.\n독립 AlertButton의 press/color 모션과 일반 SpringBehavior 예약어의 완전 이식은 아직 남아 있다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 사용과 검증 범위\n",
+      "level": 2,
+      "title": "사용과 검증 범위"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "fenced_code",
+      "start_line": 102,
+      "end_line": 110,
+      "raw": "```lvui\nimport vm AlertBackend\nApplicationWindow {\n    Alert(id: \"confirmation\", open: true, title: \"Native Alert\",\n          description: \"Choose an action.\", buttonCount: 2,\n          primaryText: \"Apply\", secondaryText: \"Close\",\n          button1Method: vm.apply, onSecondaryClicked: vm.closeDialog)\n}\n```\n",
+      "language": "lvui",
+      "code": "import vm AlertBackend\nApplicationWindow {\n    Alert(id: \"confirmation\", open: true, title: \"Native Alert\",\n          description: \"Choose an action.\", buttonCount: 2,\n          primaryText: \"Apply\", secondaryText: \"Close\",\n          button1Method: vm.apply, onSecondaryClicked: vm.closeDialog)\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 112,
+      "end_line": 115,
+      "raw": "Alert에는 임의 자식 View를 넣지 않는다. `open: true`는 마운트와 부모 백엔드 구성 뒤 최초\n개방한다. 콘텐츠 생성 함수 안의 초기 개방은 현재 진단하며 활성화 뒤 명시적으로 열 수 있다.\nC++ 타입은 `Alert::create`와 `AlertButton::create`, 단순 위젯 API는 `Widgets::alert/alert_button`이다.\n타입 핸들은 텍스트·액션 개수/활성/메서드·primary 색상·아이콘/유리 표시 변경을 제공한다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 121,
+      "raw": "`tests/native/alert.cpp`는 원본 기하, 여섯 액션 위치, disabled, 메서드 교체, 포커스, 좁은 창,\n100회 재개방의 동일 위젯, 원본 SVG 바이트와 실제 blur 픽셀을 검사한다. AlertButton 검사는\n포인터·키보드의 pressed→released→method→clicked, 비활성화 취소와 실행 중 소유권 해제를\n검사한다. `examples/NativeAlertGallery`는 실제 AOT의 인자 있는/없는 메서드·여섯 액션·독립\n버튼·초기 개방·Core 표시 프레임·작업자 결과·크기 변경·종료를 함께 실행한다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 123,
+      "end_line": 126,
+      "raw": "아직 부분 이식이다. 임의 backdropSource/overlay 부모, 일반 반응형 속성 재바인딩과 전체 상속 API,\n임의 이미지 URL·일부 작은 아이콘 프레임 조합이 남아 있다.\nGPU 배경 흐림은 현재 Metal만 구현했고 D3D11/Vulkan은 요청 시 명시적으로 실패한다.\nWindows/Linux/mobile/WASM 위젯 입력·표시 검증도 미완료이다. 전체 원장의 complete로 세지 않는다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "## Metal 효과 캐시 회귀 관찰\n",
+      "level": 2,
+      "title": "Metal 효과 캐시 회귀 관찰"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 130,
+      "end_line": 134,
+      "raw": "모션 검사는 0·90·210 ms 프레임의 그림자 blur·배경 blur·전경 래스터화 횟수를\n각각 비교하고 실패 시 전후 카운터를 출력한다. 2026-10-25의 macOS M1 Max 실행에서는\n그림자·배경 blur가 각각 1→3, 전경 래스터화가 1→2로 늘어나 순수 모션의 캐시 재사용\n검사가 실패했다. 실제 창 실행·입력·정상 종료와 별개의 성능 회귀로 남겨 두며,\n이 항목의 기대 조건을 바꾸거나 완전 통과로 표시하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 Alert와 AlertButton",
+      "anchor": "네이티브-alert와-alertbutton",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "원본 배치와 액션",
+      "anchor": "원본-배치와-액션",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "버튼 메서드와 수명",
+      "anchor": "버튼-메서드와-수명",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "원본 이미지와 실제 유리 재질",
+      "anchor": "원본-이미지와-실제-유리-재질",
+      "start_line": 58
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "프레임 모션",
+      "anchor": "프레임-모션",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용과 검증 범위",
+      "anchor": "사용과-검증-범위",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Metal 효과 캐시 회귀 관찰",
+      "anchor": "metal-효과-캐시-회귀-관찰",
+      "start_line": 128
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 7,
+        "text": "NSButton·NSPanel·NSPopover나 Qt 런타임을 사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 50,
+        "text": "이전 세대의 후속 클릭 통지는 전달하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 53,
+        "text": "16과 원본 대화 상자 색상을 선택하며 높이 56을 강제하지 않는다. Alert이 액션별 높이를 지정한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000039",
+        "line": 95,
+        "text": "실제 디스플레이 콜백→Core update→GPU present로 구동하며 16ms 타이머를 사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000053",
+        "line": 134,
+        "text": "이 항목의 기대 조건을 바꾸거나 완전 통과로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000021",
+        "label": "Modal",
+        "target": "Modal.md",
+        "kind": "relative",
+        "line": 47
+      },
+      {
+        "block_id": "b000029",
+        "label": "iiGUI 재질 계약",
+        "target": "../../../iiGUI/docs/BackdropMaterials.md",
+        "kind": "relative",
+        "line": 71
+      },
+      {
+        "block_id": "b000031",
+        "label": "그림자 계약",
+        "target": "../../../iiGUI/docs/Shadows.md",
+        "kind": "relative",
+        "line": 77
+      },
+      {
+        "block_id": "b000039",
+        "label": "iiGUI 모션 계약",
+        "target": "../../../iiGUI/docs/NativeMotion.md",
+        "kind": "relative",
+        "line": 97
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

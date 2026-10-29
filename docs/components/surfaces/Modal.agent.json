@@ -1,0 +1,762 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:a36123e4334286a10d24ae041b8811e354405abbd2e185abbfd4e9bcb1fbeb73",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/surfaces/Modal.md",
+    "sha256": "ece875ed313263d418c9d040cf925c0c16b5c293b22e840928a983169a017c4a",
+    "bytes": 3717,
+    "line_count": 106,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "모달",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"modal\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 모달\n",
+      "level": 1,
+      "title": "모달"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/surfaces/Modal.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Modal`는 왼쪽 아이콘, 제목/설명 및 최대 3개의 작업 버튼이 있는 Apple 스타일의 대화 상자 표면입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- 아이콘 + 텍스트 + 작업 컨트롤이 포함된 중앙 상단 이동 모달 프레임을 제공합니다.\n- 모달이 열려 있는 동안 흐리게 오버레이를 표시합니다.\n- 사용자가 모달 프레임 외부를 클릭하면 취소됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "아이콘 + 텍스트 + 작업 컨트롤이 포함된 중앙 상단 이동 모달 프레임을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모달이 열려 있는 동안 흐리게 오버레이를 표시합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자가 모달 프레임 외부를 클릭하면 취소됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "상태 및 동작:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 30,
+      "raw": "- `open`\n- `dismissOnBackground`\n- `useOverlayLayer`\n- `cancel()`\n- `handleBackdropClick(localX, localY)`\n- `containsFramePoint(localX, localY)`\n- `actionVisible(index)`\n- `triggerAction(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`open`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dismissOnBackground`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`useOverlayLayer`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancel()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`handleBackdropClick(localX, localY)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`containsFramePoint(localX, localY)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`actionVisible(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`triggerAction(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "크기 및 레이아웃:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 37,
+      "raw": "- `minWidth`, `maxWidth`, `preferredWidth`\n- `sidePadding`\n- `frameMinHeight`\n- `verticalOffset`(기본 상단 이동)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`minWidth`, `maxWidth`, `preferredWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sidePadding`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameMinHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`verticalOffset`(기본 상단 이동)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "내용:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 41,
+      "end_line": 47,
+      "raw": "- `title`\n- `description`, `message`, `desc`(`description`의 별칭)\n- `iconName`, `iconSource`, `showIcon`\n- `iconSize`, `iconCornerRadius`\n- `contentComponent`: 열려 있는 동안 헤더와 작업 사이에 로드되는 선택적 `Component`입니다.\n- `contentItem`: 읽기 전용 로드된 항목 또는 닫혀 있는 동안 `null`.\n- 해결됨: `resolvedIconSource`, `resolvedDescription`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`title`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`description`, `message`, `desc`(`description`의 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconName`, `iconSource`, `showIcon`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSize`, `iconCornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`contentComponent`: 열려 있는 동안 헤더와 작업 사이에 로드되는 선택적 `Component`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`contentItem`: 읽기 전용 로드된 항목 또는 닫혀 있는 동안 `null`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결됨: `resolvedIconSource`, `resolvedDescription`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "작업:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 54,
+      "raw": "- `buttonCount` (`0=auto`, `1~3=explicit`)\n- `primaryText`, `secondaryText`, `tertiaryText`\n- `primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`\n- 해결됨: `resolvedButtonCount`, `hasPrimaryAction`, `hasSecondaryAction`, `hasTertiaryAction`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`buttonCount` (`0=auto`, `1~3=explicit`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryText`, `secondaryText`, `tertiaryText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryEnabled`, `secondaryEnabled`, `tertiaryEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결됨: `resolvedButtonCount`, `hasPrimaryAction`, `hasSecondaryAction`, `hasTertiaryAction`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "프레임 스타일:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 58,
+      "end_line": 61,
+      "raw": "- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)\n- `frameCornerRadius`, `resolvedFrameCornerRadius`\n- `frameColor`\n- `backdropColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`shapeStyle` (`shapeRoundRect`, `shapeCylinder`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameCornerRadius`, `resolvedFrameCornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backdropColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 65,
+      "end_line": 68,
+      "raw": "- `canceled()`\n- `primaryClicked()`\n- `secondaryClicked()`\n- `tertiaryClicked()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`canceled()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryClicked()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`secondaryClicked()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tertiaryClicked()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 74,
+      "end_line": 82,
+      "raw": "- `open`가 `true`이면 `Modal`가 표시되고 활성화됩니다.\n- 프레임은 수평 중앙에 위치하며 수직 중앙보다 약간 위에 있습니다.\n- 배경화면 외부 클릭은 `dismissOnBackground == true`일 때 `cancel()`를 호출합니다.\n- 프레임 내부의 배경화면 클릭은 취소되지 않습니다.\n- 열리면 구성요소가 사용 가능한 경우 `Controls.Overlay.overlay`로 다시 상위화될 수 있습니다.\n- 제공된 컨텐츠 뷰는 프레임의 컨텐츠 너비를 수신하고 해당 `implicitHeight`에 기여합니다. 닫으면 언로드됩니다. 다시 열면 새로운 인스턴스가 생성됩니다. 구성 요소가 제공되지 않으면 기본 아이콘/텍스트/작업 레이아웃이 변경되지 않습니다.\n- 자체 작업이 있는 보기의 경우 `showIcon: false` 및 `primaryText: \"\"`를 설정합니다. 전체 호스트 예는 [ColorPicker](../control/ColorPicker.md)를 참조하세요.\n- `buttonCount`는 최대 3로 고정됩니다.\n- 자동 모드(`buttonCount=0`)에서 3차 텍스트는 3 작업을 활성화하고, 보조 텍스트는 2작업을 활성화하며, 그렇지 않으면 기본만 활성화합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`open`가 `true`이면 `Modal`가 표시되고 활성화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프레임은 수평 중앙에 위치하며 수직 중앙보다 약간 위에 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "배경화면 외부 클릭은 `dismissOnBackground == true`일 때 `cancel()`를 호출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프레임 내부의 배경화면 클릭은 취소되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "열리면 구성요소가 사용 가능한 경우 `Controls.Overlay.overlay`로 다시 상위화될 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제공된 컨텐츠 뷰는 프레임의 컨텐츠 너비를 수신하고 해당 `implicitHeight`에 기여합니다. 닫으면 언로드됩니다. 다시 열면 새로운 인스턴스가 생성됩니다. 구성 요소가 제공되지 않으면 기본 아이콘/텍스트/작업 레이아웃이 변경되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "자체 작업이 있는 보기의 경우 `showIcon: false` 및 `primaryText: \"\"`를 설정합니다. 전체 호스트 예는 [ColorPicker](../control/ColorPicker.md)를 참조하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttonCount`는 최대 3로 고정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "자동 모드(`buttonCount=0`)에서 3차 텍스트는 3 작업을 활성화하고, 보조 텍스트는 2작업을 활성화하며, 그렇지 않으면 기본만 활성화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "fenced_code",
+      "start_line": 88,
+      "end_line": 100,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Modal {\n    open: true\n    iconName: \"projectStructure\"\n    title: \"Unlock iPhone 15 Pro Max to Continue\"\n    description: \"Xcode cannot launch because the device is locked.\"\n    buttonCount: 2\n    primaryText: \"Cancel Running\"\n    secondaryText: \"Later\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Modal {\n    open: true\n    iconName: \"projectStructure\"\n    title: \"Unlock iPhone 15 Pro Max to Continue\"\n    description: \"Xcode cannot launch because the device is locked.\"\n    buttonCount: 2\n    primaryText: \"Cancel Running\"\n    secondaryText: \"Later\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "프레임과 배경이 함께 들어갑니다. 닫는 프레임은 페이딩되는 동안 계속 표시됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "모달",
+      "anchor": "모달",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 72
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 86
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 104
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000047",
+        "label": "ColorPicker",
+        "target": "../control/ColorPicker.md",
+        "kind": "relative",
+        "line": 80
+      },
+      {
+        "block_id": "b000059",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 106
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

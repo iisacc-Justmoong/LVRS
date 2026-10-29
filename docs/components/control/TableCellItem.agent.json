@@ -1,0 +1,919 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c91f625fb09f85c8859ef3a6876b44f492bcceb5f214eaff9c30b5c1f5c6727e",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/TableCellItem.md",
+    "sha256": "bdd571e3087980659c7a9b467d9ed01a334fb4c374bbf5193f1c69849debd600",
+    "bytes": 5062,
+    "line_count": 141,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "TableCellItem",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# TableCellItem\n",
+      "level": 1,
+      "title": "TableCellItem"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/display/TableCellItem.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`TableCellItem`는 가장 작은 테이블 기본 형식(선행 구분선 + 단일 텍스트 본문)입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- Figma 행 기하학과 일치하는 하나의 컴팩트 테이블 셀을 렌더링합니다.\n- 테이블 셀 데이터 개체에서 직접 텍스트 및 시각적 재정의를 해결합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 행 기하학과 일치하는 하나의 컴팩트 테이블 셀을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "테이블 셀 데이터 개체에서 직접 텍스트 및 시각적 재정의를 해결합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 16,
+      "end_line": 32,
+      "raw": "- `itemData`(객체와 유사한 셀 설명자, 선택 사항)\n- `text`\n- `cellHeight`\n- `contentSpacing`\n- `dividerColor`\n- `textColor`\n- `showDivider`\n- `clipContent`\n- `textStyle`(레이블 스타일 열거형 값)\n- `inputable`(기본값 `false`, 텍스트 경계에서 인라인 입력 오버레이 전환)\n- `selected`, `current`\n- `selectionColor`, `currentBorderColor`, `currentBorderWidth`\n- `inputResult`(최신 편집 가능한 문자열 값)\n- `valueType` (`string`, `int`, `float`, `bool`; 주입된 검증인에 의해 사용됨)\n- `valueValidator`(상위 테이블에 의해 주입된 선택적 함수)\n- `typedValue`(최신에 허용된 입력 값)\n- `inputAccepted` (마지막 검증 결과)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemData`(객체와 유사한 셀 설명자, 선택 사항)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`contentSpacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dividerColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showDivider`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clipContent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textStyle`(레이블 스타일 열거형 값)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputable`(기본값 `false`, 텍스트 경계에서 인라인 입력 오버레이 전환)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selected`, `current`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectionColor`, `currentBorderColor`, `currentBorderWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputResult`(최신 편집 가능한 문자열 값)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueType` (`string`, `int`, `float`, `bool`; 주입된 검증인에 의해 사용됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueValidator`(상위 테이블에 의해 주입된 선택적 함수)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`typedValue`(최신에 허용된 입력 값)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputAccepted` (마지막 검증 결과)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "입력 이벤트:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 36,
+      "end_line": 39,
+      "raw": "- `inputEdited(text)`\n- `inputSubmitted(text)`\n- `inputRejected(text, valueType)`\n- `applyInputResult(value)`는 정규화된 `string`를 반환합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`inputEdited(text)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputSubmitted(text)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputRejected(text, valueType)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyInputResult(value)`는 정규화된 `string`를 반환합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "해결된 읽기 전용 값:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 43,
+      "end_line": 50,
+      "raw": "- `resolvedText`\n- `resolvedCellHeight`\n- `resolvedContentSpacing`\n- `resolvedDividerColor`\n- `resolvedTextColor`\n- `resolvedShowDivider`\n- `resolvedClipContent`\n- `resolvedTextStyle`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`resolvedText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedCellHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedContentSpacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedDividerColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedTextColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedShowDivider`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedClipContent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedTextStyle`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "fenced_code",
+      "start_line": 56,
+      "end_line": 65,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.TableCellItem {\n    itemData: ({\n        text: \"Renderer\",\n        dividerColor: LV.Theme.panelBackground03\n    })\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.TableCellItem {\n    itemData: ({\n        text: \"Renderer\",\n        dividerColor: LV.Theme.panelBackground03\n    })\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 71,
+      "end_line": 77,
+      "raw": "- `itemData`는 `label`, `text`, `title`와 같은 객체 키를 지원합니다.\n- 레이블/텍스트/제목 키가 없는 경우에도 `itemData.value`가 허용됩니다.\n- 객체 키가 누락된 경우 구성 요소 수준 대체 경로 소품이 사용됩니다.\n- 구분선과 텍스트 렌더링은 조밀하게 유지됩니다(`24px` 셀 높이, 줄임표 텍스트).\n- `selected`는 셀 선택 레이어를 채웁니다. `current`는 현재 셀 테두리를 그립니다. `Table`는 두 상태를 기본 대리자에게 자동으로 제공합니다.\n- `inputable`가 활성화되면 `InputField`는 텍스트 영역을 오버레이하고 원래 라벨 슬롯에 맞춰 정렬된 형상을 유지합니다. 내장된 라인 박스와 네이티브 입력은 데스크톱과 모바일의 Body `13 / 13`에 고정되어 이전에 잘린 `16 / 32` 라인 박스를 피합니다.\n- `valueValidator`는 부모가 주입한 API입니다. `true/false` 또는 `{ accepted, text, value }`를 반환할 수 있습니다. 거부된 편집 내용은 `inputResult`를 변경하지 않고 그대로 두고 `inputRejected`를 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemData`는 `label`, `text`, `title`와 같은 객체 키를 지원합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이블/텍스트/제목 키가 없는 경우에도 `itemData.value`가 허용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체 키가 누락된 경우 구성 요소 수준 대체 경로 소품이 사용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구분선과 텍스트 렌더링은 조밀하게 유지됩니다(`24px` 셀 높이, 줄임표 텍스트).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selected`는 셀 선택 레이어를 채웁니다. `current`는 현재 셀 테두리를 그립니다. `Table`는 두 상태를 기본 대리자에게 자동으로 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputable`가 활성화되면 `InputField`는 텍스트 영역을 오버레이하고 원래 라벨 슬롯에 맞춰 정렬된 형상을 유지합니다. 내장된 라인 박스와 네이티브 입력은 데스크톱과 모바일의 Body `13 / 13`에 고정되어 이전에 잘린 `16 / 32` 라인 박스를 피합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueValidator`는 부모가 주입한 API입니다. `true/false` 또는 `{ accepted, text, value }`를 반환할 수 있습니다. 거부된 편집 내용은 `inputResult`를 변경하지 않고 그대로 두고 `inputRejected`를 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "<a id=\"practical-tip\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "## 실용적인 팁\n",
+      "level": 2,
+      "title": "실용적인 팁"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "모델 기반 테이블에는 `itemData`를 사용하고 static/one-off 케이스에는 기본 `text` 할당을 유지합니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "<a id=\"extended-example-header-like-cell-styling\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "## 확장된 예: 헤더와 같은 셀 스타일 지정\n",
+      "level": 2,
+      "title": "확장된 예: 헤더와 같은 셀 스타일 지정"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "fenced_code",
+      "start_line": 89,
+      "end_line": 98,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.TableCellItem {\n    itemData: ({ label: \"Column\" })\n    showDivider: false\n    textStyle: description\n    textColor: LV.Theme.descriptionColor\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.TableCellItem {\n    itemData: ({ label: \"Column\" })\n    showDivider: false\n    textStyle: description\n    textColor: LV.Theme.descriptionColor\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "<a id=\"extended-example-typed-edit-guard\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "## 확장된 예: 입력된 편집 가드\n",
+      "level": 2,
+      "title": "확장된 예: 입력된 편집 가드"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "fenced_code",
+      "start_line": 104,
+      "end_line": 117,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.TableCellItem {\n    valueType: \"int\"\n    valueValidator: function(value) {\n        const text = String(value).trim()\n        if (!/^-?\\d+$/.test(text))\n            return { accepted: false, text: text, value: value }\n        const intValue = Number(text)\n        return { accepted: true, text: String(intValue), value: intValue }\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.TableCellItem {\n    valueType: \"int\"\n    valueValidator: function(value) {\n        const text = String(value).trim()\n        if (!/^-?\\d+$/.test(text))\n            return { accepted: false, text: text, value: value }\n        const intValue = Number(text)\n        return { accepted: true, text: String(intValue), value: intValue }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "Q. `itemData`에 여러 레이블 필드가 포함된 경우 어떤 텍스트 키가 사용됩니까?   A. 해결 순서는 `label -> text -> title -> value`이며 구성 요소 `text`로 대체됩니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "<a id=\"validation-checklist\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "## 검증 체크리스트\n",
+      "level": 2,
+      "title": "검증 체크리스트"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 127,
+      "end_line": 129,
+      "raw": "- 구분선 가시성이 설계 요구 사항과 일치합니다.\n- 텍스트 제거는 좁은 너비에서 작동합니다.\n- 컬러 토큰 매치 테이블 디자인(`panelBackground03` 독립형 구분선, 본문 텍스트).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "구분선 가시성이 설계 요구 사항과 일치합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "텍스트 제거는 좁은 너비에서 작동합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컬러 토큰 매치 테이블 디자인(`panelBackground03` 독립형 구분선, 본문 텍스트).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "<a id=\"figma-contract\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "## Figma 계약\n",
+      "level": 2,
+      "title": "Figma 계약"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "paragraph",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "노드 `203:3863`는 `234 × 24`입니다. 주요 분배기는 `1 × 24`입니다. 콘텐츠 라인 상자는 고정된 13/13 본문 타이포그래피를 사용하는 `(x: 9, y: 5.5, width: 225, height: 13)`입니다. 모바일은 동일한 `234 × 24` 기하학, `8` 콘텐츠 간격 및 `13px` 본문 글꼴을 사용합니다.\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "html",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "heading",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "선택 채우기가 해제되고 편집기에 탄력적인 포커스 피드백이 표시됩니다. 검증은 즉시 이루어집니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "TableCellItem",
+      "anchor": "tablecellitem",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 14
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 54
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 69
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "실용적인 팁",
+      "anchor": "실용적인-팁",
+      "start_line": 81
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "확장된 예: 헤더와 같은 셀 스타일 지정",
+      "anchor": "확장된-예-헤더와-같은-셀-스타일-지정",
+      "start_line": 87
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "확장된 예: 입력된 편집 가드",
+      "anchor": "확장된-예-입력된-편집-가드",
+      "start_line": 102
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 119
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 체크리스트",
+      "anchor": "검증-체크리스트",
+      "start_line": 125
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Figma 계약",
+      "anchor": "figma-계약",
+      "start_line": 133
+    },
+    {
+      "block_id": "b000073",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 139
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000075",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 141
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

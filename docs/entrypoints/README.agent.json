@@ -1,0 +1,3432 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:fa7ef9e000c4d74a8a06b8430ae39d5f3e1fbb54365a1a291a70c550c3329341",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "README.md",
+    "sha256": "c0ecca7f69ae7e3c8a07e3dedd883123176ffc512bc5d9489929c25e42667835",
+    "bytes": 49010,
+    "line_count": 667,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "LVRS",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# LVRS\n",
+      "level": 1,
+      "title": "LVRS"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "The latest [native authoring verification record](../LVUI/docs/NativeReadinessVerification.md) distinguishes executed checks, installed-package proof, and platform limits from the historical implementation notes below.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 7,
+      "raw": "[Native ViewModels](docs/native/ViewModelRegistry.md) provides live C++ model\naccess, aliases, per-key write ownership and borrowed/retained lifetimes. Registry\nlookups do not create a shadow property store or rebuild every model descriptor.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 11,
+      "raw": "[Native snapshot history](docs/native/ModelUndoStack.md) owns undo/redo values and\nobservable depths in C++. A committed transfer preserves its snapshot even when\nan observer fails; generated LVUI views only bind data and native commands.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "[Native ProgressBar](docs/native/ProgressBar.md) retains its C++ model, state source,\npaint cache and shared Core motion across live LVUI input updates.\nCompile/link evidence is distinct from the deferred runtime batch.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 20,
+      "raw": "[Native SVG services](docs/native/SvgManager.md) own resource loading, bounded\nLRU caches, SVGZ decoding, owner-loop HTTP requests and lazy PNG encoding.\nLVUI's view-only Image binds immutable native images and applies its dependent\noptions as one validated C++ value. Native execution remains deferred.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 24,
+      "raw": "[Native presentation models](docs/native/PresentationModels.md) provide Core-owned\nViewModel, StateModel and ProgressModel APIs with weak state sources and explicit\nowner-thread notifications. Runtime verification remains deferred to the final batch.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 30,
+      "raw": "Native [hierarchy data](docs/native/Hierarchy.md) now provides typed preorder rows,\nindexed subtree moves and a separate visibility/height projection for each view.\nBranch expansion and navigation queries preserve the shared model revision.\nThe full HierarchyItem/HierarchyList widget and LVUI integration are still pending;\nall newly compiled tests remain deferred to the final whole-goal runtime batch.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 35,
+      "raw": "Native [application surfaces](docs/native/AppSurfaces.md) now provide AppHeader\nactions and AppCard header/body composition, original implicit metrics, retained\nchildren and typed live LVUI inputs. The new NativeAppSurfaces example uses the\nCore application entry point; runtime execution stays deferred to the final batch.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 41,
+      "raw": "Native [navigation tracking](docs/native/NavigationTracking.md) now supplies a\nseparate PageMonitor visit log and ViewStateTracker logical-stack model. Navigator\nsynchronizes only its selected target, while applications explicitly record visits.\nThe native page gallery displays both models and keeps visit undo separate from navigation.\nRuntime verification remains deferred to the final whole-goal batch.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 46,
+      "raw": "Native [Link](docs/native/Link.md) now composes text or arbitrary native child\nviews in a transparent iiGUI action surface, with typed routing, state colors,\nshaped underline and Core Observable inputs. The two-page gallery includes live\nhref rebinding. Execution remains deferred to the final whole-goal batch.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 48,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 55,
+      "raw": "LVRS now has a native C++23 implementation built from LVUI AOT and iiGUI's own\nGPU-rendered widgets. `LVRS_BACKEND=native` is the default; this path does not\nfind or link Qt. Cocoa provides the window, input/IME and accessibility boundary;\ncomponent layout, state and rendering belong to iiGUI. Native migration is in\nprogress: [architecture](docs/native/Architecture.md) and the\n[full parity ledger](docs/native/Parity.md) distinguish implemented basic behavior\nfrom the complete existing LVRS contract.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 65,
+      "raw": "Build native LVRS in `build/native/build` using the updated iiSDKCore, LVUI and\niiGUI package prefixes. Resource services also require iiFileProvider Native,\niiJson, iiNetwork 0.5+ and iiVisualCodec 0.2+ with its Image component. Configure\ntheir package prefixes and OpenSSL 3 through standard CMake search paths or\n`OPENSSL_ROOT_DIR`; Video and USD codecs are not required by this path.\n`examples/NativeGallery` is a runnable LVUI app using\n`LVRS::LVRS` and Core's application entrypoint. The legacy Qt/QML implementation\nbelow is available with `-DLVRS_BACKEND=qt`; existing installed Qt consumers have\nnot been replaced by this source migration.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 75,
+      "raw": "The native gallery includes icon/help/dropdown buttons, icon-bearing tabs,\nComboBox fields, directional steppers and label/icon segmented rows. Segmented\nrows keep independent child actions; they do not introduce a selection model.\nNative Menu/ContextMenu families add owned popup scopes, scrolling, context\ntargets, shortcuts and regular/context typography. Backdrop blur, spring motion\nand dynamic object models remain part of the full migration.\nAuthored SVG assets and aliases are embedded as native data; text/image foreground\ntextures survive panel-only state changes. See the architecture for supported\nSVG semantics and the remaining component and platform contracts.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 86,
+      "raw": "`examples/NativeColorGallery` shares one native color model across wheel, HS, SV,\nspectrum and hue/brightness rails. It exercises RGB, HSV, CMYK, grayscale, alpha,\nRRGGBB/RRGGBBAA input and apply/cancel through Core change queries. The original\nwheel PNG is embedded unchanged. Color backgrounds use dependency-keyed caches;\nselection changes reuse their images. `ColorPicker` now composes the six original\nediting variants, channel ramps and numeric commits, comparison/recent swatches,\nHEX/alpha and apply/cancel/eyedropper requests from native iiGUI widgets.\n`examples/NativePickerGallery` AOT-compiles three shared-model pickers. See the\n[native ColorPicker contract](docs/native/ColorPicker.md) for supported inputs and\nremaining visual, reactive and platform parity.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 88,
+      "end_line": 92,
+      "raw": "`Popover` retains ordinary C++ widget content in the same native GPU overlay,\nincluding ColorPicker editing, nested menus, modal/nonmodal input and owner-driven\napply/cancel. `examples/NativePopoverGallery` exercises reopening one scoped\nbackend and Core display frames. See the [native Popover contract](docs/native/Popover.md)\nfor close policies and remaining material, reactive and platform work.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 98,
+      "raw": "The same example now opens its editor from a native `ColorPickerButton`, using\nthe separate original button-ring PNG, 22/28/36 metrics, authored state colors,\nfocus border and whole-button disabled opacity. Shared Core color state updates\nthe preview without rebuilding it. See [ColorPickerButton](docs/native/ColorPickerButton.md)\nfor the supported API and remaining motion/inherited contracts.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 109,
+      "raw": "`examples/NativeActivationGallery` demonstrates compiled per-open content factories\nabove LVUI's outer view. Editor objects, models and subscriptions retire on close;\nthe parent backend and native GPU surface remain. See [activation ownership](docs/native/ActivationContent.md).\nThe native [Modal](docs/native/Modal.md) now uses that mechanism for centered,\nwidth-aware persistent header/icon/action chrome and a fresh AOT-compiled body.\nActions remain open until their owner closes the dialog; cancellation is distinct\nfrom programmatic closure. `examples/NativeModalGallery` exercises initial open,\nreopening, 420ms/150ms native frame transitions, immediate body retirement, live\nreduced-motion settings, Core worker delivery, resize and teardown. Reactive\noptions, inherited behavior and platform parity remain ongoing.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 111,
+      "end_line": 119,
+      "raw": "[Alert and AlertButton](docs/native/Alert.md) now compile from LVUI to native C++\nwidgets with the authored one/two/three-action layouts, typed method-before-click\ndispatch, static reopen lifetime, original embedded SVGs and real Metal GPU glass.\n`examples/NativeAlertGallery` exercises all six action positions and both C++\nmethod signatures through Core's application runtime. Authored GPU shadows and\n420ms OutBack / 150ms InCubic transitions now share native display frames, with\nlive reduced-motion/speed preferences and retained exit pixels. General reactive\nbindings, AlertButton feedback, other components' motion and additional RHI\neffects remain pending. See [native motion](../iiGUI/docs/NativeMotion.md).\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 127,
+      "raw": "The native [Sheet](docs/native/Sheet.md) retains its header and editor while closed,\nwith desktop centering and mobile bottom presentation, fit/medium/large detents,\nexplicit safe insets, fixed chrome, native body scrolling and grabber dismissal.\n`examples/NativeSheetGallery` compiles both presentations from LVUI and exercises\nretained edits, display-driven slide/snap-back motion and Core-owned teardown.\nGeneral reactive/inherited behavior, transition-completion signal timing and\nadditional platform adapters remain part of the full migration.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "## Legacy Qt/QML implementation\n",
+      "level": 2,
+      "title": "Legacy Qt/QML implementation"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "[Windows build and execution](docs/WindowsBuildAndRun.md)\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 133,
+      "end_line": 138,
+      "raw": "Windows shared builds retain the LVRS DLL dependency for QML-only consumers on\nboth MSVC and MinGW. The native resource initialization symbol is retained at\nlink time so QML types register even when no C++ LVRS API is called. The Windows\nQML link regression creates an EventListener without referencing a backend API.\nSee [Windows validation](docs/Windows-validation.md) for the current full-suite\nresults and remaining Windows failures.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 140,
+      "end_line": 152,
+      "raw": "Windows shared builds export the C++ runtime API as well as QML registration\nsymbols. MinGW uses `--export-all-symbols`; MSVC uses CMake's automatic exports.\n`LVRSTests_windows_exports` links and invokes bootstrap and foreground-service\nAPIs through the resulting DLL import library.\nTooltip test fixtures construct QByteArray explicitly so conditional expressions\nhave the same type on MSVC, Clang and GCC.\nMinGW consumers retain the module's resource initializer as a link dependency,\nincluding QML-only consumers verified by `LVRSTests_import_api`.\nPublic QObject classes also use generated DLL import/export annotations so\npointer-to-member signal connections resolve to the same address across DLLs.\nThe Windows export smoke test verifies a typed signal connection and delivery.\nThe example aggregate-target check is registered only when `LVRS_BUILD_EXAMPLES`\nis enabled; all independent example configuration checks remain available.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "LVRS is a Qt 6.5+ UI framework focused on deterministic rendering, event observability, and reusable QML components.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "The repository ships three layers together:\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "list",
+      "start_line": 157,
+      "end_line": 159,
+      "raw": "- A reusable static QML module (`LVRS`) with components and C++ singletons.\n- Runnable example applications under `example/`, including the visual-catalog demo.\n- Tests covering event flow, text editing behavior, import API, and backend wiring.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "A reusable static QML module (`LVRS`) with components and C++ singletons.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Runnable example applications under `example/`, including the visual-catalog demo.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Tests covering event flow, text editing behavior, import API, and backend wiring.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000053",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "paragraph",
+      "start_line": 161,
+      "end_line": 161,
+      "raw": "The framework target itself does not build an application executable; all runnable apps are example targets.\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "blank",
+      "start_line": 162,
+      "end_line": 162,
+      "raw": "\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "heading",
+      "start_line": 163,
+      "end_line": 163,
+      "raw": "## Requirements\n",
+      "level": 2,
+      "title": "Requirements"
+    },
+    {
+      "id": "b000057",
+      "kind": "blank",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "list",
+      "start_line": 165,
+      "end_line": 171,
+      "raw": "- CMake 3.21+\n- C++23 compiler\n- Qt 6.5+\n- Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`\n- Qt `Test` module only when `LVRS_BUILD_TESTS=ON`\n- Local Qt kits are discovered under `/Volumes/Storage/Qt` (for example, `/Volumes/Storage/Qt/6.8.3/macos`). Explicit `QT_VERSION_ROOT`, platform Qt hints, and `Qt6_DIR` still take precedence.\n- `LVRS_ENFORCE_VULKAN` validates fixed backend Qt features where applicable (macOS/iOS: Metal, Android: Vulkan). Windows prefers D3D11 during bootstrap and falls back to OpenGL after runtime probing, while Linux/WASM use Qt default backend selection.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "CMake 3.21+",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++23 compiler",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Qt 6.5+",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Qt modules: `Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Qt `Test` module only when `LVRS_BUILD_TESTS=ON`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Local Qt kits are discovered under `/Volumes/Storage/Qt` (for example, `/Volumes/Storage/Qt/6.8.3/macos`). Explicit `QT_VERSION_ROOT`, platform Qt hints, and `Qt6_DIR` still take precedence.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_ENFORCE_VULKAN` validates fixed backend Qt features where applicable (macOS/iOS: Metal, Android: Vulkan). Windows prefers D3D11 during bootstrap and falls back to OpenGL after runtime probing, while Linux/WASM use Qt default backend selection.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000059",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "heading",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "## Quick Install (Clone -> Install -> Use)\n",
+      "level": 2,
+      "title": "Quick Install (Clone -> Install -> Use)"
+    },
+    {
+      "id": "b000061",
+      "kind": "blank",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "fenced_code",
+      "start_line": 175,
+      "end_line": 179,
+      "raw": "```bash\ngit clone <LVRS_REPO_URL>\ncd LVRS\n./install.sh\n```\n",
+      "language": "bash",
+      "code": "git clone <LVRS_REPO_URL>\ncd LVRS\n./install.sh\n",
+      "closed": true
+    },
+    {
+      "id": "b000063",
+      "kind": "blank",
+      "start_line": 180,
+      "end_line": 180,
+      "raw": "\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "paragraph",
+      "start_line": 181,
+      "end_line": 187,
+      "raw": "`install.sh` is a wrapper around Rust CLI `lvrs install`.\nIf `cargo` exists, it runs `cargo run --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli --bin lvrs -- install ...`; otherwise it falls back to `lvrs install` from `PATH`.\nDirect `lvrs install` now also reuses the installed source metadata under `<prefix>/src/LVRS` when launched outside the repository tree. If the recorded checkout path became stale because an upper directory was renamed, the CLI relocates the project root by matching the preserved trailing path segments before falling back to the installed source snapshot itself.\nSource snapshots omit repository build directories (including hidden `.build.lvrs-stale-*` cleanup remnants), `build/rust-cli`, and legacy `src/rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.\nIf `LVRS_ROOT` or `LVRS_PROJECT_ROOT` points at an installed prefix such as `~/.local/SDK/LVRS`, the CLI treats it as an install prefix and resolves the source through `<prefix>/src/LVRS`; if that snapshot is missing, commands launched inside the checkout fall back to the current repository root.\nThe install flow builds `bootstrap_lvrs_all`.\nBy default, the bootstrap platform set follows the current host:\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 188,
+      "end_line": 190,
+      "raw": "- Linux: `linux`\n- macOS: `macos;ios;android;wasm`\n- Windows: `windows;android;wasm`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Linux: `linux`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "macOS: `macos;ios;android;wasm`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Windows: `windows;android;wasm`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "paragraph",
+      "start_line": 191,
+      "end_line": 203,
+      "raw": "Platforms without a discoverable Qt kit are skipped.\nUse `./install.sh --platforms linux,android,wasm` (comma/semicolon list) to override bootstrap/install platforms explicitly.\nOn Linux hosts, `lvrs install` now runs a CMake preflight first: it verifies the host C++ toolchain, Qt 6.5+ modules (`Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`), and required Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts (Qt online installer, `qtpaths`/`qmake`, distro multiarch installs) when possible.\nIf Linux dependencies are missing and the distro package manager is recognized, the CLI prints the exact install command and can execute it with `./install.sh --install-linux-deps`.\nUse `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `src/main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.\nInstall layout remains `<prefix>/platforms/<platform>` (`macos`, `linux`, `windows`, `ios`, `android`, `wasm`).\nThe checkout lives under `Workspace/SDK/LVRS`. The default install root is `~/.local/SDK/LVRS` for both CMake and the install CLI. Set `--prefix <path>`, `LVRS_INSTALL_PREFIX=<path>`, or an explicit `CMAKE_INSTALL_PREFIX` to move the install root.\nAfter install, `env.sh` points `CMAKE_PREFIX_PATH` to the install root (`<prefix>`) and `QML2_IMPORT_PATH` to the host platform package path.\n`find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.\nThe installer also copies the running CLI into `<prefix>/bin/lvrs` (`lvrs.exe` on Windows), and `env.sh` adds that directory to `PATH`. Shell wrappers keep Cargo output under `build/rust-cli/` unless `CARGO_TARGET_DIR` is explicitly set, so the CMake clean reinstall does not remove the running CLI.\nThe installer recreates the CMake build state on every install while preserving `build/rust-cli/`, which contains the running installer. Existing LVRS artifacts are removed only after configuration succeeds.\nUse `./install.sh --without-examples --without-tests` to disable host configure-time example/test targets.\nWhen host examples are enabled, the installer builds the `lvrs_host_examples_all` target first. Each build-tree example emits its executable under `build/example/<ExampleName>/bin`, and Linux builds now stage `bin/lvrs-runtime/` with the LVRS shared library plus QML module beside the executable. The checked-in `example/*/bin/LVRSExample*` paths are launcher scripts: inside the repository they fall back to `build/example/.../bin`, and inside the installed source snapshot they exec a sibling refreshed runtime (`*.real`). If `./install.sh --without-examples` is used, those snapshot runtime payloads are omitted.\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "heading",
+      "start_line": 205,
+      "end_line": 205,
+      "raw": "## Build (Framework-First Default)\n",
+      "level": 2,
+      "title": "Build (Framework-First Default)"
+    },
+    {
+      "id": "b000069",
+      "kind": "blank",
+      "start_line": 206,
+      "end_line": 206,
+      "raw": "\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "paragraph",
+      "start_line": 207,
+      "end_line": 207,
+      "raw": "Configure:\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "blank",
+      "start_line": 208,
+      "end_line": 208,
+      "raw": "\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "fenced_code",
+      "start_line": 209,
+      "end_line": 211,
+      "raw": "```bash\ncmake -S . -B build\n```\n",
+      "language": "bash",
+      "code": "cmake -S . -B build\n",
+      "closed": true
+    },
+    {
+      "id": "b000073",
+      "kind": "blank",
+      "start_line": 212,
+      "end_line": 212,
+      "raw": "\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "paragraph",
+      "start_line": 213,
+      "end_line": 213,
+      "raw": "Build:\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "blank",
+      "start_line": 214,
+      "end_line": 214,
+      "raw": "\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "fenced_code",
+      "start_line": 215,
+      "end_line": 217,
+      "raw": "```bash\ncmake --build build -j\n```\n",
+      "language": "bash",
+      "code": "cmake --build build -j\n",
+      "closed": true
+    },
+    {
+      "id": "b000077",
+      "kind": "blank",
+      "start_line": 218,
+      "end_line": 218,
+      "raw": "\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "paragraph",
+      "start_line": 219,
+      "end_line": 219,
+      "raw": "By default, LVRS builds as an installable framework package (no example app, no tests).\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "blank",
+      "start_line": 220,
+      "end_line": 220,
+      "raw": "\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "paragraph",
+      "start_line": 221,
+      "end_line": 221,
+      "raw": "For repository-local development, prefer the root build helper:\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "blank",
+      "start_line": 222,
+      "end_line": 222,
+      "raw": "\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "fenced_code",
+      "start_line": 223,
+      "end_line": 225,
+      "raw": "```bash\n./build.sh\n```\n",
+      "language": "bash",
+      "code": "./build.sh\n",
+      "closed": true
+    },
+    {
+      "id": "b000083",
+      "kind": "blank",
+      "start_line": 226,
+      "end_line": 226,
+      "raw": "\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "paragraph",
+      "start_line": 227,
+      "end_line": 227,
+      "raw": "`build.sh` configures `build/` with `LVRS_BUILD_EXAMPLES=ON` and `LVRS_BUILD_TESTS=ON`, builds the host outputs, and fails if any checked-in example launcher no longer matches its build-tree runtime.\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "blank",
+      "start_line": 228,
+      "end_line": 228,
+      "raw": "\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "heading",
+      "start_line": 229,
+      "end_line": 229,
+      "raw": "## Build and Run Examples\n",
+      "level": 2,
+      "title": "Build and Run Examples"
+    },
+    {
+      "id": "b000087",
+      "kind": "blank",
+      "start_line": 230,
+      "end_line": 230,
+      "raw": "\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "fenced_code",
+      "start_line": 231,
+      "end_line": 233,
+      "raw": "```bash\n./build.sh\n```\n",
+      "language": "bash",
+      "code": "./build.sh\n",
+      "closed": true
+    },
+    {
+      "id": "b000089",
+      "kind": "blank",
+      "start_line": 234,
+      "end_line": 234,
+      "raw": "\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "paragraph",
+      "start_line": 235,
+      "end_line": 235,
+      "raw": "Populate every example `bin/` directory in one pass:\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "blank",
+      "start_line": 236,
+      "end_line": 236,
+      "raw": "\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "fenced_code",
+      "start_line": 237,
+      "end_line": 239,
+      "raw": "```bash\n./build.sh --without-tests\n```\n",
+      "language": "bash",
+      "code": "./build.sh --without-tests\n",
+      "closed": true
+    },
+    {
+      "id": "b000093",
+      "kind": "blank",
+      "start_line": 240,
+      "end_line": 240,
+      "raw": "\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "paragraph",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "Run visual-catalog demo:\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "blank",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "fenced_code",
+      "start_line": 243,
+      "end_line": 245,
+      "raw": "```bash\n./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n```\n",
+      "language": "bash",
+      "code": "./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n",
+      "closed": true
+    },
+    {
+      "id": "b000097",
+      "kind": "blank",
+      "start_line": 246,
+      "end_line": 246,
+      "raw": "\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "paragraph",
+      "start_line": 247,
+      "end_line": 247,
+      "raw": "The checked-in launcher resolves the build-tree executable from `build/example/VisualCatalog/bin/LVRSExampleVisualCatalog`. You can still run that build-tree executable directly if needed.\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "blank",
+      "start_line": 248,
+      "end_line": 248,
+      "raw": "\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "paragraph",
+      "start_line": 249,
+      "end_line": 249,
+      "raw": "Run tests:\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "blank",
+      "start_line": 250,
+      "end_line": 250,
+      "raw": "\n"
+    },
+    {
+      "id": "b000102",
+      "kind": "fenced_code",
+      "start_line": 251,
+      "end_line": 253,
+      "raw": "```bash\nctest --test-dir build --output-on-failure\n```\n",
+      "language": "bash",
+      "code": "ctest --test-dir build --output-on-failure\n",
+      "closed": true
+    },
+    {
+      "id": "b000103",
+      "kind": "blank",
+      "start_line": 254,
+      "end_line": 254,
+      "raw": "\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "paragraph",
+      "start_line": 255,
+      "end_line": 255,
+      "raw": "CTest selects this build's library and QML paths even when the shell has loaded an installed LVRS `env.sh`. The import test also compares embedded QML hashes with the current checkout. Installed packages are checked separately with the [installed consumer](docs/build.md#installed-package-regression).\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "blank",
+      "start_line": 256,
+      "end_line": 256,
+      "raw": "\n"
+    },
+    {
+      "id": "b000106",
+      "kind": "heading",
+      "start_line": 257,
+      "end_line": 257,
+      "raw": "## Use in Any Qt Quick Project\n",
+      "level": 2,
+      "title": "Use in Any Qt Quick Project"
+    },
+    {
+      "id": "b000107",
+      "kind": "blank",
+      "start_line": 258,
+      "end_line": 258,
+      "raw": "\n"
+    },
+    {
+      "id": "b000108",
+      "kind": "paragraph",
+      "start_line": 259,
+      "end_line": 259,
+      "raw": "Install LVRS once:\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "blank",
+      "start_line": 260,
+      "end_line": 260,
+      "raw": "\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "fenced_code",
+      "start_line": 261,
+      "end_line": 268,
+      "raw": "```bash\ncmake -S . -B build \\\n  -DLVRS_BUILD_EXAMPLES=OFF \\\n  -DLVRS_BUILD_TESTS=OFF \\\n  -DCMAKE_INSTALL_PREFIX=/path/to/lvrs-prefix\ncmake --build build -j\ncmake --install build\n```\n",
+      "language": "bash",
+      "code": "cmake -S . -B build \\\n  -DLVRS_BUILD_EXAMPLES=OFF \\\n  -DLVRS_BUILD_TESTS=OFF \\\n  -DCMAKE_INSTALL_PREFIX=/path/to/lvrs-prefix\ncmake --build build -j\ncmake --install build\n",
+      "closed": true
+    },
+    {
+      "id": "b000111",
+      "kind": "blank",
+      "start_line": 269,
+      "end_line": 269,
+      "raw": "\n"
+    },
+    {
+      "id": "b000112",
+      "kind": "paragraph",
+      "start_line": 270,
+      "end_line": 270,
+      "raw": "In your downstream app `CMakeLists.txt`:\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "blank",
+      "start_line": 271,
+      "end_line": 271,
+      "raw": "\n"
+    },
+    {
+      "id": "b000114",
+      "kind": "fenced_code",
+      "start_line": 272,
+      "end_line": 282,
+      "raw": "```cmake\nfind_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)\nfind_package(LVRS CONFIG REQUIRED)\n\nlvrs_add_qml_app(\n    TARGET MyApp\n    URI MyApp\n    QML_FILES\n        Main.qml\n)\n```\n",
+      "language": "cmake",
+      "code": "find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)\nfind_package(LVRS CONFIG REQUIRED)\n\nlvrs_add_qml_app(\n    TARGET MyApp\n    URI MyApp\n    QML_FILES\n        Main.qml\n)\n",
+      "closed": true
+    },
+    {
+      "id": "b000115",
+      "kind": "blank",
+      "start_line": 283,
+      "end_line": 283,
+      "raw": "\n"
+    },
+    {
+      "id": "b000116",
+      "kind": "paragraph",
+      "start_line": 284,
+      "end_line": 284,
+      "raw": "In your QML:\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "blank",
+      "start_line": 285,
+      "end_line": 285,
+      "raw": "\n"
+    },
+    {
+      "id": "b000118",
+      "kind": "fenced_code",
+      "start_line": 286,
+      "end_line": 289,
+      "raw": "```qml\nimport QtQuick\nimport LVRS 1.0 as LV\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport LVRS 1.0 as LV\n",
+      "closed": true
+    },
+    {
+      "id": "b000119",
+      "kind": "blank",
+      "start_line": 290,
+      "end_line": 290,
+      "raw": "\n"
+    },
+    {
+      "id": "b000120",
+      "kind": "paragraph",
+      "start_line": 291,
+      "end_line": 295,
+      "raw": "Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.\n`lvrs_configure_qml_app()` applies a safe default runtime output directory (`<build>/bin`) when none is set, auto-links/imports LVRS static QML plugin artifacts when the package is consumed as a static build, and on Linux stages `lvrs-runtime/` beside the executable with the LVRS shared library plus QML module. `runBootstrappedQmlApp()` automatically adds Linux runtime QML import candidates such as `lvrs-runtime/qml`, installed `../lib/qt6/qml`, and snapshot platform layouts before loading QML roots. `QmlAppLaunchSpec::initialProperties` is forwarded through `QQmlApplicationEngine::setInitialProperties(...)` immediately before the legacy single-root `loadFromModule(...)` path, while `QmlAppLaunchSpec::roots` can declare multiple `QmlRootLoadSpec` entries with per-root initial properties. Set `QmlAppLaunchSpec::windowActivationPolicy` or a root-specific policy to have LVRS call `show()`, `raise()`, and/or `requestActivate()` for loaded `QWindow` roots. `QmlAppLaunchSpec::lifecycle` adds `after-root-loaded`, `after-window-activated`, and zero-delay `after-first-idle` hooks/queue tasks for delayed bootstrap work. `ForegroundServiceGate` can start app foreground services once after a visible root window exists. `PermissionRequestSequencer` can run app-defined permission steps sequentially while storing request history and aggregate diagnostics. `BootstrapParallel` can fan out independent startup domains on worker threads and apply the collected results on a chosen QObject thread. `QmlContextBinder` can apply C++ context-property exposure plans and register dedicated C++ `ViewModel` instances into `LV.ViewModels` before QML is loaded. `QmlTypeRegistrar` can register app-owned QML types from a manifest while collecting duplicate and failure diagnostics. Qt runtime deployment itself remains a target-environment concern.\n`lvrs_configure_qml_app()` now also generates platform runtime targets automatically: `run_<YourTarget>_macos`, `run_<YourTarget>_linux`, `run_<YourTarget>_windows`, `run_<YourTarget>_ios`, `run_<YourTarget>_android`, `run_<YourTarget>_wasm`.\nOn the configured host desktop platform, the matching runtime target directly launches the built executable; non-host targets provide an immediate reconfigure hint via `CMAKE_SYSTEM_NAME`.\n`LV.ApplicationWindow` now includes adaptive layout policy properties:\n"
+    },
+    {
+      "id": "b000121",
+      "kind": "list",
+      "start_line": 296,
+      "end_line": 303,
+      "raw": "- `scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)\n- `scaffoldLayoutPlatform` (platform token override; default `Qt.platform.os`)\n- `scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`\n- `scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`\n- `scaffoldCompactSpacingEnabled` + `scaffoldCompactSpacingBreakpoint`\n- `scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`\n- runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`\n- `matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`scaffoldLayoutMode` (`auto`, `mobile`, `desktop`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scaffoldLayoutPlatform` (platform token override; default `Qt.platform.os`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scaffoldForceDesktopOnLargeMobile` + `scaffoldMobileDesktopMinWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scaffoldPreferBottomNavigation` + `scaffoldBottomNavigationMaxItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scaffoldCompactSpacingEnabled` + `scaffoldCompactSpacingBreakpoint`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scaffoldNavRailMaxWidthRatio` + `scaffoldDrawerMarginSafety`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "runtime booleans: `adaptiveMobileLayout`, `adaptiveDesktopLayout`, `adaptiveRailNavigation`, `adaptiveDrawerNavigation`, `adaptiveBottomNavigation`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`matchesMedia()` extra tokens: `mobile-layout`, `desktop-layout`, `rail-nav`, `drawer-nav`, `bottom-nav`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000122",
+      "kind": "paragraph",
+      "start_line": 304,
+      "end_line": 309,
+      "raw": "State is handled through page-stack routing (internal `LV.PageRouter` or injected `pageRouter`), while placement is handled through flex layout (`RowLayout`/`ColumnLayout`) inside `LV.ApplicationWindow`.\nPage-stack API on `LV.ApplicationWindow`: `initialRoutePath`, `pageRoutes`, `pageInitialPath`, `useInternalPageStack`, `activePageRouter`, `pageStackNavigated`, `pageStackNavigationFailed`.\nBy default (`auto`), mobile platforms (`android`, `ios`) stay mobile-first even at wide widths and use bottom navigation when item count allows. `desktop-compact` also uses bottom navigation when item count fits the configured limit.\n`LV.ApplicationWindow` is now the standard downstream app root. It carries the bootstrap contract directly: platform-profile-driven runtime attach, `useInternalPageStack: true`, `internalRouterRegisterAsGlobalNavigator: true`, `pageInitialPath` seeded from `initialRoutePath`, `mobileOversizedHeightEnabled: false`, and `navigationEnabled: false`. `LV.ApplicationWindow` and `LV.Window` default `forcedDeviceTierPreset` to auto-detect mode (`-1`), and mobile display-coverage/fullscreen overrides follow `Platform.runtimeProfile(...)` so Android keeps the edge-to-edge bootstrap path while iOS uses maximized edge-to-edge coverage instead of a forced fullscreen transition. `LV.AppBootstrapWindow` remains only as a compatibility wrapper that presets `visible: true`.\nOn desktop, the default solid chrome for `LV.Window` and `LV.ApplicationWindow` includes system-owned move plus native-first edge/corner resize handling. Qt 6.8 Cocoa does not implement `QWindow::startSystemResize()`, so macOS transparently falls back to pointer-driven, min/max-constrained window geometry. Built-in resize handles forward the exact global press position, keeping remote, tablet, and synthesized input aligned with the fallback session. Configure the hit regions with `windowDragHandle*`, `windowDragExclusionItems`, and `windowResize*`, or disable those regions and call `requestWindowMove()` / `requestWindowResize(edges)` from application-owned chrome.\n`LV.ApplicationWindow` uses a fully opaque background centered on 95% `windowColor` RGB plus 5% app `primaryColor` RGB. The default `windowColor` follows `Theme.window` (`#141414`). A rectangle defines that center color, while a cached opaque texture adds fixed monochrome grain at one physical pixel per sample, with a maximum variation of two 8-bit RGB levels. The grain is unblurred and uses no glass layer or Overlay blending. Legacy `windowBackgroundOpacity` and `backgroundBlurEnabled` inputs do not change this opaque surface; `backgroundBlurSupported` and `backgroundBlurActive` are false. macOS retains an opaque native window and its existing frame/input behavior. See [ApplicationWindow material](docs/components/app/ApplicationWindow.md#default-background-material). LVRS is built as C++23.\n"
+    },
+    {
+      "id": "b000123",
+      "kind": "blank",
+      "start_line": 310,
+      "end_line": 310,
+      "raw": "\n"
+    },
+    {
+      "id": "b000124",
+      "kind": "paragraph",
+      "start_line": 311,
+      "end_line": 312,
+      "raw": "Root content is now full-bleed by default on mobile: `LV.ApplicationWindow` and `LV.Window` no longer auto-place downstream content inside `safeMargin`. `LV.ApplicationWindow` also drives the native fullscreen/client-area coverage hints needed to reach the iOS status-bar and home-indicator regions, and on iOS it does so through `Window.Maximized + MaximizeUsingFullscreenGeometryHint` so the system status indicators can remain visible. Use `layoutSafeAreaBounds` as a helper rect or bind `LV.WindowSafeAreaObserver` when the app wants to reserve the actual iOS status-bar/notch/home-indicator insets explicitly.\nIn addition, LVRS generates bootstrap targets for cross-platform output/installation:\n"
+    },
+    {
+      "id": "b000125",
+      "kind": "list",
+      "start_line": 313,
+      "end_line": 319,
+      "raw": "- `bootstrap_<YourTarget>_macos`\n- `bootstrap_<YourTarget>_linux`\n- `bootstrap_<YourTarget>_windows`\n- `bootstrap_<YourTarget>_ios`\n- `bootstrap_<YourTarget>_android`\n- `bootstrap_<YourTarget>_wasm`\n- `bootstrap_<YourTarget>_all`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_macos`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_linux`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_windows`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_ios`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_android`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_wasm`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_<YourTarget>_all`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000126",
+      "kind": "paragraph",
+      "start_line": 320,
+      "end_line": 320,
+      "raw": "LVRS also generates launch/export convenience targets:\n"
+    },
+    {
+      "id": "b000127",
+      "kind": "list",
+      "start_line": 321,
+      "end_line": 326,
+      "raw": "- `launch_<YourTarget>_ios`\n- `launch_<YourTarget>_android`\n- `launch_<YourTarget>_wasm`\n- `export_<YourTarget>_xcodeproj`\n- `export_<YourTarget>_android_studio`\n- `export_<YourTarget>_wasm_site`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`launch_<YourTarget>_ios`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`launch_<YourTarget>_android`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`launch_<YourTarget>_wasm`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`export_<YourTarget>_xcodeproj`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`export_<YourTarget>_android_studio`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`export_<YourTarget>_wasm_site`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000128",
+      "kind": "paragraph",
+      "start_line": 327,
+      "end_line": 327,
+      "raw": "`bootstrap_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/<target>/...`, build the app target, then:\n"
+    },
+    {
+      "id": "b000129",
+      "kind": "list",
+      "start_line": 328,
+      "end_line": 333,
+      "raw": "- desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`). Linux app targets built through `lvrs_add_qml_app()` also stage `lvrs-runtime/` next to the executable so the LVRS shared library is resolved through a relative `RPATH`.\n- `ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`\n- `android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`\n- `wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree and writes `LVRSWasmArtifact.cmake` entry metadata\n- `launch_<YourTarget>_wasm` serves the wasm build tree with a local static HTTP server and optionally opens the browser\n- `export_<YourTarget>_wasm_site` collects wasm web assets recursively (including nested output layouts) and writes an `index.html` redirect to the detected app entry\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "desktop targets emit executable artifact paths (`macOS`/`Linux` binaries, `Windows .exe`). Linux app targets built through `lvrs_add_qml_app()` also stage `lvrs-runtime/` next to the executable so the LVRS shared library is resolved through a relative `RPATH`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ios` generates an Xcode project by default and installs the built `.app` to the iOS Simulator via `xcrun simctl`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`android` generates an Android Studio (Gradle) project by default and installs the built `.apk` to emulator/device via `adb`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`wasm` emits browser artifacts (`.html`, `.js`, `.wasm`) in the wasm bootstrap build tree and writes `LVRSWasmArtifact.cmake` entry metadata",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`launch_<YourTarget>_wasm` serves the wasm build tree with a local static HTTP server and optionally opens the browser",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`export_<YourTarget>_wasm_site` collects wasm web assets recursively (including nested output layouts) and writes an `index.html` redirect to the detected app entry",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000130",
+      "kind": "paragraph",
+      "start_line": 334,
+      "end_line": 343,
+      "raw": "Any platform without a discoverable Qt kit is skipped with a configure-time status message, and its matching `bootstrap_`, `launch_`, and `export_` targets are omitted from the generated target graph.\nOverride paths/toolchains with `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` (`PLATFORM`: `MACOS`, `LINUX`, `WINDOWS`, `IOS`, `ANDROID`, `WASM`).\nProject-generation defaults can be controlled with `LVRS_BOOTSTRAP_GENERATE_IOS_XCODE_PROJECT` and `LVRS_BOOTSTRAP_GENERATE_ANDROID_STUDIO_PROJECT`.\nAndroid Studio output path can be overridden with `LVRS_ANDROID_STUDIO_PROJECT_DIR`.\n`androiddeployqt` lookup can be pinned with `LVRS_BOOTSTRAP_ANDROIDDEPLOYQT` (or `LVRS_BOOTSTRAP_QT_HOST_PREFIX`).\nAndroid SDK/NDK auto-detection can be overridden with `LVRS_BOOTSTRAP_ANDROID_SDK_ROOT` and `LVRS_BOOTSTRAP_ANDROID_NDK`.\nWASM launch behavior can be overridden with `LVRS_BOOTSTRAP_WASM_HOST`, `LVRS_BOOTSTRAP_WASM_PORT`, `LVRS_BOOTSTRAP_WASM_OPEN_BROWSER`.\n`LVRS_DIR` and package-registry policy cache values are forwarded automatically to bootstrap reconfigure.\nWhen LVRS is consumed from an installed multi-platform prefix, bootstrap resolves `LVRS_DIR` to the target platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so cross toolchains do not rely on root-prefix package discovery.\nLVRS package config exports toolchain hint variables for downstream scripts:\n"
+    },
+    {
+      "id": "b000131",
+      "kind": "list",
+      "start_line": 344,
+      "end_line": 351,
+      "raw": "- `LVRS_INSTALL_ROOT`\n- `LVRS_QT_HOST_PREFIX_HINT`\n- `LVRS_QT_IOS_PREFIX_HINT`\n- `LVRS_QT_ANDROID_PREFIX_HINT`\n- `LVRS_QT_WASM_PREFIX_HINT`\n- `LVRS_ANDROID_SDK_HINT`\n- `LVRS_ANDROID_NDK_HINT`\n- `LVRS_EMSDK_HINT`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LVRS_INSTALL_ROOT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_QT_HOST_PREFIX_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_QT_IOS_PREFIX_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_QT_ANDROID_PREFIX_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_QT_WASM_PREFIX_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_ANDROID_SDK_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_ANDROID_NDK_HINT`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_EMSDK_HINT`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000132",
+      "kind": "paragraph",
+      "start_line": 352,
+      "end_line": 353,
+      "raw": "If a manual cross-platform configure still bypasses the root dispatcher because the toolchain roots package search paths, set `LVRS_DIR` directly to `<prefix>/platforms/<platform>/lib/cmake/LVRS`.\nExample:\n"
+    },
+    {
+      "id": "b000133",
+      "kind": "fenced_code",
+      "start_line": 354,
+      "end_line": 356,
+      "raw": "```bash\ncmake --build build --target bootstrap_MyApp_all\n```\n",
+      "language": "bash",
+      "code": "cmake --build build --target bootstrap_MyApp_all\n",
+      "closed": true
+    },
+    {
+      "id": "b000134",
+      "kind": "paragraph",
+      "start_line": 357,
+      "end_line": 358,
+      "raw": "`lvrs_add_qml_app()` further reduces bootstrap overhead by auto-generating an app entrypoint when `SOURCES` is omitted.\nProject-wide platform defaults can be configured through:\n"
+    },
+    {
+      "id": "b000135",
+      "kind": "fenced_code",
+      "start_line": 359,
+      "end_line": 369,
+      "raw": "```cmake\nlvrs_configure_project_defaults(\n    TARGET MyApp\n    APPLE_BUNDLE_ID com.example.myapp\n    APPLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/platform/apple/Info.plist\n    APPLE_ENTITLEMENTS ${CMAKE_SOURCE_DIR}/platform/apple/MyApp.entitlements\n    ANDROID_PACKAGE_ID com.example.myapp\n    ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/platform/android/package\n    IOS_EXCLUDE_QMLTOOLING\n)\n```\n",
+      "language": "cmake",
+      "code": "lvrs_configure_project_defaults(\n    TARGET MyApp\n    APPLE_BUNDLE_ID com.example.myapp\n    APPLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/platform/apple/Info.plist\n    APPLE_ENTITLEMENTS ${CMAKE_SOURCE_DIR}/platform/apple/MyApp.entitlements\n    ANDROID_PACKAGE_ID com.example.myapp\n    ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/platform/android/package\n    IOS_EXCLUDE_QMLTOOLING\n)\n",
+      "closed": true
+    },
+    {
+      "id": "b000136",
+      "kind": "blank",
+      "start_line": 370,
+      "end_line": 370,
+      "raw": "\n"
+    },
+    {
+      "id": "b000137",
+      "kind": "paragraph",
+      "start_line": 371,
+      "end_line": 371,
+      "raw": "For framework-only multi-platform install, LVRS also generates:\n"
+    },
+    {
+      "id": "b000138",
+      "kind": "list",
+      "start_line": 372,
+      "end_line": 378,
+      "raw": "- `bootstrap_lvrs_macos`\n- `bootstrap_lvrs_linux`\n- `bootstrap_lvrs_windows`\n- `bootstrap_lvrs_ios`\n- `bootstrap_lvrs_android`\n- `bootstrap_lvrs_wasm`\n- `bootstrap_lvrs_all`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_macos`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_linux`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_windows`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_ios`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_android`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_wasm`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrap_lvrs_all`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000139",
+      "kind": "paragraph",
+      "start_line": 379,
+      "end_line": 386,
+      "raw": "`bootstrap_lvrs_*` targets configure isolated per-platform build trees under `<build>/lvrs-bootstrap/framework/...`, build `LVRSCore`, and install each platform package into `${LVRS_BOOTSTRAP_INSTALL_ROOT}/<platform>` (default: `<build>/lvrs-install/<platform>`).\nNested framework builds run with `--parallel 1` and clear inherited Make/jobserver parallel environment (`MAKEFLAGS`, `MFLAGS`, and `CMAKE_BUILD_PARALLEL_LEVEL`) before invoking the per-platform build.\nDefault framework bootstrap platform set is all runtime platforms unless `LVRS_BOOTSTRAP_FRAMEWORK_PLATFORMS` is set.\nAny platform without a matching Qt kit is skipped with a configure-time status message.\niOS framework bootstrap also requires a selected full Xcode with an iPhoneOS SDK; Command Line Tools-only hosts skip the iOS target instead of failing the aggregate install.\nPer-platform install prefixes can be overridden with `LVRS_BOOTSTRAP_INSTALL_PREFIX_<PLATFORM>`.\nCross-host targets (`linux`, `windows`, `android`, `ios`, `wasm`) require matching Qt kits and toolchains; set `LVRS_BOOTSTRAP_QT_PREFIX_<PLATFORM>` and `LVRS_BOOTSTRAP_TOOLCHAIN_FILE_<PLATFORM>` as needed.\nFor Apple compatibility, configure the parent with `CMAKE_OSX_DEPLOYMENT_TARGET` for macOS or set `LVRS_BOOTSTRAP_OSX_DEPLOYMENT_TARGET_<PLATFORM>` explicitly. The macOS child inherits the parent target, while iOS requires an explicit generic or iOS-specific value so the host version is not applied to the mobile build.\n"
+    },
+    {
+      "id": "b000140",
+      "kind": "blank",
+      "start_line": 387,
+      "end_line": 387,
+      "raw": "\n"
+    },
+    {
+      "id": "b000141",
+      "kind": "heading",
+      "start_line": 388,
+      "end_line": 388,
+      "raw": "## Rendering Backend Policy\n",
+      "level": 2,
+      "title": "Rendering Backend Policy"
+    },
+    {
+      "id": "b000142",
+      "kind": "blank",
+      "start_line": 389,
+      "end_line": 389,
+      "raw": "\n"
+    },
+    {
+      "id": "b000143",
+      "kind": "paragraph",
+      "start_line": 390,
+      "end_line": 390,
+      "raw": "At runtime, graphics backend selection is bootstrapped through `src/backend/runtime/appbootstrap.*` from each app entrypoint.\n"
+    },
+    {
+      "id": "b000144",
+      "kind": "blank",
+      "start_line": 391,
+      "end_line": 391,
+      "raw": "\n"
+    },
+    {
+      "id": "b000145",
+      "kind": "list",
+      "start_line": 392,
+      "end_line": 397,
+      "raw": "- macOS/iOS: Metal is fixed.\n- Windows: D3D11 is preferred, the runtime is probed first, and startup falls back to OpenGL when DirectX cannot be initialized during bootstrap.\n- Android: Vulkan is preferred, runtime loader availability is probed first, and startup falls back to OpenGL when Vulkan cannot be initialized during bootstrap.\n- Linux: Qt default backend selection is used.\n- WASM/other platforms: Qt default backend selection is used as fallback.\n- If a required fixed backend cannot be initialized and no platform fallback exists, app startup fails fast with a clear error message.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "macOS/iOS: Metal is fixed.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Windows: D3D11 is preferred, the runtime is probed first, and startup falls back to OpenGL when DirectX cannot be initialized during bootstrap.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Android: Vulkan is preferred, runtime loader availability is probed first, and startup falls back to OpenGL when Vulkan cannot be initialized during bootstrap.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Linux: Qt default backend selection is used.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "WASM/other platforms: Qt default backend selection is used as fallback.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "If a required fixed backend cannot be initialized and no platform fallback exists, app startup fails fast with a clear error message.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000146",
+      "kind": "blank",
+      "start_line": 398,
+      "end_line": 398,
+      "raw": "\n"
+    },
+    {
+      "id": "b000147",
+      "kind": "paragraph",
+      "start_line": 399,
+      "end_line": 399,
+      "raw": "Bootstrap render defaults are also applied conservatively before the first window is created. iOS/Android use a lower MSAA profile and reduced atlas sizing than desktop targets, while WASM uses a lighter single-frame bootstrap profile with partial-update, batch-renderer, and pipeline-cache hints disabled.\n"
+    },
+    {
+      "id": "b000148",
+      "kind": "blank",
+      "start_line": 400,
+      "end_line": 400,
+      "raw": "\n"
+    },
+    {
+      "id": "b000149",
+      "kind": "paragraph",
+      "start_line": 401,
+      "end_line": 401,
+      "raw": "Build-time backend enforcement is controlled by:\n"
+    },
+    {
+      "id": "b000150",
+      "kind": "list",
+      "start_line": 402,
+      "end_line": 402,
+      "raw": "- `LVRS_ENFORCE_VULKAN` (default `ON`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LVRS_ENFORCE_VULKAN` (default `ON`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000151",
+      "kind": "blank",
+      "start_line": 403,
+      "end_line": 403,
+      "raw": "\n"
+    },
+    {
+      "id": "b000152",
+      "kind": "paragraph",
+      "start_line": 404,
+      "end_line": 404,
+      "raw": "Build-time optimization policy is controlled by:\n"
+    },
+    {
+      "id": "b000153",
+      "kind": "list",
+      "start_line": 405,
+      "end_line": 406,
+      "raw": "- `LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (default `ON`)\n- `LVRS_ENABLE_IPO` (default `ON`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LVRS_ENABLE_PLATFORM_BUILD_OPTIMIZATIONS` (default `ON`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS_ENABLE_IPO` (default `ON`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000154",
+      "kind": "blank",
+      "start_line": 407,
+      "end_line": 407,
+      "raw": "\n"
+    },
+    {
+      "id": "b000155",
+      "kind": "paragraph",
+      "start_line": 408,
+      "end_line": 408,
+      "raw": "Both application and framework bootstrap propagation preserve explicit `OFF` values for these options and forward the resolved Apple deployment target. Empty values alone are omitted from a nested platform configure.\n"
+    },
+    {
+      "id": "b000156",
+      "kind": "blank",
+      "start_line": 409,
+      "end_line": 409,
+      "raw": "\n"
+    },
+    {
+      "id": "b000157",
+      "kind": "paragraph",
+      "start_line": 410,
+      "end_line": 410,
+      "raw": "When enabled, configure fails if:\n"
+    },
+    {
+      "id": "b000158",
+      "kind": "list",
+      "start_line": 411,
+      "end_line": 411,
+      "raw": "- The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` for Android).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "The platform-fixed backend requirements are not satisfied (`QT_FEATURE_metal` for macOS/iOS, `QT_FEATURE_vulkan` for Android).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000159",
+      "kind": "blank",
+      "start_line": 412,
+      "end_line": 412,
+      "raw": "\n"
+    },
+    {
+      "id": "b000160",
+      "kind": "heading",
+      "start_line": 413,
+      "end_line": 413,
+      "raw": "## Project Layout\n",
+      "level": 2,
+      "title": "Project Layout"
+    },
+    {
+      "id": "b000161",
+      "kind": "blank",
+      "start_line": 414,
+      "end_line": 414,
+      "raw": "\n"
+    },
+    {
+      "id": "b000162",
+      "kind": "list",
+      "start_line": 415,
+      "end_line": 423,
+      "raw": "- `src/backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).\n- `src/backend/runtime/appbootstrap.h`, `src/backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.\n- `src/qml/`: QML module entry files and components.\n- `src/main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.\n- `example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.\n- `example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.\n- `resources/iconset/`: SVG icon source set used for theme accent extraction. Most icons in this set are sourced from JetBrains Int Icons (IntelliJ Platform Icons).\n- `tests/`: Qt tests for components and runtime services.\n- `docs/`: full technical documentation index.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`src/backend/`: C++ singletons (`RuntimeEvents`, `Backend`, `RenderMonitor`, `RenderQuality`, etc.).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend/runtime/appbootstrap.h`, `src/backend/runtime/appbootstrap.cpp`: reusable pre/post app bootstrap API for downstream apps.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/qml/`: QML module entry files and components.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/main.cpp`: downstream app template entrypoint (reference only, not built by framework CMake targets). CLI/env overrides can inject `module/root/app-name/style`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`example/VisualCatalog/main.cpp`: visual-catalog app entrypoint, backend bootstrap, font loading.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`example/VisualCatalog/qml/Main.qml`: visual catalog with tab pages and EventListener runtime console.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resources/iconset/`: SVG icon source set used for theme accent extraction. Most icons in this set are sourced from JetBrains Int Icons (IntelliJ Platform Icons).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tests/`: Qt tests for components and runtime services.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/`: full technical documentation index.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000163",
+      "kind": "blank",
+      "start_line": 424,
+      "end_line": 424,
+      "raw": "\n"
+    },
+    {
+      "id": "b000164",
+      "kind": "heading",
+      "start_line": 425,
+      "end_line": 425,
+      "raw": "## Event and Input Architecture\n",
+      "level": 2,
+      "title": "Event and Input Architecture"
+    },
+    {
+      "id": "b000165",
+      "kind": "blank",
+      "start_line": 426,
+      "end_line": 426,
+      "raw": "\n"
+    },
+    {
+      "id": "b000166",
+      "kind": "paragraph",
+      "start_line": 427,
+      "end_line": 427,
+      "raw": "The event system now centers on a daemon-style flow:\n"
+    },
+    {
+      "id": "b000167",
+      "kind": "blank",
+      "start_line": 428,
+      "end_line": 428,
+      "raw": "\n"
+    },
+    {
+      "id": "b000168",
+      "kind": "list",
+      "start_line": 429,
+      "end_line": 434,
+      "raw": "1. `RuntimeEvents` installs a global event filter and records input/UI lifecycle events, including native touch point detail.\n2. `Backend.hookUserEvents()` subscribes to the runtime stream and keeps a bounded cache.\n3. `GestureEvents` classifies mobile press, scroll, hold, drag, swipe, and native gesture payloads.\n4. `EventListener` consumes backend state first (`currentUserInputState()`), then runtime fallback.\n5. `ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.\n6. UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`RuntimeEvents` installs a global event filter and records input/UI lifecycle events, including native touch point detail.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`Backend.hookUserEvents()` subscribes to the runtime stream and keeps a bounded cache.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`GestureEvents` classifies mobile press, scroll, hold, drag, swipe, and native gesture payloads.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "`EventListener` consumes backend state first (`currentUserInputState()`), then runtime fallback.",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "`ApplicationWindow` emits `globalPressedEvent` and `globalContextEvent`.",
+          "checked": null
+        },
+        {
+          "marker": "6.",
+          "text": "UI features such as `ContextMenu`, runtime console, and hierarchy scroll guards are driven from this unified stream.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000169",
+      "kind": "blank",
+      "start_line": 435,
+      "end_line": 435,
+      "raw": "\n"
+    },
+    {
+      "id": "b000170",
+      "kind": "heading",
+      "start_line": 436,
+      "end_line": 436,
+      "raw": "## Shared Desktop and Mobile Sizing\n",
+      "level": 2,
+      "title": "Shared Desktop and Mobile Sizing"
+    },
+    {
+      "id": "b000171",
+      "kind": "blank",
+      "start_line": 437,
+      "end_line": 437,
+      "raw": "\n"
+    },
+    {
+      "id": "b000172",
+      "kind": "paragraph",
+      "start_line": 438,
+      "end_line": 438,
+      "raw": "Mobile no longer doubles Theme sizes. iOS, Android, and desktop use the same spacing, controls, icons, font sizes, and line heights at `1x`. Body remains `13px`; Title remains `26px`; compact icons remain `18px`. Explicit component overrides and optional window composition scaling remain available. See [Theme](docs/theme.md) for the sizing and regression-test contract.\n"
+    },
+    {
+      "id": "b000173",
+      "kind": "blank",
+      "start_line": 439,
+      "end_line": 439,
+      "raw": "\n"
+    },
+    {
+      "id": "b000174",
+      "kind": "heading",
+      "start_line": 440,
+      "end_line": 440,
+      "raw": "## Main Visual Catalog\n",
+      "level": 2,
+      "title": "Main Visual Catalog"
+    },
+    {
+      "id": "b000175",
+      "kind": "blank",
+      "start_line": 441,
+      "end_line": 441,
+      "raw": "\n"
+    },
+    {
+      "id": "b000176",
+      "kind": "paragraph",
+      "start_line": 442,
+      "end_line": 442,
+      "raw": "`example/VisualCatalog/qml/Main.qml` is a tab-oriented design-system console with dedicated pages for:\n"
+    },
+    {
+      "id": "b000177",
+      "kind": "list",
+      "start_line": 443,
+      "end_line": 453,
+      "raw": "- Overview\n- Typography\n- EventListener console\n- Buttons\n- Accent tokens\n- Inputs / Editors\n- Checks\n- Navigation\n- Layout\n- Hierarchy\n- Scaffold\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Overview",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Typography",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "EventListener console",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Buttons",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Accent tokens",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Inputs / Editors",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Checks",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Navigation",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Layout",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Hierarchy",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Scaffold",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000178",
+      "kind": "blank",
+      "start_line": 454,
+      "end_line": 454,
+      "raw": "\n"
+    },
+    {
+      "id": "b000179",
+      "kind": "paragraph",
+      "start_line": 455,
+      "end_line": 455,
+      "raw": "The runtime console section exposes daemon health, event sequence, pointer target, pressed keys/buttons, and recent route/render events.\n"
+    },
+    {
+      "id": "b000180",
+      "kind": "blank",
+      "start_line": 456,
+      "end_line": 456,
+      "raw": "\n"
+    },
+    {
+      "id": "b000181",
+      "kind": "paragraph",
+      "start_line": 457,
+      "end_line": 457,
+      "raw": "Control → Input → Slider contains seven interactive `LV.Slider` types and the complete 112-variant Figma matrix. The component supports Mini/Small/Regular/Large, centered and capsule fills, endpoint labels/icons, ticks, segmented snapping, and native pointer/touch/keyboard input. See [Slider API](docs/components/control/Slider.md).\n"
+    },
+    {
+      "id": "b000182",
+      "kind": "blank",
+      "start_line": 458,
+      "end_line": 458,
+      "raw": "\n"
+    },
+    {
+      "id": "b000183",
+      "kind": "paragraph",
+      "start_line": 459,
+      "end_line": 459,
+      "raw": "Control → Input → ColorPicker contains six embeddable color editing views, including the hue wheel, two color planes, grayscale, RGB and CMYK. Pass an `LV.ColorPicker` through `Component` to `LV.Modal.contentComponent` or another content host. The host owns presentation and dismissal. See [ColorPicker API](docs/components/control/ColorPicker.md).\n"
+    },
+    {
+      "id": "b000184",
+      "kind": "blank",
+      "start_line": 460,
+      "end_line": 460,
+      "raw": "\n"
+    },
+    {
+      "id": "b000185",
+      "kind": "heading",
+      "start_line": 461,
+      "end_line": 461,
+      "raw": "## Documentation\n",
+      "level": 2,
+      "title": "Documentation"
+    },
+    {
+      "id": "b000186",
+      "kind": "blank",
+      "start_line": 462,
+      "end_line": 462,
+      "raw": "\n"
+    },
+    {
+      "id": "b000187",
+      "kind": "paragraph",
+      "start_line": 463,
+      "end_line": 463,
+      "raw": "Surfaces → Sheet presents reusable content as a mobile bottom sheet or centered desktop modal. `LV.Sheet.cornerRadius` accepts the device's measured corner radius in logical pixels; physical-pixel measurements must first be divided by the matching display DPR. The catalog includes share, export, folder selection with fixed actions, and inline-frame examples. See [Sheet API](docs/components/surfaces/Sheet.md).\n"
+    },
+    {
+      "id": "b000188",
+      "kind": "blank",
+      "start_line": 464,
+      "end_line": 464,
+      "raw": "\n"
+    },
+    {
+      "id": "b000189",
+      "kind": "paragraph",
+      "start_line": 465,
+      "end_line": 465,
+      "raw": "Surfaces → Tooltip presents a Component or inline view in a speech bubble. Its tail stays at a target-local point while the body flips, shifts, and constrains itself to the available display area. Hover, keyboard focus, held touch, delay/timeout, and manual origins are supported. See [Tooltip API](docs/components/surfaces/Tooltip.md).\n"
+    },
+    {
+      "id": "b000190",
+      "kind": "blank",
+      "start_line": 466,
+      "end_line": 466,
+      "raw": "\n"
+    },
+    {
+      "id": "b000191",
+      "kind": "paragraph",
+      "start_line": 467,
+      "end_line": 467,
+      "raw": "Start at:\n"
+    },
+    {
+      "id": "b000192",
+      "kind": "list",
+      "start_line": 468,
+      "end_line": 468,
+      "raw": "- `docs/README.md`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`docs/README.md`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000193",
+      "kind": "blank",
+      "start_line": 469,
+      "end_line": 469,
+      "raw": "\n"
+    },
+    {
+      "id": "b000194",
+      "kind": "paragraph",
+      "start_line": 470,
+      "end_line": 470,
+      "raw": "Key references:\n"
+    },
+    {
+      "id": "b000195",
+      "kind": "list",
+      "start_line": 471,
+      "end_line": 478,
+      "raw": "- `docs/architecture/event-pipeline.md`\n- `docs/architecture/rendering-backend.md`\n- `docs/backend/RuntimeEvents.md`\n- `docs/backend/Backend.md`\n- `docs/components/control/EventListener.md`\n- `docs/components/navigation/ContextMenu.md`\n- `docs/components/navigation/Hierarchy.md`\n- `docs/components/control/InputMethodGuard.md`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`docs/architecture/event-pipeline.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/architecture/rendering-backend.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/backend/RuntimeEvents.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/backend/Backend.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/components/control/EventListener.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/components/navigation/ContextMenu.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/components/navigation/Hierarchy.md`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`docs/components/control/InputMethodGuard.md`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000196",
+      "kind": "blank",
+      "start_line": 479,
+      "end_line": 479,
+      "raw": "\n"
+    },
+    {
+      "id": "b000197",
+      "kind": "html",
+      "start_line": 480,
+      "end_line": 480,
+      "raw": "<a id=\"android-시스템-안전-영역\"></a>\n"
+    },
+    {
+      "id": "b000198",
+      "kind": "blank",
+      "start_line": 481,
+      "end_line": 481,
+      "raw": "\n"
+    },
+    {
+      "id": "b000199",
+      "kind": "heading",
+      "start_line": 482,
+      "end_line": 482,
+      "raw": "### Android system safety zone\n",
+      "level": 3,
+      "title": "Android system safety zone"
+    },
+    {
+      "id": "b000200",
+      "kind": "blank",
+      "start_line": 483,
+      "end_line": 483,
+      "raw": "\n"
+    },
+    {
+      "id": "b000201",
+      "kind": "paragraph",
+      "start_line": 484,
+      "end_line": 484,
+      "raw": "Even if Qt 6.8 Android's default QPA safety margin is 0, `WindowSafeAreaObserver` reads Android WindowInsets system bar and display cutout and converts them to Qt logical coordinates. Apps use existing `ApplicationWindow.mobileSystemSafe*Inset` properties as is. Margins are refreshed on rotation, window size, and focus changes. Desktop and iOS maintain existing QPA margin paths. `PlatformIntegrationTests::safe_area_tracks_window_lifetime` checks window connections, rotation size, and connection removal, and Society Android emulator's bottom Files button and actual file app entry constitute device integration checks.\n"
+    },
+    {
+      "id": "b000202",
+      "kind": "blank",
+      "start_line": 485,
+      "end_line": 485,
+      "raw": "\n"
+    },
+    {
+      "id": "b000203",
+      "kind": "heading",
+      "start_line": 486,
+      "end_line": 486,
+      "raw": "### Standard window and popup materials\n",
+      "level": 3,
+      "title": "Standard window and popup materials"
+    },
+    {
+      "id": "b000204",
+      "kind": "blank",
+      "start_line": 487,
+      "end_line": 487,
+      "raw": "\n"
+    },
+    {
+      "id": "b000205",
+      "kind": "paragraph",
+      "start_line": 488,
+      "end_line": 488,
+      "raw": "`ApplicationWindow` uses an opaque 98% `Theme.window` (`#141414`) + 2% app-accent RGB center color with very fine, fixed monochrome grain (one physical pixel, at most ±2 RGB levels). Standalone `WindowMaterial` retains its near-black 50% coating, radial accents, and 64px backdrop diffusion. `ContextMenu` and `Menu` use a 12% frosted WindowMaterial coating with 64px blur. `Tooltip` and `Popover` retain PanelMaterial Glass 25 and its radial accents. See [Materials](docs/components/surfaces/Materials.md) and [Popover](docs/components/surfaces/Popover.md).\n"
+    },
+    {
+      "id": "b000206",
+      "kind": "blank",
+      "start_line": 489,
+      "end_line": 489,
+      "raw": "\n"
+    },
+    {
+      "id": "b000207",
+      "kind": "heading",
+      "start_line": 490,
+      "end_line": 490,
+      "raw": "## Interaction and motion\n",
+      "level": 2,
+      "title": "Interaction and motion"
+    },
+    {
+      "id": "b000208",
+      "kind": "blank",
+      "start_line": 491,
+      "end_line": 491,
+      "raw": "\n"
+    },
+    {
+      "id": "b000209",
+      "kind": "paragraph",
+      "start_line": 492,
+      "end_line": 492,
+      "raw": "See [the motion system](docs/motion.md) for shared elastic feedback, accessibility controls, component coverage and VisualCatalog verification.\n"
+    },
+    {
+      "id": "b000210",
+      "kind": "blank",
+      "start_line": 493,
+      "end_line": 493,
+      "raw": "\n"
+    },
+    {
+      "id": "b000211",
+      "kind": "paragraph",
+      "start_line": 494,
+      "end_line": 494,
+      "raw": "The [Figma parity audit](docs/figma-parity.md) records the current component inventory, exact color tokens and corrected compact/regular menu contracts.\n"
+    },
+    {
+      "id": "b000212",
+      "kind": "blank",
+      "start_line": 495,
+      "end_line": 495,
+      "raw": "\n"
+    },
+    {
+      "id": "b000213",
+      "kind": "paragraph",
+      "start_line": 496,
+      "end_line": 496,
+      "raw": "ContextMenu and Menu now share a lighter frosted WindowMaterial coating. See the [menu material contract](docs/components/navigation/ContextMenu.md#window-derived-frosted-menu) for tint, blur and accent overrides.\n"
+    },
+    {
+      "id": "b000214",
+      "kind": "blank",
+      "start_line": 497,
+      "end_line": 497,
+      "raw": "\n"
+    },
+    {
+      "id": "b000215",
+      "kind": "heading",
+      "start_line": 498,
+      "end_line": 498,
+      "raw": "## Source layout\n",
+      "level": 2,
+      "title": "Source layout"
+    },
+    {
+      "id": "b000216",
+      "kind": "blank",
+      "start_line": 499,
+      "end_line": 499,
+      "raw": "\n"
+    },
+    {
+      "id": "b000217",
+      "kind": "paragraph",
+      "start_line": 500,
+      "end_line": 500,
+      "raw": "Implementation files and their headers live together under `src/`. Existing feature and platform subdirectories retain their responsibilities. Build configuration, tests, documentation, resources, and maintenance scripts remain at the project root. Configure and build using the repository-local `build/` directory.\n"
+    },
+    {
+      "id": "b000218",
+      "kind": "blank",
+      "start_line": 501,
+      "end_line": 501,
+      "raw": "\n"
+    },
+    {
+      "id": "b000219",
+      "kind": "html",
+      "start_line": 502,
+      "end_line": 502,
+      "raw": "<a id=\"lvrs-모바일-탐색\"></a>\n"
+    },
+    {
+      "id": "b000220",
+      "kind": "blank",
+      "start_line": 503,
+      "end_line": 503,
+      "raw": "\n"
+    },
+    {
+      "id": "b000221",
+      "kind": "heading",
+      "start_line": 504,
+      "end_line": 504,
+      "raw": "## LVRS mobile navigation\n",
+      "level": 2,
+      "title": "LVRS mobile navigation"
+    },
+    {
+      "id": "b000222",
+      "kind": "blank",
+      "start_line": 505,
+      "end_line": 505,
+      "raw": "\n"
+    },
+    {
+      "id": "b000223",
+      "kind": "paragraph",
+      "start_line": 506,
+      "end_line": 506,
+      "raw": "`MobileNavigationBar` · `MobileNavigationTab` provides [Figma spec](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243)device curvature, optional independent search, left collapse placement, sticky selection movement, and optional labels. Search is disabled by default and added via `search: ({})`. Usage refers to [component documentation](docs/components/navigation/MobileNavigationBar.md).\n"
+    },
+    {
+      "id": "b000224",
+      "kind": "blank",
+      "start_line": 507,
+      "end_line": 507,
+      "raw": "\n"
+    },
+    {
+      "id": "b000225",
+      "kind": "heading",
+      "start_line": 508,
+      "end_line": 508,
+      "raw": "## Recovering an interrupted install\n",
+      "level": 2,
+      "title": "Recovering an interrupted install"
+    },
+    {
+      "id": "b000226",
+      "kind": "blank",
+      "start_line": 509,
+      "end_line": 509,
+      "raw": "\n"
+    },
+    {
+      "id": "b000227",
+      "kind": "paragraph",
+      "start_line": 510,
+      "end_line": 534,
+      "raw": "LVRS now requests iiFileProvider 0.7.1 or a compatible newer package to match\nthe current SDK interfaces. Framework bootstrap builds iiFileProvider\nfrom the sibling SDK checkout for iOS, Android and WebAssembly with the same Qt\nkit, ABI, sysroot and toolchain. Each cross package owns its dependency under\n`deps/iiFileProvider`; its installed config selects this target package before\nambient host packages. `LVRS_BOOTSTRAP_FILE_PROVIDER_SOURCE_DIR` overrides the\nsource location. iOS, Android and WASM use the provider's pinned SQLite source.\nBootstrap and installed consumers discover the installed provider package set\nand resolve Native, Catalog, Objects, Temporary and SQLite from that target\nprefix. Explicit package directories retain this closure under root-only\ncross-toolchain searches and exclude ambient host package hints.\nLVRS remains version 1.0.1. The provider-bootstrap CTest exercises target\nselection, ABI forwarding, installation and dependency-failure propagation.\nThe source snapshot also preserves the sibling iiFileProvider sources, excluding\nits build outputs, so reinstalling from the installed snapshot can rebuild\ncross dependencies when the original checkout is unavailable.\nAndroid discovery rejects an incompatible explicit CMake NDK override and skips\nobsolete shell hints when a compatible installed NDK is available. The provider\nrequires libc++ `<stop_token>` and `<expected>` support. NDK r30 and the Qt\nmultithread WASM kit provide the required C++23 library/thread facilities.\nBoth parent CMake target generation and the Rust CLI check shell NDK hints before\npromoting them into explicit child settings. This includes a stale\n`LVRS_BOOTSTRAP_ANDROID_NDK` in the shell. Explicit `-DLVRS_BOOTSTRAP_ANDROID_NDK=...`\ncommand-line overrides remain authoritative and incompatible explicit paths\nproduce a diagnostic.\n"
+    },
+    {
+      "id": "b000228",
+      "kind": "blank",
+      "start_line": 535,
+      "end_line": 535,
+      "raw": "\n"
+    },
+    {
+      "id": "b000229",
+      "kind": "paragraph",
+      "start_line": 536,
+      "end_line": 544,
+      "raw": "`cmake --build build` requires a completed configure step and `build/CMakeCache.txt`.\nSourcing a toolchain environment only exports variables; it does not create the cache.\nIf configuration was interrupted, rerun `./install.sh` (or the shell's `lvrs install`\nwrapper). The installer configures the fixed `build/` directory before building.\nInstall third-party toolchains in system locations, outside `Workspace/SDK`.\nThe Unix wrapper inherits `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_NDK_ROOT`, and\n`EMSDK` from the system shell environment; it never auto-loads a sibling toolchain\ndirectory. Set `LVRS_TOOLCHAIN_ENV_FILE` only for an explicit environment file\noverride. An explicit missing file is an error.\n"
+    },
+    {
+      "id": "b000230",
+      "kind": "blank",
+      "start_line": 545,
+      "end_line": 545,
+      "raw": "\n"
+    },
+    {
+      "id": "b000231",
+      "kind": "paragraph",
+      "start_line": 546,
+      "end_line": 550,
+      "raw": "Regression checks: `sh tests/test_install_wrapper.sh` and\n`cargo test --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli`.\nThey cover system environment inheritance, ignored sibling toolchains, explicit\noverrides, argument boundaries, preservation of the\nCargo executable during CMake cleanup, and recreation of a missing build directory.\n"
+    },
+    {
+      "id": "b000232",
+      "kind": "blank",
+      "start_line": 551,
+      "end_line": 551,
+      "raw": "\n"
+    },
+    {
+      "id": "b000233",
+      "kind": "heading",
+      "start_line": 552,
+      "end_line": 552,
+      "raw": "## License\n",
+      "level": 2,
+      "title": "License"
+    },
+    {
+      "id": "b000234",
+      "kind": "blank",
+      "start_line": 553,
+      "end_line": 553,
+      "raw": "\n"
+    },
+    {
+      "id": "b000235",
+      "kind": "paragraph",
+      "start_line": 554,
+      "end_line": 554,
+      "raw": "SPDX-License-Identifier: MIT\n"
+    },
+    {
+      "id": "b000236",
+      "kind": "blank",
+      "start_line": 555,
+      "end_line": 555,
+      "raw": "\n"
+    },
+    {
+      "id": "b000237",
+      "kind": "paragraph",
+      "start_line": 556,
+      "end_line": 558,
+      "raw": "The original code and documentation in this repository are licensed under the\n[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model\nweights retain their respective licenses.\n"
+    },
+    {
+      "id": "b000238",
+      "kind": "blank",
+      "start_line": 559,
+      "end_line": 559,
+      "raw": "\n"
+    },
+    {
+      "id": "b000239",
+      "kind": "paragraph",
+      "start_line": 560,
+      "end_line": 563,
+      "raw": "`TableCellItem`, `TableRow`, and `TableHeader` now generate native C++ cells,\neditable rows, and interactive column headers with typed validation callbacks.\nThe [table contract](docs/native/Tables.md) distinguishes these standalone parts\nfrom the model-backed Table view and the remaining full-parity work.\n"
+    },
+    {
+      "id": "b000240",
+      "kind": "blank",
+      "start_line": 564,
+      "end_line": 564,
+      "raw": "\n"
+    },
+    {
+      "id": "b000241",
+      "kind": "heading",
+      "start_line": 565,
+      "end_line": 565,
+      "raw": "## Native table data model\n",
+      "level": 2,
+      "title": "Native table data model"
+    },
+    {
+      "id": "b000242",
+      "kind": "blank",
+      "start_line": 566,
+      "end_line": 566,
+      "raw": "\n"
+    },
+    {
+      "id": "b000243",
+      "kind": "paragraph",
+      "start_line": 567,
+      "end_line": 575,
+      "raw": "`lvrs::TableModel` adds a Qt-free C++23 value-owned model for typed edits, atomic\nrange paste, stable sorting, merges, row/column mutation, coalesced resizing and\nundo/redo. Axis updates and prefix queries use a Fenwick index; viewport queries\ninclude intersecting merged anchors without enumerating preceding ordinary rows.\nCore `QueryPort` receivers report scoped changes. See\n[TableModel](docs/native/TableModel.md) for ownership, costs, limits and remaining\nparity. The new model tests are compiled; execution is deferred to the final\nverification batch. The full native `Table` view and automatic LVUI model binding\nremain in scope and are not complete.\n"
+    },
+    {
+      "id": "b000244",
+      "kind": "blank",
+      "start_line": 576,
+      "end_line": 576,
+      "raw": "\n"
+    },
+    {
+      "id": "b000245",
+      "kind": "heading",
+      "start_line": 577,
+      "end_line": 577,
+      "raw": "## Model-backed native Table\n",
+      "level": 2,
+      "title": "Model-backed native Table"
+    },
+    {
+      "id": "b000246",
+      "kind": "blank",
+      "start_line": 578,
+      "end_line": 578,
+      "raw": "\n"
+    },
+    {
+      "id": "b000247",
+      "kind": "paragraph",
+      "start_line": 579,
+      "end_line": 588,
+      "raw": "The native `Table` view connects to `lvrs::TableModel` through retained viewport\ndrawing, one reusable editor, selection, navigation, sorting and a scoped LVUI\nC++ model reference. See [TableView](docs/native/TableView.md) and\n`examples/NativeDataTableGallery`. Execution remains deferred; full inherited APIs,\nvirtual accessibility, full reactive/delegate contracts and cross-platform\nverification remain in scope. Native resize gestures, structure gutters,\ndeletion menus, model replacement and bounded TSV/clipboard transfer now have\nC++ implementations and AOT options. See [Table transfer](docs/native/TableTransfer.md).\nThe current native\npath requires iiSDKCore 0.18.1 for its portable number contract.\n"
+    },
+    {
+      "id": "b000248",
+      "kind": "blank",
+      "start_line": 589,
+      "end_line": 589,
+      "raw": "\n"
+    },
+    {
+      "id": "b000249",
+      "kind": "paragraph",
+      "start_line": 590,
+      "end_line": 594,
+      "raw": "The Table viewport now supports atomic two-axis positions, horizontal/Shift-wheel\nscrolling, offscreen cell reveal and horizontal editor activation. Header sorting,\nresize handles, structure gutters and context menus use the same logical X axis.\nThe gallery includes five columns wider than its viewport. Runtime tests remain\ndeferred to the final batch; the retained text layout still has an 8192-unit limit.\n"
+    },
+    {
+      "id": "b000250",
+      "kind": "blank",
+      "start_line": 595,
+      "end_line": 595,
+      "raw": "\n"
+    },
+    {
+      "id": "b000251",
+      "kind": "heading",
+      "start_line": 596,
+      "end_line": 596,
+      "raw": "## Native route and navigation models\n",
+      "level": 2,
+      "title": "Native route and navigation models"
+    },
+    {
+      "id": "b000252",
+      "kind": "blank",
+      "start_line": 597,
+      "end_line": 597,
+      "raw": "\n"
+    },
+    {
+      "id": "b000253",
+      "kind": "paragraph",
+      "start_line": 598,
+      "end_line": 604,
+      "raw": "`lvrs::RouteMatcher`, `lvrs::RouteResolver` and `lvrs::NavigationStackModel` now\nprovide C++23 path matching, compiled route lookup, bounded immutable result\ncaching and typed presentation history through Core value/change contracts.\nSee [Native navigation](docs/native/Navigation.md) and\n`example/NativeNavigationGallery`. The gallery connects an AOT LVUI backend to\nthe models; it does not yet implement the full routed-page lifecycle host.\nRuntime and sanitizer execution remain deferred to the final whole-goal batch.\n"
+    },
+    {
+      "id": "b000254",
+      "kind": "blank",
+      "start_line": 605,
+      "end_line": 605,
+      "raw": "\n"
+    },
+    {
+      "id": "b000255",
+      "kind": "heading",
+      "start_line": 606,
+      "end_line": 606,
+      "raw": "## Native routed pages\n",
+      "level": 2,
+      "title": "Native routed pages"
+    },
+    {
+      "id": "b000256",
+      "kind": "blank",
+      "start_line": 607,
+      "end_line": 607,
+      "raw": "\n"
+    },
+    {
+      "id": "b000257",
+      "kind": "paragraph",
+      "start_line": 608,
+      "end_line": 616,
+      "raw": "[`lvrs::PageRouter`](docs/native/PageRouter.md) now connects typed history to\nindependent iiGUI content generations. Compiled page factories use LVUI's `build`\nentry point within one existing surface. A successful candidate replaces the old\npage; failure preserves its widgets and history. Back constructs a fresh page\nscope. `example/NativePageRouterGallery` contains two independently generated\npages, native input, Core background-result delivery, frame progression, resize\nand shutdown contracts. Compilation, packaging and relocated-consumer checks\nremain separate from the final runtime batch. Inactive-page caching, global\nnavigation, interactive transitions and full source parity remain in scope.\n"
+    },
+    {
+      "id": "b000258",
+      "kind": "blank",
+      "start_line": 617,
+      "end_line": 617,
+      "raw": "\n"
+    },
+    {
+      "id": "b000259",
+      "kind": "paragraph",
+      "start_line": 618,
+      "end_line": 624,
+      "raw": "The native [Navigator](docs/native/Navigator.md) now manages weak target stacks,\nsame-parent sibling order and scoped registration through a replaceable\n`NavigationTarget` interface. PageRouter registers by default; an explicitly\nshared Navigator can isolate an application or editor domain. The page gallery\nuses that shared service and retires registrations with the widget scope.\nInteractive forwarding and native Link remain pending. All execution is deferred\nto the final whole-goal validation batch.\n"
+    },
+    {
+      "id": "b000260",
+      "kind": "blank",
+      "start_line": 625,
+      "end_line": 625,
+      "raw": "\n"
+    },
+    {
+      "id": "b000261",
+      "kind": "paragraph",
+      "start_line": 626,
+      "end_line": 628,
+      "raw": "Native ListToolbar, ListFooter, HierarchyToolbar and ToolbarButton provide retained\nslots, stable-ID selection, typed event payloads and LVUI bindings. See\n[native toolbars](docs/native/Toolbars.md). Runtime checks remain deferred.\n"
+    },
+    {
+      "id": "b000262",
+      "kind": "blank",
+      "start_line": 629,
+      "end_line": 629,
+      "raw": "\n"
+    },
+    {
+      "id": "b000263",
+      "kind": "paragraph",
+      "start_line": 630,
+      "end_line": 630,
+      "raw": "Native [Card and Avatar](docs/native/Media.md) and the [media gallery](example/NativeMediaGallery/README.md) use retained C++23 widgets and immutable image inputs. Runtime verification remains deferred.\n"
+    },
+    {
+      "id": "b000264",
+      "kind": "blank",
+      "start_line": 631,
+      "end_line": 631,
+      "raw": "\n"
+    },
+    {
+      "id": "b000265",
+      "kind": "paragraph",
+      "start_line": 632,
+      "end_line": 632,
+      "raw": "Native [MaterialSurface, PanelMaterial and WindowMaterial](docs/native/Materials.md) provide masked GPU blur, authored accent fields and on-demand Core color motion. See the [material gallery](example/NativeMaterialGallery/README.md); runtime execution remains deferred.\n"
+    },
+    {
+      "id": "b000266",
+      "kind": "blank",
+      "start_line": 633,
+      "end_line": 633,
+      "raw": "\n"
+    },
+    {
+      "id": "b000267",
+      "kind": "paragraph",
+      "start_line": 634,
+      "end_line": 634,
+      "raw": "The Qt-free [text document foundation](docs/native/TextDocuments.md) provides chunked, file-backed UTF-8 storage, native UTF-16 positions, exact edit metadata, incremental edits, bounded history and iiFileProvider Native publication. TextMarkup supplies the existing inline conversion contract. Native [CodeEditor](docs/native/CodeEditor.md) connects a virtual PlainText/NoWrap viewport and IME projection to that model, rebases independent view selections and retains bounded selection metadata for undo/redo. Its native glyph cache preserves RGB and color-font palettes with separate opacity. TextEditor's rich-text viewport and full source parity remain pending; runtime checks remain deferred.\n"
+    },
+    {
+      "id": "b000268",
+      "kind": "blank",
+      "start_line": 635,
+      "end_line": 635,
+      "raw": "\n"
+    },
+    {
+      "id": "b000269",
+      "kind": "paragraph",
+      "start_line": 636,
+      "end_line": 636,
+      "raw": "The [text document gallery](example/NativeTextDocumentGallery/README.md) connects that model to a retained LVUI/iiGUI scope without materializing the whole document during view queries.\n"
+    },
+    {
+      "id": "b000270",
+      "kind": "blank",
+      "start_line": 637,
+      "end_line": 637,
+      "raw": "\n"
+    },
+    {
+      "id": "b000271",
+      "kind": "paragraph",
+      "start_line": 638,
+      "end_line": 641,
+      "raw": "The [native CodeEditor gallery](example/NativeCodeEditorGallery/README.md) compiles\nthe editor from LVUI into a Core-owned C++23 application with retained property\nbindings and explicit iiFileProvider Native file publication. Build/package\nchecks remain separate from the final runtime batch.\n"
+    },
+    {
+      "id": "b000272",
+      "kind": "blank",
+      "start_line": 642,
+      "end_line": 642,
+      "raw": "\n"
+    },
+    {
+      "id": "b000273",
+      "kind": "paragraph",
+      "start_line": 643,
+      "end_line": 646,
+      "raw": "The native [Tooltip](docs/native/Tooltip.md) adds anchored rounded-tail placement,\nPanelMaterial, retained scrollable content, focus-preserving interaction and\nCore-owned show/hide/expiry deadlines. The [Tooltip gallery](example/NativeTooltipGallery/README.md)\nuses real LVUI AOT bindings and one retained C++ backend. Runtime checks are deferred.\n"
+    },
+    {
+      "id": "b000274",
+      "kind": "blank",
+      "start_line": 647,
+      "end_line": 648,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000275",
+      "kind": "paragraph",
+      "start_line": 649,
+      "end_line": 653,
+      "raw": "Native presentation telemetry is provided by `iiGUI::PresentationSource` and\n`lvrs::RenderMonitor`. The host publishes accepted presentation submissions via\nits existing Core event loop; LVUI projects native statistics and commands.\nSubmission timing is distinct from scanout and GPU completion. Native LVRS\nexecution and full platform/legacy parity remain part of the final batch.\n"
+    },
+    {
+      "id": "b000276",
+      "kind": "blank",
+      "start_line": 654,
+      "end_line": 654,
+      "raw": "\n"
+    },
+    {
+      "id": "b000277",
+      "kind": "paragraph",
+      "start_line": 655,
+      "end_line": 658,
+      "raw": "The [Native Creation Workbench](example/NativeCreationWorkbench/README.md) combines\nLVUI controls with retained C++ canvas/timeline providers and real procedural\nframe generation on iiSDKCore. Its final self-test checks GPU pixels, native input,\nresult selection and retirement; build-only evidence is not a runtime pass.\n"
+    },
+    {
+      "id": "b000278",
+      "kind": "blank",
+      "start_line": 659,
+      "end_line": 659,
+      "raw": "\n"
+    },
+    {
+      "id": "b000279",
+      "kind": "html",
+      "start_line": 660,
+      "end_line": 660,
+      "raw": "<!-- workspace-docs:readme:start -->\n"
+    },
+    {
+      "id": "b000280",
+      "kind": "heading",
+      "start_line": 661,
+      "end_line": 661,
+      "raw": "## Documentation entry points\n",
+      "level": 2,
+      "title": "Documentation entry points"
+    },
+    {
+      "id": "b000281",
+      "kind": "blank",
+      "start_line": 662,
+      "end_line": 662,
+      "raw": "\n"
+    },
+    {
+      "id": "b000282",
+      "kind": "list",
+      "start_line": 663,
+      "end_line": 666,
+      "raw": "- Human overview: this English `README.md`.\n- Agent instructions: [AGENT.md](AGENT.md).\n- Human documentation: [documentation index](docs/README.md).\n- Structured agent documentation: [agent index](docs/agent-index.json).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Human overview: this English `README.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Agent instructions: [AGENT.md](AGENT.md).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Human documentation: [documentation index](docs/README.md).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Structured agent documentation: [agent index](docs/agent-index.json).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000283",
+      "kind": "html",
+      "start_line": 667,
+      "end_line": 667,
+      "raw": "<!-- workspace-docs:readme:end -->\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "LVRS",
+      "anchor": "lvrs",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Legacy Qt/QML implementation",
+      "anchor": "legacy-qtqml-implementation",
+      "start_line": 129
+    },
+    {
+      "block_id": "b000056",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Requirements",
+      "anchor": "requirements",
+      "start_line": 163
+    },
+    {
+      "block_id": "b000060",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Quick Install (Clone -> Install -> Use)",
+      "anchor": "quick-install-clone---install---use",
+      "start_line": 173
+    },
+    {
+      "block_id": "b000068",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Build (Framework-First Default)",
+      "anchor": "build-framework-first-default",
+      "start_line": 205
+    },
+    {
+      "block_id": "b000086",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Build and Run Examples",
+      "anchor": "build-and-run-examples",
+      "start_line": 229
+    },
+    {
+      "block_id": "b000106",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Use in Any Qt Quick Project",
+      "anchor": "use-in-any-qt-quick-project",
+      "start_line": 257
+    },
+    {
+      "block_id": "b000141",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Rendering Backend Policy",
+      "anchor": "rendering-backend-policy",
+      "start_line": 388
+    },
+    {
+      "block_id": "b000160",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Project Layout",
+      "anchor": "project-layout",
+      "start_line": 413
+    },
+    {
+      "block_id": "b000164",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Event and Input Architecture",
+      "anchor": "event-and-input-architecture",
+      "start_line": 425
+    },
+    {
+      "block_id": "b000170",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Shared Desktop and Mobile Sizing",
+      "anchor": "shared-desktop-and-mobile-sizing",
+      "start_line": 436
+    },
+    {
+      "block_id": "b000174",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Main Visual Catalog",
+      "anchor": "main-visual-catalog",
+      "start_line": 440
+    },
+    {
+      "block_id": "b000185",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Documentation",
+      "anchor": "documentation",
+      "start_line": 461
+    },
+    {
+      "block_id": "b000199",
+      "parent_id": "b000185",
+      "level": 3,
+      "title": "Android system safety zone",
+      "anchor": "android-system-safety-zone",
+      "start_line": 482
+    },
+    {
+      "block_id": "b000203",
+      "parent_id": "b000185",
+      "level": 3,
+      "title": "Standard window and popup materials",
+      "anchor": "standard-window-and-popup-materials",
+      "start_line": 486
+    },
+    {
+      "block_id": "b000207",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Interaction and motion",
+      "anchor": "interaction-and-motion",
+      "start_line": 490
+    },
+    {
+      "block_id": "b000215",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Source layout",
+      "anchor": "source-layout",
+      "start_line": 498
+    },
+    {
+      "block_id": "b000221",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVRS mobile navigation",
+      "anchor": "lvrs-mobile-navigation",
+      "start_line": 504
+    },
+    {
+      "block_id": "b000225",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Recovering an interrupted install",
+      "anchor": "recovering-an-interrupted-install",
+      "start_line": 508
+    },
+    {
+      "block_id": "b000233",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "License",
+      "anchor": "license",
+      "start_line": 552
+    },
+    {
+      "block_id": "b000241",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Native table data model",
+      "anchor": "native-table-data-model",
+      "start_line": 565
+    },
+    {
+      "block_id": "b000245",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Model-backed native Table",
+      "anchor": "model-backed-native-table",
+      "start_line": 577
+    },
+    {
+      "block_id": "b000251",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Native route and navigation models",
+      "anchor": "native-route-and-navigation-models",
+      "start_line": 596
+    },
+    {
+      "block_id": "b000255",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Native routed pages",
+      "anchor": "native-routed-pages",
+      "start_line": 606
+    },
+    {
+      "block_id": "b000280",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Documentation entry points",
+      "anchor": "documentation-entry-points",
+      "start_line": 661
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 7,
+        "text": "lookups do not create a shadow property store or rebuild every model descriptor.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 61,
+        "text": "`OPENSSL_ROOT_DIR`; Video and USD codecs are not required by this path.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000027",
+        "line": 69,
+        "text": "rows keep independent child actions; they do not introduce a selection model.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000064",
+        "line": 184,
+        "text": "Source snapshots omit repository build directories (including hidden `.build.lvrs-stale-*` cleanup remnants), `build/rust-cli`, and legacy `src/rust-cli/target`, so local Cargo build artifacts are never copied into the installed framework prefix.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000066",
+        "line": 193,
+        "text": "On Linux hosts, `lvrs install` now runs a CMake preflight first: it verifies the host C++ toolchain, Qt 6.5+ modules (`Quick`, `QuickControls2`, `Qml`, `Svg`, `Network`), and required Qt host tools, then auto-resolves `Qt6_DIR`/`LVRS_BOOTSTRAP_QT_PREFIX_LINUX` from common Qt layouts (Qt online installer, `qtpaths`/`qmake`, distro multiarch installs) when possible.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000066",
+        "line": 195,
+        "text": "Use `lvrs doctor --fix` for a host-only dependency precheck/fix pass, and `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` to validate `src/main.cpp` bootstrap readiness plus cross-platform toolchain hint auto-detection before a full build; it exits non-zero when required hints/toolchains are still missing for the requested bootstrap targets.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000066",
+        "line": 199,
+        "text": "`find_package(LVRS CONFIG REQUIRED)` then resolves the active platform package via LVRS dispatcher logic. The root dispatcher version file is architecture independent so the same install root can select 64-bit native packages and the 32-bit WASM package; each selected platform package retains its own binary architecture check.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000120",
+        "line": 291,
+        "text": "Only CMake configure/build/install is required. Manual file copy or custom plugin wiring is not required.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000122",
+        "line": 309,
+        "text": "`LV.ApplicationWindow` uses a fully opaque background centered on 95% `windowColor` RGB plus 5% app `primaryColor` RGB. The default `windowColor` follows `Theme.window` (`#141414`). A rectangle defines that center color, while a cached opaque texture adds fixed monochrome grain at one physical pixel per sample, with a maximum variation of two 8-bit RGB levels. The grain is unblurred and uses no glass layer or Overlay blending. Legacy `windowBackgroundOpacity` and `backgroundBlurEnabled` inputs do not change this opaque surface; `backgroundBlurSupported` and `backgroundBlurActive` are false. macOS retains an opaque native window and its existing frame/input behavior. See [ApplicationWindow material](docs/components/app/ApplicationWindow.md#default-background-material). LVRS is built as C++23.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000130",
+        "line": 342,
+        "text": "When LVRS is consumed from an installed multi-platform prefix, bootstrap resolves `LVRS_DIR` to the target platform package directory automatically (for example `<prefix>/platforms/ios/lib/cmake/LVRS`) so cross toolchains do not rely on root-prefix package discovery.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000145",
+        "line": 397,
+        "text": "- If a required fixed backend cannot be initialized and no platform fallback exists, app startup fails fast with a clear error message.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000187",
+        "line": 463,
+        "text": "Surfaces → Sheet presents reusable content as a mobile bottom sheet or centered desktop modal. `LV.Sheet.cornerRadius` accepts the device's measured corner radius in logical pixels; physical-pixel measurements must first be divided by the matching display DPR. The catalog includes share, export, folder selection with fixed actions, and inline-frame examples. See [Sheet API](docs/components/surfaces/Sheet.md).",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000227",
+        "line": 529,
+        "text": "multithread WASM kit provide the required C++23 library/thread facilities.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000229",
+        "line": 542,
+        "text": "`EMSDK` from the system shell environment; it never auto-loads a sibling toolchain",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000062",
+        "language": "bash",
+        "code": "git clone <LVRS_REPO_URL>\ncd LVRS\n./install.sh\n"
+      },
+      {
+        "block_id": "b000072",
+        "language": "bash",
+        "code": "cmake -S . -B build\n"
+      },
+      {
+        "block_id": "b000076",
+        "language": "bash",
+        "code": "cmake --build build -j\n"
+      },
+      {
+        "block_id": "b000082",
+        "language": "bash",
+        "code": "./build.sh\n"
+      },
+      {
+        "block_id": "b000088",
+        "language": "bash",
+        "code": "./build.sh\n"
+      },
+      {
+        "block_id": "b000092",
+        "language": "bash",
+        "code": "./build.sh --without-tests\n"
+      },
+      {
+        "block_id": "b000096",
+        "language": "bash",
+        "code": "./example/VisualCatalog/bin/LVRSExampleVisualCatalog\n"
+      },
+      {
+        "block_id": "b000102",
+        "language": "bash",
+        "code": "ctest --test-dir build --output-on-failure\n"
+      },
+      {
+        "block_id": "b000110",
+        "language": "bash",
+        "code": "cmake -S . -B build \\\n  -DLVRS_BUILD_EXAMPLES=OFF \\\n  -DLVRS_BUILD_TESTS=OFF \\\n  -DCMAKE_INSTALL_PREFIX=/path/to/lvrs-prefix\ncmake --build build -j\ncmake --install build\n"
+      },
+      {
+        "block_id": "b000133",
+        "language": "bash",
+        "code": "cmake --build build --target bootstrap_MyApp_all\n"
+      }
+    ],
+    "links": [
+      {
+        "block_id": "b000003",
+        "label": "native authoring verification record",
+        "target": "../LVUI/docs/NativeReadinessVerification.md",
+        "kind": "relative",
+        "line": 3
+      },
+      {
+        "block_id": "b000005",
+        "label": "Native ViewModels",
+        "target": "docs/native/ViewModelRegistry.md",
+        "kind": "relative",
+        "line": 5
+      },
+      {
+        "block_id": "b000007",
+        "label": "Native snapshot history",
+        "target": "docs/native/ModelUndoStack.md",
+        "kind": "relative",
+        "line": 9
+      },
+      {
+        "block_id": "b000009",
+        "label": "Native ProgressBar",
+        "target": "docs/native/ProgressBar.md",
+        "kind": "relative",
+        "line": 13
+      },
+      {
+        "block_id": "b000011",
+        "label": "Native SVG services",
+        "target": "docs/native/SvgManager.md",
+        "kind": "relative",
+        "line": 17
+      },
+      {
+        "block_id": "b000013",
+        "label": "Native presentation models",
+        "target": "docs/native/PresentationModels.md",
+        "kind": "relative",
+        "line": 22
+      },
+      {
+        "block_id": "b000015",
+        "label": "hierarchy data",
+        "target": "docs/native/Hierarchy.md",
+        "kind": "relative",
+        "line": 26
+      },
+      {
+        "block_id": "b000017",
+        "label": "application surfaces",
+        "target": "docs/native/AppSurfaces.md",
+        "kind": "relative",
+        "line": 32
+      },
+      {
+        "block_id": "b000019",
+        "label": "navigation tracking",
+        "target": "docs/native/NavigationTracking.md",
+        "kind": "relative",
+        "line": 37
+      },
+      {
+        "block_id": "b000021",
+        "label": "Link",
+        "target": "docs/native/Link.md",
+        "kind": "relative",
+        "line": 43
+      },
+      {
+        "block_id": "b000023",
+        "label": "architecture",
+        "target": "docs/native/Architecture.md",
+        "kind": "relative",
+        "line": 53
+      },
+      {
+        "block_id": "b000023",
+        "label": "full parity ledger",
+        "target": "docs/native/Parity.md",
+        "kind": "relative",
+        "line": 54
+      },
+      {
+        "block_id": "b000029",
+        "label": "native ColorPicker contract",
+        "target": "docs/native/ColorPicker.md",
+        "kind": "relative",
+        "line": 85
+      },
+      {
+        "block_id": "b000031",
+        "label": "native Popover contract",
+        "target": "docs/native/Popover.md",
+        "kind": "relative",
+        "line": 91
+      },
+      {
+        "block_id": "b000033",
+        "label": "ColorPickerButton",
+        "target": "docs/native/ColorPickerButton.md",
+        "kind": "relative",
+        "line": 97
+      },
+      {
+        "block_id": "b000035",
+        "label": "activation ownership",
+        "target": "docs/native/ActivationContent.md",
+        "kind": "relative",
+        "line": 102
+      },
+      {
+        "block_id": "b000035",
+        "label": "Modal",
+        "target": "docs/native/Modal.md",
+        "kind": "relative",
+        "line": 103
+      },
+      {
+        "block_id": "b000037",
+        "label": "Alert and AlertButton",
+        "target": "docs/native/Alert.md",
+        "kind": "relative",
+        "line": 111
+      },
+      {
+        "block_id": "b000037",
+        "label": "native motion",
+        "target": "../iiGUI/docs/NativeMotion.md",
+        "kind": "relative",
+        "line": 119
+      },
+      {
+        "block_id": "b000039",
+        "label": "Sheet",
+        "target": "docs/native/Sheet.md",
+        "kind": "relative",
+        "line": 121
+      },
+      {
+        "block_id": "b000043",
+        "label": "Windows build and execution",
+        "target": "docs/WindowsBuildAndRun.md",
+        "kind": "relative",
+        "line": 131
+      },
+      {
+        "block_id": "b000045",
+        "label": "Windows validation",
+        "target": "docs/Windows-validation.md",
+        "kind": "relative",
+        "line": 137
+      },
+      {
+        "block_id": "b000104",
+        "label": "installed consumer",
+        "target": "docs/build.md#installed-package-regression",
+        "kind": "relative",
+        "line": 255
+      },
+      {
+        "block_id": "b000122",
+        "label": "ApplicationWindow material",
+        "target": "docs/components/app/ApplicationWindow.md#default-background-material",
+        "kind": "relative",
+        "line": 309
+      },
+      {
+        "block_id": "b000172",
+        "label": "Theme",
+        "target": "docs/theme.md",
+        "kind": "relative",
+        "line": 438
+      },
+      {
+        "block_id": "b000181",
+        "label": "Slider API",
+        "target": "docs/components/control/Slider.md",
+        "kind": "relative",
+        "line": 457
+      },
+      {
+        "block_id": "b000183",
+        "label": "ColorPicker API",
+        "target": "docs/components/control/ColorPicker.md",
+        "kind": "relative",
+        "line": 459
+      },
+      {
+        "block_id": "b000187",
+        "label": "Sheet API",
+        "target": "docs/components/surfaces/Sheet.md",
+        "kind": "relative",
+        "line": 463
+      },
+      {
+        "block_id": "b000189",
+        "label": "Tooltip API",
+        "target": "docs/components/surfaces/Tooltip.md",
+        "kind": "relative",
+        "line": 465
+      },
+      {
+        "block_id": "b000205",
+        "label": "Materials",
+        "target": "docs/components/surfaces/Materials.md",
+        "kind": "relative",
+        "line": 488
+      },
+      {
+        "block_id": "b000205",
+        "label": "Popover",
+        "target": "docs/components/surfaces/Popover.md",
+        "kind": "relative",
+        "line": 488
+      },
+      {
+        "block_id": "b000209",
+        "label": "the motion system",
+        "target": "docs/motion.md",
+        "kind": "relative",
+        "line": 492
+      },
+      {
+        "block_id": "b000211",
+        "label": "Figma parity audit",
+        "target": "docs/figma-parity.md",
+        "kind": "relative",
+        "line": 494
+      },
+      {
+        "block_id": "b000213",
+        "label": "menu material contract",
+        "target": "docs/components/navigation/ContextMenu.md#window-derived-frosted-menu",
+        "kind": "relative",
+        "line": 496
+      },
+      {
+        "block_id": "b000223",
+        "label": "Figma spec",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS?node-id=1072-1243",
+        "kind": "external",
+        "line": 506
+      },
+      {
+        "block_id": "b000223",
+        "label": "component documentation",
+        "target": "docs/components/navigation/MobileNavigationBar.md",
+        "kind": "relative",
+        "line": 506
+      },
+      {
+        "block_id": "b000237",
+        "label": "MIT License",
+        "target": "LICENSE",
+        "kind": "relative",
+        "line": 557
+      },
+      {
+        "block_id": "b000239",
+        "label": "table contract",
+        "target": "docs/native/Tables.md",
+        "kind": "relative",
+        "line": 562
+      },
+      {
+        "block_id": "b000243",
+        "label": "TableModel",
+        "target": "docs/native/TableModel.md",
+        "kind": "relative",
+        "line": 572
+      },
+      {
+        "block_id": "b000247",
+        "label": "TableView",
+        "target": "docs/native/TableView.md",
+        "kind": "relative",
+        "line": 581
+      },
+      {
+        "block_id": "b000247",
+        "label": "Table transfer",
+        "target": "docs/native/TableTransfer.md",
+        "kind": "relative",
+        "line": 586
+      },
+      {
+        "block_id": "b000253",
+        "label": "Native navigation",
+        "target": "docs/native/Navigation.md",
+        "kind": "relative",
+        "line": 601
+      },
+      {
+        "block_id": "b000257",
+        "label": "`lvrs::PageRouter`",
+        "target": "docs/native/PageRouter.md",
+        "kind": "relative",
+        "line": 608
+      },
+      {
+        "block_id": "b000259",
+        "label": "Navigator",
+        "target": "docs/native/Navigator.md",
+        "kind": "relative",
+        "line": 618
+      },
+      {
+        "block_id": "b000261",
+        "label": "native toolbars",
+        "target": "docs/native/Toolbars.md",
+        "kind": "relative",
+        "line": 628
+      },
+      {
+        "block_id": "b000263",
+        "label": "Card and Avatar",
+        "target": "docs/native/Media.md",
+        "kind": "relative",
+        "line": 630
+      },
+      {
+        "block_id": "b000263",
+        "label": "media gallery",
+        "target": "example/NativeMediaGallery/README.md",
+        "kind": "relative",
+        "line": 630
+      },
+      {
+        "block_id": "b000265",
+        "label": "MaterialSurface, PanelMaterial and WindowMaterial",
+        "target": "docs/native/Materials.md",
+        "kind": "relative",
+        "line": 632
+      },
+      {
+        "block_id": "b000265",
+        "label": "material gallery",
+        "target": "example/NativeMaterialGallery/README.md",
+        "kind": "relative",
+        "line": 632
+      },
+      {
+        "block_id": "b000267",
+        "label": "text document foundation",
+        "target": "docs/native/TextDocuments.md",
+        "kind": "relative",
+        "line": 634
+      },
+      {
+        "block_id": "b000267",
+        "label": "CodeEditor",
+        "target": "docs/native/CodeEditor.md",
+        "kind": "relative",
+        "line": 634
+      },
+      {
+        "block_id": "b000269",
+        "label": "text document gallery",
+        "target": "example/NativeTextDocumentGallery/README.md",
+        "kind": "relative",
+        "line": 636
+      },
+      {
+        "block_id": "b000271",
+        "label": "native CodeEditor gallery",
+        "target": "example/NativeCodeEditorGallery/README.md",
+        "kind": "relative",
+        "line": 638
+      },
+      {
+        "block_id": "b000273",
+        "label": "Tooltip",
+        "target": "docs/native/Tooltip.md",
+        "kind": "relative",
+        "line": 643
+      },
+      {
+        "block_id": "b000273",
+        "label": "Tooltip gallery",
+        "target": "example/NativeTooltipGallery/README.md",
+        "kind": "relative",
+        "line": 645
+      },
+      {
+        "block_id": "b000277",
+        "label": "Native Creation Workbench",
+        "target": "example/NativeCreationWorkbench/README.md",
+        "kind": "relative",
+        "line": 655
+      },
+      {
+        "block_id": "b000282",
+        "label": "AGENT.md",
+        "target": "AGENT.md",
+        "kind": "relative",
+        "line": 664
+      },
+      {
+        "block_id": "b000282",
+        "label": "documentation index",
+        "target": "docs/README.md",
+        "kind": "relative",
+        "line": 665
+      },
+      {
+        "block_id": "b000282",
+        "label": "agent index",
+        "target": "docs/agent-index.json",
+        "kind": "relative",
+        "line": 666
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

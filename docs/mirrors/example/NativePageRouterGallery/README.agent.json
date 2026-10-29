@@ -1,0 +1,115 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7b66c522f3ff1a95f6b64dec23c4d110119ca7b41c59030b9ebcc8e34413386b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativePageRouterGallery/README.md",
+    "sha256": "b741ce87bc980fcc0864ec1e4c31e8ef67cff527a90cb4aeb5e7e8a70aceeb82",
+    "bytes": 1360,
+    "line_count": 21,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native Page Router Gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native Page Router Gallery\n",
+      "level": 1,
+      "title": "Native Page Router Gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 8,
+      "raw": "Two independently compiled LVUI pages share one self-rendered iiGUI surface.\nLVRS PageRouter commits typed route history only after a new page is constructed.\nAn old page scope retires on replacement; back navigation constructs a fresh scope.\niiSDKCore owns the executable, worker result delivery, frame loop and shutdown.\nThe pages and toolbar share an explicit Navigator domain. PageRouter registration\nfollows the widget scope, even if the application retains the controller.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 13,
+      "raw": "Configure with the native LVRS, iiGUI, LVUI and iiSDKCore installation prefixes.\n`install.sh [destination] [CMake options...]` only configures, builds and installs.\nIt never launches the application or invokes tests. `--self-test` is registered\nfor the final runtime verification batch; compilation is not execution evidence.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 15,
+      "end_line": 21,
+      "raw": "Home now includes text and rich-child native Links with Core Observable inputs.\nThe Target 43 toolbar action changes the live href before navigation.\nNavigator synchronizes its logical history to ViewStateTracker. A separate\nPageMonitor records committed visits; the toolbar's Undo visit changes that log\nwithout navigating. Both model summaries are drawn by the same native LVUI view.\nInactive-page caches, interactive transitions and full inherited Link contracts remain pending.\nSee [the usage contract](docs/Usage.md).\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native Page Router Gallery",
+      "anchor": "native-page-router-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 12,
+        "text": "It never launches the application or invokes tests. `--self-test` is registered",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "the usage contract",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 21
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

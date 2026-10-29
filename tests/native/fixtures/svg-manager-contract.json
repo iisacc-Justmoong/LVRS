@@ -1,0 +1,40 @@
+{
+  "original_sha256": {
+    "src/backend/graphics/svgmanager.h": "6774dc36e004e81bd9d0c071964f4493e0528c88108c59c5eb5eaa42969a9846",
+    "src/backend/graphics/svgmanager.cpp": "40e0f81e86941f211386195ca75779f828a85d495b4cf014ff650c734a088a38"
+  },
+  "properties": [
+    "lastError",
+    "vectorFirst",
+    "minimumScale",
+    "maximumScale",
+    "cacheSize",
+    "revision"
+  ],
+  "methods": [
+    "icon",
+    "deviceScale",
+    "clearCache",
+    "ensureMinimumScale"
+  ],
+  "setters": [
+    "setVectorFirst",
+    "setMinimumScale",
+    "setMaximumScale",
+    "setCacheSize"
+  ],
+  "original_defaults": {
+    "m_vectorFirst": true,
+    "m_minimumScale": 3,
+    "m_maximumScale": 4,
+    "m_cacheSize": 256,
+    "m_revision": 0
+  },
+  "native_defaults": {
+    "vector_first": true,
+    "minimum": 3,
+    "maximum": 4,
+    "cache_size": 256,
+    "revision": 0
+  }
+}

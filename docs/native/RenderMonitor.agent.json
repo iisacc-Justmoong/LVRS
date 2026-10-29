@@ -1,0 +1,278 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2ed98edb7c2bd3e34b4f79db3df094ab7d13c41bc000e0c1bfc47aa42de112b4",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/RenderMonitor.md",
+    "sha256": "f5491dea5c28bfb8a11ccbb7cd6081b20734d12a88600af18548729353b33b06",
+    "bytes": 3530,
+    "line_count": 45,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 렌더링 관측",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 렌더링 관측\n",
+      "level": 1,
+      "title": "네이티브 렌더링 관측"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "RenderMonitor는 원본 속성 11개, invokable 5개와 setter 2개를 C++로 제공한다.\n`attachWindow`는 iiGUI Host 또는 교체 가능한 PresentationSource를 받는다. 기본 객체는\n비활성 상태이며 명시적인 start는 원본처럼 연결된 창이 없어도 활성 상태를 설정한다.\nLVUI는 getter·명령을 연결하며 통계 계산이나 타이머를 실행하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "## 관측 경계와 수명\n",
+      "level": 2,
+      "title": "관측 경계와 수명"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 15,
+      "raw": "원본 [frameSwapped](https://doc.qt.io/qt-6/qquickwindow.html#frameSwapped)는 프레임이\n표시 대기열에 제출된 시점의 신호이다. 네이티브도 요청 수나 주기 타이머를 FPS로 간주하지\n않으며 NativeCanvas의 실제 presentation 카운터 증가 후 정보를 발행한다. 이는 화면\nscanout이나 GPU 실행 완료 측정값이 아니다. Host는 기존 Core 이벤트 루프로 전달하므로\n렌더링 호출 안에서 LVUI를 다시 그리는 재귀를 만들지 않는다. 측정 시각은 제출 시점의\nsteady clock이며 콜백 대기 시간과 분리한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 21,
+      "raw": "Host별 원천은 독립적이다. 자식 창은 실행 루프가 부모와 연결돼도 자기 원천과 종료를\n유지한다. 창 종료는 대기 전달을 취소하고 종료 이벤트를 발행한다. 모니터는 기존 통계를\n보존하면서 비활성화된다. 원천은 창 자원을 소유하지 않으며 모니터 퇴역은 관측만 제거한다.\n다른 모니터나 파일 상태를 변경하지 않는다. 전달 큐가 포화되면 원천을 닫고 진단을 발행한다.\n연속성이 깨진 외부 원천이나 역행 시각은 통계에 섞지 않고 lastError에 보고한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## 원본 수치 계약\n",
+      "level": 2,
+      "title": "원본 수치 계약"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "기본 샘플 용량은 240개이고 범위는 16..2000개이다. 드롭 임계값은 기본 20ms이며\n5..100ms로 제한한다. 첫 프레임은 시각 기준만 만들고, 양의 정수 밀리초 간격만 샘플에\n넣는다. p95·p99는 양의 샘플 8개마다 최근 버퍼의 nearest-rank로 갱신한다. 용량 변경은\n최근 순서를 보존하고 백분위를 즉시 계산한다. 스냅샷 필드 14개와 정수 종류도 원본과 대조한다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 33,
+      "raw": "드롭 수는 프레임 추가 시 누적된다. 임계값을 변경하면 최근 버퍼에서 다시 계산하지만,\n용량 변경에서는 다시 계산하지 않는다. stop/start는 원본처럼 마지막 활성 시각을 유지해\n재개 간격에 정지 시간을 포함한다. reset은 수치와 시각 기준을 비우고 연결·활성 설정을\n유지한다. 비유한 임계값은 명시적으로 거부하는 네이티브 입력 제한이다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 35,
+      "end_line": 38,
+      "raw": "상태 관측은 소유 스레드에서 수행하며 통지 중 재진입 명령을 거부한다. 이미 반영한 값을\n관측 오류로 롤백하지 않는다. 새 캡처 결과가 도착해도 기존 뷰 노드를 갱신하며 파일 모델의\n수정·저장 경로를 호출하지 않는다. 표시 자체가 새 프레임을 만들 수 있으므로 모니터 UI를\n사용한 수치를 측정 오버헤드가 없는 값으로 해석하지 않는다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 45,
+      "raw": "원본 두 파일 해시·클래스 API·초기 값·스냅샷 키는 native_render_contract.py로 대조한다.\n이 감사는 Qt 실행 oracle이 아니다. 원천의 창 없는 검사는 iiGUI에서 실행하며, LVRS 모델과\n실제 AOT 뷰 검사는 컴파일·링크 후 전체 목표의 최종 일괄 실행에 남긴다. 실제 창·GPU,\n모든 OS와 원본 렌더 루프의 완전한 동등성은 별도 증거가 필요하다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 렌더링 관측",
+      "anchor": "네이티브-렌더링-관측",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "관측 경계와 수명",
+      "anchor": "관측-경계와-수명",
+      "start_line": 8
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "원본 수치 계약",
+      "anchor": "원본-수치-계약",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 40
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 6,
+        "text": "LVUI는 getter·명령을 연결하며 통계 계산이나 타이머를 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 20,
+        "text": "다른 모니터나 파일 상태를 변경하지 않는다. 전달 큐가 포화되면 원천을 닫고 진단을 발행한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 31,
+        "text": "용량 변경에서는 다시 계산하지 않는다. stop/start는 원본처럼 마지막 활성 시각을 유지해",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 36,
+        "text": "관측 오류로 롤백하지 않는다. 새 캡처 결과가 도착해도 기존 뷰 노드를 갱신하며 파일 모델의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 37,
+        "text": "수정·저장 경로를 호출하지 않는다. 표시 자체가 새 프레임을 만들 수 있으므로 모니터 UI를",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 38,
+        "text": "사용한 수치를 측정 오버헤드가 없는 값으로 해석하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "frameSwapped",
+        "target": "https://doc.qt.io/qt-6/qquickwindow.html#frameSwapped",
+        "kind": "external",
+        "line": 10
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

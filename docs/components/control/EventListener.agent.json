@@ -1,0 +1,2493 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:5086c15bd0899625b49b703cdd07bf5fc3620a00aa5f2f09621104ef550002a1",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/EventListener.md",
+    "sha256": "0ed673d266cf84b224d19b920f56626758d580049a900d6ecf4c7f0e5e56881c",
+    "bytes": 12365,
+    "line_count": 345,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "EventListener",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# EventListener\n",
+      "level": 1,
+      "title": "EventListener"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/util/EventListener.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`EventListener`는 트리거 토큰을 콜백 이벤트에 매핑하는 LVRS 상호 작용 브리지 구성 요소입니다.   현재 정책은 사건 중심적입니다. 즉, 명시적으로 활성화하지 않는 한 지속적인 상태 수집을 방지합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"1-design-goal\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 1. 디자인 목표\n",
+      "level": 2,
+      "title": "1. 디자인 목표"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 실제 사건(`click`, `press`, `release`, `context request` 등)에 대한 이벤트 콜백을 전달합니다.\n- 기본적으로 고비용 페이로드 강화를 피하세요.\n- 불필요한 런타임 스냅샷/적중 테스트 풀로 인한 연쇄 반응을 방지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "실제 사건(`click`, `press`, `release`, `context request` 등)에 대한 이벤트 콜백을 전달합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본적으로 고비용 페이로드 강화를 피하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "불필요한 런타임 스냅샷/적중 테스트 풀로 인한 연쇄 반응을 방지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"2-supported-triggers\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 2. 지원되는 트리거\n",
+      "level": 2,
+      "title": "2. 지원되는 트리거"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 23,
+      "raw": "- 포인터-로컬: `clicked`, `pressed`, `released`, `entered`, `exited`, `hoverChanged`\n- 휠: `wheel`\n- 키보드: `keyPressed`, `keyReleased`\n- 글로벌 런타임: `globalPressed`, `globalContextRequested`\n- 제스처 런타임: `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`, `pressStarted`, `pressEnded`, `holdStarted`, `longPressed`, `dragStarted`, `dragUpdated`, `dragEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`, `swipeDetected`, `nativeGestureDetected`, `gestureRecognized`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "포인터-로컬: `clicked`, `pressed`, `released`, `entered`, `exited`, `hoverChanged`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "휠: `wheel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키보드: `keyPressed`, `keyReleased`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "글로벌 런타임: `globalPressed`, `globalContextRequested`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제스처 런타임: `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`, `pressStarted`, `pressEnded`, `holdStarted`, `longPressed`, `dragStarted`, `dragUpdated`, `dragEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`, `swipeDetected`, `nativeGestureDetected`, `gestureRecognized`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "<a id=\"3-core-api\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "## 3. 코어 API\n",
+      "level": 2,
+      "title": "3. 코어 API"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "table",
+      "start_line": 29,
+      "end_line": 43,
+      "raw": "|속성|기본값|의미|\n|---|---|---|\n| `trigger` | `\"clicked\"` |이벤트 소스 선택기.|\n| `action` | `null` |트리거가 실행될 때 콜백이 호출됩니다.|\n| `enabled` | `true` |리스너 활성화 플래그입니다.|\n| `acceptedButtons` | `Qt.LeftButton` |로컬 포인터 경로에서 허용되는 마우스 버튼.|\n| `macControlClickAsRight` | `true` |macOS Ctrl+왼쪽을 컨텍스트 제스처로 처리합니다.|\n| `includeUiHit` | `false` |`ui` 적중 테스트 정보로 페이로드를 강화합니다(선택).|\n| `includeInputState` | `false` |런타임/백엔드 `input` 스냅샷(선택)으로 페이로드를 강화합니다.|\n| `preferBackendState` | `false` |`includeInputState=true`인 경우 백엔드 우선 입력 상태 확인을 선호합니다.|\n| `includeBackendSummary` | `false` |페이로드에 백엔드 후크 요약 맵을 포함합니다(선택).|\n| `globalPressDedupMs` | `24` |글로벌 언론 중복 제거 시간 창입니다.|\n| `globalPressDedupTolerancePx` | `2.0` |전역 언론 중복 제거 공간 허용 범위입니다.|\n| `contextDedupMs` | `180` |컨텍스트 중복 제거 시간 창입니다.|\n| `contextDedupTolerancePx` | `2.0` |컨텍스트 중복 제거 공간 허용 오차입니다.|\n",
+      "columns": [
+        "속성",
+        "기본값",
+        "의미"
+      ],
+      "rows": [
+        [
+          "`trigger`",
+          "`\"clicked\"`",
+          "이벤트 소스 선택기."
+        ],
+        [
+          "`action`",
+          "`null`",
+          "트리거가 실행될 때 콜백이 호출됩니다."
+        ],
+        [
+          "`enabled`",
+          "`true`",
+          "리스너 활성화 플래그입니다."
+        ],
+        [
+          "`acceptedButtons`",
+          "`Qt.LeftButton`",
+          "로컬 포인터 경로에서 허용되는 마우스 버튼."
+        ],
+        [
+          "`macControlClickAsRight`",
+          "`true`",
+          "macOS Ctrl+왼쪽을 컨텍스트 제스처로 처리합니다."
+        ],
+        [
+          "`includeUiHit`",
+          "`false`",
+          "`ui` 적중 테스트 정보로 페이로드를 강화합니다(선택)."
+        ],
+        [
+          "`includeInputState`",
+          "`false`",
+          "런타임/백엔드 `input` 스냅샷(선택)으로 페이로드를 강화합니다."
+        ],
+        [
+          "`preferBackendState`",
+          "`false`",
+          "`includeInputState=true`인 경우 백엔드 우선 입력 상태 확인을 선호합니다."
+        ],
+        [
+          "`includeBackendSummary`",
+          "`false`",
+          "페이로드에 백엔드 후크 요약 맵을 포함합니다(선택)."
+        ],
+        [
+          "`globalPressDedupMs`",
+          "`24`",
+          "글로벌 언론 중복 제거 시간 창입니다."
+        ],
+        [
+          "`globalPressDedupTolerancePx`",
+          "`2.0`",
+          "전역 언론 중복 제거 공간 허용 범위입니다."
+        ],
+        [
+          "`contextDedupMs`",
+          "`180`",
+          "컨텍스트 중복 제거 시간 창입니다."
+        ],
+        [
+          "`contextDedupTolerancePx`",
+          "`2.0`",
+          "컨텍스트 중복 제거 공간 허용 오차입니다."
+        ]
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "<a id=\"4-incident-centric-payload-rules\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "## 4. 사고 중심 페이로드 규칙\n",
+      "level": 2,
+      "title": "4. 사고 중심 페이로드 규칙"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "<a id=\"41-default-mode-recommended\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "### 4.1 기본 모드(권장)\n",
+      "level": 3,
+      "title": "4.1 기본 모드(권장)"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "기본적으로:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 55,
+      "end_line": 57,
+      "raw": "- `input` 스냅샷을 가져오지 않았습니다.\n- UI 적중 테스트 순회가 실행되지 않습니다.\n- 콜백은 직접적인 사건 필드만 수신합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`input` 스냅샷을 가져오지 않았습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "UI 적중 테스트 순회가 실행되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "콜백은 직접적인 사건 필드만 수신합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "이는 런타임 결합을 최소화하고 필요하지 않은 경우에 대한 보이지 않는 뷰 트리 추적을 방지합니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "<a id=\"42-enriched-mode-explicit-opt-in\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "### 4.2 강화 모드(명시적 옵트인)\n",
+      "level": 3,
+      "title": "4.2 강화 모드(명시적 옵트인)"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "콜백 로직에 실제로 런타임 상태 일관성이 필요한 경우 `includeInputState: true`를 설정하세요.   결정에 UI 적중 메타데이터가 필요한 경우(예: 상황별 메뉴)에만 `includeUiHit: true`를 설정하십시오.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "<a id=\"43-backend-summary-mode\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "### 4.3 백엔드 요약 모드\n",
+      "level": 3,
+      "title": "4.3 백엔드 요약 모드"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "`includeBackendSummary: true`는 진단 지향적이며 고속 흐름에서는 비용이 많이 들 수 있습니다.   핫 경로 상호 작용 콜백이 아닌 도구/디버그 대시보드에만 사용하세요.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"5-payload-schema\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 5. 페이로드 스키마\n",
+      "level": 2,
+      "title": "5. 페이로드 스키마"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"local-pointer-clickedpressedreleased\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "### 로컬 포인터(`clicked|pressed|released`)\n",
+      "level": 3,
+      "title": "로컬 포인터(`clicked|pressed|released`)"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "항상:\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "list",
+      "start_line": 83,
+      "end_line": 85,
+      "raw": "- `x`, `y`, `globalX`, `globalY`\n- `button`, `buttons`, `modifiers`\n- `isGlobal=false`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`button`, `buttons`, `modifiers`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isGlobal=false`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "선택사항:\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 89,
+      "end_line": 91,
+      "raw": "- `includeUiHit=true`일 때 `ui`\n- `includeInputState=true`일 때 `input`\n- `includeBackendSummary=true`일 때 `src/backend`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`includeUiHit=true`일 때 `ui`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`includeInputState=true`일 때 `input`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`includeBackendSummary=true`일 때 `src/backend`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "<a id=\"global-pointer-globalpressedglobalcontextrequested\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "### 글로벌 포인터(`globalPressed|globalContextRequested`)\n",
+      "level": 3,
+      "title": "글로벌 포인터(`globalPressed|globalContextRequested`)"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "항상:\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 99,
+      "end_line": 101,
+      "raw": "- `x`, `y`, `globalX`, `globalY`\n- `buttons`, `modifiers`\n- `isGlobal=true`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttons`, `modifiers`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isGlobal=true`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "상황별 추가:\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "list",
+      "start_line": 105,
+      "end_line": 106,
+      "raw": "- `reason`\n- `source` (`\"mouse\"` 또는 `\"context\"`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`reason`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`source` (`\"mouse\"` 또는 `\"context\"`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "선택적 강화는 로컬 포인터 페이로드와 동일한 토글을 따릅니다.\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "<a id=\"wheel--key-triggers\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "### 휠/키 트리거\n",
+      "level": 3,
+      "title": "휠/키 트리거"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "list",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "- 휠/키는 Qt 이벤트 객체를 직접 전달하도록 트리거합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "휠/키는 Qt 이벤트 객체를 직접 전달하도록 트리거합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "heading",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "### `hoverChanged`\n",
+      "level": 3,
+      "title": "`hoverChanged`"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "list",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "- 페이로드: `{ containsMouse: bool }`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "페이로드: `{ containsMouse: bool }`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "html",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "<a id=\"gesture-triggers\"></a>\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "heading",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "### 제스처 트리거\n",
+      "level": 3,
+      "title": "제스처 트리거"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "제스처 트리거는 `GestureEvents`에서 게시한 정규화된 페이로드를 수신합니다.\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "항상:\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "list",
+      "start_line": 128,
+      "end_line": 131,
+      "raw": "- `sequence`, `gestureType`, `interactionKind`, `source`\n- `classification`\n- `timestampEpochMs`\n- `x`, `y`, `globalX`, `globalY`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sequence`, `gestureType`, `interactionKind`, `source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`classification`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "paragraph",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "터치 기반 제스처 트리거는 다음을 추가로 수신합니다.\n"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "list",
+      "start_line": 135,
+      "end_line": 149,
+      "raw": "- `sessionId`\n- `previousX`, `previousY`\n- `startX`, `startY`, `startGlobalX`, `startGlobalY`\n- `deltaX`, `deltaY`\n- `totalDeltaX`, `totalDeltaY`\n- `absoluteDeltaX`, `absoluteDeltaY`\n- `distance`, `durationMs`\n- `pressDurationMs`\n- `directionX`, `directionY`, `dominantAxis`\n- `holdActive`, `dragActive`, `scrollActive`\n- `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`\n- `pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`\n- `primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`\n- `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`\n- `ui`, `originUi`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sessionId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`previousX`, `previousY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startX`, `startY`, `startGlobalX`, `startGlobalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deltaX`, `deltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`totalDeltaX`, `totalDeltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`absoluteDeltaX`, `absoluteDeltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distance`, `durationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressDurationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`directionX`, `directionY`, `dominantAxis`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`holdActive`, `dragActive`, `scrollActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui`, `originUi`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "paragraph",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "`ui` / `originUi`에는 구성 요소 식별 메타데이터가 포함됩니다.\n"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "list",
+      "start_line": 153,
+      "end_line": 155,
+      "raw": "- 논리적 대상: `objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`\n- 계층구조: `layerKind`, `depth`, `hierarchy`\n- 원시 가장 깊은 항목: `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "논리적 대상: `objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "계층구조: `layerKind`, `depth`, `hierarchy`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원시 가장 깊은 항목: `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "paragraph",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "스와이프 관련 추가 사항:\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "list",
+      "start_line": 159,
+      "end_line": 162,
+      "raw": "- `swipeDirection`\n- `velocityX`\n- `velocityY`\n- `speed`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`swipeDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`velocityX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`velocityY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`speed`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 163,
+      "end_line": 163,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "paragraph",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "스크롤 관련 추가 사항:\n"
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "list",
+      "start_line": 166,
+      "end_line": 169,
+      "raw": "- `scrollAxis`\n- `scrollDirection`\n- `scrollDeltaX`\n- `scrollDeltaY`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`scrollAxis`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDeltaX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDeltaY`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "paragraph",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "네이티브 제스처 추가:\n"
+    },
+    {
+      "id": "b000118",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000119",
+      "kind": "list",
+      "start_line": 173,
+      "end_line": 176,
+      "raw": "- `nativeGestureType`\n- `fingerCount`\n- `value`\n- `deltaX`, `deltaY`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`nativeGestureType`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fingerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`value`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deltaX`, `deltaY`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000120",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000121",
+      "kind": "html",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "<a id=\"6-dedup-behavior\"></a>\n"
+    },
+    {
+      "id": "b000122",
+      "kind": "blank",
+      "start_line": 179,
+      "end_line": 179,
+      "raw": "\n"
+    },
+    {
+      "id": "b000123",
+      "kind": "heading",
+      "start_line": 180,
+      "end_line": 180,
+      "raw": "## 6. 중복 제거 동작\n",
+      "level": 2,
+      "title": "6. 중복 제거 동작"
+    },
+    {
+      "id": "b000124",
+      "kind": "blank",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "\n"
+    },
+    {
+      "id": "b000125",
+      "kind": "list",
+      "start_line": 182,
+      "end_line": 184,
+      "raw": "- 글로벌 언론 중복 제거는 짧은 시간 내에 중복된 언론 사고를 억제합니다.\n- 컨텍스트 중복 제거는 자체 창에서 중복된 컨텍스트 사건을 억제합니다.\n- 중복 제거는 콜백 방출에만 영향을 미칩니다. 외부 런타임 데몬 카운터를 변경하지 않습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "글로벌 언론 중복 제거는 짧은 시간 내에 중복된 언론 사고를 억제합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨텍스트 중복 제거는 자체 창에서 중복된 컨텍스트 사건을 억제합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중복 제거는 콜백 방출에만 영향을 미칩니다. 외부 런타임 데몬 카운터를 변경하지 않습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000126",
+      "kind": "blank",
+      "start_line": 185,
+      "end_line": 185,
+      "raw": "\n"
+    },
+    {
+      "id": "b000127",
+      "kind": "html",
+      "start_line": 186,
+      "end_line": 186,
+      "raw": "<a id=\"7-usage-patterns\"></a>\n"
+    },
+    {
+      "id": "b000128",
+      "kind": "blank",
+      "start_line": 187,
+      "end_line": 187,
+      "raw": "\n"
+    },
+    {
+      "id": "b000129",
+      "kind": "heading",
+      "start_line": 188,
+      "end_line": 188,
+      "raw": "## 7. 사용 패턴\n",
+      "level": 2,
+      "title": "7. 사용 패턴"
+    },
+    {
+      "id": "b000130",
+      "kind": "blank",
+      "start_line": 189,
+      "end_line": 189,
+      "raw": "\n"
+    },
+    {
+      "id": "b000131",
+      "kind": "html",
+      "start_line": 190,
+      "end_line": 190,
+      "raw": "<a id=\"71-minimal-incident-listener-preferred\"></a>\n"
+    },
+    {
+      "id": "b000132",
+      "kind": "blank",
+      "start_line": 191,
+      "end_line": 191,
+      "raw": "\n"
+    },
+    {
+      "id": "b000133",
+      "kind": "heading",
+      "start_line": 192,
+      "end_line": 192,
+      "raw": "### 7.1 최소 사고 수신기(선호)\n",
+      "level": 3,
+      "title": "7.1 최소 사고 수신기(선호)"
+    },
+    {
+      "id": "b000134",
+      "kind": "blank",
+      "start_line": 193,
+      "end_line": 193,
+      "raw": "\n"
+    },
+    {
+      "id": "b000135",
+      "kind": "fenced_code",
+      "start_line": 194,
+      "end_line": 203,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalPressed\"\n    action: function(eventData) {\n        // 외부 클릭으로 닫는 로직에는 좌표와 버튼만 사용한다.\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalPressed\"\n    action: function(eventData) {\n        // 외부 클릭으로 닫는 로직에는 좌표와 버튼만 사용한다.\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000136",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000137",
+      "kind": "html",
+      "start_line": 205,
+      "end_line": 205,
+      "raw": "<a id=\"72-context-listener-with-ui-hit-metadata\"></a>\n"
+    },
+    {
+      "id": "b000138",
+      "kind": "blank",
+      "start_line": 206,
+      "end_line": 206,
+      "raw": "\n"
+    },
+    {
+      "id": "b000139",
+      "kind": "heading",
+      "start_line": 207,
+      "end_line": 207,
+      "raw": "### 7.2 UI 히트 메타데이터가 포함된 컨텍스트 리스너\n",
+      "level": 3,
+      "title": "7.2 UI 히트 메타데이터가 포함된 컨텍스트 리스너"
+    },
+    {
+      "id": "b000140",
+      "kind": "blank",
+      "start_line": 208,
+      "end_line": 208,
+      "raw": "\n"
+    },
+    {
+      "id": "b000141",
+      "kind": "fenced_code",
+      "start_line": 209,
+      "end_line": 219,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalContextRequested\"\n    includeUiHit: true\n    action: function(eventData) {\n        console.log(eventData.ui ? eventData.ui.path : \"unknown\")\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalContextRequested\"\n    includeUiHit: true\n    action: function(eventData) {\n        console.log(eventData.ui ? eventData.ui.path : \"unknown\")\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000142",
+      "kind": "blank",
+      "start_line": 220,
+      "end_line": 220,
+      "raw": "\n"
+    },
+    {
+      "id": "b000143",
+      "kind": "html",
+      "start_line": 221,
+      "end_line": 221,
+      "raw": "<a id=\"73-explicit-input-state-opt-in\"></a>\n"
+    },
+    {
+      "id": "b000144",
+      "kind": "blank",
+      "start_line": 222,
+      "end_line": 222,
+      "raw": "\n"
+    },
+    {
+      "id": "b000145",
+      "kind": "heading",
+      "start_line": 223,
+      "end_line": 223,
+      "raw": "### 7.3 명시적 입력 상태 옵트인\n",
+      "level": 3,
+      "title": "7.3 명시적 입력 상태 옵트인"
+    },
+    {
+      "id": "b000146",
+      "kind": "blank",
+      "start_line": 224,
+      "end_line": 224,
+      "raw": "\n"
+    },
+    {
+      "id": "b000147",
+      "kind": "fenced_code",
+      "start_line": 225,
+      "end_line": 237,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalContextRequested\"\n    includeInputState: true\n    preferBackendState: true\n    action: function(eventData) {\n        const input = eventData.input || ({})\n        console.log(input.activeModifierNames)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"globalContextRequested\"\n    includeInputState: true\n    preferBackendState: true\n    action: function(eventData) {\n        const input = eventData.input || ({})\n        console.log(input.activeModifierNames)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000148",
+      "kind": "blank",
+      "start_line": 238,
+      "end_line": 238,
+      "raw": "\n"
+    },
+    {
+      "id": "b000149",
+      "kind": "html",
+      "start_line": 239,
+      "end_line": 239,
+      "raw": "<a id=\"74-gesture-listener\"></a>\n"
+    },
+    {
+      "id": "b000150",
+      "kind": "blank",
+      "start_line": 240,
+      "end_line": 240,
+      "raw": "\n"
+    },
+    {
+      "id": "b000151",
+      "kind": "heading",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "### 7.4 제스처 리스너\n",
+      "level": 3,
+      "title": "7.4 제스처 리스너"
+    },
+    {
+      "id": "b000152",
+      "kind": "blank",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "\n"
+    },
+    {
+      "id": "b000153",
+      "kind": "fenced_code",
+      "start_line": 243,
+      "end_line": 252,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"swipeDetected\"\n    action: function(eventData) {\n        console.log(eventData.swipeDirection, eventData.totalDeltaX, eventData.totalDeltaY)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"swipeDetected\"\n    action: function(eventData) {\n        console.log(eventData.swipeDirection, eventData.totalDeltaX, eventData.totalDeltaY)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000154",
+      "kind": "blank",
+      "start_line": 253,
+      "end_line": 253,
+      "raw": "\n"
+    },
+    {
+      "id": "b000155",
+      "kind": "html",
+      "start_line": 254,
+      "end_line": 254,
+      "raw": "<a id=\"75-mobile-pressscroll-listeners\"></a>\n"
+    },
+    {
+      "id": "b000156",
+      "kind": "blank",
+      "start_line": 255,
+      "end_line": 255,
+      "raw": "\n"
+    },
+    {
+      "id": "b000157",
+      "kind": "heading",
+      "start_line": 256,
+      "end_line": 256,
+      "raw": "### 7.5 모바일 프레스/스크롤 리스너\n",
+      "level": 3,
+      "title": "7.5 모바일 프레스/스크롤 리스너"
+    },
+    {
+      "id": "b000158",
+      "kind": "blank",
+      "start_line": 257,
+      "end_line": 257,
+      "raw": "\n"
+    },
+    {
+      "id": "b000159",
+      "kind": "fenced_code",
+      "start_line": 258,
+      "end_line": 274,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"pressEnded\"\n    action: function(eventData) {\n        console.log(eventData.pressDurationMs, eventData.fingerCount, eventData.released)\n    }\n}\n\nLV.EventListener {\n    trigger: \"scrollStarted\"\n    action: function(eventData) {\n        console.log(eventData.scrollAxis, eventData.scrollDirection)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"pressEnded\"\n    action: function(eventData) {\n        console.log(eventData.pressDurationMs, eventData.fingerCount, eventData.released)\n    }\n}\n\nLV.EventListener {\n    trigger: \"scrollStarted\"\n    action: function(eventData) {\n        console.log(eventData.scrollAxis, eventData.scrollDirection)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000160",
+      "kind": "blank",
+      "start_line": 275,
+      "end_line": 275,
+      "raw": "\n"
+    },
+    {
+      "id": "b000161",
+      "kind": "html",
+      "start_line": 276,
+      "end_line": 276,
+      "raw": "<a id=\"8-common-pitfalls\"></a>\n"
+    },
+    {
+      "id": "b000162",
+      "kind": "blank",
+      "start_line": 277,
+      "end_line": 277,
+      "raw": "\n"
+    },
+    {
+      "id": "b000163",
+      "kind": "heading",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "## 8. 일반적인 함정\n",
+      "level": 2,
+      "title": "8. 일반적인 함정"
+    },
+    {
+      "id": "b000164",
+      "kind": "blank",
+      "start_line": 279,
+      "end_line": 279,
+      "raw": "\n"
+    },
+    {
+      "id": "b000165",
+      "kind": "list",
+      "start_line": 280,
+      "end_line": 285,
+      "raw": "- 습관적으로 어디서나 `includeInputState`를 활성화합니다.\n- 고주파 상호 작용 경로에 대해 `includeUiHit` 및 `includeBackendSummary`를 모두 활성화합니다.\n- 보도 자료 중심이어야 하는 비즈니스 로직에 `hoverChanged`를 사용합니다.\n- 전역 좌표 확인 없이 전역 트리거를 로컬 형상 전용 이벤트로 처리합니다.\n- `longPressed`가 별도의 페이로드 유형이 될 것으로 예상됩니다. `holdStarted`의 별칭입니다.\n- `EventListener`에서 전체 멀티터치 제스처 분류 체계를 기대합니다; 이는 손가락 카운트와 네이티브 포인트 배열을 전달하며, 방향성 스크롤/드래그/스와이프 분류는 Qt가 `nativeGestureDetected`를 방출하지 않는 한 기본 접촉을 따릅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "습관적으로 어디서나 `includeInputState`를 활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "고주파 상호 작용 경로에 대해 `includeUiHit` 및 `includeBackendSummary`를 모두 활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "보도 자료 중심이어야 하는 비즈니스 로직에 `hoverChanged`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전역 좌표 확인 없이 전역 트리거를 로컬 형상 전용 이벤트로 처리합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`longPressed`가 별도의 페이로드 유형이 될 것으로 예상됩니다. `holdStarted`의 별칭입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`EventListener`에서 전체 멀티터치 제스처 분류 체계를 기대합니다; 이는 손가락 카운트와 네이티브 포인트 배열을 전달하며, 방향성 스크롤/드래그/스와이프 분류는 Qt가 `nativeGestureDetected`를 방출하지 않는 한 기본 접촉을 따릅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000166",
+      "kind": "blank",
+      "start_line": 286,
+      "end_line": 286,
+      "raw": "\n"
+    },
+    {
+      "id": "b000167",
+      "kind": "html",
+      "start_line": 287,
+      "end_line": 287,
+      "raw": "<a id=\"9-troubleshooting-matrix\"></a>\n"
+    },
+    {
+      "id": "b000168",
+      "kind": "blank",
+      "start_line": 288,
+      "end_line": 288,
+      "raw": "\n"
+    },
+    {
+      "id": "b000169",
+      "kind": "heading",
+      "start_line": 289,
+      "end_line": 289,
+      "raw": "## 9. 문제 해결 매트릭스\n",
+      "level": 2,
+      "title": "9. 문제 해결 매트릭스"
+    },
+    {
+      "id": "b000170",
+      "kind": "blank",
+      "start_line": 290,
+      "end_line": 290,
+      "raw": "\n"
+    },
+    {
+      "id": "b000171",
+      "kind": "table",
+      "start_line": 291,
+      "end_line": 298,
+      "raw": "|증상|예상 원인|검증|조치|\n|---|---|---|---|\n|콜백이 실행되지 않음|잘못된 트리거 토큰 또는 비활성화된 리스너|`trigger` 검사, `enabled`|토큰/상태 수정|\n|누락 `ui` 페이로드| `includeUiHit=false` |리스너 소품 검사|필요한 경우에만 활성화|\n|누락 `input` 페이로드| `includeInputState=false` |리스너 소품 검사|해당 리스너에 대해 명시적으로 활성화|\n|중복 컨텍스트 콜백|소스에 대한 중복 제거 창이 너무 느슨함|중복 제거 구성 검사|`contextDedup*` 값 조정|\n|swipe/drag 발화 안됨|런타임 연결되지 않거나 임계값이 너무 엄격함|트리거 타입 및 이동 페이로드 검사|제스처 트리거 경로 사용 및 `GestureEvents` 를 통해 임계값 조정|\n|헤비 콜백 체인|전역적으로 불필요한 강화 활성화|핫 경로의 소품 검사|사고 페이로드를 최소화|\n",
+      "columns": [
+        "증상",
+        "예상 원인",
+        "검증",
+        "조치"
+      ],
+      "rows": [
+        [
+          "콜백이 실행되지 않음",
+          "잘못된 트리거 토큰 또는 비활성화된 리스너",
+          "`trigger` 검사, `enabled`",
+          "토큰/상태 수정"
+        ],
+        [
+          "누락 `ui` 페이로드",
+          "`includeUiHit=false`",
+          "리스너 소품 검사",
+          "필요한 경우에만 활성화"
+        ],
+        [
+          "누락 `input` 페이로드",
+          "`includeInputState=false`",
+          "리스너 소품 검사",
+          "해당 리스너에 대해 명시적으로 활성화"
+        ],
+        [
+          "중복 컨텍스트 콜백",
+          "소스에 대한 중복 제거 창이 너무 느슨함",
+          "중복 제거 구성 검사",
+          "`contextDedup*` 값 조정"
+        ],
+        [
+          "swipe/drag 발화 안됨",
+          "런타임 연결되지 않거나 임계값이 너무 엄격함",
+          "트리거 타입 및 이동 페이로드 검사",
+          "제스처 트리거 경로 사용 및 `GestureEvents` 를 통해 임계값 조정"
+        ],
+        [
+          "헤비 콜백 체인",
+          "전역적으로 불필요한 강화 활성화",
+          "핫 경로의 소품 검사",
+          "사고 페이로드를 최소화"
+        ]
+      ]
+    },
+    {
+      "id": "b000172",
+      "kind": "blank",
+      "start_line": 299,
+      "end_line": 299,
+      "raw": "\n"
+    },
+    {
+      "id": "b000173",
+      "kind": "html",
+      "start_line": 300,
+      "end_line": 300,
+      "raw": "<a id=\"10-codex-oriented-playbook\"></a>\n"
+    },
+    {
+      "id": "b000174",
+      "kind": "blank",
+      "start_line": 301,
+      "end_line": 301,
+      "raw": "\n"
+    },
+    {
+      "id": "b000175",
+      "kind": "heading",
+      "start_line": 302,
+      "end_line": 302,
+      "raw": "## 10. Codex 중심 플레이북\n",
+      "level": 2,
+      "title": "10. Codex 중심 플레이북"
+    },
+    {
+      "id": "b000176",
+      "kind": "blank",
+      "start_line": 303,
+      "end_line": 303,
+      "raw": "\n"
+    },
+    {
+      "id": "b000177",
+      "kind": "html",
+      "start_line": 304,
+      "end_line": 304,
+      "raw": "<a id=\"101-safe-codex-defaults-for-new-listeners\"></a>\n"
+    },
+    {
+      "id": "b000178",
+      "kind": "blank",
+      "start_line": 305,
+      "end_line": 305,
+      "raw": "\n"
+    },
+    {
+      "id": "b000179",
+      "kind": "heading",
+      "start_line": 306,
+      "end_line": 306,
+      "raw": "### 새로운 청취자를 위한 10.1 Safe Codex 기본값\n",
+      "level": 3,
+      "title": "새로운 청취자를 위한 10.1 Safe Codex 기본값"
+    },
+    {
+      "id": "b000180",
+      "kind": "blank",
+      "start_line": 307,
+      "end_line": 307,
+      "raw": "\n"
+    },
+    {
+      "id": "b000181",
+      "kind": "list",
+      "start_line": 308,
+      "end_line": 311,
+      "raw": "1. `includeUiHit=false`를 유지하세요.\n2. `includeInputState=false`를 유지하세요.\n3. `includeBackendSummary=false`를 유지하세요.\n4. 콜백 논리에 필요한 경우에만 강화를 활성화합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`includeUiHit=false`를 유지하세요.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`includeInputState=false`를 유지하세요.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`includeBackendSummary=false`를 유지하세요.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "콜백 논리에 필요한 경우에만 강화를 활성화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000182",
+      "kind": "blank",
+      "start_line": 312,
+      "end_line": 312,
+      "raw": "\n"
+    },
+    {
+      "id": "b000183",
+      "kind": "html",
+      "start_line": 313,
+      "end_line": 313,
+      "raw": "<a id=\"102-codex-anti-patterns\"></a>\n"
+    },
+    {
+      "id": "b000184",
+      "kind": "blank",
+      "start_line": 314,
+      "end_line": 314,
+      "raw": "\n"
+    },
+    {
+      "id": "b000185",
+      "kind": "heading",
+      "start_line": 315,
+      "end_line": 315,
+      "raw": "### 10.2 Codex 안티 패턴\n",
+      "level": 3,
+      "title": "10.2 Codex 안티 패턴"
+    },
+    {
+      "id": "b000186",
+      "kind": "blank",
+      "start_line": 316,
+      "end_line": 316,
+      "raw": "\n"
+    },
+    {
+      "id": "b000187",
+      "kind": "list",
+      "start_line": 317,
+      "end_line": 319,
+      "raw": "- 모든 리스너에 입력 상태 강화를 자동 주입하지 마세요.\n- 프레임별 추적 의미 체계에 전역 수신기를 사용하지 마세요.\n- 공유 루트 리스너에 부작용이 많은 콜백 본문을 추가하지 마세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "모든 리스너에 입력 상태 강화를 자동 주입하지 마세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프레임별 추적 의미 체계에 전역 수신기를 사용하지 마세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공유 루트 리스너에 부작용이 많은 콜백 본문을 추가하지 마세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000188",
+      "kind": "blank",
+      "start_line": 320,
+      "end_line": 320,
+      "raw": "\n"
+    },
+    {
+      "id": "b000189",
+      "kind": "html",
+      "start_line": 321,
+      "end_line": 321,
+      "raw": "<a id=\"103-codex-regression-checklist\"></a>\n"
+    },
+    {
+      "id": "b000190",
+      "kind": "blank",
+      "start_line": 322,
+      "end_line": 322,
+      "raw": "\n"
+    },
+    {
+      "id": "b000191",
+      "kind": "heading",
+      "start_line": 323,
+      "end_line": 323,
+      "raw": "### 10.3 코덱스 회귀 체크리스트\n",
+      "level": 3,
+      "title": "10.3 코덱스 회귀 체크리스트"
+    },
+    {
+      "id": "b000192",
+      "kind": "blank",
+      "start_line": 324,
+      "end_line": 324,
+      "raw": "\n"
+    },
+    {
+      "id": "b000193",
+      "kind": "paragraph",
+      "start_line": 325,
+      "end_line": 325,
+      "raw": "수정 후:\n"
+    },
+    {
+      "id": "b000194",
+      "kind": "blank",
+      "start_line": 326,
+      "end_line": 326,
+      "raw": "\n"
+    },
+    {
+      "id": "b000195",
+      "kind": "list",
+      "start_line": 327,
+      "end_line": 330,
+      "raw": "1. 글로벌 언론/컨텍스트 청취자는 여전히 사건당 정확히 한 번만 실행됩니다.\n2. 외부 해제 흐름은 최소한의 페이로드로 계속 작동합니다.\n3. 제스처는 런타임 자동 연결을 트리거하고 인식된 누르기/스크롤/제스처 페이로드를 제공합니다.\n4. 강화된 리스너는 활성화된 경우 요청된 선택적 필드를 계속 수신합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "글로벌 언론/컨텍스트 청취자는 여전히 사건당 정확히 한 번만 실행됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "외부 해제 흐름은 최소한의 페이로드로 계속 작동합니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "제스처는 런타임 자동 연결을 트리거하고 인식된 누르기/스크롤/제스처 페이로드를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "강화된 리스너는 활성화된 경우 요청된 선택적 필드를 계속 수신합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000196",
+      "kind": "blank",
+      "start_line": 331,
+      "end_line": 331,
+      "raw": "\n"
+    },
+    {
+      "id": "b000197",
+      "kind": "html",
+      "start_line": 332,
+      "end_line": 332,
+      "raw": "<a id=\"11-related-apis\"></a>\n"
+    },
+    {
+      "id": "b000198",
+      "kind": "blank",
+      "start_line": 333,
+      "end_line": 333,
+      "raw": "\n"
+    },
+    {
+      "id": "b000199",
+      "kind": "heading",
+      "start_line": 334,
+      "end_line": 334,
+      "raw": "## 11. 관련 API\n",
+      "level": 2,
+      "title": "11. 관련 API"
+    },
+    {
+      "id": "b000200",
+      "kind": "blank",
+      "start_line": 335,
+      "end_line": 335,
+      "raw": "\n"
+    },
+    {
+      "id": "b000201",
+      "kind": "list",
+      "start_line": 336,
+      "end_line": 339,
+      "raw": "- `RuntimeEvents`: 글로벌 트리거용 런타임 데몬 소스입니다.\n- `GestureEvents`: 제스처 트리거에서 사용되는 상위 수준 제스처 소스입니다.\n- `Backend`: 선택적 백엔드 우선 입력 상태 소스.\n- `ApplicationWindow`: 앱 전체 동작을 위해 루트 수준 전역 수신기를 설치합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents`: 글로벌 트리거용 런타임 데몬 소스입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`GestureEvents`: 제스처 트리거에서 사용되는 상위 수준 제스처 소스입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Backend`: 선택적 백엔드 우선 입력 상태 소스.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ApplicationWindow`: 앱 전체 동작을 위해 루트 수준 전역 수신기를 설치합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000202",
+      "kind": "blank",
+      "start_line": 340,
+      "end_line": 340,
+      "raw": "\n"
+    },
+    {
+      "id": "b000203",
+      "kind": "html",
+      "start_line": 341,
+      "end_line": 341,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000204",
+      "kind": "blank",
+      "start_line": 342,
+      "end_line": 342,
+      "raw": "\n"
+    },
+    {
+      "id": "b000205",
+      "kind": "heading",
+      "start_line": 343,
+      "end_line": 343,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000206",
+      "kind": "blank",
+      "start_line": 344,
+      "end_line": 344,
+      "raw": "\n"
+    },
+    {
+      "id": "b000207",
+      "kind": "paragraph",
+      "start_line": 345,
+      "end_line": 345,
+      "raw": "리스너는 이벤트를 전달합니다. 아래의 실제 컨트롤은 눈에 보이는 동작을 제공합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "EventListener",
+      "anchor": "eventlistener",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "1. 디자인 목표",
+      "anchor": "1-디자인-목표",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2. 지원되는 트리거",
+      "anchor": "2-지원되는-트리거",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "3. 코어 API",
+      "anchor": "3-코어-api",
+      "start_line": 27
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "4. 사고 중심 페이로드 규칙",
+      "anchor": "4-사고-중심-페이로드-규칙",
+      "start_line": 47
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "4.1 기본 모드(권장)",
+      "anchor": "41-기본-모드권장",
+      "start_line": 51
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "4.2 강화 모드(명시적 옵트인)",
+      "anchor": "42-강화-모드명시적-옵트인",
+      "start_line": 63
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "4.3 백엔드 요약 모드",
+      "anchor": "43-백엔드-요약-모드",
+      "start_line": 69
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "5. 페이로드 스키마",
+      "anchor": "5-페이로드-스키마",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000053",
+      "level": 3,
+      "title": "로컬 포인터(`clicked|pressed|released`)",
+      "anchor": "로컬-포인터clickedpressedreleased",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000053",
+      "level": 3,
+      "title": "글로벌 포인터(`globalPressed|globalContextRequested`)",
+      "anchor": "글로벌-포인터globalpressedglobalcontextrequested",
+      "start_line": 95
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000053",
+      "level": 3,
+      "title": "휠/키 트리거",
+      "anchor": "휠키-트리거",
+      "start_line": 112
+    },
+    {
+      "block_id": "b000087",
+      "parent_id": "b000053",
+      "level": 3,
+      "title": "`hoverChanged`",
+      "anchor": "hoverchanged",
+      "start_line": 116
+    },
+    {
+      "block_id": "b000093",
+      "parent_id": "b000053",
+      "level": 3,
+      "title": "제스처 트리거",
+      "anchor": "제스처-트리거",
+      "start_line": 122
+    },
+    {
+      "block_id": "b000123",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "6. 중복 제거 동작",
+      "anchor": "6-중복-제거-동작",
+      "start_line": 180
+    },
+    {
+      "block_id": "b000129",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "7. 사용 패턴",
+      "anchor": "7-사용-패턴",
+      "start_line": 188
+    },
+    {
+      "block_id": "b000133",
+      "parent_id": "b000129",
+      "level": 3,
+      "title": "7.1 최소 사고 수신기(선호)",
+      "anchor": "71-최소-사고-수신기선호",
+      "start_line": 192
+    },
+    {
+      "block_id": "b000139",
+      "parent_id": "b000129",
+      "level": 3,
+      "title": "7.2 UI 히트 메타데이터가 포함된 컨텍스트 리스너",
+      "anchor": "72-ui-히트-메타데이터가-포함된-컨텍스트-리스너",
+      "start_line": 207
+    },
+    {
+      "block_id": "b000145",
+      "parent_id": "b000129",
+      "level": 3,
+      "title": "7.3 명시적 입력 상태 옵트인",
+      "anchor": "73-명시적-입력-상태-옵트인",
+      "start_line": 223
+    },
+    {
+      "block_id": "b000151",
+      "parent_id": "b000129",
+      "level": 3,
+      "title": "7.4 제스처 리스너",
+      "anchor": "74-제스처-리스너",
+      "start_line": 241
+    },
+    {
+      "block_id": "b000157",
+      "parent_id": "b000129",
+      "level": 3,
+      "title": "7.5 모바일 프레스/스크롤 리스너",
+      "anchor": "75-모바일-프레스스크롤-리스너",
+      "start_line": 256
+    },
+    {
+      "block_id": "b000163",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "8. 일반적인 함정",
+      "anchor": "8-일반적인-함정",
+      "start_line": 278
+    },
+    {
+      "block_id": "b000169",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "9. 문제 해결 매트릭스",
+      "anchor": "9-문제-해결-매트릭스",
+      "start_line": 289
+    },
+    {
+      "block_id": "b000175",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "10. Codex 중심 플레이북",
+      "anchor": "10-codex-중심-플레이북",
+      "start_line": 302
+    },
+    {
+      "block_id": "b000179",
+      "parent_id": "b000175",
+      "level": 3,
+      "title": "새로운 청취자를 위한 10.1 Safe Codex 기본값",
+      "anchor": "새로운-청취자를-위한-101-safe-codex-기본값",
+      "start_line": 306
+    },
+    {
+      "block_id": "b000185",
+      "parent_id": "b000175",
+      "level": 3,
+      "title": "10.2 Codex 안티 패턴",
+      "anchor": "102-codex-안티-패턴",
+      "start_line": 315
+    },
+    {
+      "block_id": "b000191",
+      "parent_id": "b000175",
+      "level": 3,
+      "title": "10.3 코덱스 회귀 체크리스트",
+      "anchor": "103-코덱스-회귀-체크리스트",
+      "start_line": 323
+    },
+    {
+      "block_id": "b000199",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "11. 관련 API",
+      "anchor": "11-관련-api",
+      "start_line": 334
+    },
+    {
+      "block_id": "b000205",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 343
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000207",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 345
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000023",
+        "columns": [
+          "속성",
+          "기본값",
+          "의미"
+        ],
+        "rows": [
+          [
+            "`trigger`",
+            "`\"clicked\"`",
+            "이벤트 소스 선택기."
+          ],
+          [
+            "`action`",
+            "`null`",
+            "트리거가 실행될 때 콜백이 호출됩니다."
+          ],
+          [
+            "`enabled`",
+            "`true`",
+            "리스너 활성화 플래그입니다."
+          ],
+          [
+            "`acceptedButtons`",
+            "`Qt.LeftButton`",
+            "로컬 포인터 경로에서 허용되는 마우스 버튼."
+          ],
+          [
+            "`macControlClickAsRight`",
+            "`true`",
+            "macOS Ctrl+왼쪽을 컨텍스트 제스처로 처리합니다."
+          ],
+          [
+            "`includeUiHit`",
+            "`false`",
+            "`ui` 적중 테스트 정보로 페이로드를 강화합니다(선택)."
+          ],
+          [
+            "`includeInputState`",
+            "`false`",
+            "런타임/백엔드 `input` 스냅샷(선택)으로 페이로드를 강화합니다."
+          ],
+          [
+            "`preferBackendState`",
+            "`false`",
+            "`includeInputState=true`인 경우 백엔드 우선 입력 상태 확인을 선호합니다."
+          ],
+          [
+            "`includeBackendSummary`",
+            "`false`",
+            "페이로드에 백엔드 후크 요약 맵을 포함합니다(선택)."
+          ],
+          [
+            "`globalPressDedupMs`",
+            "`24`",
+            "글로벌 언론 중복 제거 시간 창입니다."
+          ],
+          [
+            "`globalPressDedupTolerancePx`",
+            "`2.0`",
+            "전역 언론 중복 제거 공간 허용 범위입니다."
+          ],
+          [
+            "`contextDedupMs`",
+            "`180`",
+            "컨텍스트 중복 제거 시간 창입니다."
+          ],
+          [
+            "`contextDedupTolerancePx`",
+            "`2.0`",
+            "컨텍스트 중복 제거 공간 허용 오차입니다."
+          ]
+        ]
+      },
+      {
+        "block_id": "b000171",
+        "columns": [
+          "증상",
+          "예상 원인",
+          "검증",
+          "조치"
+        ],
+        "rows": [
+          [
+            "콜백이 실행되지 않음",
+            "잘못된 트리거 토큰 또는 비활성화된 리스너",
+            "`trigger` 검사, `enabled`",
+            "토큰/상태 수정"
+          ],
+          [
+            "누락 `ui` 페이로드",
+            "`includeUiHit=false`",
+            "리스너 소품 검사",
+            "필요한 경우에만 활성화"
+          ],
+          [
+            "누락 `input` 페이로드",
+            "`includeInputState=false`",
+            "리스너 소품 검사",
+            "해당 리스너에 대해 명시적으로 활성화"
+          ],
+          [
+            "중복 컨텍스트 콜백",
+            "소스에 대한 중복 제거 창이 너무 느슨함",
+            "중복 제거 구성 검사",
+            "`contextDedup*` 값 조정"
+          ],
+          [
+            "swipe/drag 발화 안됨",
+            "런타임 연결되지 않거나 임계값이 너무 엄격함",
+            "트리거 타입 및 이동 페이로드 검사",
+            "제스처 트리거 경로 사용 및 `GestureEvents` 를 통해 임계값 조정"
+          ],
+          [
+            "헤비 콜백 체인",
+            "전역적으로 불필요한 강화 활성화",
+            "핫 경로의 소품 검사",
+            "사고 페이로드를 최소화"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

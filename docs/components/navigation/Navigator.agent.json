@@ -1,0 +1,989 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2eedcbd69d834731fdcc8c3022b962aab18958b43ed10d46995b0b128addedf1",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/Navigator.md",
+    "sha256": "26fa7e7d3231e35d986d2ae8ec1ebfa804a13b5b132e54d2007aea0431b6c6cf",
+    "bytes": 3863,
+    "line_count": 139,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네비게이터",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"navigator\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 네비게이터\n",
+      "level": 1,
+      "title": "네비게이터"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/navigation/Navigator.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Navigator`는 활성 `PageRouter` 탐색을 위한 글로벌 싱글턴 대표입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- 한 줄의 앱 전체 탐색 호출을 허용합니다.\n- 라우터 등록 스택을 추적하고 활성 라우터를 선택합니다.\n- 프록시 경로/구성 요소 탐색 및 백 스택 작업.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "한 줄의 앱 전체 탐색 호출을 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라우터 등록 스택을 추적하고 활성 라우터를 선택합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "프록시 경로/구성 요소 탐색 및 백 스택 작업.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"properties\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 속성\n",
+      "level": 2,
+      "title": "속성"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 29,
+      "raw": "- `router`\n- `routerStack`\n- `hasRouter`\n- `currentPath`\n- `depth`\n- `interactiveTransitionActive`\n- `interactiveTransitionProgress`\n- `interactiveTransitionDirection`\n- `interactiveTransitionOperation`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`router`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`routerStack`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasRouter`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`depth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionProgress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactiveTransitionOperation`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "html",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "<a id=\"router-lifecycle-methods\"></a>\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "## 라우터 수명주기 방법\n",
+      "level": 2,
+      "title": "라우터 수명주기 방법"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 35,
+      "end_line": 36,
+      "raw": "- `registerRouter(targetRouter)`\n- `unregisterRouter(targetRouter?)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`registerRouter(targetRouter)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`unregisterRouter(targetRouter?)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "등록 순서는 라우터가 상위 항목을 공유할 때 형제 순서를 고려한 다음 추가로 대체됩니다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "<a id=\"navigation-methods\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## 탐색 방법\n",
+      "level": 2,
+      "title": "탐색 방법"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "경로 기반:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 50,
+      "raw": "- `go(path, params)`\n- `replace(path, params)`\n- `setRoot(path, params)`\n- `back()`\n- `popToRoot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`go(path, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`replace(path, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setRoot(path, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`back()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`popToRoot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "구성 요소 기반:\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 56,
+      "raw": "- `goTo(component, params)`\n- `replaceWith(component, params)`\n- `setRootComponent(component, params)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`goTo(component, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`replaceWith(component, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setRootComponent(component, params)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "대화형:\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 60,
+      "end_line": 68,
+      "raw": "- `beginInteractiveTransition(spec)`\n- `beginInteractiveBack(meta?)`\n- `beginInteractivePush(path, params?, meta?)`\n- `beginInteractiveReplace(path, params?, meta?)`\n- `beginInteractiveSetRoot(path, params?, meta?)`\n- `updateInteractiveTransition(progress, details?)`\n- `finishInteractiveTransition(commit?)`\n- `cancelInteractiveTransition()`\n- `shouldCommitInteractiveTransition(progress?, velocityX?, velocityY?)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`beginInteractiveTransition(spec)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveBack(meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractivePush(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveReplace(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`beginInteractiveSetRoot(path, params?, meta?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updateInteractiveTransition(progress, details?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`finishInteractiveTransition(commit?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancelInteractiveTransition()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shouldCommitInteractiveTransition(progress?, velocityX?, velocityY?)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "fenced_code",
+      "start_line": 74,
+      "end_line": 81,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.LabelButton {\n    text: \"Open Reports\"\n    onClicked: LV.Navigator.go(\"/reports\")\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.LabelButton {\n    text: \"Open Reports\"\n    onClicked: LV.Navigator.go(\"/reports\")\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 87,
+      "end_line": 90,
+      "raw": "- 활성 라우터는 `routerStack`의 꼬리입니다.\n- 가능한 라우터가 없으면 모든 탐색 방법은 `false`를 반환합니다.\n- 라우터 활성화 변경 시 지원되는 경우 추적기 동기화 후크(`syncViewStateTracker`)가 호출됩니다.\n- 대화형 전환 도우미는 얇은 프록시로 유지됩니다. 미리보기 생성 및 스택 커밋은 여전히 ​​라우터의 책임입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "활성 라우터는 `routerStack`의 꼬리입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "가능한 라우터가 없으면 모든 탐색 방법은 `false`를 반환합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라우터 활성화 변경 시 지원되는 경우 추적기 동기화 후크(`syncViewStateTracker`)가 호출됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 전환 도우미는 얇은 프록시로 유지됩니다. 미리보기 생성 및 스택 커밋은 여전히 ​​라우터의 책임입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "<a id=\"nested-router-strategy\"></a>\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "## 중첩 라우터 전략\n",
+      "level": 2,
+      "title": "중첩 라우터 전략"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "중첩된 라우터가 있는 애플리케이션에서는 등록/등록 취소 순서에 따라 활성 라우터 확인이 결정됩니다. 중첩된 탐색 영역을 탑재/마운트 해제할 때 명시적인 등록 경계를 사용하세요.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "html",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "<a id=\"debug-tip\"></a>\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 디버그 팁\n",
+      "level": 2,
+      "title": "디버그 팁"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "경로 오류를 진단하기 전에 디버그 패널에서 `Navigator.currentPath` 및 `Navigator.depth`를 확인하여 전역 대상 라우터 상태를 확인하세요.\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "html",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "<a id=\"recipe-safe-back-action\"></a>\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "## 레시피: 세이프 백 액션\n",
+      "level": 2,
+      "title": "레시피: 세이프 백 액션"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "fenced_code",
+      "start_line": 108,
+      "end_line": 115,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nfunction safeBack() {\n    if (LV.Navigator.depth > 1)\n        LV.Navigator.back()\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nfunction safeBack() {\n    if (LV.Navigator.depth > 1)\n        LV.Navigator.back()\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "활성 라우터를 통한 대화형 가장자리 스와이프:\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "fenced_code",
+      "start_line": 119,
+      "end_line": 127,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nfunction driveEdgePan(progress, velocityX) {\n    if (!LV.Navigator.interactiveTransitionActive)\n        LV.Navigator.beginInteractiveBack({ source: \"edge-pan\" })\n    LV.Navigator.updateInteractiveTransition(progress, { velocityX: velocityX })\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nfunction driveEdgePan(progress, velocityX) {\n    if (!LV.Navigator.interactiveTransitionActive)\n        LV.Navigator.beginInteractiveBack({ source: \"edge-pan\" })\n    LV.Navigator.updateInteractiveTransition(progress, { velocityX: velocityX })\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "html",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "<a id=\"failure-pattern\"></a>\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "heading",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "## 실패 패턴\n",
+      "level": 2,
+      "title": "실패 패턴"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "paragraph",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "단일 항목 스택에서 깊이 가드 없이 `back()`를 호출하면 작동하지 않으며 상위 공급 측 흐름 설계에서 탐색 버그를 숨길 수 있습니다.\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "html",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "heading",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "네비게이터는 보이는 페이지 전환을 소유한 활성 PageRouter로 전달됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "네비게이터",
+      "anchor": "네비게이터",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "속성",
+      "anchor": "속성",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "라우터 수명주기 방법",
+      "anchor": "라우터-수명주기-방법",
+      "start_line": 33
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "탐색 방법",
+      "anchor": "탐색-방법",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 72
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 85
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "중첩 라우터 전략",
+      "anchor": "중첩-라우터-전략",
+      "start_line": 94
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "디버그 팁",
+      "anchor": "디버그-팁",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "레시피: 세이프 백 액션",
+      "anchor": "레시피-세이프-백-액션",
+      "start_line": 106
+    },
+    {
+      "block_id": "b000081",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "실패 패턴",
+      "anchor": "실패-패턴",
+      "start_line": 131
+    },
+    {
+      "block_id": "b000087",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 137
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000089",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 139
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

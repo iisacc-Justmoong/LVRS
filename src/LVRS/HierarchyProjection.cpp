@@ -134,6 +134,7 @@ struct HierarchyProjection::Impl final {
 };
 HierarchyProjection::HierarchyProjection(std::shared_ptr<Impl> p):impl_(std::move(p)){}
 HierarchyProjection::~HierarchyProjection(){(void)close();}
+core::Result<bool> HierarchyProjection::set_default_row_extent(double extent){auto p=impl_;if(auto r=p->ready(true);!r)return std::unexpected(r.error());if(!valid_extent(extent))return core::fail(core::ErrorCode::invalid_argument,"Invalid hierarchy default extent");if(extent==p->options.row_extent)return false;const auto previous=p->options.row_extent;p->options.row_extent=extent;auto built=protect<void>([&]()->core::Result<void>{p->rebuild();return {};});if(!built){p->options.row_extent=previous;return std::unexpected(built.error());}++p->value.revision;auto sent=p->publish(0,p->value.count,false,false);if(!sent)return std::unexpected(sent.error());return true;}
 core::Result<std::shared_ptr<HierarchyProjection>> HierarchyProjection::create(std::shared_ptr<HierarchyModel> model,HierarchyProjectionOptions options){
     if(!model||!valid_extent(options.row_extent)||!options.maximum_rows||options.maximum_rows>4000000||options.maximum_index_bytes<4096||options.maximum_index_bytes>std::size_t(1024)*1024*1024)return core::fail(core::ErrorCode::invalid_argument,"Invalid hierarchy projection options");
     return protect<std::shared_ptr<HierarchyProjection>>([&]()->core::Result<std::shared_ptr<HierarchyProjection>>{

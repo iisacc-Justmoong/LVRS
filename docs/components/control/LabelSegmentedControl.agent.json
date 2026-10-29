@@ -1,0 +1,706 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4be89955cbefb148b3be4321e5b50f7b6e2b827f25c8c3445625ecfaf519950a",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/LabelSegmentedControl.md",
+    "sha256": "86257ba26a932e11ddc502438ec2abd44cb71c5feed15efb0e48a6cc37ee79da",
+    "bytes": 3708,
+    "line_count": 87,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "LabelSegmentedControl",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# LabelSegmentedControl\n",
+      "level": 1,
+      "title": "LabelSegmentedControl"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/buttons/LabelSegmentedControl.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`LabelSegmentedControl`는 `LabelButton` 하위 항목을 위한 Figma 라벨 분할 컨테이너입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 레이블 버튼에 대해 `IconSegmentedControl`와 동일한 분할된 셸 동작을 제공합니다.\n- 분할된 톤 정책과 크기 조정을 일관되게 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "레이블 버튼에 대해 `IconSegmentedControl`와 동일한 분할된 셸 동작을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "분할된 톤 정책과 크기 조정을 일관되게 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "컨테이너 스타일:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 24,
+      "raw": "- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)\n- `cornerRadius`(기본값 `Theme.radiusLg`, `12`), `resolvedCornerRadius`\n- `horizontalPadding`, `verticalPadding`, `spacing`\n- `borderWidth`, `borderColor`\n- `backgroundColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`shapeStyle` (`shapeRoundRect`, `shapeCylinder`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cornerRadius`(기본값 `Theme.radiusLg`, `12`), `resolvedCornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`horizontalPadding`, `verticalPadding`, `spacing`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`borderWidth`, `borderColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backgroundColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "행동:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 31,
+      "raw": "- `forceBorderlessTone`(기본값 `true`)\n- `segmentCount`(읽기 전용)\n- `default property alias buttons: segmentRow.data`\n- 주입 방법 API: `method`, `methods`, `hasInjectedMethods`, `invokeMethods(...)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`forceBorderlessTone`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`segmentCount`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`default property alias buttons: segmentRow.data`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주입 방법 API: `method`, `methods`, `hasInjectedMethods`, `invokeMethods(...)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 37,
+      "end_line": 40,
+      "raw": "- 톤이 가능한 하위 항목은 세그먼트로 처리됩니다.\n- 톤 동기화(`AbstractButton.Borderless`)는 완료 시 및 하위 변형 시 실행됩니다.\n- 하위 버튼 크기는 `LabelButton`의 소유로 유지됩니다. 세그먼트 패딩이나 간격이 변경되면 행이 다시 배치되므로 업데이트된 데스크톱/모바일 버튼 측정항목이 컨테이너에 전파됩니다.\n- 컨테이너 자체는 직접 오케스트레이션을 위해 삽입된 메서드를 수신할 수 있습니다. 하위 버튼 클릭은 각 하위 버튼의 소유로 유지됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "톤이 가능한 하위 항목은 세그먼트로 처리됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "톤 동기화(`AbstractButton.Borderless`)는 완료 시 및 하위 변형 시 실행됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "하위 버튼 크기는 `LabelButton`의 소유로 유지됩니다. 세그먼트 패딩이나 간격이 변경되면 행이 다시 배치되므로 업데이트된 데스크톱/모바일 버튼 측정항목이 컨테이너에 전파됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨테이너 자체는 직접 오케스트레이션을 위해 삽입된 메서드를 수신할 수 있습니다. 하위 버튼 클릭은 각 하위 버튼의 소유로 유지됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "<a id=\"figma-visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "## Figma 시각적 계약\n",
+      "level": 2,
+      "title": "Figma 시각적 계약"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 49,
+      "raw": "- 출처: [Figma `206:3827`(`LabelSegementedControl`)](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=206-3827), 검증된 2026-09-10.\n- 각 세그먼트는 경계 없는 `44:599` `LabelButton`: `56 x 22`, 수평 패딩 `8`, 몸체 `13px Medium / 13px`입니다.\n- 컨테이너: 가로 패딩 `4`, 세로 패딩 `3.5`, 간격 `2`, 테두리 `2`, 반경 `12`(`Theme.radiusLg`). 하위 버튼은 반경 `8`(`Theme.radiusMd`)를 유지합니다.\n- 표면: `Theme.panelBackground08`; 국경: `Theme.panelBackground12`.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "출처: [Figma `206:3827`(`LabelSegementedControl`)](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=206-3827), 검증된 2026-09-10.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 세그먼트는 경계 없는 `44:599` `LabelButton`: `56 x 22`, 수평 패딩 `8`, 몸체 `13px Medium / 13px`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨테이너: 가로 패딩 `4`, 세로 패딩 `3.5`, 간격 `2`, 테두리 `2`, 반경 `12`(`Theme.radiusLg`). 하위 버튼은 반경 `8`(`Theme.radiusMd`)를 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "표면: `Theme.panelBackground08`; 국경: `Theme.panelBackground12`.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "table",
+      "start_line": 51,
+      "end_line": 58,
+      "raw": "|개수|데스크탑 크기|\n| ---: | ---: |\n| 2 | `122 x 29` |\n| 3 | `180 x 29` |\n| 4 | `238 x 29` |\n| 5 | `296 x 29` |\n| 6 | `354 x 29` |\n| 7 | `412 x 29` |\n",
+      "columns": [
+        "개수",
+        "데스크탑 크기"
+      ],
+      "rows": [
+        [
+          "2",
+          "`122 x 29`"
+        ],
+        [
+          "3",
+          "`180 x 29`"
+        ],
+        [
+          "4",
+          "`238 x 29`"
+        ],
+        [
+          "5",
+          "`296 x 29`"
+        ],
+        [
+          "6",
+          "`354 x 29`"
+        ],
+        [
+          "7",
+          "`412 x 29`"
+        ]
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "데스크톱과 모바일은 `count * 56 + (count - 1) * 2 + 8` 너비를 사용합니다. 2섹먼트 컨트롤은 `122 x 29` 이며, 2 `56 x 22` 버튼, `2` 간격, `4` 수평 패딩, 및 `3.5` 수직 패딩을 가집니다. 바디는 `13px` 를 유지합니다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "<a id=\"verification\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "`LVRSTests_import_api::segmented_control_figma_contract_loads` 는 데스크톱 및 모바일 테마 설정 하에 있는 모든 6 계수를 확인하며, 컨테이너/버튼 반지름, 경계, 톤, 패딩, 간격, 및 색상을 포함합니다. 네이티브 Qt 플랫폼으로 실행할 때 렌더링된 참조 이미지를 저장하려면 `LVRS_SEGMENT_CAPTURE_DIR` 를 설정합니다. 모바일 행은 호스트의 공유 테마 계약을 확인하며, 이는 기기 실행이 아닙니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 72,
+      "end_line": 81,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.LabelSegmentedControl {\n    method: function(eventData) { syncSelectionModel() }\n\n    LV.LabelButton { text: \"A\" }\n    LV.LabelButton { text: \"B\" }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.LabelSegmentedControl {\n    method: function(eventData) { syncSelectionModel() }\n\n    LV.LabelButton { text: \"A\" }\n    LV.LabelButton { text: \"B\" }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "하위 버튼은 개별적으로 반응합니다. 행은 명시적인 간격 변경에도 애니메이션을 적용합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "LabelSegmentedControl",
+      "anchor": "labelsegmentedcontrol",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 35
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Figma 시각적 계약",
+      "anchor": "figma-시각적-계약",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 64
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 85
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000035",
+        "label": "Figma `206:3827`(`LabelSegementedControl`)",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=206-3827",
+        "kind": "external",
+        "line": 46
+      },
+      {
+        "block_id": "b000057",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 87
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000037",
+        "columns": [
+          "개수",
+          "데스크탑 크기"
+        ],
+        "rows": [
+          [
+            "2",
+            "`122 x 29`"
+          ],
+          [
+            "3",
+            "`180 x 29`"
+          ],
+          [
+            "4",
+            "`238 x 29`"
+          ],
+          [
+            "5",
+            "`296 x 29`"
+          ],
+          [
+            "6",
+            "`354 x 29`"
+          ],
+          [
+            "7",
+            "`412 x 29`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -135,6 +135,10 @@ core::Result<std::vector<NavigationEntry>> NavigationStackModel::stack_after_pat
 core::Result<std::vector<NavigationEntry>> NavigationStackModel::stack_after_component_operation(std::shared_ptr<const void> component,Value params,NavigationOperation operation)const{auto p=impl_;if(auto r=p->ready();!r)return std::unexpected(r.error());return p->preview({.params=std::move(params),.component=std::move(component)},operation);}
 core::Result<std::vector<NavigationEntry>> NavigationStackModel::stack_after_pop()const{auto p=impl_;if(auto r=p->ready();!r)return std::unexpected(r.error());auto result=p->entries;if(result.size()>1)result.pop_back();return result;}
 core::Result<std::vector<NavigationEntry>> NavigationStackModel::stack_after_pop_to_root()const{auto p=impl_;if(auto r=p->ready();!r)return std::unexpected(r.error());return p->entries.empty()?std::vector<NavigationEntry>{}:std::vector<NavigationEntry>{p->entries.front()};}
+core::Result<void> NavigationStackModel::validate_entry_operation(NavigationEntry entry,NavigationOperation operation)const{
+    auto p=impl_;if(auto r=p->ready();!r)return r;auto next=prepare(std::move(entry));if(!next)return std::unexpected(next.error());auto total=p->operation_bytes(next->bytes,operation);if(!total)return std::unexpected(total.error());return {};
+}
+core::Result<bool> NavigationStackModel::apply_entry_operation(NavigationEntry entry,NavigationOperation operation){auto p=impl_;if(auto r=p->ready(true);!r)return std::unexpected(r.error());return p->apply(std::move(entry),operation);}
 core::Result<void> NavigationStackModel::validate_path_operation(std::string_view path,Value params,NavigationOperation operation)const{
     auto p=impl_;if(auto r=p->ready();!r)return r;if(path.size()>RouteLimits::path_bytes)return core::fail(core::ErrorCode::full,"Navigation path exceeds its budget");
     auto next=prepare({.path=std::string(path),.params=std::move(params)});if(!next)return std::unexpected(next.error());auto total=p->operation_bytes(next->bytes,operation);if(!total)return std::unexpected(total.error());return {};

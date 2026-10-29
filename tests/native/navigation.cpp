@@ -96,6 +96,12 @@ void run(const std::string& name){
         }else if(name=="ownership"){
             lvrs::RouteResolver resolver;bool rejected=false,resolver_rejected=false,pure=false;
             std::thread worker([&]{auto state=stack.state();rejected=!state&&state.error().code==core::ErrorCode::wrong_executor;auto configured=resolver.set_route_patterns({"/"});resolver_rejected=!configured&&configured.error().code==core::ErrorCode::wrong_executor;pure=take(RouteMatcher::match("/","/")).matched;});worker.join();check(rejected&&resolver_rejected&&pure,"Owner-thread models or pure matcher thread contract changed");
+        }else if(name=="entry"){
+            lvrs::NavigationEntry entry{.path="/native",.params=core::Value{core::Value::Object{}},.view_id="Canvas",.enabled=false};
+            good(stack.validate_entry_operation(entry));check(take(stack.state()).depth==0,"Entry preflight changed history");
+            take(stack.apply_entry_operation(entry));check(take(stack.path()).back()==entry&&take(stack.view_tracking_entries()).back().view_id=="Canvas"&&!take(stack.view_tracking_entries()).back().enabled,"A complete typed entry lost its identity or enabled state");
+            const auto revision=take(stack.state()).revision;check(!take(stack.apply_entry_operation(entry,NavigationOperation::replace))&&take(stack.state()).revision==revision,"An identical full-entry replacement mutated history");
+            entry.view_id=std::string(lvrs::NavigationLimits::view_id_bytes+1,'x');check(!stack.validate_entry_operation(entry)&&!stack.apply_entry_operation(entry)&&take(stack.state()).revision==revision,"Invalid entry identity passed admission or changed history");
         }else if(name=="limits"){
             take(stack.apply_path_operation("/safe"));auto before=take(stack.state());
             good(stack.validate_path_operation("/preview"));check(take(stack.state()).revision==before.revision,"Preflight mutated history");

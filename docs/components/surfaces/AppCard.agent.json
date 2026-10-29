@@ -1,0 +1,496 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4486f2feaf6162de66d4e0c9539ea96838fb5e055ab3b468493b046900bc6b17",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/surfaces/AppCard.md",
+    "sha256": "571e1d8020d86afb44d498b62cc88b804e567a7000976180994bdb1f2d71b363",
+    "bytes": 1517,
+    "line_count": 61,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "AppCard",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# AppCard\n",
+      "level": 1,
+      "title": "AppCard"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/surfaces/AppCard.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`AppCard`는 헤더, 구분 기호 및 유연한 콘텐츠 슬롯이 포함된 재사용 가능한 제목 표면입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 양식, 요약, 대시보드 모듈에 일관된 카드 컨테이너를 제공합니다.\n- 헤더/콘텐츠 간격 및 반경 정책을 중앙 집중화합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "양식, 요약, 대시보드 모듈에 일관된 카드 컨테이너를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "헤더/콘텐츠 간격 및 반경 정책을 중앙 집중화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "헤더:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 21,
+      "raw": "- `title`\n- `subtitle`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`title`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`subtitle`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "모양과 간격:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)\n- `cornerRadius`, `resolvedCornerRadius`\n- `cardPadding`(읽기 전용)\n- `sectionSpacing`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`shapeStyle` (`shapeRoundRect`, `shapeCylinder`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cornerRadius`, `resolvedCornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cardPadding`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sectionSpacing`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "내용:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "- 기본 `content` 슬롯(`contentSlot.data`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "기본 `content` 슬롯(`contentSlot.data`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 40,
+      "raw": "- 암시적 너비/높이는 헤더/콘텐츠 크기 + 카드 패딩으로 계산됩니다.\n- `subtitle`가 비어 있으면 자막 행이 숨겨집니다.\n- 콘텐츠 영역 높이는 슬롯 하위 `childrenRect`에 의해 결정됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "암시적 너비/높이는 헤더/콘텐츠 크기 + 카드 패딩으로 계산됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`subtitle`가 비어 있으면 자막 행이 숨겨집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "콘텐츠 영역 높이는 슬롯 하위 `childrenRect`에 의해 결정됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "fenced_code",
+      "start_line": 46,
+      "end_line": 55,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.AppCard {\n    title: \"System Health\"\n    subtitle: \"Last 15 minutes\"\n\n    LV.Label { text: \"No incidents\" }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.AppCard {\n    title: \"System Health\"\n    subtitle: \"Last 15 minutes\"\n\n    LV.Label { text: \"No incidents\" }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "카드 색상은 각 어린이가 상호 작용을 소유하는 동안 혼합됩니다. 이 컨테이너에는 암시적인 클릭 동작이 없습니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "AppCard",
+      "anchor": "appcard",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 36
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 59
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000045",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 61
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

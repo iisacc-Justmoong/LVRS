@@ -1,0 +1,745 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2c8a2f10769ab681f259ed0cded276d047b7e5ecae571e5473310e53885b3d25",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/Label.md",
+    "sha256": "020e6d09c0409e1e08f4211adb59f5dd7eeff0625568db35c73d77bdb63e7fff",
+    "bytes": 2654,
+    "line_count": 103,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "라벨",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"label\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 라벨\n",
+      "level": 1,
+      "title": "라벨"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/control/display/Label.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Label`는 스타일 토큰을 타이포그래피 측정항목에 매핑하는 LVRS 텍스트 래퍼입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- `Theme`에서 일관된 인쇄 스타일 매핑을 제공합니다.\n- 별칭을 통해 텍스트 관련 `Text` API를 노출합니다.\n- 디버그 경고 후크를 통해 스타일 준수를 확인합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Theme`에서 일관된 인쇄 스타일 매핑을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "별칭을 통해 텍스트 관련 `Text` API를 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "디버그 경고 후크를 통해 스타일 준수를 확인합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"style-constants\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 스타일 상수\n",
+      "level": 2,
+      "title": "스타일 상수"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 28,
+      "raw": "- `title`\n- `title2`\n- `header`\n- `header2`\n- `body`\n- `description`\n- `caption`\n- `disabled`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`title`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`title2`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`header`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`header2`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`body`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`description`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`caption`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`disabled`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "html",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 41,
+      "raw": "- `style`\n- `sizeToContentHeight`(기본값 `false`, 자연스럽게 래핑된 콘텐츠 측정 가능)\n- `text`, `color`, `font`\n- `elide`, `wrapMode`\n- `horizontalAlignment`, `verticalAlignment`\n- `lineHeight`, `lineHeightMode`, read-only `contentHeight`, read-only `lineCount`\n- `maximumLineCount`, `fontSizeMode`\n- `textFormat`, `linkColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`style`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sizeToContentHeight`(기본값 `false`, 자연스럽게 래핑된 콘텐츠 측정 가능)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`, `color`, `font`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`elide`, `wrapMode`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`horizontalAlignment`, `verticalAlignment`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lineHeight`, `lineHeightMode`, read-only `contentHeight`, read-only `lineCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`maximumLineCount`, `fontSizeMode`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textFormat`, `linkColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "계산된 스타일 출력:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 45,
+      "end_line": 50,
+      "raw": "- `resolvedStyleColor`\n- `stylePixelSize`\n- `styleWeight`\n- `styleName`\n- `styleLineHeight`\n- `styleLetterSpacing`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`resolvedStyleColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stylePixelSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`styleWeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`styleName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`styleLineHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`styleLetterSpacing`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "fenced_code",
+      "start_line": 56,
+      "end_line": 63,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Label {\n    text: \"Status\"\n    style: body\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Label {\n    text: \"Status\"\n    style: body\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 69,
+      "end_line": 71,
+      "raw": "- 스타일 열거형은 색상, 두께, 크기, 줄 높이 및 스타일 이름에 대한 `Theme` 토큰 그룹에 매핑됩니다.\n- 내부 `Text` 항목은 렌더링 기준 원본입니다.\n- 스타일 변경 시 비호환 텍스트 스타일은 `Debug.warn`를 통해 디버그 경고를 표시할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "스타일 열거형은 색상, 두께, 크기, 줄 높이 및 스타일 이름에 대한 `Theme` 토큰 그룹에 매핑됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "내부 `Text` 항목은 렌더링 기준 원본입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스타일 변경 시 비호환 텍스트 스타일은 `Debug.warn`를 통해 디버그 경고를 표시할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"advanced-example-two-line-clamped-description\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 고급 예시: 2-라인 클램프된 설명\n",
+      "level": 2,
+      "title": "고급 예시: 2-라인 클램프된 설명"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "fenced_code",
+      "start_line": 77,
+      "end_line": 87,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.Label {\n    width: 280\n    style: description\n    wrapMode: Text.WordWrap\n    maximumLineCount: 2\n    text: \"This text is clamped to two lines and then elided by text metrics.\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.Label {\n    width: 280\n    style: description\n    wrapMode: Text.WordWrap\n    maximumLineCount: 2\n    text: \"This text is clamped to two lines and then elided by text metrics.\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "<a id=\"practical-tip\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "## 실용적인 팁\n",
+      "level": 2,
+      "title": "실용적인 팁"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "유지 관리를 위해 하드 코딩된 글꼴 메트릭 대신 의미 체계 `style` 상수를 사용합니다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "Q. 텍스트 스타일을 사용자 정의 글꼴 재정의 또는 스타일 상수로 구성해야 합니까?   A. 먼저 스타일 상수를 선호하고, 불가피한 경우에만 최소한의 재정의를 적용하세요.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "불투명도가 원활하게 전환됩니다. 텍스트 값, 접근성 콘텐츠 및 측정값이 동시에 업데이트됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "라벨",
+      "anchor": "라벨",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "스타일 상수",
+      "anchor": "스타일-상수",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 54
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 67
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "고급 예시: 2-라인 클램프된 설명",
+      "anchor": "고급-예시-2-라인-클램프된-설명",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "실용적인 팁",
+      "anchor": "실용적인-팁",
+      "start_line": 91
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 95
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 101
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000063",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 103
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

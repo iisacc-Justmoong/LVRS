@@ -1,0 +1,1535 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:ee705b293623dc79b6df189149aef6e9cba7b6b61830962f1b4c852d6988765f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/HierarchyItem.md",
+    "sha256": "b1d15806f0b6037c75d1baf90e8bb53b1fa459075a47ae750015cb0480188bc8",
+    "bytes": 13312,
+    "line_count": 242,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "HierarchyItem",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# HierarchyItem\n",
+      "level": 1,
+      "title": "HierarchyItem"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/navigation/HierarchyItem.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`HierarchyItem`는 `HierarchyList`에서 사용되는 가장 작은 계층 구조 행 기본 요소이지만 이제 실제 디렉터리 트리, 아웃라이너 또는 계층 노드 계약 역할을 하기에 충분한 구조적 및 UX 상태를 노출합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- Figma 정렬 행 기준선(아이콘, 레이블, 선택적 갈매기형)을 렌더링합니다.\n- 항목별 계층 구조 메타데이터를 행 자체에 직접 노출합니다.\n- UX 상태 및 어포던스 상태를 행 자체에 직접 노출합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 정렬 행 기준선(아이콘, 레이블, 선택적 갈매기형)을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "항목별 계층 구조 메타데이터를 행 자체에 직접 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "UX 상태 및 어포던스 상태를 행 자체에 직접 노출합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"implemented-api-inventory\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## API 인벤토리 구현\n",
+      "level": 2,
+      "title": "API 인벤토리 구현"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "ID 및 목록 컨텍스트:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 31,
+      "raw": "- `modelData`(생성된 행에 대해 `HierarchyList.itemDelegate`에 의해 삽입된 설명자)\n- `index`(`HierarchyList.itemDelegate`에 의해 생성된 설명자 인덱스, 기본값 `-1`)\n- `itemId`, `itemKey`, `parentItemKey`\n- `parentLabel`\n- `pathLabel`, `parentPathLabel`\n- `hierarchyList`\n- `nodeData`\n- `generatedByTreeModel`\n- `resolvedItemId`(`flatIndex`를 사용하는 읽기 전용 대체 경로)\n- `resolvedItemKey`(`itemId` 또는 `flatIndex`를 사용하는 읽기 전용 대체 경로)\n- `resolvedLabel`, `resolvedPathLabel`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`modelData`(생성된 행에 대해 `HierarchyList.itemDelegate`에 의해 삽입된 설명자)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`index`(`HierarchyList.itemDelegate`에 의해 생성된 설명자 인덱스, 기본값 `-1`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemId`, `itemKey`, `parentItemKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`parentLabel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pathLabel`, `parentPathLabel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hierarchyList`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`nodeData`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`generatedByTreeModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedItemId`(`flatIndex`를 사용하는 읽기 전용 대체 경로)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedItemKey`(`itemId` 또는 `flatIndex`를 사용하는 읽기 전용 대체 경로)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedLabel`, `resolvedPathLabel`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "트리 구조 및 순서:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 35,
+      "end_line": 41,
+      "raw": "- `indentLevel`, `treeDepth`\n- `flatIndex`\n- `visibleIndex`\n- `siblingIndex`\n- `visibleSiblingIndex`\n- `hasParentItem`(읽기 전용)\n- `isRootItem`, `isBranchItem`, `isLeafItem`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`indentLevel`, `treeDepth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`flatIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`siblingIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleSiblingIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasParentItem`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isRootItem`, `isBranchItem`, `isLeafItem`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "하위 메타데이터:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 45,
+      "end_line": 59,
+      "raw": "- `hasChildItems`\n- `childCount`\n- `visibleChildCount`\n- `hiddenChildCount`(읽기 전용)\n- `descendantCount`\n- `visibleDescendantCount`\n- `hiddenDescendantCount`(읽기 전용)\n- `childItemKeys`\n- `childItemLabels`\n- `childItemKeysText`(읽기 전용 쉼표로 구분된 문자열)\n- `childItemLabelsText`(읽기 전용 쉼표로 구분된 문자열)\n- `hasVisibleChildItems`, `hasHiddenChildItems`(읽기 전용)\n- `hasVisibleDescendants`, `hasHiddenDescendants`(읽기 전용)\n- `firstChildItemKey`, `firstChildItemLabel`(읽기 전용)\n- `lastChildItemKey`, `lastChildItemLabel`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`hasChildItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleChildCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hiddenChildCount`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descendantCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleDescendantCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hiddenDescendantCount`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childItemKeys`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childItemLabels`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childItemKeysText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childItemLabelsText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasVisibleChildItems`, `hasHiddenChildItems`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasVisibleDescendants`, `hasHiddenDescendants`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`firstChildItemKey`, `firstChildItemLabel`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastChildItemKey`, `lastChildItemLabel`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "상위 및 경로 메타데이터:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 63,
+      "end_line": 70,
+      "raw": "- `ancestorItemKeys`\n- `ancestorLabels`\n- `ancestorItemKeysText`(읽기 전용 쉼표로 구분된 문자열)\n- `ancestorLabelsText`(읽기 전용 쉼표로 구분된 문자열)\n- `pathItemKeys`\n- `pathItemLabels`\n- `pathItemKeysText`(읽기 전용 쉼표로 구분된 문자열)\n- `pathItemLabelsText`(읽기 전용 쉼표로 구분된 문자열)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ancestorItemKeys`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ancestorLabels`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ancestorItemKeysText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ancestorLabelsText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pathItemKeys`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pathItemLabels`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pathItemKeysText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pathItemLabelsText`(읽기 전용 쉼표로 구분된 문자열)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "형제 메타데이터:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 74,
+      "end_line": 83,
+      "raw": "- `siblingIndex`\n- `visibleSiblingIndex`\n- `siblingCount`\n- `visibleSiblingCount`\n- `isFirstSibling`, `isLastSibling`, `isOnlySibling`(읽기 전용)\n- `isFirstVisibleSibling`, `isLastVisibleSibling`, `isOnlyVisibleSibling`(읽기 전용)\n- `count`(기본값 `-1`, `0` 이상으로 설정될 때까지 숨겨짐)\n- `countView`(`Component`; 선택적 사용자 정의 후행 카운트 보기)\n- `countViewItem`(읽기 전용 로드 카운트 뷰 인스턴스)\n- `effectiveShowCount`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`siblingIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleSiblingIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`siblingCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleSiblingCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isFirstSibling`, `isLastSibling`, `isOnlySibling`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`isFirstVisibleSibling`, `isLastVisibleSibling`, `isOnlyVisibleSibling`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`count`(기본값 `-1`, `0` 이상으로 설정될 때까지 숨겨짐)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`countView`(`Component`; 선택적 사용자 정의 후행 카운트 보기)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`countViewItem`(읽기 전용 로드 카운트 뷰 인스턴스)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveShowCount`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "확장 및 쉐브론 어포던스:\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 87,
+      "end_line": 98,
+      "raw": "- `showChevron`\n- `effectiveShowChevron`(읽기 전용)\n- `trailingChevronAnchorVisible`(읽기 전용)\n- `chevronExpandable`(읽기 전용)\n- `expanded`\n- `collapsed`(읽기 전용)\n- `canToggleExpanded`, `canExpand`, `canCollapse`(읽기 전용)\n- 방향 상수: `directionRight`, `directionLeft`, `directionUp`, `directionDown`\n- `selectionDirection`\n- `resolvedSelectionDirection`(읽기 전용)\n- `resolvedChevronRotation`(읽기 전용)\n- `resolvedChevronIconName`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`showChevron`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveShowChevron`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`trailingChevronAnchorVisible`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`chevronExpandable`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`expanded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`collapsed`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canToggleExpanded`, `canExpand`, `canCollapse`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방향 상수: `directionRight`, `directionLeft`, `directionUp`, `directionDown`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectionDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedSelectionDirection`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedChevronRotation`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedChevronIconName`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "활성화 및 선택:\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 102,
+      "end_line": 107,
+      "raw": "- `selected`\n- `activatable`\n- `selectable`(`activatable`의 별칭)\n- `active`(읽기 전용)\n- `inactive`(읽기 전용)\n- `canBecomeActive`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`selected`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activatable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectable`(`activatable`의 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`active`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inactive`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canBecomeActive`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "UX 상태:\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 111,
+      "end_line": 116,
+      "raw": "- 열거 상수: `uxStateIdle` , `uxStateHover` , `uxStateActive` , `uxStateInactive` , `uxStatePressed` , `uxStateDrag`\n- `uxState`(읽기 전용)\n- `uxStateName`(읽기 전용)\n- 호환성 상태 필드: `stateIdle` , `stateHover` , `stateActive`\n- 호환성 상호작용 필드: `interactionState` , `interactionStateName`\n- 주 깃발: `isHoverState` , `isActiveState` , `isInactiveState` , `isPressedState` , `isDragState`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "열거 상수: `uxStateIdle` , `uxStateHover` , `uxStateActive` , `uxStateInactive` , `uxStatePressed` , `uxStateDrag`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`uxState`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`uxStateName`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "호환성 상태 필드: `stateIdle` , `stateHover` , `stateActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "호환성 상호작용 필드: `interactionState` , `interactionStateName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주 깃발: `isHoverState` , `isActiveState` , `isInactiveState` , `isPressedState` , `isDragState`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "드래그 어포던스:\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "list",
+      "start_line": 120,
+      "end_line": 136,
+      "raw": "- `dragAllowed`\n- `dragPreviewActive`\n- `dragPreviewOpacity`\n- `draggable`(읽기 전용, 목록 편집 가능성 반영)\n- `dragEnabled`(읽기 전용, 항목 수준 드래그 API 가용성)\n- `pointerDragRequiresLongPress`(읽기 전용)\n- `immediatePointerDragEnabled`(읽기 전용)\n- `mobileDragHoldInterval`(기본값 `1000`)\n- `dragging`(읽기 전용)\n- `dragActive`, `dragTargetValid`, `dragSourceItem`, `dragAnchorItem`, `dragParentTargetItem`(읽기 전용)\n- `dragSourceIndex`, `dragSourceEndIndex`(읽기 전용)\n- `dragTargetIndex`, `dragTargetDepth`(읽기 전용)\n- 드롭 모드 상수: `dropModeNone` , `dropModeBefore` , `dropModeAfter` , `dropModeChild` , `dropModeRoot`\n- `dragTargetMode`, `dragTargetModeName`(읽기 전용)\n- `dragTargetParentItemKey`, `dragTargetParentLabel`, `dragTargetParentPathLabel`(읽기 전용)\n- `dragTargetAnchorItemKey`, `dragTargetAnchorLabel`(읽기 전용)\n- `dropBefore`, `dropAfter`, `dropAsChild`, `dropAsRoot`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`dragAllowed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragPreviewActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragPreviewOpacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`draggable`(읽기 전용, 목록 편집 가능성 반영)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragEnabled`(읽기 전용, 항목 수준 드래그 API 가용성)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pointerDragRequiresLongPress`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`immediatePointerDragEnabled`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mobileDragHoldInterval`(기본값 `1000`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragging`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragActive`, `dragTargetValid`, `dragSourceItem`, `dragAnchorItem`, `dragParentTargetItem`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragSourceIndex`, `dragSourceEndIndex`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragTargetIndex`, `dragTargetDepth`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "드롭 모드 상수: `dropModeNone` , `dropModeBefore` , `dropModeAfter` , `dropModeChild` , `dropModeRoot`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragTargetMode`, `dragTargetModeName`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragTargetParentItemKey`, `dragTargetParentLabel`, `dragTargetParentPathLabel`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragTargetAnchorItemKey`, `dragTargetAnchorLabel`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dropBefore`, `dropAfter`, `dropAsChild`, `dropAsRoot`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "드래그/이동 방법:\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 140,
+      "end_line": 149,
+      "raw": "- `beginDrag(localX, localY)`\n- `updateDrag(localX, localY)`\n- `endDrag(commitMove)`\n- `commitDrag()`\n- `cancelDrag()`\n- `moveTo(targetIndex, targetDepth)`\n- `moveBefore(targetItem)`\n- `moveAfter(targetItem)`\n- `moveAsChildOf(targetItem)`\n- `moveToRoot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`beginDrag(localX, localY)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updateDrag(localX, localY)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`endDrag(commitMove)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`commitDrag()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cancelDrag()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveTo(targetIndex, targetDepth)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveBefore(targetItem)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveAfter(targetItem)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveAsChildOf(targetItem)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`moveToRoot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "드래그 신호:\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 153,
+      "end_line": 155,
+      "raw": "- `dragStarted(sourceIndex, sourceEndIndex, sourceDepth)`\n- `dragUpdated(targetIndex, targetDepth, modeName, parentItemKey, anchorItemKey)`\n- `dragEnded(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey, anchorItemKey)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`dragStarted(sourceIndex, sourceEndIndex, sourceDepth)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragUpdated(targetIndex, targetDepth, modeName, parentItemKey, anchorItemKey)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragEnded(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey, anchorItemKey)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "Figma의 레이아웃 기본값:\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 159,
+      "end_line": 166,
+      "raw": "- `rowHeight`(기본값 `20`)\n- `itemWidth`(기본값 `200`)\n- `iconSize`(데스크탑 및 모바일의 경우 기본 `Theme.iconSm`: `18`)\n- `chevronSize`(데스크톱 `16`, 모바일 `32`)\n- `baseLeftPadding`(기본값 `8`)\n- `rowRightPadding`(기본값 `8`)\n- `leadingSpacing`(기본값 `2`)\n- `computedLeftPadding`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`rowHeight`(기본값 `20`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemWidth`(기본값 `200`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSize`(데스크탑 및 모바일의 경우 기본 `Theme.iconSm`: `18`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`chevronSize`(데스크톱 `16`, 모바일 `32`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`baseLeftPadding`(기본값 `8`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowRightPadding`(기본값 `8`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`leadingSpacing`(기본값 `2`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`computedLeftPadding`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "paragraph",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "시각적 토큰:\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "list",
+      "start_line": 170,
+      "end_line": 179,
+      "raw": "- `iconPlaceholderColor`\n- `textColorNormal`, `textColorDisabled`\n- `rowBackgroundColorIdle`\n- `rowBackgroundColor`(읽기 전용으로 확인된 호환성 색상)\n- `rowBackgroundColorHover`\n- `rowBackgroundColorPressed`\n- `rowBackgroundColorActive`\n- `rowBackgroundColorInactive`\n- `rowBackgroundColorDrag`\n- `rowVisible`(읽기 전용, `_rowVisibleInternal`에서)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`iconPlaceholderColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textColorNormal`, `textColorDisabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorIdle`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColor`(읽기 전용으로 확인된 호환성 색상)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorHover`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorPressed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorInactive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowBackgroundColorDrag`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowVisible`(읽기 전용, `_rowVisibleInternal`에서)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 180,
+      "end_line": 180,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "html",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 182,
+      "end_line": 182,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 183,
+      "end_line": 183,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 184,
+      "end_line": 184,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 185,
+      "end_line": 208,
+      "raw": "- Figma 구성 요소(`314:93`)는 `8px` 가로 패딩이 있는 `200x20` 행, `18px` 선행 아이콘, `2px` 선행 간격, `16px` 갈매기 모양 및 데스크톱 및 모바일의 `5px` 코너 반경.\n- 레이블은 프로젝트 전체 본문 글꼴 크기를 `13`로 유지하고 계층 구조 행의 Figma 라인 상자를 데스크톱 및 모바일의 `16px`로 유지합니다.\n- `count`는 기본 `-1`에서 숨겨진 상태로 유지됩니다. 후행 카운트 콘텐츠를 렌더링하려면 `count`를 `0` 이상으로 설정하세요.\n- 후행 카운트 콘텐츠는 갈매기형 자체가 표시되지 않는 경우에도 `8px` 간격을 사용하여 갈매기형 앵커 바로 왼쪽에 렌더링됩니다.\n- `countView`는 기본 후행 개수 레이블을 대체합니다. 사용자 정의 보기가 `count` 및/또는 `hierarchyItem` 속성을 노출하는 경우 `HierarchyItem`는 로드 후 해당 속성을 동기화합니다.\n- 상세 Figma 컴포넌트 ( `314:93` ) 는 3 표준 시각적 채우기를 정의합니다: `Default` = 투명, `Inactive` = `Theme.panelBackground12` , `Active` = `Theme.accentBlueMuted` .\n- `HierarchyList`는 상위/하위/주문/경로 메타데이터를 각 관리 행에 동기화합니다.\n- 항목 수준 드래그/드롭은 `HierarchyItem`에서 시작되고 커밋됩니다. `HierarchyList`는 지원 프로젝션을 제공하고 소스 변형을 계층 구조 모델에 위임합니다.\n- `childCount`는 직속 하위 수입니다. `descendantCount`는 행 아래의 전체 하위 트리 수입니다.\n- `visibleDescendantCount`는 행 아래에 현재 표시되는 하위 항목만 계산하므로 축소된 하위 항목은 `hiddenDescendantCount`를 통해 측정 가능한 상태로 유지됩니다.\n- `childItemKeysText` 및 `childItemLabelsText`는 배열을 직접 검사하고 싶지 않은 소비자가 요청한 문자열 형식 하위 요약을 제공합니다.\n- `ancestor*`, `pathItem*` 및 형제 수 필드는 `HierarchyList`를 다시 조회하지 않고도 행에서 직접 계보 및 로컬 순서를 노출합니다.\n- 생성된 행을 드래그하면 연결된 평면 깊이 모델이 제자리에 다시 작성됩니다. 행 순서 변경, 이동된 하위 트리 깊이 변경 및 `parentKey` / `parentItemKey`가 배열 개체 또는 쓰기 가능한 모델 역할에서 다시 계산됩니다.\n- `dragAllowed`를 사용하면 호스트는 편집 가능한 계층 구조 내에서 보호된 노드에 대한 드래그 시작을 방지하면서 행을 선택 가능하고 표시할 수 있도록 유지합니다.\n- 모바일 대상(`Theme.mobileTarget == true`)에서는 `1000ms`에 대한 행이 유지될 때까지 포인터 끌기 시작이 지연됩니다. 데스크탑 대상은 즉각적인 드래그 픽업을 유지합니다.\n- 모바일 대상에서는 누르는 대신 손을 떼거나 클릭할 때 터치 활성화가 이루어지므로 주변 `Flickable` 표면은 행이 활성화되기 전에 스크롤 제스처를 훔칠 수 있습니다.\n- 대화형 행 활성화는 행이 이미 활성화된 경우에도 목록 활성화를 다시 요청하므로 활성화 콜백을 수신하는 호스트는 반복적인 탭/클릭을 의도적인 작업 트리거로 처리할 수 있습니다.\n- `dragTargetModeName`는 현재 삭제 의도를 `before`, `after`, `child` 또는 `root`로 확인합니다.\n- `activatable`/`selectable` 행 클릭으로 갈매기형 기반 확장을 방해하지 않고 항목을 활성화할 수 있는지 여부를 제어합니다.\n- `uxState`는 UX 처리를 위한 기본 열거형입니다. 우선순위는 `Drag` -> `Inactive` -> `Active` -> `Pressed` -> `Hover` -> `Idle`입니다.\n- `indentStep`의 기본값은 `8`이므로 깊이 수준이 추가될 때마다 왼쪽 패딩이 `8`만큼 증가합니다.\n- 행 클릭은 활성화만 요청합니다. 행 클릭은 확장을 전환하지 않습니다.\n- 쉐브론 클릭은 `expanded`를 토글한 다음 활성화가 허용되면 활성화를 요청합니다.\n- `selectionDirection: \"auto\"`는 `expanded=false`를 오른쪽으로, `expanded=true`를 아래쪽으로 매핑합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 구성 요소(`314:93`)는 `8px` 가로 패딩이 있는 `200x20` 행, `18px` 선행 아이콘, `2px` 선행 간격, `16px` 갈매기 모양 및 데스크톱 및 모바일의 `5px` 코너 반경.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이블은 프로젝트 전체 본문 글꼴 크기를 `13`로 유지하고 계층 구조 행의 Figma 라인 상자를 데스크톱 및 모바일의 `16px`로 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`count`는 기본 `-1`에서 숨겨진 상태로 유지됩니다. 후행 카운트 콘텐츠를 렌더링하려면 `count`를 `0` 이상으로 설정하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "후행 카운트 콘텐츠는 갈매기형 자체가 표시되지 않는 경우에도 `8px` 간격을 사용하여 갈매기형 앵커 바로 왼쪽에 렌더링됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`countView`는 기본 후행 개수 레이블을 대체합니다. 사용자 정의 보기가 `count` 및/또는 `hierarchyItem` 속성을 노출하는 경우 `HierarchyItem`는 로드 후 해당 속성을 동기화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상세 Figma 컴포넌트 ( `314:93` ) 는 3 표준 시각적 채우기를 정의합니다: `Default` = 투명, `Inactive` = `Theme.panelBackground12` , `Active` = `Theme.accentBlueMuted` .",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`HierarchyList`는 상위/하위/주문/경로 메타데이터를 각 관리 행에 동기화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "항목 수준 드래그/드롭은 `HierarchyItem`에서 시작되고 커밋됩니다. `HierarchyList`는 지원 프로젝션을 제공하고 소스 변형을 계층 구조 모델에 위임합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childCount`는 직속 하위 수입니다. `descendantCount`는 행 아래의 전체 하위 트리 수입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleDescendantCount`는 행 아래에 현재 표시되는 하위 항목만 계산하므로 축소된 하위 항목은 `hiddenDescendantCount`를 통해 측정 가능한 상태로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`childItemKeysText` 및 `childItemLabelsText`는 배열을 직접 검사하고 싶지 않은 소비자가 요청한 문자열 형식 하위 요약을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ancestor*`, `pathItem*` 및 형제 수 필드는 `HierarchyList`를 다시 조회하지 않고도 행에서 직접 계보 및 로컬 순서를 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "생성된 행을 드래그하면 연결된 평면 깊이 모델이 제자리에 다시 작성됩니다. 행 순서 변경, 이동된 하위 트리 깊이 변경 및 `parentKey` / `parentItemKey`가 배열 개체 또는 쓰기 가능한 모델 역할에서 다시 계산됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragAllowed`를 사용하면 호스트는 편집 가능한 계층 구조 내에서 보호된 노드에 대한 드래그 시작을 방지하면서 행을 선택 가능하고 표시할 수 있도록 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 대상(`Theme.mobileTarget == true`)에서는 `1000ms`에 대한 행이 유지될 때까지 포인터 끌기 시작이 지연됩니다. 데스크탑 대상은 즉각적인 드래그 픽업을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 대상에서는 누르는 대신 손을 떼거나 클릭할 때 터치 활성화가 이루어지므로 주변 `Flickable` 표면은 행이 활성화되기 전에 스크롤 제스처를 훔칠 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 행 활성화는 행이 이미 활성화된 경우에도 목록 활성화를 다시 요청하므로 활성화 콜백을 수신하는 호스트는 반복적인 탭/클릭을 의도적인 작업 트리거로 처리할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragTargetModeName`는 현재 삭제 의도를 `before`, `after`, `child` 또는 `root`로 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activatable`/`selectable` 행 클릭으로 갈매기형 기반 확장을 방해하지 않고 항목을 활성화할 수 있는지 여부를 제어합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`uxState`는 UX 처리를 위한 기본 열거형입니다. 우선순위는 `Drag` -> `Inactive` -> `Active` -> `Pressed` -> `Hover` -> `Idle`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`indentStep`의 기본값은 `8`이므로 깊이 수준이 추가될 때마다 왼쪽 패딩이 `8`만큼 증가합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행 클릭은 활성화만 요청합니다. 행 클릭은 확장을 전환하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "쉐브론 클릭은 `expanded`를 토글한 다음 활성화가 허용되면 활성화를 요청합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectionDirection: \"auto\"`는 `expanded=false`를 오른쪽으로, `expanded=true`를 아래쪽으로 매핑합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 209,
+      "end_line": 209,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "html",
+      "start_line": 210,
+      "end_line": 210,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 211,
+      "end_line": 211,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "heading",
+      "start_line": 212,
+      "end_line": 212,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 213,
+      "end_line": 213,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "fenced_code",
+      "start_line": 214,
+      "end_line": 229,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.HierarchyItem {\n    label: \"Camera\"\n    iconName: \"toolwindowhierarchy\"\n    indentLevel: 1\n    count: 12\n    showChevron: true\n    activatable: true\n    onDragEnded: function(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey) {\n        if (committed)\n            console.log(\"moved\", fromIndex, toIndex, targetDepth, modeName, parentItemKey)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.HierarchyItem {\n    label: \"Camera\"\n    iconName: \"toolwindowhierarchy\"\n    indentLevel: 1\n    count: 12\n    showChevron: true\n    activatable: true\n    onDragEnded: function(committed, fromIndex, toIndex, targetDepth, modeName, parentItemKey) {\n        if (committed)\n            console.log(\"moved\", fromIndex, toIndex, targetDepth, modeName, parentItemKey)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 230,
+      "end_line": 230,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 231,
+      "end_line": 231,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 232,
+      "end_line": 232,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 233,
+      "end_line": 233,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 234,
+      "end_line": 234,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 235,
+      "end_line": 236,
+      "raw": "상속된 인스턴스별 `interactionPhase` / `interactionInput` 트랙 입력은 `interactionState`, 선택, 확장 및 `uxState` 와 독립적으로 수행됩니다. `interaction.enabled` 는 비활성화 가능 행과 드래그 미리보기에 대해 거짓입니다. 모바일 환경에서 장시간 누름 포인터 피드백과 네이티브 스페이스/엔터 누름 피드백은 모두 소유된 누름 상태를 공급하므로, 편집 가능한 행에서 키보드 활성화가 여전히 작동합니다. Figma 의 접이식/비접이식 집합에는 완전한 입력 변형이 포함되어 있으며, 참조하십시오.\n[구성 요소 인스턴스 상태](../../instance-states.md).\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 237,
+      "end_line": 237,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "paragraph",
+      "start_line": 238,
+      "end_line": 238,
+      "raw": "기본/호버/누름 색상은 `rowBackgroundColorIdle`, `rowBackgroundColorHover` (surfaceGhost) 및 `rowBackgroundColorPressed` (surfaceAlt) 을 계속 사용합니다. 활성 선택은 accentMuted 를 유지하며, 비활성 상태는 panelBackground12 를 유지합니다. 이 모델 상태는 키보드 포커스와는 별개입니다. 릴리즈는 버튼/메뉴/목록 행과 동일한 명시적 180ms OutBack 정책을 사용하며, 추가 채우기 또는 테두리가 없습니다.\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 239,
+      "end_line": 239,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 240,
+      "end_line": 240,
+      "raw": "1.5px 기본 포커스 링은 고정 행 바깥에 3px 위치하며, 스페이스/엔터 누름 및 릴리즈 동안 지속됩니다. 비활성화 가능 행은 포커스 링이나 변형을 가지지 않으면서 기존 독립적인 공개 동작을 유지합니다. 모바일 장시간 누름 입력은 콘텐츠 및 표면 변환 모두에 `effectivePressedState` 를 사용하며, 비활성 및 활성 드래그 미리보기는 변형을 억제합니다. 모바일 포인터를 행 바깥에서 릴리스하면 릴리스 리바운드가 없이 행 동작이 취소됩니다. 선택, 확장 및 드래그/드롭 모델 변경은 동기적으로 유지됩니다.\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "행이 미묘하게 압축되고 갈매기형 모양이 새로 확장된 방향으로 회전합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "HierarchyItem",
+      "anchor": "hierarchyitem",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API 인벤토리 구현",
+      "anchor": "api-인벤토리-구현",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 183
+    },
+    {
+      "block_id": "b000077",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 212
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 233
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000085",
+        "label": "구성 요소 인스턴스 상태",
+        "target": "../../instance-states.md",
+        "kind": "relative",
+        "line": 236
+      },
+      {
+        "block_id": "b000091",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 242
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

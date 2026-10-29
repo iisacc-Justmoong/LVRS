@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:26f0277004a3643eb859fbe5d1cf72e5e515d8cc647fc5764a921ba83ba02945",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeAppSurfaces/AGENT.md",
+    "sha256": "9118e8162c3bff61bf1ab484653dc8d4d17eb4ee401317f846c58f69a666f7f8",
+    "bytes": 340,
+    "line_count": 5,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "예제 작업 지침",
+    "role": "instructions",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 예제 작업 지침\n",
+      "level": 1,
+      "title": "예제 작업 지침"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "C++23·LVUI AOT·LVRS 자체 위젯·iiGUI·iiSDKCore를 사용한다. 앱 소스와 헤더는 App/에\n함께 두고 문서와 테스트를 갱신한다. 빌드 디렉터리는 build/이다. 앱·테스트·self-test\n실행은 사용자 지시에 따라 전체 구현 작업의 마지막 일괄 단계에 모은다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "예제 작업 지침",
+      "anchor": "예제-작업-지침",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "original_sha256": {
+    "src/backend/model/modelsource.h": "9fd630f17ebbabe5ad0eac9b71c7739697512a23d9c54826de8ce0bc836d953a",
+    "src/backend/model/modelsource.cpp": "43aa45d3f317e3388d2700010f602afea45e17c5c39ff3174d63c0846ae3d8e3",
+    "src/backend/navigation/modeladapter.h": "f358c46a7a743708de7796c71bcffa92dc288f9fe176ef983e9b1b82314fa95e",
+    "src/backend/navigation/modeladapter.cpp": "9f616c6b54653292774d480574c821e9f855fbe1b66d94b0075f6d4b31751327"
+  },
+  "ModelSource": {
+    "properties": [
+      "source",
+      "column",
+      "count",
+      "revision",
+      "itemModel"
+    ],
+    "methods": [
+      "at",
+      "row",
+      "roleValue",
+      "textValue",
+      "boolValue",
+      "intValue",
+      "invalidate"
+    ]
+  },
+  "ModelAdapter": {
+    "properties": [],
+    "methods": [
+      "isItemModel",
+      "count",
+      "row"
+    ]
+  }
+}

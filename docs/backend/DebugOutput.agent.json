@@ -1,0 +1,2396 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:dbece1a2b09fb40ec1730559886528345f98a67bbe7242e54f642fa156f1b440",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/DebugOutput.md",
+    "sha256": "3ae4018eb0fe0b78ef2d5aea69275d29ebdd529e99b005c1299ffaad15062bd6",
+    "bytes": 13896,
+    "line_count": 311,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "디버그 출력 스키마",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"debug-output-schema\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 디버그 출력 스키마\n",
+      "level": 1,
+      "title": "디버그 출력 스키마"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/backend/runtime/debuglogger.h`, `src/backend/runtime/debuglogger.cpp`, `src/backend/runtime/runtimeevents.h`, `src/backend/runtime/runtimeevents.cpp`, `src/backend/runtime/gestureevents.h`, `src/backend/runtime/gestureevents.cpp`, `src/backend/io/backend.h`, `src/backend/io/backend.cpp`, `example/VisualCatalog/qml/Main.qml`, `src/qml/components/control/util/EventListener.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "이 문서는 LVRS 데모 앱에서 내보내지고 표시되는 디버그 및 런타임 이벤트 데이터에서 사용되는 스키마를 정의합니다. 이는 개발자가 stdout 로그, 런타임 이벤트 및 QML 모니터 보기 간의 관계를 모호함 없이 추적할 수 있도록 하기 위한 것입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"1-output-channels\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 1. 출력 채널\n",
+      "level": 2,
+      "title": "1. 출력 채널"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 20,
+      "raw": "- 부트스트랩 stdout 진단: `LV.Debug`를 반드시 사용할 수 있기 전에 `preApplicationBootstrap`, `postApplicationBootstrap` 및 `runBootstrappedQmlApp`에서 내보냅니다.\n- Stdout 텍스트 로그: `LV.Debug`에서 `printEntryToStdout()`를 통해 내보냅니다.\n- Stdout JSON 로그: `LV.Debug.jsonOutput == true`일 때 추가 라인이 `[DEBUG-ENTRY] { ... }`로 생성됩니다.\n- 디버그 메모리 버퍼: `LV.Debug.entries()/filteredEntries()/summary()`를 통해 사용 가능.\n- RuntimeEvents 버퍼: `LV.RuntimeEvents.recentEvents()`를 통해 사용 가능합니다.\n- GestureEvents 라이브 표면: `LV.GestureEvents.gestureSequence`, `LV.GestureEvents.lastGesture` 및 제스처 신호를 통해 사용할 수 있습니다.\n- 백엔드 후크 버퍼: `LV.Backend.hookedUserEvents()`를 통해 사용 가능합니다.\n- 데모 이벤트 리스너 모니터: `example/VisualCatalog/qml/Main.qml`의 `runtimeConsoleRows` 및 `eventMonitorSamplesModel`에 의해 표시됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "부트스트랩 stdout 진단: `LV.Debug`를 반드시 사용할 수 있기 전에 `preApplicationBootstrap`, `postApplicationBootstrap` 및 `runBootstrappedQmlApp`에서 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Stdout 텍스트 로그: `LV.Debug`에서 `printEntryToStdout()`를 통해 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Stdout JSON 로그: `LV.Debug.jsonOutput == true`일 때 추가 라인이 `[DEBUG-ENTRY] { ... }`로 생성됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "디버그 메모리 버퍼: `LV.Debug.entries()/filteredEntries()/summary()`를 통해 사용 가능.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "RuntimeEvents 버퍼: `LV.RuntimeEvents.recentEvents()`를 통해 사용 가능합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "GestureEvents 라이브 표면: `LV.GestureEvents.gestureSequence`, `LV.GestureEvents.lastGesture` 및 제스처 신호를 통해 사용할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "백엔드 후크 버퍼: `LV.Backend.hookedUserEvents()`를 통해 사용 가능합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데모 이벤트 리스너 모니터: `example/VisualCatalog/qml/Main.qml`의 `runtimeConsoleRows` 및 `eventMonitorSamplesModel`에 의해 표시됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "<a id=\"2-current-default-output-policy-mainqml-bootstrap\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "## 2. 현재 기본 출력 정책(Main.qml 부트스트랩)\n",
+      "level": 2,
+      "title": "2. 현재 기본 출력 정책(Main.qml 부트스트랩)"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "`Component.onCompleted` 및 `debuggerBootstrap()`에 의해 구성된 기본값은 다음과 같습니다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 35,
+      "raw": "- `LV.Debug.enabled = true`(stdout 출력 활성화됨)\n- `LV.Debug.verboseOutput = false`\n- `LV.Debug.jsonOutput = false`\n- `LV.Debug.runtimeEchoEnabled = false`\n- `LV.Debug.runtimeEchoMinIntervalMs >= 250`\n- `LV.Debug.stdoutMinimumLevel = \"WARN\"`\n- `LV.Debug.stdoutNoiseReductionEnabled = true`\n- `LV.Debug.runtimeCaptureEnabled = true`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LV.Debug.enabled = true`(stdout 출력 활성화됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.verboseOutput = false`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.jsonOutput = false`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.runtimeEchoEnabled = false`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.runtimeEchoMinIntervalMs >= 250`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.stdoutMinimumLevel = \"WARN\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.stdoutNoiseReductionEnabled = true`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LV.Debug.runtimeCaptureEnabled = true`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "효과적인 동작은 고주파수 입력/수명주기 소음 억제 기능을 갖춘 경고 중심(`WARN/ERROR`) 출력입니다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "부트스트랩 진단은 `LV.Debug`와 별개입니다. 이는 항상 `LVRS bootstrap.` 접두사가 붙은 일반 표준 출력 라인이며 부트스트랩 옵션, 렌더링 기본값, 백엔드 검색, 가져오기 경로 확인 및 글꼴 정책 결정을 설명하는 컴팩트 JSON 페이로드를 전달합니다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "<a id=\"bootstrap-stdout-line-format\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "### 부트스트랩 stdout 라인 형식\n",
+      "level": 3,
+      "title": "부트스트랩 stdout 라인 형식"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 45,
+      "end_line": 47,
+      "raw": "- 접두사: `LVRS bootstrap.<stage>`\n- 페이로드: 압축된 JSON 맵\n- 레벨: 정상적인 진행의 경우 `INFO`, 대체 경로/소프트 저하의 경우 `WARN`, 치명적인 부트스트랩 오류의 경우 `CRITICAL`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "접두사: `LVRS bootstrap.<stage>`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "페이로드: 압축된 JSON 맵",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레벨: 정상적인 진행의 경우 `INFO`, 대체 경로/소프트 저하의 경우 `WARN`, 치명적인 부트스트랩 오류의 경우 `CRITICAL`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "일반적인 부트스트랩 단계:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 61,
+      "raw": "- `pre.options`\n- `pre.render-quality`\n- `pre.quick-style`\n- `graphics.probe`\n- `graphics.selected`\n- `graphics.fallback`\n- `pre.complete`\n- `post.application`\n- `post.font-policy`\n- `entry.import-paths`\n- `entry.load-request`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`pre.options`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pre.render-quality`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pre.quick-style`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`graphics.probe`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`graphics.selected`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`graphics.fallback`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pre.complete`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`post.application`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`post.font-policy`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`entry.import-paths`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`entry.load-request`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "<a id=\"3-lvdebug-entry-schema\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "## 3. LV.Debug 항목 스키마\n",
+      "level": 2,
+      "title": "3. LV.Debug 항목 스키마"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "`LV.Debug.log/warn/error` 및 `RuntimeEvents.eventRecorded`는 동일한 엔트리 버퍼(`m_entries`)에 저장됩니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"common-fields\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "### 공통 필드\n",
+      "level": 3,
+      "title": "공통 필드"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 73,
+      "end_line": 88,
+      "raw": "- `source`: `\"logger\"` 또는 `\"runtime\"`\n- `level`: `\"LOG\" | \"WARN\" | \"ERROR\" | \"RUNTIME\"`\n- `component`: e.g. `\"Main\"`, `\"RenderMonitor\"`, `\"RuntimeEvents\"`\n- `event`: 이벤트 이름\n- `message`: 기본 UI/stdout 라인 메시지\n- `timestampEpochMs`: 에포크 ms\n- `timestamp`: `HH:MM:SS.CS`(센티초)\n- `timestampIso`: UTC ISO 문자열\n- `sequence`: DebugLogger-로컬 시퀀스(1에서 증분)\n- `sessionElapsedMs`: 디버그 세션 시작 이후 경과된 ms\n- `processId`\n- `threadId`\n- `applicationName`\n- `applicationVersion`\n- `data`(옵션)\n- `runtimeEventSequence`(RuntimeEvents 장착 시)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`source`: `\"logger\"` 또는 `\"runtime\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`level`: `\"LOG\" | \"WARN\" | \"ERROR\" | \"RUNTIME\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`component`: e.g. `\"Main\"`, `\"RenderMonitor\"`, `\"RuntimeEvents\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`event`: 이벤트 이름",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`message`: 기본 UI/stdout 라인 메시지",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`: 에포크 ms",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestamp`: `HH:MM:SS.CS`(센티초)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampIso`: UTC ISO 문자열",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sequence`: DebugLogger-로컬 시퀀스(1에서 증분)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sessionElapsedMs`: 디버그 세션 시작 이후 경과된 ms",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`processId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`threadId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applicationName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applicationVersion`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`data`(옵션)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeEventSequence`(RuntimeEvents 장착 시)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "<a id=\"additional-fields-for-runtime-source\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "### `runtime` 소스에 대한 추가 필드\n",
+      "level": 3,
+      "title": "`runtime` 소스에 대한 추가 필드"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 94,
+      "end_line": 95,
+      "raw": "- `uptimeMs`\n- `rawEvent`(원시 `RuntimeEvents` 이벤트)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`uptimeMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rawEvent`(원시 `RuntimeEvents` 이벤트)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "<a id=\"4-stdout-output-rules\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "## 4. Stdout 출력 규칙\n",
+      "level": 2,
+      "title": "4. Stdout 출력 규칙"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "<a id=\"level-priority\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "### 레벨 우선순위\n",
+      "level": 3,
+      "title": "레벨 우선순위"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 105,
+      "end_line": 106,
+      "raw": "- `ERROR=3`, `WARN=2`, `RUNTIME=1`, `LOG=1`, `NONE=99`\n- `shouldOutputLevel(entry.level) >= stdoutMinimumLevel`인 경우에만 출력이 방출됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ERROR=3`, `WARN=2`, `RUNTIME=1`, `LOG=1`, `NONE=99`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shouldOutputLevel(entry.level) >= stdoutMinimumLevel`인 경우에만 출력이 방출됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "<a id=\"noise-filter-stdoutnoisereductionenabledtrue\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "### 노이즈 필터(`stdoutNoiseReductionEnabled=true`)\n",
+      "level": 3,
+      "title": "노이즈 필터(`stdoutNoiseReductionEnabled=true`)"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "list",
+      "start_line": 112,
+      "end_line": 116,
+      "raw": "- `LOG` 수준에서 `created`, `shown`, `hidden`, `destroyed`를 차단합니다.\n- `LOG` 수준에서 `RenderMonitor.render-stats`를 차단합니다.\n- 고주파수 `RUNTIME` 이벤트를 차단합니다.\n  - `ui-event`, `mouse-move`, `hover-move`, `mouse-wheel`, `mouse-press`, `mouse-release`, `mouse-double-click`\n  - `key-press`, `key-release`, `touch-event`, `tablet-event`, `tablet-proximity`, `native-gesture`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LOG` 수준에서 `created`, `shown`, `hidden`, `destroyed`를 차단합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LOG` 수준에서 `RenderMonitor.render-stats`를 차단합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "고주파수 `RUNTIME` 이벤트를 차단합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui-event`, `mouse-move`, `hover-move`, `mouse-wheel`, `mouse-press`, `mouse-release`, `mouse-double-click`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`key-press`, `key-release`, `touch-event`, `tablet-event`, `tablet-proximity`, `native-gesture`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "html",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "<a id=\"line-format\"></a>\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "heading",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "### 라인 형식\n",
+      "level": 3,
+      "title": "라인 형식"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "list",
+      "start_line": 122,
+      "end_line": 124,
+      "raw": "- `verboseOutput=false`: `entry.message`만 인쇄합니다.\n- `verboseOutput=true`: `[timestamp] [level] #sequence component.event pid=... tid=... runtimeSeq=... data=...`\n- `jsonOutput=true`: 위 줄 뒤에 `[DEBUG-ENTRY] {compact-json}`를 추가합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`verboseOutput=false`: `entry.message`만 인쇄합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`verboseOutput=true`: `[timestamp] [level] #sequence component.event pid=... tid=... runtimeSeq=... data=...`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`jsonOutput=true`: 위 줄 뒤에 `[DEBUG-ENTRY] {compact-json}`를 추가합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "html",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "<a id=\"5-runtimeevents-raw-event-eventrecorded-schema\"></a>\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "## 5. RuntimeEvents 원시 이벤트(`eventRecorded`) 스키마\n",
+      "level": 2,
+      "title": "5. RuntimeEvents 원시 이벤트(`eventRecorded`) 스키마"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "paragraph",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "`recordRuntimeEvent()`에서 내보내는 공통 필드:\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "list",
+      "start_line": 132,
+      "end_line": 136,
+      "raw": "- `sequence`\n- `type`\n- `timestampEpochMs`\n- `uptimeMs`\n- `payload`(옵션)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sequence`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`type`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`uptimeMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`payload`(옵션)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "주요 `type` 값 및 주요 `payload` 필드:\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "list",
+      "start_line": 140,
+      "end_line": 150,
+      "raw": "- `key-press`, `key-release`: `key`, `keyName`, `modifiers`, `autoRepeat`, `text`, `pressedKeys`, `pressedKeyCodes`, `activeModifierNames`\n- `mouse-move`, `hover-move`: `x`, `y`, `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`, `pointerUi`, `pointerObjectName`, `pointerClassName`, `pointerPath`\n- `mouse-press`, `mouse-release`, `mouse-double-click`: 위의 키 + `button`, `lastMousePressEpochMs`/`lastMouseReleaseEpochMs`, 경과된 필드\n- `mouse-wheel`: 위의 키 + `angleDeltaX/Y`, `pixelDeltaX/Y`, `phase`, `inverted`\n- `touch-event` : `phase` , `pointCount` , `fingerCount` , `activeFingerCount` , 단계 수, `primaryPointId` , `multiTouch` , `released` , `cancelled` , `nativeTimestamp` , 터치 장치 메타데이터, `x` , `y` , `buttons` , `pressedMouseButtons` , `mouseButtonPressed` , `lastMousePressEpochMs` , `lastMouseReleaseEpochMs` , `releaseEpochMs` , `pressDurationMs` , 경과 시간 필드, 네이티브 `points[]` , `pointerUi` , `pointerObjectName` , `pointerClassName` , `pointerPath`\n- `tablet-event`: `phase`, `pressure`, `rotation`, `xTilt`, `yTilt`, `pointerType` 등\n- `tablet-proximity`: `phase`\n- `native-gesture`: `gestureType`, `fingerCount`, `value`, `deltaX/Y`, 포인터/장치 정보\n- `context-requested`: `x`, `y`, `modifiers`, `buttons`, `reason`, `pointerUi`\n- `ui-event`: `eventType`, `objectName`, `className`, `visible`\n- `daemon-started`, `daemon-stopped`, `window-attached`, `window-detached`, `counters-reset`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`key-press`, `key-release`: `key`, `keyName`, `modifiers`, `autoRepeat`, `text`, `pressedKeys`, `pressedKeyCodes`, `activeModifierNames`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mouse-move`, `hover-move`: `x`, `y`, `buttons`, `pressedMouseButtons`, `modifiers`, `mouseButtonPressed`, `pointerUi`, `pointerObjectName`, `pointerClassName`, `pointerPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mouse-press`, `mouse-release`, `mouse-double-click`: 위의 키 + `button`, `lastMousePressEpochMs`/`lastMouseReleaseEpochMs`, 경과된 필드",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mouse-wheel`: 위의 키 + `angleDeltaX/Y`, `pixelDeltaX/Y`, `phase`, `inverted`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touch-event` : `phase` , `pointCount` , `fingerCount` , `activeFingerCount` , 단계 수, `primaryPointId` , `multiTouch` , `released` , `cancelled` , `nativeTimestamp` , 터치 장치 메타데이터, `x` , `y` , `buttons` , `pressedMouseButtons` , `mouseButtonPressed` , `lastMousePressEpochMs` , `lastMouseReleaseEpochMs` , `releaseEpochMs` , `pressDurationMs` , 경과 시간 필드, 네이티브 `points[]` , `pointerUi` , `pointerObjectName` , `pointerClassName` , `pointerPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tablet-event`: `phase`, `pressure`, `rotation`, `xTilt`, `yTilt`, `pointerType` 등",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tablet-proximity`: `phase`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`native-gesture`: `gestureType`, `fingerCount`, `value`, `deltaX/Y`, 포인터/장치 정보",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`context-requested`: `x`, `y`, `modifiers`, `buttons`, `reason`, `pointerUi`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui-event`: `eventType`, `objectName`, `className`, `visible`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`daemon-started`, `daemon-stopped`, `window-attached`, `window-detached`, `counters-reset`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "html",
+      "start_line": 152,
+      "end_line": 152,
+      "raw": "<a id=\"6-runtime-state-snapshot-api-output\"></a>\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 153,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "heading",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "## 6. 런타임 상태 스냅샷 API 출력\n",
+      "level": 2,
+      "title": "6. 런타임 상태 스냅샷 API 출력"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "heading",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "### `LV.RuntimeEvents.snapshot()`\n",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.snapshot()`"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "list",
+      "start_line": 158,
+      "end_line": 164,
+      "raw": "- `running`\n- 키/마우스/UI 카운터\n- `idle`, `idleForMs`\n- `pid`, `rssBytes`, `uptimeMs`\n- `daemonBootEpochMs`, `eventSequence`, `recentEventCount`\n- `lastEvent`\n- `input`(`inputState()`의 결과)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`running`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키/마우스/UI 카운터",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`idle`, `idleForMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pid`, `rssBytes`, `uptimeMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`daemonBootEpochMs`, `eventSequence`, `recentEventCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastEvent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`input`(`inputState()`의 결과)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "heading",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "### `LV.RuntimeEvents.daemonHealth()`\n",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.daemonHealth()`"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "list",
+      "start_line": 168,
+      "end_line": 174,
+      "raw": "- `running`, `attachedWindow`\n- `bootEpochMs`, `eventSequence`\n- `recentEventCount`, `recentEventCapacity`\n- `idle`, `idleForMs`\n- `pid`\n- `lastEvent`\n- `input`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`running`, `attachedWindow`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootEpochMs`, `eventSequence`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`recentEventCount`, `recentEventCapacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`idle`, `idleForMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pid`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastEvent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`input`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "heading",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "### `LV.RuntimeEvents.inputState()`\n",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.inputState()`"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "list",
+      "start_line": 178,
+      "end_line": 184,
+      "raw": "- 포인터 좌표/버튼/버튼 이름/눌린 상태\n- 마지막 보도/공개 타임스탬프 및 경과 기간\n- `activePressDurationMs`\n- `pointerUi`(적중 테스트 결과)\n- `anyKeyPressed`, `pressedKeys`, `pressedKeyCodes`\n- `activeModifiers`, `activeModifierNames`\n- `lastKey`, `lastKeyText`, `lastKeyModifiers`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "포인터 좌표/버튼/버튼 이름/눌린 상태",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "마지막 보도/공개 타임스탬프 및 경과 기간",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activePressDurationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pointerUi`(적중 테스트 결과)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`anyKeyPressed`, `pressedKeys`, `pressedKeyCodes`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`activeModifiers`, `activeModifierNames`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastKey`, `lastKeyText`, `lastKeyModifiers`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 185,
+      "end_line": 185,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "html",
+      "start_line": 186,
+      "end_line": 186,
+      "raw": "<a id=\"7-backend-hook-output\"></a>\n"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 187,
+      "end_line": 187,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "heading",
+      "start_line": 188,
+      "end_line": 188,
+      "raw": "## 7. 백엔드 후크 출력\n",
+      "level": 2,
+      "title": "7. 백엔드 후크 출력"
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 189,
+      "end_line": 189,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "paragraph",
+      "start_line": 190,
+      "end_line": 190,
+      "raw": "`LV.Backend.hookUserEvents()`는 RuntimeEvents를 구독하고 별도의 버퍼를 유지합니다.\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 191,
+      "end_line": 191,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "heading",
+      "start_line": 192,
+      "end_line": 192,
+      "raw": "### `LV.Backend.hookedUserEvents(limit)`\n",
+      "level": 3,
+      "title": "`LV.Backend.hookedUserEvents(limit)`"
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 193,
+      "end_line": 193,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "list",
+      "start_line": 194,
+      "end_line": 194,
+      "raw": "- RuntimeEvents 원시 이벤트 목록과 `hookEpochMs`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "RuntimeEvents 원시 이벤트 목록과 `hookEpochMs`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 195,
+      "end_line": 195,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "heading",
+      "start_line": 196,
+      "end_line": 196,
+      "raw": "### `LV.Backend.hookedUserEventSummary()`\n",
+      "level": 3,
+      "title": "`LV.Backend.hookedUserEventSummary()`"
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 197,
+      "end_line": 197,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "list",
+      "start_line": 198,
+      "end_line": 204,
+      "raw": "- `hooked`\n- `eventCount`\n- `capacity`\n- `lastEvent`\n- `input`(`currentUserInputState()`의 결과)\n- `typeCounts`(이벤트 유형별 집계)\n- `runtimeEventSequence`(런타임 장착 시)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`hooked`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`eventCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`capacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastEvent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`input`(`currentUserInputState()`의 결과)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`typeCounts`(이벤트 유형별 집계)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeEventSequence`(런타임 장착 시)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000118",
+      "kind": "blank",
+      "start_line": 205,
+      "end_line": 205,
+      "raw": "\n"
+    },
+    {
+      "id": "b000119",
+      "kind": "html",
+      "start_line": 206,
+      "end_line": 206,
+      "raw": "<a id=\"8-mainqml-event-listener-monitor-output\"></a>\n"
+    },
+    {
+      "id": "b000120",
+      "kind": "blank",
+      "start_line": 207,
+      "end_line": 207,
+      "raw": "\n"
+    },
+    {
+      "id": "b000121",
+      "kind": "heading",
+      "start_line": 208,
+      "end_line": 208,
+      "raw": "## 8. Main.qml 이벤트 리스너 모니터 출력\n",
+      "level": 2,
+      "title": "8. Main.qml 이벤트 리스너 모니터 출력"
+    },
+    {
+      "id": "b000122",
+      "kind": "blank",
+      "start_line": 209,
+      "end_line": 209,
+      "raw": "\n"
+    },
+    {
+      "id": "b000123",
+      "kind": "html",
+      "start_line": 210,
+      "end_line": 210,
+      "raw": "<a id=\"runtime-console-row-runtimeconsolerows-schema\"></a>\n"
+    },
+    {
+      "id": "b000124",
+      "kind": "blank",
+      "start_line": 211,
+      "end_line": 211,
+      "raw": "\n"
+    },
+    {
+      "id": "b000125",
+      "kind": "heading",
+      "start_line": 212,
+      "end_line": 212,
+      "raw": "### 런타임 콘솔 행(`runtimeConsoleRows[]`) 스키마\n",
+      "level": 3,
+      "title": "런타임 콘솔 행(`runtimeConsoleRows[]`) 스키마"
+    },
+    {
+      "id": "b000126",
+      "kind": "blank",
+      "start_line": 213,
+      "end_line": 213,
+      "raw": "\n"
+    },
+    {
+      "id": "b000127",
+      "kind": "list",
+      "start_line": 214,
+      "end_line": 222,
+      "raw": "- `category`: `runtime|input|ui|render|navigation|system`\n- `source`\n- `type`\n- `sequence`\n- `timestampEpochMs`\n- `uptimeMs`\n- `payload`\n- `summary`(유형별 요약 문자열)\n- `detail`(축약된 페이로드 문자열)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`category`: `runtime|input|ui|render|navigation|system`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`type`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`sequence`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`uptimeMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`payload`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`summary`(유형별 요약 문자열)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`detail`(축약된 페이로드 문자열)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000128",
+      "kind": "blank",
+      "start_line": 223,
+      "end_line": 223,
+      "raw": "\n"
+    },
+    {
+      "id": "b000129",
+      "kind": "paragraph",
+      "start_line": 224,
+      "end_line": 224,
+      "raw": "디스플레이 타임스탬프는 `HH:MM:SS.mmm` 형식의 `runtimeConsoleTimestamp()`를 따릅니다.\n"
+    },
+    {
+      "id": "b000130",
+      "kind": "blank",
+      "start_line": 225,
+      "end_line": 225,
+      "raw": "\n"
+    },
+    {
+      "id": "b000131",
+      "kind": "paragraph",
+      "start_line": 226,
+      "end_line": 226,
+      "raw": "카테고리 매핑은 `runtimeConsoleCategoryForType()`를 따릅니다.\n"
+    },
+    {
+      "id": "b000132",
+      "kind": "blank",
+      "start_line": 227,
+      "end_line": 227,
+      "raw": "\n"
+    },
+    {
+      "id": "b000133",
+      "kind": "list",
+      "start_line": 228,
+      "end_line": 233,
+      "raw": "- 입력 제품군: `key-*`, `mouse-*`, `touch-*`, `tablet-*`, `native-gesture*`, `hover-*`, `context-*`, `global-*` -> `input`\n- `ui-event` -> `ui`\n- `render-*` -> `render`\n- `route-*`, `viewstack-*` -> `navigation`\n- `daemon-*`, `window-*`, `catalog-*`, `counters-*` -> `runtime`\n- 기타 -> `system`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "입력 제품군: `key-*`, `mouse-*`, `touch-*`, `tablet-*`, `native-gesture*`, `hover-*`, `context-*`, `global-*` -> `input`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui-event` -> `ui`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`render-*` -> `render`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`route-*`, `viewstack-*` -> `navigation`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`daemon-*`, `window-*`, `catalog-*`, `counters-*` -> `runtime`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기타 -> `system`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000134",
+      "kind": "blank",
+      "start_line": 234,
+      "end_line": 234,
+      "raw": "\n"
+    },
+    {
+      "id": "b000135",
+      "kind": "html",
+      "start_line": 235,
+      "end_line": 235,
+      "raw": "<a id=\"eventlistener-sample-eventmonitorsamplesmodel-schema\"></a>\n"
+    },
+    {
+      "id": "b000136",
+      "kind": "blank",
+      "start_line": 236,
+      "end_line": 236,
+      "raw": "\n"
+    },
+    {
+      "id": "b000137",
+      "kind": "heading",
+      "start_line": 237,
+      "end_line": 237,
+      "raw": "### EventListener 샘플(`eventMonitorSamplesModel`) 스키마\n",
+      "level": 3,
+      "title": "EventListener 샘플(`eventMonitorSamplesModel`) 스키마"
+    },
+    {
+      "id": "b000138",
+      "kind": "blank",
+      "start_line": 238,
+      "end_line": 238,
+      "raw": "\n"
+    },
+    {
+      "id": "b000139",
+      "kind": "list",
+      "start_line": 239,
+      "end_line": 242,
+      "raw": "- `trigger`\n- `source`\n- `timestampEpochMs`\n- `payload`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`trigger`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`payload`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000140",
+      "kind": "blank",
+      "start_line": 243,
+      "end_line": 243,
+      "raw": "\n"
+    },
+    {
+      "id": "b000141",
+      "kind": "paragraph",
+      "start_line": 244,
+      "end_line": 244,
+      "raw": "샘플이 `eventMonitorMaxSamples`를 초과하면 가장 오래된 항목이 먼저 제거됩니다(FIFO).\n"
+    },
+    {
+      "id": "b000142",
+      "kind": "blank",
+      "start_line": 245,
+      "end_line": 245,
+      "raw": "\n"
+    },
+    {
+      "id": "b000143",
+      "kind": "html",
+      "start_line": 246,
+      "end_line": 246,
+      "raw": "<a id=\"9-eventlistener-callback-payload-schema\"></a>\n"
+    },
+    {
+      "id": "b000144",
+      "kind": "blank",
+      "start_line": 247,
+      "end_line": 247,
+      "raw": "\n"
+    },
+    {
+      "id": "b000145",
+      "kind": "heading",
+      "start_line": 248,
+      "end_line": 248,
+      "raw": "## 9. EventListener 콜백 페이로드 스키마\n",
+      "level": 2,
+      "title": "9. EventListener 콜백 페이로드 스키마"
+    },
+    {
+      "id": "b000146",
+      "kind": "blank",
+      "start_line": 249,
+      "end_line": 249,
+      "raw": "\n"
+    },
+    {
+      "id": "b000147",
+      "kind": "paragraph",
+      "start_line": 250,
+      "end_line": 250,
+      "raw": "`src/qml/components/control/util/EventListener.qml` 기반:\n"
+    },
+    {
+      "id": "b000148",
+      "kind": "blank",
+      "start_line": 251,
+      "end_line": 251,
+      "raw": "\n"
+    },
+    {
+      "id": "b000149",
+      "kind": "list",
+      "start_line": 252,
+      "end_line": 271,
+      "raw": "- 로컬 포인터 트리거(`clicked|pressed|released`):\n  - `x`, `y`, `globalX`, `globalY`, `button`, `buttons`, `modifiers`, `isGlobal=false`\n  - `ui`(옵션, `includeUiHit=true`)\n  - `input`(옵션, `includeInputState=true`)\n  - `src/backend`(옵션, `includeBackendSummary=true`)\n- 글로벌 트리거(`globalPressed|globalContextRequested`):\n  - `x`, `y`, `globalX`, `globalY`, `buttons`, `modifiers`, `isGlobal=true`\n  - `ui`(옵션, `includeUiHit=true`)\n  - `input`(옵션, `includeInputState=true`)\n  - `src/backend`(옵션)\n  - 컨텍스트 이벤트의 경우 `reason` 및 `source(mouse|context)`가 추가됩니다.\n- 제스처 트리거(`touchStarted|touchUpdated|touchEnded|touchCancelled|pressStarted|pressEnded|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|scrollStarted|scrollUpdated|scrollEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):\n  - 공통: `sequence`, `gestureType`, `interactionKind`, `classification`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`\n  - 터치에서 파생된: `sessionId`, `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`, `durationMs`, `pressDurationMs`, `directionX`, `directionY`, `dominantAxis`, `holdActive`, `dragActive`, `scrollActive`, `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`, 삭제되지 않은 필드, 포인터/버튼 상태, `ui`, `originUi`\n  - `ui` / `originUi`는 논리적 대상 메타데이터(`objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`, `layerKind`, `hierarchy`) 및 원시 리프 메타데이터(`hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`)\n  - 스와이프 전용: `swipeDirection`, `velocityX`, `velocityY`, `speed`\n  - 스크롤 특정: `scrollAxis`, `scrollDirection`, `scrollDeltaX/Y`\n  - 네이티브 제스처별: `nativeGestureType`, `fingerCount`, `value`, `deltaX/Y`\n  - 선택적 `input` / `src/backend` 강화는 다른 트리거와 동일한 옵트인 스위치를 따릅니다.\n- 키/휠 트리거는 Qt 이벤트 객체를 직접 전달합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "로컬 포인터 트리거(`clicked|pressed|released`):",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`, `button`, `buttons`, `modifiers`, `isGlobal=false`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui`(옵션, `includeUiHit=true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`input`(옵션, `includeInputState=true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend`(옵션, `includeBackendSummary=true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "글로벌 트리거(`globalPressed|globalContextRequested`):",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`, `buttons`, `modifiers`, `isGlobal=true`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui`(옵션, `includeUiHit=true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`input`(옵션, `includeInputState=true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend`(옵션)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨텍스트 이벤트의 경우 `reason` 및 `source(mouse|context)`가 추가됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제스처 트리거(`touchStarted|touchUpdated|touchEnded|touchCancelled|pressStarted|pressEnded|holdStarted|longPressed|dragStarted|dragUpdated|dragEnded|scrollStarted|scrollUpdated|scrollEnded|swipeDetected|nativeGestureDetected|gestureRecognized`):",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공통: `sequence`, `gestureType`, `interactionKind`, `classification`, `source`, `timestampEpochMs`, `x`, `y`, `globalX`, `globalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "터치에서 파생된: `sessionId`, `previous*`, `start*`, `delta*`, `totalDelta*`, `distance`, `durationMs`, `pressDurationMs`, `directionX`, `directionY`, `dominantAxis`, `holdActive`, `dragActive`, `scrollActive`, `phase`, `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`, `points`, 삭제되지 않은 필드, 포인터/버튼 상태, `ui`, `originUi`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui` / `originUi`는 논리적 대상 메타데이터(`objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`, `layerKind`, `hierarchy`) 및 원시 리프 메타데이터(`hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스와이프 전용: `swipeDirection`, `velocityX`, `velocityY`, `speed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스크롤 특정: `scrollAxis`, `scrollDirection`, `scrollDeltaX/Y`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 제스처별: `nativeGestureType`, `fingerCount`, `value`, `deltaX/Y`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적 `input` / `src/backend` 강화는 다른 트리거와 동일한 옵트인 스위치를 따릅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키/휠 트리거는 Qt 이벤트 객체를 직접 전달합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000150",
+      "kind": "blank",
+      "start_line": 272,
+      "end_line": 272,
+      "raw": "\n"
+    },
+    {
+      "id": "b000151",
+      "kind": "paragraph",
+      "start_line": 273,
+      "end_line": 273,
+      "raw": "중복 제거:\n"
+    },
+    {
+      "id": "b000152",
+      "kind": "blank",
+      "start_line": 274,
+      "end_line": 274,
+      "raw": "\n"
+    },
+    {
+      "id": "b000153",
+      "kind": "list",
+      "start_line": 275,
+      "end_line": 276,
+      "raw": "- 글로벌 프레스 중복 제거: `globalPressDedupMs`(기본값 24ms), 좌표 공차 `globalPressDedupTolerancePx`(기본값 2px)\n- 컨텍스트 중복 제거: `contextDedupMs`(기본값 180ms), 좌표 공차 `contextDedupTolerancePx`(기본값 2px)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "글로벌 프레스 중복 제거: `globalPressDedupMs`(기본값 24ms), 좌표 공차 `globalPressDedupTolerancePx`(기본값 2px)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨텍스트 중복 제거: `contextDedupMs`(기본값 180ms), 좌표 공차 `contextDedupTolerancePx`(기본값 2px)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000154",
+      "kind": "blank",
+      "start_line": 277,
+      "end_line": 277,
+      "raw": "\n"
+    },
+    {
+      "id": "b000155",
+      "kind": "html",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "<a id=\"10-render-performance-alert-output-conditions\"></a>\n"
+    },
+    {
+      "id": "b000156",
+      "kind": "blank",
+      "start_line": 279,
+      "end_line": 279,
+      "raw": "\n"
+    },
+    {
+      "id": "b000157",
+      "kind": "heading",
+      "start_line": 280,
+      "end_line": 280,
+      "raw": "## 10. 렌더링 성능 경고 출력 조건\n",
+      "level": 2,
+      "title": "10. 렌더링 성능 경고 출력 조건"
+    },
+    {
+      "id": "b000158",
+      "kind": "blank",
+      "start_line": 281,
+      "end_line": 281,
+      "raw": "\n"
+    },
+    {
+      "id": "b000159",
+      "kind": "paragraph",
+      "start_line": 282,
+      "end_line": 282,
+      "raw": "`evaluateRenderPerformance()`는 주기적으로 실행되며 `LV.Debug`를 통해 방출됩니다.\n"
+    },
+    {
+      "id": "b000160",
+      "kind": "blank",
+      "start_line": 283,
+      "end_line": 283,
+      "raw": "\n"
+    },
+    {
+      "id": "b000161",
+      "kind": "list",
+      "start_line": 284,
+      "end_line": 286,
+      "raw": "- 심각: `lastFrameMs >= 50` 또는 `fps < 18` -> `ERROR render-performance-severe` (최소 간격: 1600ms)\n- 저하됨: `lastFrameMs >= 33` 또는 `fps < 30` -> `WARN render-performance-degraded`(최소 간격: 2000ms)\n- 복구 : 3 초 동안 정상 상태가 유지된 후 `WARN render-performance-recovered`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "심각: `lastFrameMs >= 50` 또는 `fps < 18` -> `ERROR render-performance-severe` (최소 간격: 1600ms)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "저하됨: `lastFrameMs >= 33` 또는 `fps < 30` -> `WARN render-performance-degraded`(최소 간격: 2000ms)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "복구 : 3 초 동안 정상 상태가 유지된 후 `WARN render-performance-recovered`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000162",
+      "kind": "blank",
+      "start_line": 287,
+      "end_line": 287,
+      "raw": "\n"
+    },
+    {
+      "id": "b000163",
+      "kind": "paragraph",
+      "start_line": 288,
+      "end_line": 288,
+      "raw": "일반적인 페이로드:\n"
+    },
+    {
+      "id": "b000164",
+      "kind": "blank",
+      "start_line": 289,
+      "end_line": 289,
+      "raw": "\n"
+    },
+    {
+      "id": "b000165",
+      "kind": "list",
+      "start_line": 290,
+      "end_line": 293,
+      "raw": "- `fps`\n- `lastFrameMs`\n- `frameCount`\n- `src/backend` (`LV.RenderQuality.graphicsBackend`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`fps`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastFrameMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`frameCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend` (`LV.RenderQuality.graphicsBackend`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000166",
+      "kind": "blank",
+      "start_line": 294,
+      "end_line": 294,
+      "raw": "\n"
+    },
+    {
+      "id": "b000167",
+      "kind": "html",
+      "start_line": 295,
+      "end_line": 295,
+      "raw": "<a id=\"consumer-implementation-notes\"></a>\n"
+    },
+    {
+      "id": "b000168",
+      "kind": "blank",
+      "start_line": 296,
+      "end_line": 296,
+      "raw": "\n"
+    },
+    {
+      "id": "b000169",
+      "kind": "heading",
+      "start_line": 297,
+      "end_line": 297,
+      "raw": "## 소비자 구현 참고 사항\n",
+      "level": 2,
+      "title": "소비자 구현 참고 사항"
+    },
+    {
+      "id": "b000170",
+      "kind": "blank",
+      "start_line": 298,
+      "end_line": 298,
+      "raw": "\n"
+    },
+    {
+      "id": "b000171",
+      "kind": "paragraph",
+      "start_line": 299,
+      "end_line": 299,
+      "raw": "로그 뷰어 또는 원격 측정 파이프라인과 통합하는 경우:\n"
+    },
+    {
+      "id": "b000172",
+      "kind": "blank",
+      "start_line": 300,
+      "end_line": 300,
+      "raw": "\n"
+    },
+    {
+      "id": "b000173",
+      "kind": "list",
+      "start_line": 301,
+      "end_line": 303,
+      "raw": "- `sequence`를 정렬된 이벤트 커서로 처리합니다.\n- `timestamp` 필드를 벽시계로 처리하고 외부적으로 대기 시간을 계산합니다.\n- 향후 호환성을 위해 선택적 페이로드 필드에 대한 엄격한 스키마 구문 분석을 피하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sequence`를 정렬된 이벤트 커서로 처리합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestamp` 필드를 벽시계로 처리하고 외부적으로 대기 시간을 계산합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "향후 호환성을 위해 선택적 페이로드 필드에 대한 엄격한 스키마 구문 분석을 피하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000174",
+      "kind": "blank",
+      "start_line": 304,
+      "end_line": 304,
+      "raw": "\n"
+    },
+    {
+      "id": "b000175",
+      "kind": "html",
+      "start_line": 305,
+      "end_line": 305,
+      "raw": "<a id=\"parser-safety-recommendations\"></a>\n"
+    },
+    {
+      "id": "b000176",
+      "kind": "blank",
+      "start_line": 306,
+      "end_line": 306,
+      "raw": "\n"
+    },
+    {
+      "id": "b000177",
+      "kind": "heading",
+      "start_line": 307,
+      "end_line": 307,
+      "raw": "## 파서 안전 권장 사항\n",
+      "level": 2,
+      "title": "파서 안전 권장 사항"
+    },
+    {
+      "id": "b000178",
+      "kind": "blank",
+      "start_line": 308,
+      "end_line": 308,
+      "raw": "\n"
+    },
+    {
+      "id": "b000179",
+      "kind": "list",
+      "start_line": 309,
+      "end_line": 311,
+      "raw": "- 항상 null 검사 중첩 맵(`payload`, `input`, `ui`),\n- 이전 항목에 대한 누락된 키를 허용합니다.\n- 향후 확장성을 보존하려면 알 수 없는 필드 통과를 유지하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "항상 null 검사 중첩 맵(`payload`, `input`, `ui`),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이전 항목에 대한 누락된 키를 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "향후 확장성을 보존하려면 알 수 없는 필드 통과를 유지하세요.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "디버그 출력 스키마",
+      "anchor": "디버그-출력-스키마",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "1. 출력 채널",
+      "anchor": "1-출력-채널",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "2. 현재 기본 출력 정책(Main.qml 부트스트랩)",
+      "anchor": "2-현재-기본-출력-정책mainqml-부트스트랩",
+      "start_line": 24
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000017",
+      "level": 3,
+      "title": "부트스트랩 stdout 라인 형식",
+      "anchor": "부트스트랩-stdout-라인-형식",
+      "start_line": 43
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "3. LV.Debug 항목 스키마",
+      "anchor": "3-lvdebug-항목-스키마",
+      "start_line": 65
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000039",
+      "level": 3,
+      "title": "공통 필드",
+      "anchor": "공통-필드",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000039",
+      "level": 3,
+      "title": "`runtime` 소스에 대한 추가 필드",
+      "anchor": "runtime-소스에-대한-추가-필드",
+      "start_line": 92
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "4. Stdout 출력 규칙",
+      "anchor": "4-stdout-출력-규칙",
+      "start_line": 99
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000057",
+      "level": 3,
+      "title": "레벨 우선순위",
+      "anchor": "레벨-우선순위",
+      "start_line": 103
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000057",
+      "level": 3,
+      "title": "노이즈 필터(`stdoutNoiseReductionEnabled=true`)",
+      "anchor": "노이즈-필터stdoutnoisereductionenabledtrue",
+      "start_line": 110
+    },
+    {
+      "block_id": "b000073",
+      "parent_id": "b000057",
+      "level": 3,
+      "title": "라인 형식",
+      "anchor": "라인-형식",
+      "start_line": 120
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "5. RuntimeEvents 원시 이벤트(`eventRecorded`) 스키마",
+      "anchor": "5-runtimeevents-원시-이벤트eventrecorded-스키마",
+      "start_line": 128
+    },
+    {
+      "block_id": "b000091",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "6. 런타임 상태 스냅샷 API 출력",
+      "anchor": "6-런타임-상태-스냅샷-api-출력",
+      "start_line": 154
+    },
+    {
+      "block_id": "b000093",
+      "parent_id": "b000091",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.snapshot()`",
+      "anchor": "lvruntimeeventssnapshot",
+      "start_line": 156
+    },
+    {
+      "block_id": "b000097",
+      "parent_id": "b000091",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.daemonHealth()`",
+      "anchor": "lvruntimeeventsdaemonhealth",
+      "start_line": 166
+    },
+    {
+      "block_id": "b000101",
+      "parent_id": "b000091",
+      "level": 3,
+      "title": "`LV.RuntimeEvents.inputState()`",
+      "anchor": "lvruntimeeventsinputstate",
+      "start_line": 176
+    },
+    {
+      "block_id": "b000107",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "7. 백엔드 후크 출력",
+      "anchor": "7-백엔드-후크-출력",
+      "start_line": 188
+    },
+    {
+      "block_id": "b000111",
+      "parent_id": "b000107",
+      "level": 3,
+      "title": "`LV.Backend.hookedUserEvents(limit)`",
+      "anchor": "lvbackendhookedusereventslimit",
+      "start_line": 192
+    },
+    {
+      "block_id": "b000115",
+      "parent_id": "b000107",
+      "level": 3,
+      "title": "`LV.Backend.hookedUserEventSummary()`",
+      "anchor": "lvbackendhookedusereventsummary",
+      "start_line": 196
+    },
+    {
+      "block_id": "b000121",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "8. Main.qml 이벤트 리스너 모니터 출력",
+      "anchor": "8-mainqml-이벤트-리스너-모니터-출력",
+      "start_line": 208
+    },
+    {
+      "block_id": "b000125",
+      "parent_id": "b000121",
+      "level": 3,
+      "title": "런타임 콘솔 행(`runtimeConsoleRows[]`) 스키마",
+      "anchor": "런타임-콘솔-행runtimeconsolerows-스키마",
+      "start_line": 212
+    },
+    {
+      "block_id": "b000137",
+      "parent_id": "b000121",
+      "level": 3,
+      "title": "EventListener 샘플(`eventMonitorSamplesModel`) 스키마",
+      "anchor": "eventlistener-샘플eventmonitorsamplesmodel-스키마",
+      "start_line": 237
+    },
+    {
+      "block_id": "b000145",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "9. EventListener 콜백 페이로드 스키마",
+      "anchor": "9-eventlistener-콜백-페이로드-스키마",
+      "start_line": 248
+    },
+    {
+      "block_id": "b000157",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "10. 렌더링 성능 경고 출력 조건",
+      "anchor": "10-렌더링-성능-경고-출력-조건",
+      "start_line": 280
+    },
+    {
+      "block_id": "b000169",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "소비자 구현 참고 사항",
+      "anchor": "소비자-구현-참고-사항",
+      "start_line": 297
+    },
+    {
+      "block_id": "b000177",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "파서 안전 권장 사항",
+      "anchor": "파서-안전-권장-사항",
+      "start_line": 307
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000013",
+        "line": 13,
+        "text": "- 부트스트랩 stdout 진단: `LV.Debug`를 반드시 사용할 수 있기 전에 `preApplicationBootstrap`, `postApplicationBootstrap` 및 `runBootstrappedQmlApp`에서 내보냅니다.",
+        "basis": "lexical_match",
+        "context": "list"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

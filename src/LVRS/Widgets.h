@@ -1,10 +1,17 @@
 #pragma once
 #include "Theme.h"
+#include "PlatformInfo.h"
+#include "ModelAdapter.h"
+#include "FontPolicy.h"
+#include "SvgManager.h"
+#include "RenderMonitor.h"
+#include "Image.h"
 #include "Icons.h"
 #include "ColorPicker.h"
 #include "ColorPickerButton.h"
 #include "Modal.h"
 #include "Sheet.h"
+#include "InputField.h"
 #include "Alert.h"
 #include "TableCellItem.h"
 #include "TableRow.h"
@@ -24,6 +31,13 @@
 #include "HierarchyToolbar.h"
 #include "ListToolbar.h"
 #include "ListFooter.h"
+#include "ViewModel.h"
+#include "StateModel.h"
+#include "ProgressModel.h"
+#include "ProgressBar.h"
+#include "ModelUndoStack.h"
+#include "ViewModelRegistry.h"
+#include "HierarchyList.h"
 #include <iiGUI/NativeWidgets.h>
 
 namespace lvrs {
@@ -90,6 +104,7 @@ public:
     [[nodiscard]] Result<Widget> input_field(Widget,std::string_view,ii::gui::InputOptions={},std::function<void(std::string)> = {},ii::runtime::Task={});
     [[nodiscard]] Result<Widget> slider(Widget,std::string_view,ii::gui::SliderOptions={},std::function<void(double)> = {});
     [[nodiscard]] Result<Widget> progress(Widget,std::string_view,ii::gui::ProgressOptions={});
+    [[nodiscard]] Result<Widget> progress_bar(Widget,std::string_view,ProgressBarOptions={});
     [[nodiscard]] Result<Widget> color_surface(Widget,std::string_view,ii::gui::ColorSurfaceOptions,std::function<void(ii::gui::WidgetColor)> = {});
     [[nodiscard]] Result<Widget> color_picker(Widget,std::string_view,ColorPickerOptions={},ColorPickerEvents={});
     [[nodiscard]] Result<Widget> color_picker_button(Widget,std::string_view,ColorPickerButtonOptions={},ii::gui::ControlEvents={});

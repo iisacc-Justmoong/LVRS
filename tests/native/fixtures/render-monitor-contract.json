@@ -1,0 +1,56 @@
+{
+  "original_sha256": {
+    "src/backend/runtime/renderingmonitor.h": "4b3d62112ea122ef6dc6e43cbc2cba854c5240035b5dea04796b9ccd70032018",
+    "src/backend/runtime/renderingmonitor.cpp": "51f2390a1e664597d4142a0b5f62c63c6ce765ca55981063c6d3ea85facbb28e"
+  },
+  "properties": [
+    "active",
+    "fps",
+    "lastFrameMs",
+    "avgFrameMs",
+    "p95FrameMs",
+    "p99FrameMs",
+    "droppedFrameCount",
+    "droppedFrameThresholdMs",
+    "frameSampleCapacity",
+    "recentSampleCount",
+    "frameCount"
+  ],
+  "methods": [
+    "attachWindow",
+    "start",
+    "stop",
+    "reset",
+    "performanceSnapshot"
+  ],
+  "setters": [
+    "setDroppedFrameThresholdMs",
+    "setFrameSampleCapacity"
+  ],
+  "snapshot_keys": [
+    "schema",
+    "component",
+    "epochMs",
+    "active",
+    "fps",
+    "lastFrameMs",
+    "avgFrameMs",
+    "p95FrameMs",
+    "p99FrameMs",
+    "frameCount",
+    "droppedFrameCount",
+    "droppedFrameThresholdMs",
+    "recentSampleCount",
+    "frameSampleCapacity"
+  ],
+  "native_defaults": {
+    "capacity": 240,
+    "threshold": 20,
+    "active": false
+  },
+  "original_defaults": {
+    "m_frameSampleCapacity": 240,
+    "m_droppedFrameThresholdMs": 20,
+    "m_active": false
+  }
+}

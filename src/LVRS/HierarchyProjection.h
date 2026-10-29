@@ -44,6 +44,7 @@ public:
     [[nodiscard]] ii::core::Result<bool> expand_all();
     [[nodiscard]] ii::core::Result<bool> collapse_all(bool keep_root_expanded=true);
     [[nodiscard]] ii::core::Result<bool> set_row_extent(std::size_t,double);
+    [[nodiscard]] ii::core::Result<bool> set_default_row_extent(double);
     [[nodiscard]] ii::core::Result<void> observe(std::shared_ptr<const HierarchyProjectionPort>);
     [[nodiscard]] ii::core::Result<void> close();
 private:

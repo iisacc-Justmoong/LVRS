@@ -1,0 +1,2537 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:50397faa29e79d20b3869879bcfcaac7e41943580c33fca3ec6f67c9bd8bb66b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/figma-theme-tokens.md",
+    "sha256": "958ba8a1bfde9fef6496346bf8c6e43933bb061cecef1b811b279dd3fa20ae9f",
+    "bytes": 20878,
+    "line_count": 283,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Figma theme token contract",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Figma theme token contract\n",
+      "level": 1,
+      "title": "Figma theme token contract"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "This document records the Figma-first color and typography contract for the LVRS\nGUI theme. The authoritative captured data is\n[`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json),\nfrom the [LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS).\nThe 2026-10-19 accent revision uses the ten user-selected swatches on the Color page as its color authority. The fixture retains **77 variables: 41 colors and 36 typography variables**, plus **seven text styles**. All 41 color variables were read back after the update. Existing variable IDs and names, typography and style bindings are retained. Component bounds are retained; ColorPicker recent-color cells share the same row width across ten swatches. The authored RGBA values and source-node mapping are also recorded in [`accent-palette.json`](../tests/fixtures/accent-palette.json).\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "The source mapping is `src/qml/Theme.qml`. Hex values below are rounded display values; the canonical QML properties use original floating-point `Qt.rgba` values. Tests compare those channels at QColor precision. Building and testing this checkout is separate from updating an installed SDK. The user performs `lvrs install` for this revision.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## Scope and naming\n",
+      "level": 2,
+      "title": "Scope and naming"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 25,
+      "raw": "- `Theme Colors` contains 13 panel/window colors, six text colors, four action\n  colors and 18 named accent properties: ten canonical colors, seven compatibility\n  aliases and one neutral Gray. Names express roles and color names.\n- `Theme Typography` contains a shared family and seven five-property recipes.\n- Existing IDs are retained when an existing variable or style is renamed. Old\n  QML panel and typography property names remain compatibility aliases.\n- Existing control-specific fills, pressed/selected state overrides, materials,\n  icon-derived colors and platform-specific tokens are outside the core inventory.\n  Their absence from the core set does not authorize deleting them. Existing\n  paints that used the replaced accents, including their opacity stops and\n  composites, follow the new colors while retaining their state behavior.\n- The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**\n  `Theme.<property>` references. It is not CSS syntax or a web-only implementation.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Theme Colors` contains 13 panel/window colors, six text colors, four action",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Theme Typography` contains a shared family and seven five-property recipes.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Existing IDs are retained when an existing variable or style is renamed. Old",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Existing control-specific fills, pressed/selected state overrides, materials,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "table",
+      "start_line": 27,
+      "end_line": 31,
+      "raw": "| Collection | ID | Active core inventory |\n| --- | --- | ---: |\n| Theme Colors | `VariableCollectionId:44:457` | 41; 33 in the initial snapshot |\n| Theme Typography | `VariableCollectionId:1305:73` | 36 |\n| Compatibility Icon Colors | `VariableCollectionId:963:2` | 0; 1,548 retained hidden variables |\n",
+      "columns": [
+        "Collection",
+        "ID",
+        "Active core inventory"
+      ],
+      "rows": [
+        [
+          "Theme Colors",
+          "`VariableCollectionId:44:457`",
+          "41; 33 in the initial snapshot"
+        ],
+        [
+          "Theme Typography",
+          "`VariableCollectionId:1305:73`",
+          "36"
+        ],
+        [
+          "Compatibility Icon Colors",
+          "`VariableCollectionId:963:2`",
+          "0; 1,548 retained hidden variables"
+        ]
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 35,
+      "raw": "Colors use the captured `Dark` mode. Typography uses its captured mode; the\nfixture records every mode ID. Variable scopes are compared as sets, not by\narray ordering. Each variable has `codeSyntax.WEB: \"Theme.<property>\"`.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## Panel roles and exact values\n",
+      "level": 2,
+      "title": "Panel roles and exact values"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 42,
+      "raw": "These normalized RGB channels are copied from actual Figma `resolved` values.\nEvery panel alpha is `1`. Preserve the floating values rather than replacing\nthem with rounded hexadecimal colors. The order is a role inventory, not a\nmonotonic brightness ramp; do not recalculate steps 07 and 08 to match their names.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "table",
+      "start_line": 44,
+      "end_line": 58,
+      "raw": "| Figma variable | QML property | Normalized RGB | Retained ID |\n| --- | --- | --- | --- |\n| `Panel/canvas` | `Theme.canvas` | `(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)` | `VariableID:44:467` |\n| `Panel/surfaceGhost` | `Theme.surfaceGhost` | `(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)` | `VariableID:44:468` |\n| `Panel/windowAlt` | `Theme.windowAlt` | `(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)` | `VariableID:44:469` |\n| `Panel/subSurface` | `Theme.subSurface` | `(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)` | `VariableID:44:470` |\n| `Panel/surfaceSolid` | `Theme.surfaceSolid` | `(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)` | `VariableID:215:9618` |\n| `Panel/surfaceAlt` | `Theme.surfaceAlt` | `(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)` | `VariableID:215:9620` |\n| `Panel/surfaceInteractive` | `Theme.surfaceInteractive` | `(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)` | `VariableID:215:9621` |\n| `Panel/surfacePanel` | `Theme.surfacePanel` | `(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)` | `VariableID:215:9622` |\n| `Panel/surfaceControl` | `Theme.surfaceControl` | `(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)` | `VariableID:215:9623` |\n| `Panel/surfaceInput` | `Theme.surfaceInput` | `(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)` | `VariableID:215:9624` |\n| `Panel/surfaceInputHover` | `Theme.surfaceInputHover` | `(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)` | `VariableID:215:9625` |\n| `Panel/surfaceRaised` | `Theme.surfaceRaised` | `(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)` | `VariableID:215:9626` |\n| `Panel/window` | `Theme.window` | `(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)` | `VariableID:1305:74` |\n",
+      "columns": [
+        "Figma variable",
+        "QML property",
+        "Normalized RGB",
+        "Retained ID"
+      ],
+      "rows": [
+        [
+          "`Panel/canvas`",
+          "`Theme.canvas`",
+          "`(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)`",
+          "`VariableID:44:467`"
+        ],
+        [
+          "`Panel/surfaceGhost`",
+          "`Theme.surfaceGhost`",
+          "`(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)`",
+          "`VariableID:44:468`"
+        ],
+        [
+          "`Panel/windowAlt`",
+          "`Theme.windowAlt`",
+          "`(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)`",
+          "`VariableID:44:469`"
+        ],
+        [
+          "`Panel/subSurface`",
+          "`Theme.subSurface`",
+          "`(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)`",
+          "`VariableID:44:470`"
+        ],
+        [
+          "`Panel/surfaceSolid`",
+          "`Theme.surfaceSolid`",
+          "`(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)`",
+          "`VariableID:215:9618`"
+        ],
+        [
+          "`Panel/surfaceAlt`",
+          "`Theme.surfaceAlt`",
+          "`(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)`",
+          "`VariableID:215:9620`"
+        ],
+        [
+          "`Panel/surfaceInteractive`",
+          "`Theme.surfaceInteractive`",
+          "`(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)`",
+          "`VariableID:215:9621`"
+        ],
+        [
+          "`Panel/surfacePanel`",
+          "`Theme.surfacePanel`",
+          "`(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)`",
+          "`VariableID:215:9622`"
+        ],
+        [
+          "`Panel/surfaceControl`",
+          "`Theme.surfaceControl`",
+          "`(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)`",
+          "`VariableID:215:9623`"
+        ],
+        [
+          "`Panel/surfaceInput`",
+          "`Theme.surfaceInput`",
+          "`(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)`",
+          "`VariableID:215:9624`"
+        ],
+        [
+          "`Panel/surfaceInputHover`",
+          "`Theme.surfaceInputHover`",
+          "`(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)`",
+          "`VariableID:215:9625`"
+        ],
+        [
+          "`Panel/surfaceRaised`",
+          "`Theme.surfaceRaised`",
+          "`(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)`",
+          "`VariableID:215:9626`"
+        ],
+        [
+          "`Panel/window`",
+          "`Theme.window`",
+          "`(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)`",
+          "`VariableID:1305:74`"
+        ]
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 61,
+      "raw": "The twelve legacy properties alias the corresponding role without creating a\nsecond color authority. `window` remains independent of the twelve legacy steps.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "table",
+      "start_line": 63,
+      "end_line": 76,
+      "raw": "| Legacy QML property | Role |\n| --- | --- |\n| `panelBackground01` | `canvas` |\n| `panelBackground02` | `surfaceGhost` |\n| `panelBackground03` | `windowAlt` |\n| `panelBackground04` | `subSurface` |\n| `panelBackground05` | `surfaceSolid` |\n| `panelBackground06` | `surfaceAlt` |\n| `panelBackground07` | `surfaceInteractive` |\n| `panelBackground08` | `surfacePanel` |\n| `panelBackground09` | `surfaceControl` |\n| `panelBackground10` | `surfaceInput` |\n| `panelBackground11` | `surfaceInputHover` |\n| `panelBackground12` | `surfaceRaised` |\n",
+      "columns": [
+        "Legacy QML property",
+        "Role"
+      ],
+      "rows": [
+        [
+          "`panelBackground01`",
+          "`canvas`"
+        ],
+        [
+          "`panelBackground02`",
+          "`surfaceGhost`"
+        ],
+        [
+          "`panelBackground03`",
+          "`windowAlt`"
+        ],
+        [
+          "`panelBackground04`",
+          "`subSurface`"
+        ],
+        [
+          "`panelBackground05`",
+          "`surfaceSolid`"
+        ],
+        [
+          "`panelBackground06`",
+          "`surfaceAlt`"
+        ],
+        [
+          "`panelBackground07`",
+          "`surfaceInteractive`"
+        ],
+        [
+          "`panelBackground08`",
+          "`surfacePanel`"
+        ],
+        [
+          "`panelBackground09`",
+          "`surfaceControl`"
+        ],
+        [
+          "`panelBackground10`",
+          "`surfaceInput`"
+        ],
+        [
+          "`panelBackground11`",
+          "`surfaceInputHover`"
+        ],
+        [
+          "`panelBackground12`",
+          "`surfaceRaised`"
+        ]
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "## Text colors and accent-backed roles\n",
+      "level": 2,
+      "title": "Text colors and accent-backed roles"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 81,
+      "raw": "Text colors use white RGB `(1,1,1)` with the actual alpha values below. The base\nis fully opaque. They describe text opacity independently from a text-size recipe.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "table",
+      "start_line": 83,
+      "end_line": 90,
+      "raw": "| Figma variable | QML property | Normalized alpha | Retained ID |\n| --- | --- | --- | --- |\n| `Text/titleHeaderColor` | `Theme.titleHeaderColor` | `0.8999999761581421` | `VariableID:44:458` |\n| `Text/bodyColor` | `Theme.bodyColor` | `0.800000011920929` | `VariableID:44:459` |\n| `Text/descriptionColor` | `Theme.descriptionColor` | `0.6000000238418579` | `VariableID:44:460` |\n| `Text/captionColor` | `Theme.captionColor` | `0.5` | `VariableID:44:461` |\n| `Text/disabledColor` | `Theme.disabledColor` | `0.30000001192092896` | `VariableID:44:462` |\n| `Text/textTokenBase` | `Theme.textTokenBase` | `1` | `VariableID:1305:75` |\n",
+      "columns": [
+        "Figma variable",
+        "QML property",
+        "Normalized alpha",
+        "Retained ID"
+      ],
+      "rows": [
+        [
+          "`Text/titleHeaderColor`",
+          "`Theme.titleHeaderColor`",
+          "`0.8999999761581421`",
+          "`VariableID:44:458`"
+        ],
+        [
+          "`Text/bodyColor`",
+          "`Theme.bodyColor`",
+          "`0.800000011920929`",
+          "`VariableID:44:459`"
+        ],
+        [
+          "`Text/descriptionColor`",
+          "`Theme.descriptionColor`",
+          "`0.6000000238418579`",
+          "`VariableID:44:460`"
+        ],
+        [
+          "`Text/captionColor`",
+          "`Theme.captionColor`",
+          "`0.5`",
+          "`VariableID:44:461`"
+        ],
+        [
+          "`Text/disabledColor`",
+          "`Theme.disabledColor`",
+          "`0.30000001192092896`",
+          "`VariableID:44:462`"
+        ],
+        [
+          "`Text/textTokenBase`",
+          "`Theme.textTokenBase`",
+          "`1`",
+          "`VariableID:1305:75`"
+        ]
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 92,
+      "end_line": 96,
+      "raw": "2026-10-29 확인 기준 Figma의 `Action/*` 변수는 삭제되었다. 컴포넌트의 기본 역할은\nAccent Blue, Green, Yellow, Red를 사용한다. 기존 QML 사용자를 위해 `Theme.primary`,\n`success`, `warning`, `danger` 속성은 유지하며 각각 기본 Blue와 Green, Yellow, Red를\n참조한다. `ApplicationWindow.primaryColor`는 앱별 primary 오버라이드를 계속 제공한다.\n고정 Accent 팔레트와 상태 색상은 앱별 오버라이드로 바뀌지 않는다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "<a id=\"ten-original-accent-colors\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## Ten authored accent colors\n",
+      "level": 2,
+      "title": "Ten authored accent colors"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "The ten swatches supplied by the user replace the previous canonical palette in place. Existing variable IDs and public property names are retained. Every alpha is 1. The exact floating-point oracle is `authoredAccentPalette.colors` in the fixture; HEX is for display and static SVG paints.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "table",
+      "start_line": 104,
+      "end_line": 115,
+      "raw": "| Figma variable / QML property | HEX display | Source node | Retained variable ID |\n| --- | --- | --- | --- |\n| `Accent/accentBlue` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |\n| `Accent/accentRed` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |\n| `Accent/accentGreen` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |\n| `Accent/accentYellow` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |\n| `Accent/accentPurple` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |\n| `Accent/accentRose` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |\n| `Accent/accentOrange` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |\n| `Accent/accentBrown` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |\n| `Accent/accentCyan` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |\n| `Accent/accentTeal` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |\n",
+      "columns": [
+        "Figma variable / QML property",
+        "HEX display",
+        "Source node",
+        "Retained variable ID"
+      ],
+      "rows": [
+        [
+          "`Accent/accentBlue` / `Theme.accentBlue`",
+          "`#1582FF`",
+          "`1477:30`",
+          "`VariableID:1305:76`"
+        ],
+        [
+          "`Accent/accentRed` / `Theme.accentRed`",
+          "`#FF4646`",
+          "`1477:31`",
+          "`VariableID:1305:77`"
+        ],
+        [
+          "`Accent/accentGreen` / `Theme.accentGreen`",
+          "`#00E71F`",
+          "`1477:32`",
+          "`VariableID:1305:78`"
+        ],
+        [
+          "`Accent/accentYellow` / `Theme.accentYellow`",
+          "`#FFD427`",
+          "`1477:33`",
+          "`VariableID:1305:79`"
+        ],
+        [
+          "`Accent/accentPurple` / `Theme.accentPurple`",
+          "`#874AFF`",
+          "`1477:34`",
+          "`VariableID:1305:80`"
+        ],
+        [
+          "`Accent/accentRose` / `Theme.accentRose`",
+          "`#F94471`",
+          "`1477:36`",
+          "`VariableID:1305:81`"
+        ],
+        [
+          "`Accent/accentOrange` / `Theme.accentOrange`",
+          "`#FF7A27`",
+          "`1477:35`",
+          "`VariableID:1305:82`"
+        ],
+        [
+          "`Accent/accentBrown` / `Theme.accentBrown`",
+          "`#432318`",
+          "`1477:37`",
+          "`VariableID:1305:83`"
+        ],
+        [
+          "`Accent/accentCyan` / `Theme.accentCyan`",
+          "`#21D3FF`",
+          "`1477:38`",
+          "`VariableID:1305:84`"
+        ],
+        [
+          "`Accent/accentTeal` / `Theme.accentTeal`",
+          "`#00C7DD`",
+          "`1477:40`",
+          "`VariableID:1305:85`"
+        ]
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "<a id=\"eight-attached-palette-colors\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 125,
+      "raw": "On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,\nthe compatibility Green alias, and the Green gradient stops\nretain their IDs. The stops retain their existing alpha. Matching SVG paints\nand their current manifest hashes follow the new Green while geometry remains\nunchanged. The authored fixture records this per-color revision.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "## Compatibility accent aliases\n",
+      "level": 2,
+      "title": "Compatibility accent aliases"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "The former independently sampled palette is superseded by the authored ten-color system. Its saved IDs and editable circles remain available. Seven properties alias canonical colors in Figma and QML; Gray stays neutral.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "table",
+      "start_line": 131,
+      "end_line": 140,
+      "raw": "| Compatibility property | Canonical property / value | Retained ID |\n| --- | --- | --- |\n| `accentPaletteBlue` | `accentBlue` | `VariableID:1325:2` |\n| `accentPalettePurple` | `accentPurple` | `VariableID:1325:3` |\n| `accentPalettePink` | `accentRose` | `VariableID:1325:4` |\n| `accentPaletteRed` | `accentRed` | `VariableID:1325:5` |\n| `accentPaletteOrange` | `accentOrange` | `VariableID:1325:6` |\n| `accentPaletteYellow` | `accentYellow` | `VariableID:1325:7` |\n| `accentPaletteGreen` | `accentGreen` | `VariableID:1325:8` |\n| `accentPaletteGray` | neutral `#8C8C8C` | `VariableID:1325:9` |\n",
+      "columns": [
+        "Compatibility property",
+        "Canonical property / value",
+        "Retained ID"
+      ],
+      "rows": [
+        [
+          "`accentPaletteBlue`",
+          "`accentBlue`",
+          "`VariableID:1325:2`"
+        ],
+        [
+          "`accentPalettePurple`",
+          "`accentPurple`",
+          "`VariableID:1325:3`"
+        ],
+        [
+          "`accentPalettePink`",
+          "`accentRose`",
+          "`VariableID:1325:4`"
+        ],
+        [
+          "`accentPaletteRed`",
+          "`accentRed`",
+          "`VariableID:1325:5`"
+        ],
+        [
+          "`accentPaletteOrange`",
+          "`accentOrange`",
+          "`VariableID:1325:6`"
+        ],
+        [
+          "`accentPaletteYellow`",
+          "`accentYellow`",
+          "`VariableID:1325:7`"
+        ],
+        [
+          "`accentPaletteGreen`",
+          "`accentGreen`",
+          "`VariableID:1325:8`"
+        ],
+        [
+          "`accentPaletteGray`",
+          "neutral `#8C8C8C`",
+          "`VariableID:1325:9`"
+        ]
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "## Typography variables and recipes\n",
+      "level": 2,
+      "title": "Typography variables and recipes"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 146,
+      "end_line": 150,
+      "raw": "The shared `Font/fontBody` STRING variable is `Pretendard` and maps to\n`Theme.fontBody`. Its ID is `VariableID:1305:86`. QML retains\n`FontPolicy.resolveFamily(FontPolicy.preferredFamily)`, so a runtime fallback does\nnot change the preferred Figma family contract. Pixel sizes, line heights and\nletter spacing are authored logical pixels with no mobile multiplier.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 151,
+      "end_line": 151,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "table",
+      "start_line": 152,
+      "end_line": 160,
+      "raw": "| Text style | QML recipe prefix | Size / line height | Weight | Style name | Letter spacing |\n| --- | --- | --- | --- | --- | --- |\n| Title | `textTitle` | 26 / 26 | 700 | Bold | 0 |\n| Subtitle | `textSubtitle` | 22 / 22 | 700 | Bold | 0 |\n| Header | `textHeader` | 17 / 17 | 600 | SemiBold | 0 |\n| Subheader | `textSubheader` | 15 / 15 | 600 | SemiBold | 0 |\n| Body | `textBody` | 13 / 13 | 500 | Medium | 0 |\n| Description | `textDescription` | 12 / 12 | 600 | SemiBold | 0 |\n| Caption | `textCaption` | 11 / 11 | 400 | Regular | 0 |\n",
+      "columns": [
+        "Text style",
+        "QML recipe prefix",
+        "Size / line height",
+        "Weight",
+        "Style name",
+        "Letter spacing"
+      ],
+      "rows": [
+        [
+          "Title",
+          "`textTitle`",
+          "26 / 26",
+          "700",
+          "Bold",
+          "0"
+        ],
+        [
+          "Subtitle",
+          "`textSubtitle`",
+          "22 / 22",
+          "700",
+          "Bold",
+          "0"
+        ],
+        [
+          "Header",
+          "`textHeader`",
+          "17 / 17",
+          "600",
+          "SemiBold",
+          "0"
+        ],
+        [
+          "Subheader",
+          "`textSubheader`",
+          "15 / 15",
+          "600",
+          "SemiBold",
+          "0"
+        ],
+        [
+          "Body",
+          "`textBody`",
+          "13 / 13",
+          "500",
+          "Medium",
+          "0"
+        ],
+        [
+          "Description",
+          "`textDescription`",
+          "12 / 12",
+          "600",
+          "SemiBold",
+          "0"
+        ],
+        [
+          "Caption",
+          "`textCaption`",
+          "11 / 11",
+          "400",
+          "Regular",
+          "0"
+        ]
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 161,
+      "end_line": 161,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 162,
+      "end_line": 164,
+      "raw": "Each recipe exposes its size plus `Weight`, `StyleName`, `LineHeight` and\n`LetterSpacing`. Seven recipes × five variables, plus one shared family,\nproduce the 36-variable typography inventory. The complete variable mapping is:\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "table",
+      "start_line": 166,
+      "end_line": 203,
+      "raw": "| Figma variable | Type | QML property | Value | ID |\n| --- | --- | --- | --- | --- |\n| `Font/fontBody` | STRING | `Theme.fontBody` | `Pretendard` | `VariableID:1305:86` |\n| `Title/textTitle` | FLOAT | `Theme.textTitle` | `26` | `VariableID:1305:87` |\n| `Title/textTitleLineHeight` | FLOAT | `Theme.textTitleLineHeight` | `26` | `VariableID:1305:88` |\n| `Title/textTitleStyleName` | STRING | `Theme.textTitleStyleName` | `Bold` | `VariableID:1305:89` |\n| `Title/textTitleWeight` | FLOAT | `Theme.textTitleWeight` | `700` | `VariableID:1305:90` |\n| `Title/textTitleLetterSpacing` | FLOAT | `Theme.textTitleLetterSpacing` | `0` | `VariableID:1305:91` |\n| `Subtitle/textSubtitle` | FLOAT | `Theme.textSubtitle` | `22` | `VariableID:1305:92` |\n| `Subtitle/textSubtitleLineHeight` | FLOAT | `Theme.textSubtitleLineHeight` | `22` | `VariableID:1305:93` |\n| `Subtitle/textSubtitleStyleName` | STRING | `Theme.textSubtitleStyleName` | `Bold` | `VariableID:1305:94` |\n| `Subtitle/textSubtitleWeight` | FLOAT | `Theme.textSubtitleWeight` | `700` | `VariableID:1305:95` |\n| `Subtitle/textSubtitleLetterSpacing` | FLOAT | `Theme.textSubtitleLetterSpacing` | `0` | `VariableID:1305:96` |\n| `Header/textHeader` | FLOAT | `Theme.textHeader` | `17` | `VariableID:1305:97` |\n| `Header/textHeaderLineHeight` | FLOAT | `Theme.textHeaderLineHeight` | `17` | `VariableID:1305:98` |\n| `Header/textHeaderStyleName` | STRING | `Theme.textHeaderStyleName` | `SemiBold` | `VariableID:1305:99` |\n| `Header/textHeaderWeight` | FLOAT | `Theme.textHeaderWeight` | `600` | `VariableID:1305:100` |\n| `Header/textHeaderLetterSpacing` | FLOAT | `Theme.textHeaderLetterSpacing` | `0` | `VariableID:1305:101` |\n| `Subheader/textSubheader` | FLOAT | `Theme.textSubheader` | `15` | `VariableID:1305:102` |\n| `Subheader/textSubheaderLineHeight` | FLOAT | `Theme.textSubheaderLineHeight` | `15` | `VariableID:1305:103` |\n| `Subheader/textSubheaderStyleName` | STRING | `Theme.textSubheaderStyleName` | `SemiBold` | `VariableID:1305:104` |\n| `Subheader/textSubheaderWeight` | FLOAT | `Theme.textSubheaderWeight` | `600` | `VariableID:1305:105` |\n| `Subheader/textSubheaderLetterSpacing` | FLOAT | `Theme.textSubheaderLetterSpacing` | `0` | `VariableID:1305:106` |\n| `Body/textBody` | FLOAT | `Theme.textBody` | `13` | `VariableID:1305:107` |\n| `Body/textBodyLineHeight` | FLOAT | `Theme.textBodyLineHeight` | `13` | `VariableID:1305:108` |\n| `Body/textBodyStyleName` | STRING | `Theme.textBodyStyleName` | `Medium` | `VariableID:1305:109` |\n| `Body/textBodyWeight` | FLOAT | `Theme.textBodyWeight` | `500` | `VariableID:1305:110` |\n| `Body/textBodyLetterSpacing` | FLOAT | `Theme.textBodyLetterSpacing` | `0` | `VariableID:1305:111` |\n| `Description/textDescription` | FLOAT | `Theme.textDescription` | `12` | `VariableID:1305:112` |\n| `Description/textDescriptionLineHeight` | FLOAT | `Theme.textDescriptionLineHeight` | `12` | `VariableID:1305:113` |\n| `Description/textDescriptionStyleName` | STRING | `Theme.textDescriptionStyleName` | `SemiBold` | `VariableID:1305:114` |\n| `Description/textDescriptionWeight` | FLOAT | `Theme.textDescriptionWeight` | `600` | `VariableID:1305:115` |\n| `Description/textDescriptionLetterSpacing` | FLOAT | `Theme.textDescriptionLetterSpacing` | `0` | `VariableID:1305:116` |\n| `Caption/textCaption` | FLOAT | `Theme.textCaption` | `11` | `VariableID:1305:117` |\n| `Caption/textCaptionLineHeight` | FLOAT | `Theme.textCaptionLineHeight` | `11` | `VariableID:1305:118` |\n| `Caption/textCaptionStyleName` | STRING | `Theme.textCaptionStyleName` | `Regular` | `VariableID:1305:119` |\n| `Caption/textCaptionWeight` | FLOAT | `Theme.textCaptionWeight` | `400` | `VariableID:1305:120` |\n| `Caption/textCaptionLetterSpacing` | FLOAT | `Theme.textCaptionLetterSpacing` | `0` | `VariableID:1305:121` |\n",
+      "columns": [
+        "Figma variable",
+        "Type",
+        "QML property",
+        "Value",
+        "ID"
+      ],
+      "rows": [
+        [
+          "`Font/fontBody`",
+          "STRING",
+          "`Theme.fontBody`",
+          "`Pretendard`",
+          "`VariableID:1305:86`"
+        ],
+        [
+          "`Title/textTitle`",
+          "FLOAT",
+          "`Theme.textTitle`",
+          "`26`",
+          "`VariableID:1305:87`"
+        ],
+        [
+          "`Title/textTitleLineHeight`",
+          "FLOAT",
+          "`Theme.textTitleLineHeight`",
+          "`26`",
+          "`VariableID:1305:88`"
+        ],
+        [
+          "`Title/textTitleStyleName`",
+          "STRING",
+          "`Theme.textTitleStyleName`",
+          "`Bold`",
+          "`VariableID:1305:89`"
+        ],
+        [
+          "`Title/textTitleWeight`",
+          "FLOAT",
+          "`Theme.textTitleWeight`",
+          "`700`",
+          "`VariableID:1305:90`"
+        ],
+        [
+          "`Title/textTitleLetterSpacing`",
+          "FLOAT",
+          "`Theme.textTitleLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:91`"
+        ],
+        [
+          "`Subtitle/textSubtitle`",
+          "FLOAT",
+          "`Theme.textSubtitle`",
+          "`22`",
+          "`VariableID:1305:92`"
+        ],
+        [
+          "`Subtitle/textSubtitleLineHeight`",
+          "FLOAT",
+          "`Theme.textSubtitleLineHeight`",
+          "`22`",
+          "`VariableID:1305:93`"
+        ],
+        [
+          "`Subtitle/textSubtitleStyleName`",
+          "STRING",
+          "`Theme.textSubtitleStyleName`",
+          "`Bold`",
+          "`VariableID:1305:94`"
+        ],
+        [
+          "`Subtitle/textSubtitleWeight`",
+          "FLOAT",
+          "`Theme.textSubtitleWeight`",
+          "`700`",
+          "`VariableID:1305:95`"
+        ],
+        [
+          "`Subtitle/textSubtitleLetterSpacing`",
+          "FLOAT",
+          "`Theme.textSubtitleLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:96`"
+        ],
+        [
+          "`Header/textHeader`",
+          "FLOAT",
+          "`Theme.textHeader`",
+          "`17`",
+          "`VariableID:1305:97`"
+        ],
+        [
+          "`Header/textHeaderLineHeight`",
+          "FLOAT",
+          "`Theme.textHeaderLineHeight`",
+          "`17`",
+          "`VariableID:1305:98`"
+        ],
+        [
+          "`Header/textHeaderStyleName`",
+          "STRING",
+          "`Theme.textHeaderStyleName`",
+          "`SemiBold`",
+          "`VariableID:1305:99`"
+        ],
+        [
+          "`Header/textHeaderWeight`",
+          "FLOAT",
+          "`Theme.textHeaderWeight`",
+          "`600`",
+          "`VariableID:1305:100`"
+        ],
+        [
+          "`Header/textHeaderLetterSpacing`",
+          "FLOAT",
+          "`Theme.textHeaderLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:101`"
+        ],
+        [
+          "`Subheader/textSubheader`",
+          "FLOAT",
+          "`Theme.textSubheader`",
+          "`15`",
+          "`VariableID:1305:102`"
+        ],
+        [
+          "`Subheader/textSubheaderLineHeight`",
+          "FLOAT",
+          "`Theme.textSubheaderLineHeight`",
+          "`15`",
+          "`VariableID:1305:103`"
+        ],
+        [
+          "`Subheader/textSubheaderStyleName`",
+          "STRING",
+          "`Theme.textSubheaderStyleName`",
+          "`SemiBold`",
+          "`VariableID:1305:104`"
+        ],
+        [
+          "`Subheader/textSubheaderWeight`",
+          "FLOAT",
+          "`Theme.textSubheaderWeight`",
+          "`600`",
+          "`VariableID:1305:105`"
+        ],
+        [
+          "`Subheader/textSubheaderLetterSpacing`",
+          "FLOAT",
+          "`Theme.textSubheaderLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:106`"
+        ],
+        [
+          "`Body/textBody`",
+          "FLOAT",
+          "`Theme.textBody`",
+          "`13`",
+          "`VariableID:1305:107`"
+        ],
+        [
+          "`Body/textBodyLineHeight`",
+          "FLOAT",
+          "`Theme.textBodyLineHeight`",
+          "`13`",
+          "`VariableID:1305:108`"
+        ],
+        [
+          "`Body/textBodyStyleName`",
+          "STRING",
+          "`Theme.textBodyStyleName`",
+          "`Medium`",
+          "`VariableID:1305:109`"
+        ],
+        [
+          "`Body/textBodyWeight`",
+          "FLOAT",
+          "`Theme.textBodyWeight`",
+          "`500`",
+          "`VariableID:1305:110`"
+        ],
+        [
+          "`Body/textBodyLetterSpacing`",
+          "FLOAT",
+          "`Theme.textBodyLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:111`"
+        ],
+        [
+          "`Description/textDescription`",
+          "FLOAT",
+          "`Theme.textDescription`",
+          "`12`",
+          "`VariableID:1305:112`"
+        ],
+        [
+          "`Description/textDescriptionLineHeight`",
+          "FLOAT",
+          "`Theme.textDescriptionLineHeight`",
+          "`12`",
+          "`VariableID:1305:113`"
+        ],
+        [
+          "`Description/textDescriptionStyleName`",
+          "STRING",
+          "`Theme.textDescriptionStyleName`",
+          "`SemiBold`",
+          "`VariableID:1305:114`"
+        ],
+        [
+          "`Description/textDescriptionWeight`",
+          "FLOAT",
+          "`Theme.textDescriptionWeight`",
+          "`600`",
+          "`VariableID:1305:115`"
+        ],
+        [
+          "`Description/textDescriptionLetterSpacing`",
+          "FLOAT",
+          "`Theme.textDescriptionLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:116`"
+        ],
+        [
+          "`Caption/textCaption`",
+          "FLOAT",
+          "`Theme.textCaption`",
+          "`11`",
+          "`VariableID:1305:117`"
+        ],
+        [
+          "`Caption/textCaptionLineHeight`",
+          "FLOAT",
+          "`Theme.textCaptionLineHeight`",
+          "`11`",
+          "`VariableID:1305:118`"
+        ],
+        [
+          "`Caption/textCaptionStyleName`",
+          "STRING",
+          "`Theme.textCaptionStyleName`",
+          "`Regular`",
+          "`VariableID:1305:119`"
+        ],
+        [
+          "`Caption/textCaptionWeight`",
+          "FLOAT",
+          "`Theme.textCaptionWeight`",
+          "`400`",
+          "`VariableID:1305:120`"
+        ],
+        [
+          "`Caption/textCaptionLetterSpacing`",
+          "FLOAT",
+          "`Theme.textCaptionLetterSpacing`",
+          "`0`",
+          "`VariableID:1305:121`"
+        ]
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 205,
+      "end_line": 205,
+      "raw": "### Actual style bindings\n",
+      "level": 3,
+      "title": "Actual style bindings"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 206,
+      "end_line": 206,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 207,
+      "end_line": 207,
+      "raw": "Every saved text style has exactly five bound fields:\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 208,
+      "end_line": 208,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "table",
+      "start_line": 209,
+      "end_line": 215,
+      "raw": "| Style field | Variable |\n| --- | --- |\n| `fontFamily` | Shared `Font/fontBody` |\n| `fontSize` | Recipe size property |\n| `fontWeight` | Recipe `Weight` property |\n| `lineHeight` | Recipe `LineHeight` property; unit `PIXELS` |\n| `letterSpacing` | Recipe `LetterSpacing` property; unit `PIXELS` |\n",
+      "columns": [
+        "Style field",
+        "Variable"
+      ],
+      "rows": [
+        [
+          "`fontFamily`",
+          "Shared `Font/fontBody`"
+        ],
+        [
+          "`fontSize`",
+          "Recipe size property"
+        ],
+        [
+          "`fontWeight`",
+          "Recipe `Weight` property"
+        ],
+        [
+          "`lineHeight`",
+          "Recipe `LineHeight` property; unit `PIXELS`"
+        ],
+        [
+          "`letterSpacing`",
+          "Recipe `LetterSpacing` property; unit `PIXELS`"
+        ]
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 216,
+      "end_line": 216,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 217,
+      "end_line": 221,
+      "raw": "The observed Figma behavior is that `fontWeight` binding selects the static\nfont style and replaces a `fontStyle` binding. The seven `StyleName` STRING\nvariables record the matching QML recipe; they are not a sixth active style\nbinding. Do not report simultaneous `fontStyle` and `fontWeight` bindings.\nExisting text-style IDs are retained:\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 222,
+      "end_line": 222,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "table",
+      "start_line": 223,
+      "end_line": 231,
+      "raw": "| Style | ID |\n| --- | --- |\n| Title | `S:9be61cca334d9c7ad10f6748611727c4fc6340a5,` |\n| Subtitle | `S:3e4074fd4df418ade1039a2b0184720c6c2ffbe5,` |\n| Header | `S:62f4d4aa9883bcf345b9273542940cb7e312a6aa,` |\n| Subheader | `S:1bb19003757942c30f3fafada1b8400cab71cf0e,` |\n| Body | `S:cc3cf61d5106b1d70f4ce271776b7f93fc3ae046,` |\n| Description | `S:85e5273ae601efad5b2a9d337177cc9d9762eae1,` |\n| Caption | `S:1fad39b1005ddd0b4ed008f63820dcd864b00ba4,` |\n",
+      "columns": [
+        "Style",
+        "ID"
+      ],
+      "rows": [
+        [
+          "Title",
+          "`S:9be61cca334d9c7ad10f6748611727c4fc6340a5,`"
+        ],
+        [
+          "Subtitle",
+          "`S:3e4074fd4df418ade1039a2b0184720c6c2ffbe5,`"
+        ],
+        [
+          "Header",
+          "`S:62f4d4aa9883bcf345b9273542940cb7e312a6aa,`"
+        ],
+        [
+          "Subheader",
+          "`S:1bb19003757942c30f3fafada1b8400cab71cf0e,`"
+        ],
+        [
+          "Body",
+          "`S:cc3cf61d5106b1d70f4ce271776b7f93fc3ae046,`"
+        ],
+        [
+          "Description",
+          "`S:85e5273ae601efad5b2a9d337177cc9d9762eae1,`"
+        ],
+        [
+          "Caption",
+          "`S:1fad39b1005ddd0b4ed008f63820dcd864b00ba4,`"
+        ]
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 232,
+      "end_line": 232,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 233,
+      "end_line": 233,
+      "raw": "### Typography compatibility\n",
+      "level": 3,
+      "title": "Typography compatibility"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 234,
+      "end_line": 234,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "paragraph",
+      "start_line": 235,
+      "end_line": 240,
+      "raw": "`textTitle2` aliases `textSubtitle`; `textHeader2` aliases `textSubheader`.\nTheir `Weight`, `StyleName`, `LineHeight` and `LetterSpacing` companions follow\nexactly the same mapping, preserving all ten old public properties. Existing\nLabel `title2`/`header2` enum names and unrelated consumer files are unchanged.\n`textDisabled` and its four companions continue to use Caption metrics; Disabled\nhas a separate text color, not an eighth size recipe.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "## Hidden icon-color compatibility\n",
+      "level": 2,
+      "title": "Hidden icon-color compatibility"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 243,
+      "end_line": 243,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "paragraph",
+      "start_line": 244,
+      "end_line": 249,
+      "raw": "`Compatibility Icon Colors` retains **1,548** existing variables. The collection\nand every variable are hidden from publishing; every variable has an empty\nscope set. This removes the extracted palette from normal token selection\nwithout deleting IDs or severing existing paint bindings. Hiding is not removal.\nOlder icon-specific values and gradient-stop variables remain available to their\nexisting consumers. The captured selected original-color aliases are:\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 250,
+      "end_line": 250,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "table",
+      "start_line": 251,
+      "end_line": 264,
+      "raw": "| Compatibility variable | Retained ID | Core target ID |\n| --- | --- | --- |\n| `Primitive/defaultPrimary` | `VariableID:964:2` | `VariableID:44:463` |\n| `Primitive/accentWhite` | `VariableID:964:10` | `VariableID:1305:75` |\n| `Primitive/accentBlue` | `VariableID:964:18` | `VariableID:1305:76` |\n| `Primitive/accentRed` | `VariableID:964:22` | `VariableID:1305:77` |\n| `Primitive/accentGreen` | `VariableID:964:30` | `VariableID:1305:78` |\n| `Primitive/accentOrangeMuted` | `VariableID:964:38` | `VariableID:1305:82` |\n| `Primitive/accentYellow` | `VariableID:964:46` | `VariableID:1305:79` |\n| `Primitive/accentBrownMuted` | `VariableID:964:62` | `VariableID:1305:83` |\n| `Primitive/accentPurple` | `VariableID:964:66` | `VariableID:1305:80` |\n| `Primitive/accentRose` | `VariableID:964:94` | `VariableID:1305:81` |\n| `Primitive/accentDimTeal` | `VariableID:964:186` | `VariableID:1305:85` |\n| `Primitive/accentLightCyan` | `VariableID:964:222` | `VariableID:1305:84` |\n",
+      "columns": [
+        "Compatibility variable",
+        "Retained ID",
+        "Core target ID"
+      ],
+      "rows": [
+        [
+          "`Primitive/defaultPrimary`",
+          "`VariableID:964:2`",
+          "`VariableID:44:463`"
+        ],
+        [
+          "`Primitive/accentWhite`",
+          "`VariableID:964:10`",
+          "`VariableID:1305:75`"
+        ],
+        [
+          "`Primitive/accentBlue`",
+          "`VariableID:964:18`",
+          "`VariableID:1305:76`"
+        ],
+        [
+          "`Primitive/accentRed`",
+          "`VariableID:964:22`",
+          "`VariableID:1305:77`"
+        ],
+        [
+          "`Primitive/accentGreen`",
+          "`VariableID:964:30`",
+          "`VariableID:1305:78`"
+        ],
+        [
+          "`Primitive/accentOrangeMuted`",
+          "`VariableID:964:38`",
+          "`VariableID:1305:82`"
+        ],
+        [
+          "`Primitive/accentYellow`",
+          "`VariableID:964:46`",
+          "`VariableID:1305:79`"
+        ],
+        [
+          "`Primitive/accentBrownMuted`",
+          "`VariableID:964:62`",
+          "`VariableID:1305:83`"
+        ],
+        [
+          "`Primitive/accentPurple`",
+          "`VariableID:964:66`",
+          "`VariableID:1305:80`"
+        ],
+        [
+          "`Primitive/accentRose`",
+          "`VariableID:964:94`",
+          "`VariableID:1305:81`"
+        ],
+        [
+          "`Primitive/accentDimTeal`",
+          "`VariableID:964:186`",
+          "`VariableID:1305:85`"
+        ],
+        [
+          "`Primitive/accentLightCyan`",
+          "`VariableID:964:222`",
+          "`VariableID:1305:84`"
+        ]
+      ]
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 265,
+      "end_line": 265,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "heading",
+      "start_line": 266,
+      "end_line": 266,
+      "raw": "## Accent revision verification — 2026-10-19\n",
+      "level": 2,
+      "title": "Accent revision verification — 2026-10-19"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 267,
+      "end_line": 267,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "paragraph",
+      "start_line": 268,
+      "end_line": 268,
+      "raw": "The Figma update preserves all ten source-node bounds and binds them to the existing canonical variables. It updates matching variables, unbound component paints, gradient stops, shared paint styles and reference labels across the file. The ColorPicker current-color variable is an alias of canonical Purple. Its six master views and six existing instances expose all ten colors inside their existing row bounds. Both the design reference and source examples use the new system.\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 269,
+      "end_line": 269,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 270,
+      "end_line": 270,
+      "raw": "Source validation covers:\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 271,
+      "end_line": 271,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "list",
+      "start_line": 272,
+      "end_line": 277,
+      "raw": "- Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.\n- All 77 saved typed Theme properties and retained typography/style contracts.\n- Rendered pixel samples for all ten canonical swatches.\n- Default and custom app Primary propagation, controls, overlays, and ten catalog choices.\n- SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.\n- ColorPicker defaults and recent colors from the same canonical palette.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "All 77 saved typed Theme properties and retained typography/style contracts.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Rendered pixel samples for all ten canonical swatches.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Default and custom app Primary propagation, controls, overlays, and ten catalog choices.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "ColorPicker defaults and recent colors from the same canonical palette.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 279,
+      "end_line": 279,
+      "raw": "The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 280,
+      "end_line": 280,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "paragraph",
+      "start_line": 281,
+      "end_line": 281,
+      "raw": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 282,
+      "end_line": 282,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 283,
+      "end_line": 283,
+      "raw": "The final macOS source build succeeded. A fresh focused CTest run passed **12/12 targets** with **0 failures** in **64.29 seconds** after the final helper-resource update. The JUnit report is [`final-ctest.xml`](../build/accent-palette-20261019/final-ctest.xml), with a machine-readable summary in [`verification.json`](../build/accent-palette-20261019/verification.json). Six conditional cases for native RHI, hover delivery and optional captures remain skipped and are recorded in `final-qt-tests.log`; this run does not claim all-platform native execution or installation.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Figma theme token contract",
+      "anchor": "figma-theme-token-contract",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Scope and naming",
+      "anchor": "scope-and-naming",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Panel roles and exact values",
+      "anchor": "panel-roles-and-exact-values",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Text colors and accent-backed roles",
+      "anchor": "text-colors-and-accent-backed-roles",
+      "start_line": 78
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Ten authored accent colors",
+      "anchor": "ten-authored-accent-colors",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Compatibility accent aliases",
+      "anchor": "compatibility-accent-aliases",
+      "start_line": 127
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Typography variables and recipes",
+      "anchor": "typography-variables-and-recipes",
+      "start_line": 144
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000055",
+      "level": 3,
+      "title": "Actual style bindings",
+      "anchor": "actual-style-bindings",
+      "start_line": 205
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000055",
+      "level": 3,
+      "title": "Typography compatibility",
+      "anchor": "typography-compatibility",
+      "start_line": 233
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Hidden icon-color compatibility",
+      "anchor": "hidden-icon-color-compatibility",
+      "start_line": 242
+    },
+    {
+      "block_id": "b000085",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Accent revision verification — 2026-10-19",
+      "anchor": "accent-revision-verification--2026-10-19",
+      "start_line": 266
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000017",
+        "line": 42,
+        "text": "monotonic brightness ramp; do not recalculate steps 07 and 08 to match their names.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000053",
+        "line": 142,
+        "text": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000071",
+        "line": 220,
+        "text": "binding. Do not report simultaneous `fontStyle` and `fontWeight` bindings.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000095",
+        "line": 281,
+        "text": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000003",
+        "label": "`tests/fixtures/figma-theme-contract.json`",
+        "target": "../tests/fixtures/figma-theme-contract.json",
+        "kind": "relative",
+        "line": 5
+      },
+      {
+        "block_id": "b000003",
+        "label": "LVRS Figma file",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS",
+        "kind": "external",
+        "line": 6
+      },
+      {
+        "block_id": "b000003",
+        "label": "`accent-palette.json`",
+        "target": "../tests/fixtures/accent-palette.json",
+        "kind": "relative",
+        "line": 7
+      },
+      {
+        "block_id": "b000097",
+        "label": "`final-ctest.xml`",
+        "target": "../build/accent-palette-20261019/final-ctest.xml",
+        "kind": "relative",
+        "line": 283
+      },
+      {
+        "block_id": "b000097",
+        "label": "`verification.json`",
+        "target": "../build/accent-palette-20261019/verification.json",
+        "kind": "relative",
+        "line": 283
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000011",
+        "columns": [
+          "Collection",
+          "ID",
+          "Active core inventory"
+        ],
+        "rows": [
+          [
+            "Theme Colors",
+            "`VariableCollectionId:44:457`",
+            "41; 33 in the initial snapshot"
+          ],
+          [
+            "Theme Typography",
+            "`VariableCollectionId:1305:73`",
+            "36"
+          ],
+          [
+            "Compatibility Icon Colors",
+            "`VariableCollectionId:963:2`",
+            "0; 1,548 retained hidden variables"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000019",
+        "columns": [
+          "Figma variable",
+          "QML property",
+          "Normalized RGB",
+          "Retained ID"
+        ],
+        "rows": [
+          [
+            "`Panel/canvas`",
+            "`Theme.canvas`",
+            "`(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)`",
+            "`VariableID:44:467`"
+          ],
+          [
+            "`Panel/surfaceGhost`",
+            "`Theme.surfaceGhost`",
+            "`(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)`",
+            "`VariableID:44:468`"
+          ],
+          [
+            "`Panel/windowAlt`",
+            "`Theme.windowAlt`",
+            "`(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)`",
+            "`VariableID:44:469`"
+          ],
+          [
+            "`Panel/subSurface`",
+            "`Theme.subSurface`",
+            "`(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)`",
+            "`VariableID:44:470`"
+          ],
+          [
+            "`Panel/surfaceSolid`",
+            "`Theme.surfaceSolid`",
+            "`(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)`",
+            "`VariableID:215:9618`"
+          ],
+          [
+            "`Panel/surfaceAlt`",
+            "`Theme.surfaceAlt`",
+            "`(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)`",
+            "`VariableID:215:9620`"
+          ],
+          [
+            "`Panel/surfaceInteractive`",
+            "`Theme.surfaceInteractive`",
+            "`(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)`",
+            "`VariableID:215:9621`"
+          ],
+          [
+            "`Panel/surfacePanel`",
+            "`Theme.surfacePanel`",
+            "`(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)`",
+            "`VariableID:215:9622`"
+          ],
+          [
+            "`Panel/surfaceControl`",
+            "`Theme.surfaceControl`",
+            "`(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)`",
+            "`VariableID:215:9623`"
+          ],
+          [
+            "`Panel/surfaceInput`",
+            "`Theme.surfaceInput`",
+            "`(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)`",
+            "`VariableID:215:9624`"
+          ],
+          [
+            "`Panel/surfaceInputHover`",
+            "`Theme.surfaceInputHover`",
+            "`(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)`",
+            "`VariableID:215:9625`"
+          ],
+          [
+            "`Panel/surfaceRaised`",
+            "`Theme.surfaceRaised`",
+            "`(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)`",
+            "`VariableID:215:9626`"
+          ],
+          [
+            "`Panel/window`",
+            "`Theme.window`",
+            "`(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)`",
+            "`VariableID:1305:74`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000023",
+        "columns": [
+          "Legacy QML property",
+          "Role"
+        ],
+        "rows": [
+          [
+            "`panelBackground01`",
+            "`canvas`"
+          ],
+          [
+            "`panelBackground02`",
+            "`surfaceGhost`"
+          ],
+          [
+            "`panelBackground03`",
+            "`windowAlt`"
+          ],
+          [
+            "`panelBackground04`",
+            "`subSurface`"
+          ],
+          [
+            "`panelBackground05`",
+            "`surfaceSolid`"
+          ],
+          [
+            "`panelBackground06`",
+            "`surfaceAlt`"
+          ],
+          [
+            "`panelBackground07`",
+            "`surfaceInteractive`"
+          ],
+          [
+            "`panelBackground08`",
+            "`surfacePanel`"
+          ],
+          [
+            "`panelBackground09`",
+            "`surfaceControl`"
+          ],
+          [
+            "`panelBackground10`",
+            "`surfaceInput`"
+          ],
+          [
+            "`panelBackground11`",
+            "`surfaceInputHover`"
+          ],
+          [
+            "`panelBackground12`",
+            "`surfaceRaised`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000029",
+        "columns": [
+          "Figma variable",
+          "QML property",
+          "Normalized alpha",
+          "Retained ID"
+        ],
+        "rows": [
+          [
+            "`Text/titleHeaderColor`",
+            "`Theme.titleHeaderColor`",
+            "`0.8999999761581421`",
+            "`VariableID:44:458`"
+          ],
+          [
+            "`Text/bodyColor`",
+            "`Theme.bodyColor`",
+            "`0.800000011920929`",
+            "`VariableID:44:459`"
+          ],
+          [
+            "`Text/descriptionColor`",
+            "`Theme.descriptionColor`",
+            "`0.6000000238418579`",
+            "`VariableID:44:460`"
+          ],
+          [
+            "`Text/captionColor`",
+            "`Theme.captionColor`",
+            "`0.5`",
+            "`VariableID:44:461`"
+          ],
+          [
+            "`Text/disabledColor`",
+            "`Theme.disabledColor`",
+            "`0.30000001192092896`",
+            "`VariableID:44:462`"
+          ],
+          [
+            "`Text/textTokenBase`",
+            "`Theme.textTokenBase`",
+            "`1`",
+            "`VariableID:1305:75`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000039",
+        "columns": [
+          "Figma variable / QML property",
+          "HEX display",
+          "Source node",
+          "Retained variable ID"
+        ],
+        "rows": [
+          [
+            "`Accent/accentBlue` / `Theme.accentBlue`",
+            "`#1582FF`",
+            "`1477:30`",
+            "`VariableID:1305:76`"
+          ],
+          [
+            "`Accent/accentRed` / `Theme.accentRed`",
+            "`#FF4646`",
+            "`1477:31`",
+            "`VariableID:1305:77`"
+          ],
+          [
+            "`Accent/accentGreen` / `Theme.accentGreen`",
+            "`#00E71F`",
+            "`1477:32`",
+            "`VariableID:1305:78`"
+          ],
+          [
+            "`Accent/accentYellow` / `Theme.accentYellow`",
+            "`#FFD427`",
+            "`1477:33`",
+            "`VariableID:1305:79`"
+          ],
+          [
+            "`Accent/accentPurple` / `Theme.accentPurple`",
+            "`#874AFF`",
+            "`1477:34`",
+            "`VariableID:1305:80`"
+          ],
+          [
+            "`Accent/accentRose` / `Theme.accentRose`",
+            "`#F94471`",
+            "`1477:36`",
+            "`VariableID:1305:81`"
+          ],
+          [
+            "`Accent/accentOrange` / `Theme.accentOrange`",
+            "`#FF7A27`",
+            "`1477:35`",
+            "`VariableID:1305:82`"
+          ],
+          [
+            "`Accent/accentBrown` / `Theme.accentBrown`",
+            "`#432318`",
+            "`1477:37`",
+            "`VariableID:1305:83`"
+          ],
+          [
+            "`Accent/accentCyan` / `Theme.accentCyan`",
+            "`#21D3FF`",
+            "`1477:38`",
+            "`VariableID:1305:84`"
+          ],
+          [
+            "`Accent/accentTeal` / `Theme.accentTeal`",
+            "`#00C7DD`",
+            "`1477:40`",
+            "`VariableID:1305:85`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000051",
+        "columns": [
+          "Compatibility property",
+          "Canonical property / value",
+          "Retained ID"
+        ],
+        "rows": [
+          [
+            "`accentPaletteBlue`",
+            "`accentBlue`",
+            "`VariableID:1325:2`"
+          ],
+          [
+            "`accentPalettePurple`",
+            "`accentPurple`",
+            "`VariableID:1325:3`"
+          ],
+          [
+            "`accentPalettePink`",
+            "`accentRose`",
+            "`VariableID:1325:4`"
+          ],
+          [
+            "`accentPaletteRed`",
+            "`accentRed`",
+            "`VariableID:1325:5`"
+          ],
+          [
+            "`accentPaletteOrange`",
+            "`accentOrange`",
+            "`VariableID:1325:6`"
+          ],
+          [
+            "`accentPaletteYellow`",
+            "`accentYellow`",
+            "`VariableID:1325:7`"
+          ],
+          [
+            "`accentPaletteGreen`",
+            "`accentGreen`",
+            "`VariableID:1325:8`"
+          ],
+          [
+            "`accentPaletteGray`",
+            "neutral `#8C8C8C`",
+            "`VariableID:1325:9`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000059",
+        "columns": [
+          "Text style",
+          "QML recipe prefix",
+          "Size / line height",
+          "Weight",
+          "Style name",
+          "Letter spacing"
+        ],
+        "rows": [
+          [
+            "Title",
+            "`textTitle`",
+            "26 / 26",
+            "700",
+            "Bold",
+            "0"
+          ],
+          [
+            "Subtitle",
+            "`textSubtitle`",
+            "22 / 22",
+            "700",
+            "Bold",
+            "0"
+          ],
+          [
+            "Header",
+            "`textHeader`",
+            "17 / 17",
+            "600",
+            "SemiBold",
+            "0"
+          ],
+          [
+            "Subheader",
+            "`textSubheader`",
+            "15 / 15",
+            "600",
+            "SemiBold",
+            "0"
+          ],
+          [
+            "Body",
+            "`textBody`",
+            "13 / 13",
+            "500",
+            "Medium",
+            "0"
+          ],
+          [
+            "Description",
+            "`textDescription`",
+            "12 / 12",
+            "600",
+            "SemiBold",
+            "0"
+          ],
+          [
+            "Caption",
+            "`textCaption`",
+            "11 / 11",
+            "400",
+            "Regular",
+            "0"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000063",
+        "columns": [
+          "Figma variable",
+          "Type",
+          "QML property",
+          "Value",
+          "ID"
+        ],
+        "rows": [
+          [
+            "`Font/fontBody`",
+            "STRING",
+            "`Theme.fontBody`",
+            "`Pretendard`",
+            "`VariableID:1305:86`"
+          ],
+          [
+            "`Title/textTitle`",
+            "FLOAT",
+            "`Theme.textTitle`",
+            "`26`",
+            "`VariableID:1305:87`"
+          ],
+          [
+            "`Title/textTitleLineHeight`",
+            "FLOAT",
+            "`Theme.textTitleLineHeight`",
+            "`26`",
+            "`VariableID:1305:88`"
+          ],
+          [
+            "`Title/textTitleStyleName`",
+            "STRING",
+            "`Theme.textTitleStyleName`",
+            "`Bold`",
+            "`VariableID:1305:89`"
+          ],
+          [
+            "`Title/textTitleWeight`",
+            "FLOAT",
+            "`Theme.textTitleWeight`",
+            "`700`",
+            "`VariableID:1305:90`"
+          ],
+          [
+            "`Title/textTitleLetterSpacing`",
+            "FLOAT",
+            "`Theme.textTitleLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:91`"
+          ],
+          [
+            "`Subtitle/textSubtitle`",
+            "FLOAT",
+            "`Theme.textSubtitle`",
+            "`22`",
+            "`VariableID:1305:92`"
+          ],
+          [
+            "`Subtitle/textSubtitleLineHeight`",
+            "FLOAT",
+            "`Theme.textSubtitleLineHeight`",
+            "`22`",
+            "`VariableID:1305:93`"
+          ],
+          [
+            "`Subtitle/textSubtitleStyleName`",
+            "STRING",
+            "`Theme.textSubtitleStyleName`",
+            "`Bold`",
+            "`VariableID:1305:94`"
+          ],
+          [
+            "`Subtitle/textSubtitleWeight`",
+            "FLOAT",
+            "`Theme.textSubtitleWeight`",
+            "`700`",
+            "`VariableID:1305:95`"
+          ],
+          [
+            "`Subtitle/textSubtitleLetterSpacing`",
+            "FLOAT",
+            "`Theme.textSubtitleLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:96`"
+          ],
+          [
+            "`Header/textHeader`",
+            "FLOAT",
+            "`Theme.textHeader`",
+            "`17`",
+            "`VariableID:1305:97`"
+          ],
+          [
+            "`Header/textHeaderLineHeight`",
+            "FLOAT",
+            "`Theme.textHeaderLineHeight`",
+            "`17`",
+            "`VariableID:1305:98`"
+          ],
+          [
+            "`Header/textHeaderStyleName`",
+            "STRING",
+            "`Theme.textHeaderStyleName`",
+            "`SemiBold`",
+            "`VariableID:1305:99`"
+          ],
+          [
+            "`Header/textHeaderWeight`",
+            "FLOAT",
+            "`Theme.textHeaderWeight`",
+            "`600`",
+            "`VariableID:1305:100`"
+          ],
+          [
+            "`Header/textHeaderLetterSpacing`",
+            "FLOAT",
+            "`Theme.textHeaderLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:101`"
+          ],
+          [
+            "`Subheader/textSubheader`",
+            "FLOAT",
+            "`Theme.textSubheader`",
+            "`15`",
+            "`VariableID:1305:102`"
+          ],
+          [
+            "`Subheader/textSubheaderLineHeight`",
+            "FLOAT",
+            "`Theme.textSubheaderLineHeight`",
+            "`15`",
+            "`VariableID:1305:103`"
+          ],
+          [
+            "`Subheader/textSubheaderStyleName`",
+            "STRING",
+            "`Theme.textSubheaderStyleName`",
+            "`SemiBold`",
+            "`VariableID:1305:104`"
+          ],
+          [
+            "`Subheader/textSubheaderWeight`",
+            "FLOAT",
+            "`Theme.textSubheaderWeight`",
+            "`600`",
+            "`VariableID:1305:105`"
+          ],
+          [
+            "`Subheader/textSubheaderLetterSpacing`",
+            "FLOAT",
+            "`Theme.textSubheaderLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:106`"
+          ],
+          [
+            "`Body/textBody`",
+            "FLOAT",
+            "`Theme.textBody`",
+            "`13`",
+            "`VariableID:1305:107`"
+          ],
+          [
+            "`Body/textBodyLineHeight`",
+            "FLOAT",
+            "`Theme.textBodyLineHeight`",
+            "`13`",
+            "`VariableID:1305:108`"
+          ],
+          [
+            "`Body/textBodyStyleName`",
+            "STRING",
+            "`Theme.textBodyStyleName`",
+            "`Medium`",
+            "`VariableID:1305:109`"
+          ],
+          [
+            "`Body/textBodyWeight`",
+            "FLOAT",
+            "`Theme.textBodyWeight`",
+            "`500`",
+            "`VariableID:1305:110`"
+          ],
+          [
+            "`Body/textBodyLetterSpacing`",
+            "FLOAT",
+            "`Theme.textBodyLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:111`"
+          ],
+          [
+            "`Description/textDescription`",
+            "FLOAT",
+            "`Theme.textDescription`",
+            "`12`",
+            "`VariableID:1305:112`"
+          ],
+          [
+            "`Description/textDescriptionLineHeight`",
+            "FLOAT",
+            "`Theme.textDescriptionLineHeight`",
+            "`12`",
+            "`VariableID:1305:113`"
+          ],
+          [
+            "`Description/textDescriptionStyleName`",
+            "STRING",
+            "`Theme.textDescriptionStyleName`",
+            "`SemiBold`",
+            "`VariableID:1305:114`"
+          ],
+          [
+            "`Description/textDescriptionWeight`",
+            "FLOAT",
+            "`Theme.textDescriptionWeight`",
+            "`600`",
+            "`VariableID:1305:115`"
+          ],
+          [
+            "`Description/textDescriptionLetterSpacing`",
+            "FLOAT",
+            "`Theme.textDescriptionLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:116`"
+          ],
+          [
+            "`Caption/textCaption`",
+            "FLOAT",
+            "`Theme.textCaption`",
+            "`11`",
+            "`VariableID:1305:117`"
+          ],
+          [
+            "`Caption/textCaptionLineHeight`",
+            "FLOAT",
+            "`Theme.textCaptionLineHeight`",
+            "`11`",
+            "`VariableID:1305:118`"
+          ],
+          [
+            "`Caption/textCaptionStyleName`",
+            "STRING",
+            "`Theme.textCaptionStyleName`",
+            "`Regular`",
+            "`VariableID:1305:119`"
+          ],
+          [
+            "`Caption/textCaptionWeight`",
+            "FLOAT",
+            "`Theme.textCaptionWeight`",
+            "`400`",
+            "`VariableID:1305:120`"
+          ],
+          [
+            "`Caption/textCaptionLetterSpacing`",
+            "FLOAT",
+            "`Theme.textCaptionLetterSpacing`",
+            "`0`",
+            "`VariableID:1305:121`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000069",
+        "columns": [
+          "Style field",
+          "Variable"
+        ],
+        "rows": [
+          [
+            "`fontFamily`",
+            "Shared `Font/fontBody`"
+          ],
+          [
+            "`fontSize`",
+            "Recipe size property"
+          ],
+          [
+            "`fontWeight`",
+            "Recipe `Weight` property"
+          ],
+          [
+            "`lineHeight`",
+            "Recipe `LineHeight` property; unit `PIXELS`"
+          ],
+          [
+            "`letterSpacing`",
+            "Recipe `LetterSpacing` property; unit `PIXELS`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000073",
+        "columns": [
+          "Style",
+          "ID"
+        ],
+        "rows": [
+          [
+            "Title",
+            "`S:9be61cca334d9c7ad10f6748611727c4fc6340a5,`"
+          ],
+          [
+            "Subtitle",
+            "`S:3e4074fd4df418ade1039a2b0184720c6c2ffbe5,`"
+          ],
+          [
+            "Header",
+            "`S:62f4d4aa9883bcf345b9273542940cb7e312a6aa,`"
+          ],
+          [
+            "Subheader",
+            "`S:1bb19003757942c30f3fafada1b8400cab71cf0e,`"
+          ],
+          [
+            "Body",
+            "`S:cc3cf61d5106b1d70f4ce271776b7f93fc3ae046,`"
+          ],
+          [
+            "Description",
+            "`S:85e5273ae601efad5b2a9d337177cc9d9762eae1,`"
+          ],
+          [
+            "Caption",
+            "`S:1fad39b1005ddd0b4ed008f63820dcd864b00ba4,`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000083",
+        "columns": [
+          "Compatibility variable",
+          "Retained ID",
+          "Core target ID"
+        ],
+        "rows": [
+          [
+            "`Primitive/defaultPrimary`",
+            "`VariableID:964:2`",
+            "`VariableID:44:463`"
+          ],
+          [
+            "`Primitive/accentWhite`",
+            "`VariableID:964:10`",
+            "`VariableID:1305:75`"
+          ],
+          [
+            "`Primitive/accentBlue`",
+            "`VariableID:964:18`",
+            "`VariableID:1305:76`"
+          ],
+          [
+            "`Primitive/accentRed`",
+            "`VariableID:964:22`",
+            "`VariableID:1305:77`"
+          ],
+          [
+            "`Primitive/accentGreen`",
+            "`VariableID:964:30`",
+            "`VariableID:1305:78`"
+          ],
+          [
+            "`Primitive/accentOrangeMuted`",
+            "`VariableID:964:38`",
+            "`VariableID:1305:82`"
+          ],
+          [
+            "`Primitive/accentYellow`",
+            "`VariableID:964:46`",
+            "`VariableID:1305:79`"
+          ],
+          [
+            "`Primitive/accentBrownMuted`",
+            "`VariableID:964:62`",
+            "`VariableID:1305:83`"
+          ],
+          [
+            "`Primitive/accentPurple`",
+            "`VariableID:964:66`",
+            "`VariableID:1305:80`"
+          ],
+          [
+            "`Primitive/accentRose`",
+            "`VariableID:964:94`",
+            "`VariableID:1305:81`"
+          ],
+          [
+            "`Primitive/accentDimTeal`",
+            "`VariableID:964:186`",
+            "`VariableID:1305:85`"
+          ],
+          [
+            "`Primitive/accentLightCyan`",
+            "`VariableID:964:222`",
+            "`VariableID:1305:84`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

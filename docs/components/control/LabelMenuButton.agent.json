@@ -1,0 +1,598 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:362ae08bba61569d9ee98e4e8456fd7ee6acde0b5d5ca03728fc30f93745af65",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/LabelMenuButton.md",
+    "sha256": "830d8298672ced50a919343dcb916f678cd1eede389fbfd813094e8c1eb59465",
+    "bytes": 2716,
+    "line_count": 77,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "LabelMenuButton",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# LabelMenuButton\n",
+      "level": 1,
+      "title": "LabelMenuButton"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/buttons/LabelMenuButton.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`LabelMenuButton`는 [DropdownButton](DropdownButton.md)의 라벨 사전 설정입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 컴팩트한 텍스트 우선 메뉴 트리거를 제공합니다.\n- 신호음 및 활성화된 상태와 일관되게 표시기 동작을 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "컴팩트한 텍스트 우선 메뉴 트리거를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "신호음 및 활성화된 상태와 일관되게 표시기 동작을 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "텍스트 및 어조:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 22,
+      "raw": "- `text`(상속됨)\n- `tone`(상속됨, 기본값: `Primary`, `Kind=accent`와 일치)\n- `AbstractButton`에서 상속된 주입 메서드 API: `method`, `methods`, `invokeMethods(...)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`text`(상속됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tone`(상속됨, 기본값: `Primary`, `Kind=accent`와 일치)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`AbstractButton`에서 상속된 주입 메서드 API: `method`, `methods`, `invokeMethods(...)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "표시기:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 29,
+      "raw": "- `indicatorSize`(읽기 전용, 데스크톱 및 모바일의 경우 `Theme.iconSm`: `18 x 18`)\n- 톤/활성화 상태의 `resolvedIndicatorName`\n- `Theme.iconPath(...)`를 통해 렌더링됨\n- 슈퍼샘플링 인식 아이콘 소스 크기(`indicatorSourceSize`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`indicatorSize`(읽기 전용, 데스크톱 및 모바일의 경우 `Theme.iconSm`: `18 x 18`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "톤/활성화 상태의 `resolvedIndicatorName`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Theme.iconPath(...)`를 통해 렌더링됨",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "슈퍼샘플링 인식 아이콘 소스 크기(`indicatorSourceSize`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "표시기 아이콘 매핑:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 36,
+      "raw": "- 기본값: `generalchevronDown`\n- 경계선 없음: `generalchevronDownBorderless`\n- 기본/파괴: `generalchevronDownAccent`\n- 비활성화됨: `generalchevronDownDisabled`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "기본값: `generalchevronDown`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경계선 없음: `generalchevronDownBorderless`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본/파괴: `generalchevronDownAccent`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "비활성화됨: `generalchevronDownDisabled`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "레이아웃:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 40,
+      "end_line": 45,
+      "raw": "- 고정 `figmaButtonHeight`: `22` 데스크톱, `44` 모바일\n- 왼쪽 삽입: `horizontalPadding: Theme.gap8`(`8` 데스크톱, `16` 모바일)\n- 독립적인 오른쪽 삽입: `rightPadding: Theme.gap2`(`2` 데스크톱, `4` 모바일)\n- `cornerRadius: Theme.radiusMd`(`8` 데스크톱, `16` 모바일)\n- `verticalPadding: Theme.gap2`(`2` 데스크톱, `4` 모바일)\n- 라벨-쉐브론 간격: `spacing: Theme.gapNone`(`0`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "고정 `figmaButtonHeight`: `22` 데스크톱, `44` 모바일",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "왼쪽 삽입: `horizontalPadding: Theme.gap8`(`8` 데스크톱, `16` 모바일)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "독립적인 오른쪽 삽입: `rightPadding: Theme.gap2`(`2` 데스크톱, `4` 모바일)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cornerRadius: Theme.radiusMd`(`8` 데스크톱, `16` 모바일)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`verticalPadding: Theme.gap2`(`2` 데스크톱, `4` 모바일)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라벨-쉐브론 간격: `spacing: Theme.gapNone`(`0`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "<a id=\"figma-visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## Figma 시각적 계약\n",
+      "level": 2,
+      "title": "Figma 시각적 계약"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 56,
+      "raw": "- 출처: `700:337`, `Type=LabelMenuButton`.\n- 텍스트 `Open`를 사용하면 데스크탑 프레임은 `60 x 22`, 텍스트 `x=8, y=4.5, 32 x 13`, 쉐브론 `x=40, y=2, 18 x 18`입니다.\n- 데스크톱과 모바일에서는 본문 타이포그래피가 `13px Medium / 13px`로 고정되어 있습니다.\n- 해당 모바일 토큰 구성은 `88 x 44`입니다.\n- 기존 톤별 `generalchevronDown*.svg` 자산은 Figma 벡터와 일치하며 재사용됩니다.\n- 명시적 너비가 암시적 프레임보다 좁은 경우 갈매기형 표시는 오른쪽 삽입 내부에 남아 있는 동안 레이블은 사라집니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "출처: `700:337`, `Type=LabelMenuButton`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "텍스트 `Open`를 사용하면 데스크탑 프레임은 `60 x 22`, 텍스트 `x=8, y=4.5, 32 x 13`, 쉐브론 `x=40, y=2, 18 x 18`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱과 모바일에서는 본문 타이포그래피가 `13px Medium / 13px`로 고정되어 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해당 모바일 토큰 구성은 `88 x 44`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기존 톤별 `generalchevronDown*.svg` 자산은 Figma 벡터와 일치하며 재사용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "명시적 너비가 암시적 프레임보다 좁은 경우 갈매기형 표시는 오른쪽 삽입 내부에 남아 있는 동안 레이블은 사라집니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "fenced_code",
+      "start_line": 62,
+      "end_line": 71,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.LabelMenuButton {\n    text: \"Options\"\n    method: function(eventData) {\n        menu.open()\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.LabelMenuButton {\n    text: \"Options\"\n    method: function(eventData) {\n        menu.open()\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "트리거는 클릭되거나 삽입된 메서드 콜백을 지연시키지 않고 리바운드됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "LabelMenuButton",
+      "anchor": "labelmenubutton",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Figma 시각적 계약",
+      "anchor": "figma-시각적-계약",
+      "start_line": 49
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 60
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 75
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "DropdownButton",
+        "target": "DropdownButton.md",
+        "kind": "relative",
+        "line": 5
+      },
+      {
+        "block_id": "b000049",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 77
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -21,9 +21,11 @@
 - `fallbackCellWidth`
 - `minColumnWidth`
 - `textColor`
+- `defaultLeadingIcon`(기본 `generalchevronDown`), `defaultTrailingIcon`(기본 빈 문자열)
+- `iconSize`(18), `iconSpacing`(7)
 - `separatorHeight`
 - `separatorColor`
-- `cellDelegate`: 선택적 헤더별 셀 구성 요소 위임. 기본 대리자는 기존 텍스트 레이블을 렌더링합니다.
+- `cellDelegate`: 선택적 헤더별 셀 구성 요소 위임. 기본 대리자는 아이콘 슬롯과 텍스트 레이블을 렌더링한다.
 - `interactive`(기본값 `false`)
 - `sortColumn`(기본값 `-1`), `sortOrder`
 
@@ -58,7 +60,7 @@ LV.TableHeader {
     columnWidths: [160, 80, 120]
     cellItems: [
         { label: "Name", type: "string" },
-        { label: "Count", type: "int" },
+        { label: "Count", type: "int", leadingIcon: "", trailingIcon: "generalchevronDown" },
         { label: "Enabled", type: "bool" }
     ]
 }
@@ -74,6 +76,7 @@ LV.TableHeader {
 - 열 유형은 객체 키 `type`, `valueType`, `cellType` 또는 `dataType`를 허용합니다.
 - 기본 헤더 항목은 유형을 추론합니다: `string -> string`, 정수 -> `int`, 정수가 아닌 숫자 -> `float`, 부울 -> `bool`.
 - 선택적 열별 `contentSpacing`/`horizontalPadding` 재정의가 지원됩니다.
+- 각 열의 `leadingIcon`, `trailingIcon`으로 아이콘 이름이나 리소스 URL을 지정한다. 생략 시 각각 기본 아래 방향 Chevron과 아이콘 없음이 적용되며, 빈 문자열은 해당 슬롯을 숨긴다. 아이콘은 레이블에 7px 간격으로 붙고 좁은 열에서는 레이블이 말줄임된다.
 - 리피터 대리자는 제공된 경우 `columnWidths`를 사용하고, 그렇지 않으면 `fallbackCellWidth`를 사용하고, 그렇지 않으면 동일한 자동 너비를 사용합니다.
 - 렌더링된 모든 헤더 셀은 `cellDelegate`를 인스턴스화하고 하나의 `modelData` 개체를 주입합니다. 설명자에는 `index`, `descriptor`, `cellData`, `text`, `valueType`, `x`, `width`, `height`가 포함됩니다. `padding`.
 - `cellData` 및 `columnData`에는 원래 열 항목이 포함되어 있습니다. `sorted` 및 `sortOrder`를 사용하면 사용자 정의 대리자가 자체 정렬 표시기를 그릴 수 있습니다.
@@ -161,7 +164,7 @@ Q. `TableHeader`에서 열별 정렬을 직접 정의할 수 있나요?   A. 현
 
 ## Figma 계약
 
-노드 `203:3647` 는 `717 × 25` 입니다: `24` 헤더 행과 `1` 하단 구분선입니다. 3 기본 열은 `239` 넓이이며, 각 레이블은 `8` 가로 패딩을 가지며, 텍스트는 12/12 설명 스타일을 사용합니다. 모바일은 동일한 `717 × 25` 기하학, `8` 패딩, `1` 구분선, 및 `12px` 설명 타이포그래피를 사용합니다.
+노드 `203:3647`은 `717 × 25`이다. 각 기본 열은 너비 239, 좌우 패딩 8, 선행 아이콘 18, 아이콘 간격 7과 12/12 설명 텍스트를 사용한다. 후행 아이콘은 기본적으로 숨긴다.
 
 <a id="shared-motion"></a>
 

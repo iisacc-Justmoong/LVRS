@@ -10,6 +10,7 @@ void run(const std::string& name){
     auto model=std::make_shared<lvrs::TableModel>();lvrs::TableModelOptions data;
     data.columns={{"Asset","string"},{"Count","int"},{"Ready","bool"}};data.column_widths={220,180,160};data.inputable=true;
     data.rows={{{{.value=std::string("Alpha")},{.value=std::int64_t(12)},{.value=true}}},{{{.value=std::string("Beta")},{.value=std::int64_t(3)},{.value=false}}}};
+    if(name=="header_icons"){data.columns[1].leading_icon="";data.columns[1].trailing_icon="generalchevronDown";}
     if(name=="virtual"||name=="merged"){const auto repeated_row=data.rows.front();data.rows.assign(100000,repeated_row);}
     if(name=="merged")data.merges={{10,0,10000,2}};
     if(name=="horizontal_merged"){data.merges={{0,0,1,3}};data.inputable=false;}
@@ -40,7 +41,13 @@ void run(const std::string& name){
                  .row_resized=[&](std::size_t index,double height){check(index==0&&height==49,"Row resize completion payload lost");++rows_resized;}}));return {};
         }));
         auto viewport=take(table.viewport().snapshot());
-        if(name=="virtual"){
+        if(name=="header_icons"){
+            auto header=take(mount.find("table.header"));
+            check(take(header.snapshot()).drawing_images==3,"Table did not render per-column header icon slots");
+            auto replacement=model->options();for(auto& column:replacement.columns){column.leading_icon="";column.trailing_icon="";}
+            take(model->set_options(std::move(replacement)));
+            check(take(header.snapshot()).drawing_images==0,"Table did not update hidden header icons");
+        }else if(name=="virtual"){
             check(viewport.content_height==2400000&&take(mount.snapshot()).size()<16,"Native table allocated one widget per row/cell");
             good(table.viewport().set_scroll_offset(24));
             check(take(table.snapshot()).first_visible_row==1&&take(mount.snapshot()).size()<16,"Viewport callback must redraw without rewriting its scroll configuration");

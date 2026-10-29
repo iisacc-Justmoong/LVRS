@@ -155,118 +155,6 @@
       "hidden": false
     },
     {
-      "id": "VariableID:44:463",
-      "name": "Action/primary",
-      "property": "primary",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:76"
-      },
-      "resolved": {
-        "r": 0.08120492845773697,
-        "g": 0.5099760293960571,
-        "b": 1,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.primary"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:44:464",
-      "name": "Action/success",
-      "property": "success",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:78"
-      },
-      "resolved": {
-        "r": 0,
-        "g": 0.9058823585510254,
-        "b": 0.12156862765550613,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.success"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:44:465",
-      "name": "Action/warning",
-      "property": "warning",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:79"
-      },
-      "resolved": {
-        "r": 1,
-        "g": 0.8303598165512085,
-        "b": 0.15179912745952606,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.warning"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:44:466",
-      "name": "Action/danger",
-      "property": "danger",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:77"
-      },
-      "resolved": {
-        "r": 1,
-        "g": 0.2760854959487915,
-        "b": 0.2760854959487915,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.danger"
-      },
-      "hidden": false
-    },
-    {
       "id": "VariableID:44:467",
       "name": "Panel/canvas",
       "property": "canvas",
@@ -2333,5 +2221,15 @@
   },
   "neutralAccentCompatibility": {
     "accentPaletteGray": "#8C8C8C"
+  },
+  "actionTokenRemoval": {
+    "verifiedOn": "2026-10-29",
+    "roles": {
+      "primary": "accentBlue",
+      "success": "accentGreen",
+      "warning": "accentYellow",
+      "danger": "accentRed"
+    },
+    "note": "Figma Action variables were removed; the QML role properties remain compatibility aliases."
   }
 }

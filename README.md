@@ -1,5 +1,28 @@
 # LVRS
 
+The latest [native authoring verification record](../LVUI/docs/NativeReadinessVerification.md) distinguishes executed checks, installed-package proof, and platform limits from the historical implementation notes below.
+
+[Native ViewModels](docs/native/ViewModelRegistry.md) provides live C++ model
+access, aliases, per-key write ownership and borrowed/retained lifetimes. Registry
+lookups do not create a shadow property store or rebuild every model descriptor.
+
+[Native snapshot history](docs/native/ModelUndoStack.md) owns undo/redo values and
+observable depths in C++. A committed transfer preserves its snapshot even when
+an observer fails; generated LVUI views only bind data and native commands.
+
+[Native ProgressBar](docs/native/ProgressBar.md) retains its C++ model, state source,
+paint cache and shared Core motion across live LVUI input updates.
+Compile/link evidence is distinct from the deferred runtime batch.
+
+[Native SVG services](docs/native/SvgManager.md) own resource loading, bounded
+LRU caches, SVGZ decoding, owner-loop HTTP requests and lazy PNG encoding.
+LVUI's view-only Image binds immutable native images and applies its dependent
+options as one validated C++ value. Native execution remains deferred.
+
+[Native presentation models](docs/native/PresentationModels.md) provide Core-owned
+ViewModel, StateModel and ProgressModel APIs with weak state sources and explicit
+owner-thread notifications. Runtime verification remains deferred to the final batch.
+
 Native [hierarchy data](docs/native/Hierarchy.md) now provides typed preorder rows,
 indexed subtree moves and a separate visibility/height projection for each view.
 Branch expansion and navigation queries preserve the shared model revision.
@@ -32,7 +55,11 @@ progress: [architecture](docs/native/Architecture.md) and the
 from the complete existing LVRS contract.
 
 Build native LVRS in `build/native/build` using the updated iiSDKCore, LVUI and
-iiGUI package prefixes. `examples/NativeGallery` is a runnable LVUI app using
+iiGUI package prefixes. Resource services also require iiFileProvider Native,
+iiJson, iiNetwork 0.5+ and iiVisualCodec 0.2+ with its Image component. Configure
+their package prefixes and OpenSSL 3 through standard CMake search paths or
+`OPENSSL_ROOT_DIR`; Video and USD codecs are not required by this path.
+`examples/NativeGallery` is a runnable LVUI app using
 `LVRS::LVRS` and Core's application entrypoint. The legacy Qt/QML implementation
 below is available with `-DLVRS_BACKEND=qt`; existing installed Qt consumers have
 not been replaced by this source migration.
@@ -101,7 +128,7 @@ additional platform adapters remain part of the full migration.
 
 ## Legacy Qt/QML implementation
 
-[Windows 빌드 및 실행](docs/WindowsBuildAndRun.md)
+[Windows build and execution](docs/WindowsBuildAndRun.md)
 
 Windows shared builds retain the LVRS DLL dependency for QML-only consumers on
 both MSVC and MinGW. The native resource initialization symbol is retained at
@@ -617,3 +644,24 @@ The native [Tooltip](docs/native/Tooltip.md) adds anchored rounded-tail placemen
 PanelMaterial, retained scrollable content, focus-preserving interaction and
 Core-owned show/hide/expiry deadlines. The [Tooltip gallery](example/NativeTooltipGallery/README.md)
 uses real LVUI AOT bindings and one retained C++ backend. Runtime checks are deferred.
+
+
+Native presentation telemetry is provided by `iiGUI::PresentationSource` and
+`lvrs::RenderMonitor`. The host publishes accepted presentation submissions via
+its existing Core event loop; LVUI projects native statistics and commands.
+Submission timing is distinct from scanout and GPU completion. Native LVRS
+execution and full platform/legacy parity remain part of the final batch.
+
+The [Native Creation Workbench](example/NativeCreationWorkbench/README.md) combines
+LVUI controls with retained C++ canvas/timeline providers and real procedural
+frame generation on iiSDKCore. Its final self-test checks GPU pixels, native input,
+result selection and retirement; build-only evidence is not a runtime pass.
+
+<!-- workspace-docs:readme:start -->
+## Documentation entry points
+
+- Human overview: this English `README.md`.
+- Agent instructions: [AGENT.md](AGENT.md).
+- Human documentation: [documentation index](docs/README.md).
+- Structured agent documentation: [agent index](docs/agent-index.json).
+<!-- workspace-docs:readme:end -->

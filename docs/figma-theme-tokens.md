@@ -75,7 +75,7 @@ second color authority. `window` remains independent of the twelve legacy steps.
 | `panelBackground11` | `surfaceInputHover` |
 | `panelBackground12` | `surfaceRaised` |
 
-## Text and action colors
+## Text colors and accent-backed roles
 
 Text colors use white RGB `(1,1,1)` with the actual alpha values below. The base
 is fully opaque. They describe text opacity independently from a text-size recipe.
@@ -89,14 +89,11 @@ is fully opaque. They describe text opacity independently from a text-size recip
 | `Text/disabledColor` | `Theme.disabledColor` | `0.30000001192092896` | `VariableID:44:462` |
 | `Text/textTokenBase` | `Theme.textTokenBase` | `1` | `VariableID:1305:75` |
 
-| Figma variable | QML property | Canonical alias | Retained ID |
-| --- | --- | --- | --- |
-| `Action/primary` | `Theme.primary` | `Accent/accentBlue` | `VariableID:44:463` |
-| `Action/success` | `Theme.success` | `Accent/accentGreen` | `VariableID:44:464` |
-| `Action/warning` | `Theme.warning` | `Accent/accentYellow` | `VariableID:44:465` |
-| `Action/danger` | `Theme.danger` | `Accent/accentRed` | `VariableID:44:466` |
-
-`Action/primary` records the default Blue. `ApplicationWindow.primaryColor` still configures the mutable `Theme.primaryColor`; `Theme.primary` and `Theme.accent` expose that app value. Primary overlays and 25%/16%/36% surface composites follow it, including custom alpha. Status colors and canonical accent properties remain fixed when app branding changes.
+2026-10-29 확인 기준 Figma의 `Action/*` 변수는 삭제되었다. 컴포넌트의 기본 역할은
+Accent Blue, Green, Yellow, Red를 사용한다. 기존 QML 사용자를 위해 `Theme.primary`,
+`success`, `warning`, `danger` 속성은 유지하며 각각 기본 Blue와 Green, Yellow, Red를
+참조한다. `ApplicationWindow.primaryColor`는 앱별 primary 오버라이드를 계속 제공한다.
+고정 Accent 팔레트와 상태 색상은 앱별 오버라이드로 바뀌지 않는다.
 
 <a id="ten-original-accent-colors"></a>
 
@@ -122,7 +119,7 @@ The ten swatches supplied by the user replace the previous canonical palette in 
 <a id="eight-attached-palette-colors"></a>
 
 On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,
-`Action/success`, the compatibility Green alias, and the Green gradient stops
+the compatibility Green alias, and the Green gradient stops
 retain their IDs. The stops retain their existing alpha. Matching SVG paints
 and their current manifest hashes follow the new Green while geometry remains
 unchanged. The authored fixture records this per-color revision.

@@ -1,0 +1,585 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:8497de6263cf5617983dc9d4b47798e7d145ed8e3fd905dcc7853151bd77b6ac",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/performance-baseline-p0.md",
+    "sha256": "d37b5aacdc0c88a67f39e0780f6c00fcda46c14aa962e325448f7f50a773cd23",
+    "bytes": 1586,
+    "line_count": 60,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "P0 기준 보고서",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"p0-baseline-report\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# P0 기준 보고서\n",
+      "level": 1,
+      "title": "P0 기준 보고서"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "보고서 타임스탬프(UTC): `2026-02-18T03:13:34Z`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"environment\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 환경\n",
+      "level": 2,
+      "title": "환경"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "table",
+      "start_line": 11,
+      "end_line": 17,
+      "raw": "|품목|값|\n|---|---|\n|호스트| `Darwin Mac-Studio 25.3.0` |\n| OS | `macOS 26.3 (25D125)` |\n| CPU | `Apple M1 Max` |\n|메모리| `34359738368 bytes (32 GiB)` |\n| GPU/Metal | `Apple M1 Max / Metal 4` |\n",
+      "columns": [
+        "품목",
+        "값"
+      ],
+      "rows": [
+        [
+          "호스트",
+          "`Darwin Mac-Studio 25.3.0`"
+        ],
+        [
+          "OS",
+          "`macOS 26.3 (25D125)`"
+        ],
+        [
+          "CPU",
+          "`Apple M1 Max`"
+        ],
+        [
+          "메모리",
+          "`34359738368 bytes (32 GiB)`"
+        ],
+        [
+          "GPU/Metal",
+          "`Apple M1 Max / Metal 4`"
+        ]
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "<a id=\"buildtest-context\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "## 컨텍스트 구축/테스트\n",
+      "level": 2,
+      "title": "컨텍스트 구축/테스트"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "table",
+      "start_line": 23,
+      "end_line": 28,
+      "raw": "|품목|값|\n|---|---|\n|빌드 디렉토리| `build-codex` |\n| Qt runtime | `Qt 6.8.3` |\n|테스트 바이너리 1| `LVRSTests_backend_io` |\n|테스트 바이너리 2| `LVRSTests_runtime_services` |\n",
+      "columns": [
+        "품목",
+        "값"
+      ],
+      "rows": [
+        [
+          "빌드 디렉토리",
+          "`build-codex`"
+        ],
+        [
+          "Qt runtime",
+          "`Qt 6.8.3`"
+        ],
+        [
+          "테스트 바이너리 1",
+          "`LVRSTests_backend_io`"
+        ],
+        [
+          "테스트 바이너리 2",
+          "`LVRSTests_runtime_services`"
+        ]
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "<a id=\"measured-results\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## 측정 결과\n",
+      "level": 2,
+      "title": "측정 결과"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "### 1) `LVRSTests_backend_io`\n",
+      "level": 3,
+      "title": "1) `LVRSTests_backend_io`"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "table",
+      "start_line": 36,
+      "end_line": 42,
+      "raw": "|미터법|값|\n|---|---|\n|Qt 요약| `8 passed, 0 failed, 430ms` |\n|벽시계 (`time -lp`)| `real 0.58s` |\n|최대 RSS (`time -lp`)| `71335936 bytes` |\n|최대 메모리 공간(`time -lp`)| `14584064 bytes` |\n|비자발적 컨텍스트 스위치| `997` |\n",
+      "columns": [
+        "미터법",
+        "값"
+      ],
+      "rows": [
+        [
+          "Qt 요약",
+          "`8 passed, 0 failed, 430ms`"
+        ],
+        [
+          "벽시계 (`time -lp`)",
+          "`real 0.58s`"
+        ],
+        [
+          "최대 RSS (`time -lp`)",
+          "`71335936 bytes`"
+        ],
+        [
+          "최대 메모리 공간(`time -lp`)",
+          "`14584064 bytes`"
+        ],
+        [
+          "비자발적 컨텍스트 스위치",
+          "`997`"
+        ]
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "### 2) `LVRSTests_runtime_services`\n",
+      "level": 3,
+      "title": "2) `LVRSTests_runtime_services`"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "table",
+      "start_line": 46,
+      "end_line": 52,
+      "raw": "|미터법|값|\n|---|---|\n|Qt 요약| `11 passed, 0 failed, 571ms` |\n|벽시계 (`time -lp`)| `real 0.72s` |\n|최대 RSS (`time -lp`)| `71483392 bytes` |\n|최대 메모리 공간(`time -lp`)| `14600512 bytes` |\n|비자발적 컨텍스트 스위치| `995` |\n",
+      "columns": [
+        "미터법",
+        "값"
+      ],
+      "rows": [
+        [
+          "Qt 요약",
+          "`11 passed, 0 failed, 571ms`"
+        ],
+        [
+          "벽시계 (`time -lp`)",
+          "`real 0.72s`"
+        ],
+        [
+          "최대 RSS (`time -lp`)",
+          "`71483392 bytes`"
+        ],
+        [
+          "최대 메모리 공간(`time -lp`)",
+          "`14600512 bytes`"
+        ],
+        [
+          "비자발적 컨텍스트 스위치",
+          "`995`"
+        ]
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "<a id=\"notes\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "## 메모\n",
+      "level": 2,
+      "title": "메모"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 58,
+      "end_line": 60,
+      "raw": "- 이 보고서는 향후 최적화 단계의 상대적 비교를 위한 P0 기준 스냅샷입니다.\n- 종단적 비교를 위해 동일한 기계/프로파일/설정을 사용하십시오.\n- p95/p99 회귀 검사는 동일한 테스트 명령을 사용하여 이 기준과 비교되어야 합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이 보고서는 향후 최적화 단계의 상대적 비교를 위한 P0 기준 스냅샷입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "종단적 비교를 위해 동일한 기계/프로파일/설정을 사용하십시오.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "p95/p99 회귀 검사는 동일한 테스트 명령을 사용하여 이 기준과 비교되어야 합니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "P0 기준 보고서",
+      "anchor": "p0-기준-보고서",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "환경",
+      "anchor": "환경",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "컨텍스트 구축/테스트",
+      "anchor": "컨텍스트-구축테스트",
+      "start_line": 21
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "측정 결과",
+      "anchor": "측정-결과",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000021",
+      "level": 3,
+      "title": "1) `LVRSTests_backend_io`",
+      "anchor": "1-lvrstests_backend_io",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000021",
+      "level": 3,
+      "title": "2) `LVRSTests_runtime_services`",
+      "anchor": "2-lvrstests_runtime_services",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "메모",
+      "anchor": "메모",
+      "start_line": 56
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000011",
+        "columns": [
+          "품목",
+          "값"
+        ],
+        "rows": [
+          [
+            "호스트",
+            "`Darwin Mac-Studio 25.3.0`"
+          ],
+          [
+            "OS",
+            "`macOS 26.3 (25D125)`"
+          ],
+          [
+            "CPU",
+            "`Apple M1 Max`"
+          ],
+          [
+            "메모리",
+            "`34359738368 bytes (32 GiB)`"
+          ],
+          [
+            "GPU/Metal",
+            "`Apple M1 Max / Metal 4`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000017",
+        "columns": [
+          "품목",
+          "값"
+        ],
+        "rows": [
+          [
+            "빌드 디렉토리",
+            "`build-codex`"
+          ],
+          [
+            "Qt runtime",
+            "`Qt 6.8.3`"
+          ],
+          [
+            "테스트 바이너리 1",
+            "`LVRSTests_backend_io`"
+          ],
+          [
+            "테스트 바이너리 2",
+            "`LVRSTests_runtime_services`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000025",
+        "columns": [
+          "미터법",
+          "값"
+        ],
+        "rows": [
+          [
+            "Qt 요약",
+            "`8 passed, 0 failed, 430ms`"
+          ],
+          [
+            "벽시계 (`time -lp`)",
+            "`real 0.58s`"
+          ],
+          [
+            "최대 RSS (`time -lp`)",
+            "`71335936 bytes`"
+          ],
+          [
+            "최대 메모리 공간(`time -lp`)",
+            "`14584064 bytes`"
+          ],
+          [
+            "비자발적 컨텍스트 스위치",
+            "`997`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000029",
+        "columns": [
+          "미터법",
+          "값"
+        ],
+        "rows": [
+          [
+            "Qt 요약",
+            "`11 passed, 0 failed, 571ms`"
+          ],
+          [
+            "벽시계 (`time -lp`)",
+            "`real 0.72s`"
+          ],
+          [
+            "최대 RSS (`time -lp`)",
+            "`71483392 bytes`"
+          ],
+          [
+            "최대 메모리 공간(`time -lp`)",
+            "`14600512 bytes`"
+          ],
+          [
+            "비자발적 컨텍스트 스위치",
+            "`995`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

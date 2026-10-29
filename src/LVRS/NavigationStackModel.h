@@ -58,6 +58,8 @@ public:
     [[nodiscard]] ii::core::Result<std::vector<NavigationEntry>> stack_after_pop()const;
     [[nodiscard]] ii::core::Result<std::vector<NavigationEntry>> stack_after_pop_to_root()const;
     // Preflight a single operation without copying the presentation history.
+    [[nodiscard]] ii::core::Result<void> validate_entry_operation(NavigationEntry,NavigationOperation=NavigationOperation::push)const;
+    [[nodiscard]] ii::core::Result<bool> apply_entry_operation(NavigationEntry,NavigationOperation=NavigationOperation::push);
     [[nodiscard]] ii::core::Result<void> validate_path_operation(std::string_view,ii::core::Value={},NavigationOperation=NavigationOperation::push)const;
     [[nodiscard]] ii::core::Result<void> validate_component_operation(std::shared_ptr<const void>,ii::core::Value={},NavigationOperation=NavigationOperation::push)const;
     [[nodiscard]] ii::core::Result<bool> apply_path_operation(std::string_view,ii::core::Value={},NavigationOperation=NavigationOperation::push);

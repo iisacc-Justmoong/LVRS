@@ -1,0 +1,211 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:67cf28a86bac75d7a816895e03550d9606a08fe8aa11781df170dbe71916291b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "resources/images/card/README.md",
+    "sha256": "f9774c47aed46d44797eb03dccd956791c0b5037be8c3ef6461a1bd6bc47297c",
+    "bytes": 654,
+    "line_count": 22,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Figma Card icons",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Figma Card icons\n",
+      "level": 1,
+      "title": "Figma Card icons"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "Exact SVG exports from the LVRS Figma file on 2026-09-11. These retain each\n18 × 18 component's original paths, padding and color, which differ from some\n16 × 16 iconset counterparts. Do not redraw or stretch the 16 px exports to\napproximate these designs.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "File: https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "table",
+      "start_line": 10,
+      "end_line": 22,
+      "raw": "| Asset | Node |\n|---|---|\n| folder.svg | 207:33205 |\n| project.svg | 207:33585 |\n| device.svg | 207:33183 |\n| model.svg | 207:33826 |\n| member.svg | 207:32764 |\n| link.svg | 207:33649 |\n| globe.svg | 207:33084 |\n| image.svg | 207:33029 |\n| text.svg | 207:33043 |\n| check.svg | 207:33545 |\n| more.svg | 207:33719 |\n",
+      "columns": [
+        "Asset",
+        "Node"
+      ],
+      "rows": [
+        [
+          "folder.svg",
+          "207:33205"
+        ],
+        [
+          "project.svg",
+          "207:33585"
+        ],
+        [
+          "device.svg",
+          "207:33183"
+        ],
+        [
+          "model.svg",
+          "207:33826"
+        ],
+        [
+          "member.svg",
+          "207:32764"
+        ],
+        [
+          "link.svg",
+          "207:33649"
+        ],
+        [
+          "globe.svg",
+          "207:33084"
+        ],
+        [
+          "image.svg",
+          "207:33029"
+        ],
+        [
+          "text.svg",
+          "207:33043"
+        ],
+        [
+          "check.svg",
+          "207:33545"
+        ],
+        [
+          "more.svg",
+          "207:33719"
+        ]
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Figma Card icons",
+      "anchor": "figma-card-icons",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "16 × 16 iconset counterparts. Do not redraw or stretch the 16 px exports to",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000007",
+        "columns": [
+          "Asset",
+          "Node"
+        ],
+        "rows": [
+          [
+            "folder.svg",
+            "207:33205"
+          ],
+          [
+            "project.svg",
+            "207:33585"
+          ],
+          [
+            "device.svg",
+            "207:33183"
+          ],
+          [
+            "model.svg",
+            "207:33826"
+          ],
+          [
+            "member.svg",
+            "207:32764"
+          ],
+          [
+            "link.svg",
+            "207:33649"
+          ],
+          [
+            "globe.svg",
+            "207:33084"
+          ],
+          [
+            "image.svg",
+            "207:33029"
+          ],
+          [
+            "text.svg",
+            "207:33043"
+          ],
+          [
+            "check.svg",
+            "207:33545"
+          ],
+          [
+            "more.svg",
+            "207:33719"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

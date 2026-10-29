@@ -1,0 +1,107 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:dfdfeb5061640ccefffba79a2923e88a234329a87ca3bfe3fa08618261423fdb",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeMediaGallery/docs/Usage.md",
+    "sha256": "a6bd2ebd72e4558c4aa67bd68315fa3a222f42e2354052462146ed96cafcca07",
+    "bytes": 1168,
+    "line_count": 15,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Card·Avatar 갤러리",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Card·Avatar 갤러리\n",
+      "level": 1,
+      "title": "Card·Avatar 갤러리"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "LVUI의 모든 카드 종류와 세 아바타 크기를 같은 Backend 한 개로 구성한다.\n백그라운드 Core 작업이 불변 RGBA 이미지를 만들고 owner 이벤트 루프로 전송한다.\n타이머 대신 Core 프레임 루프의 unscaled end 단계가 종료 검사를 담당한다.\n메타데이터·진행률·선택·행·이미지·커스텀 팩토리는 기존 C++ 위젯을 유지하며 바뀐다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 11,
+      "raw": "빌드: 설치된 Native LVRS와 Core·iiGUI·LVUI 패키지 경로를 지정해 install.sh를 사용한다.\n기본 산출물은 build/와 build/install이다. 시스템 설치본을 자동 교체하지 않는다.\n실행 시 --self-test는 선택·내부 액션·사용자 프리뷰·배경 결과·리사이즈·정상 종료를 검사한다.\n현재 이 실행은 전체 작업 최종 일괄 단계로 보류되어 있다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "원본 URL 로더/Qt 비동기 캐시 대신 준비된 RasterImage를 받는다. 외부 파일의 읽기·\n디코딩·취소는 앱/리소스 계층이 맡는다. 커스텀 자식의 둥근 clip, 전체 motion·AX·상속\nAPI 및 타 플랫폼 실행은 아직 동등성이 완료되지 않았다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Card·Avatar 갤러리",
+      "anchor": "cardavatar-갤러리",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 9,
+        "text": "기본 산출물은 build/와 build/install이다. 시스템 설치본을 자동 교체하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

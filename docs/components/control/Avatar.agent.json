@@ -1,0 +1,506 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:6b6752bbd7fd0e98513ef72bb63e7636128a81aa6ff9e0992622175711e37d3d",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/Avatar.md",
+    "sha256": "87a50284c64fc908cb451502a5cbaa4abae370ee284c98260b8eda9f205ce399",
+    "bytes": 4412,
+    "line_count": 73,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Avatar",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Avatar\n",
+      "level": 1,
+      "title": "Avatar"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "## Purpose\n",
+      "level": 2,
+      "title": "Purpose"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`LV.Avatar` displays an image inside a circular user-profile surface. The image keeps its aspect ratio, fills the circle, and crops equally from opposite edges. Figma sizes are Large (64), Medium (40), and Small (24).\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "Import `LVRS 1.0 as LV`.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "table",
+      "start_line": 11,
+      "end_line": 19,
+      "raw": "| Property | Default | Description |\n| --- | --- | --- |\n| `source: url` | empty | Image URL, using the same loaders and codecs as Qt Quick `Image`. |\n| `size: int` | `LV.Avatar.Large` | `LV.Avatar.Small`, `Medium`, or `Large`; implicit diameter 24, 40, or 64. |\n| `backgroundColor: color` | `LV.Theme.surfaceRaised` | Surface behind transparent images, and while the source is empty, loading, or invalid. Set `\"transparent\"` to show only the image. |\n| `asynchronous: bool` | `true` | Decode local images in the background. Network sources always load asynchronously. |\n| `cache: bool` | `true` | Use the Qt Quick image cache. |\n| `status: int` (read-only) | `Image.Null` | Current source state: `Image.Null`, `Loading`, `Ready`, or `Error`. |\n| `progress: real` (read-only) | `0` | Current source-loading progress, from 0 to 1. |\n",
+      "columns": [
+        "Property",
+        "Default",
+        "Description"
+      ],
+      "rows": [
+        [
+          "`source: url`",
+          "empty",
+          "Image URL, using the same loaders and codecs as Qt Quick `Image`."
+        ],
+        [
+          "`size: int`",
+          "`LV.Avatar.Large`",
+          "`LV.Avatar.Small`, `Medium`, or `Large`; implicit diameter 24, 40, or 64."
+        ],
+        [
+          "`backgroundColor: color`",
+          "`LV.Theme.surfaceRaised`",
+          "Surface behind transparent images, and while the source is empty, loading, or invalid. Set `\"transparent\"` to show only the image."
+        ],
+        [
+          "`asynchronous: bool`",
+          "`true`",
+          "Decode local images in the background. Network sources always load asynchronously."
+        ],
+        [
+          "`cache: bool`",
+          "`true`",
+          "Use the Qt Quick image cache."
+        ],
+        [
+          "`status: int` (read-only)",
+          "`Image.Null`",
+          "Current source state: `Image.Null`, `Loading`, `Ready`, or `Error`."
+        ],
+        [
+          "`progress: real` (read-only)",
+          "`0`",
+          "Current source-loading progress, from 0 to 1."
+        ]
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "`width` and `height` may override the implicit size. The circle uses the smaller dimension and remains centered horizontally and vertically, including inside a rectangular layout slot. Set `Accessible.name` to identify the user when the avatar conveys identity.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## Usage\n",
+      "level": 2,
+      "title": "Usage"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "fenced_code",
+      "start_line": 25,
+      "end_line": 34,
+      "raw": "```qml\nimport QtQuick\nimport LVRS 1.0 as LV\n\nLV.Avatar {\n    source: Qt.resolvedUrl(\"images/profile.webp\")\n    size: LV.Avatar.Medium\n    Accessible.name: \"Alex Kim\"\n}\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport LVRS 1.0 as LV\n\nLV.Avatar {\n    source: Qt.resolvedUrl(\"images/profile.webp\")\n    size: LV.Avatar.Medium\n    Accessible.name: \"Alex Kim\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "fenced_code",
+      "start_line": 36,
+      "end_line": 43,
+      "raw": "```qml\nRow {\n    spacing: LV.Theme.gap12\n    LV.Avatar { source: user.photoUrl; size: LV.Avatar.Large }\n    LV.Avatar { source: \"qrc:/images/profile.svg\"; size: LV.Avatar.Medium }\n    LV.Avatar { source: \"image://profiles/current\"; size: LV.Avatar.Small }\n}\n```\n",
+      "language": "qml",
+      "code": "Row {\n    spacing: LV.Theme.gap12\n    LV.Avatar { source: user.photoUrl; size: LV.Avatar.Large }\n    LV.Avatar { source: \"qrc:/images/profile.svg\"; size: LV.Avatar.Medium }\n    LV.Avatar { source: \"image://profiles/current\"; size: LV.Avatar.Small }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "Relative asset URLs, `file:`, `qrc:`, HTTP(S), `data:`, and registered `image://` providers are accepted. Raster and vector formats are decoded by the Qt image plugins shipped with the application, including PNG, JPEG, WebP, BMP, GIF, and SVG when their plugins are present. Animated formats are displayed as a still image, following `Image`; this component does not play animations. Native `QImage`/`QPixmap` data can be supplied through a registered Qt Quick image provider.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "For an asset relative to the consuming QML document, use `Qt.resolvedUrl(...)` at the call site, as in the first example. This keeps the image tied to that document's location when its URL is forwarded to internal loaders, following [Qt 6 URL resolution](https://doc.qt.io/qt-6.8/qml-url.html).\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## How It Works\n",
+      "level": 2,
+      "title": "How It Works"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "The source uses `Image.PreserveAspectCrop` with both alignment axes set to center. A circular alpha mask removes all pixels outside the circle instead of relying on rectangular `clip`. GPU rendering uses Qt Quick `MultiEffect`; the software renderer paints the same centered crop into a circular Canvas clip. Both paths preserve source transparency.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "Changing the URL replaces the image. Empty or failed sources clear the previous image and expose `backgroundColor`; clients can inspect `status` for their own fallback behavior. The component does not introduce a hover state or intercept input.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "## Validation\n",
+      "level": 2,
+      "title": "Validation"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "`LVRSTests_avatar` checks all three sizes, rectangular layout slots, horizontal and vertical crop centering, transparent corners, source replacement, errors, file formats, data URLs, resources, image providers, and a local HTTP response. Run the pixel checks on both scene graphs:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "fenced_code",
+      "start_line": 59,
+      "end_line": 63,
+      "raw": "```sh\ncmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSTests_avatar\nQT_QUICK_BACKEND=software ctest --test-dir build --output-on-failure -R '^LVRSTests_avatar$'\n```\n",
+      "language": "sh",
+      "code": "cmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSTests_avatar\nQT_QUICK_BACKEND=software ctest --test-dir build --output-on-failure -R '^LVRSTests_avatar$'\n",
+      "closed": true
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "On macOS, exercise the GPU path with the native Cocoa window system (the offscreen platform does not support Metal windows):\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "fenced_code",
+      "start_line": 67,
+      "end_line": 71,
+      "raw": "```sh\nQT_QPA_PLATFORM=cocoa QT_QUICK_BACKEND=rhi QSG_RHI_BACKEND=metal \\\n    QML_IMPORT_PATH=\"$PWD/build\" DYLD_LIBRARY_PATH=\"$PWD/build\" \\\n    LVRS_AVATAR_REQUIRE_GPU=1 build/tests/LVRSTests_avatar\n```\n",
+      "language": "sh",
+      "code": "QT_QPA_PLATFORM=cocoa QT_QUICK_BACKEND=rhi QSG_RHI_BACKEND=metal \\\n    QML_IMPORT_PATH=\"$PWD/build\" DYLD_LIBRARY_PATH=\"$PWD/build\" \\\n    LVRS_AVATAR_REQUIRE_GPU=1 build/tests/LVRSTests_avatar\n",
+      "closed": true
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "The standalone project under `tests/installed-consumer` checks the installed package independently of the build-tree QML module. Its `installed_lvrs_avatar` test repeats the image and pixel contracts against the installed library, while `installed_lvrs_qml_consumer` checks the three sizes and (when `LVRS_CONSUMER_SOURCE_DIR` is set) compares every embedded QML source with the checkout.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Avatar",
+      "anchor": "avatar",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000003",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Purpose",
+      "anchor": "purpose",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Usage",
+      "anchor": "usage",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "How It Works",
+      "anchor": "how-it-works",
+      "start_line": 49
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Validation",
+      "anchor": "validation",
+      "start_line": 55
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000035",
+        "language": "sh",
+        "code": "cmake -S . -B build -DLVRS_BUILD_TESTS=ON\ncmake --build build --target LVRSTests_avatar\nQT_QUICK_BACKEND=software ctest --test-dir build --output-on-failure -R '^LVRSTests_avatar$'\n"
+      },
+      {
+        "block_id": "b000039",
+        "language": "sh",
+        "code": "QT_QPA_PLATFORM=cocoa QT_QUICK_BACKEND=rhi QSG_RHI_BACKEND=metal \\\n    QML_IMPORT_PATH=\"$PWD/build\" DYLD_LIBRARY_PATH=\"$PWD/build\" \\\n    LVRS_AVATAR_REQUIRE_GPU=1 build/tests/LVRSTests_avatar\n"
+      }
+    ],
+    "links": [
+      {
+        "block_id": "b000023",
+        "label": "Qt 6 URL resolution",
+        "target": "https://doc.qt.io/qt-6.8/qml-url.html",
+        "kind": "external",
+        "line": 47
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000011",
+        "columns": [
+          "Property",
+          "Default",
+          "Description"
+        ],
+        "rows": [
+          [
+            "`source: url`",
+            "empty",
+            "Image URL, using the same loaders and codecs as Qt Quick `Image`."
+          ],
+          [
+            "`size: int`",
+            "`LV.Avatar.Large`",
+            "`LV.Avatar.Small`, `Medium`, or `Large`; implicit diameter 24, 40, or 64."
+          ],
+          [
+            "`backgroundColor: color`",
+            "`LV.Theme.surfaceRaised`",
+            "Surface behind transparent images, and while the source is empty, loading, or invalid. Set `\"transparent\"` to show only the image."
+          ],
+          [
+            "`asynchronous: bool`",
+            "`true`",
+            "Decode local images in the background. Network sources always load asynchronously."
+          ],
+          [
+            "`cache: bool`",
+            "`true`",
+            "Use the Qt Quick image cache."
+          ],
+          [
+            "`status: int` (read-only)",
+            "`Image.Null`",
+            "Current source state: `Image.Null`, `Loading`, `Ready`, or `Error`."
+          ],
+          [
+            "`progress: real` (read-only)",
+            "`0`",
+            "Current source-loading progress, from 0 to 1."
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

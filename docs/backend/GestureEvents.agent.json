@@ -1,0 +1,2339 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:9a0e57f1051ebf2ce6208c53ec3413520ee9bf11450d68d9a25d89ddbbc5d434",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/GestureEvents.md",
+    "sha256": "f16b896a3f517f6e423477c05ecdbb0e8c81021f74c265ac72bbcd4584209d4a",
+    "bytes": 11116,
+    "line_count": 307,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "GestureEvents",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# GestureEvents\n",
+      "level": 1,
+      "title": "GestureEvents"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/runtime/gestureevents.h` / `src/backend/runtime/gestureevents.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`GestureEvents`는 LVRS 고급 제스처 인식 싱글턴입니다.   `RuntimeEvents` 위에 위치하며 원시 터치/네이티브 제스처 런타임 기록을 QML 친화적 제스처 이벤트로 전환합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"1-scope-and-responsibilities\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 1. 범위와 책임\n",
+      "level": 2,
+      "title": "1. 범위와 책임"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "`GestureEvents` 소유:\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 17,
+      "raw": "- `RuntimeEvents::eventRecorded` 위에 터치 세션 추적,\n- `touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`에 대한 상위 수준 제스처 분류,\n- `pressStarted`, `pressEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`에 대한 파생된 의미 이벤트\n- `nativeGestureDetected`를 통한 네이티브 제스처 전달 정규화,\n- `gestureSequence` 및 `lastGesture`를 통한 안정적인 최종 이벤트 검사.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents::eventRecorded` 위에 터치 세션 추적,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchStarted`, `touchUpdated`, `touchEnded`, `touchCancelled`에 대한 상위 수준 제스처 분류,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressStarted`, `pressEnded`, `scrollStarted`, `scrollUpdated`, `scrollEnded`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`, `swipeDetected`에 대한 파생된 의미 이벤트",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`nativeGestureDetected`를 통한 네이티브 제스처 전달 정규화,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`gestureSequence` 및 `lastGesture`를 통한 안정적인 최종 이벤트 검사.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "`GestureEvents`는 ****를 소유하지 않습니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 24,
+      "raw": "- 원시 애플리케이션 이벤트 필터링(`RuntimeEvents`가 이를 소유함),\n- 최근 이벤트 버퍼링/데몬 상태 원격 측정(`RuntimeEvents`가 이것을 소유함),\n- 백엔드 미러링/지속성(`Backend`가 이것을 소유함),\n- 기본 접촉 경로를 넘어서는 다중 접촉 제스처 분류.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "원시 애플리케이션 이벤트 필터링(`RuntimeEvents`가 이를 소유함),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최근 이벤트 버퍼링/데몬 상태 원격 측정(`RuntimeEvents`가 이것을 소유함),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "백엔드 미러링/지속성(`Backend`가 이것을 소유함),",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 접촉 경로를 넘어서는 다중 접촉 제스처 분류.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "<a id=\"2-property-api\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "## 2. 속성 API\n",
+      "level": 2,
+      "title": "2. 속성 API"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "table",
+      "start_line": 30,
+      "end_line": 40,
+      "raw": "|속성|기본값|의미|\n|---|---:|---|\n| `runtimeAttached` | `false` |`RuntimeEvents` 소스가 바인딩된 경우 True입니다.|\n| `holdThresholdMs` | `450` |`holdStarted`에 필요한 최소 정지 프레스 지속 시간.|\n| `dragThresholdPx` | `12.0` |드래그 분류가 시작되기 전에 이동 거리가 필요합니다.|\n| `scrollThresholdPx` | `12.0` |스크롤 분류가 시작되기 전에 주축 한 손가락 이동 거리가 필요합니다.|\n| `swipeThresholdPx` | `48.0` |스와이프 감지에 필요한 최소 총 이동 거리.|\n| `swipeMaxDurationMs` | `700` |스와이프는 이 기간 내에 완료되어야 합니다.|\n| `axisDominanceRatio` | `1.35` |우세 방향을 분류하는 데 사용되는 축 비율(`x`, `y`, `diagonal`).|\n| `gestureSequence` | `0` |인식된 제스처 페이로드에 대한 단조로운 시퀀스입니다.|\n| `lastGesture` | `{}` |마지막으로 게시된 상위 수준 제스처 페이로드입니다.|\n",
+      "columns": [
+        "속성",
+        "기본값",
+        "의미"
+      ],
+      "rows": [
+        [
+          "`runtimeAttached`",
+          "`false`",
+          "`RuntimeEvents` 소스가 바인딩된 경우 True입니다."
+        ],
+        [
+          "`holdThresholdMs`",
+          "`450`",
+          "`holdStarted`에 필요한 최소 정지 프레스 지속 시간."
+        ],
+        [
+          "`dragThresholdPx`",
+          "`12.0`",
+          "드래그 분류가 시작되기 전에 이동 거리가 필요합니다."
+        ],
+        [
+          "`scrollThresholdPx`",
+          "`12.0`",
+          "스크롤 분류가 시작되기 전에 주축 한 손가락 이동 거리가 필요합니다."
+        ],
+        [
+          "`swipeThresholdPx`",
+          "`48.0`",
+          "스와이프 감지에 필요한 최소 총 이동 거리."
+        ],
+        [
+          "`swipeMaxDurationMs`",
+          "`700`",
+          "스와이프는 이 기간 내에 완료되어야 합니다."
+        ],
+        [
+          "`axisDominanceRatio`",
+          "`1.35`",
+          "우세 방향을 분류하는 데 사용되는 축 비율(`x`, `y`, `diagonal`)."
+        ],
+        [
+          "`gestureSequence`",
+          "`0`",
+          "인식된 제스처 페이로드에 대한 단조로운 시퀀스입니다."
+        ],
+        [
+          "`lastGesture`",
+          "`{}`",
+          "마지막으로 게시된 상위 수준 제스처 페이로드입니다."
+        ]
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "<a id=\"3-method-contract\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "## 3. 메소드 계약\n",
+      "level": 2,
+      "title": "3. 메소드 계약"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "### `attachRuntime(runtimeObject = null): bool`\n",
+      "level": 3,
+      "title": "`attachRuntime(runtimeObject = null): bool`"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 48,
+      "end_line": 50,
+      "raw": "- 명시적인 `RuntimeEvents` 개체를 허용하거나 싱글턴를 자동으로 확인합니다.\n- `RuntimeEvents::eventRecorded`에 연결합니다.\n- 바인딩이 성공하면 `true`를 반환합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "명시적인 `RuntimeEvents` 개체를 허용하거나 싱글턴를 자동으로 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents::eventRecorded`에 연결합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "바인딩이 성공하면 `true`를 반환합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "### `detachRuntime()`\n",
+      "level": 3,
+      "title": "`detachRuntime()`"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 55,
+      "raw": "- 바인딩된 런타임 소스에서 연결을 끊습니다.\n- 활성 터치 세션 상태를 지웁니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "바인딩된 런타임 소스에서 연결을 끊습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "활성 터치 세션 상태를 지웁니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "### `resetState()`\n",
+      "level": 3,
+      "title": "`resetState()`"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 59,
+      "end_line": 61,
+      "raw": "- 활성 터치/끌기/홀드 세션 상태를 지웁니다.\n- 진행 중인 타이머를 재설정합니다.\n- 런타임 바인딩을 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "활성 터치/끌기/홀드 세션 상태를 지웁니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "진행 중인 타이머를 재설정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "런타임 바인딩을 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "<a id=\"4-signals\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "## 4. 신호\n",
+      "level": 2,
+      "title": "4. 신호"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "list",
+      "start_line": 67,
+      "end_line": 82,
+      "raw": "- `gestureRecognized(eventData)`\n- `touchStarted(eventData)`\n- `touchUpdated(eventData)`\n- `touchEnded(eventData)`\n- `touchCancelled(eventData)`\n- `pressStarted(eventData)`\n- `pressEnded(eventData)`\n- `holdStarted(eventData)`\n- `dragStarted(eventData)`\n- `dragUpdated(eventData)`\n- `dragEnded(eventData)`\n- `scrollStarted(eventData)`\n- `scrollUpdated(eventData)`\n- `scrollEnded(eventData)`\n- `swipeDetected(eventData)`\n- `nativeGestureDetected(eventData)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`gestureRecognized(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchStarted(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchUpdated(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchEnded(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchCancelled(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressStarted(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressEnded(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`holdStarted(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragStarted(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragUpdated(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragEnded(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollStarted(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollUpdated(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollEnded(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`swipeDetected(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`nativeGestureDetected(eventData)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "`gestureRecognized`는 위의 보다 구체적인 신호를 포함하여 게시된 모든 상위 수준 페이로드에 대해 방출됩니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "<a id=\"5-payload-schema\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "## 5. 페이로드 스키마\n",
+      "level": 2,
+      "title": "5. 페이로드 스키마"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "<a id=\"51-common-gesture-fields\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "### 5.1 일반적인 제스처 필드\n",
+      "level": 3,
+      "title": "5.1 일반적인 제스처 필드"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "게시된 모든 페이로드에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 96,
+      "end_line": 103,
+      "raw": "- `sequence`\n- `gestureType`\n- `interactionKind`\n- `classification`\n- `source`\n- `timestampEpochMs`\n- `x`, `y`, `globalX`, `globalY`\n- `ui`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sequence`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`gestureType`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`interactionKind`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`classification`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`timestampEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`x`, `y`, `globalX`, `globalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ui`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "`ui` 및 `originUi`는 강화된 `RuntimeEvents.hitTestUiAt()` 스키마를 사용합니다.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 107,
+      "end_line": 109,
+      "raw": "- 논리적 대상 ID: `objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`\n- 레이어 및 계층: `layerKind`, `depth`, `hierarchy`, 루트/창 필드\n- 원시 가장 깊은 잎: `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`, `hitLocalX`, `hitLocalY`, `hitDepth`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "논리적 대상 ID: `objectName`, `className`, `componentName`, `qmlId`, `qmlBaseUrl`, `path`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이어 및 계층: `layerKind`, `depth`, `hierarchy`, 루트/창 필드",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원시 가장 깊은 잎: `hitObjectName`, `hitClassName`, `hitPath`, `hitComponentName`, `hitQmlId`, `hitLocalX`, `hitLocalY`, `hitDepth`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "<a id=\"52-touch-derived-gesture-fields\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "### 5.2 터치 기반 제스처 필드\n",
+      "level": 3,
+      "title": "5.2 터치 기반 제스처 필드"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "paragraph",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "`touch*`, `press*`, `scroll*`, `holdStarted`, `drag*` 및 `swipeDetected`에는 다음이 추가로 포함됩니다.\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "list",
+      "start_line": 117,
+      "end_line": 140,
+      "raw": "- `sessionId`\n- `previousX`, `previousY`\n- `startX`, `startY`, `startGlobalX`, `startGlobalY`\n- `deltaX`, `deltaY`\n- `totalDeltaX`, `totalDeltaY`\n- `absoluteDeltaX`, `absoluteDeltaY`\n- `distance`\n- `durationMs`\n- `pressDurationMs`\n- `directionX` (`positive|negative|none`)\n- `directionY` (`positive|negative|none`)\n- `dominantAxis` (`x|y|diagonal|none`)\n- `holdActive`, `dragActive`, `scrollActive`\n- `holdThresholdMs`, `dragThresholdPx`, `scrollThresholdPx`, `swipeThresholdPx`, `swipeMaxDurationMs`\n- `phase`\n- `pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`\n- `pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`\n- `primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`\n- `points`\n- `buttons`\n- `pressedMouseButtons`\n- `modifiers`\n- `mouseButtonPressed`\n- `originUi`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`sessionId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`previousX`, `previousY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startX`, `startY`, `startGlobalX`, `startGlobalY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deltaX`, `deltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`totalDeltaX`, `totalDeltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`absoluteDeltaX`, `absoluteDeltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distance`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`durationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressDurationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`directionX` (`positive|negative|none`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`directionY` (`positive|negative|none`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dominantAxis` (`x|y|diagonal|none`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`holdActive`, `dragActive`, `scrollActive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`holdThresholdMs`, `dragThresholdPx`, `scrollThresholdPx`, `swipeThresholdPx`, `swipeMaxDurationMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`phase`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pointCount`, `fingerCount`, `activeFingerCount`, `maximumFingerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressedFingerCount`, `updatedFingerCount`, `stationaryFingerCount`, `releasedFingerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryPointId`, `multiTouch`, `released`, `cancelled`, `releaseEpochMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`points`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttons`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressedMouseButtons`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modifiers`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mouseButtonPressed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`originUi`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "`points`의 각 항목은 `RuntimeEvents`의 네이티브 `QEventPoint` 세부 정보를 그대로 반영한다. 여기에는 상태 이름, 타임스탬프/pressTimestamp/timeHeld, 압력/회전/타원, 속도 및 위치 계열(`position*`, `pressPosition*`, `lastPosition*`, `scene*`, `global*`)이 포함된다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "html",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "<a id=\"53-scroll-specific-fields\"></a>\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "heading",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "### 5.3 스크롤 특정 필드\n",
+      "level": 3,
+      "title": "5.3 스크롤 특정 필드"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "`scrollStarted`, `scrollUpdated` 및 `scrollEnded` 추가:\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "list",
+      "start_line": 150,
+      "end_line": 153,
+      "raw": "- `scrollAxis` (`x|y`)\n- `scrollDirection`\n- `scrollDeltaX`\n- `scrollDeltaY`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`scrollAxis` (`x|y`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDeltaX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollDeltaY`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "html",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "<a id=\"54-swipe-specific-fields\"></a>\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "heading",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "### 5.4 스와이프 관련 필드\n",
+      "level": 3,
+      "title": "5.4 스와이프 관련 필드"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "paragraph",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "`swipeDetected`는 다음을 추가합니다.\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "list",
+      "start_line": 161,
+      "end_line": 164,
+      "raw": "- `swipeDirection`\n- `velocityX`\n- `velocityY`\n- `speed`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`swipeDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`velocityX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`velocityY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`speed`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "`swipeDirection`는 총 델타에서 파생되며 다음과 같을 수 있습니다.\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "list",
+      "start_line": 168,
+      "end_line": 172,
+      "raw": "- `leftToRight`\n- `rightToLeft`\n- `topToBottom`\n- `bottomToTop`\n- 4 대각선 토큰 중 하나\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`leftToRight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rightToLeft`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`topToBottom`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bottomToTop`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "4 대각선 토큰 중 하나",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "html",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "<a id=\"55-native-gesture-fields\"></a>\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "heading",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "### 5.5 네이티브 제스처 필드\n",
+      "level": 3,
+      "title": "5.5 네이티브 제스처 필드"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "`nativeGestureDetected`는 다음을 추가합니다.\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 179,
+      "end_line": 179,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "list",
+      "start_line": 180,
+      "end_line": 187,
+      "raw": "- `nativeGestureType`\n- `fingerCount`\n- `value`\n- `deltaX`\n- `deltaY`\n- `buttons`\n- `pressedMouseButtons`\n- `modifiers`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`nativeGestureType`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fingerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`value`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deltaX`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`deltaY`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buttons`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressedMouseButtons`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modifiers`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 188,
+      "end_line": 188,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "html",
+      "start_line": 189,
+      "end_line": 189,
+      "raw": "<a id=\"6-recognition-rules\"></a>\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 190,
+      "end_line": 190,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "heading",
+      "start_line": 191,
+      "end_line": 191,
+      "raw": "## 6. 인식 규칙\n",
+      "level": 2,
+      "title": "6. 인식 규칙"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 192,
+      "end_line": 192,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "html",
+      "start_line": 193,
+      "end_line": 193,
+      "raw": "<a id=\"press\"></a>\n"
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 194,
+      "end_line": 194,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "heading",
+      "start_line": 195,
+      "end_line": 195,
+      "raw": "### 언론\n",
+      "level": 3,
+      "title": "언론"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 196,
+      "end_line": 196,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "list",
+      "start_line": 197,
+      "end_line": 199,
+      "raw": "- `TouchBegin`부터 시작됩니다.\n- 네이티브 손가락 수 및 포인트 메타데이터를 사용하여 `pressStarted`를 즉시 내보냅니다.\n- `pressDurationMs`, `releaseEpochMs`, `released`, `cancelled` 및 `finalInteractionKind`를 사용하여 릴리스/취소 시 `pressEnded`를 방출합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`TouchBegin`부터 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 손가락 수 및 포인트 메타데이터를 사용하여 `pressStarted`를 즉시 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pressDurationMs`, `releaseEpochMs`, `released`, `cancelled` 및 `finalInteractionKind`를 사용하여 릴리스/취소 시 `pressEnded`를 방출합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 200,
+      "end_line": 200,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "html",
+      "start_line": 201,
+      "end_line": 201,
+      "raw": "<a id=\"scroll\"></a>\n"
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 202,
+      "end_line": 202,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "heading",
+      "start_line": 203,
+      "end_line": 203,
+      "raw": "### 스크롤\n",
+      "level": 3,
+      "title": "스크롤"
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "list",
+      "start_line": 205,
+      "end_line": 207,
+      "raw": "- 하나의 활성 터치 접촉이 주요 `x` 또는 `y` 축에서 `scrollThresholdPx`를 넘어 이동한 후에 시작됩니다.\n- `scrollStarted`를 한 번 방출하고, 이후 인식된 움직임 시 `scrollUpdated`를 방출하고, 해제/취소 시 `scrollEnded`를 방출합니다.\n- 스크롤 분류는 연속 동작 지향적입니다. 빠른 릴리스도 여전히 `swipeDetected` 자격을 얻을 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "하나의 활성 터치 접촉이 주요 `x` 또는 `y` 축에서 `scrollThresholdPx`를 넘어 이동한 후에 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollStarted`를 한 번 방출하고, 이후 인식된 움직임 시 `scrollUpdated`를 방출하고, 해제/취소 시 `scrollEnded`를 방출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스크롤 분류는 연속 동작 지향적입니다. 빠른 릴리스도 여전히 `swipeDetected` 자격을 얻을 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000118",
+      "kind": "blank",
+      "start_line": 208,
+      "end_line": 208,
+      "raw": "\n"
+    },
+    {
+      "id": "b000119",
+      "kind": "html",
+      "start_line": 209,
+      "end_line": 209,
+      "raw": "<a id=\"hold\"></a>\n"
+    },
+    {
+      "id": "b000120",
+      "kind": "blank",
+      "start_line": 210,
+      "end_line": 210,
+      "raw": "\n"
+    },
+    {
+      "id": "b000121",
+      "kind": "heading",
+      "start_line": 211,
+      "end_line": 211,
+      "raw": "### 보류\n",
+      "level": 3,
+      "title": "보류"
+    },
+    {
+      "id": "b000122",
+      "kind": "blank",
+      "start_line": 212,
+      "end_line": 212,
+      "raw": "\n"
+    },
+    {
+      "id": "b000123",
+      "kind": "list",
+      "start_line": 213,
+      "end_line": 214,
+      "raw": "- `TouchBegin`부터 시작됩니다.\n- `holdThresholdMs`가 경과할 때까지 포인터가 `dragThresholdPx` 내에 머무는 경우에만 실행됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`TouchBegin`부터 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`holdThresholdMs`가 경과할 때까지 포인터가 `dragThresholdPx` 내에 머무는 경우에만 실행됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000124",
+      "kind": "blank",
+      "start_line": 215,
+      "end_line": 215,
+      "raw": "\n"
+    },
+    {
+      "id": "b000125",
+      "kind": "html",
+      "start_line": 216,
+      "end_line": 216,
+      "raw": "<a id=\"drag\"></a>\n"
+    },
+    {
+      "id": "b000126",
+      "kind": "blank",
+      "start_line": 217,
+      "end_line": 217,
+      "raw": "\n"
+    },
+    {
+      "id": "b000127",
+      "kind": "heading",
+      "start_line": 218,
+      "end_line": 218,
+      "raw": "### 드래그\n",
+      "level": 3,
+      "title": "드래그"
+    },
+    {
+      "id": "b000128",
+      "kind": "blank",
+      "start_line": 219,
+      "end_line": 219,
+      "raw": "\n"
+    },
+    {
+      "id": "b000129",
+      "kind": "list",
+      "start_line": 220,
+      "end_line": 221,
+      "raw": "- 터치 원점으로부터의 총 거리가 `dragThresholdPx`에 도달하면 시작됩니다.\n- `dragStarted`를 한 번 내보낸 다음 이후 업데이트에서 `dragUpdated`를 내보낸 다음 릴리스/취소 시 `dragEnded`를 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "터치 원점으로부터의 총 거리가 `dragThresholdPx`에 도달하면 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dragStarted`를 한 번 내보낸 다음 이후 업데이트에서 `dragUpdated`를 내보낸 다음 릴리스/취소 시 `dragEnded`를 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000130",
+      "kind": "blank",
+      "start_line": 222,
+      "end_line": 222,
+      "raw": "\n"
+    },
+    {
+      "id": "b000131",
+      "kind": "html",
+      "start_line": 223,
+      "end_line": 223,
+      "raw": "<a id=\"swipe\"></a>\n"
+    },
+    {
+      "id": "b000132",
+      "kind": "blank",
+      "start_line": 224,
+      "end_line": 224,
+      "raw": "\n"
+    },
+    {
+      "id": "b000133",
+      "kind": "heading",
+      "start_line": 225,
+      "end_line": 225,
+      "raw": "### 스와이프\n",
+      "level": 3,
+      "title": "스와이프"
+    },
+    {
+      "id": "b000134",
+      "kind": "blank",
+      "start_line": 226,
+      "end_line": 226,
+      "raw": "\n"
+    },
+    {
+      "id": "b000135",
+      "kind": "list",
+      "start_line": 227,
+      "end_line": 230,
+      "raw": "- 터치 엔드에서 평가됩니다.\n- `distance >= swipeThresholdPx`가 필요합니다.\n- `durationMs <= swipeMaxDurationMs`가 필요합니다.\n- 방향은 `axisDominanceRatio`에서 파생됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "터치 엔드에서 평가됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`distance >= swipeThresholdPx`가 필요합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`durationMs <= swipeMaxDurationMs`가 필요합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방향은 `axisDominanceRatio`에서 파생됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000136",
+      "kind": "blank",
+      "start_line": 231,
+      "end_line": 231,
+      "raw": "\n"
+    },
+    {
+      "id": "b000137",
+      "kind": "html",
+      "start_line": 232,
+      "end_line": 232,
+      "raw": "<a id=\"native-gesture\"></a>\n"
+    },
+    {
+      "id": "b000138",
+      "kind": "blank",
+      "start_line": 233,
+      "end_line": 233,
+      "raw": "\n"
+    },
+    {
+      "id": "b000139",
+      "kind": "heading",
+      "start_line": 234,
+      "end_line": 234,
+      "raw": "### 네이티브 제스처\n",
+      "level": 3,
+      "title": "네이티브 제스처"
+    },
+    {
+      "id": "b000140",
+      "kind": "blank",
+      "start_line": 235,
+      "end_line": 235,
+      "raw": "\n"
+    },
+    {
+      "id": "b000141",
+      "kind": "list",
+      "start_line": 236,
+      "end_line": 237,
+      "raw": "- `RuntimeEvents`에서 이미 캡처한 원시 `native-gesture` 레코드를 사용합니다.\n- Qt가 보고하는 플랫폼 제스처 종류인 `fingerCount`, 스칼라 `value` 및 `deltaX/Y`를 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents`에서 이미 캡처한 원시 `native-gesture` 레코드를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Qt가 보고하는 플랫폼 제스처 종류인 `fingerCount`, 스칼라 `value` 및 `deltaX/Y`를 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000142",
+      "kind": "blank",
+      "start_line": 238,
+      "end_line": 238,
+      "raw": "\n"
+    },
+    {
+      "id": "b000143",
+      "kind": "html",
+      "start_line": 239,
+      "end_line": 239,
+      "raw": "<a id=\"7-integration-patterns\"></a>\n"
+    },
+    {
+      "id": "b000144",
+      "kind": "blank",
+      "start_line": 240,
+      "end_line": 240,
+      "raw": "\n"
+    },
+    {
+      "id": "b000145",
+      "kind": "heading",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "## 7. 통합 패턴\n",
+      "level": 2,
+      "title": "7. 통합 패턴"
+    },
+    {
+      "id": "b000146",
+      "kind": "blank",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "\n"
+    },
+    {
+      "id": "b000147",
+      "kind": "html",
+      "start_line": 243,
+      "end_line": 243,
+      "raw": "<a id=\"71-direct-singleton-usage\"></a>\n"
+    },
+    {
+      "id": "b000148",
+      "kind": "blank",
+      "start_line": 244,
+      "end_line": 244,
+      "raw": "\n"
+    },
+    {
+      "id": "b000149",
+      "kind": "heading",
+      "start_line": 245,
+      "end_line": 245,
+      "raw": "### 7.1 직접 싱글턴 사용법\n",
+      "level": 3,
+      "title": "7.1 직접 싱글턴 사용법"
+    },
+    {
+      "id": "b000150",
+      "kind": "blank",
+      "start_line": 246,
+      "end_line": 246,
+      "raw": "\n"
+    },
+    {
+      "id": "b000151",
+      "kind": "fenced_code",
+      "start_line": 247,
+      "end_line": 262,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.RuntimeEvents.start()\n    LV.RuntimeEvents.attachWindow(rootWindow)\n    LV.GestureEvents.attachRuntime(LV.RuntimeEvents)\n}\n\nConnections {\n    target: LV.GestureEvents\n    function onSwipeDetected(eventData) {\n        console.log(eventData.swipeDirection, eventData.totalDeltaX, eventData.totalDeltaY)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.RuntimeEvents.start()\n    LV.RuntimeEvents.attachWindow(rootWindow)\n    LV.GestureEvents.attachRuntime(LV.RuntimeEvents)\n}\n\nConnections {\n    target: LV.GestureEvents\n    function onSwipeDetected(eventData) {\n        console.log(eventData.swipeDirection, eventData.totalDeltaX, eventData.totalDeltaY)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000152",
+      "kind": "blank",
+      "start_line": 263,
+      "end_line": 263,
+      "raw": "\n"
+    },
+    {
+      "id": "b000153",
+      "kind": "html",
+      "start_line": 264,
+      "end_line": 264,
+      "raw": "<a id=\"72-preferred-qml-consumption-through-eventlistener\"></a>\n"
+    },
+    {
+      "id": "b000154",
+      "kind": "blank",
+      "start_line": 265,
+      "end_line": 265,
+      "raw": "\n"
+    },
+    {
+      "id": "b000155",
+      "kind": "heading",
+      "start_line": 266,
+      "end_line": 266,
+      "raw": "### 7.2 `EventListener`를 통한 기본 QML 소비\n",
+      "level": 3,
+      "title": "7.2 `EventListener`를 통한 기본 QML 소비"
+    },
+    {
+      "id": "b000156",
+      "kind": "blank",
+      "start_line": 267,
+      "end_line": 267,
+      "raw": "\n"
+    },
+    {
+      "id": "b000157",
+      "kind": "fenced_code",
+      "start_line": 268,
+      "end_line": 277,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"swipeDetected\"\n    action: function(eventData) {\n        console.log(eventData.swipeDirection)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.EventListener {\n    trigger: \"swipeDetected\"\n    action: function(eventData) {\n        console.log(eventData.swipeDirection)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000158",
+      "kind": "blank",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "\n"
+    },
+    {
+      "id": "b000159",
+      "kind": "paragraph",
+      "start_line": 279,
+      "end_line": 279,
+      "raw": "`EventListener`는 제스처 트리거가 사용될 때 `RuntimeEvents` 및 `GestureEvents`를 자동으로 연결합니다.\n"
+    },
+    {
+      "id": "b000160",
+      "kind": "blank",
+      "start_line": 280,
+      "end_line": 280,
+      "raw": "\n"
+    },
+    {
+      "id": "b000161",
+      "kind": "html",
+      "start_line": 281,
+      "end_line": 281,
+      "raw": "<a id=\"8-current-recognition-boundary\"></a>\n"
+    },
+    {
+      "id": "b000162",
+      "kind": "blank",
+      "start_line": 282,
+      "end_line": 282,
+      "raw": "\n"
+    },
+    {
+      "id": "b000163",
+      "kind": "heading",
+      "start_line": 283,
+      "end_line": 283,
+      "raw": "## 8. 현재 인식 경계\n",
+      "level": 2,
+      "title": "8. 현재 인식 경계"
+    },
+    {
+      "id": "b000164",
+      "kind": "blank",
+      "start_line": 284,
+      "end_line": 284,
+      "raw": "\n"
+    },
+    {
+      "id": "b000165",
+      "kind": "list",
+      "start_line": 285,
+      "end_line": 287,
+      "raw": "- 인식은 기본 접촉 중심입니다.\n- 멀티터치 포인트 배열, 손가락 카운트 및 최대 세션 손가락 카운트가 전달됩니다. 방향 스크롤/드래그/스와이프 분류는 플랫폼이 네이티브 제스처를 발생시키지 않는 한 기본 접촉 경로를 계속 추적합니다.\n- 원시 데스크탑 마우스 의미 체계는 `GestureEvents`가 아닌 `EventListener` 포인터/전역 트리거에 의해 처리됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "인식은 기본 접촉 중심입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "멀티터치 포인트 배열, 손가락 카운트 및 최대 세션 손가락 카운트가 전달됩니다. 방향 스크롤/드래그/스와이프 분류는 플랫폼이 네이티브 제스처를 발생시키지 않는 한 기본 접촉 경로를 계속 추적합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원시 데스크탑 마우스 의미 체계는 `GestureEvents`가 아닌 `EventListener` 포인터/전역 트리거에 의해 처리됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000166",
+      "kind": "blank",
+      "start_line": 288,
+      "end_line": 288,
+      "raw": "\n"
+    },
+    {
+      "id": "b000167",
+      "kind": "html",
+      "start_line": 289,
+      "end_line": 289,
+      "raw": "<a id=\"9-troubleshooting-matrix\"></a>\n"
+    },
+    {
+      "id": "b000168",
+      "kind": "blank",
+      "start_line": 290,
+      "end_line": 290,
+      "raw": "\n"
+    },
+    {
+      "id": "b000169",
+      "kind": "heading",
+      "start_line": 291,
+      "end_line": 291,
+      "raw": "## 9. 문제 해결 매트릭스\n",
+      "level": 2,
+      "title": "9. 문제 해결 매트릭스"
+    },
+    {
+      "id": "b000170",
+      "kind": "blank",
+      "start_line": 292,
+      "end_line": 292,
+      "raw": "\n"
+    },
+    {
+      "id": "b000171",
+      "kind": "table",
+      "start_line": 293,
+      "end_line": 299,
+      "raw": "|증상|예상 원인|검증|조치|\n|---|---|---|---|\n|제스처 콜백 없음|런타임 연결되지 않음|`runtimeAttached`|검사 `attachRuntime()` 호출 또는 `EventListener` 제스처 트리거 사용|\n|홀드가 실행되지 않음|드래그 임계값이 너무 일찍 도달함|`distance` 대 `dragThresholdPx`|검사 `dragThresholdPx` 증가 또는 부수적 움직임 감소|\n|스와이프가 감지되지 않음|지속 시간이 너무 길거나 거리가 너무 짧음|`durationMs` 검사, `distance`|조정 `swipeThresholdPx` / `swipeMaxDurationMs`|\n|방향이 대각선처럼 보입니다|축 우세 비율이 너무 엄격합니다|`dominantAxis`|낮은 `axisDominanceRatio`|\n|에는 원시 전체 제스처 기록이 필요합니다.|는 `lastGesture`만 사용합니다.|는 `gestureSequence` 변경 사항을 검사합니다.|는 `gestureRecognized`를 구독하고 자체 버퍼를 유지합니다.|\n",
+      "columns": [
+        "증상",
+        "예상 원인",
+        "검증",
+        "조치"
+      ],
+      "rows": [
+        [
+          "제스처 콜백 없음",
+          "런타임 연결되지 않음",
+          "`runtimeAttached`",
+          "검사 `attachRuntime()` 호출 또는 `EventListener` 제스처 트리거 사용"
+        ],
+        [
+          "홀드가 실행되지 않음",
+          "드래그 임계값이 너무 일찍 도달함",
+          "`distance` 대 `dragThresholdPx`",
+          "검사 `dragThresholdPx` 증가 또는 부수적 움직임 감소"
+        ],
+        [
+          "스와이프가 감지되지 않음",
+          "지속 시간이 너무 길거나 거리가 너무 짧음",
+          "`durationMs` 검사, `distance`",
+          "조정 `swipeThresholdPx` / `swipeMaxDurationMs`"
+        ],
+        [
+          "방향이 대각선처럼 보입니다",
+          "축 우세 비율이 너무 엄격합니다",
+          "`dominantAxis`",
+          "낮은 `axisDominanceRatio`"
+        ],
+        [
+          "에는 원시 전체 제스처 기록이 필요합니다.",
+          "는 `lastGesture`만 사용합니다.",
+          "는 `gestureSequence` 변경 사항을 검사합니다.",
+          "는 `gestureRecognized`를 구독하고 자체 버퍼를 유지합니다."
+        ]
+      ]
+    },
+    {
+      "id": "b000172",
+      "kind": "blank",
+      "start_line": 300,
+      "end_line": 300,
+      "raw": "\n"
+    },
+    {
+      "id": "b000173",
+      "kind": "html",
+      "start_line": 301,
+      "end_line": 301,
+      "raw": "<a id=\"10-related-apis\"></a>\n"
+    },
+    {
+      "id": "b000174",
+      "kind": "blank",
+      "start_line": 302,
+      "end_line": 302,
+      "raw": "\n"
+    },
+    {
+      "id": "b000175",
+      "kind": "heading",
+      "start_line": 303,
+      "end_line": 303,
+      "raw": "## 10. 관련 API\n",
+      "level": 2,
+      "title": "10. 관련 API"
+    },
+    {
+      "id": "b000176",
+      "kind": "blank",
+      "start_line": 304,
+      "end_line": 304,
+      "raw": "\n"
+    },
+    {
+      "id": "b000177",
+      "kind": "list",
+      "start_line": 305,
+      "end_line": 307,
+      "raw": "- `RuntimeEvents`: 원시 이벤트 캡처 소스.\n- `EventListener`: 제스처 콜백을 위한 QML 트리거 브리지입니다.\n- `Backend`: 원시 런타임 이벤트용 백엔드 미러입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents`: 원시 이벤트 캡처 소스.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`EventListener`: 제스처 콜백을 위한 QML 트리거 브리지입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Backend`: 원시 런타임 이벤트용 백엔드 미러입니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "GestureEvents",
+      "anchor": "gestureevents",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "1. 범위와 책임",
+      "anchor": "1-범위와-책임",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2. 속성 API",
+      "anchor": "2-속성-api",
+      "start_line": 28
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "3. 메소드 계약",
+      "anchor": "3-메소드-계약",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "`attachRuntime(runtimeObject = null): bool`",
+      "anchor": "attachruntimeruntimeobject--null-bool",
+      "start_line": 46
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "`detachRuntime()`",
+      "anchor": "detachruntime",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000027",
+      "level": 3,
+      "title": "`resetState()`",
+      "anchor": "resetstate",
+      "start_line": 57
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "4. 신호",
+      "anchor": "4-신호",
+      "start_line": 65
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "5. 페이로드 스키마",
+      "anchor": "5-페이로드-스키마",
+      "start_line": 88
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000051",
+      "level": 3,
+      "title": "5.1 일반적인 제스처 필드",
+      "anchor": "51-일반적인-제스처-필드",
+      "start_line": 92
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000051",
+      "level": 3,
+      "title": "5.2 터치 기반 제스처 필드",
+      "anchor": "52-터치-기반-제스처-필드",
+      "start_line": 113
+    },
+    {
+      "block_id": "b000077",
+      "parent_id": "b000051",
+      "level": 3,
+      "title": "5.3 스크롤 특정 필드",
+      "anchor": "53-스크롤-특정-필드",
+      "start_line": 146
+    },
+    {
+      "block_id": "b000085",
+      "parent_id": "b000051",
+      "level": 3,
+      "title": "5.4 스와이프 관련 필드",
+      "anchor": "54-스와이프-관련-필드",
+      "start_line": 157
+    },
+    {
+      "block_id": "b000097",
+      "parent_id": "b000051",
+      "level": 3,
+      "title": "5.5 네이티브 제스처 필드",
+      "anchor": "55-네이티브-제스처-필드",
+      "start_line": 176
+    },
+    {
+      "block_id": "b000105",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "6. 인식 규칙",
+      "anchor": "6-인식-규칙",
+      "start_line": 191
+    },
+    {
+      "block_id": "b000109",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "언론",
+      "anchor": "언론",
+      "start_line": 195
+    },
+    {
+      "block_id": "b000115",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "스크롤",
+      "anchor": "스크롤",
+      "start_line": 203
+    },
+    {
+      "block_id": "b000121",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "보류",
+      "anchor": "보류",
+      "start_line": 211
+    },
+    {
+      "block_id": "b000127",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "드래그",
+      "anchor": "드래그",
+      "start_line": 218
+    },
+    {
+      "block_id": "b000133",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "스와이프",
+      "anchor": "스와이프",
+      "start_line": 225
+    },
+    {
+      "block_id": "b000139",
+      "parent_id": "b000105",
+      "level": 3,
+      "title": "네이티브 제스처",
+      "anchor": "네이티브-제스처",
+      "start_line": 234
+    },
+    {
+      "block_id": "b000145",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "7. 통합 패턴",
+      "anchor": "7-통합-패턴",
+      "start_line": 241
+    },
+    {
+      "block_id": "b000149",
+      "parent_id": "b000145",
+      "level": 3,
+      "title": "7.1 직접 싱글턴 사용법",
+      "anchor": "71-직접-싱글턴-사용법",
+      "start_line": 245
+    },
+    {
+      "block_id": "b000155",
+      "parent_id": "b000145",
+      "level": 3,
+      "title": "7.2 `EventListener`를 통한 기본 QML 소비",
+      "anchor": "72-eventlistener를-통한-기본-qml-소비",
+      "start_line": 266
+    },
+    {
+      "block_id": "b000163",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "8. 현재 인식 경계",
+      "anchor": "8-현재-인식-경계",
+      "start_line": 283
+    },
+    {
+      "block_id": "b000169",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "9. 문제 해결 매트릭스",
+      "anchor": "9-문제-해결-매트릭스",
+      "start_line": 291
+    },
+    {
+      "block_id": "b000175",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "10. 관련 API",
+      "anchor": "10-관련-api",
+      "start_line": 303
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000023",
+        "columns": [
+          "속성",
+          "기본값",
+          "의미"
+        ],
+        "rows": [
+          [
+            "`runtimeAttached`",
+            "`false`",
+            "`RuntimeEvents` 소스가 바인딩된 경우 True입니다."
+          ],
+          [
+            "`holdThresholdMs`",
+            "`450`",
+            "`holdStarted`에 필요한 최소 정지 프레스 지속 시간."
+          ],
+          [
+            "`dragThresholdPx`",
+            "`12.0`",
+            "드래그 분류가 시작되기 전에 이동 거리가 필요합니다."
+          ],
+          [
+            "`scrollThresholdPx`",
+            "`12.0`",
+            "스크롤 분류가 시작되기 전에 주축 한 손가락 이동 거리가 필요합니다."
+          ],
+          [
+            "`swipeThresholdPx`",
+            "`48.0`",
+            "스와이프 감지에 필요한 최소 총 이동 거리."
+          ],
+          [
+            "`swipeMaxDurationMs`",
+            "`700`",
+            "스와이프는 이 기간 내에 완료되어야 합니다."
+          ],
+          [
+            "`axisDominanceRatio`",
+            "`1.35`",
+            "우세 방향을 분류하는 데 사용되는 축 비율(`x`, `y`, `diagonal`)."
+          ],
+          [
+            "`gestureSequence`",
+            "`0`",
+            "인식된 제스처 페이로드에 대한 단조로운 시퀀스입니다."
+          ],
+          [
+            "`lastGesture`",
+            "`{}`",
+            "마지막으로 게시된 상위 수준 제스처 페이로드입니다."
+          ]
+        ]
+      },
+      {
+        "block_id": "b000171",
+        "columns": [
+          "증상",
+          "예상 원인",
+          "검증",
+          "조치"
+        ],
+        "rows": [
+          [
+            "제스처 콜백 없음",
+            "런타임 연결되지 않음",
+            "`runtimeAttached`",
+            "검사 `attachRuntime()` 호출 또는 `EventListener` 제스처 트리거 사용"
+          ],
+          [
+            "홀드가 실행되지 않음",
+            "드래그 임계값이 너무 일찍 도달함",
+            "`distance` 대 `dragThresholdPx`",
+            "검사 `dragThresholdPx` 증가 또는 부수적 움직임 감소"
+          ],
+          [
+            "스와이프가 감지되지 않음",
+            "지속 시간이 너무 길거나 거리가 너무 짧음",
+            "`durationMs` 검사, `distance`",
+            "조정 `swipeThresholdPx` / `swipeMaxDurationMs`"
+          ],
+          [
+            "방향이 대각선처럼 보입니다",
+            "축 우세 비율이 너무 엄격합니다",
+            "`dominantAxis`",
+            "낮은 `axisDominanceRatio`"
+          ],
+          [
+            "에는 원시 전체 제스처 기록이 필요합니다.",
+            "는 `lastGesture`만 사용합니다.",
+            "는 `gestureSequence` 변경 사항을 검사합니다.",
+            "는 `gestureRecognized`를 구독하고 자체 버퍼를 유지합니다."
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

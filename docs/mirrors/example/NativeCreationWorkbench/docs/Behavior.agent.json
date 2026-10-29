@@ -1,0 +1,135 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:23d2e8d84fc3c603cb84d91d749ea9913b7e20534f9b3fe08c7701ae12ff36cd",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeCreationWorkbench/docs/Behavior.md",
+    "sha256": "db71e950d6c8eef8b9e57e4de34f0c009847a6afba9802c53a756bb5139a9f46",
+    "bytes": 1688,
+    "line_count": 20,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "작업 공간 동작 계약",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 작업 공간 동작 계약\n",
+      "level": 1,
+      "title": "작업 공간 동작 계약"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "LVUI는 배치·입력 전달·상태 표시만 선언한다. 파라미터 검증·절차적 픽셀 계산·결과 선택·\n캔버스 팬·타임라인 탐색·재생은 C++가 수행한다. 프레임 24개는 실제 RGBA 버퍼이며\n주어진 너비·높이·시드로 생성한다. 예제 입력 범위는 64..512픽셀, 출력 1..8개이며\n제품의 생성 파라미터 범위를 축소하는 변경이 아니다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 11,
+      "raw": "렌더링 작업은 기존 iiSDKCore 작업 큐에서 수행하고 완료 값은 같은 앱의 소유 루프로\n전달한다. source 객체를 매 프레임 교체하지 않는다. 캔버스·타임라인은 두 개의 유지되는\nNativeView 원천이며, 원천의 Core 관측·프레임 콜백·입력 캡처는 해당 세대가 소유한다.\n팬·탐색·재생·창 크기 변경·결과 선택은 파일 revision을 변경하지 않는다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 16,
+      "raw": "self-test는 실제 창에서 서로 다른 프레임의 캔버스 중심 픽셀·불투명도를 대조하고,\n포인터 탐색과 팬, 생성 행 선택, 창 크기 변경과 편집 값 유지, 실제 프레임 콜백 및 종료를\n검사한다. 빌드 성공·정적 분석과 실제 실행 통과는 별도로 기록한다. GPU·UI 응답 성능의\n전체 제품 측정이나 AI 생성·스토리지·SNS 게시 통합을 증명하는 예제로 해석하지 않는다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 20,
+      "raw": "최초 실행에서 아직 크기가 배정되지 않은 paint 호출에 0폭 패널을 반환한 오류를 발견했다.\n크기가 0인 준비 단계에는 빈 그리기 값을 반환하고 실제 배치 후 정상 장면을 생성한다.\n초기 실패와 수정 후 실제 실행 결과를 별도로 보존한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "작업 공간 동작 계약",
+      "anchor": "작업-공간-동작-계약",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 9,
+        "text": "전달한다. source 객체를 매 프레임 교체하지 않는다. 캔버스·타임라인은 두 개의 유지되는",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000005",
+        "line": 11,
+        "text": "팬·탐색·재생·창 크기 변경·결과 선택은 파일 revision을 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 16,
+        "text": "전체 제품 측정이나 AI 생성·스토리지·SNS 게시 통합을 증명하는 예제로 해석하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

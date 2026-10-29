@@ -1,0 +1,444 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:ceb2a8447be9675ecec1c33f28ce4b0c1d89d7f17eba80498bcc6270d9184c71",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Link.md",
+    "sha256": "f893e3cfe02d685a8eec74d861f595d7a565eaad48131769bd52a49771b0eba1",
+    "bytes": 6809,
+    "line_count": 99,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 Link",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 Link\n",
+      "level": 1,
+      "title": "네이티브 Link"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "`lvrs::Link`와 LVUI의 Link는 iiGUI의 자체 C++ ActionSurface로 구성한다. 원본\nLink.qml의 기본 텍스트, 사용자 정의 자식 슬롯, 투명한 배경, 탐색 대상 우선순위와\n상태별 색상을 구현한다. OS 링크 컨트롤이나 일반 텍스트 버튼 별칭을 사용하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 시각 합성과 입력\n",
+      "level": 2,
+      "title": "시각 합성과 입력"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 13,
+      "raw": "기본값은 description 12·semibold·고정 행 높이 12, 가로 패딩 14·세로 패딩 10,\n최소 높이 36, 포커스 링 반경 8이다. 배경은 투명하다. 자식 슬롯이 비어 있으면\n텍스트를 표시하고 일반 자식 뷰가 있으면 텍스트 fallback을 숨긴다. 원본처럼 텍스트\n자연 크기는 슬롯의 implicit 크기 계산에 참여한다. 여러 자식은 같은 콘텐츠 원점을\n사용하므로 행·열 구성에는 HStack/VStack을 사용한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "fenced_code",
+      "start_line": 15,
+      "end_line": 25,
+      "raw": "```text\nimport vm Backend\nWindow {\n    Link(id: \"report\", to: vm.href, navigator: vm.navigator, underline: true) {\n        HStack(spacing: 6) {\n            Label(text: \"Open report\")\n            Label(text: \"↗\")\n        }\n    }\n}\n```\n",
+      "language": "text",
+      "code": "import vm Backend\nWindow {\n    Link(id: \"report\", to: vm.href, navigator: vm.navigator, underline: true) {\n        HStack(spacing: 6) {\n            Label(text: \"Open report\")\n            Label(text: \"↗\")\n        }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 30,
+      "raw": "자식은 같은 네이티브 위젯 세대와 기존 LVUI 백엔드 스코프를 사용한다. 자식 컨트롤의\n클릭을 부모 Link로 중복 처리하지 않는다. 장식용 뷰와 빈 패딩은 부모의 동작 영역이다.\n포인터·포커스·Enter/Space의 눌림/해제·취소는 iiGUI가 처리한다. 비활성화 시 하위\n포커스와 눌림도 취소한다. 링크 역할과 press는 macOS 가상 접근성 피어에 연결한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 36,
+      "raw": "link_color 기본값은 생성 시 appearance의 accent, hover_color는 흰색 90%,\npressed_color는 링크 RGB를 1.2로 나눈 값, disabled_color는 흰색 60%이다.\n명시적인 RGBA 색상과 밑줄을 교체할 수 있다. 밑줄은 AppKit attributed text·\nDirectWrite·Pango 셰이핑을 사용하며 GPU에 그 결과를 전달한다. 임의 고정 선을\n추가하는 장식으로 처리하지 않는다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "## 경로와 컴포넌트 탐색\n",
+      "level": 2,
+      "title": "경로와 컴포넌트 탐색"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 43,
+      "raw": "LinkOptions는 text, href, params, router, navigator, target_component, replace,\nenabled, underline, tone, 네 가지 색상과 기본 패딩·크기·포커스 옵션을 받는다.\nhref 기본값은 `/`이며 set_to는 set_href와 같은 속성을 변경한다. LVUI의 href와\nto는 별칭이므로 동시에 지정하면 컴파일 오류이다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 49,
+      "raw": "탐색 대상은 살아 있는 명시적 NavigationTarget이 우선한다. 없거나 만료되면 지정한\nNavigator, 또는 소유 스레드의 기본 Navigator를 사용한다. target_component가 있으면\nhref보다 우선하며, 그렇지 않으면 빈 href는 무동작이다. replace는 현재 항목 교체,\nfalse는 push를 요청한다. Core Value와 컴파일한 PageComponent 정체성을 보존한다.\n문자열 소스나 QML 컴포넌트를 런타임에 해석하지 않는다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 55,
+      "raw": "trigger_navigation()은 원본의 명시적 triggerNavigation 호출에 대응한다. 수명이\n끝난 위젯에는 호출할 수 없지만, 명시적인 메서드 호출 자체를 enabled·visible로\n차단하지 않는다. 사용자 클릭은 iiGUI의 유효 활성화·모달·포커스 경계를 따른다.\n명시적 대상의 bool은 그 대상 계약, Navigator의 bool은 위임 수락 여부이다.\n오류는 Result와 cause로 전달하고 경쟁하는 동일 Link 탐색은 busy이다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 59,
+      "raw": "params는 NavigationStackModel과 같은 단일 항목/중첩/노드 예산으로 검사한다.\n경로는 64 KiB 이하 UTF-8·NUL 없음 계약이며 경로 정규화는 최종 대상이 수행한다.\ntyped component가 아닌 경로의 매개변수는 PageRouter의 객체 계약도 따른다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "## C++ 객체·메서드·반응형 입력\n",
+      "level": 2,
+      "title": "C++ 객체·메서드·반응형 입력"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 66,
+      "raw": "Link::create는 root() 핸들과 약한 Link 객체를 반환하고, 빌더가 상태를 retain한다.\n선택적인 LinkContentFactory는 같은 빌더와 root를 받아 일반 자식을 구성한다.\n실패하면 외부 마운트 팩토리가 오류를 전파해 기존 마운트를 유지해야 한다. 같은\n빌더에 이미 추가한 노드를 Link만의 별도 트랜잭션으로 되돌리는 API는 아니다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 71,
+      "raw": "공개 setter로 text, href/to, params, router, navigator, target_component, replace,\nenabled, tone, underline, 네 색상과 method/methods를 바꿀 수 있다. 색상 교체는\n현재 네이티브 옵션에서 시작하므로 최신 text·enabled 바인딩을 덮어쓰지 않는다.\nDisabled tone은 별도의 interaction gate이므로 요청한 enabled를 잃지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 73,
+      "end_line": 78,
+      "raw": "공통 ButtonEvent/ButtonMethod는 AlertButton에서 독립된 헤더로 분리했다. Link는\nmethod 하나와 최대 256개 typed methods, clicked·pressed·released·canceled를\n받는다. 네이티브 클릭 순서는 탐색 결과 알림 후 살아 있는 소스의 method, methods,\nclicked이다. 앞선 콜백이 소스를 종료하면 남은 메서드를 호출하지 않는다. 탐색 오류는\nnavigation_failed가 받으며 없으면 호스트의 오류 장벽으로 전달한다. navigated는\n위임 결과를 전달한다. 이미 커밋한 탐색의 수신 오류를 무조건 재시도하지 않는다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 85,
+      "raw": "LVUI는 기존 import의 C++ 멤버를 직접 사용한다. href/to·params·router·navigator·\ntargetComponent·replace·underline·tone·색상·text·enabled·visible는 Core Observable\n이면 위젯 세대의 BindingScope에 구독한다. 일반 C++ 멤버는 구성 시 값으로 사용하며\n임의의 C++ 대입을 자동 감지한다고 가정하지 않는다. shared_ptr::get을 Observable\n접근으로 오인하지 않는다. method와 methods는 호출이 아닌 지연 참조이고 자식은\n같은 백엔드를 재사용한다. 반응형 패딩·치수 등 일반 상속 속성은 여전히 남아 있다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "## 범위와 검증\n",
+      "level": 2,
+      "title": "범위와 검증"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 89,
+      "end_line": 92,
+      "raw": "원본 전체의 부분 이식이다. 상속된 spring/색상 모션, 입력 방식별 포커스 링·outset,\n장기 누름·반복·모든 Qt hit-test/자식 overflow 예외, named method trigger registry,\n모든 signal 순서, 전체 reactive/inherited API와 플랫폼 접근성은 남아 있다.\n모바일/WASM 위젯 호스트와 Windows/Linux 실제 빌드·실행도 별도 증거가 필요하다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 99,
+      "raw": "tests/native/link.cpp에는 기하·경로·별칭·replace·컴포넌트·전역/만료 대상·자식·입력·\n색상/비활성 tone·Core 바인딩·예산·메서드·실패·재진입·소유자 종료를 등록한다.\n두 페이지 AOT 예제는 Target 43 버튼으로 링크 목적지를 바꾼 뒤 탐색하는 self-test와\n자식 링크를 포함한다. iiGUI ActionSurface·밑줄 검증과 함께 모든 앱·테스트 실행은\n사용자 지시에 따라 전체 작업의 최종 일괄 단계까지 미룬다. 현재 컴파일·링크·설치\n소비자 정적 증거를 실행 통과나 완전한 원본 동등성으로 표시하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 Link",
+      "anchor": "네이티브-link",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "시각 합성과 입력",
+      "anchor": "시각-합성과-입력",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "경로와 컴포넌트 탐색",
+      "anchor": "경로와-컴포넌트-탐색",
+      "start_line": 38
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "C++ 객체·메서드·반응형 입력",
+      "anchor": "c-객체메서드반응형-입력",
+      "start_line": 61
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "범위와 검증",
+      "anchor": "범위와-검증",
+      "start_line": 87
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "상태별 색상을 구현한다. OS 링크 컨트롤이나 일반 텍스트 버튼 별칭을 사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 28,
+        "text": "클릭을 부모 Link로 중복 처리하지 않는다. 장식용 뷰와 빈 패딩은 부모의 동작 영역이다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 36,
+        "text": "추가하는 장식으로 처리하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 49,
+        "text": "문자열 소스나 QML 컴포넌트를 런타임에 해석하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 53,
+        "text": "차단하지 않는다. 사용자 클릭은 iiGUI의 유효 활성화·모달·포커스 경계를 따른다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000027",
+        "line": 65,
+        "text": "실패하면 외부 마운트 팩토리가 오류를 전파해 기존 마운트를 유지해야 한다. 같은",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 76,
+        "text": "clicked이다. 앞선 콜백이 소스를 종료하면 남은 메서드를 호출하지 않는다. 탐색 오류는",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 78,
+        "text": "위임 결과를 전달한다. 이미 커밋한 탐색의 수신 오류를 무조건 재시도하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 83,
+        "text": "임의의 C++ 대입을 자동 감지한다고 가정하지 않는다. shared_ptr::get을 Observable",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 84,
+        "text": "접근으로 오인하지 않는다. method와 methods는 호출이 아닌 지연 참조이고 자식은",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000039",
+        "line": 99,
+        "text": "소비자 정적 증거를 실행 통과나 완전한 원본 동등성으로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

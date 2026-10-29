@@ -1,0 +1,319 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:ba669fe71b06060ec7bfce87b3d93b6dc4b2403805ec5488c0dd5e6e72a618cc",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/PlatformInfo.md",
+    "sha256": "1fedc473ccb149f94a21d03c1c37234c13ee278e9d86c8c5b6137f083f7ce195",
+    "bytes": 4363,
+    "line_count": 61,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 플랫폼 정보와 전체 런타임 프로필",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 플랫폼 정보와 전체 런타임 프로필\n",
+      "level": 1,
+      "title": "네이티브 플랫폼 정보와 전체 런타임 프로필"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "`lvrs::PlatformInfo`는 기존 Platform 싱글턴의 18개 속성·9개 조회 메서드를 C++ 읽기 전용\n객체로 제공한다. 현재 OS와 프로세스 아키텍처는 `iiSDKCore::PlatformProfile`에서 읽으며\nQt·QSysInfo·QVariant·QML 엔진을 요구하지 않는다. Core는 LVRS를 참조하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 10,
+      "raw": "기본 생성자는 현재 Core/네이티브 빌드 환경을 읽는다. `PlatformEnvironment`를 전달하는\n생성자는 별도의 타깃 문맥을 구성한다. 문맥을 조회하거나 다른 문맥을 선택해도 OS·창·\n렌더러·파일이나 원래 문맥을 바꾸지 않는다. 객체는 가변 상태·구독·스레드를 소유하지 않아\n서로 독립적으로 읽거나 값으로 복사할 수 있다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 16,
+      "raw": "macOS의 기존 `os()` 값은 `osx`, `canonicalOs()` 값은 `macos`를 유지한다. macOS·Linux·\nWindows·iOS·Android·WASM의 원래 순서, 모바일/데스크톱 구분, 22개 별칭을 보존한다.\nASCII 타깃 이름은 대소문자를 구분하지 않고 Unicode 공백을 제거한다. 잘못된 UTF-8은\n예외로 거절한다. 이름이 없는 predicate는 false이며 기본 프로필/백엔드 조회만 현재\n문맥을 사용한다. `runtimeProfile()`의 requested에는 공백을 제거한 원래 표기를 보존한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 21,
+      "raw": "프로필의 41개 필드는 Core Value 객체로 반환한다. CMake 시스템 이름·파일 확장자,\n부트스트랩 MSAA·프레임·아틀라스, 모바일 윈도우 권고, 화면 분기점·내비게이션 폭·서랍\n여백·전환 시간 등을 원본 값으로 제공한다. WASM은 데스크톱 분류에 속하지만 직접 실행과\n적응형 애니메이션은 false이다. 임의 타깃을 일부 문자열만으로 인식하지 않는다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 28,
+      "raw": "`metalSupported()`·`vulkanSupported()`는 실제 링크한 네이티브 패키지의 빌드 기능이다.\n원본 `backendFeatureReadyFor()`는 Metal·Vulkan의 기능 게이트만 검사하며 default/D3D11은\n별도 게이트가 없다. 이 의미를 유지한다. `generationSupported`는 알려진 설정 타깃이라는\n뜻이고 설치된 교차 컴파일러·원격 장치·해당 플랫폼의 실제 실행 가능성을 증명하지 않는다.\n특히 네이티브 WASM 창/표시 어댑터의 완성을 의미하지 않는다. 실제 선택된 GPU와 성능은\nHost/표면의 별도 실행 정보로 확인해야 한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 32,
+      "raw": "아키텍처 표기는 Core의 현재 프로세스/빌드 문맥을 따른다. 혼합 ABI·에뮬레이션에서 원본\nQSysInfo가 보고하는 네이티브 CPU와의 일치 여부는 플랫폼 실행 검증에 남긴다. 기본 Core\n탐지를 사용하면서 이 차이를 숨기거나 모든 플랫폼의 물리 CPU를 조사했다고 보고하지 않는다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## LVUI 연결\n",
+      "level": 2,
+      "title": "LVUI 연결"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "fenced_code",
+      "start_line": 36,
+      "end_line": 44,
+      "raw": "```lvui\nimport platform lvrs.PlatformInfo\nWindow {\n    VStack {\n        Label(text: platform.canonicalOs())\n        Label(text: platform.runtimeProfile(\"ios\")[\"adaptiveWideBreakpoint\"])\n    }\n}\n```\n",
+      "language": "lvui",
+      "code": "import platform lvrs.PlatformInfo\nWindow {\n    VStack {\n        Label(text: platform.canonicalOs())\n        Label(text: platform.runtimeProfile(\"ios\")[\"adaptiveWideBreakpoint\"])\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 46,
+      "end_line": 48,
+      "raw": "일반 C++ 메서드·Core Value·목록 결과를 기존 AOT 경계에 연결한다. 별도의 소스 해석기나\n플랫폼별 QML 함수를 만들지 않는다. 서비스 인스턴스는 import를 소유한 활성화에 속하며,\n타입만 불러오는 `import class`는 인스턴스를 만들지 않는다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "## 검증 경계\n",
+      "level": 2,
+      "title": "검증 경계"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 56,
+      "raw": "`tools/native_platform_contract.py`는 원본 전체 소스 해시를 고정한 검토용 fixture에서\n7개 프로필·41개 필드·22개 별칭과 공개 속성/메서드 표면을 대조한다. fixture는 원본을\n읽고 작성한 기대값이며 원본 Qt 실행 결과라고 주장하지 않는다. 원본이 변경되면 해시만\n덮어쓰지 않고 전체 기대값을 다시 검토해야 한다. 빌드 시 native C++ 데이터로 생성하므로\n검사 바이너리에도 런타임 JSON 파서를 추가하지 않는다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 61,
+      "raw": "네이티브 모델 검사 12개는 전체 필드·호스트/기능 조합·별칭·공백·미지원 타깃·문맥 독립성을,\n생성 뷰 7개는 기본 import·메타데이터·선택 문맥·Static·입력 정체성·파일 비변경·퇴역을\n다룬다. LVRS 실행은 전체 목표의 최종 일괄 단계에 모으고 중간 컴파일·링크와 구분한다.\n서체 등록·SVG 로딩이나 FontPolicy/SvgManager 전체 API의 구현 완료로 대체하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 플랫폼 정보와 전체 런타임 프로필",
+      "anchor": "네이티브-플랫폼-정보와-전체-런타임-프로필",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVUI 연결",
+      "anchor": "lvui-연결",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 경계",
+      "anchor": "검증-경계",
+      "start_line": 50
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "Qt·QSysInfo·QVariant·QML 엔진을 요구하지 않는다. Core는 LVRS를 참조하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 21,
+        "text": "적응형 애니메이션은 false이다. 임의 타깃을 일부 문자열만으로 인식하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 26,
+        "text": "뜻이고 설치된 교차 컴파일러·원격 장치·해당 플랫폼의 실제 실행 가능성을 증명하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 27,
+        "text": "특히 네이티브 WASM 창/표시 어댑터의 완성을 의미하지 않는다. 실제 선택된 GPU와 성능은",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 28,
+        "text": "Host/표면의 별도 실행 정보로 확인해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 32,
+        "text": "탐지를 사용하면서 이 차이를 숨기거나 모든 플랫폼의 물리 CPU를 조사했다고 보고하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 54,
+        "text": "읽고 작성한 기대값이며 원본 Qt 실행 결과라고 주장하지 않는다. 원본이 변경되면 해시만",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 55,
+        "text": "덮어쓰지 않고 전체 기대값을 다시 검토해야 한다. 빌드 시 native C++ 데이터로 생성하므로",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 56,
+        "text": "검사 바이너리에도 런타임 JSON 파서를 추가하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 61,
+        "text": "서체 등록·SVG 로딩이나 FontPolicy/SvgManager 전체 API의 구현 완료로 대체하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

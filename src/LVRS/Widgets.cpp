@@ -105,7 +105,11 @@ Widgets::Result<Widgets::Widget> Widgets::context_menu_divider(Widget p,std::str
 Widgets::Result<Widgets::Widget> Widgets::check_box(Widget p,std::string_view id,ii::gui::CheckOptions o,std::function<void(bool)> f) { return builder_.check_box(p,id,std::move(o),std::move(f)); }
 Widgets::Result<Widgets::Widget> Widgets::radio_button(Widget p,std::string_view id,ii::gui::CheckOptions o,std::function<void(bool)> f) { return builder_.radio_button(p,id,std::move(o),std::move(f)); }
 Widgets::Result<Widgets::Widget> Widgets::toggle_switch(Widget p,std::string_view id,ii::gui::CheckOptions o,std::function<void(bool)> f) { return builder_.toggle_switch(p,id,std::move(o),std::move(f)); }
-Widgets::Result<Widgets::Widget> Widgets::input_field(Widget p,std::string_view id,ii::gui::InputOptions o,std::function<void(std::string)> f,ii::runtime::Task s) { return builder_.input_field(p,id,std::move(o),std::move(f),std::move(s)); }
+Widgets::Result<Widgets::Widget> Widgets::input_field(Widget p,std::string_view id,ii::gui::InputOptions o,std::function<void(std::string)> f,ii::runtime::Task s) {
+    if(!o.style)o.style=detail::input_field_style(InputFieldShape::rounded,o.password?InputFieldMode::password:InputFieldMode::text,o.enabled);
+    return builder_.input_field(p,id,std::move(o),std::move(f),std::move(s));
+}
 Widgets::Result<Widgets::Widget> Widgets::slider(Widget p,std::string_view id,ii::gui::SliderOptions o,std::function<void(double)> f) { return builder_.slider(p,id,o,std::move(f)); }
 Widgets::Result<Widgets::Widget> Widgets::progress(Widget p,std::string_view id,ii::gui::ProgressOptions o) { return builder_.progress(p,id,o); }
+Widgets::Result<Widgets::Widget> Widgets::progress_bar(Widget p,std::string_view id,ProgressBarOptions o) { auto bar=ProgressBar::create(builder_,p,id,std::move(o));if(!bar)return std::unexpected(bar.error());return bar->root(); }
 } // namespace lvrs

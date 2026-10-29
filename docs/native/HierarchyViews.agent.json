@@ -1,0 +1,475 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:0a816f5f0522d612d5f49cffd46c05f7802d004608bbfa6768fa62e6a92f0bd5",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/HierarchyViews.md",
+    "sha256": "ac85fa0a12f930b8a350e43dfa5f3a1252fa7ff6b35c199d6a13e40181b33287",
+    "bytes": 11227,
+    "line_count": 124,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "계층 행과 가상화 목록",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 계층 행과 가상화 목록\n",
+      "level": 1,
+      "title": "계층 행과 가상화 목록"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "`HierarchyItem`과 `HierarchyList`는 기존 HierarchyModel/Projection 및\n[HierarchyController](HierarchyController.md)를 실제 iiGUI 자체 위젯에 연결한다.\n기존 QML 전체가 비교 기준이며 이 단계의 빌드만으로 원본 전체 계약을 완료로 표시하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 11,
+      "raw": "행은 body Label, 들여쓰기, 아이콘/글리프/placeholder, count, 우측 펼침 화살표와 사용자\ncountView 슬롯을 가진다. 기본 폭 200·높이 20·들여쓰기 8·아이콘/화살표 16·라디우스 5,\nbody 12/16·600 및 원본 Theme의 idle/hover/pressed/active/inactive 색을 사용한다.\n사용자 countView는 일반 C++ WidgetBuilder로 구성하며 행과 같은 키 수명에 남는다.\n데이터 갱신·선택·픽셀 스크롤은 해당 슬롯을 다시 생성하지 않는다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 18,
+      "raw": "LVUI의 `HierarchyItem(countView: ...)`도 이 C++ 슬롯을 사용한다. 타입 지정 View의\n첫 입력으로 현재 HierarchyItem 핸들을 전달하고 별도 자식 활성화를 구성한다. Core 옵션\ngetter를 통해 표시 변경을 추적하고, 지역 import·입력·구독의 수명은 countView에 속한다.\ncount가 음수일 때 생성하지 않으며 숨김은 기존 활성화를 퇴역시키고 재표시는 새로 생성한다.\nHierarchyList의 HierarchyItem 루트 itemDelegate도 LVUI에서 구성할 수 있으며\n[delegate 컨텍스트](HierarchyDelegate.md)가 소스 옵션·원래 이벤트·사용자 표시를 연결한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 23,
+      "raw": "숨겨진 countView의 새 콘텐츠 생성에 실패하면 이전 행 옵션과 표시를 보존한다. 실패한\n위젯 세대를 닫고 같은 설정의 재시도를 허용한다. 팩터리는 후보 옵션을 읽을 수 있으나\n구성 중 해당 행의 set_options는 busy이다. 옵션 getter의 위젯 수명 확인은 Core 읽기\n수집을 가려서 레이아웃의 보조 읽기가 행 표시식의 의존성에 섞이지 않도록 한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 29,
+      "raw": "HierarchyList에는 model 또는 controller 하나만 전달한다. 모델을 전달하면 독립적인\n컨트롤러를 만들고, 명시적인 컨트롤러를 전달하면 그 선택/펼침을 공유한다. 기본 네이티브\n뷰포트는 200×400이며 부모 배치를 따른다. 논리 길이와 높이는 C++ 인덱스가 소유하고\n표시 범위·overscan만 키별 콘텐츠로 마운트한다. 기본 행 예산은 512개이며 iiGUI의 전체\n노드 admission도 별도로 적용한다. 스크롤에서 경로·자식 배열 메타데이터를 생성하지 않는다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 35,
+      "raw": "`set_options`의 model/controller 변경은 안정된 바깥 위젯 아래 새 콘텐츠 세대로 준비한다.\n모든 초기 행 팩터리와 행 예산 검사를 통과해야 새 소스를 게시한다. 실패 시 이전 컨트롤러·\n행 핸들·선택·관찰 연결을 보존한다. 성공 시 같은 key의 행도 새 소스 수명으로 다시 만들며,\n이전 행과 관찰 연결을 퇴역시키고 그 뷰가 시작한 드래그는 확정 없이 취소한다.\n같은 소스의 스타일 갱신은 기존 키별 행과 사용자 슬롯을 유지한다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 40,
+      "raw": "모델 교체는 살아 있는 활성 key를 새 독립 컨트롤러의 초기값으로 전달한다. 해당 key가\n없으면 selected 또는 첫 활성 가능 행을 선택한다. 명시적 컨트롤러는 자신의 선택·펼침을\n사용한다. 비어 있는 소스는 새 빈 모델이다. 초기 선택은 후보 단계에서 뷰포트에 배치하며\n교체만으로 사용자 활성/펼침 콜백을 만들지 않는다. 이전 소스가 닫혀도 새 소스로 복구할 수 있다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 49,
+      "raw": "후보 구성 중 같은 목록의 재설정은 busy이다. 별도 공유 컨트롤러에 명시한 높이·편집·자동 펼침\n옵션은 후보 행 생성 전에 그 컨트롤러의 뷰 상태에 적용한다. 이후 후보가 거절되어도 외부 공유\n컨트롤러의 이 설정이나 사용자 팩터리의 외부 부수효과까지 되돌리지는 않는다. 보존 보장은\n현재 게시된 목록 세대에 관한 것이다. 어느 경로도 모델 행이나 문서를 수정하지 않는다.\n게시 뒤 리사이즈·새 소스 데이터 도착의 admission 오류는 일반 갱신 오류로 별도 보고한다.\n`state()`와 `controller()`는 안정된 목록의 소스 세대도 Core 읽기 의존성에 포함한다.\n소스 게시 후 이 의존성을 무효화하여 네이티브 바인딩이 새 컨트롤러를 다시 읽게 한다.\n게시 후 관찰자의 예외는 새 소스를 되돌리지 않으며 다음 관찰자까지 전달한 뒤 오류로 반환한다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 53,
+      "raw": "펼침/접기 콜백은 한 명령의 모든 실제 변경에 대해 전달한다. 목록은 최종 상태를 먼저 한 번\n반영하며 펼침 콜백 다음에 활성 콜백을 보낸다. 하나의 콜백이 실패해도 다음 콜백을 전달한 뒤\n첫 오류를 반환한다. 콜백이 뷰를 퇴역시키면 해당 세대의 나머지 알림은 전달하지 않는다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 59,
+      "raw": "화살표와 방향키는 컨트롤러에 명령을 보낸다. 외부에서 키를 활성화하면 뷰포트에 드러내고\nensure_visible 콜백을 전달한다. 행 내부의 사용자 버튼/입력은 해당 컨트롤의 동작과\n수명을 유지한다. 드래그는 임계 이동 뒤에만 시작하고 이동 계획·삽입선을 표시하며 마우스\n놓기에서 명시적으로 이동을 확정한다. 스크롤 범위 밖으로 간 드래그 원본 행은 임시로\n유지한다. 단순 선택·펼침·스크롤·조회는 모델 revision이나 앱 파일을 변경하지 않는다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 64,
+      "raw": "metadata는 명시적인 `HierarchyItem::metadata` 또는 컨트롤러 조회 때만 생성한다.\n동적 모델 role/QVariant 어댑터, 모든 수동 행·전체 delegate 정책, 전체 상속 스타일·\n모션, 터치 길게 누르기와 가장자리 자동 스크롤, 완전한 트리 접근성/모든 플랫폼 픽셀 계약은\n계속 남은 범위이다. 사용자 파일에 이동 결과를 영속 반영하는 책임은 앱 백엔드에 있다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 68,
+      "raw": "`tests/native/hierarchy_views.cpp`는 실제 창 없는 자체 위젯의 행 표시·입력·가상화·\n정체성·사용자 슬롯·후보 실패 보존·메타데이터 지연 계산과 문서 비변경 검사를 준비한다.\nLVRS 앱·테스트 실행은 전체 목표의 최종 일괄 단계에 수행한다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 75,
+      "raw": "이전 hierarchy-views 체크포인트(2026-10-27)에서는 일반·ASan/UBSan 구성에서 계층 컨트롤러 22개, 위젯 19개, 생성 뷰 7개와\n기존 모델/투영 69개를 합친 117개 검사의 실행 파일·등록 명령을 대조했다. LVRS 검사는\n실행하지 않았다. LVUI 관련 검사 74개씩은 실행 통과했으며, 69개 생성 팩터리의 C++를\n두 구성에서 컴파일하고 생성 헤더 일치를 확인했다. 재배치한 소비자는 12개 팩터리를\n포함하여 두 구성에서 링크했고 공개 헤더 15개와 계층 라이브러리 객체 6개를 대조했다.\n기록은 소스 저장소의 `build/lvui-completion/hierarchy-views/verification-20261027.json`이다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 77,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 84,
+      "raw": "2026-10-27의 hierarchy-sources 후속 체크포인트는 소스 교체와 펼침 알림 보완을 포함한다.\n일반·ASan/UBSan의 LVUI 관련 검사 74개씩이 통과했고, 생성 팩터리 69개의 C++와\n재배치 소비자 팩터리 12개를 두 구성에서 컴파일·링크한다. LVRS는 컨트롤러 27개,\n위젯 31개, 생성 뷰 8개, 모델/투영 69개를 합친 135개 검사를 준비하며 실행하지 않는다.\n최종 증거는 `build/lvui-completion/hierarchy-sources/verification-20261027.json`에 기록한다.\n실행 통과나 전체 LVRS/LVUI 완료를 의미하지 않는다. 메모리 오류 검사 구성의 iiGUI 의존성은\n일반 설치본이므로 전체 GUI 런타임을 계측했다는 주장도 하지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 86,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 95,
+      "raw": "2026-10-27의 hierarchy-slots 체크포인트에서는 LVUI countView와 타입 지정 행 핸들,\n독립 import/Bindings, 실패한 콘텐츠 후보의 재시도, C++ 타입 청사진 별칭과 백엔드 인자\n전달을 추가했다. 일반·ASan/UBSan에서 LVUI 전체 295개를 각각 통과했다. 첫 일반 검사에서\n생성된 지원 입력 문서의 낡은 항목 1개를 발견하여 소스 기준으로 재생성한 뒤 전체 검사를\n다시 통과했다. 생성 팩터리 70개와 재배치 소비자 팩터리 13개를 두 구성에서 컴파일·링크한다.\nLVRS는 컨트롤러 27개·위젯 33개·생성 뷰 14개·모델/투영 69개로 총 143개를 빌드·등록하고,\n실행은 전체 목표의 마지막에 수행한다. LVRS 실제 실행·OS/GPU/접근성·다른 플랫폼의\n실행 증거로 해석하지 않는다. 메모리 구성의 iiGUI는 일반 설치본이므로 GUI 전체 계측도\n주장하지 않는다. 기록은 `build/lvui-completion/hierarchy-slots/verification-20261027.json`이다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 97,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 98,
+      "end_line": 106,
+      "raw": "2026-10-27 hierarchy-delegates 체크포인트에서는 HierarchyItem 루트 LVUI itemDelegate,\n행별 HierarchyDelegateContext, 소스/적용 revision 확인, 원래 이벤트와 사용자 이벤트 연결,\n기존 C++ 팩터리 스타일 보존과 중첩 countView를 추가했다. LVUI 전체 검사는 일반과\nASan/UBSan 각각 299개를 통과했다. 생성 팩터리 71개와 재배치 소비자 14개를 두 구성에서\n컴파일·링크한다. LVRS는 컨텍스트 16개·컨트롤러 27개·위젯 35개·생성 뷰 23개·모델/투영\n69개로 총 170개를 빌드·등록하며, 실제 실행은 전체 목표의 마지막에 수행한다.\n실제 창/GPU·접근성·다른 플랫폼·성능 개선률과 GUI 전체 메모리 계측의 증거로 해석하지 않는다.\n메모리 구성의 iiGUI 의존성은 일반 설치본이다. 최종 대조는\n`build/lvui-completion/hierarchy-delegates/verification-20261027.json`에 기록한다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "## 중첩 구성 실패의 진단\n",
+      "level": 2,
+      "title": "중첩 구성 실패의 진단"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 110,
+      "end_line": 112,
+      "raw": "행·목록 내부의 오류 전달 예외는 `std::exception` 계약으로 원래 Error 메시지를 제공한다.\n후보 구성·레이아웃 콜백의 원인을 재전파해도 표준 소비자가 메시지를 확인할 수 있다.\n기존 Result 반환과 후보 보존 정책을 유지하며 가상 목록 구성 회귀에서 오류 진단을 함께 사용한다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 114,
+      "end_line": 116,
+      "raw": "중첩 콘텐츠 세대의 루트 크기는 `set_extent`로 갱신한다. 루트에는 같은 세대의 직접\nabsolute 부모가 없으므로 자식 전용 `set_frame`을 호출하지 않는다. 1,000개 항목의\n뷰포트 크기 변경·가상화 유지·소스 revision 비변경을 같은 회귀에서 확인한다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 118,
+      "end_line": 120,
+      "raw": "미세 스크롤로 하단에 새로운 부분 행이 보이면 해당 키의 행은 새로 생성할 수 있다.\n회귀는 기존 표시 키의 모든 위젯 ID 보존과 새로 보이는 키 수만큼의 생성만 허용한다.\n전체 생성 횟수가 무조건 0이어야 한다는 조건으로 정상적인 표시 범위 확대를 실패 처리하지 않는다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 122,
+      "end_line": 124,
+      "raw": "교체 후보 구성 중에는 스크롤 콜백을 아직 전달하지 않을 수 있다. 활성 키를 보이도록\n설정한 오프셋을 목록 자체도 기록하여 첫 렌더가 이를 0으로 덮어쓰지 않게 한다.\n표시 행 예산 초과는 원래 full 오류 코드를 보존하여 기존 원천을 유지한 채 거부한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "계층 행과 가상화 목록",
+      "anchor": "계층-행과-가상화-목록",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "중첩 구성 실패의 진단",
+      "anchor": "중첩-구성-실패의-진단",
+      "start_line": 108
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "기존 QML 전체가 비교 기준이며 이 단계의 빌드만으로 원본 전체 계약을 완료로 표시하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000005",
+        "line": 11,
+        "text": "데이터 갱신·선택·픽셀 스크롤은 해당 슬롯을 다시 생성하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 29,
+        "text": "노드 admission도 별도로 적용한다. 스크롤에서 경로·자식 배열 메타데이터를 생성하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 45,
+        "text": "현재 게시된 목록 세대에 관한 것이다. 어느 경로도 모델 행이나 문서를 수정하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 53,
+        "text": "첫 오류를 반환한다. 콜백이 뷰를 퇴역시키면 해당 세대의 나머지 알림은 전달하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 59,
+        "text": "유지한다. 단순 선택·펼침·스크롤·조회는 모델 revision이나 앱 파일을 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 81,
+        "text": "위젯 31개, 생성 뷰 8개, 모델/투영 69개를 합친 135개 검사를 준비하며 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 83,
+        "text": "실행 통과나 전체 LVRS/LVUI 완료를 의미하지 않는다. 메모리 오류 검사 구성의 iiGUI 의존성은",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 84,
+        "text": "일반 설치본이므로 전체 GUI 런타임을 계측했다는 주장도 하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 94,
+        "text": "실행 증거로 해석하지 않는다. 메모리 구성의 iiGUI는 일반 설치본이므로 GUI 전체 계측도",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 95,
+        "text": "주장하지 않는다. 기록은 `build/lvui-completion/hierarchy-slots/verification-20261027.json`이다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 104,
+        "text": "실제 창/GPU·접근성·다른 플랫폼·성능 개선률과 GUI 전체 메모리 계측의 증거로 해석하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000039",
+        "line": 115,
+        "text": "absolute 부모가 없으므로 자식 전용 `set_frame`을 호출하지 않는다. 1,000개 항목의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000041",
+        "line": 120,
+        "text": "전체 생성 횟수가 무조건 0이어야 한다는 조건으로 정상적인 표시 범위 확대를 실패 처리하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000003",
+        "label": "HierarchyController",
+        "target": "HierarchyController.md",
+        "kind": "relative",
+        "line": 4
+      },
+      {
+        "block_id": "b000007",
+        "label": "delegate 컨텍스트",
+        "target": "HierarchyDelegate.md",
+        "kind": "relative",
+        "line": 18
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

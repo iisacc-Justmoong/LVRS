@@ -1,0 +1,100 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:27f6b1ab65c2af69791796bfccd20004c19766313d552d9217528bad063699f3",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeNavigationGallery/AGENT.md",
+    "sha256": "8fba4bc5ac93446fc75d6c07bd9b8570f920b68b8fd865f198c718871c5cedf8",
+    "bytes": 687,
+    "line_count": 9,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 탐색 모델 예제 작업 지침",
+    "role": "instructions",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 탐색 모델 예제 작업 지침\n",
+      "level": 1,
+      "title": "네이티브 탐색 모델 예제 작업 지침"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "이 예제는 LVUI AOT·iiGUI 자체 위젯과 C++23 탐색 모델을 연결한다.\n앱 소스는 `App/`, 문서는 `docs/`, CTest 등록은 `tests/`에 둔다.\n빌드 출력은 `build/`에 두며 `install.sh`는 앱을 실행하지 않고 빌드·설치만 수행한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 9,
+      "raw": "현재 사용자 요청에 따라 테스트와 앱의 실제 실행은 전체 작업의 최종 일괄 단계에 모은다.\n빌드 성공을 실행 성공으로 표현하지 않는다. 모델 경로 표시 예제를 완성된 PageRouter\n페이지 호스트라고 표현하지 않는다. scope 소유 backend와 Core 포트의 약한 수신 수명을 유지한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 탐색 모델 예제 작업 지침",
+      "anchor": "네이티브-탐색-모델-예제-작업-지침",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 8,
+        "text": "빌드 성공을 실행 성공으로 표현하지 않는다. 모델 경로 표시 예제를 완성된 PageRouter",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000005",
+        "line": 9,
+        "text": "페이지 호스트라고 표현하지 않는다. scope 소유 backend와 Core 포트의 약한 수신 수명을 유지한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

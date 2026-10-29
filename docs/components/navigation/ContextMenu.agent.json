@@ -1,0 +1,1256 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7cf8aa3596bf4319195f2b3e994ce389b8a2a9add4ace59c92d9dff8ea96e08c",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/ContextMenu.md",
+    "sha256": "e164ba78b582898901969bb873a40ef5c3e5ffa5eb176ecb4ba6ac65b01b663c",
+    "bytes": 12123,
+    "line_count": 189,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ContextMenu",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ContextMenu\n",
+      "level": 1,
+      "title": "ContextMenu"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/navigation/ContextMenu.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ContextMenu`는 런타임로 조정된 개방형 애니메이션과 전역 외부 해제 브리징이 포함된 팝업 메뉴입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 이질적인 메뉴 모델(문자열/객체/분할기)을 렌더링합니다.\n- 정규화된 이벤트 신호와 선택적 콜백 컨텍스트를 내보냅니다.\n- 오버레이/글로벌 이벤트 경로 전반에 걸쳐 긴밀한 행동을 결정적으로 유지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이질적인 메뉴 모델(문자열/객체/분할기)을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정규화된 이벤트 신호와 선택적 콜백 컨텍스트를 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "오버레이/글로벌 이벤트 경로 전반에 걸쳐 긴밀한 행동을 결정적으로 유지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "데이터 및 선택:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 23,
+      "raw": "- `items`\n- `selectedIndex`\n- `entryCount`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`items`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectedIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`entryCount`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "열기/닫기 동작:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 33,
+      "raw": "- `autoCloseOnTrigger`\n- `dismissOnGlobalPress`\n- `dismissOnGlobalContextRequest`\n- `openAt(x, y)`\n- `openFor(item, x, y)`\n- `dismissIfOutsideGlobalEvent(eventData)`\n- `triggerEntry(index)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`autoCloseOnTrigger`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dismissOnGlobalPress`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dismissOnGlobalContextRequest`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`openAt(x, y)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`openFor(item, x, y)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dismissIfOutsideGlobalEvent(eventData)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`triggerEntry(index)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "시각적/레이아웃:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 37,
+      "end_line": 47,
+      "raw": "- `itemWidth`, `itemSpacing`(기본값 `Theme.gap2`)\n- `resolvedItemWidth`(읽기 전용)\n- `showIconSlot`(기본 `true`, 기본 `ContextMenuItem` 행으로 전달됨)\n- `itemDelegate`: 비분할 항목에 사용되는 선택적 구성 요소입니다.\n- `dividerDelegate`: 구분선 항목에 사용되는 선택적 구성 요소입니다.\n- `menuColor`, `menuOpacity`, `resolvedMenuColor`(기본 창 배경색, 12% 표면 색조)\n- `menuBlurRadius`(64 논리 픽셀), `menuAccentStrength`(표준 방사형 액센트 코팅의 0.08)\n- `primaryColor`, `backdropSource`, `backdropBackground`: 창 악센트 및 안전한 창 내 캡처 소스; 전경 내용은 불투명하게 유지됩니다.\n- `dividerColor`(기본 `Theme.contextMenuDivider`, 30% 흰색)\n- `edgeMargin`(자동 배치에 사용되는 뷰포트 삽입, 기본값 `Theme.gap4`)\n- `openHorizontalDirection`, `openVerticalDirection`(마지막으로 확인된 배치 방향)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemWidth`, `itemSpacing`(기본값 `Theme.gap2`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedItemWidth`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showIconSlot`(기본 `true`, 기본 `ContextMenuItem` 행으로 전달됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemDelegate`: 비분할 항목에 사용되는 선택적 구성 요소입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dividerDelegate`: 구분선 항목에 사용되는 선택적 구성 요소입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`menuColor`, `menuOpacity`, `resolvedMenuColor`(기본 창 배경색, 12% 표면 색조)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`menuBlurRadius`(64 논리 픽셀), `menuAccentStrength`(표준 방사형 액센트 코팅의 0.08)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`primaryColor`, `backdropSource`, `backdropBackground`: 창 악센트 및 안전한 창 내 캡처 소스; 전경 내용은 불투명하게 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`dividerColor`(기본 `Theme.contextMenuDivider`, 30% 흰색)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`edgeMargin`(자동 배치에 사용되는 뷰포트 삽입, 기본값 `Theme.gap4`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`openHorizontalDirection`, `openVerticalDirection`(마지막으로 확인된 배치 방향)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "애니메이션 조정:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 51,
+      "end_line": 54,
+      "raw": "- `enableOpenBounce`, `autoTuneByBackend`\n- `openBounceDuration`, `openSettleDuration`\n- `openStartScale`, `openOvershootScale`\n- 해결됨: `resolvedOpenBounceEnabled`, `resolvedOpenReboundDuration`, `resolvedOpenBackOvershoot`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`enableOpenBounce`, `autoTuneByBackend`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`openBounceDuration`, `openSettleDuration`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`openStartScale`, `openOvershootScale`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결됨: `resolvedOpenBounceEnabled`, `resolvedOpenReboundDuration`, `resolvedOpenBackOvershoot`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 58,
+      "end_line": 59,
+      "raw": "- `itemTriggered(index, item)`\n- `itemEventTriggered(eventName, payload, index, item)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemTriggered(index, item)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemEventTriggered(eventName, payload, index, item)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "html",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "<a id=\"entry-object-contract\"></a>\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "## 참가 개체 계약\n",
+      "level": 2,
+      "title": "참가 개체 계약"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "지원되는 개체 필드는 다음과 같습니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 67,
+      "end_line": 78,
+      "raw": "- 표준 압축 항목 필드: `icon`, `label`, `keyVisible`, `key`\n- 라벨/텍스트: `label`, `text`, `title`\n- 아이콘: `iconName`/`icon`, `iconSource`/`source`\n- 아이콘 슬롯 가시성: `showIconSlot` 또는 `iconSlotVisible`\n- 핵심 텍스트: `key`, `shortcut`, `keyText`\n- 주요 가시성 : `keyVisible`, `shortcutVisible`, `showShortcut`\n- 상태: `enabled`, `state`, `selected`\n- 쉐브론/어린이: `showChevron`, `hasChildItems`, `hasSubmenu`, `expanded`, `selectionDirection`\n- 이벤트: `eventName`/`event`/`action`, `eventPayload`/`payload`, `events[]`\n- 콜백: `onTriggered`, `onClicked`, `handler`\n- 정책 닫기: `closeOnTrigger`, `autoClose`, `keepOpen`, `preventClose`\n- 분배기: `type: \"divider\"` 또는 `divider: true`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "표준 압축 항목 필드: `icon`, `label`, `keyVisible`, `key`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "라벨/텍스트: `label`, `text`, `title`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘: `iconName`/`icon`, `iconSource`/`source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘 슬롯 가시성: `showIconSlot` 또는 `iconSlotVisible`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "핵심 텍스트: `key`, `shortcut`, `keyText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주요 가시성 : `keyVisible`, `shortcutVisible`, `showShortcut`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태: `enabled`, `state`, `selected`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "쉐브론/어린이: `showChevron`, `hasChildItems`, `hasSubmenu`, `expanded`, `selectionDirection`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이벤트: `eventName`/`event`/`action`, `eventPayload`/`payload`, `events[]`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "콜백: `onTriggered`, `onClicked`, `handler`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정책 닫기: `closeOnTrigger`, `autoClose`, `keepOpen`, `preventClose`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "분배기: `type: \"divider\"` 또는 `divider: true`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "콜백은 컨텍스트 `{ index, item, menu, eventName, payload, emit(), close() }`를 수신합니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "체vron 렌더링 조건은 `showChevron && hasChildItems` (엔트리 필드에서 해결됨) 입니다. 단축키 가시성은 단축키 텍스트가 존재할 때만 `true` 로 기본값이며, `key` / `shortcut` / `keyText` 가 없는 엔트리는 명시적으로 요청되지 않는 한 후미 단축키 공간을 예약하지 않습니다. 아이콘 슬롯 가시성은 메뉴 레벨 `showIconSlot` 값으로 기본값입니다. 개별 엔트리는 `showIconSlot` 또는 호환성 별칭 `iconSlotVisible` 로 이를 덮어쓸 수 있습니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "<a id=\"delegate-contract\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "## 계약위임\n",
+      "level": 2,
+      "title": "계약위임"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 88,
+      "end_line": 92,
+      "raw": "- 구분자가 아닌 각 항목은 `itemDelegate`를 인스턴스화합니다. 각 구분선 항목은 `dividerDelegate`를 인스턴스화합니다.\n- 두 대리자 모두 주입된 `modelData` 개체 하나를 받고 `property var modelData`를 선언해야 합니다.\n- `modelData`에는 `index`, `entry`, `divider`, `label`, `shortcut`, `keyVisible`, `showIconSlot`, `iconName`, `iconSource`, `showChevron`, `hasChildItems`, `expanded`, `selectionDirection`, `enabled`, `state` 및 `trigger()`.\n- `modelData.trigger()`는 `triggerEntry(index)`를 호출하고, 정규화된 메뉴 신호를 내보내고, 콜백/이벤트를 실행하고, 닫기 정책을 적용합니다.\n- 사용자 정의 대리자는 자신의 클릭/탭 동작을 `modelData.trigger()`에 연결하는 일을 담당합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "구분자가 아닌 각 항목은 `itemDelegate`를 인스턴스화합니다. 각 구분선 항목은 `dividerDelegate`를 인스턴스화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "두 대리자 모두 주입된 `modelData` 개체 하나를 받고 `property var modelData`를 선언해야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modelData`에는 `index`, `entry`, `divider`, `label`, `shortcut`, `keyVisible`, `showIconSlot`, `iconName`, `iconSource`, `showChevron`, `hasChildItems`, `expanded`, `selectionDirection`, `enabled`, `state` 및 `trigger()`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modelData.trigger()`는 `triggerEntry(index)`를 호출하고, 정규화된 메뉴 신호를 내보내고, 콜백/이벤트를 실행하고, 닫기 정책을 적용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자 정의 대리자는 자신의 클릭/탭 동작을 `modelData.trigger()`에 연결하는 일을 담당합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "html",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "<a id=\"placement-contract\"></a>\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "## 배치 계약\n",
+      "level": 2,
+      "title": "배치 계약"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "list",
+      "start_line": 98,
+      "end_line": 102,
+      "raw": "- `openAt(x, y)`는 오버레이 경계에 대해 내장된 가장자리 인식 배치를 수행합니다.\n- 기본 설정은 기준점에서 오른쪽/아래쪽입니다.\n- 공간이 부족하면 배치가 왼쪽 및/또는 위로 뒤집힙니다.\n- 최종 위치는 `edgeMargin`를 사용하여 뷰포트에 고정됩니다.\n- `resolveOpenPlacement(...)`는 결정론적 테스트 및 툴링을 위한 내부 배치 솔버를 공개합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`openAt(x, y)`는 오버레이 경계에 대해 내장된 가장자리 인식 배치를 수행합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 설정은 기준점에서 오른쪽/아래쪽입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공간이 부족하면 배치가 왼쪽 및/또는 위로 뒤집힙니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최종 위치는 `edgeMargin`를 사용하여 뷰포트에 고정됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolveOpenPlacement(...)`는 결정론적 테스트 및 툴링을 위한 내부 배치 솔버를 공개합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "<a id=\"width-contract\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "## 폭 계약\n",
+      "level": 2,
+      "title": "폭 계약"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 108,
+      "end_line": 115,
+      "raw": "- `itemWidth`는 기준 최소 행 너비입니다.\n- `resolvedItemWidth`는 기본 `itemWidth`, 가장 넓은 대리자 암시적 너비 및 호출자가 제공한 명시적 팝업 너비 중 더 큰 너비로 확장됩니다.\n- 팝업 프레임 자체는 최소한 `implicitWidth`로 승격되므로 좁은 명시적 `width`는 메뉴를 콘텐츠 중심 크기 아래로 고정할 수 없습니다.\n- 대리자 행 및 구분선은 `resolvedItemWidth`를 사용하므로 콤보 트리거 메뉴는 콘텐츠 또는 발신자 크기 조정이 필요할 때 트리거 자체보다 더 넓어질 수 있습니다.\n- 대리자 `MenuItem` 행은 `resolvedItemWidth` 내에서 응답 상태를 유지하므로 제한된 메뉴가 레이블/바로가기/갈매기 모양 콘텐츠를 팝업 경계 외부로 푸시하거나 내부 스페이서를 네거티브 형상으로 축소하지 않습니다.\n- 너비 검색은 각 행의 제한되지 않은 자연 콘텐츠 너비를 사용하므로 표시되는 텍스트 제거는 팝업 크기 조정에 피드백되지 않습니다.\n- 너비 프로빙은 렌더링된 행과 동일한 컴팩트/일반 글꼴 계약을 사용합니다. 더 넓은 크롬이 필요한 사용자 정의 대리자는 `itemWidth` 또는 명시적 팝업 `width`를 설정해야 합니다.\n- 너비 프로빙은 렌더링된 대리자와 동일한 아이콘 슬롯 가시성을 전달하므로 `showIconSlot: false`는 숨겨진 선행 여백을 남기는 대신 콘텐츠 중심 메뉴 너비를 줄입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemWidth`는 기준 최소 행 너비입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolvedItemWidth`는 기본 `itemWidth`, 가장 넓은 대리자 암시적 너비 및 호출자가 제공한 명시적 팝업 너비 중 더 큰 너비로 확장됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "팝업 프레임 자체는 최소한 `implicitWidth`로 승격되므로 좁은 명시적 `width`는 메뉴를 콘텐츠 중심 크기 아래로 고정할 수 없습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대리자 행 및 구분선은 `resolvedItemWidth`를 사용하므로 콤보 트리거 메뉴는 콘텐츠 또는 발신자 크기 조정이 필요할 때 트리거 자체보다 더 넓어질 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대리자 `MenuItem` 행은 `resolvedItemWidth` 내에서 응답 상태를 유지하므로 제한된 메뉴가 레이블/바로가기/갈매기 모양 콘텐츠를 팝업 경계 외부로 푸시하거나 내부 스페이서를 네거티브 형상으로 축소하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "너비 검색은 각 행의 제한되지 않은 자연 콘텐츠 너비를 사용하므로 표시되는 텍스트 제거는 팝업 크기 조정에 피드백되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "너비 프로빙은 렌더링된 행과 동일한 컴팩트/일반 글꼴 계약을 사용합니다. 더 넓은 크롬이 필요한 사용자 정의 대리자는 `itemWidth` 또는 명시적 팝업 `width`를 설정해야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "너비 프로빙은 렌더링된 대리자와 동일한 아이콘 슬롯 가시성을 전달하므로 `showIconSlot: false`는 숨겨진 선행 여백을 남기는 대신 콘텐츠 중심 메뉴 너비를 줄입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "<a id=\"visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "## 시각적 계약\n",
+      "level": 2,
+      "title": "시각적 계약"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "list",
+      "start_line": 121,
+      "end_line": 127,
+      "raw": "- Figma 소스: `331:9332`, `331:9282` 및 `331:9283`로 구성됩니다.\n- 최소 항목 너비 141px, 모든 4 측면의 8px 패딩, 2px 행 간격입니다.\n- 5개의 18px 행과 1개의 3px 구분선이 참조 157 × 119px 팝업을 생성합니다.\n- 컴팩트 라벨은 Inter 일반 12를 사용하고, 바로가기는 Pretendard SemiBold 12를 사용합니다.\n- 구분선은 4px 수평 삽입과 함께 30% 불투명도의 흰색을 사용합니다.\n- 팝업에서는 메뉴 반경이 12px인 WindowMaterial, 색조 12%, 흐림 효과가 64px, 표준 악센트 그라데이션 강도의 8%가 사용됩니다.\n- 별도의 Figma 메뉴 계열(110:857)의 경우 메뉴: 24px 행, 4px 수직 패딩 및 panel08 전폭 분할기를 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 소스: `331:9332`, `331:9282` 및 `331:9283`로 구성됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최소 항목 너비 141px, 모든 4 측면의 8px 패딩, 2px 행 간격입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "5개의 18px 행과 1개의 3px 구분선이 참조 157 × 119px 팝업을 생성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컴팩트 라벨은 Inter 일반 12를 사용하고, 바로가기는 Pretendard SemiBold 12를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구분선은 4px 수평 삽입과 함께 30% 불투명도의 흰색을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "팝업에서는 메뉴 반경이 12px인 WindowMaterial, 색조 12%, 흐림 효과가 64px, 표준 악센트 그라데이션 강도의 8%가 사용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "별도의 Figma 메뉴 계열(110:857)의 경우 메뉴: 24px 행, 4px 수직 패딩 및 panel08 전폭 분할기를 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "html",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "fenced_code",
+      "start_line": 133,
+      "end_line": 145,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.ContextMenu {\n    id: menu\n    showIconSlot: false\n    items: [\n        { label: \"Copy\", eventName: \"menu.copy\", showChevron: false },\n        { type: \"divider\" },\n        { label: \"Inspect\", showIconSlot: true, keepOpen: true, events: [\"menu.inspect\"] }\n    ]\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.ContextMenu {\n    id: menu\n    showIconSlot: false\n    items: [\n        { label: \"Copy\", eventName: \"menu.copy\", showChevron: false },\n        { type: \"divider\" },\n        { label: \"Inspect\", showIconSlot: true, keepOpen: true, events: [\"menu.inspect\"] }\n    ]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "fenced_code",
+      "start_line": 147,
+      "end_line": 163,
+      "raw": "```qml\nComponent {\n    id: destructiveMenuRow\n\n    LV.MenuItem {\n        property var modelData: ({})\n        label: modelData.label || \"\"\n        enabled: modelData.enabled === true\n        onClicked: modelData.trigger()\n    }\n}\n\nLV.ContextMenu {\n    itemDelegate: destructiveMenuRow\n    items: [{ label: \"Delete\", eventName: \"delete\" }]\n}\n```\n",
+      "language": "qml",
+      "code": "Component {\n    id: destructiveMenuRow\n\n    LV.MenuItem {\n        property var modelData: ({})\n        label: modelData.label || \"\"\n        enabled: modelData.enabled === true\n        onClicked: modelData.trigger()\n    }\n}\n\nLV.ContextMenu {\n    itemDelegate: destructiveMenuRow\n    items: [{ label: \"Delete\", eventName: \"delete\" }]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "메뉴는 리바운드를 통해 해결된 원점에서 축소된 다음 해제 시 페이드됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "paragraph",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "Figma 컴팩트 기본값은 141px 최소 항목 너비, 18px 행, 모든 측면의 8px 패딩을 사용합니다. 5 참조 행과 하나의 구분자는 157 × 119px를 생성합니다. `compactItems` 는 기본값이 참이며 일반적으로 너비 탐사 타이포그래피도 제어합니다. `Menu` 를 사용하여 규칙적인 24px 행과 4px 수직 패딩을 보존합니다.\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "html",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "<a id=\"window-derived-frosted-menu\"></a>\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "heading",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "## 창 파생 프로스트 메뉴\n",
+      "level": 2,
+      "title": "창 파생 프로스트 메뉴"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "기본 `menuColor`는 창 `background.color`를 상속한다. ApplicationWindow의 기본 배경에서는 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 혼합한 최종 색상이며, `windowColor` 바탕색과 구별된다. `menuColor`를 직접 지정하면 해당 값이 우선한다.\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "paragraph",
+      "start_line": 179,
+      "end_line": 179,
+      "raw": "2026-09-12 시각적 수정안은 사용자의 글래스 처리 요청을 따르며 이전 Figma 글래스 25 메뉴 코팅을 대체합니다. ContextMenu 와 메뉴는 WindowMaterial , 윈도우의 채움 색상과 주요 팔레트, 그리고 48px/16px/30% 높이를 공유합니다. 컴팩트/규칙 행 레이아웃은 이 소재와 독립적입니다.\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 180,
+      "end_line": 180,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "`menuOpacity` 는 중성 톤만 제어하며 (기본값 0.12 ), `menuBlurRadius` 는 배경 블러를 제어하며 (64 로직 픽셀), `menuAccentStrength` 는 추가 원형 코팅을 확대합니다 (0.08 ). 포착된 창은 이미 강조 조명 정보를 포함하고 있으므로, 두 번째 풀 강도 레이어를 추가하면 메뉴가 과도하게 파랗게 변합니다. 유리 테두리와 내장 하이라이트는 그대로 표시됩니다. 팝업 불투명도는 1로 유지되어 레이블과 선택된 행이 완전히 불투명하게 유지됩니다. 명시적 menuColor , 배경 소스 및 해당 3 재료 값은 여전히 덮어쓸 수 있습니다.\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 182,
+      "end_line": 182,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 183,
+      "end_line": 183,
+      "raw": "네이티브 자료 테스트에서는 기존 25%/16px/풀 액센트 처리를 새로운 처리와 비교하고, 감소된 파란색 농도를 측정하고, 실제 배경 확산을 확인하고, 메뉴 유형과 재정의를 모두 테스트합니다.\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 184,
+      "end_line": 184,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "paragraph",
+      "start_line": 185,
+      "end_line": 185,
+      "raw": "기본 콘텐츠 포착은 `ApplicationWindow.materialBackdropSource` 를 사용하며, 이는 팝업 오버레이를 제외합니다. 전체 Qt 창 콘텐츠 조상을 포착하는 것은 피드백을 피하기 위해 MaterialSurface 에 의해 거부되며, 안전한 앱 콘텐츠 호스트를 사용하면 메뉴 뒤의 텍스트와 제어가 실제로 블러에 참여합니다. 다른 창 구현체는 명시적인 안전한 `backdropSource` 를 계속 제공할 수 있습니다.\n"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 186,
+      "end_line": 186,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "paragraph",
+      "start_line": 187,
+      "end_line": 187,
+      "raw": "포착은 테마 materialTint , 불투명한 중성 베이스 위에 합성된 후 확산됩니다. 이 베이스를 중성으로 유지하면 컬러 윈도우 필드가 두 번째 불투명한 강조 레이어로 변하는 것을 방지합니다. 이는 덮인 앱 텍스트의 두 번째, 블러되지 않은 사본이 포착 알파를 통해 보일 것을 방지합니다. 네이티브 테스트는 고립된 효과 텍스처뿐만 아니라 스트립 패턴 위의 최종 가시 윈도우 픽셀을 측정합니다.\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 188,
+      "end_line": 188,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "paragraph",
+      "start_line": 189,
+      "end_line": 189,
+      "raw": "macOS / Metal 에서 2026-09-12에서 확인되었으며: 모든 53 LVRS CTest 사례와 모든 9 네이티브 재료 검사가 통과했습니다. 설치된 런타임 는 83 소스 QML 파일과 일치합니다. Society ( 16 테스트) 및 Dreamscapes ( 5 테스트)가 재구성되어 테스트 수트를 통과한 후 다시 시작되었으며, 생성 횟수 메뉴는 기본 콘텐츠를 가시적으로 확산시키면서 명확한 레이블과 선택을 유지합니다. 두 실행 중인 앱이 업데이트된 워크스페이스 런타임 를 로드했습니다. VisualCatalog 도 동일한 런타임 로 재구성되어 다시 시작되었습니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ContextMenu",
+      "anchor": "contextmenu",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "참가 개체 계약",
+      "anchor": "참가-개체-계약",
+      "start_line": 63
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "계약위임",
+      "anchor": "계약위임",
+      "start_line": 86
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "배치 계약",
+      "anchor": "배치-계약",
+      "start_line": 96
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "폭 계약",
+      "anchor": "폭-계약",
+      "start_line": 106
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "시각적 계약",
+      "anchor": "시각적-계약",
+      "start_line": 119
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 131
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 167
+    },
+    {
+      "block_id": "b000091",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "창 파생 프로스트 메뉴",
+      "anchor": "창-파생-프로스트-메뉴",
+      "start_line": 175
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000085",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 169
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:6703c96514ef0ed57c061c6d1ae163d418a1f2f33167393d0ee4b7f1cc487663",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/Menu.md",
+    "sha256": "040e141e2b6f063032905af690b3dd4e526584b7a7f1a279edca0c2b52461b95",
+    "bytes": 1179,
+    "line_count": 17,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "메뉴",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"menu\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 메뉴\n",
+      "level": 1,
+      "title": "메뉴"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "일반 메뉴는 Figma `110:857` 에서 유래합니다. 메뉴는 ContextMenu 모델, 신호, 배치, 해제 및 안개 처리된 WindowMaterial API 를 상속하며, `compactItems: false` 24px MenuItem 행, 145px 최소 콘텐츠 너비, 8px 가로 / 4px 세로 패딩 및 패널08 MenuDivider 선을 포함합니다. 8 참조 행과 2 구분선은 161 × 224px를 생성합니다. ContextMenu 를 18px 컴팩트 행에 사용합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "fenced_code",
+      "start_line": 7,
+      "end_line": 13,
+      "raw": "```qml\nimport LVRS as LV\nLV.Menu {\n    items: [{ label: \"Open\", key: \"⌘O\" }, { type: \"divider\" }, { label: \"Close\" }]\n    onItemTriggered: (index, item) => console.log(item.label)\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS as LV\nLV.Menu {\n    items: [{ label: \"Open\", key: \"⌘O\" }, { type: \"divider\" }, { label: \"Close\" }]\n    onItemTriggered: (index, item) => console.log(item.label)\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "Pressable 유형은 공유 AbstractButton 압축, 리바운드 및 키보드 활성화를 사용합니다. `Motion.reducedMotion`는 보간을 제거합니다. 소스 노드, 상태 값 및 검증 범위는 [Figma audit](../../figma-parity.md)를 참조하세요.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "공유 메뉴 코팅은 12% 색조, 64px 흐림 및 8% 추가 악센트 강도를 사용합니다. 메뉴 행 인쇄술과 기하학은 일반 24px 계약으로 유지됩니다. [ContextMenu](ContextMenu.md#window-derived-frosted-menu)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "메뉴",
+      "anchor": "메뉴",
+      "start_line": 3
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000009",
+        "label": "Figma audit",
+        "target": "../../figma-parity.md",
+        "kind": "relative",
+        "line": 15
+      },
+      {
+        "block_id": "b000011",
+        "label": "ContextMenu",
+        "target": "ContextMenu.md#window-derived-frosted-menu",
+        "kind": "relative",
+        "line": 17
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

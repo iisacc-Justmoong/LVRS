@@ -1,0 +1,921 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:693736850db2c116cbd3235d7e09325e800bb411ccf042837719f4b8345500f8",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/Debug.md",
+    "sha256": "b6745accf30d0255653408864aa68aa3591f6101f34cbbe7a7d311b5953d489a",
+    "bytes": 2957,
+    "line_count": 124,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "디버그",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"debug\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 디버그\n",
+      "level": 1,
+      "title": "디버그"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/backend/runtime/debuglogger.h` / `src/backend/runtime/debuglogger.cpp`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`Debug`(`DebugLogger`)는 메모리 버퍼, 필터링 및 선택적 stdout 에코와 통합된 QML/C++용 공유 로깅 싱글턴입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- 구조화된 애플리케이션/런타임 로깅을 중앙 집중화합니다.\n- UI 도구용 한계가 설정된 메모리 내 입력 버퍼를 제공합니다.\n- `RuntimeEvents`에서 선택적 런타임 스트림 캡처를 제공합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "구조화된 애플리케이션/런타임 로깅을 중앙 집중화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "UI 도구용 한계가 설정된 메모리 내 입력 버퍼를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents`에서 선택적 런타임 스트림 캡처를 제공합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"core-methods\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 핵심 방법\n",
+      "level": 2,
+      "title": "핵심 방법"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "로그 방출:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 25,
+      "raw": "- `log(component, event, data?)`\n- `warn(component, event, data?)`\n- `error(component, event, data?)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`log(component, event, data?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`warn(component, event, data?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`error(component, event, data?)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "런타임 부착:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 30,
+      "raw": "- `attachRuntimeEvents()`\n- `detachRuntimeEvents()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`attachRuntimeEvents()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`detachRuntimeEvents()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "쿼리 및 유지 관리:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 38,
+      "raw": "- `entries(limit?)`\n- `filteredEntries(limit?)`\n- `summary()`\n- `clearEntries()`\n- `setFilters(levels, components, text)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`entries(limit?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`filteredEntries(limit?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`summary()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clearEntries()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setFilters(levels, components, text)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "<a id=\"key-properties\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## 주요 속성\n",
+      "level": 2,
+      "title": "주요 속성"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "활성화:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 49,
+      "raw": "- `enabled`\n- `runtimeCaptureEnabled`\n- `runtimeEchoEnabled`\n- `paused`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`enabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeCaptureEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeEchoEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`paused`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "에코 정책:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 53,
+      "end_line": 58,
+      "raw": "- `runtimeEchoMinIntervalMs`\n- `runtimeEchoExcludeTypes`\n- `stdoutMinimumLevel`\n- `stdoutNoiseReductionEnabled`\n- `verboseOutput`\n- `jsonOutput`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`runtimeEchoMinIntervalMs`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeEchoExcludeTypes`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stdoutMinimumLevel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stdoutNoiseReductionEnabled`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`verboseOutput`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`jsonOutput`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "버퍼/필터 상태:\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "list",
+      "start_line": 62,
+      "end_line": 65,
+      "raw": "- `maxEntries`, `entryCount`, `droppedCount`, `sequence`\n- `runtimeAttached`\n- `levelFilter`, `componentFilter`, `textFilter`\n- `lastEntry`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`maxEntries`, `entryCount`, `droppedCount`, `sequence`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`runtimeAttached`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`levelFilter`, `componentFilter`, `textFilter`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastEntry`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "<a id=\"runtime-capture-flow\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "## 런타임 캡처 흐름\n",
+      "level": 2,
+      "title": "런타임 캡처 흐름"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "list",
+      "start_line": 71,
+      "end_line": 75,
+      "raw": "1. `attachRuntimeEvents()`는 런타임 싱글턴를 해결합니다.\n2. `eventRecorded`를 구독하세요.\n3. 런타임 이벤트를 디버그 항목으로 변환합니다.\n4. 필터/출력 정책을 적용합니다.\n5. 한계가 설정된 항목 버퍼를 추가합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`attachRuntimeEvents()`는 런타임 싱글턴를 해결합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`eventRecorded`를 구독하세요.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "런타임 이벤트를 디버그 항목으로 변환합니다.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "필터/출력 정책을 적용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "한계가 설정된 항목 버퍼를 추가합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"usage-example\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## 사용예\n",
+      "level": 2,
+      "title": "사용예"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "fenced_code",
+      "start_line": 81,
+      "end_line": 89,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.Debug.enabled = true\n    LV.Debug.attachRuntimeEvents()\n    LV.Debug.setFilters([\"WARN\", \"ERROR\"], [], \"\")\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.Debug.enabled = true\n    LV.Debug.attachRuntimeEvents()\n    LV.Debug.setFilters([\"WARN\", \"ERROR\"], [], \"\")\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "<a id=\"related-schema\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "## 관련 스키마\n",
+      "level": 2,
+      "title": "관련 스키마"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "자세한 출력 항목 스키마 및 콘솔 행 필드는 다음에 정의되어 있습니다.\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "- `docs/backend/DebugOutput.md`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`docs/backend/DebugOutput.md`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "<a id=\"advanced-filter-example\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "## 고급 필터 예\n",
+      "level": 2,
+      "title": "고급 필터 예"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "fenced_code",
+      "start_line": 103,
+      "end_line": 112,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.Debug.enabled = true\n    LV.Debug.runtimeCaptureEnabled = true\n    LV.Debug.runtimeEchoEnabled = false\n    LV.Debug.setFilters([\"WARN\", \"ERROR\"], [\"RuntimeEvents\", \"PageRouter\"], \"\")\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nComponent.onCompleted: {\n    LV.Debug.enabled = true\n    LV.Debug.runtimeCaptureEnabled = true\n    LV.Debug.runtimeEchoEnabled = false\n    LV.Debug.setFilters([\"WARN\", \"ERROR\"], [\"RuntimeEvents\", \"PageRouter\"], \"\")\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "html",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "<a id=\"performance-notes\"></a>\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "## 성능 노트\n",
+      "level": 2,
+      "title": "성능 노트"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "list",
+      "start_line": 118,
+      "end_line": 120,
+      "raw": "- 긴 세션을 위해 `maxEntries` 한계가 설정된를 유지하십시오.\n- 하위 소비 측 파서가 요구하는 경우에만 stdout JSON 출력을 활성화합니다.\n- 고주파 노이즈를 억제하려면 `runtimeEchoExcludeTypes`를 적극적으로 사용하십시오.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "긴 세션을 위해 `maxEntries` 한계가 설정된를 유지하십시오.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "하위 소비 측 파서가 요구하는 경우에만 stdout JSON 출력을 활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "고주파 노이즈를 억제하려면 `runtimeEchoExcludeTypes`를 적극적으로 사용하십시오.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "Q. 로거를 활성화하면 비즈니스 로직 동작이 변경됩니까?   A. 그러면 안됩니다. 로거는 관찰 전용이며 기능 결과를 변경해서는 안 됩니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "디버그",
+      "anchor": "디버그",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "핵심 방법",
+      "anchor": "핵심-방법",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "주요 속성",
+      "anchor": "주요-속성",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "런타임 캡처 흐름",
+      "anchor": "런타임-캡처-흐름",
+      "start_line": 69
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용예",
+      "anchor": "사용예",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "관련 스키마",
+      "anchor": "관련-스키마",
+      "start_line": 93
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "고급 필터 예",
+      "anchor": "고급-필터-예",
+      "start_line": 101
+    },
+    {
+      "block_id": "b000075",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "성능 노트",
+      "anchor": "성능-노트",
+      "start_line": 116
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 122
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000081",
+        "line": 124,
+        "text": "Q. 로거를 활성화하면 비즈니스 로직 동작이 변경됩니까?   A. 그러면 안됩니다. 로거는 관찰 전용이며 기능 결과를 변경해서는 안 됩니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

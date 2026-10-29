@@ -1,0 +1,1384 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:761853769632bafc9b18bd0fa3e2596ab64be37cea2190b2d654b9ee5f625d49",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/ViewModels.md",
+    "sha256": "552cd6cff8e682308a4d8e4b74f6626a8b85a98504c468f5cf02944749d654ad",
+    "bytes": 6321,
+    "line_count": 198,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ViewModels",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ViewModels\n",
+      "level": 1,
+      "title": "ViewModels"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치:\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "list",
+      "start_line": 5,
+      "end_line": 7,
+      "raw": "- `src/backend/state/viewmodel.h` / `src/backend/state/viewmodel.cpp`\n- `src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`\n- `src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`src/backend/state/viewmodel.h` / `src/backend/state/viewmodel.cpp`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend/state/statemodel.h` / `src/backend/state/statemodel.cpp`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/backend/state/viewmodelregistry.h` / `src/backend/state/viewmodelregistry.cpp`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`ViewModel`는 전용 ViewModel 개체에 대한 C++ 기본 유형입니다. `StateModel`는 QML에서 구성 요소 상태를 마이그레이션하는 동안 사용되는 구체적인 키-값 상태 모델입니다. `ViewModels`는 싱글턴 레지스트리이며 MVVM 모델 개체에 대한 소유권 게이트입니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 15,
+      "end_line": 20,
+      "raw": "- C++ ViewModels에 일관된 진단 표면을 제공합니다.\n- 아직 도메인별 하위 클래스가 필요하지 않은 구성 요소에 대해 재사용 가능한 C++ 상태 개체를 제공합니다.\n- 키로 모델 객체를 등록합니다.\n- 뷰 ID를 키에 바인딩합니다.\n- 단일 작성자 소유권 의미 체계를 적용합니다.\n- 개발자 도구가 도메인 클래스를 몰라도 검사할 수 있는 설명자를 노출합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "C++ ViewModels에 일관된 진단 표면을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아직 도메인별 하위 클래스가 필요하지 않은 구성 요소에 대해 재사용 가능한 C++ 상태 개체를 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키로 모델 객체를 등록합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "뷰 ID를 키에 바인딩합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "단일 작성자 소유권 의미 체계를 적용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "개발자 도구가 도메인 클래스를 몰라도 검사할 수 있는 설명자를 노출합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "<a id=\"c-viewmodel-base\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "## C++ ViewModel 베이스\n",
+      "level": 2,
+      "title": "C++ ViewModel 베이스"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "앱은 안정적인 MVVM 계약이 필요할 때 `ViewModel`에서 파생되는 C++ ViewModel 클래스를 선호해야 합니다. 도메인별 상태 및 명령은 여전히 ​​앱 하위 클래스에 있습니다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "기본 속성:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 30,
+      "end_line": 35,
+      "raw": "- `key: string`\n- `displayName: string`\n- `busy: bool`\n- `error: string`\n- `hasError: bool`\n- `metadata: map`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`key: string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`displayName: string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`busy: bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`error: string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasError: bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`metadata: map`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "기본 방법:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 39,
+      "end_line": 40,
+      "raw": "- `clearError()`\n- `snapshot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`clearError()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`snapshot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "기본 유형은 생성할 수 없는 C++ 유형으로 QML에 등록됩니다. QML는 부트스트랩 앱에 등록된 구체적인 인스턴스를 사용합니다. 기본 유형을 인스턴스화해서는 안됩니다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "## StateModel\n",
+      "level": 2,
+      "title": "StateModel"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "`StateModel`는 `ViewModel`에서 파생되며 다음을 추가합니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "list",
+      "start_line": 48,
+      "end_line": 54,
+      "raw": "- `values`\n- `stateKeys`\n- `revision`\n- `empty`\n- `value(...)`, `setValue(...)`, `applyPatch(...)`, `removeValue(...)`, `clearValues()`\n- `valueOr(...)`\n- `stateSnapshot()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`values`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateKeys`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`empty`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`value(...)`, `setValue(...)`, `applyPatch(...)`, `removeValue(...)`, `clearValues()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueOr(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateSnapshot()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "형식화된 도메인 ViewModel를 설계하기 전에 임시 QML 구성 요소 상태를 C++로 이동할 때 선호되는 첫 번째 단계입니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "<a id=\"properties\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "## 속성\n",
+      "level": 2,
+      "title": "속성"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 62,
+      "end_line": 67,
+      "raw": "- `keys: stringList`\n- `views: stringList`\n- `bindings: map`\n- `owners: map`\n- `descriptors: map`\n- `lastError: string`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`keys: stringList`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`views: stringList`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bindings: map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`owners: map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descriptors: map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastError: string`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"registration-apis\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "## 등록 API\n",
+      "level": 2,
+      "title": "등록 API"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 73,
+      "end_line": 77,
+      "raw": "- `set(key, object)`\n- `registerViewModel(object, fallbackKey = \"\")`\n- `get(key)`\n- `remove(key)`\n- `clear()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`set(key, object)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`registerViewModel(object, fallbackKey = \"\")`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`get(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`remove(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`clear()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "`registerViewModel()`는 ViewModel 개체에 대한 기본 C++ 부트스트랩 진입점입니다. 먼저 명시적인 대체 경로에서 키를 확인한 다음 `ViewModel::key`에서 키를 확인하고 개체를 저장하고 설명자 관찰을 시작합니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "<a id=\"binding-and-ownership-apis\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "## 바인딩 및 소유권 API\n",
+      "level": 2,
+      "title": "바인딩 및 소유권 API"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "list",
+      "start_line": 85,
+      "end_line": 92,
+      "raw": "- `bindView(viewId, key, writable = false)`\n- `unbindView(viewId)`\n- `getForView(viewId)`\n- `keyForView(viewId)`\n- `claimOwnership(viewId, key)`\n- `releaseOwnership(viewId, key?)`\n- `canWrite(viewId, key?)`\n- `ownerOf(key)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`bindView(viewId, key, writable = false)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`unbindView(viewId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`getForView(viewId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`keyForView(viewId)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`claimOwnership(viewId, key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`releaseOwnership(viewId, key?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canWrite(viewId, key?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ownerOf(key)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "<a id=\"property-access-apis\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "## 자산 액세스 API\n",
+      "level": 2,
+      "title": "자산 액세스 API"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 98,
+      "end_line": 100,
+      "raw": "- `updateProperty(viewId, property, value)`\n- `updatePropertyByKey(viewId, key, property, value)`\n- `readProperty(viewId, property)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`updateProperty(viewId, property, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updatePropertyByKey(viewId, key, property, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`readProperty(viewId, property)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "<a id=\"descriptor-apis\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "## 설명자 API\n",
+      "level": 2,
+      "title": "설명자 API"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "list",
+      "start_line": 106,
+      "end_line": 107,
+      "raw": "- `descriptor(key)`\n- `descriptors`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`descriptor(key)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descriptors`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "설명 맵에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 111,
+      "end_line": 117,
+      "raw": "- `key`\n- `className`\n- `owner`\n- `views`\n- `viewModel`\n- `ViewModel`에서 파생된 개체의 경우 `viewModelKey`, `displayName`, `busy`, `error`, `hasError`, `metadata`\n- `StateModel`에서 파생된 개체의 경우 `stateModel`, `values`, `stateKeys`, `revision`, `empty`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`key`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`className`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`owner`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`views`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`viewModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModel`에서 파생된 개체의 경우 `viewModelKey`, `displayName`, `busy`, `error`, `hasError`, `metadata`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`StateModel`에서 파생된 개체의 경우 `stateModel`, `values`, `stateKeys`, `revision`, `empty`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "`descriptorsChanged`는 등록된 ViewModel 진단 변경, 키가 추가/제거될 때 또는 보기 바인딩/소유권이 변경될 때 내보내집니다.\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "html",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "<a id=\"write-guard-semantics\"></a>\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "## 가드 의미론 작성\n",
+      "level": 2,
+      "title": "가드 의미론 작성"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "paragraph",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "다음과 같은 경우 쓰기 업데이트가 실패합니다.\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "list",
+      "start_line": 127,
+      "end_line": 130,
+      "raw": "- 보기 ID가 비어 있습니다.\n- 뷰에는 바인딩이 없습니다.\n- 뷰는 대상 키의 소유자가 아닙니다.\n- 키/객체/속성이 잘못되었습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "보기 ID가 비어 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "뷰에는 바인딩이 없습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "뷰는 대상 키의 소유자가 아닙니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키/객체/속성이 잘못되었습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "실패하면 API는 `false`를 반환하고 `lastError`를 업데이트합니다.\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "html",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "<a id=\"usage-example\"></a>\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "heading",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "## 사용예\n",
+      "level": 2,
+      "title": "사용예"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "fenced_code",
+      "start_line": 138,
+      "end_line": 155,
+      "raw": "```cpp\nclass DashboardViewModel : public ViewModel\n{\n    Q_OBJECT\n    Q_PROPERTY(QString status READ status NOTIFY statusChanged)\n    // 도메인 상태와 명령은 생략하였다.\n};\n\nauto *vm = new DashboardViewModel(&engine);\nvm->setKey(QStringLiteral(\"Dashboard\"));\nvm->setDisplayName(QStringLiteral(\"Dashboard\"));\nvm->setMetadata({{QStringLiteral(\"domain\"), QStringLiteral(\"dashboard\")}});\n\nauto *registry = engine.singletonInstance<ViewModelRegistry *>(QStringLiteral(\"LVRS\"),\n                                                               QStringLiteral(\"ViewModels\"));\nregistry->registerViewModel(vm);\nregistry->bindView(QStringLiteral(\"DashboardPage\"), QStringLiteral(\"Dashboard\"), true);\n```\n",
+      "language": "cpp",
+      "code": "class DashboardViewModel : public ViewModel\n{\n    Q_OBJECT\n    Q_PROPERTY(QString status READ status NOTIFY statusChanged)\n    // 도메인 상태와 명령은 생략하였다.\n};\n\nauto *vm = new DashboardViewModel(&engine);\nvm->setKey(QStringLiteral(\"Dashboard\"));\nvm->setDisplayName(QStringLiteral(\"Dashboard\"));\nvm->setMetadata({{QStringLiteral(\"domain\"), QStringLiteral(\"dashboard\")}});\n\nauto *registry = engine.singletonInstance<ViewModelRegistry *>(QStringLiteral(\"LVRS\"),\n                                                               QStringLiteral(\"ViewModels\"));\nregistry->registerViewModel(vm);\nregistry->bindView(QStringLiteral(\"DashboardPage\"), QStringLiteral(\"Dashboard\"), true);\n",
+      "closed": true
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 157,
+      "end_line": 157,
+      "raw": "QML는 레지스트리를 통해 객체를 사용해야 합니다.\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "fenced_code",
+      "start_line": 159,
+      "end_line": 163,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nproperty var vm: LV.ViewModels.getForView(\"DashboardPage\")\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nproperty var vm: LV.ViewModels.getForView(\"DashboardPage\")\n",
+      "closed": true
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 164,
+      "end_line": 164,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "html",
+      "start_line": 165,
+      "end_line": 165,
+      "raw": "<a id=\"internal-behavior-notes\"></a>\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 166,
+      "end_line": 166,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "heading",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "## 내부 행동 참고 사항\n",
+      "level": 2,
+      "title": "내부 행동 참고 사항"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 168,
+      "end_line": 168,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "list",
+      "start_line": 169,
+      "end_line": 172,
+      "raw": "- 토큰은 트림 정규화됩니다.\n- 키가 사라지면 오래된 바인딩/소유자가 정리됩니다.\n- 레지스트리에 부모로 지정된 객체는 키 참조가 모두 사라지면 자동으로 처분될 수 있습니다.\n- 개체가 더 이상 레지스트리 키에 의해 참조되지 않으면 설명자 관찰의 연결이 끊어집니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "토큰은 트림 정규화됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키가 사라지면 오래된 바인딩/소유자가 정리됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레지스트리에 부모로 지정된 객체는 키 참조가 모두 사라지면 자동으로 처분될 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "개체가 더 이상 레지스트리 키에 의해 참조되지 않으면 설명자 관찰의 연결이 끊어집니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "html",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "<a id=\"extended-example-explicit-ownership-transfer\"></a>\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "heading",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "## 확장된 예: 명시적인 소유권 이전\n",
+      "level": 2,
+      "title": "확장된 예: 명시적인 소유권 이전"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "fenced_code",
+      "start_line": 178,
+      "end_line": 186,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nfunction transferOwner(fromView, toView, key) {\n    LV.ViewModels.releaseOwnership(fromView, key)\n    if (!LV.ViewModels.claimOwnership(toView, key))\n        console.warn(LV.ViewModels.lastError)\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nfunction transferOwner(fromView, toView, key) {\n    LV.ViewModels.releaseOwnership(fromView, key)\n    if (!LV.ViewModels.claimOwnership(toView, key))\n        console.warn(LV.ViewModels.lastError)\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 187,
+      "end_line": 187,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "html",
+      "start_line": 188,
+      "end_line": 188,
+      "raw": "<a id=\"review-checklist\"></a>\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 189,
+      "end_line": 189,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "heading",
+      "start_line": 190,
+      "end_line": 190,
+      "raw": "## 체크리스트 검토\n",
+      "level": 2,
+      "title": "체크리스트 검토"
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 191,
+      "end_line": 191,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "list",
+      "start_line": 192,
+      "end_line": 194,
+      "raw": "- 모든 쓰기 가능한 뷰에는 명시적인 소유권 주장이 있어야 합니다.\n- 읽기 전용 뷰는 `writable=false`와 바인딩되어야 합니다.\n- `lastError`는 쓰기 실패에 대한 개발자 도구에 표시되어야 합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "모든 쓰기 가능한 뷰에는 명시적인 소유권 주장이 있어야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "읽기 전용 뷰는 `writable=false`와 바인딩되어야 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lastError`는 쓰기 실패에 대한 개발자 도구에 표시되어야 합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 195,
+      "end_line": 195,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "heading",
+      "start_line": 196,
+      "end_line": 196,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 197,
+      "end_line": 197,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "paragraph",
+      "start_line": 198,
+      "end_line": 198,
+      "raw": "Q. 2 뷰가 동시에 하나의 키에 쓸 수 있나요? A. 아니요. 소유권 모델은 계약상 단일 작성자입니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ViewModels",
+      "anchor": "viewmodels",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 13
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "C++ ViewModel 베이스",
+      "anchor": "c-viewmodel-베이스",
+      "start_line": 24
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "StateModel",
+      "anchor": "statemodel",
+      "start_line": 44
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "속성",
+      "anchor": "속성",
+      "start_line": 60
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "등록 API",
+      "anchor": "등록-api",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "바인딩 및 소유권 API",
+      "anchor": "바인딩-및-소유권-api",
+      "start_line": 83
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "자산 액세스 API",
+      "anchor": "자산-액세스-api",
+      "start_line": 96
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "설명자 API",
+      "anchor": "설명자-api",
+      "start_line": 104
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "가드 의미론 작성",
+      "anchor": "가드-의미론-작성",
+      "start_line": 123
+    },
+    {
+      "block_id": "b000089",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용예",
+      "anchor": "사용예",
+      "start_line": 136
+    },
+    {
+      "block_id": "b000099",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "내부 행동 참고 사항",
+      "anchor": "내부-행동-참고-사항",
+      "start_line": 167
+    },
+    {
+      "block_id": "b000105",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "확장된 예: 명시적인 소유권 이전",
+      "anchor": "확장된-예-명시적인-소유권-이전",
+      "start_line": 176
+    },
+    {
+      "block_id": "b000111",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "체크리스트 검토",
+      "anchor": "체크리스트-검토",
+      "start_line": 190
+    },
+    {
+      "block_id": "b000115",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 196
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000029",
+        "line": 42,
+        "text": "기본 유형은 생성할 수 없는 C++ 유형으로 QML에 등록됩니다. QML는 부트스트랩 앱에 등록된 구체적인 인스턴스를 사용합니다. 기본 유형을 인스턴스화해서는 안됩니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

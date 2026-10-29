@@ -15,6 +15,10 @@ Item {
     property color textColor: Theme.descriptionColor
     property real separatorHeight: Theme.strokeThin
     property color separatorColor: Theme.panelBackground10
+    property string defaultLeadingIcon: "generalchevronDown"
+    property string defaultTrailingIcon: ""
+    property int iconSize: Theme.scaleMetric(18)
+    property int iconSpacing: Theme.gap7
     property Component cellDelegate: null
     property bool interactive: false
     property int sortColumn: -1
@@ -30,21 +34,58 @@ Item {
             property var modelData: ({})
             property int index: modelData.index === undefined ? -1 : modelData.index
             readonly property var descriptor: modelData.descriptor || ({})
+            readonly property var sourceData: descriptor.sourceData
+            readonly property string leadingIcon: sourceData && sourceData.leadingIcon !== undefined
+                ? String(sourceData.leadingIcon || "") : control.defaultLeadingIcon
+            readonly property string trailingIcon: sourceData && sourceData.trailingIcon !== undefined
+                ? String(sourceData.trailingIcon || "") : control.defaultTrailingIcon
+            clip: true
 
-            Label {
-                objectName: control.objectName.length > 0
-                    ? control.objectName + "_cell_" + index + "_label"
-                    : ""
+            Row {
+                id: content
                 anchors.left: parent.left
                 anchors.leftMargin: descriptor.padding || 0
                 anchors.right: parent.right
                 anchors.rightMargin: descriptor.padding || 0
                 anchors.verticalCenter: parent.verticalCenter
-                height: styleLineHeight
-                style: description
-                text: descriptor.text || ""
-                color: control.textColor
-                elide: Text.ElideRight
+                height: control.iconSize
+                spacing: control.iconSpacing
+
+                Image {
+                    id: leading
+                    objectName: control.objectName.length > 0
+                        ? control.objectName + "_cell_" + index + "_leadingIcon" : ""
+                    width: control.iconSize
+                    height: control.iconSize
+                    visible: leadingIcon.length > 0
+                    source: Theme.iconPath(leadingIcon)
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                Label {
+                    objectName: control.objectName.length > 0
+                        ? control.objectName + "_cell_" + index + "_label" : ""
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.max(0, Math.min(implicitWidth, content.width
+                        - (leading.visible ? leading.width + content.spacing : 0)
+                        - (trailing.visible ? trailing.width + content.spacing : 0)))
+                    height: styleLineHeight
+                    style: description
+                    text: descriptor.text || ""
+                    color: control.textColor
+                    elide: Text.ElideRight
+                }
+
+                Image {
+                    id: trailing
+                    objectName: control.objectName.length > 0
+                        ? control.objectName + "_cell_" + index + "_trailingIcon" : ""
+                    width: control.iconSize
+                    height: control.iconSize
+                    visible: trailingIcon.length > 0
+                    source: Theme.iconPath(trailingIcon)
+                    fillMode: Image.PreserveAspectFit
+                }
             }
         }
     }

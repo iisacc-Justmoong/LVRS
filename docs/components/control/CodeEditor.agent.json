@@ -1,0 +1,586 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7c61b945bb244ae03135365cb31e76cd34d909db759954650c0639816c39256a",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/CodeEditor.md",
+    "sha256": "223b8941780044a68cdf2fb45077fe8fa4d469c3e36baa11373e2c8871781465",
+    "bytes": 3181,
+    "line_count": 75,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "CodeEditor",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# CodeEditor\n",
+      "level": 1,
+      "title": "CodeEditor"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/input/CodeEditor.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`CodeEditor`는 선택적 스니펫 헤더가 있는 코드 지향 편집기(`TextEdit.NoWrap`, `TextEdit.PlainText`)입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 고정폭 코드 편집을 결정적으로 유지합니다.\n- 스니펫 메타데이터 헤더(`title/language`)를 제공하세요.\n- 별칭을 통해 하위 수준 `TextEdit` API를 노출합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "고정폭 코드 편집을 결정적으로 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스니펫 메타데이터 헤더(`title/language`)를 제공하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "별칭을 통해 하위 수준 `TextEdit` API를 노출합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "기본 별칭:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 23,
+      "raw": "- `editorItem`(읽기 전용 별칭)\n- `text`, `readOnly`, `cursorPosition`, `selectionStart`, `selectionEnd`, `selectedText`\n- `contentWidth`, `contentHeight`, `lineCount`, `textDocument`, `canPaste`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`editorItem`(읽기 전용 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`text`, `readOnly`, `cursorPosition`, `selectionStart`, `selectionEnd`, `selectedText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`contentWidth`, `contentHeight`, `lineCount`, `textDocument`, `canPaste`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "코드별:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 29,
+      "raw": "- 읽기 전용 `wrapMode` (`NoWrap`)\n- 읽기 전용 `textFormat` (`PlainText`)\n- `snippetTitle`, `snippetLanguage`, `showSnippetHeader`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "읽기 전용 `wrapMode` (`NoWrap`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "읽기 전용 `textFormat` (`PlainText`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`snippetTitle`, `snippetLanguage`, `showSnippetHeader`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "레이아웃/시각적:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 39,
+      "raw": "- `fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`\n- `headerHeight`, `headerSpacing`, `topInset`\n- `insetHorizontal`, `insetVertical`\n- `shapeStyle`, `cornerRadius`\n- `showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`\n- 뷰포트 스크롤 물리학: `viewportFlickDeceleration`, `viewportMaximumFlickVelocity`\n- 읽기 전용 뷰포트 정책: `viewportBoundsBehavior`, `viewportBoundsMovement`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`fieldMinHeight`, `editorHeight`, `resolvedEditorHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`headerHeight`, `headerSpacing`, `topInset`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`insetHorizontal`, `insetVertical`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shapeStyle`, `cornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showScrollBar`, `autoFocusOnPress`, `preferNativeGestures`, `preferNativeTextInteraction`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "뷰포트 스크롤 물리학: `viewportFlickDeceleration`, `viewportMaximumFlickVelocity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "읽기 전용 뷰포트 정책: `viewportBoundsBehavior`, `viewportBoundsMovement`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "신호 및 방법:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 43,
+      "end_line": 44,
+      "raw": "- `textEdited(text)`, `submitted(text)`\n- `forceEditorFocus()`, `insertText(value)`, `clear()`, `select()`, `selectAll()`, `deselect()`, `cut()`, `copy()`, `paste()`, `undo()`, `redo()`, `submit()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`textEdited(text)`, `submitted(text)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`forceEditorFocus()`, `insertText(value)`, `clear()`, `select()`, `selectAll()`, `deselect()`, `cut()`, `copy()`, `paste()`, `undo()`, `redo()`, `submit()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 50,
+      "end_line": 55,
+      "raw": "- 제출 바로가기: `Ctrl+Enter` 또는 `Cmd+Enter`.\n- 헤더 영역 높이는 `showSnippetHeader`가 true인 경우에만 상단 삽입에 포함됩니다.\n- IME/스크롤 안전을 위한 `InputMethodGuard` + `WheelScrollGuard`가 포함되어 있습니다.\n- 편집 표면은 전체 커버 `MouseArea`를 설치하지 않습니다. 포인터, IME, 선택 및 키보드 제스처는 기본 `TextEdit`에 의해 처리됩니다.\n- 모바일 타겟 기본값은 이제 `Theme.mobileTarget` 를 따르며, iOS -타겟 실행 시 기본 `TextEdit` 는 `NativeRendering` 를 사용하고 편집기 뷰포트 는 네이티브 텍스트 모드에서 인터랙티브 터치 플릭을 취하지 않으므로 소프트웨어 키보드 편집 제스처, 반복 삭제, 및 텍스트 선택 제스처는 플랫폼 네이티브 경로에 유지됩니다.\n- 모바일 대상 스크롤 기본값은 편집기 뷰포트에서 경계가 고정된 상태로 유지되는 동안(`StopAtBounds`) 플릭 모멘텀(`viewportFlickDeceleration`, `viewportMaximumFlickVelocity`)을 계속 조정합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "제출 바로가기: `Ctrl+Enter` 또는 `Cmd+Enter`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "헤더 영역 높이는 `showSnippetHeader`가 true인 경우에만 상단 삽입에 포함됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "IME/스크롤 안전을 위한 `InputMethodGuard` + `WheelScrollGuard`가 포함되어 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 표면은 전체 커버 `MouseArea`를 설치하지 않습니다. 포인터, IME, 선택 및 키보드 제스처는 기본 `TextEdit`에 의해 처리됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 타겟 기본값은 이제 `Theme.mobileTarget` 를 따르며, iOS -타겟 실행 시 기본 `TextEdit` 는 `NativeRendering` 를 사용하고 편집기 뷰포트 는 네이티브 텍스트 모드에서 인터랙티브 터치 플릭을 취하지 않으므로 소프트웨어 키보드 편집 제스처, 반복 삭제, 및 텍스트 선택 제스처는 플랫폼 네이티브 경로에 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 대상 스크롤 기본값은 편집기 뷰포트에서 경계가 고정된 상태로 유지되는 동안(`StopAtBounds`) 플릭 모멘텀(`viewportFlickDeceleration`, `viewportMaximumFlickVelocity`)을 계속 조정합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "fenced_code",
+      "start_line": 61,
+      "end_line": 69,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.CodeEditor {\n    snippetTitle: \"main.cpp\"\n    snippetLanguage: \"C++\"\n    text: \"int main() { return 0; }\"\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.CodeEditor {\n    snippetTitle: \"main.cpp\"\n    snippetLanguage: \"C++\"\n    text: \"int main() { return 0; }\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "편집기 프레임은 동일한 포커스 처리를 받습니다. 구문과 텍스트 업데이트가 즉시 이루어집니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "CodeEditor",
+      "anchor": "codeeditor",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 59
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 73
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000049",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 75
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

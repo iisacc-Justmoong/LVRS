@@ -1,0 +1,434 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c3c68e0b57d0d8367ba6021347d5bb07ddd3aeba09b00c806716301e2efd1c6a",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Modal.md",
+    "sha256": "ee06b24be6871cdd72c67db3618c9dbeae9574822d2150fa770e22c98bdfab40",
+    "bytes": 7442,
+    "line_count": 102,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 Modal",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 Modal\n",
+      "level": 1,
+      "title": "네이티브 Modal"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "`lvrs::Modal`, `Widgets::modal`과 LVUI `Modal`을 iiGUI 자체 C++ 위젯으로 구현했다.\n원본은 `src/qml/components/surfaces/Modal.qml`이며, 창·입력·IME·가상 접근성은 iiGUI가\n연결하고 앱 수명·작업자·프레임은 iiSDKCore가 소유한다. OS 대화 상자나 Cocoa 컨트롤은 만들지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 배치와 외형\n",
+      "level": 2,
+      "title": "배치와 외형"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 12,
+      "raw": "프레임은 창의 수평·수직 중앙에서 기본 16 논리 단위 위에 놓인다. 기본 폭은\n`min(980, max(520, min(760, 창 폭 - 48)))`이다. 내부 패딩 20, 섹션 간격 20,\n최소 높이 210, 기본 모서리 12이다. 원본처럼 창이 최소 폭보다 작아지면 최소 폭을 유지한다.\n`shapeStyle: .cylinder`는 짧은 변의 절반을 반경으로 사용한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 17,
+      "raw": "왼쪽 아이콘은 기본 72×72·모서리 16·안쪽 여백 8이며 원본 배경과 테두리를 사용한다.\n이름이 없으면 작은 기본 사각형을 표시한다. `iconName`은 내장 SVG 이름이고,\n직접 C++에서는 `icon_source`에 네이티브 불변 이미지를 전달할 수 있다. LVUI의 `iconSource`는\n스코프의 공개 이미지 멤버 참조이다. 비정사각 이미지는 비율을 유지하여 중앙에 맞춘다. 임의 URL·파일 로딩은 포함하지 않는다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 21,
+      "raw": "제목은 title2·고정 줄 높이 22, 설명은 body·고정 줄 높이 18이며 폭에 따라 줄바꿈하고 프레임 높이에 반영된다.\n설명이 비어 있으면 `message`를 사용한다. `desc`는 LVUI에서 `description`의 별칭이며\n두 이름을 동시에 지정하면 진단한다. `showIcon: false`는 아이콘 공간도 제거한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## 액션과 취소\n",
+      "level": 2,
+      "title": "액션과 취소"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 28,
+      "raw": "`buttonCount: 0`은 자동이다. 3차 텍스트가 있으면 세 개, 2차 텍스트가 있으면 두 개,\n기본 텍스트만 있으면 한 개, 모두 비면 액션이 없다. 양수 개수는 1~3으로 제한한다.\n필요한 텍스트가 비면 각각 OK·Cancel·More를 사용한다. 순서는 오른쪽부터 기본·2차·3차이며\n간격 12, 높이 20, 모서리 4이다. 개별 enabled 상태를 적용한다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 35,
+      "raw": "액션은 콜백을 실행하며 자동으로 닫지 않는다. 소유자가 확정·유지·닫기를 결정한다.\n`close()`·`close_popup()`은 일반 닫기, `cancel()`·`cancel_popup()`은 취소이다.\n취소는 본문 해제와 닫힘 통지 뒤 `canceled`를 한 번 전달한다. 이미 닫혔으면 다시 전달하지 않는다.\n외부 누름은 `dismissOnBackground`가 true일 때 취소하고 항상 배경 입력을 차단한다.\n네이티브 키보드 정책으로 자식이 처리하지 않은 Escape도 취소한다. Tab과 이전 포커스 복귀는\niiGUI의 팝업 수명 계약을 따른다. 부모 해제·숨김은 사용자 취소로 세지 않는다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## 열림 단위 콘텐츠\n",
+      "level": 2,
+      "title": "열림 단위 콘텐츠"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 39,
+      "end_line": 51,
+      "raw": "```lvui\nimport vm ModalBackend\nApplicationWindow {\n    Modal(id: \"dialog\", title: \"Native Modal\", description: \"Fresh editor\",\n          iconName: \"projectStructure\", buttonCount: 2,\n          primaryText: \"Apply\", secondaryText: \"Close\",\n          onPrimaryClicked: vm.apply, onSecondaryClicked: vm.closeDialog) {\n        VStack(spacing: 12) {\n            InputField(id: \"editor\", text: \"Fresh\", onEdited: vm.edited)\n        }\n    }\n}\n```\n",
+      "language": "lvui",
+      "code": "import vm ModalBackend\nApplicationWindow {\n    Modal(id: \"dialog\", title: \"Native Modal\", description: \"Fresh editor\",\n          iconName: \"projectStructure\", buttonCount: 2,\n          primaryText: \"Apply\", secondaryText: \"Close\",\n          onPrimaryClicked: vm.apply, onSecondaryClicked: vm.closeDialog) {\n        VStack(spacing: 12) {\n            InputField(id: \"editor\", text: \"Fresh\", onEdited: vm.edited)\n        }\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 61,
+      "raw": "자식 블록은 C++ `ModalContentFactory`로 AOT 생성된다. 제목·설명·아이콘·액션은 마운트 시\n한 번 생성한 정적 C++ 위젯이다. 본문만 정적 외곽 안의 `bodySlot`에 열 때 생성하고\n닫을 때 즉시 해제한다. 비활성 본문은 배치 간격에도 포함하지 않는다. 제목·아이콘과\n액션이 모두 없으면 빈 섹션의 간격을 제거한다. 바깥 import의 백엔드는 동일 인스턴스를\n빌려 쓴다. 매번 새 backend를 만들지 않는다.\n콘텐츠 안 ID는 별도 활성화 범위이고 같은 이름의 바깥 ID와 충돌하지 않는다. 다른 범위의\ncontext menu target을 직접 참조하면 컴파일 시 거부한다. `open: true`는 마운트와 백엔드\n구성이 끝난 뒤 최초 개방한다. 생성 함수 안의 중첩 Modal에 초기 개방을 요구하는 것은\n현재 거부하며, 활성화 완료 뒤 소유자가 명시적으로 연다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 70,
+      "raw": "C++에서는 `Modal::create(builder,parent,id,options,events,content)`를 사용한다.\n`content`는 `(WidgetBuilder&, Widget parent) -> Result<void>`이다. 자식 객체·구독을\n`builder.retain`으로 소유할 수 있다. `content_item()`은 현재 콘텐츠 컨테이너,\n`root().popup_content(\"editor\")`는 현재 자식 핸들이다. 이전 핸들은 다음 개방을 조작하지 못한다.\n`action_visible`·`trigger_action`·`contains_frame_point`도 제공한다.\n`root().popup_content`는 열린 동안 본문 다음 정적 외곽을 찾는다. 정적 외곽은\n마운트의 `find(\"modal.title\")`처럼 닫힌 동안에도 같은 핸들로 조회할 수 있다.\n실행 중 캡처·외부 공유 소유자·작업 취소의 경계는 [활성화 계약](ActivationContent.md)을 따른다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "## 네이티브 프레임 모션\n",
+      "level": 2,
+      "title": "네이티브 프레임 모션"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 78,
+      "raw": "기본 열림은 원본처럼 420ms OutBack·overshoot 1.45, 닫힘은 150ms InCubic이다.\n프레임 scale은 `0.92 + 0.08 × revealProgress`이며 opacity와 dim은 진행 값을 0~1로 제한한다.\n본문 Loader는 닫는 즉시 제거하므로 퇴장 프레임의 높이도 본문 없이 재계산한다.\n제목·아이콘·액션은 남아 퇴장하지만 입력은 즉시 차단하고 이전 포커스로 복귀한다.\n도중 다시 열면 현재 표시 값에서 진행하며 본문은 새로 만든다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 84,
+      "raw": "`motionEnabled`/`set_motion_enabled`는 로컬 전환을 제어한다. `motion: vm.motion`에는\n스코프 소유 `std::shared_ptr<lvrs::Motion>`을 빌려 주며, 생략하면 호스트 모델을 사용한다.\n공유 모델의 enabled·reduced_motion·speed는 실행 중에도 적용한다. 프레임 콜백은\nCore의 unscaled 시계를 사용하므로 게임 일시 정지와 독립적이다. 모션이 끝나면\n명시적 연속 루프가 없는 앱은 유휴 상태로 돌아간다. [모션 계약](../../../iiGUI/docs/NativeMotion.md)을 따른다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 86,
+      "end_line": 87,
+      "raw": "frameColor의 alpha도 허용하며 선형 색 공간에서 아래 배경과 합성한다. 모션을 끄면\n정적 레이아웃과 색상에 즉시 도달한다. 현재 실제 합성과 위젯 실행 검증은 macOS Metal 범위이다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "## 검증과 남은 차이\n",
+      "level": 2,
+      "title": "검증과 남은 차이"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 91,
+      "end_line": 94,
+      "raw": "`tests/native/modal.cpp`는 원본 기본 배치·아이콘·설명 대체·액션 순서/기본 텍스트/차단,\n일반 닫기와 취소, 30회 새 콘텐츠 생성·해제, 크기 변경 시 기존 콘텐츠 유지와 실제 Metal\n프레임 픽셀을 검사한다. `examples/NativeModalGallery`는 LVUI의 실제 자식 생성 함수와\n초기 개방을 사용하며 Core 프레임·백그라운드 결과·크기 변경·종료를 함께 검사한다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 96,
+      "end_line": 98,
+      "raw": "`tests/native/modal_motion.cpp`는 정적 외곽의 반복 사용, 본문 즉시 해제·퇴장·재개방,\n실행 중 모션 설정, 변환 입력, 반투명 프레임 픽셀, 빈 섹션, 생성 실패와 닫힘 콜백의\n재진입을 검사한다. `NativeModalGallery`의 자체 검사도 실제 프레임 전환까지 진행한다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 102,
+      "raw": "아직 부분 이식이다. 반응형 속성 재바인딩, 대체 overlay 부모, 전체 상속 API,\n임의 icon URL과 언어 내부의 별도 자식 backend import가 남아 있다.\nWindows/Linux/mobile/WASM 위젯 입력 어댑터도 미완료이다. 전체 대응표의 complete로 세지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 Modal",
+      "anchor": "네이티브-modal",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "배치와 외형",
+      "anchor": "배치와-외형",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "액션과 취소",
+      "anchor": "액션과-취소",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "열림 단위 콘텐츠",
+      "anchor": "열림-단위-콘텐츠",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "네이티브 프레임 모션",
+      "anchor": "네이티브-프레임-모션",
+      "start_line": 72
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증과 남은 차이",
+      "anchor": "검증과-남은-차이",
+      "start_line": 89
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000009",
+        "line": 17,
+        "text": "스코프의 공개 이미지 멤버 참조이다. 비정사각 이미지는 비율을 유지하여 중앙에 맞춘다. 임의 URL·파일 로딩은 포함하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 32,
+        "text": "취소는 본문 해제와 닫힘 통지 뒤 `canceled`를 한 번 전달한다. 이미 닫혔으면 다시 전달하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 55,
+        "text": "닫을 때 즉시 해제한다. 비활성 본문은 배치 간격에도 포함하지 않는다. 제목·아이콘과",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 58,
+        "text": "콘텐츠 안 ID는 별도 활성화 범위이고 같은 이름의 바깥 ID와 충돌하지 않는다. 다른 범위의",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000025",
+        "label": "활성화 계약",
+        "target": "ActivationContent.md",
+        "kind": "relative",
+        "line": 70
+      },
+      {
+        "block_id": "b000031",
+        "label": "모션 계약",
+        "target": "../../../iiGUI/docs/NativeMotion.md",
+        "kind": "relative",
+        "line": 84
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

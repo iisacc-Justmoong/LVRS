@@ -1,0 +1,423 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c6286f5c045e6a1dcb7b77641ebb3b5da10a468109cd7a4b4fa521e39930274c",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/app/WindowSafeAreaObserver.md",
+    "sha256": "de704624b7a20f2b4f703ee762edb7ea8ff916e1d2010064d5509d41ddb57b23",
+    "bytes": 2916,
+    "line_count": 70,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "WindowSafeAreaObserver",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# WindowSafeAreaObserver\n",
+      "level": 1,
+      "title": "WindowSafeAreaObserver"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/platform/windowsafeareaobserver.h`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`WindowSafeAreaObserver`는 바인딩된 `QWindow`/`QQuickWindow`에 대한 플랫폼 창 안전 영역 삽입을 노출합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 하위 소비 측 앱은 레이아웃을 안전 영역 컨테이너에 강제로 적용하지 않고 실제 시스템 안전 영역 삽입을 읽을 수 있습니다.\n- 상태 표시줄, 노치 및 홈 표시기 영역이 의도적으로 앱으로 제어되는 풀블리드 루트를 지원합니다.\n- 바인딩된 창이 표시되거나, 크기가 조정되거나, 이동되거나, 다시 화면이 표시되거나 플랫폼 표면이 변경되면 삽입 값을 새로 고칩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "하위 소비 측 앱은 레이아웃을 안전 영역 컨테이너에 강제로 적용하지 않고 실제 시스템 안전 영역 삽입을 읽을 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "상태 표시줄, 노치 및 홈 표시기 영역이 의도적으로 앱으로 제어되는 풀블리드 루트를 지원합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "바인딩된 창이 표시되거나, 크기가 조정되거나, 이동되거나, 다시 화면이 표시되거나 플랫폼 표면이 변경되면 삽입 값을 새로 고칩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 17,
+      "end_line": 24,
+      "raw": "- `window`: `QWindow`/`QQuickWindow` 개체를 대상으로 합니다.\n- `leftInset`\n- `topInset`\n- `rightInset`\n- `bottomInset`\n- `bottomCornerRadius` :  Android   12+ 화면 하단 모서리 반지름, Qt 로직 픽셀로 변환됨. 사용 불가능할 때 `-1` 를 반환하며, 플랫폼이 사각 모서리를 보고할 때 `0` 를 반환함. 화면 기하학으로 새로고침되며 분리 시 `-1` 로 초기화됨. `resolved` 는 패딩을 설명하며 모서리 반지름 사용 가능 여부를 설명하지 않음.\n- `resolved` : 관찰자가 플랫폼 창을 가지게 되고 현재 안전 영역 마진이 조회된 후 한 번 `true` 합니다.\n- `refresh()`: 강제로 다시 쿼리합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`window`: `QWindow`/`QQuickWindow` 개체를 대상으로 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`leftInset`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`topInset`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rightInset`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bottomInset`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bottomCornerRadius` :  Android   12+ 화면 하단 모서리 반지름, Qt 로직 픽셀로 변환됨. 사용 불가능할 때 `-1` 를 반환하며, 플랫폼이 사각 모서리를 보고할 때 `0` 를 반환함. 화면 기하학으로 새로고침되며 분리 시 `-1` 로 초기화됨. `resolved` 는 패딩을 설명하며 모서리 반지름 사용 가능 여부를 설명하지 않음.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resolved` : 관찰자가 플랫폼 창을 가지게 되고 현재 안전 영역 마진이 조회된 후 한 번 `true` 합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`refresh()`: 강제로 다시 쿼리합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 30,
+      "end_line": 55,
+      "raw": "```qml\nimport QtQuick\nimport LVRS 1.0 as LV\n\nLV.ApplicationWindow {\n    id: root\n    visible: true\n\n    LV.WindowSafeAreaObserver {\n        id: safeArea\n        window: root\n    }\n\n    Rectangle {\n        anchors.fill: parent\n        color: \"#111827\"\n    }\n\n    Item {\n        x: safeArea.leftInset\n        y: safeArea.topInset\n        width: parent.width - safeArea.leftInset - safeArea.rightInset\n        height: 56\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "import QtQuick\nimport LVRS 1.0 as LV\n\nLV.ApplicationWindow {\n    id: root\n    visible: true\n\n    LV.WindowSafeAreaObserver {\n        id: safeArea\n        window: root\n    }\n\n    Rectangle {\n        anchors.fill: parent\n        color: \"#111827\"\n    }\n\n    Item {\n        x: safeArea.leftInset\n        y: safeArea.topInset\n        width: parent.width - safeArea.leftInset - safeArea.rightInset\n        height: 56\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "html",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 61,
+      "end_line": 64,
+      "raw": "- 내부적으로 관찰자는 `ApplicationWindow` 패딩에서 추론하는 대신 Qt의 플랫폼 창 안전 영역 여백을 쿼리합니다.\n- LVRS는 의도적으로 루트 콘텐츠를 모바일에서 풀 블리드 상태로 유지하기 때문에 이는 중요합니다. 앱은 시스템 삽입을 언제 존중할지 결정합니다.\n- 플랫폼 창이 존재하기 전에는 `resolved`가 `false`로 유지되고 삽입 값은 `0`로 유지됩니다.\n- 안전 영역 여백을 보고하지 않는 플랫폼에서는 관찰자가 연결 후에도 성공적으로 확인하지만 모든 삽입 값은 `0`로 유지됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "내부적으로 관찰자는 `ApplicationWindow` 패딩에서 추론하는 대신 Qt의 플랫폼 창 안전 영역 여백을 쿼리합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "LVRS는 의도적으로 루트 콘텐츠를 모바일에서 풀 블리드 상태로 유지하기 때문에 이는 중요합니다. 앱은 시스템 삽입을 언제 존중할지 결정합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "플랫폼 창이 존재하기 전에는 `resolved`가 `false`로 유지되고 삽입 값은 `0`로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "안전 영역 여백을 보고하지 않는 플랫폼에서는 관찰자가 연결 후에도 성공적으로 확인하지만 모든 삽입 값은 `0`로 유지됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "관찰자는 주변 창이 올바르게 배치될 수 있도록 네이티브 형상을 동기식으로 보고합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "WindowSafeAreaObserver",
+      "anchor": "windowsafeareaobserver",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 28
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 59
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 68
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000033",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 70
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

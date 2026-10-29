@@ -1,0 +1,160 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:80f445b50ad0b4e7cbd60fbc6fab69f841e56505167292c0d01c5949a5990e0b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/TypingPractice/README.md",
+    "sha256": "72debe3247aa8f240c5caddb5dc9d331b1dbb6f17612c816b70060b21a44bb6c",
+    "bytes": 443,
+    "line_count": 16,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Typing Practice Example",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Typing Practice Example\n",
+      "level": 1,
+      "title": "Typing Practice Example"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "A typing practice example built only with LVRS components.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "The practice screen now chooses its own viewport from `layoutSafeAreaBounds`, which keeps the render surface full-bleed while reserving content space explicitly.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## Run\n",
+      "level": 2,
+      "title": "Run"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "From repository root:\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "fenced_code",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "```bash\n./build.sh\n./example/TypingPractice/bin/LVRSExampleTypingPractice\n```\n",
+      "language": "bash",
+      "code": "./build.sh\n./example/TypingPractice/bin/LVRSExampleTypingPractice\n",
+      "closed": true
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "On macOS Finder, you can run it by clicking `example/run-typing-practice.command`.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Typing Practice Example",
+      "anchor": "typing-practice-example",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Run",
+      "anchor": "run",
+      "start_line": 7
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [
+      {
+        "block_id": "b000011",
+        "language": "bash",
+        "code": "./build.sh\n./example/TypingPractice/bin/LVRSExampleTypingPractice\n"
+      }
+    ],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

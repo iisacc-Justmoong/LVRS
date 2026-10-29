@@ -1,0 +1,588 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d3cdfa42cb564959afd4e63ae61e07e355691da6b91eec789cb30dc6ac620425",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/WheelScrollGuard.md",
+    "sha256": "233450f1990b533e7093390d41f452a77f55df72802010d596f56e9c405accc0",
+    "bytes": 2699,
+    "line_count": 77,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "WheelScrollGuard",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# WheelScrollGuard\n",
+      "level": 1,
+      "title": "WheelScrollGuard"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/util/WheelScrollGuard.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`WheelScrollGuard`는 휠 델타를 의도된 내부 플릭 가능 항목으로 라우팅하고 선택적으로 이벤트를 소비합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "- 내부 스크롤 표면과 외부 스크롤 표면 사이에 중첩된 스크롤 블리드를 방지합니다.\n- 휠 델타 입력을 한계가 설정된 `contentY` 업데이트로 변환합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "내부 스크롤 표면과 외부 스크롤 표면 사이에 중첩된 스크롤 블리드를 방지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "휠 델타 입력을 한계가 설정된 `contentY` 업데이트로 변환합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 16,
+      "end_line": 19,
+      "raw": "- `targetFlickable`(`contentY`, `contentHeight`, `height`를 노출해야 함)\n- `consumeInside`(기본값 `true`)\n- `fallbackStep`(기본값 `Theme.gap20`)\n- `wheelRouted(wheelEvent, delta, previousContentY, nextContentY)` 신호\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`targetFlickable`(`contentY`, `contentHeight`, `height`를 노출해야 함)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`consumeInside`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fallbackStep`(기본값 `Theme.gap20`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`wheelRouted(wheelEvent, delta, previousContentY, nextContentY)` 신호",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "fenced_code",
+      "start_line": 25,
+      "end_line": 33,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.WheelScrollGuard {\n    anchors.fill: parent\n    targetFlickable: innerFlick\n    consumeInside: true\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.WheelScrollGuard {\n    anchors.fill: parent\n    targetFlickable: innerFlick\n    consumeInside: true\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "html",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 39,
+      "end_line": 42,
+      "raw": "- 내부 `EventListener` 트리거 `wheel`를 사용합니다.\n- 포인터 포인트가 대상 플릭 가능한 범위 내에 있는 경우에만 이벤트를 라우팅합니다.\n- 델타 소스 우선순위: `pixelDelta.y` -> `angleDelta.y`는 `fallbackStep`로 변환됩니다.\n- 한계가 설정된 `contentY` 업데이트(`0..maxContentY`)를 적용하고 `wheelRouted`를 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "내부 `EventListener` 트리거 `wheel`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "포인터 포인트가 대상 플릭 가능한 범위 내에 있는 경우에만 이벤트를 라우팅합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "델타 소스 우선순위: `pixelDelta.y` -> `angleDelta.y`는 `fallbackStep`로 변환됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "한계가 설정된 `contentY` 업데이트(`0..maxContentY`)를 적용하고 `wheelRouted`를 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "<a id=\"advanced-example-passive-routing-mode\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "## 고급 예: 패시브 라우팅 모드\n",
+      "level": 2,
+      "title": "고급 예: 패시브 라우팅 모드"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "fenced_code",
+      "start_line": 48,
+      "end_line": 55,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.WheelScrollGuard {\n    targetFlickable: editorFlick\n    consumeInside: false\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.WheelScrollGuard {\n    targetFlickable: editorFlick\n    consumeInside: false\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "이 모드는 휠 델타를 라우팅하지만 이벤트 수락을 강제하지는 않습니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "Q. 휠 스크롤이 여전히 외부 컨테이너에 영향을 미치는 이유는 무엇입니까?   A. `consumeInside`를 확인하세요. false인 경우 이벤트 전파가 의도적으로 허용됩니다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "Q. 휠 이벤트가 발생해도 왜 움직이지 않나요?   A. 대상이 유효한 `contentHeight`, `height`를 노출하고 현재 스크롤 가능한 오버플로가 있는지 확인합니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "<a id=\"validation-checklist\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "## 검증 체크리스트\n",
+      "level": 2,
+      "title": "검증 체크리스트"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 69,
+      "end_line": 71,
+      "raw": "- 포인터 내부 감지는 중첩된 변환 아래에 올바르게 매핑됩니다.\n- 델타 변환은 마우스와 터치패드 전체에서 일관되게 작동합니다.\n- 한계가 설정된 스크롤은 콘텐츠 제한을 초과하는 것을 방지합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "포인터 내부 감지는 중첩된 변환 아래에 올바르게 매핑됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "델타 변환은 마우스와 터치패드 전체에서 일관되게 작동합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "한계가 설정된 스크롤은 콘텐츠 제한을 초과하는 것을 방지합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "휠 라우팅은 동기식입니다. 애니메이션이 이벤트를 지연시키거나 수신자를 변경하지 않습니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "WheelScrollGuard",
+      "anchor": "wheelscrollguard",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 14
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 23
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "고급 예: 패시브 라우팅 모드",
+      "anchor": "고급-예-패시브-라우팅-모드",
+      "start_line": 46
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 59
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증 체크리스트",
+      "anchor": "검증-체크리스트",
+      "start_line": 67
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 75
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000053",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 77
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

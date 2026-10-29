@@ -1,0 +1,729 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:2fc58cc5f6d6ce7007c6a3850be14dfde3ac83d5fc18a63e7009ace7e6192efe",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/MenuItem.md",
+    "sha256": "6b485b3daf55ce4127be234ce2c69e3634979c415fed99c5ce2fdb7923460f79",
+    "bytes": 7236,
+    "line_count": 106,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "MenuItem",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# MenuItem\n",
+      "level": 1,
+      "title": "MenuItem"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/navigation/MenuItem.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`MenuItem`는 `ContextMenu` 대리인이 사용하는 상황에 맞는 메뉴 행 구성 요소입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 선택/비활성 상태로 아이콘/레이블/키 행을 렌더링합니다.\n- 키 가시성과 쉐브론 가시성을 독립적으로 제어합니다.\n- 방향이 `auto`인 경우 접기/확장 상태에서 쉐브론 방향을 구동합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "선택/비활성 상태로 아이콘/레이블/키 행을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "키 가시성과 쉐브론 가시성을 독립적으로 제어합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "방향이 `auto`인 경우 접기/확장 상태에서 쉐브론 방향을 구동합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "상태 상수 및 속성:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 22,
+      "raw": "- `defaultState`, `selectedState`, `inactiveState`\n- `state`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`defaultState`, `selectedState`, `inactiveState`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`state`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "방향 상수 및 속성:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 27,
+      "raw": "- `directionRight`, `directionLeft`, `directionUp`, `directionDown`\n- `selectionDirection`(`int` 또는 문자열: `auto|right|left|up|down`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`directionRight`, `directionLeft`, `directionUp`, `directionDown`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectionDirection`(`int` 또는 문자열: `auto|right|left|up|down`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "내용:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 41,
+      "raw": "- 표준 입력: 아이콘 문자열, 라벨 문자열, 키 가시성 부울, 키 문자열\n- `label`\n- `key` / `shortcut`(별칭, 기본값 `\"key\"`)\n- `keyVisible`(부울, 기본값 `true`)\n- `keyPlaceholder`(기본값 `\"\"`)\n- `iconName`(기본값 `\"procedure\"`), `iconSource`\n- `showIconSlot`(부울, 기본값 `true`)\n- `showChevron`(기본값 `true`)\n- `hasChildItems`(기본값 `true`)\n- `expanded`\n- `effectiveShowChevron`(읽기 전용: `showChevron && hasChildItems`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "표준 입력: 아이콘 문자열, 라벨 문자열, 키 가시성 부울, 키 문자열",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`label`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`key` / `shortcut`(별칭, 기본값 `\"key\"`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`keyVisible`(부울, 기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`keyPlaceholder`(기본값 `\"\"`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconName`(기본값 `\"procedure\"`), `iconSource`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showIconSlot`(부울, 기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showChevron`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`hasChildItems`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`expanded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveShowChevron`(읽기 전용: `showChevron && hasChildItems`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "레이아웃 및 시각적 요소:\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 45,
+      "end_line": 48,
+      "raw": "- `itemWidth`, `itemHeight`\n- `iconSize`, `chevronSize`\n- `iconPlaceholderColor`, `chevronColor`\n- 해결됨: `effectiveShowIconSlot`, `resolvedIconSlotWidth`, `resolvedIconLabelGap`, `resolvedIconSource`, `resolvedShortcutText`, `resolvedSelectionDirection`, `resolvedChevronRotation`, `resolvedBackgroundColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemWidth`, `itemHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconSize`, `chevronSize`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconPlaceholderColor`, `chevronColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해결됨: `effectiveShowIconSlot`, `resolvedIconSlotWidth`, `resolvedIconLabelGap`, `resolvedIconSource`, `resolvedShortcutText`, `resolvedSelectionDirection`, `resolvedChevronRotation`, `resolvedBackgroundColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 71,
+      "raw": "- Figma 소스: 노드 `107:498`(`MenuItem` 구성 요소 세트), 기본 변형은 노드 `107:495`에 있습니다.\n- 독립 실행형 기본값은 측정된 Figma 인스턴스(`label: \"Label\"`, `key: \"key\"`, `keyVisible: true`, `iconName: \"procedure\"`) 및 표시되는 오른쪽 갈매기형입니다. `ContextMenu` 모델 대리인은 여전히 ​​정규화된 항목 값을 명시적으로 제공합니다.\n- 데스크톱과 모바일은 동일한 `161 x 24` 프레임과 `13px` 본문 타이포그래피를 사용합니다.\n- 일반 `MenuItem`의 `selected` 배경은 Press와 동일한 `Theme.accentMuted`이다. 기본 Primary에서는 짙은 파란색 `#203C5B`이며, 사용자 지정 Primary에서는 Press와 함께 갱신된다. `inactive` 배경은 기존 토큰을 유지한다.\n- 아이콘 프레임은 데스크톱에서는 `18 x 18`, 모바일에서는 `36 x 36`입니다. 쉐브론 프레임은 데스크톱에서는 `16 x 16`이고 모바일에서는 `32 x 32`입니다.\n- 행은 데스크톱 및 모바일에서 `4px` 가로 및 `3px` 세로 패딩을 사용합니다.\n- Figma 패리티 픽스처는 `procedure.svg`(아이콘 `x=4, y=3, 18 x 18`, 레이블 `x=30, y=5.5, 33 x 13`, 바로 가기 `x=112, y=5.5, 21 x 13` 및 `x=141, y=4, 16 x 16`의 `generalchevronRight.svg`)를 사용합니다.\n- 레이블과 바로가기는 모두 고정된 본문 계약(Pretendard 중간 `13px`, `13px` 줄 높이 및 문자 간격 0)을 사용합니다. `labelMetricCompensation`는 호환성을 위해 계속 사용 가능하지만 `0`로 확인됩니다.\n- `implicitWidth`는 아이콘/레이블/키/쉐브론 콘텐츠에 더 많은 공간이 필요한 경우 `itemWidth` 이상으로 확장됩니다.\n- 자연 레이블 및 바로 가기 너비는 표시된 생략된 텍스트와 독립적으로 측정되므로 제한된 렌더링은 `implicitWidth`로 피드백되지 않습니다.\n- 행 레이아웃은 제한된 너비에서 반응합니다. 레이블 및 바로가기 텍스트는 행 내에서 사라지고, 후행 메타데이터는 항목 프레임 내부에 유지되며, 유연한 스페이서는 절대 음수 너비로 확인되지 않습니다.\n- `showIconSlot: false`는 아이콘 이미지뿐만 아니라 왼쪽 아이콘 슬롯 자체도 제거합니다. 행은 아이콘 너비나 아이콘-레이블 간격을 예약하지 않으며 레이블은 행 원점에서 시작됩니다.\n- 레이블과 바로가기는 모두 `body` 스타일 토큰을 사용합니다.\n- 아이콘 소스를 확인할 수 없는 경우 작은 원형 강조 자리 표시자가 표시됩니다.\n- `keyVisible`가 `false`이면 키 텍스트가 숨겨집니다.\n- `keyVisible`가 `true`이고 `key`가 비어 있으면 `keyPlaceholder`가 렌더링됩니다.\n- 쉐브론은 `effectiveShowChevron`가 `true`인 경우에만 표시됩니다.\n- `selectionDirection: \"auto\"`는 `expanded=false`를 오른쪽으로, `expanded=true`를 아래쪽으로 매핑합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Figma 소스: 노드 `107:498`(`MenuItem` 구성 요소 세트), 기본 변형은 노드 `107:495`에 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "독립 실행형 기본값은 측정된 Figma 인스턴스(`label: \"Label\"`, `key: \"key\"`, `keyVisible: true`, `iconName: \"procedure\"`) 및 표시되는 오른쪽 갈매기형입니다. `ContextMenu` 모델 대리인은 여전히 ​​정규화된 항목 값을 명시적으로 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱과 모바일은 동일한 `161 x 24` 프레임과 `13px` 본문 타이포그래피를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "일반 `MenuItem`의 `selected` 배경은 Press와 동일한 `Theme.accentMuted`이다. 기본 Primary에서는 짙은 파란색 `#203C5B`이며, 사용자 지정 Primary에서는 Press와 함께 갱신된다. `inactive` 배경은 기존 토큰을 유지한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘 프레임은 데스크톱에서는 `18 x 18`, 모바일에서는 `36 x 36`입니다. 쉐브론 프레임은 데스크톱에서는 `16 x 16`이고 모바일에서는 `32 x 32`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행은 데스크톱 및 모바일에서 `4px` 가로 및 `3px` 세로 패딩을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Figma 패리티 픽스처는 `procedure.svg`(아이콘 `x=4, y=3, 18 x 18`, 레이블 `x=30, y=5.5, 33 x 13`, 바로 가기 `x=112, y=5.5, 21 x 13` 및 `x=141, y=4, 16 x 16`의 `generalchevronRight.svg`)를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이블과 바로가기는 모두 고정된 본문 계약(Pretendard 중간 `13px`, `13px` 줄 높이 및 문자 간격 0)을 사용합니다. `labelMetricCompensation`는 호환성을 위해 계속 사용 가능하지만 `0`로 확인됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`implicitWidth`는 아이콘/레이블/키/쉐브론 콘텐츠에 더 많은 공간이 필요한 경우 `itemWidth` 이상으로 확장됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "자연 레이블 및 바로 가기 너비는 표시된 생략된 텍스트와 독립적으로 측정되므로 제한된 렌더링은 `implicitWidth`로 피드백되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행 레이아웃은 제한된 너비에서 반응합니다. 레이블 및 바로가기 텍스트는 행 내에서 사라지고, 후행 메타데이터는 항목 프레임 내부에 유지되며, 유연한 스페이서는 절대 음수 너비로 확인되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`showIconSlot: false`는 아이콘 이미지뿐만 아니라 왼쪽 아이콘 슬롯 자체도 제거합니다. 행은 아이콘 너비나 아이콘-레이블 간격을 예약하지 않으며 레이블은 행 원점에서 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "레이블과 바로가기는 모두 `body` 스타일 토큰을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "아이콘 소스를 확인할 수 없는 경우 작은 원형 강조 자리 표시자가 표시됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`keyVisible`가 `false`이면 키 텍스트가 숨겨집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`keyVisible`가 `true`이고 `key`가 비어 있으면 `keyPlaceholder`가 렌더링됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "쉐브론은 `effectiveShowChevron`가 `true`인 경우에만 표시됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectionDirection: \"auto\"`는 `expanded=false`를 오른쪽으로, `expanded=true`를 아래쪽으로 매핑합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "fenced_code",
+      "start_line": 77,
+      "end_line": 91,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.MenuItem {\n    label: \"Open Recent\"\n    showIconSlot: false\n    key: \"Cmd+O\"\n    keyVisible: true\n    hasChildItems: true\n    showChevron: true\n    expanded: false\n    selectionDirection: \"auto\"\n    state: selectedState\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.MenuItem {\n    label: \"Open Recent\"\n    showIconSlot: false\n    key: \"Cmd+O\"\n    keyVisible: true\n    hasChildItems: true\n    showChevron: true\n    expanded: false\n    selectionDirection: \"auto\"\n    state: selectedState\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 98,
+      "raw": "`interaction`, `interactionPhase` 및 `interactionInput`는 인스턴스별로 소유됩니다. 이는 기존 정수 `state`(기본값/선택됨/비활성화)와는 별개입니다. Figma의 축소/확장 세트는 완전한 입력 변형을 보유합니다. 참조\n[구성 요소 인스턴스 상태](../../instance-states.md).\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "Figma 상태는 `state` 선택 모델과 독립적입니다: 기본값은 작성된 투명 채우기를 사용하며, 호버는 `Theme.surfaceAlt` 를, 누름은 `Theme.accentMuted` 를, 릴리스는 현재 호버/기본 채우기를 180ms OutBack 변형만 함께 복원합니다. 일반 `MenuItem`의 선택된 행은 축소·확장, 포인터·키보드 및 모든 입력 단계에서 Press와 동일한 `Theme.accentMuted`를 유지한다. Figma Menus의 두 세트에 있는 Selected 변형 20개는 `Fill/pressed` 토큰에 연결되어 있다. 별도 컴팩트 디자인인 `ContextMenuItem`은 기존 `Theme.contextMenuItemSelectedBackground`(`Theme.primary`)를 유지한다. 비활성 행은 작성된 채우기와 타이포그래피를 유지하지만, 활성화하거나 호버하거나 변형되거나 Tab 초점을 받을 수 없습니다. 확장과 기존 레이블/아이콘/단축키 속성은 독립적으로 유지됩니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "키보드 Tab/Shift+Tab은 포커스를 이동한다. Space와 Enter는 즉시 누름 상태로 만들고 키를 놓을 때 활성화한다. Enter를 누른 상태에서 포커스를 잃으면 취소한다. 1.5px Primary 포커스 링은 고정된 행 경계 바깥 3px에 위치하며 누름/해제 중에도 보인다. `motionEnabled`·전역 모션 감소·로컬 색상 덮어쓰기를 계속 지원한다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "채우기 혼합, 행 리바운드 및 공개 회전은 확장을 따릅니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "`compact` 기본값은 false 입니다. ContextMenuItem 실제 컴팩트 Figma 계열을 선택하며: 18px 행, 반지름 0, Inter 일반 12 레이블 및 Pretendard SemiBold 12 단축키입니다. 일반 기본값은 24px 에 Pretendard 중간 13를 유지합니다. 너비 측정은 렌더링된 레이블과 단축키와 동일한 글꼴을 사용합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "MenuItem",
+      "anchor": "menuitem",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 95
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000049",
+        "label": "구성 요소 인스턴스 상태",
+        "target": "../../instance-states.md",
+        "kind": "relative",
+        "line": 98
+      },
+      {
+        "block_id": "b000055",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 104
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

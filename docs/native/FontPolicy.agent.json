@@ -1,0 +1,214 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:90324b96589b1c0a22b443c8fbd0ea1570a80011fe05ecb61d509d34c525c9af",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/FontPolicy.md",
+    "sha256": "c9367101a04188681359311f7ca58b6902bc2efda6bf8539f6e643c216895a00",
+    "bytes": 2377,
+    "line_count": 18,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 FontPolicy",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 FontPolicy\n",
+      "level": 1,
+      "title": "네이티브 FontPolicy"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "원본 `backend/fonts/fontpolicy.*`의 속성 5개, invokable 6개, 정적 부트스트랩 3개를 C++23으로 제공한다. `iiGUI::FontDatabase`를 주입해 플랫폼 글꼴 조회와 애플리케이션 상태를 분리한다. 기본 생성자는 UI 스레드의 기본 글꼴 서비스를 사용하며 명시적 생성자는 독립 환경을 사용한다. 정책 인스턴스는 LVUI 뷰 scope가 소유한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "선호 가족명은 Pretendard이다. 탐지에는 대소문자를 무시한 정확한 일치를 우선하고 이후 포함하는 가족명을 사용한다. 실제 fallback 적용은 원본처럼 목록에서 처음 발견한 포함 일치를 사용한다. 현재 애플리케이션 가족명에 Pretendard가 포함된 경우의 조기 성공, 생성자에서 경고를 만들지 않는 동작, 실패하고 가족도 없을 때만 경고하는 동작을 보존한다. 이름만으로 판단한 성공은 실제 glyph 출력의 증명이 아니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`refresh()`는 공급자의 목록을 갱신한 뒤 effectiveFamily와 pretendardAvailable을 한 묶음으로 알린다. lastWarning은 독립적으로 변경 시에만 알린다. `resolveFamily`는 요청의 공백을 제거하고 실제 목록에 있으면 요청한 철자를 유지하며, 없으면 현재 effectiveFamily를 사용한다. 수치·스타일 조회는 iiGUI의 같은 7개 원본 토큰을 사용한다. 알 수 없는 크기는 인자로 받은 fallback을 유지한다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "table",
+      "start_line": 9,
+      "end_line": 14,
+      "raw": "| 크기 | 굵기 | 스타일 |\n|---|---|---|\n| 26·22 | 700 | Bold |\n| 17·15·12 | 600 | SemiBold |\n| 13 | 500 | Medium |\n| 11 | 400 | Regular |\n",
+      "columns": [
+        "크기",
+        "굵기",
+        "스타일"
+      ],
+      "rows": [
+        [
+          "26·22",
+          "700",
+          "Bold"
+        ],
+        [
+          "17·15·12",
+          "600",
+          "SemiBold"
+        ],
+        [
+          "13",
+          "500",
+          "Medium"
+        ],
+        [
+          "11",
+          "400",
+          "Regular"
+        ]
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "정적 등록은 번들 10개와 원본 대체 대상 8개를 사용한다. Theme의 최초 네이티브 appearance도 같은 정책으로 부트스트랩한다. 등록은 scope 재평가나 hover마다 반복하지 않는다. 표시 갱신은 위젯 트리의 글꼴 측정 캐시를 갱신하며 사용자 파일·생성 작업 상태를 수정하지 않는다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "LVUI import·일반 바인딩·Static 값과 명령 참조를 실제 생성 C++로 연결하는 예제 및 회귀 검사를 유지한다. 원본 전체의 상속 API·스타일·플랫폼 동작이 입증되기 전에는 완전 이식으로 표시하지 않는다. LVRS 앱·테스트 실행은 저장소 지침에 따른 전체 작업 마지막 일괄 검증에 유보한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 FontPolicy",
+      "anchor": "네이티브-fontpolicy",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 16,
+        "text": "정적 등록은 번들 10개와 원본 대체 대상 8개를 사용한다. Theme의 최초 네이티브 appearance도 같은 정책으로 부트스트랩한다. 등록은 scope 재평가나 hover마다 반복하지 않는다. 표시 갱신은 위젯 트리의 글꼴 측정 캐시를 갱신하며 사용자 파일·생성 작업 상태를 수정하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 18,
+        "text": "LVUI import·일반 바인딩·Static 값과 명령 참조를 실제 생성 C++로 연결하는 예제 및 회귀 검사를 유지한다. 원본 전체의 상속 API·스타일·플랫폼 동작이 입증되기 전에는 완전 이식으로 표시하지 않는다. LVRS 앱·테스트 실행은 저장소 지침에 따른 전체 작업 마지막 일괄 검증에 유보한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000009",
+        "columns": [
+          "크기",
+          "굵기",
+          "스타일"
+        ],
+        "rows": [
+          [
+            "26·22",
+            "700",
+            "Bold"
+          ],
+          [
+            "17·15·12",
+            "600",
+            "SemiBold"
+          ],
+          [
+            "13",
+            "500",
+            "Medium"
+          ],
+          [
+            "11",
+            "400",
+            "Regular"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

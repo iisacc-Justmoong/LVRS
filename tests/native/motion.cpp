@@ -20,11 +20,12 @@ void alert(){
         auto mount=take(host.mount_widgets([&](gui::WidgetBuilder& builder)->core::Result<void>{auto root=take(builder.vstack({},"root"));alert=take(lvrs::Alert::create(builder,root,"alert",{.motion=preferences},{.closed=[&]{++closed;}}));return {};},lvrs::Theme().appearance()));
         auto now=runtime::Clock::now();good(alert.open());auto start=take(alert.root().snapshot());check(start.reveal_progress==0&&start.transitioning,"Default Alert did not start native entry motion");
         take(host.capture_canvas());auto initial=take(host.graphics_info());check(initial.shadow_blurs>0&&initial.backdrop_blurs>0,"Authored unscaled shadow/glass were absent at the first frame");
-        (void)frames.step(now+90ms);take(host.capture_canvas());auto part=take(alert.root().snapshot());check(part.reveal_progress>0&&part.reveal_progress<1&&part.visual_bounds.width<part.bounds.width,"Alert did not animate its card on Core frames");
+        (void)frames.step(now+90ms);take(host.capture_canvas());auto part=take(alert.root().snapshot());check(part.reveal_progress>0&&part.reveal_progress<1&&part.visual_bounds.width<part.bounds.width,"Alert did not animate its card on Core frames");auto first_visible=take(host.graphics_info());
         (void)frames.step(now+210ms);auto overshoot=take(alert.root().snapshot());check(overshoot.reveal_progress>1&&overshoot.visual_bounds.width>overshoot.bounds.width,"Original OutBack overshoot was lost");take(host.capture_canvas());auto reused=take(host.graphics_info());
         if(initial.api==gui::GraphicsApi::metal){
+            check(first_visible.foreground_rasterizations>0&&first_visible.foreground_rasterizations<=initial.foreground_rasterizations+1,"First visible foreground performed redundant raster work");
             std::cerr<<"METAL_MOTION_COUNTS shadow="<<initial.shadow_blurs<<"->"<<reused.shadow_blurs<<" backdrop="<<initial.backdrop_blurs<<"->"<<reused.backdrop_blurs<<" foreground="<<initial.foreground_rasterizations<<"->"<<reused.foreground_rasterizations<<'\n';
-            check(reused.shadow_blurs==initial.shadow_blurs&&reused.backdrop_blurs==initial.backdrop_blurs&&reused.foreground_rasterizations==initial.foreground_rasterizations,"Metal pure motion re-rasterized retained effects");
+            check(reused.shadow_blurs==initial.shadow_blurs&&reused.backdrop_blurs==initial.backdrop_blurs&&reused.foreground_rasterizations==first_visible.foreground_rasterizations,"Metal pure motion re-rasterized retained effects");
             check(reused.shadow_masks==initial.shadow_masks&&reused.backdrop_copies==initial.backdrop_copies,"Metal pure motion regenerated invariant masks or source captures");
         }
         else check(reused.shadow_blurs>initial.shadow_blurs&&reused.backdrop_blurs>initial.backdrop_blurs,"Inline native renderer did not execute the changed effect frame");

@@ -1,0 +1,115 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:f2a7dee76c20d5850e22061bfd263a49907de9c15d01ef15ff9cea4ab6ae2b50",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeAppSurfaces/README.md",
+    "sha256": "bcd822cbe2ea73e67f782dbe8157e53e958b5666664cdfc715a2e0c3578551d5",
+    "bytes": 968,
+    "line_count": 16,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native Application Surfaces",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native Application Surfaces\n",
+      "level": 1,
+      "title": "Native Application Surfaces"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "AppHeader actions and AppCard body content are compiled from LVUI to ordinary\niiGUI C++ widgets on one native surface. Core Observable inputs update title,\nsubtitle, compact spacing, card geometry and shape without rebuilding the backend\nor the retained editor. iiSDKCore owns the entry point, worker result, frame loop\nand shutdown. No Qt or OS widget controls are used.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 12,
+      "raw": "`install.sh [destination] [CMake options...]` configures, builds and installs under\n`build/`; it never launches the app or invokes tests. The registered `--self-test`\nis deferred to the final whole-goal runtime batch. Build evidence is separate from\nruntime, visual and memory-safety verification. See [usage](docs/Usage.md).\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 16,
+      "raw": "The same scoped backend also drives ListToolbar, ListFooter, a model-backed\nHierarchyToolbar and retained manual ToolbarButtons. Immutable shared configurations\nupdate through Core Observable without comparing or interpreting callbacks.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native Application Surfaces",
+      "anchor": "native-application-surfaces",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 10,
+        "text": "`build/`; it never launches the app or invokes tests. The registered `--self-test`",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "usage",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 12
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

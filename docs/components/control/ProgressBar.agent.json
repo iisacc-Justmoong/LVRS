@@ -1,0 +1,807 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:214f7950a750482dc9a6e3965f7c398024df6096caf9cda2e4cd81d5b45fc5ae",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/control/ProgressBar.md",
+    "sha256": "670d53830bd1c303359f4abf1ed3f30773a9178b807b186974147d1c87400170",
+    "bytes": 3928,
+    "line_count": 137,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ProgressBar",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ProgressBar\n",
+      "level": 1,
+      "title": "ProgressBar"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/qml/components/control/display/ProgressBar.qml`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ProgressBar`는 경량 범위 기반 진행률 표시기입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 사용자 정의 숫자 범위에서 정규화된 진행 상황을 렌더링합니다.\n- 제공된 경우 C++ `StateModel`에서 범위 상태를 읽습니다.\n- 컴팩트한 크기 사전 설정 및 모양 정책을 지원합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "사용자 정의 숫자 범위에서 정규화된 진행 상황을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "제공된 경우 C++ `StateModel`에서 범위 상태를 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컴팩트한 크기 사전 설정 및 모양 정책을 지원합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "크기와 모양:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 21,
+      "end_line": 24,
+      "raw": "- `size` (`large`, `regular`)\n- `shapeStyle` (`shapeRoundRect`, `shapeCylinder`)\n- `cornerRadius`\n- `barHeight`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`size` (`large`, `regular`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`shapeStyle` (`shapeRoundRect`, `shapeCylinder`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cornerRadius`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`barHeight`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "범위:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 48,
+      "raw": "- `minimumValue`\n- `maximumValue`\n- `startValue`\n- `currentValue`\n- `endValue`(`maximumValue`의 호환성 별칭)\n- `stateModel`\n- `minimumValueStateKey`\n- `maximumValueStateKey`\n- `startValueStateKey`\n- `currentValueStateKey`\n- `usingStateModel`(읽기 전용)\n- `effectiveMinimumValue`(읽기 전용)\n- `effectiveMaximumValue`(읽기 전용)\n- `effectiveStartValue`(읽기 전용)\n- `effectiveCurrentValue`(읽기 전용)\n- `valueRange`(읽기 전용)\n- `normalizedStart`(읽기 전용, `0..1`에 고정됨)\n- `normalizedCurrent`(읽기 전용, `0..1`에 고정됨)\n- `fillStart`(읽기 전용, 고정된 세그먼트 시작)\n- `fillProgress`(읽기 전용, 고정된 세그먼트 길이)\n- `progress`(읽기 전용, `0..1`에 고정됨)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`minimumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`maximumValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentValue`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`endValue`(`maximumValue`의 호환성 별칭)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateModel`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minimumValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`maximumValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentValueStateKey`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`usingStateModel`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveMinimumValue`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveMaximumValue`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveStartValue`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`effectiveCurrentValue`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`valueRange`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedStart`(읽기 전용, `0..1`에 고정됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`normalizedCurrent`(읽기 전용, `0..1`에 고정됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillStart`(읽기 전용, 고정된 세그먼트 시작)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillProgress`(읽기 전용, 고정된 세그먼트 길이)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`progress`(읽기 전용, `0..1`에 고정됨)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "색상:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 52,
+      "end_line": 53,
+      "raw": "- `trackColor`\n- `fillColor`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`trackColor`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fillColor`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 59,
+      "end_line": 67,
+      "raw": "- `ProgressBar`는 범위 정규화를 C++ `ProgressModel`에 위임합니다.\n- `minimumValue` 및 `maximumValue`는 전체 숫자 범위를 정의합니다.\n- `startValue` 및 `currentValue`는 해당 범위 내의 채워진 세그먼트를 정의합니다.\n- `stateModel`가 있는 경우 막대는 해당 C++ 상태 개체에서 키별로 `effective*` 값을 읽고 키가 없거나 숫자가 아닌 경우 직접 QML 속성으로 대체됩니다.\n- 클램핑 기능이 있는 `progress = (effectiveCurrentValue - effectiveMinimumValue) / (effectiveMaximumValue - effectiveMinimumValue)`.\n- 시각적 채우기는 `fillStart = min(normalizedStart, normalizedCurrent)`에서 시작됩니다.\n- 시각적 채우기 너비는 `fillProgress = abs(normalizedCurrent - normalizedStart)`입니다.\n- 0에 가까운 범위는 이진 출력(`0` 또는 `1`)으로 대체됩니다.\n- 원통 모양은 min(너비, 높이)/2 반경을 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ProgressBar`는 범위 정규화를 C++ `ProgressModel`에 위임합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minimumValue` 및 `maximumValue`는 전체 숫자 범위를 정의합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`startValue` 및 `currentValue`는 해당 범위 내의 채워진 세그먼트를 정의합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stateModel`가 있는 경우 막대는 해당 C++ 상태 개체에서 키별로 `effective*` 값을 읽고 키가 없거나 숫자가 아닌 경우 직접 QML 속성으로 대체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "클램핑 기능이 있는 `progress = (effectiveCurrentValue - effectiveMinimumValue) / (effectiveMaximumValue - effectiveMinimumValue)`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "시각적 채우기는 `fillStart = min(normalizedStart, normalizedCurrent)`에서 시작됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "시각적 채우기 너비는 `fillProgress = abs(normalizedCurrent - normalizedStart)`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "0에 가까운 범위는 이진 출력(`0` 또는 `1`)으로 대체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원통 모양은 min(너비, 높이)/2 반경을 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"backend-model\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "## 백엔드 모델\n",
+      "level": 2,
+      "title": "백엔드 모델"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "`ProgressModel`는 유효 값, 상태 모델 대체 경로, 정규화된 값, 채우기 세그먼트 수학 및 반경 계산을 소유합니다. `ProgressBar.qml`는 해당 모델 주변의 렌더 어댑터입니다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "fenced_code",
+      "start_line": 79,
+      "end_line": 90,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.ProgressBar {\n    width: 180\n    size: regular\n    minimumValue: 0\n    maximumValue: 100\n    startValue: 0\n    currentValue: 64\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.ProgressBar {\n    width: 180\n    size: regular\n    minimumValue: 0\n    maximumValue: 100\n    startValue: 0\n    currentValue: 64\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "<a id=\"c-state-example\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "## C++ 상태 예\n",
+      "level": 2,
+      "title": "C++ 상태 예"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 96,
+      "end_line": 113,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.StateModel {\n    id: progressState\n    values: ({\n        minimumValue: 0,\n        maximumValue: 100,\n        startValue: 0,\n        currentValue: 64\n    })\n}\n\nLV.ProgressBar {\n    width: 180\n    stateModel: progressState\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.StateModel {\n    id: progressState\n    values: ({\n        minimumValue: 0,\n        maximumValue: 100,\n        startValue: 0,\n        currentValue: 64\n    })\n}\n\nLV.ProgressBar {\n    width: 180\n    stateModel: progressState\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "<a id=\"segment-example\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "## 세그먼트 예\n",
+      "level": 2,
+      "title": "세그먼트 예"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "fenced_code",
+      "start_line": 119,
+      "end_line": 129,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.ProgressBar {\n    width: 180\n    minimumValue: -50\n    maximumValue: 150\n    startValue: 50\n    currentValue: 100\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.ProgressBar {\n    width: 180\n    minimumValue: -50\n    maximumValue: 150\n    startValue: 50\n    currentValue: 100\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "이것은 트랙의 50% 에서 75% 까지 섹션을 채웁니다. `currentValue` 가 `startValue` 보다 낮으면 컴포넌트는 여전히 2 값 사이의 섹션을 렌더링합니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "paragraph",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "표시된 채우기는 탄력적으로 고정됩니다. 숫자 진행 상황은 현재 상태로 유지되고 렌더링된 채우기는 트랙 내부에 유지됩니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ProgressBar",
+      "anchor": "progressbar",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 17
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 57
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "백엔드 모델",
+      "anchor": "백엔드-모델",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 77
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "C++ 상태 예",
+      "anchor": "c-상태-예",
+      "start_line": 94
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "세그먼트 예",
+      "anchor": "세그먼트-예",
+      "start_line": 117
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "공유 모션",
+      "anchor": "공유-모션",
+      "start_line": 135
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000065",
+        "label": "모션 정책",
+        "target": "../../motion.md",
+        "kind": "relative",
+        "line": 137
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

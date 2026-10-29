@@ -1,0 +1,156 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:b0620c6ab59dccf884facfab07d7ad5565e3bc3caf284f9c6c46511636c6159d",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Opacity.md",
+    "sha256": "abfeac6154f270587552561d40f61d58943e760ce587cbb46172212fc0965a24",
+    "bytes": 1911,
+    "line_count": 24,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "공통 opacity 입력과 네이티브 표시 트리",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 공통 opacity 입력과 네이티브 표시 트리\n",
+      "level": 1,
+      "title": "공통 opacity 입력과 네이티브 표시 트리"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "LVRS 네이티브 컴포넌트의 루트 위젯은 iiGUI의 `Widget::set_opacity`를 사용한다.\nLVUI는 공통 입력 `opacity`를 같은 C++ 메서드에 연결하므로 컴포넌트의 선택색·disabled\n색상을 변경하거나 개별 옵션에 opacity 필드를 중복 추가하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 9,
+      "raw": "기본값은 1이며 유한한 0부터 1까지의 값만 허용한다. 작성한 값은\n`WidgetSnapshot::opacity`, 일반 부모·소유 콘텐츠 부모의 곱은 `effective_opacity`에서\n확인한다. 개별 paint 색상의 alpha와 애니메이션의 일시적인 진행률은 별도 값이다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "값을 바꾸어도 기존 컴포넌트의 루트·사용자 콘텐츠·입력·포커스·선택·파일 데이터는\n유지한다. 0에서도 입력을 받는다. 비활성 정책은 enabled, 보임과 입력 제거 정책은\nvisible로 구분한다. 계층 행을 흐리게 표시하기 위한 시각적 투영이 원본 HierarchyModel의\nrevision이나 레이어 visible 필드를 변경해서는 안 된다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 18,
+      "raw": "표시 곱은 텍스트·이미지·패널·사용자 그리기·그림자·재질과 소유된 중첩 콘텐츠에\n전달된다. 클립·투명도가 다른 형제의 배치도 구분한다. OS 창 자체의 투명도와 별도\n오프스크린 그룹 합성은 이 계약에 포함하지 않는다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 24,
+      "raw": "`LVRSNativeOpacityTests`는 LVUI 공통 회귀 소스의 8개 사례와 네이티브 계층 행의 선택·\n이름·count 변경 후 루트/슬롯 투명도 보존 1개를 컴파일한다.\n모든 LVRS 앱·테스트·self-test 실행은 저장소 지침대로 전체 작업의 최종 일괄 단계에\n모으므로 중간 컴파일·링크 성공을 LVRS 실행 또는 GPU 시각 동등성으로 보고하지 않는다.\n이 작업만으로 원본 LVRS 전체 상속·이벤트·모션·플랫폼 계약을 complete로 바꾸지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "공통 opacity 입력과 네이티브 표시 트리",
+      "anchor": "공통-opacity-입력과-네이티브-표시-트리",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "색상을 변경하거나 개별 옵션에 opacity 필드를 중복 추가하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 14,
+        "text": "revision이나 레이어 visible 필드를 변경해서는 안 된다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 18,
+        "text": "오프스크린 그룹 합성은 이 계약에 포함하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 23,
+        "text": "모으므로 중간 컴파일·링크 성공을 LVRS 실행 또는 GPU 시각 동등성으로 보고하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

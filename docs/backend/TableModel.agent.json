@@ -1,0 +1,704 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:421f2fc5ff095eb73273a481607e1e54055b7e942b5abd603451cb5bc4c0169f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/TableModel.md",
+    "sha256": "048a986f10cb64ddc5b885ecc6524bbb27738d2e9aa39713a9cb6531450d57b7",
+    "bytes": 7127,
+    "line_count": 101,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "TableModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# TableModel\n",
+      "level": 1,
+      "title": "TableModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "`visibleCellsInRange(top, bottom)`은 본문 좌표의 반개구간과 겹치는 셀 설명자만\n반환한다. 병합 셀의 앵커·전체 기하·전역 인덱스는 `visibleCells()`와 같다.\n범위 밖 셀은 QML용 맵으로 변환하지 않는다. 행/열 누적 좌표와 앞선 병합 범위를\n계산하는 네이티브 탐색은 유지하므로, 이 API는 디스크 인덱스나 행 데이터의\n지연 로딩을 대신하지 않는다. 잘못된 범위 또는 비유한 수는 빈 목록을 반환한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "위치: `src/backend/model/tablemodel.h`, `src/backend/model/tablemodel.cpp`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "`TableModel`는 `Table.qml`에 대한 비시각적 테이블 모델 동작을 소유합니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 17,
+      "end_line": 20,
+      "raw": "- C++에서 머리글, 행, 표시되는 셀, 셀 범위 및 열 유형을 확인합니다.\n- 런타임 셀 병합/분할 및 행/열 삽입/삭제 돌연변이를 소유합니다.\n- 자체 테이블 기하학, 행/열 크기 조정 상태 및 셀 컨텍스트 작업 설명자.\n- 헤더 선언 유형에서 본문 셀 값을 검증하고 강제합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "C++에서 머리글, 행, 표시되는 셀, 셀 범위 및 열 유형을 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "런타임 셀 병합/분할 및 행/열 삽입/삭제 돌연변이를 소유합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "자체 테이블 기하학, 행/열 크기 조정 상태 및 셀 컨텍스트 작업 설명자.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "헤더 선언 유형에서 본문 셀 값을 검증하고 강제합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "입력:\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 26,
+      "end_line": 38,
+      "raw": "- `rows`\n- `headerCellItems`\n- `headerColumns`\n- `defaultHeaderText`\n- `defaultCellText`\n- `inputable`\n- `tableWidth`\n- `rowHeight`\n- `cellWidth`\n- `columnWidths`\n- `rowHeights`\n- `minColumnWidth`\n- `minRowHeight`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`rows`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`headerCellItems`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`headerColumns`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`defaultHeaderText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`defaultCellText`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`inputable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tableWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowHeight`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnWidths`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowHeights`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minColumnWidth`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`minRowHeight`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "읽기 전용:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 42,
+      "end_line": 53,
+      "raw": "- `rowCount`\n- `headerCount`\n- `columnCount`\n- `rowsModelBacked`\n- `cellEditingAvailable`\n- `structureMutationAvailable`\n- `resizingColumnIndex`, `resizingRowIndex`\n- `contextRowIndex`, `contextColumnIndex`\n- `revision`\n- `undoStack`\n- `canUndo`, `canRedo`\n- `undoDepth`, `redoDepth`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`rowCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`headerCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`columnCount`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowsModelBacked`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`cellEditingAvailable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`structureMutationAvailable`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`resizingColumnIndex`, `resizingRowIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`contextRowIndex`, `contextColumnIndex`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`undoStack`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`canUndo`, `canRedo`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`undoDepth`, `redoDepth`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 57,
+      "end_line": 67,
+      "raw": "- 데이터: `resolvedHeaderSource()`, `rowAt(index)`, `cellAt(rowIndex, columnIndex)`, `headerAt(columnIndex)`\n- 입력: `headerCellType(columnIndex)`, `columnType(columnIndex)`, `coerceCellValue(value, valueType)`, `validateCellInput(...)`\n- 편집: `setCellValue(rowIndex, columnIndex, value)`\n- 범위: `cellRowSpan(...)`, `cellColumnSpan(...)`, `mergeAnchorForCell(...)`, `isCoveredCell(...)`, `visibleCells()`\n- 기하학: `columnWidth(...)`, `columnX(...)`, `columnSpanWidth(...)`, `rowHeightAt(...)`, `rowY(...)`, `rowSpanHeight(...)`, `totalBodyHeight()`\n- 크기 조정: `setColumnWidth(...)`, `setRowHeight(...)`, `beginColumnResize(...)`, `updateColumnResize(...)`, `endColumnResize()`\n- 구조: `insertRow(...)`, `appendRow()`, `deleteRow(...)`, `removeRow(...)`, `insertColumn(...)`, `appendColumn()`, `deleteColumn(...)`, `removeColumn(...)`\n- 컨텍스트: `setContextCell(...)`, `contextMenuDescriptors(...)`, `triggerContextAction(...)`\n- 병합/분할: `canMergeCells(...)`, `mergeCells(...)`, `splitCell(...)`\n- 입력 가능 여부: `rowInputable(rowEntry)`, `cellInputable(rowIndex, columnIndex)`\n- 내역: `undo()`, `redo()`, `clearUndoStack()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "데이터: `resolvedHeaderSource()`, `rowAt(index)`, `cellAt(rowIndex, columnIndex)`, `headerAt(columnIndex)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "입력: `headerCellType(columnIndex)`, `columnType(columnIndex)`, `coerceCellValue(value, valueType)`, `validateCellInput(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집: `setCellValue(rowIndex, columnIndex, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "범위: `cellRowSpan(...)`, `cellColumnSpan(...)`, `mergeAnchorForCell(...)`, `isCoveredCell(...)`, `visibleCells()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기하학: `columnWidth(...)`, `columnX(...)`, `columnSpanWidth(...)`, `rowHeightAt(...)`, `rowY(...)`, `rowSpanHeight(...)`, `totalBodyHeight()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "크기 조정: `setColumnWidth(...)`, `setRowHeight(...)`, `beginColumnResize(...)`, `updateColumnResize(...)`, `endColumnResize()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구조: `insertRow(...)`, `appendRow()`, `deleteRow(...)`, `removeRow(...)`, `insertColumn(...)`, `appendColumn()`, `deleteColumn(...)`, `removeColumn(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컨텍스트: `setContextCell(...)`, `contextMenuDescriptors(...)`, `triggerContextAction(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "병합/분할: `canMergeCells(...)`, `mergeCells(...)`, `splitCell(...)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "입력 가능 여부: `rowInputable(rowEntry)`, `cellInputable(rowIndex, columnIndex)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "내역: `undo()`, `redo()`, `clearUndoStack()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 73,
+      "end_line": 91,
+      "raw": "- 헤더 소스는 먼저 `headerCellItems`에서 확인한 다음 `headerColumns`에서 확인합니다.\n- `rows`가 `QAbstractItemModel`인 경우, `TableModel`는 C++ 모델을 기준 원본로 유지하고 `rowCount()`, `columnCount()`, `data(index, Qt::DisplayRole)`에서 렌더링 행을 빌드합니다. `data(index, Qt::EditRole)`.\n- 기본 테이블 헤더가 아직 사용 중인 경우 C++ 항목 모델의 수평 `headerData(..., Qt::DisplayRole)`가 표시되는 헤더 레이블을 제공합니다.\n- 헤더 개체는 `type`, `valueType`, `cellType` 또는 `dataType`를 선언할 수 있습니다.\n- 기본 헤더는 해당 값에서 `string`, `int`, `float` 또는 `bool`를 추론합니다.\n- `visibleCells()`는 `x`, `y`, `width` 및 `height`를 사용하여 평면화된 렌더링 모델을 반환하고 포함된 병합 멤버를 제외합니다.\n- 병합 범위의 종료 행에서는 해당 범위가 더 이상 셀을 가리지 않는다. 명시적인 병합 멤버 표시는 별도로 유지한다. `LVRSTests_navigation_state::table_projection_matches_public_cell_queries`는 종료 직전·종료 행의 표시 셀 수와 명시적 멤버 표시를 검사한다.\n- `count`/`get(index)`가 있는 객체를 포함하여 배열 및 목록과 같은 객체를 표시할 수 있습니다.\n- C++ 항목 모델은 모델 개체를 `rows`에 할당하여 직접 표시할 수 있습니다.\n- `setCellValue(rowIndex, columnIndex, value)`는 표준 `QAbstractItemModel::setData(index, coercedValue, Qt::EditRole)` 경로를 통해 C++ 항목 모델 행을 작성합니다. 모델이 `value`, `edit` 또는 `text` 역할을 노출하는 경우 해당 역할은 `Qt::EditRole` 이후에 시도됩니다.\n- C++ 항목 모델 편집은 소스 소유입니다. 모델은 적절하게 `dataChanged`, `rowsInserted`, `rowsRemoved`, `columnsInserted`, `columnsRemoved`, `layoutChanged`, `modelReset` 또는 `headerDataChanged`를 방출해야 합니다. `TableModel`는 이를 수신하고 렌더링 설명자를 새로 고칩니다.\n- 구조적 변형은 행이 변경 가능한 배열/목록 값에서 나온 경우에만 허용됩니다. 읽기 전용 목록형 객체는 표시 전용으로 유지됩니다.\n- 행/열 구조 편집 및 셀 병합/분할에는 여전히 변경 가능한 배열 행이 필요합니다. C++ 모델은 자체 구조 편집 API를 소유하고 있습니다.\n- 구조를 변경하기 전에 병합 메타데이터가 정규화되므로 이전 범위가 잘못된 행이나 열을 가리키지 않습니다.\n- 행/열 삽입 및 삭제 작업을 통해 `rowHeights` 및 `columnWidths`가 편집된 구조에 맞게 정렬됩니다.\n- 크기 조정 작업은 백엔드 변형이며 데이터 및 구조 편집과 동일한 실행 취소 스택을 사용합니다.\n- 셀 상황에 맞는 메뉴는 백엔드 설명입니다. QML는 설명자를 표시 가능한 `ContextMenu` 항목에만 매핑하고 선택한 작업을 전달합니다.\n- 각 허용된 배열 지원 변형 이전에 `TableModel`는 `ModelUndoStack`에 스냅샷을 기록합니다.\n- `undo()` 및 `redo()`는 `rows`, 존재하는 경우 유지된 C++ 소스 객체, `headerCellItems`, `headerColumns`, `columnWidths`, `rowHeights` 및 행 변경 가능 상태를 복원한 다음 정상적인 돌연변이에서 사용되는 것과 동일한 모델/헤더/기하학 변경 신호를 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "헤더 소스는 먼저 `headerCellItems`에서 확인한 다음 `headerColumns`에서 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rows`가 `QAbstractItemModel`인 경우, `TableModel`는 C++ 모델을 기준 원본로 유지하고 `rowCount()`, `columnCount()`, `data(index, Qt::DisplayRole)`에서 렌더링 행을 빌드합니다. `data(index, Qt::EditRole)`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 테이블 헤더가 아직 사용 중인 경우 C++ 항목 모델의 수평 `headerData(..., Qt::DisplayRole)`가 표시되는 헤더 레이블을 제공합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "헤더 개체는 `type`, `valueType`, `cellType` 또는 `dataType`를 선언할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 헤더는 해당 값에서 `string`, `int`, `float` 또는 `bool`를 추론합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`visibleCells()`는 `x`, `y`, `width` 및 `height`를 사용하여 평면화된 렌더링 모델을 반환하고 포함된 병합 멤버를 제외합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "병합 범위의 종료 행에서는 해당 범위가 더 이상 셀을 가리지 않는다. 명시적인 병합 멤버 표시는 별도로 유지한다. `LVRSTests_navigation_state::table_projection_matches_public_cell_queries`는 종료 직전·종료 행의 표시 셀 수와 명시적 멤버 표시를 검사한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`count`/`get(index)`가 있는 객체를 포함하여 배열 및 목록과 같은 객체를 표시할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++ 항목 모델은 모델 개체를 `rows`에 할당하여 직접 표시할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`setCellValue(rowIndex, columnIndex, value)`는 표준 `QAbstractItemModel::setData(index, coercedValue, Qt::EditRole)` 경로를 통해 C++ 항목 모델 행을 작성합니다. 모델이 `value`, `edit` 또는 `text` 역할을 노출하는 경우 해당 역할은 `Qt::EditRole` 이후에 시도됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++ 항목 모델 편집은 소스 소유입니다. 모델은 적절하게 `dataChanged`, `rowsInserted`, `rowsRemoved`, `columnsInserted`, `columnsRemoved`, `layoutChanged`, `modelReset` 또는 `headerDataChanged`를 방출해야 합니다. `TableModel`는 이를 수신하고 렌더링 설명자를 새로 고칩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구조적 변형은 행이 변경 가능한 배열/목록 값에서 나온 경우에만 허용됩니다. 읽기 전용 목록형 객체는 표시 전용으로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행/열 구조 편집 및 셀 병합/분할에는 여전히 변경 가능한 배열 행이 필요합니다. C++ 모델은 자체 구조 편집 API를 소유하고 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구조를 변경하기 전에 병합 메타데이터가 정규화되므로 이전 범위가 잘못된 행이나 열을 가리키지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "행/열 삽입 및 삭제 작업을 통해 `rowHeights` 및 `columnWidths`가 편집된 구조에 맞게 정렬됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "크기 조정 작업은 백엔드 변형이며 데이터 및 구조 편집과 동일한 실행 취소 스택을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "셀 상황에 맞는 메뉴는 백엔드 설명입니다. QML는 설명자를 표시 가능한 `ContextMenu` 항목에만 매핑하고 선택한 작업을 전달합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 허용된 배열 지원 변형 이전에 `TableModel`는 `ModelUndoStack`에 스냅샷을 기록합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`undo()` 및 `redo()`는 `rows`, 존재하는 경우 유지된 C++ 소스 객체, `headerCellItems`, `headerColumns`, `columnWidths`, `rowHeights` 및 행 변경 가능 상태를 복원한 다음 정상적인 돌연변이에서 사용되는 것과 동일한 모델/헤더/기하학 변경 신호를 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "html",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "<a id=\"qml-boundary\"></a>\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "heading",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "## QML 경계\n",
+      "level": 2,
+      "title": "QML 경계"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 99,
+      "raw": "`columnCount()`의 행 탐색 결과는 모델 리비전 동안 재사용한다. 행·헤더·구조 변경,\n외부 모델 갱신과 실행 취소/재실행은 리비전을 갱신하여 이 값을 무효화한다.\n이에 따라 화면의 여러 셀과 열 너비가 같은 전체 행을 반복 탐색하지 않는다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "`Table.qml` 는 이제 렌더링 및 이벤트 어댑터입니다. 시각적 입력을 `TableModel` 에 바인딩하고, `visibleCells()` 를 렌더링하며, 리사이즈 핸들 및 셀 컨텍스트 메뉴에서 포인터 이벤트를 전달하고, 백엔드 변형이 성공한 후 공개 QML 신호를 방출합니다. 기하학, 리사이징, 구조 편집, 병합/분할, 값 유효성 검사, 컨텍스트 메뉴 사용 가능성, 및 취소/재실행은 `TableModel` 에 의해 소유됩니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "TableModel",
+      "anchor": "tablemodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 22
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000037",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML 경계",
+      "anchor": "qml-경계",
+      "start_line": 95
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 5,
+        "text": "범위 밖 셀은 QML용 맵으로 변환하지 않는다. 행/열 누적 좌표와 앞선 병합 범위를",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000003",
+        "line": 7,
+        "text": "지연 로딩을 대신하지 않는다. 잘못된 범위 또는 비유한 수는 빈 목록을 반환한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000039",
+        "line": 99,
+        "text": "이에 따라 화면의 여러 셀과 열 너비가 같은 전체 행을 반복 탐색하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

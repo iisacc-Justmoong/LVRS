@@ -6,7 +6,7 @@ ii::core::Result<void> TableHeaderModel::set_options(TableHeaderModelOptions o){
     using namespace table_detail;
     if(!metric(o.width)||!metric(o.row_height,1)||!metric(o.horizontal_padding)||!metric(o.fallback_cell_width)||!metric(o.minimum_column_width,1)||o.columns.size()>512||o.column_widths.size()>512)return ii::core::fail(ii::core::ErrorCode::invalid_argument,"Invalid TableHeaderModel geometry/count");
     for(auto w:o.column_widths)if(!std::isfinite(w)||std::abs(w)>8192)return ii::core::fail(ii::core::ErrorCode::invalid_argument,"Invalid TableHeaderModel column width");
-    for(const auto& c:o.columns)if(!text(c.text)||!text(c.value_type)||(c.padding&&!metric(*c.padding)))return ii::core::fail(ii::core::ErrorCode::invalid_argument,"Invalid TableHeaderModel column data");
+    for(const auto& c:o.columns)if(!text(c.text)||!text(c.value_type)||!text(c.leading_icon)||!text(c.trailing_icon)||(c.padding&&!metric(*c.padding)))return ii::core::fail(ii::core::ErrorCode::invalid_argument,"Invalid TableHeaderModel column data");
     if(revision_&&o==options_)return {};
     std::vector<TableHeaderDescriptor> next;next.reserve(std::max(std::size_t(1),o.columns.size()));
     const auto automatic=std::max(o.minimum_column_width,std::floor(o.width/std::max(std::size_t(1),o.columns.size())));

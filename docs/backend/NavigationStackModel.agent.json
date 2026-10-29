@@ -1,0 +1,692 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:6be0583d811e4f542607a7d60e4b879343554bdedc31eb3188176cdd7cfa385d",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/NavigationStackModel.md",
+    "sha256": "746c5f9b3de0afdec94b189bcd8d557b08c10b23aaef3793e7df8e18a9220fcf",
+    "bytes": 2712,
+    "line_count": 86,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "NavigationStackModel",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# NavigationStackModel\n",
+      "level": 1,
+      "title": "NavigationStackModel"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/navigation/navigationstackmodel.h`, `src/backend/navigation/navigationstackmodel.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`NavigationStackModel`는 `PageRouter.qml`에 대한 경로 스택 돌연변이 및 뷰 추적 파생을 소유합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- 경로 항목이 페이지 스택에 들어가기 전에 정규화합니다.\n- 푸시, 교체, 루트 설정, 팝 및 팝-루트 작업에 대한 스택 결과를 빌드합니다.\n- 경로 기반 항목과 함께 구성 요소 기반 스택 항목을 유지합니다.\n- 커밋된 스택에서 현재 경로/매개변수 및 뷰 추적 메타데이터를 파생합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "경로 항목이 페이지 스택에 들어가기 전에 정규화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "푸시, 교체, 루트 설정, 팝 및 팝-루트 작업에 대한 스택 결과를 빌드합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경로 기반 항목과 함께 구성 요소 기반 스택 항목을 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "커밋된 스택에서 현재 경로/매개변수 및 뷰 추적 메타데이터를 파생합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "입력:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "- `path`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`path`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "읽기 전용:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 24,
+      "end_line": 28,
+      "raw": "- `currentPath`\n- `currentParams`\n- `viewTrackingEntries`\n- `trackedViewIds`\n- `depth`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`currentPath`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentParams`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`viewTrackingEntries`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`trackedViewIds`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`depth`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 32,
+      "end_line": 46,
+      "raw": "- `normalizePath(pathValue)`\n- `createPathEntry(pathValue, params)`\n- `createComponentPathEntry(component, params)`\n- `stackAfterPathOperation(pathValue, params, mode)`\n- `stackAfterComponentOperation(component, params, mode)`\n- `stackAfterPop()`\n- `stackAfterPopToRoot()`\n- `applyPathOperation(pathValue, params, mode)`\n- `applyComponentOperation(component, params, mode)`\n- `pop()`\n- `popToRoot()`\n- `currentEntryDescriptor()`\n- `createViewTrackingEntry(entry, index)`\n- `buildViewTrackingEntries(pathValue?)`\n- `updateTrackedViewIds(entries)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`normalizePath(pathValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`createPathEntry(pathValue, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`createComponentPathEntry(component, params)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackAfterPathOperation(pathValue, params, mode)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackAfterComponentOperation(component, params, mode)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackAfterPop()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stackAfterPopToRoot()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyPathOperation(pathValue, params, mode)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`applyComponentOperation(component, params, mode)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`pop()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`popToRoot()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentEntryDescriptor()`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`createViewTrackingEntry(entry, index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`buildViewTrackingEntries(pathValue?)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updateTrackedViewIds(entries)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "<a id=\"stack-entry-contract\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "## 스택 진입 계약\n",
+      "level": 2,
+      "title": "스택 진입 계약"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "경로 항목:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 55,
+      "raw": "- `path`\n- `params`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`path`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`params`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "구성 요소 항목:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 59,
+      "end_line": 61,
+      "raw": "- 빈 문자열인 `path`\n- `params`\n- `component`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "빈 문자열인 `path`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`params`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`component`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "조회 추적 항목:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 65,
+      "end_line": 67,
+      "raw": "- `viewId`\n- `path`\n- `enabled`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`viewId`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`path`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabled`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "list",
+      "start_line": 73,
+      "end_line": 80,
+      "raw": "- 경로 정규화는 `RouteMatcher`에 위임됩니다.\n- `mode == \"set\"`는 전체 스택을 하나의 항목으로 대체합니다.\n- `mode == \"replace\"`는 현재 항목을 대체합니다.\n- 다른 모드에서는 새 항목이 추가됩니다.\n- `currentPath` 및 `currentParams`는 마지막 스택 항목에서 파생됩니다.\n- 구성 요소 항목은 `viewId`가 제공되지 않는 한 `_component_<index>` 형식으로 생성된 보기 ID를 받습니다.\n- `enabled: false`, `disabled: true` 또는 `params.disabled: true`가 포함된 항목은 보기 추적이 비활성화된 것으로 표시됩니다.\n- `updateTrackedViewIds`는 최신 추적 세트에서 사라진 ID를 반환하므로 QML는 스냅샷을 릴리스할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "경로 정규화는 `RouteMatcher`에 위임됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mode == \"set\"`는 전체 스택을 하나의 항목으로 대체합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`mode == \"replace\"`는 현재 항목을 대체합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "다른 모드에서는 새 항목이 추가됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`currentPath` 및 `currentParams`는 마지막 스택 항목에서 파생됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "구성 요소 항목은 `viewId`가 제공되지 않는 한 `_component_<index>` 형식으로 생성된 보기 ID를 받습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabled: false`, `disabled: true` 또는 `params.disabled: true`가 포함된 항목은 보기 추적이 비활성화된 것으로 표시됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`updateTrackedViewIds`는 최신 추적 세트에서 사라진 ID를 반환하므로 QML는 스냅샷을 릴리스할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "html",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "<a id=\"qml-boundary\"></a>\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "## QML 경계\n",
+      "level": 2,
+      "title": "QML 경계"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "`PageRouter.qml`는 여전히 `StackView` 작업, 경로 확인 및 대화형 전환 오케스트레이션을 소유하고 있습니다. `NavigationStackModel`는 커밋된 스택 수학, 정규화된 항목 생성, 현재 항목 파생 및 보기 추적 항목 생성을 소유합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "NavigationStackModel",
+      "anchor": "navigationstackmodel",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 16
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "스택 진입 계약",
+      "anchor": "스택-진입-계약",
+      "start_line": 50
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 71
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML 경계",
+      "anchor": "qml-경계",
+      "start_line": 84
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

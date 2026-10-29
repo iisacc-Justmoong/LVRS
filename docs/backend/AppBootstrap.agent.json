@@ -1,0 +1,1772 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:a081f1018027c074762d90d15cb67225e9f21a4aca8ed4026878c2145480959c",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/AppBootstrap.md",
+    "sha256": "fabb76c716fd6e3911348e9576bd2cf12dfd96bb07d4694160f83a6cbb77b3fb",
+    "bytes": 13526,
+    "line_count": 278,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "AppBootstrap",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# AppBootstrap\n",
+      "level": 1,
+      "title": "AppBootstrap"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/runtime/appbootstrap.h` / `src/backend/runtime/appbootstrap.cpp` / `src/backend/runtime/appentry.h`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`AppBootstrap`는 그래픽 백엔드 정책, 스타일 설정 및 글꼴 대체 경로 설정을 위한 사전/사후 애플리케이션 초기화 루틴을 제공합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 9,
+      "end_line": 14,
+      "raw": "- `lvrs::preApplicationBootstrap(options) -> AppBootstrapState`\n- `lvrs::postApplicationBootstrap(app, options) -> void`\n- `lvrs::loadQmlRootObjects(engine, roots, options) -> QmlRootLoadResult`\n- `lvrs::runQmlAppLifecycleStage(context, hooks, stage, logDiagnostics) -> QmlBootstrapQueueResult`\n- `lvrs::scheduleQmlAppLifecycleStage(receiver, context, hooks, stage, logDiagnostics) -> bool`\n- `lvrs::runBootstrappedQmlApp(argc, argv, launchSpec) -> int`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`lvrs::preApplicationBootstrap(options) -> AppBootstrapState`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::postApplicationBootstrap(app, options) -> void`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::loadQmlRootObjects(engine, roots, options) -> QmlRootLoadResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::runQmlAppLifecycleStage(context, hooks, stage, logDiagnostics) -> QmlBootstrapQueueResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::scheduleQmlAppLifecycleStage(receiver, context, hooks, stage, logDiagnostics) -> bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`lvrs::runBootstrappedQmlApp(argc, argv, launchSpec) -> int`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "Quick 모듈 앱의 경우 Qt 에 대해 `src/backend/runtime/appentry.h` 와 `QmlAppLaunchSpec` 를 pre/post 부트스트랩 시퀀스 주위의 표준 래퍼로 선호합니다. 이는 필요한 부트스트랩 순서를 그대로 유지하며, `QQmlApplicationEngine::loadFromModule(...)` 이전에 `initialProperties` 를 통해 루트 QML 속성을 초기화할 수 있습니다. `runBootstrappedQmlApp()` 는 이제 루트 생성을 `loadQmlRootObjects()` 에 위임하므로, 하위 소비 측 앱은 레거시 `moduleUri/rootObject` 필드를 통해 하나의 루트를 로드하거나 `QmlAppLaunchSpec::roots` 를 통해 여러 루트를 로드할 수 있습니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "<a id=\"qml-root-loading\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "## QML 루트 로딩\n",
+      "level": 2,
+      "title": "QML 루트 로딩"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "`QmlRootLoadSpec`는 하나의 루트 객체를 설명합니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 24,
+      "end_line": 27,
+      "raw": "- `moduleUri: QString`\n- `rootObject: QString`(기본값 `Main`)\n- `initialProperties: QVariantMap`\n- `windowActivationPolicy: QmlWindowActivationPolicy`(기본값 `Inherit`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`moduleUri: QString`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rootObject: QString`(기본값 `Main`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`initialProperties: QVariantMap`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windowActivationPolicy: QmlWindowActivationPolicy`(기본값 `Inherit`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "`QmlAppLaunchSpec`는 호환성을 위해 단일 루트 필드를 유지하고 다음을 추가합니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 32,
+      "raw": "- 멀티 루트 앱용 `roots: QList<QmlRootLoadSpec>`\n- 앱 수준 대체 경로인 `windowActivationPolicy: QmlWindowActivationPolicy`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "멀티 루트 앱용 `roots: QList<QmlRootLoadSpec>`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "앱 수준 대체 경로인 `windowActivationPolicy: QmlWindowActivationPolicy`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "`roots` 가 비어있을 때, LVRS 는 `moduleUri` , `rootObject` , `initialProperties` , 및 `windowActivationPolicy` 에서 하나의 `QmlRootLoadSpec` 를 생성합니다. `roots` 가 비어있지 않을 때, 각 루트는 `moduleUri` 를 생략하여 앱 레벨 모듈 URI 를 상속할 수 있으며, 루트별 초기 속성은 앱 레벨 초기 속성과 병합되지 않습니다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "`QmlRootLoadResult` 보고서:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 38,
+      "end_line": 42,
+      "raw": "- `ok`\n- `errors`\n- `rootObjects`\n- `windows`\n- `errorMessage()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ok`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errors`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rootObjects`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`windows`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errorMessage()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "루트 로딩은 엄격합니다. 새 엔진 루트 객체를 추가하지 않는 빈 모듈 URI/root 객체 또는 `loadFromModule(...)` 호출은 무시되는 대신 로드 실패로 보고됩니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "<a id=\"window-activation-policy\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## 창 활성화 정책\n",
+      "level": 2,
+      "title": "창 활성화 정책"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "`QmlWindowActivationPolicy`는 로드된 루트 객체가 `QWindow`일 때 LVRS가 수행하는 작업을 제어합니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "list",
+      "start_line": 52,
+      "end_line": 56,
+      "raw": "- `Inherit`: 앱/기본 정책 사용\n- `None`: QML 가시성 및 활성화를 그대로 유지합니다.\n- `Show`: `show()`에 전화\n- `ShowAndRaise`: `show()` 및 `raise()`를 호출합니다.\n- `ShowRaiseAndActivate`: `show()`, `raise()` 및 `requestActivate()`를 호출합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`Inherit`: 앱/기본 정책 사용",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`None`: QML 가시성 및 활성화를 그대로 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Show`: `show()`에 전화",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ShowAndRaise`: `show()` 및 `raise()`를 호출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ShowRaiseAndActivate`: `show()`, `raise()` 및 `requestActivate()`를 호출합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "기본 앱 수준 정책은 기존 QML 기반 가시성을 유지하기 위한 `None`입니다. 이전에 각 루트 로드 후 `show/raise/activate`를 반복했던 앱은 이제 앱 사양 또는 개별 루트 사양에 `windowActivationPolicy = QmlWindowActivationPolicy::ShowRaiseAndActivate`를 설정할 수 있습니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "html",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "<a id=\"lifecycle-hooks-and-queue\"></a>\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "## 수명주기 후크 및 대기열\n",
+      "level": 2,
+      "title": "수명주기 후크 및 대기열"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "`QmlAppLaunchSpec::lifecycle`는 3개의 부트스트랩 스테이지를 제공합니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 66,
+      "end_line": 68,
+      "raw": "- `AfterRootLoaded` (`after-root-loaded`)\n- `AfterWindowActivated` (`after-window-activated`)\n- `AfterFirstIdle` (`after-first-idle`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`AfterRootLoaded` (`after-root-loaded`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`AfterWindowActivated` (`after-window-activated`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`AfterFirstIdle` (`after-first-idle`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "각 단계는 직접 후크와 명명된 대기열 작업을 지원합니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "list",
+      "start_line": 72,
+      "end_line": 75,
+      "raw": "- `afterRootLoaded`\n- `afterWindowActivated`\n- `afterFirstIdle`\n- `tasks: QList<QmlBootstrapTask>`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`afterRootLoaded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`afterWindowActivated`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`afterFirstIdle`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`tasks: QList<QmlBootstrapTask>`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "`QmlBootstrapTask` 필드:\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "list",
+      "start_line": 79,
+      "end_line": 83,
+      "raw": "- `name: QString`\n- `stage: QmlAppLifecycleStage`\n- `priority: int`(낮은 값이 먼저 실행되고 동일한 우선순위를 위해 삽입 순서가 유지됨)\n- `fatal: bool`\n- `run(context, errorMessage) -> bool`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`name: QString`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stage: QmlAppLifecycleStage`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`priority: int`(낮은 값이 먼저 실행되고 동일한 우선순위를 위해 삽입 순서가 유지됨)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`fatal: bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`run(context, errorMessage) -> bool`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "`runBootstrappedQmlApp()` 는 루트 생성 후 `AfterRootLoaded` 와 `AfterWindowActivated` 를 동기적으로 실행합니다. 동기 단계 중 어느 하나에서 치명적인 실패가 발생하면 `-1` 로 시작이 중단됩니다. `AfterFirstIdle` 는 `scheduleQmlAppLifecycleStage()` 를 통해 0- 지연 이벤트 루프 턴으로 예약되어, 일반적인 지연된 부트스트랩 `QTimer::singleShot(0, ...)` 패턴과 일치합니다. 예약된 대기 단계에서 치명적인 실패가 발생하면 `-1` 로 애플리케이션이 종료됩니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "수명주기 컨텍스트는 다음을 노출합니다.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "list",
+      "start_line": 89,
+      "end_line": 92,
+      "raw": "- `application`\n- `engine`\n- `rootLoadResult`\n- `stage`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`application`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`engine`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rootLoadResult`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`stage`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "LVRS는 단계 타이밍, 작업 순서 지정 및 진단만 소유합니다. 하위 소비 측 앱은 여전히 ​​각 단계에 속하는 도메인 서비스 또는 데이터 로더를 결정합니다.\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "## `AppBootstrapOptions`\n",
+      "level": 2,
+      "title": "`AppBootstrapOptions`"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "list",
+      "start_line": 98,
+      "end_line": 106,
+      "raw": "- `applicationName: QString`\n- `quickStyleName: QString`\n- `configureRenderQualityDefaults: bool`(기본값 `true`)\n- `bootstrapGraphicsBackend: bool`(기본값 `true`)\n- `logBootstrapDiagnostics: bool`(기본값 `true`)\n- `logGraphicsBackend: bool`(기본값 `true`)\n- `installBundledFonts: bool`(기본값 `true`)\n- `installPretendardFallbacks: bool`(기본값 `true`)\n- `enforcePretendardFallback: bool`(기본값 `true`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`applicationName: QString`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`quickStyleName: QString`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`configureRenderQualityDefaults: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`bootstrapGraphicsBackend: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`logBootstrapDiagnostics: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`logGraphicsBackend: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`installBundledFonts: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`installPretendardFallbacks: bool`(기본값 `true`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enforcePretendardFallback: bool`(기본값 `true`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 107,
+      "end_line": 107,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "## `AppBootstrapState`\n",
+      "level": 2,
+      "title": "`AppBootstrapState`"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 110,
+      "end_line": 112,
+      "raw": "- `ok: bool`\n- `errorMessage: QString`\n- `graphicsBackend: GraphicsBackendBootstrapResult`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ok: bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`errorMessage: QString`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`graphicsBackend: GraphicsBackendBootstrapResult`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "html",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "<a id=\"required-call-order\"></a>\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "heading",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "## 필수 호출 순서\n",
+      "level": 2,
+      "title": "필수 호출 순서"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "list",
+      "start_line": 118,
+      "end_line": 121,
+      "raw": "1. `QGuiApplication`를 생성하기 전에 `preApplicationBootstrap`를 호출하세요.\n2. `state.ok == false`인 경우 시작을 중단합니다.\n3. `QGuiApplication`를 구축하세요.\n4. 앱 생성 후 즉시 `postApplicationBootstrap`를 호출하세요.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`QGuiApplication`를 생성하기 전에 `preApplicationBootstrap`를 호출하세요.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`state.ok == false`인 경우 시작을 중단합니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`QGuiApplication`를 구축하세요.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "앱 생성 후 즉시 `postApplicationBootstrap`를 호출하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "<a id=\"what-preapplicationbootstrap-does\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "## `preApplicationBootstrap`의 기능\n",
+      "level": 2,
+      "title": "`preApplicationBootstrap`의 기능"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "list",
+      "start_line": 127,
+      "end_line": 132,
+      "raw": "- 옵션 `RenderQuality::configureGlobalDefaults()`.\n- 옵션 `QQuickStyle::setStyle(quickStyleName)`.\n- 컴팩트 JSON 페이로드를 사용한 단계별 부트스트랩 진단 로깅.\n- 옵션 그래픽 백엔드 부트스트랩 및 진단 로깅.\n- `RenderQuality` 전역 기본값이 적용되기 전에 플랫폼 부트스트랩 프로필을 통해 시드 장면 그래프 환경 힌트(예: 파이프라인 캐시 및 아틀라스 크기 조정)가 적용됩니다.\n- 부트스트랩 책임은 백엔드 선택 및 Qt 사전 창 기본값으로 제한됩니다. 실시간 품질 정책은 런타임 `RenderQuality.applyWindow(...)`의 소유로 유지됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "옵션 `RenderQuality::configureGlobalDefaults()`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "옵션 `QQuickStyle::setStyle(quickStyleName)`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "컴팩트 JSON 페이로드를 사용한 단계별 부트스트랩 진단 로깅.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "옵션 그래픽 백엔드 부트스트랩 및 진단 로깅.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RenderQuality` 전역 기본값이 적용되기 전에 플랫폼 부트스트랩 프로필을 통해 시드 장면 그래프 환경 힌트(예: 파이프라인 캐시 및 아틀라스 크기 조정)가 적용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "부트스트랩 책임은 백엔드 선택 및 Qt 사전 창 기본값으로 제한됩니다. 실시간 품질 정책은 런타임 `RenderQuality.applyWindow(...)`의 소유로 유지됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "html",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "<a id=\"platform-bootstrap-policy\"></a>\n"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "heading",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "### 플랫폼 부트스트랩 정책\n",
+      "level": 3,
+      "title": "플랫폼 부트스트랩 정책"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "list",
+      "start_line": 138,
+      "end_line": 142,
+      "raw": "- macOS / iOS: Metal 백엔드 수정; `4x/3`(macOS) 또는 `4x/2`(iOS) MSAA/비행 중인 프레임 부트스트랩 프로필.\n- Windows: 런타임 프로빙 및 OpenGL 대체 경로가 포함된 D3D11 첫 번째 부트스트랩; `4x/2` 부트스트랩 렌더 프로필.\n- Android: Vulkan-첫 번째 부트스트랩 및 OpenGL 대체 경로; `4x/2` 부트스트랩 렌더 프로필 및 텍스처 아틀라스 가장자리 감소.\n- Linux: Qt 기본 백엔드 선택; `4x/2` 부트스트랩 렌더 프로필.\n- WASM: Qt 기본 백엔드 선택; 부분 업데이트, 배치 렌더러 및 파이프라인 캐시 힌트가 명시적으로 강제 해제되고 부트스트랩에서 데스크톱 수준 깊이/스텐실 기본값을 강제하지 않고 더 가벼운 `2x/1` 부트스트랩 렌더링 프로필.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "macOS / iOS: Metal 백엔드 수정; `4x/3`(macOS) 또는 `4x/2`(iOS) MSAA/비행 중인 프레임 부트스트랩 프로필.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Windows: 런타임 프로빙 및 OpenGL 대체 경로가 포함된 D3D11 첫 번째 부트스트랩; `4x/2` 부트스트랩 렌더 프로필.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Android: Vulkan-첫 번째 부트스트랩 및 OpenGL 대체 경로; `4x/2` 부트스트랩 렌더 프로필 및 텍스처 아틀라스 가장자리 감소.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Linux: Qt 기본 백엔드 선택; `4x/2` 부트스트랩 렌더 프로필.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "WASM: Qt 기본 백엔드 선택; 부분 업데이트, 배치 렌더러 및 파이프라인 캐시 힌트가 명시적으로 강제 해제되고 부트스트랩에서 데스크톱 수준 깊이/스텐실 기본값을 강제하지 않고 더 가벼운 `2x/1` 부트스트랩 렌더링 프로필.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "html",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "<a id=\"diagnostics-output\"></a>\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 145,
+      "end_line": 145,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "heading",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "### 진단 출력\n",
+      "level": 3,
+      "title": "진단 출력"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "paragraph",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "`logBootstrapDiagnostics == true`, 부트스트랩는 stdout에 간결한 구조의 라인을 작성합니다. 주요 이벤트는 다음과 같습니다.\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "list",
+      "start_line": 150,
+      "end_line": 169,
+      "raw": "- `LVRS bootstrap.pre.options`\n- `LVRS bootstrap.pre.render-quality`\n- `LVRS bootstrap.pre.quick-style`\n- `LVRS bootstrap.graphics.probe`\n- `LVRS bootstrap.graphics.selected`\n- `LVRS bootstrap.graphics.fallback`\n- `LVRS bootstrap.pre.complete`\n- `LVRS bootstrap.post.application`\n- `LVRS bootstrap.post.font-policy`\n- `LVRS bootstrap.entry.import-paths`\n- `LVRS bootstrap.entry.load-request`\n- `LVRS bootstrap.entry.root-load-request`\n- `LVRS bootstrap.entry.root-loaded`\n- `LVRS bootstrap.entry.root-load-failed`\n- `LVRS bootstrap.lifecycle.stage-start`\n- `LVRS bootstrap.lifecycle.queue-start`\n- `LVRS bootstrap.lifecycle.task-start`\n- `LVRS bootstrap.lifecycle.task-complete`\n- `LVRS bootstrap.lifecycle.task-failed`\n- `LVRS bootstrap.lifecycle.stage-complete`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.pre.options`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.pre.render-quality`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.pre.quick-style`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.graphics.probe`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.graphics.selected`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.graphics.fallback`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.pre.complete`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.post.application`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.post.font-policy`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.entry.import-paths`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.entry.load-request`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.entry.root-load-request`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.entry.root-loaded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.entry.root-load-failed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.stage-start`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.queue-start`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.task-start`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.task-complete`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.task-failed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`LVRS bootstrap.lifecycle.stage-complete`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "paragraph",
+      "start_line": 171,
+      "end_line": 171,
+      "raw": "페이로드에는 플랫폼 태그, 요청된 부트스트랩 옵션, 효과적인 렌더 프로필 기본값, 장면 그래프 환경 값, 백엔드 프로브 후보, 대체 경로 이유 및 글꼴 정책 결정이 포함됩니다.\n"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 172,
+      "end_line": 172,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "html",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "<a id=\"what-postapplicationbootstrap-does\"></a>\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 174,
+      "end_line": 174,
+      "raw": "\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "heading",
+      "start_line": 175,
+      "end_line": 175,
+      "raw": "## `postApplicationBootstrap`의 기능\n",
+      "level": 2,
+      "title": "`postApplicationBootstrap`의 기능"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 176,
+      "end_line": 176,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "list",
+      "start_line": 177,
+      "end_line": 180,
+      "raw": "- 애플리케이션 이름을 적용합니다(제공된 경우).\n- 공유 `FontPolicy` 부트스트랩 경로에서 번들 글꼴을 로드합니다.\n- Pretendard 대체를 설치합니다.\n- 선택적으로 Pretendard 대체 경로를 적용하고 적용이 실패할 경우 경고합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "애플리케이션 이름을 적용합니다(제공된 경우).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공유 `FontPolicy` 부트스트랩 경로에서 번들 글꼴을 로드합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Pretendard 대체를 설치합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적으로 Pretendard 대체 경로를 적용하고 적용이 실패할 경우 경고합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000108",
+      "kind": "blank",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "\n"
+    },
+    {
+      "id": "b000109",
+      "kind": "html",
+      "start_line": 182,
+      "end_line": 182,
+      "raw": "<a id=\"typical-c-usage\"></a>\n"
+    },
+    {
+      "id": "b000110",
+      "kind": "blank",
+      "start_line": 183,
+      "end_line": 183,
+      "raw": "\n"
+    },
+    {
+      "id": "b000111",
+      "kind": "heading",
+      "start_line": 184,
+      "end_line": 184,
+      "raw": "## 일반적인 C++ 사용법\n",
+      "level": 2,
+      "title": "일반적인 C++ 사용법"
+    },
+    {
+      "id": "b000112",
+      "kind": "blank",
+      "start_line": 185,
+      "end_line": 185,
+      "raw": "\n"
+    },
+    {
+      "id": "b000113",
+      "kind": "fenced_code",
+      "start_line": 186,
+      "end_line": 197,
+      "raw": "```cpp\nlvrs::AppBootstrapOptions options;\noptions.applicationName = QStringLiteral(\"MyApp\");\noptions.quickStyleName = QStringLiteral(\"Basic\");\n\nconst lvrs::AppBootstrapState state = lvrs::preApplicationBootstrap(options);\nif (!state.ok)\n    return -1;\n\nQGuiApplication app(argc, argv);\nlvrs::postApplicationBootstrap(app, options);\n```\n",
+      "language": "cpp",
+      "code": "lvrs::AppBootstrapOptions options;\noptions.applicationName = QStringLiteral(\"MyApp\");\noptions.quickStyleName = QStringLiteral(\"Basic\");\n\nconst lvrs::AppBootstrapState state = lvrs::preApplicationBootstrap(options);\nif (!state.ok)\n    return -1;\n\nQGuiApplication app(argc, argv);\nlvrs::postApplicationBootstrap(app, options);\n",
+      "closed": true
+    },
+    {
+      "id": "b000114",
+      "kind": "blank",
+      "start_line": 198,
+      "end_line": 198,
+      "raw": "\n"
+    },
+    {
+      "id": "b000115",
+      "kind": "html",
+      "start_line": 199,
+      "end_line": 199,
+      "raw": "<a id=\"option-tuning-examples\"></a>\n"
+    },
+    {
+      "id": "b000116",
+      "kind": "blank",
+      "start_line": 200,
+      "end_line": 200,
+      "raw": "\n"
+    },
+    {
+      "id": "b000117",
+      "kind": "heading",
+      "start_line": 201,
+      "end_line": 201,
+      "raw": "## 옵션 튜닝 예\n",
+      "level": 2,
+      "title": "옵션 튜닝 예"
+    },
+    {
+      "id": "b000118",
+      "kind": "blank",
+      "start_line": 202,
+      "end_line": 202,
+      "raw": "\n"
+    },
+    {
+      "id": "b000119",
+      "kind": "paragraph",
+      "start_line": 203,
+      "end_line": 203,
+      "raw": "최소 시작(제한된 테스트 하니스에 대해 백엔드 부트스트랩 비활성화):\n"
+    },
+    {
+      "id": "b000120",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000121",
+      "kind": "fenced_code",
+      "start_line": 205,
+      "end_line": 209,
+      "raw": "```cpp\nlvrs::AppBootstrapOptions options;\noptions.bootstrapGraphicsBackend = false;\noptions.logGraphicsBackend = false;\n```\n",
+      "language": "cpp",
+      "code": "lvrs::AppBootstrapOptions options;\noptions.bootstrapGraphicsBackend = false;\noptions.logGraphicsBackend = false;\n",
+      "closed": true
+    },
+    {
+      "id": "b000122",
+      "kind": "blank",
+      "start_line": 210,
+      "end_line": 210,
+      "raw": "\n"
+    },
+    {
+      "id": "b000123",
+      "kind": "paragraph",
+      "start_line": 211,
+      "end_line": 211,
+      "raw": "글꼴 중심 시작(입력 체계 정책만 유지):\n"
+    },
+    {
+      "id": "b000124",
+      "kind": "blank",
+      "start_line": 212,
+      "end_line": 212,
+      "raw": "\n"
+    },
+    {
+      "id": "b000125",
+      "kind": "fenced_code",
+      "start_line": 213,
+      "end_line": 219,
+      "raw": "```cpp\nlvrs::AppBootstrapOptions options;\noptions.configureRenderQualityDefaults = false;\noptions.bootstrapGraphicsBackend = false;\noptions.installBundledFonts = true;\noptions.installPretendardFallbacks = true;\n```\n",
+      "language": "cpp",
+      "code": "lvrs::AppBootstrapOptions options;\noptions.configureRenderQualityDefaults = false;\noptions.bootstrapGraphicsBackend = false;\noptions.installBundledFonts = true;\noptions.installPretendardFallbacks = true;\n",
+      "closed": true
+    },
+    {
+      "id": "b000126",
+      "kind": "blank",
+      "start_line": 220,
+      "end_line": 220,
+      "raw": "\n"
+    },
+    {
+      "id": "b000127",
+      "kind": "paragraph",
+      "start_line": 221,
+      "end_line": 221,
+      "raw": "멀티루트 앱 항목:\n"
+    },
+    {
+      "id": "b000128",
+      "kind": "blank",
+      "start_line": 222,
+      "end_line": 222,
+      "raw": "\n"
+    },
+    {
+      "id": "b000129",
+      "kind": "fenced_code",
+      "start_line": 223,
+      "end_line": 239,
+      "raw": "```cpp\nlvrs::QmlAppLaunchSpec launchSpec;\nlaunchSpec.bootstrap.applicationName = QStringLiteral(\"MyApp\");\nlaunchSpec.bootstrap.quickStyleName = QStringLiteral(\"Basic\");\nlaunchSpec.moduleUri = QStringLiteral(\"MyApp\");\nlaunchSpec.windowActivationPolicy = lvrs::QmlWindowActivationPolicy::ShowRaiseAndActivate;\n\nlvrs::QmlRootLoadSpec shellRoot;\nshellRoot.rootObject = QStringLiteral(\"Main\");\nshellRoot.initialProperties.insert(QStringLiteral(\"initialRoutePath\"), QStringLiteral(\"/\"));\n\nlvrs::QmlRootLoadSpec inspectorRoot;\ninspectorRoot.rootObject = QStringLiteral(\"InspectorWindow\");\n\nlaunchSpec.roots = {shellRoot, inspectorRoot};\nreturn lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);\n```\n",
+      "language": "cpp",
+      "code": "lvrs::QmlAppLaunchSpec launchSpec;\nlaunchSpec.bootstrap.applicationName = QStringLiteral(\"MyApp\");\nlaunchSpec.bootstrap.quickStyleName = QStringLiteral(\"Basic\");\nlaunchSpec.moduleUri = QStringLiteral(\"MyApp\");\nlaunchSpec.windowActivationPolicy = lvrs::QmlWindowActivationPolicy::ShowRaiseAndActivate;\n\nlvrs::QmlRootLoadSpec shellRoot;\nshellRoot.rootObject = QStringLiteral(\"Main\");\nshellRoot.initialProperties.insert(QStringLiteral(\"initialRoutePath\"), QStringLiteral(\"/\"));\n\nlvrs::QmlRootLoadSpec inspectorRoot;\ninspectorRoot.rootObject = QStringLiteral(\"InspectorWindow\");\n\nlaunchSpec.roots = {shellRoot, inspectorRoot};\nreturn lvrs::runBootstrappedQmlApp(argc, argv, launchSpec);\n",
+      "closed": true
+    },
+    {
+      "id": "b000130",
+      "kind": "blank",
+      "start_line": 240,
+      "end_line": 240,
+      "raw": "\n"
+    },
+    {
+      "id": "b000131",
+      "kind": "paragraph",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "지연된 부트스트랩 대기열:\n"
+    },
+    {
+      "id": "b000132",
+      "kind": "blank",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "\n"
+    },
+    {
+      "id": "b000133",
+      "kind": "fenced_code",
+      "start_line": 243,
+      "end_line": 259,
+      "raw": "```cpp\nlvrs::QmlBootstrapTask loadPresets;\nloadPresets.name = QStringLiteral(\"load-presets\");\nloadPresets.stage = lvrs::QmlAppLifecycleStage::AfterFirstIdle;\nloadPresets.priority = 20;\nloadPresets.run = [](const lvrs::QmlAppLifecycleContext &, QString *errorMessage) {\n    const bool ok = startPresetLoad();\n    if (!ok && errorMessage)\n        *errorMessage = QStringLiteral(\"Preset load failed\");\n    return ok;\n};\n\nlaunchSpec.lifecycle.afterWindowActivated = [](const lvrs::QmlAppLifecycleContext &context) {\n    qInfo() << \"Activated windows:\" << context.rootLoadResult.windows.size();\n};\nlaunchSpec.lifecycle.tasks = {loadPresets};\n```\n",
+      "language": "cpp",
+      "code": "lvrs::QmlBootstrapTask loadPresets;\nloadPresets.name = QStringLiteral(\"load-presets\");\nloadPresets.stage = lvrs::QmlAppLifecycleStage::AfterFirstIdle;\nloadPresets.priority = 20;\nloadPresets.run = [](const lvrs::QmlAppLifecycleContext &, QString *errorMessage) {\n    const bool ok = startPresetLoad();\n    if (!ok && errorMessage)\n        *errorMessage = QStringLiteral(\"Preset load failed\");\n    return ok;\n};\n\nlaunchSpec.lifecycle.afterWindowActivated = [](const lvrs::QmlAppLifecycleContext &context) {\n    qInfo() << \"Activated windows:\" << context.rootLoadResult.windows.size();\n};\nlaunchSpec.lifecycle.tasks = {loadPresets};\n",
+      "closed": true
+    },
+    {
+      "id": "b000134",
+      "kind": "blank",
+      "start_line": 260,
+      "end_line": 260,
+      "raw": "\n"
+    },
+    {
+      "id": "b000135",
+      "kind": "paragraph",
+      "start_line": 261,
+      "end_line": 261,
+      "raw": "여러 시작 도메인을 독립적으로 로드한 다음 기본 스레드에 적용할 수 있는 경우 병렬 도메인 로드는 수명 주기 작업 내에 중첩될 수 있습니다. 실행자 계약에는 `docs/backend/BootstrapParallel.md`를 사용하십시오. 앱에서 도메인 구문 분석 및 ViewModel 돌연변이 정책을 유지합니다.\n"
+    },
+    {
+      "id": "b000136",
+      "kind": "blank",
+      "start_line": 262,
+      "end_line": 262,
+      "raw": "\n"
+    },
+    {
+      "id": "b000137",
+      "kind": "paragraph",
+      "start_line": 263,
+      "end_line": 263,
+      "raw": "하나 이상의 루트 창이 표시된 후 서비스가 한 번만 시작되어야 하는 경우 `AfterWindowActivated` 작업에서 `ForegroundServiceGate`를 사용하여 포그라운드 서비스 시작을 보호할 수 있습니다. `docs/backend/ForegroundServices.md`를 참조하세요. 서비스 ID, 권한 및 스케줄러 의미 체계는 앱 정책으로 유지됩니다.\n"
+    },
+    {
+      "id": "b000138",
+      "kind": "blank",
+      "start_line": 264,
+      "end_line": 264,
+      "raw": "\n"
+    },
+    {
+      "id": "b000139",
+      "kind": "paragraph",
+      "start_line": 265,
+      "end_line": 265,
+      "raw": "권한 부트스트랩는 포그라운드 서비스 또는 수명 주기 작업 내에서 `PermissionRequestSequencer`를 사용하여 요청 기록을 보존하면서 앱 정의 권한 확인을 순서대로 실행할 수 있습니다. `docs/backend/PermissionSequencer.md`를 참조하세요. 네이티브 권한 API 및 프롬프트 정책은 앱/플랫폼 코드로 유지됩니다.\n"
+    },
+    {
+      "id": "b000140",
+      "kind": "blank",
+      "start_line": 266,
+      "end_line": 266,
+      "raw": "\n"
+    },
+    {
+      "id": "b000141",
+      "kind": "html",
+      "start_line": 267,
+      "end_line": 267,
+      "raw": "<a id=\"troubleshooting\"></a>\n"
+    },
+    {
+      "id": "b000142",
+      "kind": "blank",
+      "start_line": 268,
+      "end_line": 268,
+      "raw": "\n"
+    },
+    {
+      "id": "b000143",
+      "kind": "heading",
+      "start_line": 269,
+      "end_line": 269,
+      "raw": "## 문제 해결\n",
+      "level": 2,
+      "title": "문제 해결"
+    },
+    {
+      "id": "b000144",
+      "kind": "blank",
+      "start_line": 270,
+      "end_line": 270,
+      "raw": "\n"
+    },
+    {
+      "id": "b000145",
+      "kind": "list",
+      "start_line": 271,
+      "end_line": 274,
+      "raw": "- `state.ok == false`: `state.errorMessage`를 기본 근본 원인 문자열로 사용합니다.\n- 부트스트랩 stdout 라인에는 이미 렌더링 기본값, 백엔드 프로빙 및 대체 경로 이유에 대한 구조화된 페이로드가 포함되어 있습니다. 가능한 경우 CI 및 충돌 보고서에 캡처하십시오.\n- 누락된 스타일 변경: 앱을 생성하기 전에 `quickStyleName`가 설정되어 있는지 확인하세요.\n- 예기치 않은 글꼴 대체 경로: 번들 글꼴 리소스 및 대체 경로 적용 결과를 확인합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`state.ok == false`: `state.errorMessage`를 기본 근본 원인 문자열로 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "부트스트랩 stdout 라인에는 이미 렌더링 기본값, 백엔드 프로빙 및 대체 경로 이유에 대한 구조화된 페이로드가 포함되어 있습니다. 가능한 경우 CI 및 충돌 보고서에 캡처하십시오.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "누락된 스타일 변경: 앱을 생성하기 전에 `quickStyleName`가 설정되어 있는지 확인하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "예기치 않은 글꼴 대체 경로: 번들 글꼴 리소스 및 대체 경로 적용 결과를 확인합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000146",
+      "kind": "blank",
+      "start_line": 275,
+      "end_line": 275,
+      "raw": "\n"
+    },
+    {
+      "id": "b000147",
+      "kind": "heading",
+      "start_line": 276,
+      "end_line": 276,
+      "raw": "## FAQ\n",
+      "level": 2,
+      "title": "FAQ"
+    },
+    {
+      "id": "b000148",
+      "kind": "blank",
+      "start_line": 277,
+      "end_line": 277,
+      "raw": "\n"
+    },
+    {
+      "id": "b000149",
+      "kind": "paragraph",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "Q. `postApplicationBootstrap`를 건너뛸 수 있나요?   A. 기술적으로는 건너뛸 수 있지만 권장 시작 기준(글꼴/대체/앱 이름)은 불완전합니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "AppBootstrap",
+      "anchor": "appbootstrap",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "QML 루트 로딩",
+      "anchor": "qml-루트-로딩",
+      "start_line": 20
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "창 활성화 정책",
+      "anchor": "창-활성화-정책",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "수명주기 후크 및 대기열",
+      "anchor": "수명주기-후크-및-대기열",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "`AppBootstrapOptions`",
+      "anchor": "appbootstrapoptions",
+      "start_line": 96
+    },
+    {
+      "block_id": "b000071",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "`AppBootstrapState`",
+      "anchor": "appbootstrapstate",
+      "start_line": 108
+    },
+    {
+      "block_id": "b000077",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "필수 호출 순서",
+      "anchor": "필수-호출-순서",
+      "start_line": 116
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "`preApplicationBootstrap`의 기능",
+      "anchor": "preapplicationbootstrap의-기능",
+      "start_line": 125
+    },
+    {
+      "block_id": "b000089",
+      "parent_id": "b000083",
+      "level": 3,
+      "title": "플랫폼 부트스트랩 정책",
+      "anchor": "플랫폼-부트스트랩-정책",
+      "start_line": 136
+    },
+    {
+      "block_id": "b000095",
+      "parent_id": "b000083",
+      "level": 3,
+      "title": "진단 출력",
+      "anchor": "진단-출력",
+      "start_line": 146
+    },
+    {
+      "block_id": "b000105",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "`postApplicationBootstrap`의 기능",
+      "anchor": "postapplicationbootstrap의-기능",
+      "start_line": 175
+    },
+    {
+      "block_id": "b000111",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "일반적인 C++ 사용법",
+      "anchor": "일반적인-c-사용법",
+      "start_line": 184
+    },
+    {
+      "block_id": "b000117",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "옵션 튜닝 예",
+      "anchor": "옵션-튜닝-예",
+      "start_line": 201
+    },
+    {
+      "block_id": "b000143",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "문제 해결",
+      "anchor": "문제-해결",
+      "start_line": 269
+    },
+    {
+      "block_id": "b000147",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "FAQ",
+      "anchor": "faq",
+      "start_line": 276
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000075",
+        "line": 114,
+        "text": "<a id=\"required-call-order\"></a>",
+        "basis": "lexical_match",
+        "context": "html"
+      },
+      {
+        "block_id": "b000077",
+        "line": 116,
+        "text": "## 필수 호출 순서",
+        "basis": "lexical_match",
+        "context": "heading"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

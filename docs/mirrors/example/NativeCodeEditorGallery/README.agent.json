@@ -1,0 +1,115 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7e2eb9410e02d7e175c6633b4286e403bcc620909d3e8ad59ca0ce12d0367ff0",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeCodeEditorGallery/README.md",
+    "sha256": "86c1abb78bec951ab42ad4ade343b41ac418695cd72378cbb2492690642ba94f",
+    "bytes": 1091,
+    "line_count": 7,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Native CodeEditor Gallery",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Native CodeEditor Gallery\n",
+      "level": 1,
+      "title": "Native CodeEditor Gallery"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "A C++23, Qt-free LVUI application backed by iiGUI's own CodeEditor widgets and an iiSDKCore application entry point. Native font/IME services provide glyph layout and text input; no OS text-edit control is constructed.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "Two editors share one document with independent selections and viewport state. Edits rebase the sibling selection; undo/redo restores the originating view's selection while rebasing the other view. Use the in-memory sample by default or pass `--document PATH` to load a UTF-8 file through iiFileProvider Native. Editing never saves automatically. The Save action publishes explicitly and rejects incomplete or failed loads. Read-only, undo/redo, Unicode navigation and Core-owned background results share the retained view scope.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "Build/install into this example's `build/` with `./install.sh` and the staged native LVRS package locations. Documentation: [build and behavior](docs/Usage.md). The registered self-test is compiled but deferred to the final whole-goal runtime batch. A built bundle is not proof of a displayed or tested editor.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Native CodeEditor Gallery",
+      "anchor": "native-codeeditor-gallery",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 5,
+        "text": "Two editors share one document with independent selections and viewport state. Edits rebase the sibling selection; undo/redo restores the originating view's selection while rebasing the other view. Use the in-memory sample by default or pass `--document PATH` to load a UTF-8 file through iiFileProvider Native. Editing never saves automatically. The Save action publishes explicitly and rejects incomplete or failed loads. Read-only, undo/redo, Unicode navigation and Core-owned background results share the retained view scope.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "build and behavior",
+        "target": "docs/Usage.md",
+        "kind": "relative",
+        "line": 7
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

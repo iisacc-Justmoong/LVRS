@@ -1,0 +1,958 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:0bbfeea97af7e62306b5e7082ed38b3664419ea2a971dee3cf50517f6f650a93",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/components/navigation/List.md",
+    "sha256": "fe0f3ec2d3a4f5d4316e549acba7a22f8cf30190b83ed3865ae57357dc9edd2e",
+    "bytes": 9935,
+    "line_count": 171,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "목록",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"list\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 목록\n",
+      "level": 1,
+      "title": "목록"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "위치: `src/qml/components/navigation/List.qml`\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`List`는 직접 모델 또는 레거시 `items` 어레이에서 혼합 컴팩트 및 복합 행을 포함하여 모든 17 [ListItem 변형](ListItem.md)를 렌더링합니다. 미니 전용 목록에는 측정된 Figma `SmallList` 표면과 `ListFooter`가 유지됩니다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "- 간단한 1열 탐색 행을 렌더링합니다.\n- 호출자가 데이터를 하위 구성 요소로 변환하지 않고도 직접 모델 입력을 허용합니다.\n- 기존 LVRS 탐색 화면과 호환되는 도구 모음/바닥글 어포던스를 유지하세요.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "간단한 1열 탐색 행을 렌더링합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "호출자가 데이터를 하위 구성 요소로 변환하지 않고도 직접 모델 입력을 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기존 LVRS 탐색 화면과 호환되는 도구 모음/바닥글 어포던스를 유지하세요.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "<a id=\"core-api\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "## 코어 API\n",
+      "level": 2,
+      "title": "코어 API"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "모델 입력:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 23,
+      "end_line": 27,
+      "raw": "- `model`: 선호되는 직접 행 소스.\n- `items`: `model`가 `null`/`undefined`인 경우에만 사용되는 레거시 행 소스입니다.\n- `usingModel`(읽기 전용): `model`가 활성 소스인 경우 true입니다.\n- `entryCount`(읽기 전용), `entryAt(index)`.\n- `modelColumn`: `model`가 C++ `QAbstractItemModel`일 때 사용되는 열입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`model`: 선호되는 직접 행 소스.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`items`: `model`가 `null`/`undefined`인 경우에만 사용되는 레거시 행 소스입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`usingModel`(읽기 전용): `model`가 활성 소스인 경우 true입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`entryCount`(읽기 전용), `entryAt(index)`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`modelColumn`: `model`가 C++ `QAbstractItemModel`일 때 사용되는 열입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "역할 매핑:\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 31,
+      "end_line": 38,
+      "raw": "- `labelRole`(기본값 `label`)\n- `textRole`(기본값 `text`)\n- `titleRole`(기본값 `title`)\n- `iconRole`(기본값 `iconName`)\n- `enabledRole`(기본값 `enabled`)\n- `selectedRole`(기본값 `selected`)\n- `typeRole`(기본값 `type`): ListItem 열거형 또는 정확한 Figma 유형 이름을 허용합니다. 레거시 `size`, 그 다음에는 `defaultItemType`(`Mini`)로 대체됩니다.\n- `descriptionRole`(기본값 `description`)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`labelRole`(기본값 `label`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textRole`(기본값 `text`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`titleRole`(기본값 `title`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iconRole`(기본값 `iconName`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabledRole`(기본값 `enabled`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`selectedRole`(기본값 `selected`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`typeRole`(기본값 `type`): ListItem 열거형 또는 정확한 Figma 유형 이름을 허용합니다. 레거시 `size`, 그 다음에는 `defaultItemType`(`Mini`)로 대체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`descriptionRole`(기본값 `description`)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "레이아웃 및 상태:\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 42,
+      "end_line": 50,
+      "raw": "- `selectedIndex`(기본값 `-1`), `interactive`\n- `listWidth`(`170` 데스크톱), `minimumListHeight`(`140` 데스크톱), `itemHeight`(`22` 데스크톱), `itemLabelLeftPadding`(`4` 데스크톱)\n- `defaultItemIconName`(기본값 `nodesfolder`)\n- `expandToContent`(기본값 `false`): 실제 행 높이, 행 간격 및 도구 모음/바닥글의 합계로 커집니다.\n- `scrollable`(기본값 `true`): 콘텐츠가 뷰포트를 초과하는 경우 세로 스크롤을 활성화합니다.\n- `itemSpacing`(기본값 `0`); `itemHeight`는 고정 보폭이 아닌 행당 최소값입니다.\n- `listWidth`는 기본적으로 가장 넓은 필수 사전 설정으로 설정됩니다. Mini의 경우 170, Detail의 경우 194, Navigation/Toggle/Checkable의 경우 280, 합성 유형의 경우 400입니다. 명시적 너비 재정의는 계속 지원됩니다.\n- `backgroundColor`, `selectedRowColor`, `separatorColor`, `separatorOpacity`\n- `itemDelegate`: 선택적 행별 구성 요소 위임. 기본값은 모델 유형과 함께 `ListItem`를 사용하고 `Mini`로 대체됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`selectedIndex`(기본값 `-1`), `interactive`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listWidth`(`170` 데스크톱), `minimumListHeight`(`140` 데스크톱), `itemHeight`(`22` 데스크톱), `itemLabelLeftPadding`(`4` 데스크톱)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`defaultItemIconName`(기본값 `nodesfolder`)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`expandToContent`(기본값 `false`): 실제 행 높이, 행 간격 및 도구 모음/바닥글의 합계로 커집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollable`(기본값 `true`): 콘텐츠가 뷰포트를 초과하는 경우 세로 스크롤을 활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemSpacing`(기본값 `0`); `itemHeight`는 고정 보폭이 아닌 행당 최소값입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`listWidth`는 기본적으로 가장 넓은 필수 사전 설정으로 설정됩니다. Mini의 경우 170, Detail의 경우 194, Navigation/Toggle/Checkable의 경우 280, 합성 유형의 경우 400입니다. 명시적 너비 재정의는 계속 지원됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`backgroundColor`, `selectedRowColor`, `separatorColor`, `separatorOpacity`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemDelegate`: 선택적 행별 구성 요소 위임. 기본값은 모델 유형과 함께 `ListItem`를 사용하고 `Mini`로 대체됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "도구 모음/바닥글:\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 57,
+      "raw": "- `toolbarVisible`, `toolbarIcon1`, `toolbarIcon2`, `toolbarIcon3`\n- `footerVisible`, `footerButton1`, `footerButton2`, `footerButton3`\n- 기본 바닥글 슬롯은 `addFile`, `generaldelete` 및 `settings` 메뉴 버튼입니다.\n- 스톡 바닥글 버튼은 설정 아이콘과 갈매기 모양 사이에 `Theme.iconSm` 아이콘 프레임(`18 x 18` 데스크탑, `36 x 36` 모바일), `Theme.gap2` 삽입 및 `ListFooter.stockMenuButtonSpacing`(`-2` 데스크탑, `-4` 모바일)을 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`toolbarVisible`, `toolbarIcon1`, `toolbarIcon2`, `toolbarIcon3`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerVisible`, `footerButton1`, `footerButton2`, `footerButton3`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 바닥글 슬롯은 `addFile`, `generaldelete` 및 `settings` 메뉴 버튼입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스톡 바닥글 버튼은 설정 아이콘과 갈매기 모양 사이에 `Theme.iconSm` 아이콘 프레임(`18 x 18` 데스크탑, `36 x 36` 모바일), `Theme.gap2` 삽입 및 `ListFooter.stockMenuButtonSpacing`(`-2` 데스크탑, `-4` 모바일)을 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "신호:\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 61,
+      "end_line": 65,
+      "raw": "- `itemTriggered(index, item)`\n- `itemEdited(index, item, field, value)`\n- `itemActionTriggered(index, item, action, payload)`\n- `toolbarIconTriggered(index, source)`\n- `footerButtonTriggered(index, config)`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`itemTriggered(index, item)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemEdited(index, item, field, value)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemActionTriggered(index, item, action, payload)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`toolbarIconTriggered(index, source)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`footerButtonTriggered(index, config)`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "<a id=\"figma-visual-contract\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "## Figma 시각적 계약\n",
+      "level": 2,
+      "title": "Figma 시각적 계약"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 71,
+      "end_line": 75,
+      "raw": "- 소스: `203:5161`(`SmallList`), `209:9199`(`ListFooter`) 및 `241:9253`(`ListItem` 구성 요소 세트).\n- 데스크탑 `SmallList`는 `Theme.panelBackground03`가 포함된 `170 x 140`입니다. 해당 항목 뷰포트는 ​​`170 x 114`입니다. 6개의 `22px` 행이 `132px`를 차지하므로 마지막 행은 `26px` 바닥글 위에서 의도적으로 잘립니다.\n- 기본 행은 `Mini` 변형입니다. 가로/세로 패딩 `4/2`, `nodesfolder` 아이콘 `18 x 18`, `1px` 아이콘-레이블 간격 및 본문 `13px Medium / 13px` 텍스트입니다. 데스크톱 및 모바일에서 본문은 `13px`에 고정되어 있습니다.\n- `ListFooter`는 `86 x 26`입니다. 외부 패딩 `2`, 버튼 프레임 `22 x 22`, 슬롯 너비 `22`, `22` 및 `38`입니다. 정확한 기존 `addFile`, `generaldelete`, `settings` 및 `generalchevronDownBorderless` SVG 자산이 재사용됩니다.\n- 데스크톱과 모바일은 동일한 형상을 공유합니다. 목록 `170 x 140`, 미니 행 `170 x 22`, 세부 정보 행 `194 x 106` 및 바닥글 `86 x 26`. 본문 텍스트는 `13px`로 유지됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "소스: `203:5161`(`SmallList`), `209:9199`(`ListFooter`) 및 `241:9253`(`ListItem` 구성 요소 세트).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크탑 `SmallList`는 `Theme.panelBackground03`가 포함된 `170 x 140`입니다. 해당 항목 뷰포트는 ​​`170 x 114`입니다. 6개의 `22px` 행이 `132px`를 차지하므로 마지막 행은 `26px` 바닥글 위에서 의도적으로 잘립니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 행은 `Mini` 변형입니다. 가로/세로 패딩 `4/2`, `nodesfolder` 아이콘 `18 x 18`, `1px` 아이콘-레이블 간격 및 본문 `13px Medium / 13px` 텍스트입니다. 데스크톱 및 모바일에서 본문은 `13px`에 고정되어 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ListFooter`는 `86 x 26`입니다. 외부 패딩 `2`, 버튼 프레임 `22 x 22`, 슬롯 너비 `22`, `22` 및 `38`입니다. 정확한 기존 `addFile`, `generaldelete`, `settings` 및 `generalchevronDownBorderless` SVG 자산이 재사용됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크톱과 모바일은 동일한 형상을 공유합니다. 목록 `170 x 140`, 미니 행 `170 x 22`, 세부 정보 행 `194 x 106` 및 바닥글 `86 x 26`. 본문 텍스트는 `13px`로 유지됩니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "<a id=\"behavior-contract\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "## 행동 계약\n",
+      "level": 2,
+      "title": "행동 계약"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 81,
+      "end_line": 98,
+      "raw": "- `model`는 `items`보다 우선합니다.\n- 지원되는 직접 모델 입력:\n  - JavaScript 배열 및 기본 배열,\n  - 객체 배열,\n  - QML `ListModel`/`count` 및 `get(index)`가 있는 목록 유사 객체,\n  - C++ `QAbstractItemModel` 인스턴스는 QML에 노출됩니다.\n- 직접 모델 입력은 C++ `ModelSource` 유형을 통해 읽습니다.\n- C++ 아이템 모델 변경(`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`)이 `ModelSource.revision`를 무효화합니다. `entryCount` 및 행 새로 고침.\n- 기본 행은 `String(value)`로 렌더링되고 `defaultItemIconName`를 사용합니다. 해당 레이블은 아이콘 이름으로 해석되지 않습니다.\n- 객체/모델 행은 `labelRole`, `textRole`, `titleRole`, `display`, `edit`의 레이블 텍스트를 확인합니다.\n- `enabledRole` 및 `selectedRole`는 선택 사항입니다. `enabledRole`가 누락되면 활성화되었음을 의미합니다. `selectedRole`가 누락되어 `selectedIndex`로 대체됩니다.\n- `itemTriggered`는 `entryAt(index)`에서 반환된 확인된 행 항목을 내보냅니다.\n- 렌더링된 모든 행은 `itemDelegate`를 인스턴스화하고 하나의 `modelData` 개체를 주입합니다. 설명자에는 `index`, `entry`, `label`, `iconName`, `enabled`, `selected`, `type`, `description`, `properties`(원래 개체/역할 맵) 및 `trigger()`.\n- 기본 위임은 행 항목에서 ListItem 콘텐츠, 상태, 구성 개체 및 가시성 속성을 전달합니다. 지원되는 이름은 [ListItem](ListItem.md)를 참조하세요.\n- 모델 새로 고침은 기존 대리인의 `modelData`를 업데이트합니다. 단순히 텍스트나 선택 항목이 변경되었다는 이유만으로 편집기를 삭제/재생성하지 않습니다. `itemDelegate`를 변경하면 대리인이 교체됩니다.\n- 사용자 변경 사항은 `itemEdited`를 내보냅니다. 애플리케이션은 모델 지속성을 소유합니다. 배열을 업데이트하거나, QML `ListModel.setProperty`를 호출하거나, 해당 핸들러에서 C++ 모델의 setter를 호출하세요. 임의의 애플리케이션 모델은 자동으로 변경되지 않습니다. 새로 고친 모델 데이터는 신뢰할 수 있는 상태로 유지됩니다.\n- 기둥은 각 대리자의 실제 높이를 사용하여 대리자를 배치합니다. 복합 행은 후속 행과 겹치지 않습니다. Flickable은 바닥글이 스크롤 뷰포트 외부에 남아 있는 동안 오버플로를 노출합니다.\n- 사용자 지정 대리자는 목록에서 정규화된 `itemTriggered` 신호를 내보내려는 경우 `property var modelData`를 선언하고 `modelData.trigger()`를 호출해야 합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`model`는 `items`보다 우선합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "지원되는 직접 모델 입력:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "JavaScript 배열 및 기본 배열,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체 배열,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QML `ListModel`/`count` 및 `get(index)`가 있는 목록 유사 객체,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++ `QAbstractItemModel` 인스턴스는 QML에 노출됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "직접 모델 입력은 C++ `ModelSource` 유형을 통해 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++ 아이템 모델 변경(`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged`, `dataChanged`)이 `ModelSource.revision`를 무효화합니다. `entryCount` 및 행 새로 고침.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 행은 `String(value)`로 렌더링되고 `defaultItemIconName`를 사용합니다. 해당 레이블은 아이콘 이름으로 해석되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "객체/모델 행은 `labelRole`, `textRole`, `titleRole`, `display`, `edit`의 레이블 텍스트를 확인합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`enabledRole` 및 `selectedRole`는 선택 사항입니다. `enabledRole`가 누락되면 활성화되었음을 의미합니다. `selectedRole`가 누락되어 `selectedIndex`로 대체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemTriggered`는 `entryAt(index)`에서 반환된 확인된 행 항목을 내보냅니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "렌더링된 모든 행은 `itemDelegate`를 인스턴스화하고 하나의 `modelData` 개체를 주입합니다. 설명자에는 `index`, `entry`, `label`, `iconName`, `enabled`, `selected`, `type`, `description`, `properties`(원래 개체/역할 맵) 및 `trigger()`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 위임은 행 항목에서 ListItem 콘텐츠, 상태, 구성 개체 및 가시성 속성을 전달합니다. 지원되는 이름은 [ListItem](ListItem.md)를 참조하세요.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모델 새로 고침은 기존 대리인의 `modelData`를 업데이트합니다. 단순히 텍스트나 선택 항목이 변경되었다는 이유만으로 편집기를 삭제/재생성하지 않습니다. `itemDelegate`를 변경하면 대리인이 교체됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자 변경 사항은 `itemEdited`를 내보냅니다. 애플리케이션은 모델 지속성을 소유합니다. 배열을 업데이트하거나, QML `ListModel.setProperty`를 호출하거나, 해당 핸들러에서 C++ 모델의 setter를 호출하세요. 임의의 애플리케이션 모델은 자동으로 변경되지 않습니다. 새로 고친 모델 데이터는 신뢰할 수 있는 상태로 유지됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기둥은 각 대리자의 실제 높이를 사용하여 대리자를 배치합니다. 복합 행은 후속 행과 겹치지 않습니다. Flickable은 바닥글이 스크롤 뷰포트 외부에 남아 있는 동안 오버플로를 노출합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자 지정 대리자는 목록에서 정규화된 `itemTriggered` 신호를 내보내려는 경우 `property var modelData`를 선언하고 `modelData.trigger()`를 호출해야 합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "<a id=\"legacy-listitem-variants\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "## 레거시 ListItem 변형\n",
+      "level": 2,
+      "title": "레거시 ListItem 변형"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "list",
+      "start_line": 104,
+      "end_line": 107,
+      "raw": "- `size: ListItem.Mini`는 데스크탑의 `170 x 22`이며 기존 `inputable`, `inputResult`, `inputEdited` 및 `inputSubmitted` API를 유지합니다. 인라인 편집기는 데스크톱과 모바일에서 고정된 Body `13 / 13` 라인 상자를 사용하며 둘 모두에서 동일한 행 형상을 사용합니다.\n- 데스크탑에서는 `size: ListItem.Detail`가 `194 x 106`입니다. `12px SemiBold / 12px` 제목 및 날짜 텍스트, `11px Regular / 11px` 메타데이터, `12/8` 가로/세로 패딩 및 `8px` 섹션 간격을 사용합니다.\n- 세부 데이터는 `detail`, `dateText`, `folderLabel1`, `folderLabel2`, `tagLabel1` 및 `tagLabel2`를 통해 노출됩니다. 해당 아이콘 이름은 기본적으로 `bookmarksbookmark`, `folder@14x14` 및 `vcscurrentBranch`입니다.\n- Figma 변형에는 구분 기호가 포함되어 있지 않으므로 `separatorVisible`의 기본값은 `false`입니다. 기존 구분 기호 색상/크기 속성은 명시적 선택에 계속 사용할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`size: ListItem.Mini`는 데스크탑의 `170 x 22`이며 기존 `inputable`, `inputResult`, `inputEdited` 및 `inputSubmitted` API를 유지합니다. 인라인 편집기는 데스크톱과 모바일에서 고정된 Body `13 / 13` 라인 상자를 사용하며 둘 모두에서 동일한 행 형상을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "데스크탑에서는 `size: ListItem.Detail`가 `194 x 106`입니다. `12px SemiBold / 12px` 제목 및 날짜 텍스트, `11px Regular / 11px` 메타데이터, `12/8` 가로/세로 패딩 및 `8px` 섹션 간격을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "세부 데이터는 `detail`, `dateText`, `folderLabel1`, `folderLabel2`, `tagLabel1` 및 `tagLabel2`를 통해 노출됩니다. 해당 아이콘 이름은 기본적으로 `bookmarksbookmark`, `folder@14x14` 및 `vcscurrentBranch`입니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Figma 변형에는 구분 기호가 포함되어 있지 않으므로 `separatorVisible`의 기본값은 `false`입니다. 기존 구분 기호 색상/크기 속성은 명시적 선택에 계속 사용할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "나머지 15 사전 설정과 해당 대화형 구성은 [ListItem](ListItem.md)에 문서화되어 있습니다. 시각적 카탈로그 목록 섹션은 모든 17 유형을 보여주고 해당 예제 모델에 대한 편집 내용을 다시 유지합니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "html",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 112,
+      "end_line": 112,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "fenced_code",
+      "start_line": 115,
+      "end_line": 134,
+      "raw": "```qml\nLV.List {\n    id: mixedList\n    expandToContent: true\n    footerVisible: false\n    items: [\n        { type: \"Navigation\", label: \"Library\", value: \"24\" },\n        { type: \"Form\", label: \"Metadata\", inputText1: \"Project\" }\n    ]\n    onItemEdited: function(index, item, field, value) {\n        const next = items.slice()\n        next[index] = Object.assign({}, item)\n        next[index][field] = value\n        items = next\n    }\n    onItemActionTriggered: function(index, item, action, payload) {\n        console.log(index, action, payload)\n    }\n}\n```\n",
+      "language": "qml",
+      "code": "LV.List {\n    id: mixedList\n    expandToContent: true\n    footerVisible: false\n    items: [\n        { type: \"Navigation\", label: \"Library\", value: \"24\" },\n        { type: \"Form\", label: \"Metadata\", inputText1: \"Project\" }\n    ]\n    onItemEdited: function(index, item, field, value) {\n        const next = items.slice()\n        next[index] = Object.assign({}, item)\n        next[index][field] = value\n        items = next\n    }\n    onItemActionTriggered: function(index, item, action, payload) {\n        console.log(index, action, payload)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "fenced_code",
+      "start_line": 136,
+      "end_line": 145,
+      "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.List {\n    model: [\n        { label: \"Overview\", iconName: \"nodesfolder\" },\n        { label: \"Settings\", enabled: false }\n    ]\n}\n```\n",
+      "language": "qml",
+      "code": "import LVRS 1.0 as LV\n\nLV.List {\n    model: [\n        { label: \"Overview\", iconName: \"nodesfolder\" },\n        { label: \"Settings\", enabled: false }\n    ]\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 146,
+      "end_line": 146,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "fenced_code",
+      "start_line": 147,
+      "end_line": 153,
+      "raw": "```qml\nLV.ListItem {\n    size: LV.ListItem.Detail\n    detail: \"Two-line note title\"\n    dateText: \"2026-08-16\"\n}\n```\n",
+      "language": "qml",
+      "code": "LV.ListItem {\n    size: LV.ListItem.Detail\n    detail: \"Two-line note title\"\n    dateText: \"2026-08-16\"\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 154,
+      "end_line": 154,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "fenced_code",
+      "start_line": 155,
+      "end_line": 171,
+      "raw": "```qml\nComponent {\n    id: customRow\n\n    LV.AbstractButton {\n        property var modelData: ({})\n        text: modelData.label || \"\"\n        enabled: modelData.enabled === true\n        onClicked: modelData.trigger()\n    }\n}\n\nLV.List {\n    model: [{ label: \"Overview\" }, { label: \"Settings\" }]\n    itemDelegate: customRow\n}\n```\n",
+      "language": "qml",
+      "code": "Component {\n    id: customRow\n\n    LV.AbstractButton {\n        property var modelData: ({})\n        text: modelData.label || \"\"\n        enabled: modelData.enabled === true\n        onClicked: modelData.trigger()\n    }\n}\n\nLV.List {\n    model: [{ label: \"Overview\" }, { label: \"Settings\" }]\n    itemDelegate: customRow\n}\n",
+      "closed": true
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "목록",
+      "anchor": "목록",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "코어 API",
+      "anchor": "코어-api",
+      "start_line": 19
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Figma 시각적 계약",
+      "anchor": "figma-시각적-계약",
+      "start_line": 69
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "행동 계약",
+      "anchor": "행동-계약",
+      "start_line": 79
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "레거시 ListItem 변형",
+      "anchor": "레거시-listitem-변형",
+      "start_line": 102
+    },
+    {
+      "block_id": "b000061",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "사용법",
+      "anchor": "사용법",
+      "start_line": 113
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000029",
+        "line": 48,
+        "text": "- `listWidth`는 기본적으로 가장 넓은 필수 사전 설정으로 설정됩니다. Mini의 경우 170, Detail의 경우 194, Navigation/Toggle/Checkable의 경우 280, 합성 유형의 경우 400입니다. 명시적 너비 재정의는 계속 지원됩니다.",
+        "basis": "lexical_match",
+        "context": "list"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "ListItem 변형",
+        "target": "ListItem.md",
+        "kind": "relative",
+        "line": 7
+      },
+      {
+        "block_id": "b000049",
+        "label": "ListItem",
+        "target": "ListItem.md",
+        "kind": "relative",
+        "line": 94
+      },
+      {
+        "block_id": "b000057",
+        "label": "ListItem",
+        "target": "ListItem.md",
+        "kind": "relative",
+        "line": 109
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

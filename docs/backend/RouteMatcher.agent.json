@@ -1,0 +1,313 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:9bad75cab8310e11c9b08270d333f9364299eaefe010b4cd557346a902f28d87",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/RouteMatcher.md",
+    "sha256": "4fb587fb673b8d146e82ea9cc77e08f1175d6ecb3ef57c2a38113c994c0091b1",
+    "bytes": 1219,
+    "line_count": 34,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "RouteMatcher",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# RouteMatcher\n",
+      "level": 1,
+      "title": "RouteMatcher"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/navigation/routematcher.h` / `src/backend/navigation/routematcher.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`RouteMatcher`는 `PageRouter` 경로 정규화/일치 핫 경로를 C++로 이동하는 QML 싱글턴입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 일관된 규칙을 사용한 프로세스 경로 정규화(`normalizePath`).\n- C++에서 동적 세그먼트(`[id]`)와 나머지 세그먼트(`[...path]`)를 일치시킵니다.\n- QML JavaScript 루프에서 반복되는 문자열 분할/조인 오버헤드를 줄입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "일관된 규칙을 사용한 프로세스 경로 정규화(`normalizePath`).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "C++에서 동적 세그먼트(`[id]`)와 나머지 세그먼트(`[...path]`)를 일치시킵니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QML JavaScript 루프에서 반복되는 문자열 분할/조인 오버헤드를 줄입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 17,
+      "end_line": 27,
+      "raw": "- `normalizePath(path): string`\n  - 빈 입력을 `/`로 정규화\n  - 최고의 `/` 보장\n  - 루트(`/`)를 제외하고 후행 `/`를 제거합니다.\n- `match(path, routePath): map`\n  - 반환:\n    - `matched: bool`\n    - `params: map`\n  - 예:\n    - `(\"/runs/42\", \"/runs/[id]\") -> matched=true, params.id=\"42\"`\n    - `(\"/logs/a/b\", \"/logs/[...path]\") -> matched=true, params.path=\"a/b\"`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`normalizePath(path): string`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "빈 입력을 `/`로 정규화",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "최고의 `/` 보장",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "루트(`/`)를 제외하고 후행 `/`를 제거합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`match(path, routePath): map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "반환:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`matched: bool`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`params: map`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "예:",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`(\"/runs/42\", \"/runs/[id]\") -> matched=true, params.id=\"42\"`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`(\"/logs/a/b\", \"/logs/[...path]\") -> matched=true, params.path=\"a/b\"`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "<a id=\"notes\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "## 메모\n",
+      "level": 2,
+      "title": "메모"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 33,
+      "end_line": 34,
+      "raw": "- `PageRouter.qml`는 `RouteMatcher`를 선호하며 사용할 수 없는 경우 JavaScript 대체 경로 경로를 유지합니다.\n- 일치 결과는 `PageRouter` 경로 해결 캐시에 저장되어 반복 해결 비용을 더욱 절감합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`PageRouter.qml`는 `RouteMatcher`를 선호하며 사용할 수 없는 경우 JavaScript 대체 경로 경로를 유지합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "일치 결과는 `PageRouter` 경로 해결 캐시에 저장되어 반복 해결 비용을 더욱 절감합니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "RouteMatcher",
+      "anchor": "routematcher",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "메모",
+      "anchor": "메모",
+      "start_line": 31
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

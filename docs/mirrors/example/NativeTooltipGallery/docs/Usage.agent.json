@@ -1,0 +1,114 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c3c57eeed2f645e7ecdb8d0b3901f78bd6a946eb3958e459df9c98e032d0a4e3",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "example/NativeTooltipGallery/docs/Usage.md",
+    "sha256": "e28c34ddf2059fa4033427a2547669d46322bcfa7fbe55b1cca3451b5db800f8",
+    "bytes": 1071,
+    "line_count": 7,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 Tooltip 갤러리",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 Tooltip 갤러리\n",
+      "level": 1,
+      "title": "네이티브 Tooltip 갤러리"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "두 Tooltip이 각각 실제 기원 버튼을 관찰한다. 첫 말풍선에는 유지되는 레이블·버튼과 C++ 바인딩을 두고, 두 번째는 기본 줄 바꿈 레이블을 사용한다. 원래 버튼을 눌렀을 때 꼬리·바깥 클릭 닫힘이 액션을 삼키지 않는 경로를 포함한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "최종 실행용 self-test는 Core deadline 뒤 자동 표시, 포커스 비변경, 같은 자식/백엔드의 갱신과 액션, 기원 클릭·닫힘, 가용 영역 변경 시 닫힘 유지, 캔버스 캡처, 크기 변경과 정상 종료를 검사한다. 현재는 해당 앱과 테스트를 실행하지 않는다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "install.sh는 기본적으로 예제 내부 build/install에 복사한다. LVRS_DIR·LVUI_DIR·iiGUI_DIR·iiSDKCore_DIR·iiFileProviderNative_DIR와 Vulkan/SVG 의존성 위치를 전달할 수 있다. 전역 설치를 변경하거나 빌드 후 앱을 자동 실행하지 않는다. NativeTooltipGallery의 App/ 소스와 AOT 출력·패키지 빌드 증거를 실제 창 실행 결과와 구분한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 Tooltip 갤러리",
+      "anchor": "네이티브-tooltip-갤러리",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 5,
+        "text": "최종 실행용 self-test는 Core deadline 뒤 자동 표시, 포커스 비변경, 같은 자식/백엔드의 갱신과 액션, 기원 클릭·닫힘, 가용 영역 변경 시 닫힘 유지, 캔버스 캡처, 크기 변경과 정상 종료를 검사한다. 현재는 해당 앱과 테스트를 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 7,
+        "text": "install.sh는 기본적으로 예제 내부 build/install에 복사한다. LVRS_DIR·LVUI_DIR·iiGUI_DIR·iiSDKCore_DIR·iiFileProviderNative_DIR와 Vulkan/SVG 의존성 위치를 전달할 수 있다. 전역 설치를 변경하거나 빌드 후 앱을 자동 실행하지 않는다. NativeTooltipGallery의 App/ 소스와 AOT 출력·패키지 빌드 증거를 실제 창 실행 결과와 구분한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,895 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:cdead5a71f2333cc48c5243f877055446bbff897235cd1bacdd415946c44e039",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/policies/event.md",
+    "sha256": "ac5646f737ce49e83d16184363c67d049c95b300d7f7a7d3e501d1d4a283c4f2",
+    "bytes": 5654,
+    "line_count": 100,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "이벤트 정책",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"event-policy\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 이벤트 정책\n",
+      "level": 1,
+      "title": "이벤트 정책"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "목표: 통합된 런타임 이벤트 계약을 통해 상위 수준 반응을 라우팅하여 결정론적 상호 작용 동작을 보존합니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"rule-1-prefer-eventlistener-over-ad-hoc-handlers\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 규칙 1: 임시 핸들러보다 `EventListener`를 선호합니다.\n",
+      "level": 2,
+      "title": "규칙 1: 임시 핸들러보다 `EventListener`를 선호합니다."
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "구성 요소 간 상호 작용 논리는 각 구성 요소에 원시 `MouseArea`/`Keys` 배관을 복제하는 대신 `EventListener` 트리거 의미 체계를 사용해야 합니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "이유:\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "list",
+      "start_line": 14,
+      "end_line": 16,
+      "raw": "- 중앙 페이로드 모양,\n- 일관된 src/backend/runtime 대체 경로,\n- 공유 중복 제거 동작.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "중앙 페이로드 모양,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "일관된 src/backend/runtime 대체 경로,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "공유 중복 제거 동작.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000015",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "html",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "<a id=\"rule-2-use-runtimegesture-triggers-for-cross-surface-behavior\"></a>\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "heading",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "## 규칙 2: 교차 표면 동작에는 런타임/제스처 트리거를 사용하세요.\n",
+      "level": 2,
+      "title": "규칙 2: 교차 표면 동작에는 런타임/제스처 트리거를 사용하세요."
+    },
+    {
+      "id": "b000019",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "오버레이 해제, 전역 컨텍스트 메뉴 제어, 앱 수준 상호 작용 후크 및 중첩된 보기 경계에서 살아남아야 하는 모바일 터치 의미 체계의 경우 다음을 사용합니다.\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "list",
+      "start_line": 24,
+      "end_line": 28,
+      "raw": "- `globalPressed`\n- `globalContextRequested`\n- `touchStarted`, `pressStarted`, `pressEnded`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`\n- `scrollStarted`, `scrollUpdated`, `scrollEnded`\n- `swipeDetected`, `nativeGestureDetected`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`globalPressed`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`globalContextRequested`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`touchStarted`, `pressStarted`, `pressEnded`, `holdStarted`, `dragStarted`, `dragUpdated`, `dragEnded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`scrollStarted`, `scrollUpdated`, `scrollEnded`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`swipeDetected`, `nativeGestureDetected`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000023",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "이러한 트리거는 중첩된 로컬 이벤트 경계에 탄력적이며 프레임워크 관리 페이로드 계약을 공유합니다.\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "html",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "<a id=\"rule-3-incident-payload-is-default-srcbackendinput-enrichment-is-opt-in\"></a>\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "## 규칙 3: 사고 페이로드가 기본값입니다. src/backend/input 강화는 선택 사항입니다.\n",
+      "level": 2,
+      "title": "규칙 3: 사고 페이로드가 기본값입니다. src/backend/input 강화는 선택 사항입니다."
+    },
+    {
+      "id": "b000029",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "`EventListener`는 기본적으로 사고 중심을 유지해야 합니다. 콜백에 실제로 일관된 입력 스냅샷이 필요한 경우에만 `includeInputState` / `preferBackendState`를 활성화하세요.\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "html",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "<a id=\"rule-4-outside-dismiss-must-be-coordinate-based\"></a>\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## 규칙 4: 외부 해제는 좌표 기반이어야 합니다.\n",
+      "level": 2,
+      "title": "규칙 4: 외부 해제는 좌표 기반이어야 합니다."
+    },
+    {
+      "id": "b000035",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "팝업/대화상자 해제는 로컬 전용 클릭 가정이 아닌 전역-로컬 좌표 매핑 및 형상 확인을 사용해야 합니다.\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "html",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "<a id=\"rule-5-nested-wheel-isolation-is-mandatory\"></a>\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "heading",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "## 규칙 5: 중첩된 휠 격리는 필수입니다.\n",
+      "level": 2,
+      "title": "규칙 5: 중첩된 휠 격리는 필수입니다."
+    },
+    {
+      "id": "b000041",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "더 큰 스크롤 가능 페이지 내에 내부 스크롤 뷰포트를 소유한 모든 구성 요소는 이중 스크롤을 방지하기 위해 휠 격리(`WheelScrollGuard`)를 설치해야 합니다.\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "html",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "<a id=\"rule-6-text-composition-safety-is-mandatory\"></a>\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## 규칙 6: 텍스트 작성 안전은 필수입니다.\n",
+      "level": 2,
+      "title": "규칙 6: 텍스트 작성 안전은 필수입니다."
+    },
+    {
+      "id": "b000047",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "모든 텍스트 입력 표면은 `InputMethodGuard` 를 포함해야 하므로 IME 작성이 가시성/초점 전환 시 안전하게 커밋됩니다. 텍스트 입력 표면은 네이티브 `MouseArea`, `TextInput`, 또는 `TextEdit` 위에 전체 덮개 프레스/탭 핸들러(예: `TextArea`)를 배치해서는 안 되며, 선택, IME, 키보드, 더블 클릭, 트리플 클릭 및 플랫폼 텍스트 제스처는 네이티브 텍스트 항목에 직접 도달해야 합니다. 네이티브 텍스트 상호작용 모드는 네이티브 텍스트 항목보다 먼저 키보드 단축키를 소비해서는 안 됩니다. 시각 상태에 대한 비 잡기 호버 관찰은 네이티브 제스처가 활성화되지 않은 경우에만 허용됩니다.\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "html",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "<a id=\"rule-7-dedup-windows-must-remain-explicit\"></a>\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "heading",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "## 규칙 7: 중복 제거 기간은 명시적으로 유지되어야 합니다.\n",
+      "level": 2,
+      "title": "규칙 7: 중복 제거 기간은 명시적으로 유지되어야 합니다."
+    },
+    {
+      "id": "b000053",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "글로벌 프레스/컨텍스트 중복 제거 임계값(시간 및 거리)은 계약 매개변수입니다. 모든 변경 사항은 문서화하고 상황에 맞는 메뉴 동작에 대해 테스트해야 합니다.\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "html",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "<a id=\"concrete-implementation-pattern\"></a>\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "heading",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "## 구체적인 구현 패턴\n",
+      "level": 2,
+      "title": "구체적인 구현 패턴"
+    },
+    {
+      "id": "b000059",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "오버레이/팝업의 경우 선호되는 패턴은 다음과 같습니다.\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "list",
+      "start_line": 68,
+      "end_line": 71,
+      "raw": "1. 열기를 위한 로컬 작업 트리거,\n2. 외부 해제를 위한 전역 트리거,\n3. 좌표 기반 기하학 검사,\n4. 중첩된 스크롤 영역에 대한 명시적인 이벤트 소비 전략입니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "열기를 위한 로컬 작업 트리거,",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "외부 해제를 위한 전역 트리거,",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "좌표 기반 기하학 검사,",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "중첩된 스크롤 영역에 대한 명시적인 이벤트 소비 전략입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000063",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "html",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "<a id=\"review-checklist\"></a>\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "heading",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "## 체크리스트 검토\n",
+      "level": 2,
+      "title": "체크리스트 검토"
+    },
+    {
+      "id": "b000067",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "코드 검토 중에 다음과 같은 변경 사항을 거부하세요.\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "list",
+      "start_line": 79,
+      "end_line": 84,
+      "raw": "- `EventListener` 없이 페이지당 중복 글로벌 이벤트 배관,\n- 전역 해제 동작에 로컬 전용 좌표를 사용합니다.\n- 중첩된 `Flickable` 표면에서 `WheelScrollGuard`를 제거하고,\n- 편집 가능한 텍스트 컨트롤에서 IME 컴포지션 가드를 비활성화합니다.\n- 편집 가능한 텍스트 컨트롤 위에 전체 커버 누르기/탭 핸들러를 배치합니다.\n- 네이티브 상호 작용 모드에서 네이티브 텍스트 항목 이전에 편집 가능한 텍스트 키 이벤트를 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`EventListener` 없이 페이지당 중복 글로벌 이벤트 배관,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전역 해제 동작에 로컬 전용 좌표를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중첩된 `Flickable` 표면에서 `WheelScrollGuard`를 제거하고,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 가능한 텍스트 컨트롤에서 IME 컴포지션 가드를 비활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 가능한 텍스트 컨트롤 위에 전체 커버 누르기/탭 핸들러를 배치합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 상호 작용 모드에서 네이티브 텍스트 항목 이전에 편집 가능한 텍스트 키 이벤트를 사용합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000071",
+      "kind": "blank",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "html",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "<a id=\"enforcement-note\"></a>\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "blank",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "heading",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "## 시행 참고 사항\n",
+      "level": 2,
+      "title": "시행 참고 사항"
+    },
+    {
+      "id": "b000075",
+      "kind": "blank",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "paragraph",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "이벤트 동작은 고주파수 입력에서 결정성을 유지해야 합니다. 클릭 속도 또는 스크롤 버스트에 따라 동작이 변경되면 파이프라인 설계가 불완전합니다.\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "html",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "<a id=\"audit-checklist\"></a>\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "heading",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "## 감사 체크리스트\n",
+      "level": 2,
+      "title": "감사 체크리스트"
+    },
+    {
+      "id": "b000081",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "list",
+      "start_line": 96,
+      "end_line": 100,
+      "raw": "- 전역 동작은 로컬 클릭 해킹이 아닌 전역 트리거를 사용합니다.\n- 중첩된 스크롤 표면에는 명시적인 휠 격리가 포함됩니다.\n- 텍스트 입력 구성 요소에는 IME 가드 통합이 포함됩니다.\n- 편집 가능한 텍스트 컨트롤은 포인터 및 제스처 입력을 직접 수신합니다.\n- 텍스트 입력 테스트는 직접 네이티브 항목 소유권, 클릭을 통한 포커스, 키보드 입력, IME 사전 편집/커밋, 두 번 클릭 선택, 세 번 클릭 선택 상태 전달, 드래그 선택, 바로가기 통과 및 네이티브 텍스트 모드 스크롤 경쟁을 다룹니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "전역 동작은 로컬 클릭 해킹이 아닌 전역 트리거를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중첩된 스크롤 표면에는 명시적인 휠 격리가 포함됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "텍스트 입력 구성 요소에는 IME 가드 통합이 포함됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "편집 가능한 텍스트 컨트롤은 포인터 및 제스처 입력을 직접 수신합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "텍스트 입력 테스트는 직접 네이티브 항목 소유권, 클릭을 통한 포커스, 키보드 입력, IME 사전 편집/커밋, 두 번 클릭 선택, 세 번 클릭 선택 상태 전달, 드래그 선택, 바로가기 통과 및 네이티브 텍스트 모드 스크롤 경쟁을 다룹니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "이벤트 정책",
+      "anchor": "이벤트-정책",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 1: 임시 핸들러보다 `EventListener`를 선호합니다.",
+      "anchor": "규칙-1-임시-핸들러보다-eventlistener를-선호합니다",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000018",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 2: 교차 표면 동작에는 런타임/제스처 트리거를 사용하세요.",
+      "anchor": "규칙-2-교차-표면-동작에는-런타임제스처-트리거를-사용하세요",
+      "start_line": 20
+    },
+    {
+      "block_id": "b000028",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 3: 사고 페이로드가 기본값입니다. src/backend/input 강화는 선택 사항입니다.",
+      "anchor": "규칙-3-사고-페이로드가-기본값입니다-srcbackendinput-강화는-선택-사항입니다",
+      "start_line": 34
+    },
+    {
+      "block_id": "b000034",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 4: 외부 해제는 좌표 기반이어야 합니다.",
+      "anchor": "규칙-4-외부-해제는-좌표-기반이어야-합니다",
+      "start_line": 40
+    },
+    {
+      "block_id": "b000040",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 5: 중첩된 휠 격리는 필수입니다.",
+      "anchor": "규칙-5-중첩된-휠-격리는-필수입니다",
+      "start_line": 46
+    },
+    {
+      "block_id": "b000046",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 6: 텍스트 작성 안전은 필수입니다.",
+      "anchor": "규칙-6-텍스트-작성-안전은-필수입니다",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000052",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "규칙 7: 중복 제거 기간은 명시적으로 유지되어야 합니다.",
+      "anchor": "규칙-7-중복-제거-기간은-명시적으로-유지되어야-합니다",
+      "start_line": 58
+    },
+    {
+      "block_id": "b000058",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "구체적인 구현 패턴",
+      "anchor": "구체적인-구현-패턴",
+      "start_line": 64
+    },
+    {
+      "block_id": "b000066",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "체크리스트 검토",
+      "anchor": "체크리스트-검토",
+      "start_line": 75
+    },
+    {
+      "block_id": "b000074",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "시행 참고 사항",
+      "anchor": "시행-참고-사항",
+      "start_line": 88
+    },
+    {
+      "block_id": "b000080",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "감사 체크리스트",
+      "anchor": "감사-체크리스트",
+      "start_line": 94
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000032",
+        "line": 38,
+        "text": "<a id=\"rule-4-outside-dismiss-must-be-coordinate-based\"></a>",
+        "basis": "lexical_match",
+        "context": "html"
+      },
+      {
+        "block_id": "b000040",
+        "line": 46,
+        "text": "## 규칙 5: 중첩된 휠 격리는 필수입니다.",
+        "basis": "lexical_match",
+        "context": "heading"
+      },
+      {
+        "block_id": "b000046",
+        "line": 52,
+        "text": "## 규칙 6: 텍스트 작성 안전은 필수입니다.",
+        "basis": "lexical_match",
+        "context": "heading"
+      },
+      {
+        "block_id": "b000048",
+        "line": 54,
+        "text": "모든 텍스트 입력 표면은 `InputMethodGuard` 를 포함해야 하므로 IME 작성이 가시성/초점 전환 시 안전하게 커밋됩니다. 텍스트 입력 표면은 네이티브 `MouseArea`, `TextInput`, 또는 `TextEdit` 위에 전체 덮개 프레스/탭 핸들러(예: `TextArea`)를 배치해서는 안 되며, 선택, IME, 키보드, 더블 클릭, 트리플 클릭 및 플랫폼 텍스트 제스처는 네이티브 텍스트 항목에 직접 도달해야 합니다. 네이티브 텍스트 상호작용 모드는 네이티브 텍스트 항목보다 먼저 키보드 단축키를 소비해서는 안 됩니다. 시각 상태에 대한 비 잡기 호버 관찰은 네이티브 제스처가 활성화되지 않은 경우에만 허용됩니다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000050",
+        "line": 56,
+        "text": "<a id=\"rule-7-dedup-windows-must-remain-explicit\"></a>",
+        "basis": "lexical_match",
+        "context": "html"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

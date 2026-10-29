@@ -1,0 +1,393 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:43bf3b84d7f1d31a6993c7c4e4769ed44475e31c6032ada6a5f2421c1a26ec01",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/native/Tables.md",
+    "sha256": "1503b5a3281a6696c0e7c13bb92ccb1f30acbf3a2f2efb5fae2b8e852bfa511c",
+    "bytes": 6559,
+    "line_count": 95,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "네이티브 표의 셀·행·헤더",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 네이티브 표의 셀·행·헤더\n",
+      "level": 1,
+      "title": "네이티브 표의 셀·행·헤더"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 8,
+      "raw": "`TableCellItem`, `TableRow`, `TableHeader`, `TableHeaderModel`의 C++23 구현을 추가했다.\n원본은 `src/qml/components/control/display/`의 세 QML과\n`src/backend/model/tableheadermodel.*`이다. LVUI AOT가 생성한 C++에서 `lvrs::Widgets`\n또는 직접 C++ 생성기를 호출한다. iiGUI의 자체 위젯이 기하·입력·텍스트·GPU 표시를\n담당하고 iiSDKCore가 앱 수명과 작업자를 소유한다. Qt·QML·소스 해석기·OS 표/입력\n컨트롤은 연결하지 않는다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 12,
+      "raw": "별도의 [네이티브 TableModel](TableModel.md)은 값·범위 편집, 타입, 정렬, 병합,\n구조 변경, 크기 조절, undo/redo와 viewport 데이터 조회를 제공한다. 모델의 구현과\n테스트 코드가 추가되었으며 실행 검증은 최종 일괄 단계까지 유보한다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 14,
+      "end_line": 16,
+      "raw": "현재 [네이티브 Table 화면](TableView.md)을 모델과 연결하는 구현도 추가했다. 가상\nviewport와 단일 편집기, 선택/탐색/정렬, LVUI AOT의 C++ 모델 연결을 제공한다. 원본의\n전체 Table 계약과 실제 실행 검증은 별도로 남아 있다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "## 셀\n",
+      "level": 2,
+      "title": "셀"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 24,
+      "raw": "기본 셀은 234×24이며 왼쪽 1픽셀 구분선과 8픽셀 간격을 사용한다. body 글자와 행 높이는\n원본처럼 13이다. 읽기 상태는 네이티브 말줄임표 Label, 입력 상태는 투명 자체 편집기이다.\n`show_divider`, `clip_content`, 글자 역할과 색상을 지정할 수 있다. 선택 배경은 primary의\nalpha에 `31/255`를 곱하며 current 테두리는 primary와 `current_border_width`를 사용한다.\n두 색상은 명시적으로 바꿀 수 있다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 27,
+      "raw": "`text_style`은 읽기 Label의 글자 역할이다. 원본처럼 편집기 글자는 항상 body 13을 쓰며,\n역할별 content 행 높이 안에서 가운데 배치한다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 31,
+      "raw": "`TableCellItem::create`는 root와 editor를 한 번 생성한다. `set_selected`는 편집 값을\n보존한다. `set_options`는 같은 위젯에 새 데이터·외형을 적용하고 입력 override를 초기화한다.\n트리 해제 후 핸들은 `closed`를 반환하며 위젯 접근은 UI 소유 스레드에서 수행한다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 37,
+      "raw": "검증기가 없으면 원본처럼 문자열을 허용한다. `value_type`만으로 자동 변환하지 않는다.\n`TableValidator`는 accepted·표시 text·typed value를 반환한다. 거절된 입력은 마지막\naccepted 값으로 되돌리고 `rejected(text, valueType)`를 보낸다. 허용된 사용자 편집은\n`edited(text)`, Enter는 `submitted(text)`를 보낸다. `apply_input_result`는 직접 검증/적용할\n때 사용하며 edited/submitted를 합성하지 않는다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 39,
+      "end_line": 41,
+      "raw": "명시적인 `validate_table_value`는 문자열, int64 정수, 유한한 실수, bool을 지원한다.\n정수 범위 초과·NaN·무한대·잘못된 형식은 거절한다. Qt/JavaScript의 Number 변환 규칙\n전체와 같은 변환기라는 뜻은 아니다. 사용자 검증기로 규칙을 교체한다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "## 행과 헤더\n",
+      "level": 2,
+      "title": "행과 헤더"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 49,
+      "raw": "행은 기본 세 셀, 폭 717, 셀 폭 234, 높이 24이다. 간격은 원본처럼\n`max(0, (width - count * cellWidth) / (count - 1))`로 구한다. 행의 inputable 기본값과\n각 셀의 optional override를 합성하고 편집/submit에 열 인덱스를 전달한다.\n같은 개수의 `set_options`는 핸들을 보존한다. 다른 개수의 교체는 현재 거절하며 동적\n행·열·delegate 수명은 전체 Table 모델 이식 때 구현할 대상이다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 57,
+      "raw": "`TableHeaderModel`은 문자열·타입·padding을 가진 값 소유 열 목록을 받는다. 양수 column\nwidth를 반올림해 최소 폭 이상으로 제한하며 0 이하 값은 fallback을 사용한다. fallback이\n0이면 `floor(tableWidth / count)`와 최소 폭의 큰 값을 사용한다. 기본 padding 8,\n최소 폭 32, 헤더 높이 24와 하단 separator 1이다. 같은 옵션은 revision을 올리지 않는다.\n변경 때 descriptor와 prefix 위치를 한 번 계산해 열 조회는 O(1)이다. 반환 span은 다음\n옵션 교체 때 무효화되며 소유자가 동시성을 관리한다. 입력은 최대 512개, 개별 기하 8192,\n합산 열 좌표 32767 이내로 제한한다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 61,
+      "raw": "`TableHeader`는 description 12 글자와 separator를 그리고 interactive일 때 포인터·키보드·\n접근성 활성화를 `column_clicked(index, column)`으로 전달한다. 헤더 클릭 자체는 정렬하지\n않는다. 데이터 정렬은 Table 모델/소비자의 책임이다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 63,
+      "end_line": 68,
+      "raw": "각 `TableHeaderColumn`의 `leading_icon`은 기본 `generalchevronDown`, `trailing_icon`은\n기본 빈 문자열이다. 빈 이름은 슬롯을 숨기며 다른 이름은 내장 LVRS 아이콘에서 찾는다.\n아이콘은 18px, 레이블과의 간격은 7px이다. 교체 시 이름을 먼저 모두 검증하므로 존재하지\n않는 아이콘이 기존 헤더를 부분적으로 변경하지 않는다. 슬롯과 레이블은 같은 열의 너비를\n공유하고 좁을 때 레이블을 줄인다. 가상화된 `Table`도 같은 열 데이터의 슬롯을 그리며\n가로 스크롤로 잘린 아이콘은 열과 뷰포트 경계에 맞춰 잘린다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## LVUI와 검증\n",
+      "level": 2,
+      "title": "LVUI와 검증"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "fenced_code",
+      "start_line": 72,
+      "end_line": 85,
+      "raw": "```lvui\nimport vm TableBackend\nApplicationWindow {\n    VStack {\n        TableHeader(columns: [\"Name\", \"Count\"], columnWidths: [300, 120],\n                    interactive: true, onColumnClicked: vm.sort)\n        TableRow(cells: [\"Asset\", \"12\"], width: 420, cellWidth: 210,\n                 inputable: true, onCellInputEdited: vm.rowEdited)\n        TableCellItem(text: \"12\", inputable: true, valueType: \"int\",\n                      valueValidator: vm.validator,\n                      onInputEdited: vm.edited, onInputRejected: vm.rejected)\n    }\n}\n```\n",
+      "language": "lvui",
+      "code": "import vm TableBackend\nApplicationWindow {\n    VStack {\n        TableHeader(columns: [\"Name\", \"Count\"], columnWidths: [300, 120],\n                    interactive: true, onColumnClicked: vm.sort)\n        TableRow(cells: [\"Asset\", \"12\"], width: 420, cellWidth: 210,\n                 inputable: true, onCellInputEdited: vm.rowEdited)\n        TableCellItem(text: \"12\", inputable: true, valueType: \"int\",\n                      valueValidator: vm.validator,\n                      onInputEdited: vm.edited, onInputRejected: vm.rejected)\n    }\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 90,
+      "raw": "`vm.validator`는 scope 소유 C++ backend의 public `TableValidator` 값이다. 콜백은 클릭마다\nbackend를 만들지 않고 같은 scope를 사용한다. AOT의 cells/columns는 정적 String 배열,\ncolumnWidths는 정적 Number 배열이다. `examples/NativeTableGallery`는 Core entry·worker·\ndisplay frame, 편집·검증 거절·submit·헤더 활성화·크기 변경·정상 종료를 함께 검사한다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 92,
+      "end_line": 95,
+      "raw": "`tests/native/table_parts.cpp`는 기하·입력·선택 GPU·검증·수명·헤더 모델을 검사한다.\n표 화면의 범위 선택, 정렬·병합·구조 명령 연결, resize hit 영역, 가상 위젯 풀, delegate와\n일반 반응형/상속 API는 아직 이식하지 않았다. [대응표](Parity.md)의 모델과 구성 요소는\n부분 구현이며 Table 화면도 부분 이식 상태이다. 다른 OS·실제 모바일 입력 검증도 남아 있다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "네이티브 표의 셀·행·헤더",
+      "anchor": "네이티브-표의-셀행헤더",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "셀",
+      "anchor": "셀",
+      "start_line": 18
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "행과 헤더",
+      "anchor": "행과-헤더",
+      "start_line": 43
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "LVUI와 검증",
+      "anchor": "lvui와-검증",
+      "start_line": 70
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 8,
+        "text": "컨트롤은 연결하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 33,
+        "text": "검증기가 없으면 원본처럼 문자열을 허용한다. `value_type`만으로 자동 변환하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 37,
+        "text": "때 사용하며 edited/submitted를 합성하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 66,
+        "text": "않는 아이콘이 기존 헤더를 부분적으로 변경하지 않는다. 슬롯과 레이블은 같은 열의 너비를",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "네이티브 TableModel",
+        "target": "TableModel.md",
+        "kind": "relative",
+        "line": 10
+      },
+      {
+        "block_id": "b000007",
+        "label": "네이티브 Table 화면",
+        "target": "TableView.md",
+        "kind": "relative",
+        "line": 14
+      },
+      {
+        "block_id": "b000037",
+        "label": "대응표",
+        "target": "Parity.md",
+        "kind": "relative",
+        "line": 94
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

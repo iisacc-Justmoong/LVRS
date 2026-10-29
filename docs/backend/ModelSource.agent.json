@@ -1,0 +1,436 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:9b8d2275a30b84b6eae2e24737dd387885ff92968a3e49db79896fbdca01d612",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/backend/ModelSource.md",
+    "sha256": "e92d8722692aed1b4f5a4bfd3b32b6d562f2f86cede41465c71de750826c0478",
+    "bytes": 1727,
+    "line_count": 49,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "ModelSource",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# ModelSource\n",
+      "level": 1,
+      "title": "ModelSource"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "위치: `src/backend/model/modelsource.h`, `src/backend/model/modelsource.cpp`\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ModelSource`는 모델 베어링 QML 구성 요소용 공유 C++ 리더입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"purpose\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 목적\n",
+      "level": 2,
+      "title": "목적"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 13,
+      "raw": "- 하나의 주입된 `source`를 통해 JavaScript 배열, 기본 배열, QML 목록형 객체 및 `QAbstractItemModel` 인스턴스를 허용합니다.\n- QML 측 어댑터 로직 없이 항목 모델 행을 역할 이름 맵으로 프로젝트합니다.\n- 지원 C++ 항목 모델이 변경되면 개정/개수 변경 사항을 내보냅니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "하나의 주입된 `source`를 통해 JavaScript 배열, 기본 배열, QML 목록형 객체 및 `QAbstractItemModel` 인스턴스를 허용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QML 측 어댑터 로직 없이 항목 모델 행을 역할 이름 맵으로 프로젝트합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "지원 C++ 항목 모델이 변경되면 개정/개수 변경 사항을 내보냅니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## API\n",
+      "level": 2,
+      "title": "API"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "속성:\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 23,
+      "raw": "- `source`\n- `column`\n- `count`(읽기 전용)\n- `revision`(읽기 전용)\n- `itemModel`(읽기 전용)\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`source`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`column`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`count`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`revision`(읽기 전용)",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`itemModel`(읽기 전용)",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "방법:\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 27,
+      "end_line": 33,
+      "raw": "- `at(index)`\n- `row(index)`\n- `roleValue(entry, roleName, fallbackValue)`\n- `textValue(entry, roleNames, fallbackValue)`\n- `boolValue(entry, roleName, fallbackValue)`\n- `intValue(entry, roleName, fallbackValue)`\n- `invalidate()`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`at(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`row(index)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`roleValue(entry, roleName, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`textValue(entry, roleNames, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`boolValue(entry, roleName, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`intValue(entry, roleName, fallbackValue)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`invalidate()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "html",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "<a id=\"how-it-works\"></a>\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "## 동작 원리\n",
+      "level": 2,
+      "title": "동작 원리"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "list",
+      "start_line": 39,
+      "end_line": 42,
+      "raw": "- `QAbstractItemModel` 입력은 요청된 `column`에서 읽혀지고 `roleNames()`에 의해 키가 지정된 맵으로 변환됩니다.\n- `display`, `edit`, `index`, `row` 및 `column`가 안정적인 대체 경로 필드로 추가되었습니다.\n- JS/목록 유사 입력은 가능한 경우 인덱스, `get(index)` 또는 `at(index)`로 읽습니다.\n- `rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged` 및 `dataChanged`는 모두 `revision`를 무효화합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`QAbstractItemModel` 입력은 요청된 `column`에서 읽혀지고 `roleNames()`에 의해 키가 지정된 맵으로 변환됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`display`, `edit`, `index`, `row` 및 `column`가 안정적인 대체 경로 필드로 추가되었습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "JS/목록 유사 입력은 가능한 경우 인덱스, `get(index)` 또는 `at(index)`로 읽습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`rowsInserted`, `rowsRemoved`, `rowsMoved`, `modelReset`, `layoutChanged` 및 `dataChanged`는 모두 `revision`를 무효화합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "<a id=\"consumers\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "## 소비자\n",
+      "level": 2,
+      "title": "소비자"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "list",
+      "start_line": 48,
+      "end_line": 49,
+      "raw": "- `List`는 행 수, 역할 조회, 레이블 확인, 활성화 상태 및 선택 상태에 `ModelSource`를 사용합니다.\n- `HierarchyModel`는 트리 행 설명자를 투영하기 전에 `ModelSource`를 사용합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`List`는 행 수, 역할 조회, 레이블 확인, 활성화 상태 및 선택 상태에 `ModelSource`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`HierarchyModel`는 트리 행 설명자를 투영하기 전에 `ModelSource`를 사용합니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "ModelSource",
+      "anchor": "modelsource",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "목적",
+      "anchor": "목적",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "동작 원리",
+      "anchor": "동작-원리",
+      "start_line": 37
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "소비자",
+      "anchor": "소비자",
+      "start_line": 46
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

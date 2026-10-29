@@ -4,6 +4,21 @@
 
 The 2026-10-12 [LVRS Iconset](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/Layerd-Visual-Render-System?node-id=1344-9163) snapshot contains 2,846 canonical icons: 2,844 component masters and two standalone vector studies, organized into 44 Figma categories. Resources remain flat in `resources/iconset/`; Figma category information, component keys, node IDs, dimensions, native export hashes, and packaged hashes are recorded in [figma-iconset-manifest.json](figma-iconset-manifest.json).
 
+## 2026-10-29 색상 확인 범위
+
+현재 Figma 원본 2,846개를 모두 확인했고 이 중 2,178개의 자산을 갱신했다. 일반적인
+항목은 레이어와 도형을 대조하여 SVG 페인트만 교체하며 기존 형상과 반응형 뷰포트를
+보존한다. 도형 경로의 내보내기 표현이 다른 경우에는 양쪽 경로를 래스터화하여 겹침을
+대조한다. 경로 대응이 불가능한 9개는 현재 Figma 벡터를 사용하며 기존 정사각형
+뷰포트는 유지한다. 기존에 이미지 기반이던 `smartSelect`와 `translateObject`는 마스크
+호환성을 위해 Figma 8배 PNG를 SVG에 내장한다.
+
+매니페스트의 `colorReadbackCoverage`는 확인 범위를, 각 `colorReadback`은 변수 ID와
+원본 해시 또는 경로 대조 근거를 기록한다. `scripts/reconcile_figma_icon_colors.py`는
+읽기 결과를 ID별로 대조하며, 현재 매니페스트와 다른 사용자 변경을 감지하면 중단한다.
+지원하지 않는 효과나 외부 참조가 있는 벡터는 별도 처리를 위해 남긴다. 부분 읽기를
+이어 처리할 때는 이전과 새로운 읽기 파일을 같은 입력 디렉터리에 유지한다.
+
 This snapshot includes the 177 panel icons added to Figma, the consolidation of 194 duplicate components, and the 113 component name changes. Canonical resource filenames use the current Figma names and are unique under Unicode normalization and case-insensitive comparison. Existing control-specific resources remain separate from the Figma catalog.
 
 The 892 formerly monochrome icons retain their Figma accents. Their selected vector, text, or original image silhouette uses the existing LVRS ThemeColors tokens: blue, cyan, teal, yellow, red, purple, green, palette orange, and palette pink. SVG exports resolve those bindings to their authored colors. The 2026-10-19 palette revision recolors the replaced accent paints and opacity composites; unrelated artwork remains as exported; no renderer tint or replacement glyph is introduced. Twelve Boolean-operation icons additionally bind their visible union fill or stroke to the same token: coloring a consumed child alone does not affect the exported union. Their node geometry, dimensions, and path data are preserved.

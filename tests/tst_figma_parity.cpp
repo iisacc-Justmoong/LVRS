@@ -83,7 +83,7 @@ void FigmaParityTests::initTestCase()
     QVERIFY(!themeFixture["capturedAtUtc"].toString().isEmpty());
     QVERIFY(themeFixture["validation"].toObject()["passed"].toBool());
     QCOMPARE(themeFixture["validation"].toObject()["errors"].toArray().size(), 0);
-    QCOMPARE(themeFixture["variables"].toArray().size(), 77);
+    QCOMPARE(themeFixture["variables"].toArray().size(), 73);
     QCOMPARE(themeFixture["textStyles"].toArray().size(), 7);
     QCOMPARE(themeFixture["legacyPanelAliases"].toObject().size(), 12);
     QCOMPARE(themeFixture["legacyTypographyAliases"].toObject().size(), 2);
@@ -92,6 +92,7 @@ void FigmaParityTests::initTestCase()
     int typography = 0;
     for (const auto &entry : themeFixture["variables"].toArray()) {
         const auto variable = entry.toObject();
+        QVERIFY2(!variable["name"].toString().startsWith("Action/"), "Deleted Action variables must not remain in the Figma token contract");
         const auto property = variable["property"].toString();
         const auto id = variable["id"].toString();
         QVERIFY2(!property.isEmpty(), qPrintable(id));
@@ -111,7 +112,7 @@ void FigmaParityTests::initTestCase()
             ++typography;
         }
     }
-    QCOMPARE(colors, 41);
+    QCOMPARE(colors, 37);
     QCOMPARE(typography, 36);
 }
 
@@ -134,6 +135,10 @@ void FigmaParityTests::saved_theme_tokens()
     QVERIFY(root);
     auto *theme = qvariant_cast<QObject *>(root->property("theme"));
     QVERIFY(theme);
+    QCOMPARE(theme->property("success"), theme->property("accentGreen"));
+    QCOMPARE(theme->property("warning"), theme->property("accentYellow"));
+    QCOMPARE(theme->property("danger"), theme->property("accentRed"));
+    QCOMPARE(theme->property("defaultPrimary"), theme->property("accentBlue"));
     const auto property = variable["property"].toString();
     const auto propertyName = property.toUtf8();
     QVERIFY2(theme->metaObject()->indexOfProperty(propertyName.constData()) >= 0,

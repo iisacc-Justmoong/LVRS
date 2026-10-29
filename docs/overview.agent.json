@@ -1,0 +1,904 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d26303cf2691a9ff66507c8ddd048ab896bc73f116ec6f4d567505bee271268b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/overview.md",
+    "sha256": "14c10b019e177c1caed4dd7481e40e4c5a74de8c3a928f07b98b67aa2604a3f9",
+    "bytes": 6210,
+    "line_count": 111,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "개요",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"overview\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 개요\n",
+      "level": 1,
+      "title": "개요"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "LVRS는 결정적 UI 동작, 명시적인 런타임 관찰 가능성 및 보기, 탐색 및 모델 소유권 간의 엄격한 통합 경계를 중심으로 하는 Qt 6.5+ QML 프레임워크입니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"design-goals\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 디자인 목표\n",
+      "level": 2,
+      "title": "디자인 목표"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "list",
+      "start_line": 11,
+      "end_line": 14,
+      "raw": "- 컨트롤, 레이아웃, 탐색 및 표면 전반에 걸쳐 안정적인 구성 요소 계약이 이루어집니다.\n- 백엔드 우선 런타임 관측성은 QML 친화적인 API로 공개됩니다.\n- 명시적인 플랫폼/백엔드 정책을 통한 결정적 렌더링 부트스트랩.\n- 우발적인 공유 상태 경합을 방지하기 위해 안전한 MVVM 쓰기 소유권.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "컨트롤, 레이아웃, 탐색 및 표면 전반에 걸쳐 안정적인 구성 요소 계약이 이루어집니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "백엔드 우선 런타임 관측성은 QML 친화적인 API로 공개됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "명시적인 플랫폼/백엔드 정책을 통한 결정적 렌더링 부트스트랩.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "우발적인 공유 상태 경합을 방지하기 위해 안전한 MVVM 쓰기 소유권.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "<a id=\"runtime-architecture\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "## 런타임 아키텍처\n",
+      "level": 2,
+      "title": "런타임 아키텍처"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "LVRS 런타임는 3개의 협력 레이어로 분할됩니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 22,
+      "end_line": 24,
+      "raw": "1. 이벤트 캡처 데몬 ( `RuntimeEvents` ) 키보드, 포인터, 컨텍스트, 터치/태블레터/ 네이티브 제스처, UI 라이프사이클 및 프로세스 텔레메트리를 캡처합니다.\n2. 고수준 제스처 인식기(`GestureEvents`)는 원시 터치/ 네이티브 스트림을 `press`, `scroll`, `hold`, `drag`, `swipe` 및 정규화된 터치 세션 페이로드로드로 분류합니다.\n3. 백엔드 캐시/브리지(`Backend`)는 원시 런타임 이벤트 스트림을 한계가 설정된 캐시로 미러링하고 QML 사용자에게 안정적인 스냅샷을 제공합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "이벤트 캡처 데몬 ( `RuntimeEvents` ) 키보드, 포인터, 컨텍스트, 터치/태블레터/ 네이티브 제스처, UI 라이프사이클 및 프로세스 텔레메트리를 캡처합니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "고수준 제스처 인식기(`GestureEvents`)는 원시 터치/ 네이티브 스트림을 `press`, `scroll`, `hold`, `drag`, `swipe` 및 정규화된 터치 세션 페이로드로드로 분류합니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "백엔드 캐시/브리지(`Backend`)는 원시 런타임 이벤트 스트림을 한계가 설정된 캐시로 미러링하고 QML 사용자에게 안정적인 스냅샷을 제공합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "이 아키텍처는 UI 계층 논리가 두 가지 책임을 하나의 변경 가능한 스트림으로 축소하지 않고도 낮은 수준의 런타임 원격 측정 또는 높은 수준의 제스처 의미 체계를 사용할 수 있도록 존재합니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "html",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "<a id=\"ui-architecture\"></a>\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "## UI 아키텍처\n",
+      "level": 2,
+      "title": "UI 아키텍처"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "QML 모듈은 관심사별로 그룹화되어 있습니다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "list",
+      "start_line": 34,
+      "end_line": 38,
+      "raw": "- `control`: 입력, 디스플레이 컨트롤, 선택 컨트롤 및 동작 가드.\n- `layout`: 스택 기본 요소 및 앱 헤더.\n- `navigation`: 라우터, 글로벌 탐색기, 계층 구조, 상황에 맞는 메뉴.\n- `surfaces`: 카드/대화 상자 스타일 컨테이너.\n- `app`: 적응형 탐색 브리지가 있는 루트 창 셸.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`control`: 입력, 디스플레이 컨트롤, 선택 컨트롤 및 동작 가드.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`layout`: 스택 기본 요소 및 앱 헤더.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`navigation`: 라우터, 글로벌 탐색기, 계층 구조, 상황에 맞는 메뉴.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`surfaces`: 카드/대화 상자 스타일 컨테이너.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`app`: 적응형 탐색 브리지가 있는 루트 창 셸.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "<a id=\"startup-sequence\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "## 시동 순서\n",
+      "level": 2,
+      "title": "시동 순서"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "프로덕션 시작 경로는 이 순서를 따라야 합니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "list",
+      "start_line": 46,
+      "end_line": 52,
+      "raw": "1. `QGuiApplication` 이전의 `lvrs::preApplicationBootstrap(options)`.\n2. `QGuiApplication`를 구축하세요.\n3. `lvrs::postApplicationBootstrap(app, options)`.\n4. QML 루트(`LV.ApplicationWindow`)를 로드합니다.\n5. 선택적으로 런타임 브리지를 활성화합니다.\n   - `RuntimeEvents.start() + attachWindow(window)`\n   - `Backend.hookUserEvents()`\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "`QGuiApplication` 이전의 `lvrs::preApplicationBootstrap(options)`.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "`QGuiApplication`를 구축하세요.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`lvrs::postApplicationBootstrap(app, options)`.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "QML 루트(`LV.ApplicationWindow`)를 로드합니다.",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "선택적으로 런타임 브리지를 활성화합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents.start() + attachWindow(window)`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`Backend.hookUserEvents()`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "<a id=\"key-runtime-guarantees\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "## 키 런타임 보증\n",
+      "level": 2,
+      "title": "키 런타임 보증"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 58,
+      "end_line": 63,
+      "raw": "- 경로 전환은 `PageRouter.path`, 현재 경로 상태 및 선택적 `ViewStateTracker` 동기화를 업데이트합니다.\n- 대화형 페이지 전환은 완료/취소할 때까지 경로 커밋을 연기하면서 앞으로/뒤로 이동을 미리 볼 수 있습니다.\n- `ApplicationWindow` 이벤트 브리지를 통해 앱 루트에서 전역 컨텍스트/클릭 신호를 사용할 수 있습니다.\n- 중첩된 휠 동작은 `WheelScrollGuard`로 격리할 수 있습니다.\n- IME 구성 무결성은 `InputMethodGuard`에 의해 시행될 수 있습니다.\n- 모바일 누르기/스크롤 수명주기 및 손가락 수를 포함한 높은 수준의 터치/제스처 의미는 `GestureEvents` 또는 `EventListener` 제스처 트리거를 통해 사용할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "경로 전환은 `PageRouter.path`, 현재 경로 상태 및 선택적 `ViewStateTracker` 동기화를 업데이트합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 페이지 전환은 완료/취소할 때까지 경로 커밋을 연기하면서 앞으로/뒤로 이동을 미리 볼 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ApplicationWindow` 이벤트 브리지를 통해 앱 루트에서 전역 컨텍스트/클릭 신호를 사용할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "중첩된 휠 동작은 `WheelScrollGuard`로 격리할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "IME 구성 무결성은 `InputMethodGuard`에 의해 시행될 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "모바일 누르기/스크롤 수명주기 및 손가락 수를 포함한 높은 수준의 터치/제스처 의미는 `GestureEvents` 또는 `EventListener` 제스처 트리거를 통해 사용할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "<a id=\"recommended-entry-documents-by-use-case\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "## 유스케이스별 추천 엔트리 문서\n",
+      "level": 2,
+      "title": "유스케이스별 추천 엔트리 문서"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "list",
+      "start_line": 69,
+      "end_line": 73,
+      "raw": "- 런타임 이벤트 통합: `docs/backend/RuntimeEvents.md`, `docs/backend/GestureEvents.md`, `docs/components/control/EventListener.md`.\n- 탐색 및 경로 모델 바인딩: `docs/components/navigation/PageRouter.md`, `docs/mvvm.md`.\n- 대화형 내비게이션 운전: `docs/components/navigation/PageRouter.md`, `docs/components/navigation/PageTransitionController.md`.\n- 플랫폼/백엔드 동작: `docs/architecture/rendering-backend.md`, `docs/backend/Platform.md`.\n- 로깅 및 진단: `docs/backend/Debug.md`, `docs/backend/DebugOutput.md`.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "런타임 이벤트 통합: `docs/backend/RuntimeEvents.md`, `docs/backend/GestureEvents.md`, `docs/components/control/EventListener.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "탐색 및 경로 모델 바인딩: `docs/components/navigation/PageRouter.md`, `docs/mvvm.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "대화형 내비게이션 운전: `docs/components/navigation/PageRouter.md`, `docs/components/navigation/PageTransitionController.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "플랫폼/백엔드 동작: `docs/architecture/rendering-backend.md`, `docs/backend/Platform.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "로깅 및 진단: `docs/backend/Debug.md`, `docs/backend/DebugOutput.md`.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "html",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "<a id=\"end-to-end-integration-scenario\"></a>\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "## 엔드투엔드 통합 시나리오\n",
+      "level": 2,
+      "title": "엔드투엔드 통합 시나리오"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "일반적인 생산 흐름에서는 모든 런타임 레이어를 순서대로 사용합니다.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "list",
+      "start_line": 81,
+      "end_line": 87,
+      "raw": "1. 부트스트랩 앱 및 렌더링 정책(`AppBootstrap`).\n2. 런타임 데몬(`RuntimeEvents`)을 시작하고 연결합니다.\n3. 기능에 높은 수준의 터치 의미가 필요한 경우 `GestureEvents`를 연결하세요.\n4. 후크 백엔드 이벤트 미러(`Backend.hookUserEvents()`).\n5. `PageRouter` 경로를 사용하여 `ApplicationWindow`를 마운트합니다.\n6. 경로 메타데이터를 `ViewModels` 소유권에 바인딩합니다.\n7. `EventListener`를 통해 전역 컨텍스트/눌림/제스처 이벤트를 처리합니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "부트스트랩 앱 및 렌더링 정책(`AppBootstrap`).",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "런타임 데몬(`RuntimeEvents`)을 시작하고 연결합니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "기능에 높은 수준의 터치 의미가 필요한 경우 `GestureEvents`를 연결하세요.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "후크 백엔드 이벤트 미러(`Backend.hookUserEvents()`).",
+          "checked": null
+        },
+        {
+          "marker": "5.",
+          "text": "`PageRouter` 경로를 사용하여 `ApplicationWindow`를 마운트합니다.",
+          "checked": null
+        },
+        {
+          "marker": "6.",
+          "text": "경로 메타데이터를 `ViewModels` 소유권에 바인딩합니다.",
+          "checked": null
+        },
+        {
+          "marker": "7.",
+          "text": "`EventListener`를 통해 전역 컨텍스트/눌림/제스처 이벤트를 처리합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "이 체인은 시작부터 UI 상호 작용을 통해 결정적인 동작을 제공합니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "<a id=\"common-integration-mistakes\"></a>\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "## 일반적인 통합 실수\n",
+      "level": 2,
+      "title": "일반적인 통합 실수"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "list",
+      "start_line": 95,
+      "end_line": 99,
+      "raw": "- 창을 연결하지 않고 `RuntimeEvents`를 시작한 다음 UI 적중 테스트 데이터를 예상합니다.\n- 원시 `RuntimeEvents` 터치 레코드가 높은 수준의 누르기/스크롤/홀드/드래그/스와이프 의미 체계를 소유할 것으로 예상됩니다. 분류에는 `GestureEvents`를 사용합니다.\n- `ViewModels`에서 소유권을 주장하지 않은 뷰에서 모델 속성을 작성합니다.\n- `WheelScrollGuard` 없이 중첩된 `Flickable` 표면을 사용합니다.\n- 전역 좌표 대신 로컬 클릭 핸들러에서만 컨텍스트 메뉴 닫기 로직을 구축합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "창을 연결하지 않고 `RuntimeEvents`를 시작한 다음 UI 적중 테스트 데이터를 예상합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "원시 `RuntimeEvents` 터치 레코드가 높은 수준의 누르기/스크롤/홀드/드래그/스와이프 의미 체계를 소유할 것으로 예상됩니다. 분류에는 `GestureEvents`를 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ViewModels`에서 소유권을 주장하지 않은 뷰에서 모델 속성을 작성합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`WheelScrollGuard` 없이 중첩된 `Flickable` 표면을 사용합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전역 좌표 대신 로컬 클릭 핸들러에서만 컨텍스트 메뉴 닫기 로직을 구축합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "html",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "<a id=\"verification-checklist\"></a>\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "heading",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "## 검증 체크리스트\n",
+      "level": 2,
+      "title": "검증 체크리스트"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "새 앱에 LVRS를 통합한 후 다음을 확인하세요.\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 106,
+      "end_line": 106,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "list",
+      "start_line": 107,
+      "end_line": 111,
+      "raw": "- `RuntimeEvents.running == true`\n- `GestureEvents.runtimeAttached == true` 제스처 트리거가 `EventListener` 외부에서 사용되는 경우\n- 백엔드 우선 리스너가 사용되는 경우 `Backend.userEventHooked == true`\n- 경로 전환은 예상대로 `PageRouter.currentPath` 및 `ViewStateTracker.snapshot()`를 업데이트합니다.\n- 디버그 출력에는 통제되지 않은 플러드 없이 예상되는 이벤트 도메인이 포함됩니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`RuntimeEvents.running == true`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`GestureEvents.runtimeAttached == true` 제스처 트리거가 `EventListener` 외부에서 사용되는 경우",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "백엔드 우선 리스너가 사용되는 경우 `Backend.userEventHooked == true`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "경로 전환은 예상대로 `PageRouter.currentPath` 및 `ViewStateTracker.snapshot()`를 업데이트합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "디버그 출력에는 통제되지 않은 플러드 없이 예상되는 이벤트 도메인이 포함됩니다.",
+          "checked": null
+        }
+      ]
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "개요",
+      "anchor": "개요",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "디자인 목표",
+      "anchor": "디자인-목표",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "런타임 아키텍처",
+      "anchor": "런타임-아키텍처",
+      "start_line": 18
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "UI 아키텍처",
+      "anchor": "ui-아키텍처",
+      "start_line": 30
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "시동 순서",
+      "anchor": "시동-순서",
+      "start_line": 42
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "키 런타임 보증",
+      "anchor": "키-런타임-보증",
+      "start_line": 56
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "유스케이스별 추천 엔트리 문서",
+      "anchor": "유스케이스별-추천-엔트리-문서",
+      "start_line": 67
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "엔드투엔드 통합 시나리오",
+      "anchor": "엔드투엔드-통합-시나리오",
+      "start_line": 77
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "일반적인 통합 실수",
+      "anchor": "일반적인-통합-실수",
+      "start_line": 93
+    },
+    {
+      "block_id": "b000069",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증 체크리스트",
+      "anchor": "검증-체크리스트",
+      "start_line": 103
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}
