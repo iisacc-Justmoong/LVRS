@@ -41,7 +41,7 @@ Item {
                 ? String(sourceData.trailingIcon || "") : control.defaultTrailingIcon
             clip: true
 
-            Row {
+            Item {
                 id: content
                 anchors.left: parent.left
                 anchors.leftMargin: descriptor.padding || 0
@@ -49,7 +49,6 @@ Item {
                 anchors.rightMargin: descriptor.padding || 0
                 anchors.verticalCenter: parent.verticalCenter
                 height: control.iconSize
-                spacing: control.iconSpacing
 
                 Image {
                     id: leading
@@ -57,18 +56,22 @@ Item {
                         ? control.objectName + "_cell_" + index + "_leadingIcon" : ""
                     width: control.iconSize
                     height: control.iconSize
+                    x: 0
+                    anchors.verticalCenter: parent.verticalCenter
                     visible: leadingIcon.length > 0
                     source: Theme.iconPath(leadingIcon)
                     fillMode: Image.PreserveAspectFit
                 }
 
                 Label {
+                    id: label
                     objectName: control.objectName.length > 0
                         ? control.objectName + "_cell_" + index + "_label" : ""
                     anchors.verticalCenter: parent.verticalCenter
+                    x: leadingIcon.length > 0 ? leading.width + control.iconSpacing : 0
                     width: Math.max(0, Math.min(implicitWidth, content.width
-                        - (leading.visible ? leading.width + content.spacing : 0)
-                        - (trailing.visible ? trailing.width + content.spacing : 0)))
+                        - (leadingIcon.length > 0 ? leading.width + control.iconSpacing : 0)
+                        - (trailingIcon.length > 0 ? trailing.width + control.iconSpacing : 0)))
                     height: styleLineHeight
                     style: description
                     text: descriptor.text || ""
@@ -82,6 +85,8 @@ Item {
                         ? control.objectName + "_cell_" + index + "_trailingIcon" : ""
                     width: control.iconSize
                     height: control.iconSize
+                    x: label.x + label.width + control.iconSpacing
+                    anchors.verticalCenter: parent.verticalCenter
                     visible: trailingIcon.length > 0
                     source: Theme.iconPath(trailingIcon)
                     fillMode: Image.PreserveAspectFit

@@ -5339,7 +5339,7 @@ Item {
     QVERIFY(inlineItem);
     QVERIFY(searchItem);
     for (int index = 0; index < 18; ++index) {
-        auto *combination = root->findChild<QObject *>(QStringLiteral("inputCombination%1").arg(index));
+        auto *combination = visualChildByObjectName(rootItem, QStringLiteral("inputCombination%1").arg(index));
         QVERIFY(combination);
         QTRY_VERIFY2(combination->property("comboReady").toBool(), qPrintable(combination->objectName()));
     }

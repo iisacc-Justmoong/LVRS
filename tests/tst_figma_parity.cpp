@@ -29,6 +29,7 @@ private slots:
     void compatibility_accent_aliases_remain_fixed_data();
     void compatibility_accent_aliases_remain_fixed();
     void authored_accent_palette_is_rendered();
+    void accent_role_tokens_match_figma();
     void legacy_theme_aliases_data();
     void legacy_theme_aliases();
     void saved_text_style_bindings_data();
@@ -83,7 +84,7 @@ void FigmaParityTests::initTestCase()
     QVERIFY(!themeFixture["capturedAtUtc"].toString().isEmpty());
     QVERIFY(themeFixture["validation"].toObject()["passed"].toBool());
     QCOMPARE(themeFixture["validation"].toObject()["errors"].toArray().size(), 0);
-    QCOMPARE(themeFixture["variables"].toArray().size(), 73);
+    QCOMPARE(themeFixture["variables"].toArray().size(), 50);
     QCOMPARE(themeFixture["textStyles"].toArray().size(), 7);
     QCOMPARE(themeFixture["legacyPanelAliases"].toObject().size(), 12);
     QCOMPARE(themeFixture["legacyTypographyAliases"].toObject().size(), 2);
@@ -100,7 +101,7 @@ void FigmaParityTests::initTestCase()
         QVERIFY2(!themeVariablesByProperty.contains(property), qPrintable(property));
         QVERIFY2(!themeVariablesById.contains(id), qPrintable(id));
         QVERIFY2(variable.contains("resolved"), qPrintable(property));
-        QCOMPARE(variable["codeSyntax"].toObject()["WEB"].toString(), "Theme." + property);
+        QVERIFY(variable["codeSyntax"].toObject()["WEB"].toString().startsWith("var(--lvrs-"));
         QVERIFY2(!variable["hidden"].toBool(), qPrintable(property));
         themeVariablesByProperty.insert(property, variable);
         themeVariablesById.insert(id, variable);
@@ -112,8 +113,8 @@ void FigmaParityTests::initTestCase()
             ++typography;
         }
     }
-    QCOMPARE(colors, 37);
-    QCOMPARE(typography, 36);
+    QCOMPARE(colors, 30);
+    QCOMPARE(typography, 20);
 }
 
 void FigmaParityTests::saved_theme_tokens_data()
@@ -189,9 +190,7 @@ void FigmaParityTests::compatibility_accent_aliases_remain_fixed_data()
     for (auto it = aliases.begin(); it != aliases.end(); ++it) {
         const auto target = it.value().toString();
         QVERIFY(themeVariablesByProperty.contains(target));
-        const auto alias = themeVariablesByProperty.value(it.key())["value"].toObject();
-        QCOMPARE(alias["type"].toString(), QStringLiteral("VARIABLE_ALIAS"));
-        QCOMPARE(alias["id"].toString(), themeVariablesByProperty.value(target)["id"].toString());
+        QVERIFY2(!themeVariablesByProperty.contains(it.key()), "Retired Figma aliases must not remain in the variable snapshot");
         const QColor expected = AccentFixture::color(target);
         QVERIFY(expected.isValid());
         QTest::newRow(qPrintable(it.key())) << it.key() << expected;
@@ -274,6 +273,36 @@ Window {
         QVERIFY2(pixels.save(capturePath), qPrintable(capturePath));
 }
 
+void FigmaParityTests::accent_role_tokens_match_figma()
+{
+    QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-accent-roles.json"));
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const auto fixture = QJsonDocument::fromJson(file.readAll()).object();
+    const auto variables = fixture["variables"].toArray();
+    QCOMPARE(variables.size(), 90);
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine,
+        "import QtQuick; import LVRS as LV; Item { function role(c, r) { return LV.Theme.accentRoleColor(c, r) } }"));
+    QVERIFY(root);
+    for (const auto &entry : variables) {
+        const auto token = entry.toObject();
+        const auto path = token["name"].toString().split('/');
+        QCOMPARE(path.size(), 3);
+        QVariant result;
+        QVERIFY(QMetaObject::invokeMethod(root.data(), "role", Q_RETURN_ARG(QVariant, result),
+                                          Q_ARG(QVariant, path[1]), Q_ARG(QVariant, path[2])));
+        const QColor actual = result.value<QColor>();
+        QVERIFY2(actual.isValid(), qPrintable(token["name"].toString()));
+        const auto expected = token["value"].toObject();
+        const QList<qreal> channels{actual.redF(), actual.greenF(), actual.blueF(), actual.alphaF()};
+        const QStringList keys{"r", "g", "b", "a"};
+        for (int index = 0; index < keys.size(); ++index)
+            QVERIFY2(qAbs(channels[index] - expected[keys[index]].toDouble()) <= 1.0 / 65535.0,
+                     qPrintable(token["name"].toString() + "." + keys[index]));
+    }
+}
+
 void FigmaParityTests::legacy_theme_aliases_data()
 {
     QTest::addColumn<QString>("legacy");
@@ -332,7 +361,9 @@ void FigmaParityTests::saved_text_style_bindings_data()
         QVERIFY2(prefixes.contains(name), qPrintable(name));
         const auto prefix = prefixes.value(name);
         const auto font = style["font"].toObject();
-        const auto weight = themeVariablesByProperty.value(prefix + "Weight").value("resolved");
+        const auto weightId = style["bindings"].toObject()["fontWeight"].toObject()["id"].toString();
+        QVERIFY(themeVariablesById.contains(weightId));
+        const auto weight = themeVariablesById.value(weightId).value("resolved");
         QTest::newRow(qPrintable(name + ":fontFamily"))
             << style << QString("fontFamily") << QString("fontBody") << font["family"];
         QTest::newRow(qPrintable(name + ":fontSize"))
@@ -361,10 +392,7 @@ void FigmaParityTests::saved_text_style_bindings()
     QCOMPARE(binding["type"].toString(), QStringLiteral("VARIABLE_ALIAS"));
     const auto id = binding["id"].toString();
     QVERIFY2(themeVariablesById.contains(id), qPrintable("Unresolved text-style variable: " + id));
-    QVERIFY2(themeVariablesByProperty.contains(property), qPrintable(property));
     const auto variable = themeVariablesById.value(id);
-    QCOMPARE(variable["property"].toString(), property);
-    QCOMPARE(id, themeVariablesByProperty.value(property)["id"].toString());
     QCOMPARE(variable["resolved"], styleValue);
     if (bindingName == "lineHeight" || bindingName == "letterSpacing")
         QCOMPARE(style[bindingName].toObject()["unit"].toString(), QStringLiteral("PIXELS"));
@@ -405,23 +433,25 @@ void FigmaParityTests::saved_text_style_font_recipes()
 {
     QFETCH(QJsonObject, style);
     const auto bindings = style["bindings"].toObject();
-    // Figma's weight binding selects the static face; the style-name token
-    // records the same QML recipe without an incompatible fontStyle binding.
+    // Figma's shared weight binding selects the face; the runtime retains
+    // style-name compatibility properties without a separate Figma variable.
     QVERIFY(!bindings.contains("fontStyle"));
     const auto weightId = bindings["fontWeight"].toObject()["id"].toString();
     QVERIFY(themeVariablesById.contains(weightId));
     const auto weightVariable = themeVariablesById.value(weightId);
-    const auto weightProperty = weightVariable["property"].toString();
-    QVERIFY(weightProperty.endsWith("Weight"));
-    const auto styleNameProperty = weightProperty.chopped(6) + "StyleName";
-    QVERIFY(themeVariablesByProperty.contains(styleNameProperty));
+    const QHash<QString, QString> prefixes{{"Title", "textTitle"}, {"Subtitle", "textSubtitle"},
+        {"Header", "textHeader"}, {"Subheader", "textSubheader"}, {"Body", "textBody"},
+        {"Description", "textDescription"}, {"Caption", "textCaption"}};
+    const auto prefix = prefixes.value(style["name"].toString());
+    QVERIFY(!prefix.isEmpty());
+    const auto styleNameProperty = prefix + "StyleName";
+    const auto weightProperty = prefix + "Weight";
     const auto font = style["font"].toObject();
     const auto styleName = font["style"].toString();
     const QHash<QString, int> weights{{"Bold", QFont::Bold}, {"SemiBold", QFont::DemiBold},
                                     {"Medium", QFont::Medium}, {"Regular", QFont::Normal}};
     QVERIFY2(weights.contains(styleName), qPrintable(styleName));
     QCOMPARE(weightVariable["resolved"].toInt(), weights.value(styleName));
-    QCOMPARE(themeVariablesByProperty.value(styleNameProperty)["resolved"].toString(), styleName);
 
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());

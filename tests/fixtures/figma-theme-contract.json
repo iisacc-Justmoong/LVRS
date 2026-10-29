@@ -1,6 +1,6 @@
 {
   "source": "figma-readback",
-  "capturedAtUtc": "2026-10-19T04:12:30Z",
+  "capturedAtUtc": "2026-10-29T01:36:25Z",
   "fileKey": "0GkItQYSNIR0lZ3iJhfJzc",
   "scope": "panel roles, text recipes, ten artwork accent colors and eight fixed image accent palette colors",
   "collections": {
@@ -34,7 +34,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.titleHeaderColor"
+        "WEB": "var(--lvrs-theme-colors-text-title-header-color)"
       },
       "hidden": false
     },
@@ -63,7 +63,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.bodyColor"
+        "WEB": "var(--lvrs-theme-colors-text-body-color)"
       },
       "hidden": false
     },
@@ -92,7 +92,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.descriptionColor"
+        "WEB": "var(--lvrs-theme-colors-text-description-color)"
       },
       "hidden": false
     },
@@ -121,7 +121,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.captionColor"
+        "WEB": "var(--lvrs-theme-colors-text-caption-color)"
       },
       "hidden": false
     },
@@ -150,7 +150,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.disabledColor"
+        "WEB": "var(--lvrs-theme-colors-text-disabled-color)"
       },
       "hidden": false
     },
@@ -179,7 +179,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.canvas"
+        "WEB": "var(--lvrs-theme-colors-panel-canvas)"
       },
       "hidden": false
     },
@@ -208,7 +208,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceGhost"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-ghost)"
       },
       "hidden": false
     },
@@ -237,7 +237,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.windowAlt"
+        "WEB": "var(--lvrs-theme-colors-panel-window-alt)"
       },
       "hidden": false
     },
@@ -266,7 +266,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.subSurface"
+        "WEB": "var(--lvrs-theme-colors-panel-sub-surface)"
       },
       "hidden": false
     },
@@ -295,7 +295,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceSolid"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-solid)"
       },
       "hidden": false
     },
@@ -324,7 +324,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceAlt"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-alt)"
       },
       "hidden": false
     },
@@ -353,7 +353,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceInteractive"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-interactive)"
       },
       "hidden": false
     },
@@ -382,7 +382,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfacePanel"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-panel)"
       },
       "hidden": false
     },
@@ -411,7 +411,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceControl"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-control)"
       },
       "hidden": false
     },
@@ -440,7 +440,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceInput"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-input)"
       },
       "hidden": false
     },
@@ -469,7 +469,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceInputHover"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-input-hover)"
       },
       "hidden": false
     },
@@ -498,7 +498,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.surfaceRaised"
+        "WEB": "var(--lvrs-theme-colors-panel-surface-raised)"
       },
       "hidden": false
     },
@@ -527,7 +527,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.window"
+        "WEB": "var(--lvrs-theme-colors-panel-window)"
       },
       "hidden": false
     },
@@ -556,13 +556,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textTokenBase"
+        "WEB": "var(--lvrs-theme-colors-text-text-token-base)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:76",
-      "name": "Accent/accentBlue",
+      "name": "Accent/Blue/Default",
       "property": "accentBlue",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -586,13 +586,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentBlue"
+        "WEB": "var(--lvrs-theme-colors-accent-blue-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:77",
-      "name": "Accent/accentRed",
+      "name": "Accent/Red/Default",
       "property": "accentRed",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -616,13 +616,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentRed"
+        "WEB": "var(--lvrs-theme-colors-accent-red-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:78",
-      "name": "Accent/accentGreen",
+      "name": "Accent/Green/Default",
       "property": "accentGreen",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -646,13 +646,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentGreen"
+        "WEB": "var(--lvrs-theme-colors-accent-green-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:79",
-      "name": "Accent/accentYellow",
+      "name": "Accent/Yellow/Default",
       "property": "accentYellow",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -676,13 +676,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentYellow"
+        "WEB": "var(--lvrs-theme-colors-accent-yellow-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:80",
-      "name": "Accent/accentPurple",
+      "name": "Accent/Purple/Default",
       "property": "accentPurple",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -706,13 +706,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentPurple"
+        "WEB": "var(--lvrs-theme-colors-accent-purple-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:81",
-      "name": "Accent/accentRose",
+      "name": "Accent/Rose/Default",
       "property": "accentRose",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -736,13 +736,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentRose"
+        "WEB": "var(--lvrs-theme-colors-accent-rose-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:82",
-      "name": "Accent/accentOrange",
+      "name": "Accent/Orange/Default",
       "property": "accentOrange",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -766,13 +766,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentOrange"
+        "WEB": "var(--lvrs-theme-colors-accent-orange-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:83",
-      "name": "Accent/accentBrown",
+      "name": "Accent/Brown/Default",
       "property": "accentBrown",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -796,13 +796,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentBrown"
+        "WEB": "var(--lvrs-theme-colors-accent-brown-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:84",
-      "name": "Accent/accentCyan",
+      "name": "Accent/Cyan/Default",
       "property": "accentCyan",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -826,13 +826,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentCyan"
+        "WEB": "var(--lvrs-theme-colors-accent-cyan-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:85",
-      "name": "Accent/accentTeal",
+      "name": "Accent/Teal/Default",
       "property": "accentTeal",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -856,209 +856,13 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentTeal"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:2",
-      "name": "Accent/accentPaletteBlue",
-      "property": "accentPaletteBlue",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:76"
-      },
-      "resolved": {
-        "r": 0.08120492845773697,
-        "g": 0.5099760293960571,
-        "b": 1,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPaletteBlue"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:3",
-      "name": "Accent/accentPalettePurple",
-      "property": "accentPalettePurple",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:80"
-      },
-      "resolved": {
-        "r": 0.5275065302848816,
-        "g": 0.291259765625,
-        "b": 1,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPalettePurple"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:4",
-      "name": "Accent/accentPalettePink",
-      "property": "accentPalettePink",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:81"
-      },
-      "resolved": {
-        "r": 0.975510835647583,
-        "g": 0.26653972268104553,
-        "b": 0.4437825083732605,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPalettePink"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:5",
-      "name": "Accent/accentPaletteRed",
-      "property": "accentPaletteRed",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:77"
-      },
-      "resolved": {
-        "r": 1,
-        "g": 0.2760854959487915,
-        "b": 0.2760854959487915,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPaletteRed"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:6",
-      "name": "Accent/accentPaletteOrange",
-      "property": "accentPaletteOrange",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:82"
-      },
-      "resolved": {
-        "r": 1,
-        "g": 0.47672274708747864,
-        "b": 0.15144230425357819,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPaletteOrange"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:7",
-      "name": "Accent/accentPaletteYellow",
-      "property": "accentPaletteYellow",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:79"
-      },
-      "resolved": {
-        "r": 1,
-        "g": 0.8303598165512085,
-        "b": 0.15179912745952606,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPaletteYellow"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1325:8",
-      "name": "Accent/accentPaletteGreen",
-      "property": "accentPaletteGreen",
-      "type": "COLOR",
-      "collection": "VariableCollectionId:44:457",
-      "mode": "44:0",
-      "value": {
-        "type": "VARIABLE_ALIAS",
-        "id": "VariableID:1305:78"
-      },
-      "resolved": {
-        "r": 0,
-        "g": 0.9058823585510254,
-        "b": 0.12156862765550613,
-        "a": 1
-      },
-      "scopes": [
-        "FRAME_FILL",
-        "SHAPE_FILL",
-        "TEXT_FILL",
-        "STROKE_COLOR"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.accentPaletteGreen"
+        "WEB": "var(--lvrs-theme-colors-accent-teal-default)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1325:9",
-      "name": "Accent/accentPaletteGray",
+      "name": "Neutral/Gray",
       "property": "accentPaletteGray",
       "type": "COLOR",
       "collection": "VariableCollectionId:44:457",
@@ -1082,7 +886,7 @@
         "STROKE_COLOR"
       ],
       "codeSyntax": {
-        "WEB": "Theme.accentPaletteGray"
+        "WEB": "var(--lvrs-theme-colors-neutral-gray)"
       },
       "hidden": false
     },
@@ -1099,7 +903,7 @@
         "FONT_FAMILY"
       ],
       "codeSyntax": {
-        "WEB": "Theme.fontBody"
+        "WEB": "var(--lvrs-theme-typography-font-font-body)"
       },
       "hidden": false
     },
@@ -1116,7 +920,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textTitle"
+        "WEB": "var(--lvrs-theme-typography-title-text-title)"
       },
       "hidden": false
     },
@@ -1133,30 +937,13 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textTitleLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:89",
-      "name": "Title/textTitleStyleName",
-      "property": "textTitleStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "Bold",
-      "resolved": "Bold",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textTitleStyleName"
+        "WEB": "var(--lvrs-theme-typography-title-text-title-line-height)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:90",
-      "name": "Title/textTitleWeight",
+      "name": "Weight/Bold",
       "property": "textTitleWeight",
       "type": "FLOAT",
       "collection": "VariableCollectionId:1305:73",
@@ -1167,13 +954,13 @@
         "FONT_WEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textTitleWeight"
+        "WEB": "var(--lvrs-theme-typography-weight-bold)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:91",
-      "name": "Title/textTitleLetterSpacing",
+      "name": "Tracking/Normal",
       "property": "textTitleLetterSpacing",
       "type": "FLOAT",
       "collection": "VariableCollectionId:1305:73",
@@ -1184,7 +971,7 @@
         "LETTER_SPACING"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textTitleLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-tracking-normal)"
       },
       "hidden": false
     },
@@ -1201,7 +988,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textSubtitle"
+        "WEB": "var(--lvrs-theme-typography-subtitle-text-subtitle)"
       },
       "hidden": false
     },
@@ -1218,58 +1005,7 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textSubtitleLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:94",
-      "name": "Subtitle/textSubtitleStyleName",
-      "property": "textSubtitleStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "Bold",
-      "resolved": "Bold",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubtitleStyleName"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:95",
-      "name": "Subtitle/textSubtitleWeight",
-      "property": "textSubtitleWeight",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 700,
-      "resolved": 700,
-      "scopes": [
-        "FONT_WEIGHT"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubtitleWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:96",
-      "name": "Subtitle/textSubtitleLetterSpacing",
-      "property": "textSubtitleLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubtitleLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-subtitle-text-subtitle-line-height)"
       },
       "hidden": false
     },
@@ -1286,7 +1022,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textHeader"
+        "WEB": "var(--lvrs-theme-typography-header-text-header)"
       },
       "hidden": false
     },
@@ -1303,30 +1039,13 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textHeaderLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:99",
-      "name": "Header/textHeaderStyleName",
-      "property": "textHeaderStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "SemiBold",
-      "resolved": "SemiBold",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textHeaderStyleName"
+        "WEB": "var(--lvrs-theme-typography-header-text-header-line-height)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:100",
-      "name": "Header/textHeaderWeight",
+      "name": "Weight/SemiBold",
       "property": "textHeaderWeight",
       "type": "FLOAT",
       "collection": "VariableCollectionId:1305:73",
@@ -1337,24 +1056,7 @@
         "FONT_WEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textHeaderWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:101",
-      "name": "Header/textHeaderLetterSpacing",
-      "property": "textHeaderLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textHeaderLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-weight-semi-bold)"
       },
       "hidden": false
     },
@@ -1371,7 +1073,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textSubheader"
+        "WEB": "var(--lvrs-theme-typography-subheader-text-subheader)"
       },
       "hidden": false
     },
@@ -1388,58 +1090,7 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textSubheaderLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:104",
-      "name": "Subheader/textSubheaderStyleName",
-      "property": "textSubheaderStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "SemiBold",
-      "resolved": "SemiBold",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubheaderStyleName"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:105",
-      "name": "Subheader/textSubheaderWeight",
-      "property": "textSubheaderWeight",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 600,
-      "resolved": 600,
-      "scopes": [
-        "FONT_WEIGHT"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubheaderWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:106",
-      "name": "Subheader/textSubheaderLetterSpacing",
-      "property": "textSubheaderLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textSubheaderLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-subheader-text-subheader-line-height)"
       },
       "hidden": false
     },
@@ -1456,7 +1107,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textBody"
+        "WEB": "var(--lvrs-theme-typography-body-text-body)"
       },
       "hidden": false
     },
@@ -1473,30 +1124,13 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textBodyLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:109",
-      "name": "Body/textBodyStyleName",
-      "property": "textBodyStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "Medium",
-      "resolved": "Medium",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textBodyStyleName"
+        "WEB": "var(--lvrs-theme-typography-body-text-body-line-height)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:110",
-      "name": "Body/textBodyWeight",
+      "name": "Weight/Medium",
       "property": "textBodyWeight",
       "type": "FLOAT",
       "collection": "VariableCollectionId:1305:73",
@@ -1507,24 +1141,7 @@
         "FONT_WEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textBodyWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:111",
-      "name": "Body/textBodyLetterSpacing",
-      "property": "textBodyLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textBodyLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-weight-medium)"
       },
       "hidden": false
     },
@@ -1541,7 +1158,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textDescription"
+        "WEB": "var(--lvrs-theme-typography-description-text-description)"
       },
       "hidden": false
     },
@@ -1558,58 +1175,7 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textDescriptionLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:114",
-      "name": "Description/textDescriptionStyleName",
-      "property": "textDescriptionStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "SemiBold",
-      "resolved": "SemiBold",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textDescriptionStyleName"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:115",
-      "name": "Description/textDescriptionWeight",
-      "property": "textDescriptionWeight",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 600,
-      "resolved": 600,
-      "scopes": [
-        "FONT_WEIGHT"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textDescriptionWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:116",
-      "name": "Description/textDescriptionLetterSpacing",
-      "property": "textDescriptionLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textDescriptionLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-description-text-description-line-height)"
       },
       "hidden": false
     },
@@ -1626,7 +1192,7 @@
         "FONT_SIZE"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textCaption"
+        "WEB": "var(--lvrs-theme-typography-caption-text-caption)"
       },
       "hidden": false
     },
@@ -1643,30 +1209,13 @@
         "LINE_HEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textCaptionLineHeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:119",
-      "name": "Caption/textCaptionStyleName",
-      "property": "textCaptionStyleName",
-      "type": "STRING",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": "Regular",
-      "resolved": "Regular",
-      "scopes": [
-        "FONT_STYLE"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textCaptionStyleName"
+        "WEB": "var(--lvrs-theme-typography-caption-text-caption-line-height)"
       },
       "hidden": false
     },
     {
       "id": "VariableID:1305:120",
-      "name": "Caption/textCaptionWeight",
+      "name": "Weight/Regular",
       "property": "textCaptionWeight",
       "type": "FLOAT",
       "collection": "VariableCollectionId:1305:73",
@@ -1677,24 +1226,7 @@
         "FONT_WEIGHT"
       ],
       "codeSyntax": {
-        "WEB": "Theme.textCaptionWeight"
-      },
-      "hidden": false
-    },
-    {
-      "id": "VariableID:1305:121",
-      "name": "Caption/textCaptionLetterSpacing",
-      "property": "textCaptionLetterSpacing",
-      "type": "FLOAT",
-      "collection": "VariableCollectionId:1305:73",
-      "mode": "1305:1",
-      "value": 0,
-      "resolved": 0,
-      "scopes": [
-        "LETTER_SPACING"
-      ],
-      "codeSyntax": {
-        "WEB": "Theme.textCaptionLetterSpacing"
+        "WEB": "var(--lvrs-theme-typography-weight-regular)"
       },
       "hidden": false
     }
@@ -1758,7 +1290,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:96"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -1774,7 +1306,7 @@
         },
         "fontWeight": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:95"
+          "id": "VariableID:1305:90"
         }
       }
     },
@@ -1797,7 +1329,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:101"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -1836,7 +1368,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:106"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -1852,7 +1384,7 @@
         },
         "fontWeight": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:105"
+          "id": "VariableID:1305:100"
         }
       }
     },
@@ -1875,7 +1407,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:111"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -1914,7 +1446,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:116"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -1930,7 +1462,7 @@
         },
         "fontWeight": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:115"
+          "id": "VariableID:1305:100"
         }
       }
     },
@@ -1953,7 +1485,7 @@
       "bindings": {
         "letterSpacing": {
           "type": "VARIABLE_ALIAS",
-          "id": "VariableID:1305:121"
+          "id": "VariableID:1305:91"
         },
         "fontSize": {
           "type": "VARIABLE_ALIAS",
@@ -2066,9 +1598,8 @@
     "passed": true,
     "errors": [],
     "scopesComparedAsSets": true,
-    "existing69VariablesPreserved": true,
-    "existing7TextStylesPreserved": true,
-    "imageColorsMatchSavedFigma": true
+    "sharedTypographyBindingsReadback": true,
+    "textStylesCount": 7
   },
   "fontStyleBindingPolicy": "Figma fontWeight binding selects the static style and replaces fontStyle binding; styleName variables record the matching QML recipe.",
   "authoredAccentPalette": {
@@ -2231,5 +1762,10 @@
       "danger": "accentRed"
     },
     "note": "Figma Action variables were removed; the QML role properties remain compatibility aliases."
+  },
+  "accentRoleReadbackOn": "2026-10-29",
+  "compatibilityAccentAliasRemoval": {
+    "verifiedOn": "2026-10-29",
+    "retainedRuntimeAliases": true
   }
 }

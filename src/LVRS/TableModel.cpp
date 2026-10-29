@@ -1,4 +1,5 @@
 #include "TableModel.h"
+#include "Icons.h"
 #include <iiSDKCore/Core/Text/Utf8.h>
 #include <algorithm>
 #include <array>
@@ -144,6 +145,10 @@ Result<Layout> make_layout(const TableModelOptions& options) {
             || !valid_text(column.leading_icon) || !valid_text(column.trailing_icon)
             || (column.padding && (!std::isfinite(*column.padding) || *column.padding < 0 || *column.padding > maximum_dimension)))
             return ii::core::fail(ErrorCode::invalid_argument, "Invalid table header");
+    for (const auto& column : options.columns)
+        if ((!column.leading_icon.empty() && !Icons::data(column.leading_icon))
+            || (!column.trailing_icon.empty() && !Icons::data(column.trailing_icon)))
+            return ii::core::fail(ErrorCode::invalid_argument, "Unknown table header icon");
     std::size_t total = 0;
     for (std::size_t row = 0; row < options.rows.size(); ++row) {
         const auto count = cells_for(options, row);

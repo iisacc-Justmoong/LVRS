@@ -91,18 +91,18 @@ Controls.AbstractButton {
     }
     readonly property color toneBackgroundColorHover: {
         if (tone === AbstractButton.Primary)
-            return Qt.darker(Theme.primary, 1.12)
+            return Theme.primaryHover
         if (tone === AbstractButton.Destructive)
-            return Qt.darker(Theme.danger, 1.12)
+            return Theme.accentRoleColor("Red", "Hover")
         if (tone === AbstractButton.Borderless)
             return Theme.surfaceAlt
         return Theme.surfaceAlt
     }
     readonly property color toneBackgroundColorPressed: {
         if (tone === AbstractButton.Primary)
-            return Qt.darker(Theme.primary, 1.2)
+            return Theme.primaryPressed
         if (tone === AbstractButton.Destructive)
-            return Qt.darker(Theme.danger, 1.2)
+            return Theme.accentRoleColor("Red", "Pressed")
         if (tone === AbstractButton.Borderless)
             return Theme.accentMuted
         return Theme.accentMuted

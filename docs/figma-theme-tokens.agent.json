@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/figma-theme-tokens.md",
-    "sha256": "958ba8a1bfde9fef6496346bf8c6e43933bb061cecef1b811b279dd3fa20ae9f",
-    "bytes": 20878,
-    "line_count": 283,
+    "sha256": "554b78699b35254a1d70561bfc9366709c79f492882b0f819f397b755383136d",
+    "bytes": 18349,
+    "line_count": 261,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -536,7 +536,7 @@
       "kind": "table",
       "start_line": 104,
       "end_line": 115,
-      "raw": "| Figma variable / QML property | HEX display | Source node | Retained variable ID |\n| --- | --- | --- | --- |\n| `Accent/accentBlue` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |\n| `Accent/accentRed` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |\n| `Accent/accentGreen` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |\n| `Accent/accentYellow` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |\n| `Accent/accentPurple` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |\n| `Accent/accentRose` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |\n| `Accent/accentOrange` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |\n| `Accent/accentBrown` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |\n| `Accent/accentCyan` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |\n| `Accent/accentTeal` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |\n",
+      "raw": "| Figma variable / QML property | HEX display | Source node | Retained variable ID |\n| --- | --- | --- | --- |\n| `Accent/Blue/Default` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |\n| `Accent/Red/Default` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |\n| `Accent/Green/Default` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |\n| `Accent/Yellow/Default` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |\n| `Accent/Purple/Default` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |\n| `Accent/Rose/Default` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |\n| `Accent/Orange/Default` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |\n| `Accent/Brown/Default` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |\n| `Accent/Cyan/Default` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |\n| `Accent/Teal/Default` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |\n",
       "columns": [
         "Figma variable / QML property",
         "HEX display",
@@ -545,61 +545,61 @@
       ],
       "rows": [
         [
-          "`Accent/accentBlue` / `Theme.accentBlue`",
+          "`Accent/Blue/Default` / `Theme.accentBlue`",
           "`#1582FF`",
           "`1477:30`",
           "`VariableID:1305:76`"
         ],
         [
-          "`Accent/accentRed` / `Theme.accentRed`",
+          "`Accent/Red/Default` / `Theme.accentRed`",
           "`#FF4646`",
           "`1477:31`",
           "`VariableID:1305:77`"
         ],
         [
-          "`Accent/accentGreen` / `Theme.accentGreen`",
+          "`Accent/Green/Default` / `Theme.accentGreen`",
           "`#00E71F`",
           "`1477:32`",
           "`VariableID:1305:78`"
         ],
         [
-          "`Accent/accentYellow` / `Theme.accentYellow`",
+          "`Accent/Yellow/Default` / `Theme.accentYellow`",
           "`#FFD427`",
           "`1477:33`",
           "`VariableID:1305:79`"
         ],
         [
-          "`Accent/accentPurple` / `Theme.accentPurple`",
+          "`Accent/Purple/Default` / `Theme.accentPurple`",
           "`#874AFF`",
           "`1477:34`",
           "`VariableID:1305:80`"
         ],
         [
-          "`Accent/accentRose` / `Theme.accentRose`",
+          "`Accent/Rose/Default` / `Theme.accentRose`",
           "`#F94471`",
           "`1477:36`",
           "`VariableID:1305:81`"
         ],
         [
-          "`Accent/accentOrange` / `Theme.accentOrange`",
+          "`Accent/Orange/Default` / `Theme.accentOrange`",
           "`#FF7A27`",
           "`1477:35`",
           "`VariableID:1305:82`"
         ],
         [
-          "`Accent/accentBrown` / `Theme.accentBrown`",
+          "`Accent/Brown/Default` / `Theme.accentBrown`",
           "`#432318`",
           "`1477:37`",
           "`VariableID:1305:83`"
         ],
         [
-          "`Accent/accentCyan` / `Theme.accentCyan`",
+          "`Accent/Cyan/Default` / `Theme.accentCyan`",
           "`#21D3FF`",
           "`1477:38`",
           "`VariableID:1305:84`"
         ],
         [
-          "`Accent/accentTeal` / `Theme.accentTeal`",
+          "`Accent/Teal/Default` / `Theme.accentTeal`",
           "`#00C7DD`",
           "`1477:40`",
           "`VariableID:1305:85`"
@@ -629,10 +629,12 @@
     },
     {
       "id": "b000043",
-      "kind": "html",
+      "kind": "heading",
       "start_line": 119,
       "end_line": 119,
-      "raw": "<a id=\"eight-attached-palette-colors\"></a>\n"
+      "raw": "## Accent 역할 토큰\n",
+      "level": 2,
+      "title": "Accent 역할 토큰"
     },
     {
       "id": "b000044",
@@ -645,99 +647,50 @@
       "id": "b000045",
       "kind": "paragraph",
       "start_line": 121,
-      "end_line": 125,
-      "raw": "On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,\nthe compatibility Green alias, and the Green gradient stops\nretain their IDs. The stops retain their existing alpha. Matching SVG paints\nand their current manifest hashes follow the new Green while geometry remains\nunchanged. The authored fixture records this per-color revision.\n"
+      "end_line": 126,
+      "raw": "Figma는 열 가지 Accent 각각에 `Default`, `Hover`, `Pressed`, `Selected`, `Disabled`,\n`Subtle`, `Outline`, `Overlay`, `Text`를 제공한다. QML에서는\n`Theme.accentRoleColor(\"Green\", \"Hover\")`, 네이티브 C++에서는\n`Theme::accent_role(Accent::green, AccentRole::hover)`로 조회한다. 네이티브 기본 역할은\n`AccentRole::standard`이다. 기본 Blue 버튼과 위험 Red 버튼의 호버·눌림 색상도 이 역할을\n사용한다. 앱이 `primaryColor`를 별도로 지정하면 기존 사용자 정의 primary 동작을 유지한다.\n"
     },
     {
       "id": "b000046",
       "kind": "blank",
-      "start_line": 126,
-      "end_line": 126,
+      "start_line": 127,
+      "end_line": 127,
       "raw": "\n"
     },
     {
       "id": "b000047",
-      "kind": "heading",
-      "start_line": 127,
-      "end_line": 127,
-      "raw": "## Compatibility accent aliases\n",
-      "level": 2,
-      "title": "Compatibility accent aliases"
+      "kind": "paragraph",
+      "start_line": 128,
+      "end_line": 132,
+      "raw": "Hover와 Pressed는 기본 RGB의 `1/1.12`, `1/1.2`, Disabled는 기본 알파의 30%, Overlay는\n`64/255`이다. Selected·Subtle·Outline은 interactive 표면에 각각 25%·16%·36%를 합성한다.\nText는 기본적으로 흰색을 30% 혼합하고 Brown은 45%를 혼합하며, Blue는 Figma의 별도\n`#5AAAFF` 값을 사용한다. 원본 90개 RGBA 값과 변수 ID는\n`tests/fixtures/figma-accent-roles.json`에 보관하고 QML과 C++ 테스트가 각각 대조한다.\n"
     },
     {
       "id": "b000048",
       "kind": "blank",
-      "start_line": 128,
-      "end_line": 128,
+      "start_line": 133,
+      "end_line": 133,
       "raw": "\n"
     },
     {
       "id": "b000049",
-      "kind": "paragraph",
-      "start_line": 129,
-      "end_line": 129,
-      "raw": "The former independently sampled palette is superseded by the authored ten-color system. Its saved IDs and editable circles remain available. Seven properties alias canonical colors in Figma and QML; Gray stays neutral.\n"
+      "kind": "html",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "<a id=\"eight-attached-palette-colors\"></a>\n"
     },
     {
       "id": "b000050",
       "kind": "blank",
-      "start_line": 130,
-      "end_line": 130,
+      "start_line": 135,
+      "end_line": 135,
       "raw": "\n"
     },
     {
       "id": "b000051",
-      "kind": "table",
-      "start_line": 131,
+      "kind": "paragraph",
+      "start_line": 136,
       "end_line": 140,
-      "raw": "| Compatibility property | Canonical property / value | Retained ID |\n| --- | --- | --- |\n| `accentPaletteBlue` | `accentBlue` | `VariableID:1325:2` |\n| `accentPalettePurple` | `accentPurple` | `VariableID:1325:3` |\n| `accentPalettePink` | `accentRose` | `VariableID:1325:4` |\n| `accentPaletteRed` | `accentRed` | `VariableID:1325:5` |\n| `accentPaletteOrange` | `accentOrange` | `VariableID:1325:6` |\n| `accentPaletteYellow` | `accentYellow` | `VariableID:1325:7` |\n| `accentPaletteGreen` | `accentGreen` | `VariableID:1325:8` |\n| `accentPaletteGray` | neutral `#8C8C8C` | `VariableID:1325:9` |\n",
-      "columns": [
-        "Compatibility property",
-        "Canonical property / value",
-        "Retained ID"
-      ],
-      "rows": [
-        [
-          "`accentPaletteBlue`",
-          "`accentBlue`",
-          "`VariableID:1325:2`"
-        ],
-        [
-          "`accentPalettePurple`",
-          "`accentPurple`",
-          "`VariableID:1325:3`"
-        ],
-        [
-          "`accentPalettePink`",
-          "`accentRose`",
-          "`VariableID:1325:4`"
-        ],
-        [
-          "`accentPaletteRed`",
-          "`accentRed`",
-          "`VariableID:1325:5`"
-        ],
-        [
-          "`accentPaletteOrange`",
-          "`accentOrange`",
-          "`VariableID:1325:6`"
-        ],
-        [
-          "`accentPaletteYellow`",
-          "`accentYellow`",
-          "`VariableID:1325:7`"
-        ],
-        [
-          "`accentPaletteGreen`",
-          "`accentGreen`",
-          "`VariableID:1325:8`"
-        ],
-        [
-          "`accentPaletteGray`",
-          "neutral `#8C8C8C`",
-          "`VariableID:1325:9`"
-        ]
-      ]
+      "raw": "On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,\nthe compatibility Green alias, and the Green gradient stops\nretain their IDs. The stops retain their existing alpha. Matching SVG paints\nand their current manifest hashes follow the new Green while geometry remains\nunchanged. The authored fixture records this per-color revision.\n"
     },
     {
       "id": "b000052",
@@ -748,10 +701,12 @@
     },
     {
       "id": "b000053",
-      "kind": "paragraph",
+      "kind": "heading",
       "start_line": 142,
       "end_line": 142,
-      "raw": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.\n"
+      "raw": "## Compatibility accent aliases\n",
+      "level": 2,
+      "title": "Compatibility accent aliases"
     },
     {
       "id": "b000054",
@@ -762,39 +717,128 @@
     },
     {
       "id": "b000055",
-      "kind": "heading",
+      "kind": "paragraph",
       "start_line": 144,
-      "end_line": 144,
+      "end_line": 146,
+      "raw": "기존의 독립 팔레트는 열 가지 Accent로 대체되었다. Figma에서 일곱 호환 별칭 변수는\n삭제되었으나, 기존 QML 호출을 위해 아래 일곱 속성은 정식 Accent를 계속 참조한다.\nGray 변수는 Figma의 `Neutral/Gray`로 유지된다.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "table",
+      "start_line": 148,
+      "end_line": 157,
+      "raw": "| Compatibility property | Canonical property / value | Figma status |\n| --- | --- | --- |\n| `accentPaletteBlue` | `accentBlue` | removed |\n| `accentPalettePurple` | `accentPurple` | removed |\n| `accentPalettePink` | `accentRose` | removed |\n| `accentPaletteRed` | `accentRed` | removed |\n| `accentPaletteOrange` | `accentOrange` | removed |\n| `accentPaletteYellow` | `accentYellow` | removed |\n| `accentPaletteGreen` | `accentGreen` | removed |\n| `accentPaletteGray` | neutral `#8C8C8C` | `Neutral/Gray`, `VariableID:1325:9` |\n",
+      "columns": [
+        "Compatibility property",
+        "Canonical property / value",
+        "Figma status"
+      ],
+      "rows": [
+        [
+          "`accentPaletteBlue`",
+          "`accentBlue`",
+          "removed"
+        ],
+        [
+          "`accentPalettePurple`",
+          "`accentPurple`",
+          "removed"
+        ],
+        [
+          "`accentPalettePink`",
+          "`accentRose`",
+          "removed"
+        ],
+        [
+          "`accentPaletteRed`",
+          "`accentRed`",
+          "removed"
+        ],
+        [
+          "`accentPaletteOrange`",
+          "`accentOrange`",
+          "removed"
+        ],
+        [
+          "`accentPaletteYellow`",
+          "`accentYellow`",
+          "removed"
+        ],
+        [
+          "`accentPaletteGreen`",
+          "`accentGreen`",
+          "removed"
+        ],
+        [
+          "`accentPaletteGray`",
+          "neutral `#8C8C8C`",
+          "`Neutral/Gray`, `VariableID:1325:9`"
+        ]
+      ]
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 158,
+      "end_line": 158,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 159,
+      "end_line": 159,
+      "raw": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 160,
+      "end_line": 160,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "heading",
+      "start_line": 161,
+      "end_line": 161,
       "raw": "## Typography variables and recipes\n",
       "level": 2,
       "title": "Typography variables and recipes"
     },
     {
-      "id": "b000056",
+      "id": "b000062",
       "kind": "blank",
-      "start_line": 145,
-      "end_line": 145,
+      "start_line": 162,
+      "end_line": 162,
       "raw": "\n"
     },
     {
-      "id": "b000057",
+      "id": "b000063",
       "kind": "paragraph",
-      "start_line": 146,
-      "end_line": 150,
+      "start_line": 163,
+      "end_line": 167,
       "raw": "The shared `Font/fontBody` STRING variable is `Pretendard` and maps to\n`Theme.fontBody`. Its ID is `VariableID:1305:86`. QML retains\n`FontPolicy.resolveFamily(FontPolicy.preferredFamily)`, so a runtime fallback does\nnot change the preferred Figma family contract. Pixel sizes, line heights and\nletter spacing are authored logical pixels with no mobile multiplier.\n"
     },
     {
-      "id": "b000058",
+      "id": "b000064",
       "kind": "blank",
-      "start_line": 151,
-      "end_line": 151,
+      "start_line": 168,
+      "end_line": 168,
       "raw": "\n"
     },
     {
-      "id": "b000059",
+      "id": "b000065",
       "kind": "table",
-      "start_line": 152,
-      "end_line": 160,
+      "start_line": 169,
+      "end_line": 177,
       "raw": "| Text style | QML recipe prefix | Size / line height | Weight | Style name | Letter spacing |\n| --- | --- | --- | --- | --- | --- |\n| Title | `textTitle` | 26 / 26 | 700 | Bold | 0 |\n| Subtitle | `textSubtitle` | 22 / 22 | 700 | Bold | 0 |\n| Header | `textHeader` | 17 / 17 | 600 | SemiBold | 0 |\n| Subheader | `textSubheader` | 15 / 15 | 600 | SemiBold | 0 |\n| Body | `textBody` | 13 / 13 | 500 | Medium | 0 |\n| Description | `textDescription` | 12 / 12 | 600 | SemiBold | 0 |\n| Caption | `textCaption` | 11 / 11 | 400 | Regular | 0 |\n",
       "columns": [
         "Text style",
@@ -864,390 +908,126 @@
       ]
     },
     {
-      "id": "b000060",
-      "kind": "blank",
-      "start_line": 161,
-      "end_line": 161,
-      "raw": "\n"
-    },
-    {
-      "id": "b000061",
-      "kind": "paragraph",
-      "start_line": 162,
-      "end_line": 164,
-      "raw": "Each recipe exposes its size plus `Weight`, `StyleName`, `LineHeight` and\n`LetterSpacing`. Seven recipes × five variables, plus one shared family,\nproduce the 36-variable typography inventory. The complete variable mapping is:\n"
-    },
-    {
-      "id": "b000062",
-      "kind": "blank",
-      "start_line": 165,
-      "end_line": 165,
-      "raw": "\n"
-    },
-    {
-      "id": "b000063",
-      "kind": "table",
-      "start_line": 166,
-      "end_line": 203,
-      "raw": "| Figma variable | Type | QML property | Value | ID |\n| --- | --- | --- | --- | --- |\n| `Font/fontBody` | STRING | `Theme.fontBody` | `Pretendard` | `VariableID:1305:86` |\n| `Title/textTitle` | FLOAT | `Theme.textTitle` | `26` | `VariableID:1305:87` |\n| `Title/textTitleLineHeight` | FLOAT | `Theme.textTitleLineHeight` | `26` | `VariableID:1305:88` |\n| `Title/textTitleStyleName` | STRING | `Theme.textTitleStyleName` | `Bold` | `VariableID:1305:89` |\n| `Title/textTitleWeight` | FLOAT | `Theme.textTitleWeight` | `700` | `VariableID:1305:90` |\n| `Title/textTitleLetterSpacing` | FLOAT | `Theme.textTitleLetterSpacing` | `0` | `VariableID:1305:91` |\n| `Subtitle/textSubtitle` | FLOAT | `Theme.textSubtitle` | `22` | `VariableID:1305:92` |\n| `Subtitle/textSubtitleLineHeight` | FLOAT | `Theme.textSubtitleLineHeight` | `22` | `VariableID:1305:93` |\n| `Subtitle/textSubtitleStyleName` | STRING | `Theme.textSubtitleStyleName` | `Bold` | `VariableID:1305:94` |\n| `Subtitle/textSubtitleWeight` | FLOAT | `Theme.textSubtitleWeight` | `700` | `VariableID:1305:95` |\n| `Subtitle/textSubtitleLetterSpacing` | FLOAT | `Theme.textSubtitleLetterSpacing` | `0` | `VariableID:1305:96` |\n| `Header/textHeader` | FLOAT | `Theme.textHeader` | `17` | `VariableID:1305:97` |\n| `Header/textHeaderLineHeight` | FLOAT | `Theme.textHeaderLineHeight` | `17` | `VariableID:1305:98` |\n| `Header/textHeaderStyleName` | STRING | `Theme.textHeaderStyleName` | `SemiBold` | `VariableID:1305:99` |\n| `Header/textHeaderWeight` | FLOAT | `Theme.textHeaderWeight` | `600` | `VariableID:1305:100` |\n| `Header/textHeaderLetterSpacing` | FLOAT | `Theme.textHeaderLetterSpacing` | `0` | `VariableID:1305:101` |\n| `Subheader/textSubheader` | FLOAT | `Theme.textSubheader` | `15` | `VariableID:1305:102` |\n| `Subheader/textSubheaderLineHeight` | FLOAT | `Theme.textSubheaderLineHeight` | `15` | `VariableID:1305:103` |\n| `Subheader/textSubheaderStyleName` | STRING | `Theme.textSubheaderStyleName` | `SemiBold` | `VariableID:1305:104` |\n| `Subheader/textSubheaderWeight` | FLOAT | `Theme.textSubheaderWeight` | `600` | `VariableID:1305:105` |\n| `Subheader/textSubheaderLetterSpacing` | FLOAT | `Theme.textSubheaderLetterSpacing` | `0` | `VariableID:1305:106` |\n| `Body/textBody` | FLOAT | `Theme.textBody` | `13` | `VariableID:1305:107` |\n| `Body/textBodyLineHeight` | FLOAT | `Theme.textBodyLineHeight` | `13` | `VariableID:1305:108` |\n| `Body/textBodyStyleName` | STRING | `Theme.textBodyStyleName` | `Medium` | `VariableID:1305:109` |\n| `Body/textBodyWeight` | FLOAT | `Theme.textBodyWeight` | `500` | `VariableID:1305:110` |\n| `Body/textBodyLetterSpacing` | FLOAT | `Theme.textBodyLetterSpacing` | `0` | `VariableID:1305:111` |\n| `Description/textDescription` | FLOAT | `Theme.textDescription` | `12` | `VariableID:1305:112` |\n| `Description/textDescriptionLineHeight` | FLOAT | `Theme.textDescriptionLineHeight` | `12` | `VariableID:1305:113` |\n| `Description/textDescriptionStyleName` | STRING | `Theme.textDescriptionStyleName` | `SemiBold` | `VariableID:1305:114` |\n| `Description/textDescriptionWeight` | FLOAT | `Theme.textDescriptionWeight` | `600` | `VariableID:1305:115` |\n| `Description/textDescriptionLetterSpacing` | FLOAT | `Theme.textDescriptionLetterSpacing` | `0` | `VariableID:1305:116` |\n| `Caption/textCaption` | FLOAT | `Theme.textCaption` | `11` | `VariableID:1305:117` |\n| `Caption/textCaptionLineHeight` | FLOAT | `Theme.textCaptionLineHeight` | `11` | `VariableID:1305:118` |\n| `Caption/textCaptionStyleName` | STRING | `Theme.textCaptionStyleName` | `Regular` | `VariableID:1305:119` |\n| `Caption/textCaptionWeight` | FLOAT | `Theme.textCaptionWeight` | `400` | `VariableID:1305:120` |\n| `Caption/textCaptionLetterSpacing` | FLOAT | `Theme.textCaptionLetterSpacing` | `0` | `VariableID:1305:121` |\n",
-      "columns": [
-        "Figma variable",
-        "Type",
-        "QML property",
-        "Value",
-        "ID"
-      ],
-      "rows": [
-        [
-          "`Font/fontBody`",
-          "STRING",
-          "`Theme.fontBody`",
-          "`Pretendard`",
-          "`VariableID:1305:86`"
-        ],
-        [
-          "`Title/textTitle`",
-          "FLOAT",
-          "`Theme.textTitle`",
-          "`26`",
-          "`VariableID:1305:87`"
-        ],
-        [
-          "`Title/textTitleLineHeight`",
-          "FLOAT",
-          "`Theme.textTitleLineHeight`",
-          "`26`",
-          "`VariableID:1305:88`"
-        ],
-        [
-          "`Title/textTitleStyleName`",
-          "STRING",
-          "`Theme.textTitleStyleName`",
-          "`Bold`",
-          "`VariableID:1305:89`"
-        ],
-        [
-          "`Title/textTitleWeight`",
-          "FLOAT",
-          "`Theme.textTitleWeight`",
-          "`700`",
-          "`VariableID:1305:90`"
-        ],
-        [
-          "`Title/textTitleLetterSpacing`",
-          "FLOAT",
-          "`Theme.textTitleLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:91`"
-        ],
-        [
-          "`Subtitle/textSubtitle`",
-          "FLOAT",
-          "`Theme.textSubtitle`",
-          "`22`",
-          "`VariableID:1305:92`"
-        ],
-        [
-          "`Subtitle/textSubtitleLineHeight`",
-          "FLOAT",
-          "`Theme.textSubtitleLineHeight`",
-          "`22`",
-          "`VariableID:1305:93`"
-        ],
-        [
-          "`Subtitle/textSubtitleStyleName`",
-          "STRING",
-          "`Theme.textSubtitleStyleName`",
-          "`Bold`",
-          "`VariableID:1305:94`"
-        ],
-        [
-          "`Subtitle/textSubtitleWeight`",
-          "FLOAT",
-          "`Theme.textSubtitleWeight`",
-          "`700`",
-          "`VariableID:1305:95`"
-        ],
-        [
-          "`Subtitle/textSubtitleLetterSpacing`",
-          "FLOAT",
-          "`Theme.textSubtitleLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:96`"
-        ],
-        [
-          "`Header/textHeader`",
-          "FLOAT",
-          "`Theme.textHeader`",
-          "`17`",
-          "`VariableID:1305:97`"
-        ],
-        [
-          "`Header/textHeaderLineHeight`",
-          "FLOAT",
-          "`Theme.textHeaderLineHeight`",
-          "`17`",
-          "`VariableID:1305:98`"
-        ],
-        [
-          "`Header/textHeaderStyleName`",
-          "STRING",
-          "`Theme.textHeaderStyleName`",
-          "`SemiBold`",
-          "`VariableID:1305:99`"
-        ],
-        [
-          "`Header/textHeaderWeight`",
-          "FLOAT",
-          "`Theme.textHeaderWeight`",
-          "`600`",
-          "`VariableID:1305:100`"
-        ],
-        [
-          "`Header/textHeaderLetterSpacing`",
-          "FLOAT",
-          "`Theme.textHeaderLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:101`"
-        ],
-        [
-          "`Subheader/textSubheader`",
-          "FLOAT",
-          "`Theme.textSubheader`",
-          "`15`",
-          "`VariableID:1305:102`"
-        ],
-        [
-          "`Subheader/textSubheaderLineHeight`",
-          "FLOAT",
-          "`Theme.textSubheaderLineHeight`",
-          "`15`",
-          "`VariableID:1305:103`"
-        ],
-        [
-          "`Subheader/textSubheaderStyleName`",
-          "STRING",
-          "`Theme.textSubheaderStyleName`",
-          "`SemiBold`",
-          "`VariableID:1305:104`"
-        ],
-        [
-          "`Subheader/textSubheaderWeight`",
-          "FLOAT",
-          "`Theme.textSubheaderWeight`",
-          "`600`",
-          "`VariableID:1305:105`"
-        ],
-        [
-          "`Subheader/textSubheaderLetterSpacing`",
-          "FLOAT",
-          "`Theme.textSubheaderLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:106`"
-        ],
-        [
-          "`Body/textBody`",
-          "FLOAT",
-          "`Theme.textBody`",
-          "`13`",
-          "`VariableID:1305:107`"
-        ],
-        [
-          "`Body/textBodyLineHeight`",
-          "FLOAT",
-          "`Theme.textBodyLineHeight`",
-          "`13`",
-          "`VariableID:1305:108`"
-        ],
-        [
-          "`Body/textBodyStyleName`",
-          "STRING",
-          "`Theme.textBodyStyleName`",
-          "`Medium`",
-          "`VariableID:1305:109`"
-        ],
-        [
-          "`Body/textBodyWeight`",
-          "FLOAT",
-          "`Theme.textBodyWeight`",
-          "`500`",
-          "`VariableID:1305:110`"
-        ],
-        [
-          "`Body/textBodyLetterSpacing`",
-          "FLOAT",
-          "`Theme.textBodyLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:111`"
-        ],
-        [
-          "`Description/textDescription`",
-          "FLOAT",
-          "`Theme.textDescription`",
-          "`12`",
-          "`VariableID:1305:112`"
-        ],
-        [
-          "`Description/textDescriptionLineHeight`",
-          "FLOAT",
-          "`Theme.textDescriptionLineHeight`",
-          "`12`",
-          "`VariableID:1305:113`"
-        ],
-        [
-          "`Description/textDescriptionStyleName`",
-          "STRING",
-          "`Theme.textDescriptionStyleName`",
-          "`SemiBold`",
-          "`VariableID:1305:114`"
-        ],
-        [
-          "`Description/textDescriptionWeight`",
-          "FLOAT",
-          "`Theme.textDescriptionWeight`",
-          "`600`",
-          "`VariableID:1305:115`"
-        ],
-        [
-          "`Description/textDescriptionLetterSpacing`",
-          "FLOAT",
-          "`Theme.textDescriptionLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:116`"
-        ],
-        [
-          "`Caption/textCaption`",
-          "FLOAT",
-          "`Theme.textCaption`",
-          "`11`",
-          "`VariableID:1305:117`"
-        ],
-        [
-          "`Caption/textCaptionLineHeight`",
-          "FLOAT",
-          "`Theme.textCaptionLineHeight`",
-          "`11`",
-          "`VariableID:1305:118`"
-        ],
-        [
-          "`Caption/textCaptionStyleName`",
-          "STRING",
-          "`Theme.textCaptionStyleName`",
-          "`Regular`",
-          "`VariableID:1305:119`"
-        ],
-        [
-          "`Caption/textCaptionWeight`",
-          "FLOAT",
-          "`Theme.textCaptionWeight`",
-          "`400`",
-          "`VariableID:1305:120`"
-        ],
-        [
-          "`Caption/textCaptionLetterSpacing`",
-          "FLOAT",
-          "`Theme.textCaptionLetterSpacing`",
-          "`0`",
-          "`VariableID:1305:121`"
-        ]
-      ]
-    },
-    {
-      "id": "b000064",
-      "kind": "blank",
-      "start_line": 204,
-      "end_line": 204,
-      "raw": "\n"
-    },
-    {
-      "id": "b000065",
-      "kind": "heading",
-      "start_line": 205,
-      "end_line": 205,
-      "raw": "### Actual style bindings\n",
-      "level": 3,
-      "title": "Actual style bindings"
-    },
-    {
       "id": "b000066",
       "kind": "blank",
-      "start_line": 206,
-      "end_line": 206,
+      "start_line": 178,
+      "end_line": 178,
       "raw": "\n"
     },
     {
       "id": "b000067",
       "kind": "paragraph",
-      "start_line": 207,
-      "end_line": 207,
-      "raw": "Every saved text style has exactly five bound fields:\n"
+      "start_line": 179,
+      "end_line": 181,
+      "raw": "각 QML 레시피의 `Weight`, `StyleName`, `LineHeight`, `LetterSpacing` 공개 속성은\n호환성을 위해 유지한다. 현재 Figma 타이포그래피는 글꼴 1개, 일곱 쌍의 크기와\n행 높이 14개, 공유 굵기 4개, 공유 자간 1개로 모두 20개 변수를 사용한다.\n"
     },
     {
       "id": "b000068",
       "kind": "blank",
-      "start_line": 208,
-      "end_line": 208,
+      "start_line": 182,
+      "end_line": 182,
       "raw": "\n"
     },
     {
       "id": "b000069",
       "kind": "table",
-      "start_line": 209,
-      "end_line": 215,
-      "raw": "| Style field | Variable |\n| --- | --- |\n| `fontFamily` | Shared `Font/fontBody` |\n| `fontSize` | Recipe size property |\n| `fontWeight` | Recipe `Weight` property |\n| `lineHeight` | Recipe `LineHeight` property; unit `PIXELS` |\n| `letterSpacing` | Recipe `LetterSpacing` property; unit `PIXELS` |\n",
+      "start_line": 183,
+      "end_line": 190,
+      "raw": "| Figma 공유 변수 | 값 | ID |\n| --- | --- | --- |\n| `Font/fontBody` | Pretendard | `VariableID:1305:86` |\n| `Weight/Bold` | 700 | `VariableID:1305:90` |\n| `Weight/SemiBold` | 600 | `VariableID:1305:100` |\n| `Weight/Medium` | 500 | `VariableID:1305:110` |\n| `Weight/Regular` | 400 | `VariableID:1305:120` |\n| `Tracking/Normal` | 0 | `VariableID:1305:91` |\n",
       "columns": [
-        "Style field",
-        "Variable"
+        "Figma 공유 변수",
+        "값",
+        "ID"
       ],
       "rows": [
         [
-          "`fontFamily`",
-          "Shared `Font/fontBody`"
+          "`Font/fontBody`",
+          "Pretendard",
+          "`VariableID:1305:86`"
         ],
         [
-          "`fontSize`",
-          "Recipe size property"
+          "`Weight/Bold`",
+          "700",
+          "`VariableID:1305:90`"
         ],
         [
-          "`fontWeight`",
-          "Recipe `Weight` property"
+          "`Weight/SemiBold`",
+          "600",
+          "`VariableID:1305:100`"
         ],
         [
-          "`lineHeight`",
-          "Recipe `LineHeight` property; unit `PIXELS`"
+          "`Weight/Medium`",
+          "500",
+          "`VariableID:1305:110`"
         ],
         [
-          "`letterSpacing`",
-          "Recipe `LetterSpacing` property; unit `PIXELS`"
+          "`Weight/Regular`",
+          "400",
+          "`VariableID:1305:120`"
+        ],
+        [
+          "`Tracking/Normal`",
+          "0",
+          "`VariableID:1305:91`"
         ]
       ]
     },
     {
       "id": "b000070",
       "kind": "blank",
-      "start_line": 216,
-      "end_line": 216,
+      "start_line": 191,
+      "end_line": 191,
       "raw": "\n"
     },
     {
       "id": "b000071",
-      "kind": "paragraph",
-      "start_line": 217,
-      "end_line": 221,
-      "raw": "The observed Figma behavior is that `fontWeight` binding selects the static\nfont style and replaces a `fontStyle` binding. The seven `StyleName` STRING\nvariables record the matching QML recipe; they are not a sixth active style\nbinding. Do not report simultaneous `fontStyle` and `fontWeight` bindings.\nExisting text-style IDs are retained:\n"
+      "kind": "heading",
+      "start_line": 192,
+      "end_line": 192,
+      "raw": "### Actual style bindings\n",
+      "level": 3,
+      "title": "Actual style bindings"
     },
     {
       "id": "b000072",
       "kind": "blank",
-      "start_line": 222,
-      "end_line": 222,
+      "start_line": 193,
+      "end_line": 193,
       "raw": "\n"
     },
     {
       "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 194,
+      "end_line": 197,
+      "raw": "일곱 Figma 텍스트 스타일은 공유 글꼴, 해당 스타일의 크기와 행 높이, 공유 굵기와\n자간을 각각 바인딩한다. `fontWeight`가 실제 글꼴 스타일을 선택하며 별도의\n`fontStyle` 바인딩은 없다. 이전 개별 굵기·자간·스타일 이름 변수는 Figma에서\n삭제되었고, 대응하는 QML 속성은 앱 호환성을 위해 남아 있다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 198,
+      "end_line": 198,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 199,
+      "end_line": 199,
+      "raw": "Existing text-style IDs are retained:\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 200,
+      "end_line": 200,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
       "kind": "table",
-      "start_line": 223,
-      "end_line": 231,
+      "start_line": 201,
+      "end_line": 209,
       "raw": "| Style | ID |\n| --- | --- |\n| Title | `S:9be61cca334d9c7ad10f6748611727c4fc6340a5,` |\n| Subtitle | `S:3e4074fd4df418ade1039a2b0184720c6c2ffbe5,` |\n| Header | `S:62f4d4aa9883bcf345b9273542940cb7e312a6aa,` |\n| Subheader | `S:1bb19003757942c30f3fafada1b8400cab71cf0e,` |\n| Body | `S:cc3cf61d5106b1d70f4ce271776b7f93fc3ae046,` |\n| Description | `S:85e5273ae601efad5b2a9d337177cc9d9762eae1,` |\n| Caption | `S:1fad39b1005ddd0b4ed008f63820dcd864b00ba4,` |\n",
       "columns": [
         "Style",
@@ -1285,77 +1065,77 @@
       ]
     },
     {
-      "id": "b000074",
-      "kind": "blank",
-      "start_line": 232,
-      "end_line": 232,
-      "raw": "\n"
-    },
-    {
-      "id": "b000075",
-      "kind": "heading",
-      "start_line": 233,
-      "end_line": 233,
-      "raw": "### Typography compatibility\n",
-      "level": 3,
-      "title": "Typography compatibility"
-    },
-    {
-      "id": "b000076",
-      "kind": "blank",
-      "start_line": 234,
-      "end_line": 234,
-      "raw": "\n"
-    },
-    {
-      "id": "b000077",
-      "kind": "paragraph",
-      "start_line": 235,
-      "end_line": 240,
-      "raw": "`textTitle2` aliases `textSubtitle`; `textHeader2` aliases `textSubheader`.\nTheir `Weight`, `StyleName`, `LineHeight` and `LetterSpacing` companions follow\nexactly the same mapping, preserving all ten old public properties. Existing\nLabel `title2`/`header2` enum names and unrelated consumer files are unchanged.\n`textDisabled` and its four companions continue to use Caption metrics; Disabled\nhas a separate text color, not an eighth size recipe.\n"
-    },
-    {
       "id": "b000078",
       "kind": "blank",
-      "start_line": 241,
-      "end_line": 241,
+      "start_line": 210,
+      "end_line": 210,
       "raw": "\n"
     },
     {
       "id": "b000079",
       "kind": "heading",
-      "start_line": 242,
-      "end_line": 242,
-      "raw": "## Hidden icon-color compatibility\n",
-      "level": 2,
-      "title": "Hidden icon-color compatibility"
+      "start_line": 211,
+      "end_line": 211,
+      "raw": "### Typography compatibility\n",
+      "level": 3,
+      "title": "Typography compatibility"
     },
     {
       "id": "b000080",
       "kind": "blank",
-      "start_line": 243,
-      "end_line": 243,
+      "start_line": 212,
+      "end_line": 212,
       "raw": "\n"
     },
     {
       "id": "b000081",
       "kind": "paragraph",
-      "start_line": 244,
-      "end_line": 249,
-      "raw": "`Compatibility Icon Colors` retains **1,548** existing variables. The collection\nand every variable are hidden from publishing; every variable has an empty\nscope set. This removes the extracted palette from normal token selection\nwithout deleting IDs or severing existing paint bindings. Hiding is not removal.\nOlder icon-specific values and gradient-stop variables remain available to their\nexisting consumers. The captured selected original-color aliases are:\n"
+      "start_line": 213,
+      "end_line": 218,
+      "raw": "`textTitle2` aliases `textSubtitle`; `textHeader2` aliases `textSubheader`.\nTheir `Weight`, `StyleName`, `LineHeight` and `LetterSpacing` companions follow\nexactly the same mapping, preserving all ten old public properties. Existing\nLabel `title2`/`header2` enum names and unrelated consumer files are unchanged.\n`textDisabled` and its four companions continue to use Caption metrics; Disabled\nhas a separate text color, not an eighth size recipe.\n"
     },
     {
       "id": "b000082",
       "kind": "blank",
-      "start_line": 250,
-      "end_line": 250,
+      "start_line": 219,
+      "end_line": 219,
       "raw": "\n"
     },
     {
       "id": "b000083",
+      "kind": "heading",
+      "start_line": 220,
+      "end_line": 220,
+      "raw": "## Hidden icon-color compatibility\n",
+      "level": 2,
+      "title": "Hidden icon-color compatibility"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 221,
+      "end_line": 221,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 222,
+      "end_line": 227,
+      "raw": "`Compatibility Icon Colors` retains **1,548** existing variables. The collection\nand every variable are hidden from publishing; every variable has an empty\nscope set. This removes the extracted palette from normal token selection\nwithout deleting IDs or severing existing paint bindings. Hiding is not removal.\nOlder icon-specific values and gradient-stop variables remain available to their\nexisting consumers. The captured selected original-color aliases are:\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 228,
+      "end_line": 228,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
       "kind": "table",
-      "start_line": 251,
-      "end_line": 264,
+      "start_line": 229,
+      "end_line": 242,
       "raw": "| Compatibility variable | Retained ID | Core target ID |\n| --- | --- | --- |\n| `Primitive/defaultPrimary` | `VariableID:964:2` | `VariableID:44:463` |\n| `Primitive/accentWhite` | `VariableID:964:10` | `VariableID:1305:75` |\n| `Primitive/accentBlue` | `VariableID:964:18` | `VariableID:1305:76` |\n| `Primitive/accentRed` | `VariableID:964:22` | `VariableID:1305:77` |\n| `Primitive/accentGreen` | `VariableID:964:30` | `VariableID:1305:78` |\n| `Primitive/accentOrangeMuted` | `VariableID:964:38` | `VariableID:1305:82` |\n| `Primitive/accentYellow` | `VariableID:964:46` | `VariableID:1305:79` |\n| `Primitive/accentBrownMuted` | `VariableID:964:62` | `VariableID:1305:83` |\n| `Primitive/accentPurple` | `VariableID:964:66` | `VariableID:1305:80` |\n| `Primitive/accentRose` | `VariableID:964:94` | `VariableID:1305:81` |\n| `Primitive/accentDimTeal` | `VariableID:964:186` | `VariableID:1305:85` |\n| `Primitive/accentLightCyan` | `VariableID:964:222` | `VariableID:1305:84` |\n",
       "columns": [
         "Compatibility variable",
@@ -1426,62 +1206,62 @@
       ]
     },
     {
-      "id": "b000084",
+      "id": "b000088",
       "kind": "blank",
-      "start_line": 265,
-      "end_line": 265,
+      "start_line": 243,
+      "end_line": 243,
       "raw": "\n"
     },
     {
-      "id": "b000085",
+      "id": "b000089",
       "kind": "heading",
-      "start_line": 266,
-      "end_line": 266,
+      "start_line": 244,
+      "end_line": 244,
       "raw": "## Accent revision verification — 2026-10-19\n",
       "level": 2,
       "title": "Accent revision verification — 2026-10-19"
     },
     {
-      "id": "b000086",
-      "kind": "blank",
-      "start_line": 267,
-      "end_line": 267,
-      "raw": "\n"
-    },
-    {
-      "id": "b000087",
-      "kind": "paragraph",
-      "start_line": 268,
-      "end_line": 268,
-      "raw": "The Figma update preserves all ten source-node bounds and binds them to the existing canonical variables. It updates matching variables, unbound component paints, gradient stops, shared paint styles and reference labels across the file. The ColorPicker current-color variable is an alias of canonical Purple. Its six master views and six existing instances expose all ten colors inside their existing row bounds. Both the design reference and source examples use the new system.\n"
-    },
-    {
-      "id": "b000088",
-      "kind": "blank",
-      "start_line": 269,
-      "end_line": 269,
-      "raw": "\n"
-    },
-    {
-      "id": "b000089",
-      "kind": "paragraph",
-      "start_line": 270,
-      "end_line": 270,
-      "raw": "Source validation covers:\n"
-    },
-    {
       "id": "b000090",
       "kind": "blank",
-      "start_line": 271,
-      "end_line": 271,
+      "start_line": 245,
+      "end_line": 245,
       "raw": "\n"
     },
     {
       "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 246,
+      "end_line": 246,
+      "raw": "The Figma update preserves all ten source-node bounds and binds them to the existing canonical variables. It updates matching variables, unbound component paints, gradient stops, shared paint styles and reference labels across the file. The ColorPicker current-color variable is an alias of canonical Purple. Its six master views and six existing instances expose all ten colors inside their existing row bounds. Both the design reference and source examples use the new system.\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 247,
+      "end_line": 247,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 248,
+      "end_line": 248,
+      "raw": "Source validation covers:\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 249,
+      "end_line": 249,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
       "kind": "list",
-      "start_line": 272,
-      "end_line": 277,
-      "raw": "- Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.\n- All 77 saved typed Theme properties and retained typography/style contracts.\n- Rendered pixel samples for all ten canonical swatches.\n- Default and custom app Primary propagation, controls, overlays, and ten catalog choices.\n- SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.\n- ColorPicker defaults and recent colors from the same canonical palette.\n",
+      "start_line": 250,
+      "end_line": 255,
+      "raw": "- Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.\n- The 50 retained Figma variables, all 90 accent roles, and shared typography/style contracts.\n- Rendered pixel samples for all ten canonical swatches.\n- Default and custom app Primary propagation, controls, overlays, and ten catalog choices.\n- SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.\n- ColorPicker defaults and recent colors from the same canonical palette.\n",
       "items": [
         {
           "marker": "-",
@@ -1490,7 +1270,7 @@
         },
         {
           "marker": "-",
-          "text": "All 77 saved typed Theme properties and retained typography/style contracts.",
+          "text": "The 50 retained Figma variables, all 90 accent roles, and shared typography/style contracts.",
           "checked": null
         },
         {
@@ -1516,45 +1296,45 @@
       ]
     },
     {
-      "id": "b000092",
-      "kind": "blank",
-      "start_line": 278,
-      "end_line": 278,
-      "raw": "\n"
-    },
-    {
-      "id": "b000093",
-      "kind": "paragraph",
-      "start_line": 279,
-      "end_line": 279,
-      "raw": "The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.\n"
-    },
-    {
-      "id": "b000094",
-      "kind": "blank",
-      "start_line": 280,
-      "end_line": 280,
-      "raw": "\n"
-    },
-    {
-      "id": "b000095",
-      "kind": "paragraph",
-      "start_line": 281,
-      "end_line": 281,
-      "raw": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.\n"
-    },
-    {
       "id": "b000096",
       "kind": "blank",
-      "start_line": 282,
-      "end_line": 282,
+      "start_line": 256,
+      "end_line": 256,
       "raw": "\n"
     },
     {
       "id": "b000097",
       "kind": "paragraph",
-      "start_line": 283,
-      "end_line": 283,
+      "start_line": 257,
+      "end_line": 257,
+      "raw": "The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.\n"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 258,
+      "end_line": 258,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 259,
+      "end_line": 259,
+      "raw": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 260,
+      "end_line": 260,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "paragraph",
+      "start_line": 261,
+      "end_line": 261,
       "raw": "The final macOS source build succeeded. A fresh focused CTest run passed **12/12 targets** with **0 failures** in **64.29 seconds** after the final helper-resource update. The JUnit report is [`final-ctest.xml`](../build/accent-palette-20261019/final-ctest.xml), with a machine-readable summary in [`verification.json`](../build/accent-palette-20261019/verification.json). Six conditional cases for native RHI, hover delivery and optional captures remain skipped and are recorded in `final-qt-tests.log`; this run does not claim all-platform native execution or installation.\n"
     }
   ],
@@ -1600,52 +1380,60 @@
       "start_line": 100
     },
     {
-      "block_id": "b000047",
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Accent 역할 토큰",
+      "anchor": "accent-역할-토큰",
+      "start_line": 119
+    },
+    {
+      "block_id": "b000053",
       "parent_id": "b000001",
       "level": 2,
       "title": "Compatibility accent aliases",
       "anchor": "compatibility-accent-aliases",
-      "start_line": 127
+      "start_line": 142
     },
     {
-      "block_id": "b000055",
+      "block_id": "b000061",
       "parent_id": "b000001",
       "level": 2,
       "title": "Typography variables and recipes",
       "anchor": "typography-variables-and-recipes",
-      "start_line": 144
+      "start_line": 161
     },
     {
-      "block_id": "b000065",
-      "parent_id": "b000055",
+      "block_id": "b000071",
+      "parent_id": "b000061",
       "level": 3,
       "title": "Actual style bindings",
       "anchor": "actual-style-bindings",
-      "start_line": 205
-    },
-    {
-      "block_id": "b000075",
-      "parent_id": "b000055",
-      "level": 3,
-      "title": "Typography compatibility",
-      "anchor": "typography-compatibility",
-      "start_line": 233
+      "start_line": 192
     },
     {
       "block_id": "b000079",
+      "parent_id": "b000061",
+      "level": 3,
+      "title": "Typography compatibility",
+      "anchor": "typography-compatibility",
+      "start_line": 211
+    },
+    {
+      "block_id": "b000083",
       "parent_id": "b000001",
       "level": 2,
       "title": "Hidden icon-color compatibility",
       "anchor": "hidden-icon-color-compatibility",
-      "start_line": 242
+      "start_line": 220
     },
     {
-      "block_id": "b000085",
+      "block_id": "b000089",
       "parent_id": "b000001",
       "level": 2,
       "title": "Accent revision verification — 2026-10-19",
       "anchor": "accent-revision-verification--2026-10-19",
-      "start_line": 266
+      "start_line": 244
     }
   ],
   "indexes": {
@@ -1658,22 +1446,15 @@
         "context": "paragraph"
       },
       {
-        "block_id": "b000053",
-        "line": 142,
+        "block_id": "b000059",
+        "line": 159,
         "text": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000071",
-        "line": 220,
-        "text": "binding. Do not report simultaneous `fontStyle` and `fontWeight` bindings.",
-        "basis": "lexical_match",
-        "context": "paragraph"
-      },
-      {
-        "block_id": "b000095",
-        "line": 281,
+        "block_id": "b000099",
+        "line": 259,
         "text": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.",
         "basis": "lexical_match",
         "context": "paragraph"
@@ -1703,18 +1484,18 @@
         "line": 7
       },
       {
-        "block_id": "b000097",
+        "block_id": "b000101",
         "label": "`final-ctest.xml`",
         "target": "../build/accent-palette-20261019/final-ctest.xml",
         "kind": "relative",
-        "line": 283
+        "line": 261
       },
       {
-        "block_id": "b000097",
+        "block_id": "b000101",
         "label": "`verification.json`",
         "target": "../build/accent-palette-20261019/verification.json",
         "kind": "relative",
-        "line": 283
+        "line": 261
       }
     ],
     "tables": [
@@ -1946,61 +1727,61 @@
         ],
         "rows": [
           [
-            "`Accent/accentBlue` / `Theme.accentBlue`",
+            "`Accent/Blue/Default` / `Theme.accentBlue`",
             "`#1582FF`",
             "`1477:30`",
             "`VariableID:1305:76`"
           ],
           [
-            "`Accent/accentRed` / `Theme.accentRed`",
+            "`Accent/Red/Default` / `Theme.accentRed`",
             "`#FF4646`",
             "`1477:31`",
             "`VariableID:1305:77`"
           ],
           [
-            "`Accent/accentGreen` / `Theme.accentGreen`",
+            "`Accent/Green/Default` / `Theme.accentGreen`",
             "`#00E71F`",
             "`1477:32`",
             "`VariableID:1305:78`"
           ],
           [
-            "`Accent/accentYellow` / `Theme.accentYellow`",
+            "`Accent/Yellow/Default` / `Theme.accentYellow`",
             "`#FFD427`",
             "`1477:33`",
             "`VariableID:1305:79`"
           ],
           [
-            "`Accent/accentPurple` / `Theme.accentPurple`",
+            "`Accent/Purple/Default` / `Theme.accentPurple`",
             "`#874AFF`",
             "`1477:34`",
             "`VariableID:1305:80`"
           ],
           [
-            "`Accent/accentRose` / `Theme.accentRose`",
+            "`Accent/Rose/Default` / `Theme.accentRose`",
             "`#F94471`",
             "`1477:36`",
             "`VariableID:1305:81`"
           ],
           [
-            "`Accent/accentOrange` / `Theme.accentOrange`",
+            "`Accent/Orange/Default` / `Theme.accentOrange`",
             "`#FF7A27`",
             "`1477:35`",
             "`VariableID:1305:82`"
           ],
           [
-            "`Accent/accentBrown` / `Theme.accentBrown`",
+            "`Accent/Brown/Default` / `Theme.accentBrown`",
             "`#432318`",
             "`1477:37`",
             "`VariableID:1305:83`"
           ],
           [
-            "`Accent/accentCyan` / `Theme.accentCyan`",
+            "`Accent/Cyan/Default` / `Theme.accentCyan`",
             "`#21D3FF`",
             "`1477:38`",
             "`VariableID:1305:84`"
           ],
           [
-            "`Accent/accentTeal` / `Theme.accentTeal`",
+            "`Accent/Teal/Default` / `Theme.accentTeal`",
             "`#00C7DD`",
             "`1477:40`",
             "`VariableID:1305:85`"
@@ -2008,57 +1789,57 @@
         ]
       },
       {
-        "block_id": "b000051",
+        "block_id": "b000057",
         "columns": [
           "Compatibility property",
           "Canonical property / value",
-          "Retained ID"
+          "Figma status"
         ],
         "rows": [
           [
             "`accentPaletteBlue`",
             "`accentBlue`",
-            "`VariableID:1325:2`"
+            "removed"
           ],
           [
             "`accentPalettePurple`",
             "`accentPurple`",
-            "`VariableID:1325:3`"
+            "removed"
           ],
           [
             "`accentPalettePink`",
             "`accentRose`",
-            "`VariableID:1325:4`"
+            "removed"
           ],
           [
             "`accentPaletteRed`",
             "`accentRed`",
-            "`VariableID:1325:5`"
+            "removed"
           ],
           [
             "`accentPaletteOrange`",
             "`accentOrange`",
-            "`VariableID:1325:6`"
+            "removed"
           ],
           [
             "`accentPaletteYellow`",
             "`accentYellow`",
-            "`VariableID:1325:7`"
+            "removed"
           ],
           [
             "`accentPaletteGreen`",
             "`accentGreen`",
-            "`VariableID:1325:8`"
+            "removed"
           ],
           [
             "`accentPaletteGray`",
             "neutral `#8C8C8C`",
-            "`VariableID:1325:9`"
+            "`Neutral/Gray`, `VariableID:1325:9`"
           ]
         ]
       },
       {
-        "block_id": "b000059",
+        "block_id": "b000065",
         "columns": [
           "Text style",
           "QML recipe prefix",
@@ -2127,300 +1908,47 @@
         ]
       },
       {
-        "block_id": "b000063",
+        "block_id": "b000069",
         "columns": [
-          "Figma variable",
-          "Type",
-          "QML property",
-          "Value",
+          "Figma 공유 변수",
+          "값",
           "ID"
         ],
         "rows": [
           [
             "`Font/fontBody`",
-            "STRING",
-            "`Theme.fontBody`",
-            "`Pretendard`",
+            "Pretendard",
             "`VariableID:1305:86`"
           ],
           [
-            "`Title/textTitle`",
-            "FLOAT",
-            "`Theme.textTitle`",
-            "`26`",
-            "`VariableID:1305:87`"
-          ],
-          [
-            "`Title/textTitleLineHeight`",
-            "FLOAT",
-            "`Theme.textTitleLineHeight`",
-            "`26`",
-            "`VariableID:1305:88`"
-          ],
-          [
-            "`Title/textTitleStyleName`",
-            "STRING",
-            "`Theme.textTitleStyleName`",
-            "`Bold`",
-            "`VariableID:1305:89`"
-          ],
-          [
-            "`Title/textTitleWeight`",
-            "FLOAT",
-            "`Theme.textTitleWeight`",
-            "`700`",
+            "`Weight/Bold`",
+            "700",
             "`VariableID:1305:90`"
           ],
           [
-            "`Title/textTitleLetterSpacing`",
-            "FLOAT",
-            "`Theme.textTitleLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:91`"
-          ],
-          [
-            "`Subtitle/textSubtitle`",
-            "FLOAT",
-            "`Theme.textSubtitle`",
-            "`22`",
-            "`VariableID:1305:92`"
-          ],
-          [
-            "`Subtitle/textSubtitleLineHeight`",
-            "FLOAT",
-            "`Theme.textSubtitleLineHeight`",
-            "`22`",
-            "`VariableID:1305:93`"
-          ],
-          [
-            "`Subtitle/textSubtitleStyleName`",
-            "STRING",
-            "`Theme.textSubtitleStyleName`",
-            "`Bold`",
-            "`VariableID:1305:94`"
-          ],
-          [
-            "`Subtitle/textSubtitleWeight`",
-            "FLOAT",
-            "`Theme.textSubtitleWeight`",
-            "`700`",
-            "`VariableID:1305:95`"
-          ],
-          [
-            "`Subtitle/textSubtitleLetterSpacing`",
-            "FLOAT",
-            "`Theme.textSubtitleLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:96`"
-          ],
-          [
-            "`Header/textHeader`",
-            "FLOAT",
-            "`Theme.textHeader`",
-            "`17`",
-            "`VariableID:1305:97`"
-          ],
-          [
-            "`Header/textHeaderLineHeight`",
-            "FLOAT",
-            "`Theme.textHeaderLineHeight`",
-            "`17`",
-            "`VariableID:1305:98`"
-          ],
-          [
-            "`Header/textHeaderStyleName`",
-            "STRING",
-            "`Theme.textHeaderStyleName`",
-            "`SemiBold`",
-            "`VariableID:1305:99`"
-          ],
-          [
-            "`Header/textHeaderWeight`",
-            "FLOAT",
-            "`Theme.textHeaderWeight`",
-            "`600`",
+            "`Weight/SemiBold`",
+            "600",
             "`VariableID:1305:100`"
           ],
           [
-            "`Header/textHeaderLetterSpacing`",
-            "FLOAT",
-            "`Theme.textHeaderLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:101`"
-          ],
-          [
-            "`Subheader/textSubheader`",
-            "FLOAT",
-            "`Theme.textSubheader`",
-            "`15`",
-            "`VariableID:1305:102`"
-          ],
-          [
-            "`Subheader/textSubheaderLineHeight`",
-            "FLOAT",
-            "`Theme.textSubheaderLineHeight`",
-            "`15`",
-            "`VariableID:1305:103`"
-          ],
-          [
-            "`Subheader/textSubheaderStyleName`",
-            "STRING",
-            "`Theme.textSubheaderStyleName`",
-            "`SemiBold`",
-            "`VariableID:1305:104`"
-          ],
-          [
-            "`Subheader/textSubheaderWeight`",
-            "FLOAT",
-            "`Theme.textSubheaderWeight`",
-            "`600`",
-            "`VariableID:1305:105`"
-          ],
-          [
-            "`Subheader/textSubheaderLetterSpacing`",
-            "FLOAT",
-            "`Theme.textSubheaderLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:106`"
-          ],
-          [
-            "`Body/textBody`",
-            "FLOAT",
-            "`Theme.textBody`",
-            "`13`",
-            "`VariableID:1305:107`"
-          ],
-          [
-            "`Body/textBodyLineHeight`",
-            "FLOAT",
-            "`Theme.textBodyLineHeight`",
-            "`13`",
-            "`VariableID:1305:108`"
-          ],
-          [
-            "`Body/textBodyStyleName`",
-            "STRING",
-            "`Theme.textBodyStyleName`",
-            "`Medium`",
-            "`VariableID:1305:109`"
-          ],
-          [
-            "`Body/textBodyWeight`",
-            "FLOAT",
-            "`Theme.textBodyWeight`",
-            "`500`",
+            "`Weight/Medium`",
+            "500",
             "`VariableID:1305:110`"
           ],
           [
-            "`Body/textBodyLetterSpacing`",
-            "FLOAT",
-            "`Theme.textBodyLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:111`"
-          ],
-          [
-            "`Description/textDescription`",
-            "FLOAT",
-            "`Theme.textDescription`",
-            "`12`",
-            "`VariableID:1305:112`"
-          ],
-          [
-            "`Description/textDescriptionLineHeight`",
-            "FLOAT",
-            "`Theme.textDescriptionLineHeight`",
-            "`12`",
-            "`VariableID:1305:113`"
-          ],
-          [
-            "`Description/textDescriptionStyleName`",
-            "STRING",
-            "`Theme.textDescriptionStyleName`",
-            "`SemiBold`",
-            "`VariableID:1305:114`"
-          ],
-          [
-            "`Description/textDescriptionWeight`",
-            "FLOAT",
-            "`Theme.textDescriptionWeight`",
-            "`600`",
-            "`VariableID:1305:115`"
-          ],
-          [
-            "`Description/textDescriptionLetterSpacing`",
-            "FLOAT",
-            "`Theme.textDescriptionLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:116`"
-          ],
-          [
-            "`Caption/textCaption`",
-            "FLOAT",
-            "`Theme.textCaption`",
-            "`11`",
-            "`VariableID:1305:117`"
-          ],
-          [
-            "`Caption/textCaptionLineHeight`",
-            "FLOAT",
-            "`Theme.textCaptionLineHeight`",
-            "`11`",
-            "`VariableID:1305:118`"
-          ],
-          [
-            "`Caption/textCaptionStyleName`",
-            "STRING",
-            "`Theme.textCaptionStyleName`",
-            "`Regular`",
-            "`VariableID:1305:119`"
-          ],
-          [
-            "`Caption/textCaptionWeight`",
-            "FLOAT",
-            "`Theme.textCaptionWeight`",
-            "`400`",
+            "`Weight/Regular`",
+            "400",
             "`VariableID:1305:120`"
           ],
           [
-            "`Caption/textCaptionLetterSpacing`",
-            "FLOAT",
-            "`Theme.textCaptionLetterSpacing`",
-            "`0`",
-            "`VariableID:1305:121`"
+            "`Tracking/Normal`",
+            "0",
+            "`VariableID:1305:91`"
           ]
         ]
       },
       {
-        "block_id": "b000069",
-        "columns": [
-          "Style field",
-          "Variable"
-        ],
-        "rows": [
-          [
-            "`fontFamily`",
-            "Shared `Font/fontBody`"
-          ],
-          [
-            "`fontSize`",
-            "Recipe size property"
-          ],
-          [
-            "`fontWeight`",
-            "Recipe `Weight` property"
-          ],
-          [
-            "`lineHeight`",
-            "Recipe `LineHeight` property; unit `PIXELS`"
-          ],
-          [
-            "`letterSpacing`",
-            "Recipe `LetterSpacing` property; unit `PIXELS`"
-          ]
-        ]
-      },
-      {
-        "block_id": "b000073",
+        "block_id": "b000077",
         "columns": [
           "Style",
           "ID"
@@ -2457,7 +1985,7 @@
         ]
       },
       {
-        "block_id": "b000083",
+        "block_id": "b000087",
         "columns": [
           "Compatibility variable",
           "Retained ID",

@@ -262,6 +262,10 @@ void invalid() {
     options.row_heights = {std::nan("")};
     check(!model.set_options(options), "Invalid row height accepted");
     options = fixture();
+    options.columns[0].trailing_icon = "unknown-icon";
+    check(!model.set_options(options) && take(model.state()).revision == before.revision,
+          "Invalid header icon changed the model");
+    options = fixture();
     options.merges = {{0, 0, std::numeric_limits<std::size_t>::max(), 1}};
     check(!model.set_options(options), "Overflowing merge range accepted");
     options = fixture();

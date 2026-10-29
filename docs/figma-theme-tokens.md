@@ -103,18 +103,33 @@ The ten swatches supplied by the user replace the previous canonical palette in 
 
 | Figma variable / QML property | HEX display | Source node | Retained variable ID |
 | --- | --- | --- | --- |
-| `Accent/accentBlue` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |
-| `Accent/accentRed` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |
-| `Accent/accentGreen` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |
-| `Accent/accentYellow` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |
-| `Accent/accentPurple` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |
-| `Accent/accentRose` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |
-| `Accent/accentOrange` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |
-| `Accent/accentBrown` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |
-| `Accent/accentCyan` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |
-| `Accent/accentTeal` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |
+| `Accent/Blue/Default` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |
+| `Accent/Red/Default` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |
+| `Accent/Green/Default` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |
+| `Accent/Yellow/Default` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |
+| `Accent/Purple/Default` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |
+| `Accent/Rose/Default` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |
+| `Accent/Orange/Default` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |
+| `Accent/Brown/Default` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |
+| `Accent/Cyan/Default` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |
+| `Accent/Teal/Default` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |
 
 `accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.
+
+## Accent 역할 토큰
+
+Figma는 열 가지 Accent 각각에 `Default`, `Hover`, `Pressed`, `Selected`, `Disabled`,
+`Subtle`, `Outline`, `Overlay`, `Text`를 제공한다. QML에서는
+`Theme.accentRoleColor("Green", "Hover")`, 네이티브 C++에서는
+`Theme::accent_role(Accent::green, AccentRole::hover)`로 조회한다. 네이티브 기본 역할은
+`AccentRole::standard`이다. 기본 Blue 버튼과 위험 Red 버튼의 호버·눌림 색상도 이 역할을
+사용한다. 앱이 `primaryColor`를 별도로 지정하면 기존 사용자 정의 primary 동작을 유지한다.
+
+Hover와 Pressed는 기본 RGB의 `1/1.12`, `1/1.2`, Disabled는 기본 알파의 30%, Overlay는
+`64/255`이다. Selected·Subtle·Outline은 interactive 표면에 각각 25%·16%·36%를 합성한다.
+Text는 기본적으로 흰색을 30% 혼합하고 Brown은 45%를 혼합하며, Blue는 Figma의 별도
+`#5AAAFF` 값을 사용한다. 원본 90개 RGBA 값과 변수 ID는
+`tests/fixtures/figma-accent-roles.json`에 보관하고 QML과 C++ 테스트가 각각 대조한다.
 
 <a id="eight-attached-palette-colors"></a>
 
@@ -126,18 +141,20 @@ unchanged. The authored fixture records this per-color revision.
 
 ## Compatibility accent aliases
 
-The former independently sampled palette is superseded by the authored ten-color system. Its saved IDs and editable circles remain available. Seven properties alias canonical colors in Figma and QML; Gray stays neutral.
+기존의 독립 팔레트는 열 가지 Accent로 대체되었다. Figma에서 일곱 호환 별칭 변수는
+삭제되었으나, 기존 QML 호출을 위해 아래 일곱 속성은 정식 Accent를 계속 참조한다.
+Gray 변수는 Figma의 `Neutral/Gray`로 유지된다.
 
-| Compatibility property | Canonical property / value | Retained ID |
+| Compatibility property | Canonical property / value | Figma status |
 | --- | --- | --- |
-| `accentPaletteBlue` | `accentBlue` | `VariableID:1325:2` |
-| `accentPalettePurple` | `accentPurple` | `VariableID:1325:3` |
-| `accentPalettePink` | `accentRose` | `VariableID:1325:4` |
-| `accentPaletteRed` | `accentRed` | `VariableID:1325:5` |
-| `accentPaletteOrange` | `accentOrange` | `VariableID:1325:6` |
-| `accentPaletteYellow` | `accentYellow` | `VariableID:1325:7` |
-| `accentPaletteGreen` | `accentGreen` | `VariableID:1325:8` |
-| `accentPaletteGray` | neutral `#8C8C8C` | `VariableID:1325:9` |
+| `accentPaletteBlue` | `accentBlue` | removed |
+| `accentPalettePurple` | `accentPurple` | removed |
+| `accentPalettePink` | `accentRose` | removed |
+| `accentPaletteRed` | `accentRed` | removed |
+| `accentPaletteOrange` | `accentOrange` | removed |
+| `accentPaletteYellow` | `accentYellow` | removed |
+| `accentPaletteGreen` | `accentGreen` | removed |
+| `accentPaletteGray` | neutral `#8C8C8C` | `Neutral/Gray`, `VariableID:1325:9` |
 
 Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.
 
@@ -159,65 +176,26 @@ letter spacing are authored logical pixels with no mobile multiplier.
 | Description | `textDescription` | 12 / 12 | 600 | SemiBold | 0 |
 | Caption | `textCaption` | 11 / 11 | 400 | Regular | 0 |
 
-Each recipe exposes its size plus `Weight`, `StyleName`, `LineHeight` and
-`LetterSpacing`. Seven recipes × five variables, plus one shared family,
-produce the 36-variable typography inventory. The complete variable mapping is:
+각 QML 레시피의 `Weight`, `StyleName`, `LineHeight`, `LetterSpacing` 공개 속성은
+호환성을 위해 유지한다. 현재 Figma 타이포그래피는 글꼴 1개, 일곱 쌍의 크기와
+행 높이 14개, 공유 굵기 4개, 공유 자간 1개로 모두 20개 변수를 사용한다.
 
-| Figma variable | Type | QML property | Value | ID |
-| --- | --- | --- | --- | --- |
-| `Font/fontBody` | STRING | `Theme.fontBody` | `Pretendard` | `VariableID:1305:86` |
-| `Title/textTitle` | FLOAT | `Theme.textTitle` | `26` | `VariableID:1305:87` |
-| `Title/textTitleLineHeight` | FLOAT | `Theme.textTitleLineHeight` | `26` | `VariableID:1305:88` |
-| `Title/textTitleStyleName` | STRING | `Theme.textTitleStyleName` | `Bold` | `VariableID:1305:89` |
-| `Title/textTitleWeight` | FLOAT | `Theme.textTitleWeight` | `700` | `VariableID:1305:90` |
-| `Title/textTitleLetterSpacing` | FLOAT | `Theme.textTitleLetterSpacing` | `0` | `VariableID:1305:91` |
-| `Subtitle/textSubtitle` | FLOAT | `Theme.textSubtitle` | `22` | `VariableID:1305:92` |
-| `Subtitle/textSubtitleLineHeight` | FLOAT | `Theme.textSubtitleLineHeight` | `22` | `VariableID:1305:93` |
-| `Subtitle/textSubtitleStyleName` | STRING | `Theme.textSubtitleStyleName` | `Bold` | `VariableID:1305:94` |
-| `Subtitle/textSubtitleWeight` | FLOAT | `Theme.textSubtitleWeight` | `700` | `VariableID:1305:95` |
-| `Subtitle/textSubtitleLetterSpacing` | FLOAT | `Theme.textSubtitleLetterSpacing` | `0` | `VariableID:1305:96` |
-| `Header/textHeader` | FLOAT | `Theme.textHeader` | `17` | `VariableID:1305:97` |
-| `Header/textHeaderLineHeight` | FLOAT | `Theme.textHeaderLineHeight` | `17` | `VariableID:1305:98` |
-| `Header/textHeaderStyleName` | STRING | `Theme.textHeaderStyleName` | `SemiBold` | `VariableID:1305:99` |
-| `Header/textHeaderWeight` | FLOAT | `Theme.textHeaderWeight` | `600` | `VariableID:1305:100` |
-| `Header/textHeaderLetterSpacing` | FLOAT | `Theme.textHeaderLetterSpacing` | `0` | `VariableID:1305:101` |
-| `Subheader/textSubheader` | FLOAT | `Theme.textSubheader` | `15` | `VariableID:1305:102` |
-| `Subheader/textSubheaderLineHeight` | FLOAT | `Theme.textSubheaderLineHeight` | `15` | `VariableID:1305:103` |
-| `Subheader/textSubheaderStyleName` | STRING | `Theme.textSubheaderStyleName` | `SemiBold` | `VariableID:1305:104` |
-| `Subheader/textSubheaderWeight` | FLOAT | `Theme.textSubheaderWeight` | `600` | `VariableID:1305:105` |
-| `Subheader/textSubheaderLetterSpacing` | FLOAT | `Theme.textSubheaderLetterSpacing` | `0` | `VariableID:1305:106` |
-| `Body/textBody` | FLOAT | `Theme.textBody` | `13` | `VariableID:1305:107` |
-| `Body/textBodyLineHeight` | FLOAT | `Theme.textBodyLineHeight` | `13` | `VariableID:1305:108` |
-| `Body/textBodyStyleName` | STRING | `Theme.textBodyStyleName` | `Medium` | `VariableID:1305:109` |
-| `Body/textBodyWeight` | FLOAT | `Theme.textBodyWeight` | `500` | `VariableID:1305:110` |
-| `Body/textBodyLetterSpacing` | FLOAT | `Theme.textBodyLetterSpacing` | `0` | `VariableID:1305:111` |
-| `Description/textDescription` | FLOAT | `Theme.textDescription` | `12` | `VariableID:1305:112` |
-| `Description/textDescriptionLineHeight` | FLOAT | `Theme.textDescriptionLineHeight` | `12` | `VariableID:1305:113` |
-| `Description/textDescriptionStyleName` | STRING | `Theme.textDescriptionStyleName` | `SemiBold` | `VariableID:1305:114` |
-| `Description/textDescriptionWeight` | FLOAT | `Theme.textDescriptionWeight` | `600` | `VariableID:1305:115` |
-| `Description/textDescriptionLetterSpacing` | FLOAT | `Theme.textDescriptionLetterSpacing` | `0` | `VariableID:1305:116` |
-| `Caption/textCaption` | FLOAT | `Theme.textCaption` | `11` | `VariableID:1305:117` |
-| `Caption/textCaptionLineHeight` | FLOAT | `Theme.textCaptionLineHeight` | `11` | `VariableID:1305:118` |
-| `Caption/textCaptionStyleName` | STRING | `Theme.textCaptionStyleName` | `Regular` | `VariableID:1305:119` |
-| `Caption/textCaptionWeight` | FLOAT | `Theme.textCaptionWeight` | `400` | `VariableID:1305:120` |
-| `Caption/textCaptionLetterSpacing` | FLOAT | `Theme.textCaptionLetterSpacing` | `0` | `VariableID:1305:121` |
+| Figma 공유 변수 | 값 | ID |
+| --- | --- | --- |
+| `Font/fontBody` | Pretendard | `VariableID:1305:86` |
+| `Weight/Bold` | 700 | `VariableID:1305:90` |
+| `Weight/SemiBold` | 600 | `VariableID:1305:100` |
+| `Weight/Medium` | 500 | `VariableID:1305:110` |
+| `Weight/Regular` | 400 | `VariableID:1305:120` |
+| `Tracking/Normal` | 0 | `VariableID:1305:91` |
 
 ### Actual style bindings
 
-Every saved text style has exactly five bound fields:
+일곱 Figma 텍스트 스타일은 공유 글꼴, 해당 스타일의 크기와 행 높이, 공유 굵기와
+자간을 각각 바인딩한다. `fontWeight`가 실제 글꼴 스타일을 선택하며 별도의
+`fontStyle` 바인딩은 없다. 이전 개별 굵기·자간·스타일 이름 변수는 Figma에서
+삭제되었고, 대응하는 QML 속성은 앱 호환성을 위해 남아 있다.
 
-| Style field | Variable |
-| --- | --- |
-| `fontFamily` | Shared `Font/fontBody` |
-| `fontSize` | Recipe size property |
-| `fontWeight` | Recipe `Weight` property |
-| `lineHeight` | Recipe `LineHeight` property; unit `PIXELS` |
-| `letterSpacing` | Recipe `LetterSpacing` property; unit `PIXELS` |
-
-The observed Figma behavior is that `fontWeight` binding selects the static
-font style and replaces a `fontStyle` binding. The seven `StyleName` STRING
-variables record the matching QML recipe; they are not a sixth active style
-binding. Do not report simultaneous `fontStyle` and `fontWeight` bindings.
 Existing text-style IDs are retained:
 
 | Style | ID |
@@ -270,7 +248,7 @@ The Figma update preserves all ten source-node bounds and binds them to the exis
 Source validation covers:
 
 - Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.
-- All 77 saved typed Theme properties and retained typography/style contracts.
+- The 50 retained Figma variables, all 90 accent roles, and shared typography/style contracts.
 - Rendered pixel samples for all ten canonical swatches.
 - Default and custom app Primary propagation, controls, overlays, and ten catalog choices.
 - SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.

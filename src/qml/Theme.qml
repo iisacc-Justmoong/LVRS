@@ -176,6 +176,8 @@ QtObject {
     readonly property color primary: primaryColor
     readonly property color accent: primary
     readonly property bool usingDefaultPrimary: Qt.colorEqual(primary, defaultPrimary)
+    readonly property color primaryHover: usingDefaultPrimary ? accentRoleColor("Blue", "Hover") : Qt.darker(primary, 1.12)
+    readonly property color primaryPressed: usingDefaultPrimary ? accentRoleColor("Blue", "Pressed") : Qt.darker(primary, 1.2)
     readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
     readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary
@@ -257,6 +259,35 @@ QtObject {
     readonly property color accentTransparent: "transparent" // none
     readonly property color accentWhite: "#FFFFFF"
     readonly property color accentGrayLight: "#CED0D6"
+    // Figma Accent/<color>/<role> values. The shared formulas reproduce the
+    // authored states while retaining the two explicitly authored Text colors.
+    function accentRoleColor(colorName, roleName) {
+        const name = String(colorName || "").toLowerCase()
+        const role = String(roleName || "Default").toLowerCase()
+        const palette = { blue: accentBlue, red: accentRed, green: accentGreen,
+            yellow: accentYellow, purple: accentPurple, rose: accentRose,
+            orange: accentOrange, brown: accentBrown, cyan: accentCyan, teal: accentTeal }
+        const color = palette[name]
+        if (color === undefined)
+            return undefined
+        if (role === "default") return color
+        if (role === "hover") return Qt.rgba(color.r / 1.12, color.g / 1.12, color.b / 1.12, color.a)
+        if (role === "pressed") return Qt.rgba(color.r / 1.2, color.g / 1.2, color.b / 1.2, color.a)
+        if (role === "disabled") return Qt.rgba(color.r, color.g, color.b, color.a * 0.3)
+        if (role === "overlay") return Qt.rgba(color.r, color.g, color.b, color.a * (64 / 255))
+        if (role === "text") {
+            if (name === "blue") return Qt.rgba(0.3529411852359772, 0.6666666865348816, 1, color.a)
+            const white = name === "brown" ? 0.45 : 0.3
+            return Qt.rgba(color.r * (1 - white) + white, color.g * (1 - white) + white,
+                           color.b * (1 - white) + white, color.a)
+        }
+        const amount = role === "selected" ? 0.25 : role === "subtle" ? 0.16
+            : role === "outline" ? 0.36 : -1
+        if (amount < 0) return undefined
+        return Qt.rgba(surfaceInteractive.r * (1 - amount) + color.r * amount,
+                       surfaceInteractive.g * (1 - amount) + color.g * amount,
+                       surfaceInteractive.b * (1 - amount) + color.b * amount, color.a)
+    }
     readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)
     readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)
     readonly property color accentSlate: "#43454A"
