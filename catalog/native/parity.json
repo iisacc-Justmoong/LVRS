@@ -428,7 +428,7 @@
     },
     {
       "path": "src/qml/Theme.qml",
-      "sha256": "6f69e02da269421e6fac8608a3b944fe5d79a78c0a61423f0152690851b17484"
+      "sha256": "ec44fb85a98ad58e3be8b9e66cdc7a2202f5f2966f0ea355cff51cb04585560a"
     },
     {
       "path": "src/qml/Window.qml",
@@ -448,7 +448,7 @@
     },
     {
       "path": "src/qml/components/control/buttons/AbstractButton.qml",
-      "sha256": "e34599e6234316d190a96e0d729a6433822a992fea6afd63a36984817ddf7509"
+      "sha256": "83a074e8202056e82b844e1e4b2c3f2ec9f62b63bb2afcacb9f668493c9c2f3b"
     },
     {
       "path": "src/qml/components/control/buttons/ButtonMethodRegistry.qml",
@@ -548,7 +548,7 @@
     },
     {
       "path": "src/qml/components/control/display/TableHeader.qml",
-      "sha256": "e9e7bdd690d6d6e669a60fd67ee0b1b8b4d00ca74788b30371ade2b4c4433c7c"
+      "sha256": "9dbcbef558f5f14a3071040d0fa698ce03720b99960330e2d17878e9ed37f280"
     },
     {
       "path": "src/qml/components/control/display/TableRow.qml",
@@ -572,7 +572,7 @@
     },
     {
       "path": "src/qml/components/control/input/InputField.qml",
-      "sha256": "d7f0c554bff96a512e75140a30bb07a257614e2a5455bb4c26b7034ffcf6c160"
+      "sha256": "122636a91eb2a058175cce38efa3e9baf9ecd2bc81f230bb3c645ab16cd4ced8"
     },
     {
       "path": "src/qml/components/control/input/Slider.qml",
@@ -865,664 +865,672 @@
   ],
   "native_api_files": [
     {
-      "path": "src/LVRS/Alert.cpp",
-      "sha256": "d3c8ee368f81de6f3352907a9f642d7815376e7f1d5ad2662553e9c1d3167524"
+      "path": "src/Components/AppCard.cpp",
+      "sha256": "093e7b7c9757ecdab13fc70c4c5d16664b6298d9705d9e7311d7107272bab4db"
     },
     {
-      "path": "src/LVRS/Alert.h",
-      "sha256": "530867b75857fea487069d37ed7edaedc37cefa943330880846a6199ceb47561"
-    },
-    {
-      "path": "src/LVRS/AlertButton.cpp",
-      "sha256": "a5ac18e8fcabe4147be9c48f432fe0d2057cc9b45526880c2f82dbe8396263f0"
-    },
-    {
-      "path": "src/LVRS/AlertButton.h",
-      "sha256": "01d32e87696eafd68734e8fab389cf4303f548ddbdf1d23da79fb0daba070826"
-    },
-    {
-      "path": "src/LVRS/AppCard.cpp",
-      "sha256": "99163f80a929ab4efcac3041a8f2e2e3350532eb53f23723e641b0d147b8dfd1"
-    },
-    {
-      "path": "src/LVRS/AppCard.h",
+      "path": "src/Components/AppCard.h",
       "sha256": "102f602c1cc784f96339c03d16ab3c7890f7c5c6ca01185fe95afda59619ee1d"
     },
     {
-      "path": "src/LVRS/AppHeader.cpp",
-      "sha256": "fe88fa1d2d3d6b4712305b4f135e8c8c4db90104030ffa0ce8ee94c1e28d91e2"
+      "path": "src/Components/AppHeader.cpp",
+      "sha256": "39e94934df0505675039e78d6b971aca87f93d719da4674ad3f8b14a4eb39568"
     },
     {
-      "path": "src/LVRS/AppHeader.h",
+      "path": "src/Components/AppHeader.h",
       "sha256": "a10788ddb607f9b5e89122661aa4bed8fd5c7602b7f9a2ae1fcf3f6a2797e931"
     },
     {
-      "path": "src/LVRS/Avatar.cpp",
-      "sha256": "86af73d0fcadf5b509f6ca14b92ca2f0778cb5ace2025f1af16d1d4ec567c290"
+      "path": "src/Components/Avatar.cpp",
+      "sha256": "47e2360ec762e5eabc5138eafde158118443bf76e464f879d264b27f6abd1212"
     },
     {
-      "path": "src/LVRS/Avatar.h",
+      "path": "src/Components/Avatar.h",
       "sha256": "26130b5824bd0c17009869eb18ca97da49ceab73f9007062042f07ee8e1422f5"
     },
     {
-      "path": "src/LVRS/ButtonMethod.cpp",
-      "sha256": "c5ae3ed292010a069c1aef5a4e5c7d2cd2ce762976d74db3b6bef87ecd93cae0"
+      "path": "src/Components/Card.cpp",
+      "sha256": "7b7811d3ea3a4655bc7cd310fcec43cf7b8c8c8268daf9562408e2e31c6ba2a9"
     },
     {
-      "path": "src/LVRS/ButtonMethod.h",
-      "sha256": "ebc668214cc831ee60c62eac49809427ea5df828a4018458a86594432daef3f0"
-    },
-    {
-      "path": "src/LVRS/Card.cpp",
-      "sha256": "0506ccecf845237bf4ca824339bb487c862be5b2cadbe267b236823392be1d2f"
-    },
-    {
-      "path": "src/LVRS/Card.h",
+      "path": "src/Components/Card.h",
       "sha256": "0135824deb7f59fe49b61278e846774527f69114effb23074261b7514c2c0fd6"
     },
     {
-      "path": "src/LVRS/CardAssets.cpp",
-      "sha256": "fd050bec9c1c8098ad88421edf26c6e7a98299756daaf519e8366d825343ee6a"
+      "path": "src/Components/CardAssets.cpp",
+      "sha256": "87e4e540d9ba30caa4cdf0c963351dda441c86ef5714a25683b964b88fb3d565"
     },
     {
-      "path": "src/LVRS/CardDetail.cpp",
-      "sha256": "72bbe731a09a667d4a3dcbe3cd5fc5c3cd9276af944a5bc82561c6fbe7316946"
+      "path": "src/Components/CardDetail.cpp",
+      "sha256": "bff888e84a4ca22704718b0330f40684cf488485f44f9d7698acea4f3d27dc5d"
     },
     {
-      "path": "src/LVRS/CardDetail.h",
-      "sha256": "3f9a85944bfc41269a0c02be503ef6a6a4f3aa78c3833f38dc4d2c59bfab6c30"
+      "path": "src/Components/CardDetail.h",
+      "sha256": "78f878cdceb20ed66599078d93c60a57a01b7a675bc3c79e7640f2c862f93f03"
     },
     {
-      "path": "src/LVRS/CodeEditor.cpp",
-      "sha256": "675e28dfa594b1af217d02f7c743cfb2a24054ec9e2148a87b7bac2d71f969fb"
+      "path": "src/Controls/ButtonMethod.cpp",
+      "sha256": "207657dcc88515bf3e4af242c7548d42bd3b20573070a0e8e79b8d0a9093a97e"
     },
     {
-      "path": "src/LVRS/CodeEditor.h",
-      "sha256": "91985c6be7855676ba5d31c904b42c52d5b9f494c7f1568c5491cd1208be36e7"
+      "path": "src/Controls/ButtonMethod.h",
+      "sha256": "ebc668214cc831ee60c62eac49809427ea5df828a4018458a86594432daef3f0"
     },
     {
-      "path": "src/LVRS/CodeEditorDetail.cpp",
-      "sha256": "0a0ab051e0254dcde5b1d74d85fbea7bec71979d114d3205d92bd05406c0a51b"
+      "path": "src/Controls/InputField.cpp",
+      "sha256": "ae793a0cf8e70cbed107099ef56b7bb3b16058ff416a60c4a2319b0c84c28915"
     },
     {
-      "path": "src/LVRS/CodeEditorDetail.h",
-      "sha256": "82964da86b7a599af6c5035605e945927ac46645bbc554ce6ba7cef757eb9e65"
+      "path": "src/Controls/InputField.h",
+      "sha256": "19b3cfa18daf005edb3ea0a94fc253d4219c79db3019df9de28d05aa6bf611cf"
     },
     {
-      "path": "src/LVRS/ColorPicker.cpp",
-      "sha256": "ebda816c6e0f52bf4a8575ddaf835783c84f9113d86fe0238d1a866931d29a66"
+      "path": "src/Controls/Link.cpp",
+      "sha256": "774f639b4be4c64cf56b476e37d1971d13623c19aafd8bae71cd3f813bbe3bb5"
     },
     {
-      "path": "src/LVRS/ColorPicker.h",
-      "sha256": "4a6e5d4f9940d2aeba994c4ab50bad0f43e46158f806c97be70cda5f840f46c2"
+      "path": "src/Controls/Link.h",
+      "sha256": "6812846b53fd1ea523bf9c085aee50e14586d5f0560768b6443a00b258ef6c82"
     },
     {
-      "path": "src/LVRS/ColorPickerButton.cpp",
-      "sha256": "8e7b4ea9e44164f5da29cddf4c67e59d85b9bc91d99466641b5db65d20c60011"
+      "path": "src/Controls/ProgressBar.cpp",
+      "sha256": "1b27741676d80958abb9bcab591f729dd2a0d1a413e3b75e903c6a933084ab35"
     },
     {
-      "path": "src/LVRS/ColorPickerButton.h",
-      "sha256": "f436074e6a3302abb2e46933f84ae17a7d4a1a8720f1f812b3d026e5c1e15178"
+      "path": "src/Controls/ProgressBar.h",
+      "sha256": "6c9d7a03780276b93ccfd1bb5293623edf140c92e59aaad6aedc1daedfceebc2"
     },
     {
-      "path": "src/LVRS/FontPolicy.cpp",
-      "sha256": "f1cd99e1b199fae7e29fffdaf31dfabbb76035257672297f67f9a5eec6e8380a"
+      "path": "src/Controls/ToolbarButton.cpp",
+      "sha256": "55b63b448a2e142e1fdaa5133001323da7ac1dd4bec8a3046681b25450f17506"
     },
     {
-      "path": "src/LVRS/FontPolicy.h",
-      "sha256": "d1709f7c0f3e844d483bce1489fc6ceded66ea13a29989406d2ed31d6d34d88b"
-    },
-    {
-      "path": "src/LVRS/HierarchyController.cpp",
-      "sha256": "f7eee54366c67763df1c10fa99644104fed4b7da5325b9a1e7974200225ec478"
-    },
-    {
-      "path": "src/LVRS/HierarchyController.h",
-      "sha256": "9e29efcfc42088636940ddaf52096f46fd1125706851aa9ea83e97fac88a22d8"
-    },
-    {
-      "path": "src/LVRS/HierarchyDelegateContext.cpp",
-      "sha256": "78c6a5ae9db5d01827c165b410a446b56fef1da3a3408491cd845144ab033305"
-    },
-    {
-      "path": "src/LVRS/HierarchyDelegateContext.h",
-      "sha256": "4e5dd12f20ce1ac523e5d9d827ac59ea239265d164f4c4fedc91b9cc36bf7e12"
-    },
-    {
-      "path": "src/LVRS/HierarchyItem.cpp",
-      "sha256": "cd74363edf979dc8b85a0ef8b4d41e3f4a1be6e7a2aa378449eb3117a1f91823"
-    },
-    {
-      "path": "src/LVRS/HierarchyItem.h",
-      "sha256": "82d7086eaf85b940e7cc13be0121eb71db5ad480f9c99f9971b3db076c528585"
-    },
-    {
-      "path": "src/LVRS/HierarchyList.cpp",
-      "sha256": "47ca1dc0907b7150b259da80092eb677b01ad0c4122e85e96d9a37a4d6f26142"
-    },
-    {
-      "path": "src/LVRS/HierarchyList.h",
-      "sha256": "9d6cc456dca326acfe9fcde1c57f68836d0b13981a9127044d747c2b45845dce"
-    },
-    {
-      "path": "src/LVRS/HierarchyModel.cpp",
-      "sha256": "713b739aaf1bd0fbbd436515306d0fbc16d755aa58d1d0171932dac98e8e99ee"
-    },
-    {
-      "path": "src/LVRS/HierarchyModel.h",
-      "sha256": "74f37af576adb6872473a30e1e603f38bddbe7a96cc5a524da898816bafdc277"
-    },
-    {
-      "path": "src/LVRS/HierarchyProjection.cpp",
-      "sha256": "3085814ef3ec0f4e6cdd73fd32396e61264f358d5e5ad0dc6a43923d0d99f813"
-    },
-    {
-      "path": "src/LVRS/HierarchyProjection.h",
-      "sha256": "2b327a02e40381e60f4fa49b0c1bf00682f36697ab81d3363768a7f230c52325"
-    },
-    {
-      "path": "src/LVRS/HierarchyToolbar.cpp",
-      "sha256": "287e33d11b45245324a10be7f90b87af476dbc974c3cf5775b6303c342bca078"
-    },
-    {
-      "path": "src/LVRS/HierarchyToolbar.h",
-      "sha256": "c926dfd4d9bfa1735312198d4d2abc70e5a759268ab6272e38e0a9ab8dbdf1f9"
-    },
-    {
-      "path": "src/LVRS/HierarchyVisibility.cpp",
-      "sha256": "12f24408ca8e3b374a5f02b452dd6333f49ca63ff0a1332ea868ff146a48decf"
-    },
-    {
-      "path": "src/LVRS/HierarchyVisibility.h",
-      "sha256": "e1bb206c24db6637e6263f9466bb37bc88ed81467c3b80bfb58c90ef0b9ece77"
-    },
-    {
-      "path": "src/LVRS/Icons.cpp",
-      "sha256": "70feb2c8a4e0d596067359495b5d0d9d081eca34df53a411d507de699cd5deef"
-    },
-    {
-      "path": "src/LVRS/Icons.h",
-      "sha256": "ecce1e99d3a09d6648613ed8943f826e054a6f689937de6c5241af1916033a9e"
-    },
-    {
-      "path": "src/LVRS/Image.cpp",
-      "sha256": "41e89846fba752f218657c1ff2e6e1676df91fc494e9c8bca669118839704027"
-    },
-    {
-      "path": "src/LVRS/Image.h",
-      "sha256": "8abee92a03499c7cde8c59d0186746d98ed60d322408003dbd4287cdcf1bb8c2"
-    },
-    {
-      "path": "src/LVRS/Link.cpp",
-      "sha256": "4e312df03a875b40096a2aa2475b839f19aae135168463a136ae654840ddaedb"
-    },
-    {
-      "path": "src/LVRS/Link.h",
-      "sha256": "760814c16ba3d69a38ff08c71c04cf5740f14a917c08623bd8aae651de3470b2"
-    },
-    {
-      "path": "src/LVRS/List.cpp",
-      "sha256": "0e013d80eed32ae9b068552101bcc5282acb841068799c491213baf00e56d2af"
-    },
-    {
-      "path": "src/LVRS/List.h",
-      "sha256": "01f8d4d299cc386a1739449003d6eeeb7a0ea08295b2e2272f2c964e7616d695"
-    },
-    {
-      "path": "src/LVRS/ListFooter.cpp",
-      "sha256": "29f5d3603634921af810bda9bbc829d3bdf93d4f6011538a7211e4381c8a4bc5"
-    },
-    {
-      "path": "src/LVRS/ListFooter.h",
-      "sha256": "04185abd592783eae1b6b1309381081c7e0dcb01b43cb88f55edc34b8e615d3b"
-    },
-    {
-      "path": "src/LVRS/ListModel.cpp",
-      "sha256": "2c51094a42c5fb026e135e1df912244a4e6338509b00077998d668442f38e898"
-    },
-    {
-      "path": "src/LVRS/ListModel.h",
-      "sha256": "876733d2af52201e8bedc430ec2f251e2e9619ace6277a45a5fe0195e15d4de7"
-    },
-    {
-      "path": "src/LVRS/ListToolbar.cpp",
-      "sha256": "a9565a4c9cbda6d99d888c3c220769d0a8ca28692e91b7f63516ba6be04e1b1e"
-    },
-    {
-      "path": "src/LVRS/ListToolbar.h",
-      "sha256": "ceb10066b95c4240b0e8bbd53bbf320bb5dd4d0e1d37d7bbc68f40197604b6ea"
-    },
-    {
-      "path": "src/LVRS/MaterialDetail.cpp",
-      "sha256": "fdec7ee635707785dc2e00f38a75efef35dc9222149d31bda55785757ee9b07b"
-    },
-    {
-      "path": "src/LVRS/MaterialDetail.h",
-      "sha256": "92eb4e278f84314d9485beae54e9e55f1299d6bcfd7618f6223e509b14d02fbd"
-    },
-    {
-      "path": "src/LVRS/MaterialSurface.cpp",
-      "sha256": "5ef0f32937748f0304de1a89f41c07526e1899ef638a0ed9bb0d6c8f96e4a410"
-    },
-    {
-      "path": "src/LVRS/MaterialSurface.h",
-      "sha256": "15057f963c2dff72282eba248cf3944ca6f61855b663ba704a99a541f8def1c9"
-    },
-    {
-      "path": "src/LVRS/Modal.cpp",
-      "sha256": "cef7e231ccc19c1f6ebbe7a286ca4ebd38be58f6f1a6da90fd42438211315f42"
-    },
-    {
-      "path": "src/LVRS/Modal.h",
-      "sha256": "da8d2c508dfda0305323ce1b56c8ad8fe546fc4f955acef06d3a117be1c73f9d"
-    },
-    {
-      "path": "src/LVRS/ModelAdapter.cpp",
-      "sha256": "0d30a8a5c4c1cafa3a46d7dc5665fed42aba902978d4e4aa59e455927529c3b7"
-    },
-    {
-      "path": "src/LVRS/ModelAdapter.h",
-      "sha256": "28c8501b54608635d127b55d2d08dce5019a9f4487d65498570c96cc9d718c8b"
-    },
-    {
-      "path": "src/LVRS/ModelProperties.cpp",
-      "sha256": "abb6d5547bb0af3a6524ba00c0fcdb24bd8ce11919976e62ceb7f11c0063bc4b"
-    },
-    {
-      "path": "src/LVRS/ModelProperties.h",
-      "sha256": "4dc1a72de43cb598aaf35370dd35780176a640713f15f7b7443e76f08564eaba"
-    },
-    {
-      "path": "src/LVRS/ModelSource.cpp",
-      "sha256": "15978ab394ddd3c308d76147ae522de0fbc78c3591026bd3777e88f3b9dea91b"
-    },
-    {
-      "path": "src/LVRS/ModelSource.h",
-      "sha256": "ac5e6f9e2bdea0f6c52dff24949c36ebb4bb98ebc325bcfe0a01111a9799d16d"
-    },
-    {
-      "path": "src/LVRS/ModelUndoStack.cpp",
-      "sha256": "3f2c8ec13ef8255f51561cab6e5253dc381df1fad2a95aa7a7b6e1bf04a2d355"
-    },
-    {
-      "path": "src/LVRS/ModelUndoStack.h",
-      "sha256": "0ca5ce00b6e88a852cb14620bcaead23eb40d9f517b367cdbfe9aa49db299960"
-    },
-    {
-      "path": "src/LVRS/Motion.cpp",
-      "sha256": "1c7ce9e586c5c7c4d5d56b1e04f53b63a1552ff2dc9c34a4099a1fd7810b68fa"
-    },
-    {
-      "path": "src/LVRS/Motion.h",
-      "sha256": "92da284131e38fffdd652f7d37a30ebdaed2fdfc30a832e2e94547e58b695a1f"
-    },
-    {
-      "path": "src/LVRS/NavigationStackModel.cpp",
-      "sha256": "d9fd30ad6e5bfaff4321d5b2639eb9c64e8016373621aa5c07aef20e08374f75"
-    },
-    {
-      "path": "src/LVRS/NavigationStackModel.h",
-      "sha256": "05079e5062817c4523d8e40c7661e3051a097c733bf13b0c777acbedcbe5dee4"
-    },
-    {
-      "path": "src/LVRS/NavigationTarget.cpp",
-      "sha256": "f74983947c2a67e2a95813dc37f6f087b36ceba5d71430f9f5862d83d2249e7b"
-    },
-    {
-      "path": "src/LVRS/NavigationTarget.h",
-      "sha256": "bcfae3d0f5734be7939dd33030caf9bb63abda38621453d15df28d1a966bc787"
-    },
-    {
-      "path": "src/LVRS/Navigator.cpp",
-      "sha256": "f4906d50b59da2098e8dbae5ae025e26996cad8600984ad4a99ee338a71c8ede"
-    },
-    {
-      "path": "src/LVRS/Navigator.h",
-      "sha256": "fd8665fdd254003cdcf55503c6e4f150b4c208f3e2638116b6fb587b9ea72a50"
-    },
-    {
-      "path": "src/LVRS/PageMonitor.cpp",
-      "sha256": "7f9b2969bee9b1979bf8a06a9488014a7d6c3e6e2a0d1cf9db2663eecd4c345d"
-    },
-    {
-      "path": "src/LVRS/PageMonitor.h",
-      "sha256": "75cccc03fcb50d418ca06fcbb88f022e16af620d6cf5f07e5c891e6c84ec09ba"
-    },
-    {
-      "path": "src/LVRS/PageRouter.cpp",
-      "sha256": "ad9c9d669fceebbd02048f26eecff9acde51815a512aeeb25bcf5b9c8569f4db"
-    },
-    {
-      "path": "src/LVRS/PageRouter.h",
-      "sha256": "f59460088ce7439914c78de3f3f848f8a54eacb6d579b917eb71f6c35e47b649"
-    },
-    {
-      "path": "src/LVRS/PanelMaterial.cpp",
-      "sha256": "d46c59859187c4ed9dc7b910a6abc6d47481bdc338abea5ad2b5f4716d6b5930"
-    },
-    {
-      "path": "src/LVRS/PanelMaterial.h",
-      "sha256": "d6cd29d4b6b666e7d394c5ccce7649de83fef7cc9c82e5323a1f66a1c33517d3"
-    },
-    {
-      "path": "src/LVRS/PlatformInfo.cpp",
-      "sha256": "5b33234767efc1a59324f3a2cb0138362226cbefee115281414402d046e70f35"
-    },
-    {
-      "path": "src/LVRS/PlatformInfo.h",
-      "sha256": "7d970c5b58af69c84f3f5a25267eff2b862a4193a09c854f8bd8c6fdcfdfed90"
-    },
-    {
-      "path": "src/LVRS/PresentationDetail.cpp",
-      "sha256": "0ce9703bfd295e06503ad369c96569531fb26f58ded018e17b848194eac76afe"
-    },
-    {
-      "path": "src/LVRS/PresentationDetail.h",
-      "sha256": "f8098b363bde5e084c1c460702a5286bcef8a32a0d8eae55d1c4db715a1edb1d"
-    },
-    {
-      "path": "src/LVRS/ProgressBar.cpp",
-      "sha256": "bce1c05a6881578f6a4539920f23c6b6ff16e1a2d9154ca914fd2694d6e68eef"
-    },
-    {
-      "path": "src/LVRS/ProgressBar.h",
-      "sha256": "5f90f3308eea41d6df93ff2cfc991c9ae312356a3d5d9ef6d62d4a2949e4ea1f"
-    },
-    {
-      "path": "src/LVRS/ProgressModel.cpp",
-      "sha256": "3bce980b6024c0e043ebcb960b7db56dd7b79840f692d638b4f6e92e18aa0723"
-    },
-    {
-      "path": "src/LVRS/ProgressModel.h",
-      "sha256": "a34735ef98d1d673d2a6e4a9652b0dc673ac1050026547bf17e78920f0329593"
-    },
-    {
-      "path": "src/LVRS/RenderMonitor.cpp",
-      "sha256": "024b57458858216fe47690e453a281089df02376b46b538f49ad6a4fd90e99b3"
-    },
-    {
-      "path": "src/LVRS/RenderMonitor.h",
-      "sha256": "3120a126f7a4f85043ce302c03d4d05018e0a28a29329bd8b8d837eb806b0540"
-    },
-    {
-      "path": "src/LVRS/RouteMatcher.cpp",
-      "sha256": "540ebe94576f9db0206ec05fb4039c21aa1fbb0480c0d108ee6145f76a4160e6"
-    },
-    {
-      "path": "src/LVRS/RouteMatcher.h",
-      "sha256": "7105f85a1d563810a0e8a9859cfcddb518d1dadd7a267efbe9f2aa6841a95aaf"
-    },
-    {
-      "path": "src/LVRS/RouteResolver.cpp",
-      "sha256": "c9c31ad79a0cbb6b16523e88fc2ead0acd2600fbc8b674ad945f1b1d29a51bd8"
-    },
-    {
-      "path": "src/LVRS/RouteResolver.h",
-      "sha256": "fcbb84efceb92bf1226dfb40460b2dd8a314e07331527dfb4573be4c8c626054"
-    },
-    {
-      "path": "src/LVRS/RoutingDetail.cpp",
-      "sha256": "7fe8ea7bfce8f97cbd0b7ad79a772d3393d62e357a614c4eb6a33460c7f3a8cc"
-    },
-    {
-      "path": "src/LVRS/RoutingDetail.h",
-      "sha256": "022a0a3fa6d87318291dccc214606c8109770fb4ed5bff02fafc35cc3a334216"
-    },
-    {
-      "path": "src/LVRS/Sheet.cpp",
-      "sha256": "548777c429f9021b44b75bf656f9ffca37e72118de02888d3063123da3389585"
-    },
-    {
-      "path": "src/LVRS/Sheet.h",
-      "sha256": "eff6329ddc54aea507335c9697f90b6e50e83d1dce7e1e064a88beeec6070d79"
-    },
-    {
-      "path": "src/LVRS/StateModel.cpp",
-      "sha256": "1a1da7dfe8628ef25cf55f76a868d905ca26c5ce8d82846964ab875c0ef5b749"
-    },
-    {
-      "path": "src/LVRS/StateModel.h",
-      "sha256": "9469309e7a524d0d88fb33ef6677588c37dad85b3254ade21c21751139e17170"
-    },
-    {
-      "path": "src/LVRS/StateSource.cpp",
-      "sha256": "b03227688263b636aeb992aa7105e323ad0f6dc534ca1a73c00be5abdac55e78"
-    },
-    {
-      "path": "src/LVRS/StateSource.h",
-      "sha256": "61cc439ea34cc77fb453cd663b9d3cfaf72338b4b6361389a570536568af1b94"
-    },
-    {
-      "path": "src/LVRS/SurfaceDetail.cpp",
-      "sha256": "ad8f0190da3876e9785ef277de0e3c9fc65c6008f0ea276381d6fb39612bd542"
-    },
-    {
-      "path": "src/LVRS/SurfaceDetail.h",
-      "sha256": "7f814e74b3b9cca3cc7925eb47c282328f170d8068ec33af16319b7a94f3b35f"
-    },
-    {
-      "path": "src/LVRS/SvgManager.cpp",
-      "sha256": "a17bd7ac67e76a408cd27476498b2ca6b9f93e9f2e822f568a6593c99ba6f00a"
-    },
-    {
-      "path": "src/LVRS/SvgManager.h",
-      "sha256": "fb256de1cfe827d131a1f16723abcdecbe4abbcfc4bada2599a1bc844705830b"
-    },
-    {
-      "path": "src/LVRS/SvgSource.cpp",
-      "sha256": "e5bb6db38838cb87a3d5bb1e2d5b810b4a3381b4367ebad321d18f68f8a89904"
-    },
-    {
-      "path": "src/LVRS/SvgSource.h",
-      "sha256": "e441cbd2d2854750c7047f6ca1bbb0ba3897add27786ec7bb743abc6703ae284"
-    },
-    {
-      "path": "src/LVRS/Table.cpp",
-      "sha256": "bfd39ead96fb4eb37accd6882788881716d64f4327da416944f9c8031af0e211"
-    },
-    {
-      "path": "src/LVRS/Table.h",
-      "sha256": "dbbd6ac49ff3c171f1dc68a925892e11208da30bc7952dde488e8dbc1389ca5f"
-    },
-    {
-      "path": "src/LVRS/TableCellItem.cpp",
-      "sha256": "5e0b5c962889456c604c69d382a984e43e801241e51ccf0c981a39e53933546e"
-    },
-    {
-      "path": "src/LVRS/TableCellItem.h",
-      "sha256": "2ba304cdee02f6057463dd4f788111b95d8fd0bdfb075600ca562cbc8b682034"
-    },
-    {
-      "path": "src/LVRS/TableDetail.cpp",
-      "sha256": "90a7372b2ee668266c9cd82385bdaf0ac80e3cc8d0e7930317ddbe25105fe2ca"
-    },
-    {
-      "path": "src/LVRS/TableDetail.h",
-      "sha256": "26c8a5f20b4879e6e3696bae4432b5f04982c97c25ecf9a4bb9caac2ade7ceb2"
-    },
-    {
-      "path": "src/LVRS/TableHeader.cpp",
-      "sha256": "df906635afb2e294df91160ee944e4a6de861ce4188d585d7e9ab49b7f1025d5"
-    },
-    {
-      "path": "src/LVRS/TableHeader.h",
-      "sha256": "8d51eaac44655684dfafee0b5c36120cffd3f1edc68ccc8e1f310d72e9b61588"
-    },
-    {
-      "path": "src/LVRS/TableHeaderModel.cpp",
-      "sha256": "e698262d11c8b6007cb87f6d67c80c75843329cb800fb06e1fc68bc7258f0204"
-    },
-    {
-      "path": "src/LVRS/TableHeaderModel.h",
-      "sha256": "443ca0ceb71706d63064e8e4058b206f84594b37ba4b90c46a28be4d9d4542be"
-    },
-    {
-      "path": "src/LVRS/TableModel.cpp",
-      "sha256": "2ec2a415b57c21d976f17d899c76a4b0db78d2e18e807d56cf6437b70d65c3f5"
-    },
-    {
-      "path": "src/LVRS/TableModel.h",
-      "sha256": "059c86c30a9c1bd2044e984aabd23b87120f952707016b64a22d576ce8d5bae5"
-    },
-    {
-      "path": "src/LVRS/TableRow.cpp",
-      "sha256": "813129b89942f80e62e13ced50a6f1e08ed4585e09553ea6f47a016e83cd2ab3"
-    },
-    {
-      "path": "src/LVRS/TableRow.h",
-      "sha256": "8e5a541534ddeaa34de8b13923203b5b3460e86fad84fb0ed3ed9bb15a098d96"
-    },
-    {
-      "path": "src/LVRS/TableTransfer.cpp",
-      "sha256": "13fffadb48a7ea8d47da986591500a33890e54dbd8d9d8fda65dd589af332190"
-    },
-    {
-      "path": "src/LVRS/TableTransfer.h",
-      "sha256": "7b1f720e366fcc54becc60de174301feb997aa79aa07115a24489b4f00e97718"
-    },
-    {
-      "path": "src/LVRS/TableValue.cpp",
-      "sha256": "fd2d7b98459f2ee35cf50c3170be7754af252650c4017366fc428e0d79b98a9f"
-    },
-    {
-      "path": "src/LVRS/TableValue.h",
-      "sha256": "168cd6c4301d76f4e1c8b9ffb7f6d4d4f659fec8a11d43b23c3cf0551fc5dbf0"
-    },
-    {
-      "path": "src/LVRS/TextDocumentDetail.cpp",
-      "sha256": "61e92e8b7a020ffff1785414eb1642c68fb65119be4c7ca51a34dd21651cf44a"
-    },
-    {
-      "path": "src/LVRS/TextDocumentDetail.h",
-      "sha256": "93a64151fbf7c7c0e77c20d92b12feb9893e7d0cf59b64cc515ff40315b6aa2e"
-    },
-    {
-      "path": "src/LVRS/TextDocumentEdit.cpp",
-      "sha256": "4e2b651ac2392f22af716dfa876129d26bca225b8ba3bf4f79dfb5bb8b98ccc8"
-    },
-    {
-      "path": "src/LVRS/TextDocumentEdit.h",
-      "sha256": "668953b5af7ab2f991a4973d483e218f097f01d03524f45b272229131159c27c"
-    },
-    {
-      "path": "src/LVRS/TextDocumentModel.cpp",
-      "sha256": "35f1492151bff9751d488b08f1de375285e370a30c338a219c926cc8a0d4799b"
-    },
-    {
-      "path": "src/LVRS/TextDocumentModel.h",
-      "sha256": "b4cfdba8c2e243df37a663c895dc71c00df79273538e0755bde8ca53376a1dc2"
-    },
-    {
-      "path": "src/LVRS/TextDocumentStorage.cpp",
-      "sha256": "5b7942969c37c0624ca6db6e1c48067d051a1acacb481734501e9de01fb7a26c"
-    },
-    {
-      "path": "src/LVRS/TextDocumentStorage.h",
-      "sha256": "e738c742057ce3f2d3528c973d22ba1bbc69601277f6f048834a352a51c154c8"
-    },
-    {
-      "path": "src/LVRS/TextMarkup.cpp",
-      "sha256": "edc7de4522554812567b852795af36232fbe46c5449e46b0ca9b7182bb4a5e74"
-    },
-    {
-      "path": "src/LVRS/TextMarkup.h",
-      "sha256": "32b7f52dd5137b333f7faaaca5679e5c06ffc089fe9852bd0bf9c42609897fc5"
-    },
-    {
-      "path": "src/LVRS/Theme.cpp",
-      "sha256": "66e2a3ff1411bd12e1658429fb031d35c0771610f5f76ee42b9b8c6b07092fa8"
-    },
-    {
-      "path": "src/LVRS/Theme.h",
-      "sha256": "4c3fc587ff2414ad8c8dda9ee95132e2e3e0a3f7ba46f8e521180ea1a89ff5fa"
-    },
-    {
-      "path": "src/LVRS/ToolbarButton.cpp",
-      "sha256": "4abe63f6d03d3bf503bf65a221e183fe7ad60c7d74fffc0b23e11772d3e2619b"
-    },
-    {
-      "path": "src/LVRS/ToolbarButton.h",
+      "path": "src/Controls/ToolbarButton.h",
       "sha256": "b02b133323b84d637d1e08b94eac06117d8845994b2e03bae387e5eff7f54b80"
     },
     {
-      "path": "src/LVRS/ToolbarDetail.cpp",
-      "sha256": "1b30784b0ce8485bd4fb81c0ebce3180b03ccc0736077a5fdb0e0ce8f6ac27aa"
+      "path": "src/Controls/ToolbarDetail.cpp",
+      "sha256": "4a4658cb76f9dafce0e3f1868ebe0c00c6c31ac9f28d1fdcbfffe9fdd330882d"
     },
     {
-      "path": "src/LVRS/ToolbarDetail.h",
-      "sha256": "fb43bdab37dad0e06eb09506ebb0a2ca9d8fb974a903ebd2f6cc4632fdc82369"
+      "path": "src/Controls/ToolbarDetail.h",
+      "sha256": "f44406a92dd6ceb9fc20587b488b928f4910cea092923a5617ff005a95aa3bef"
     },
     {
-      "path": "src/LVRS/Tooltip.cpp",
-      "sha256": "074dabb538b8cfdc4e522dbe2ed769b024070940b1a44848251d79fe20d75beb"
+      "path": "src/Controls/Widgets.cpp",
+      "sha256": "6d0e2026fc4104f03b5c74e6e1d28737a1870accf8ca08471983640683efd65d"
     },
     {
-      "path": "src/LVRS/Tooltip.h",
-      "sha256": "5af194ed27e51475934a4148574ec19fc8be589604395c806e134d8f4fff5806"
+      "path": "src/Controls/Widgets.h",
+      "sha256": "44fea686d538a9d7723a868a5c71bff9a6d8543739604014a84c469bfcbafbbe"
     },
     {
-      "path": "src/LVRS/TooltipLayout.cpp",
-      "sha256": "2625d8440d7c6813bfcded6ee304074921cc736b1c6dba18dcd10c9f9674e523"
+      "path": "src/Hierarchy/HierarchyController.cpp",
+      "sha256": "07760b4698e274057275ef07abb58f0337d8fc2fe60d6bff79c547856410d4bb"
     },
     {
-      "path": "src/LVRS/TooltipLayout.h",
+      "path": "src/Hierarchy/HierarchyController.h",
+      "sha256": "043598766a55e19097e1b6a9f523576fd6e06be539f5ff8c45d1b2f4a14c2509"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyDelegateContext.cpp",
+      "sha256": "e20383dc2d81d19f0c63b801d6839cfc100d3ea968398b3d7e8d11af6df67ced"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyDelegateContext.h",
+      "sha256": "82d8f6d5de674bee95af098548c44728dfd42858430ed62ae688720f25a3aacc"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyItem.cpp",
+      "sha256": "7c5d5bcb4ae1e6908d14c7d0b529529b240ff4124b3cb38dd42bed69423af5c4"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyItem.h",
+      "sha256": "e663096fee632ece3e7ac939949eb6b5e099ec7ee626419ec18306878aa3a969"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyList.cpp",
+      "sha256": "190a7e25b3d3ab757d7b6cb22ee3807526a6b67fe6658590d3a305627a3d1907"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyList.h",
+      "sha256": "8c6b0bf4c8c0ba6900446f67efb50b4964c2c45170a3b219065476accc184634"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyModel.cpp",
+      "sha256": "4d6a441ddf927807525e04f92a667fb803af12c5f4a03c9b4f8d88a3662013fe"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyModel.h",
+      "sha256": "74f37af576adb6872473a30e1e603f38bddbe7a96cc5a524da898816bafdc277"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyProjection.cpp",
+      "sha256": "53dfa9873b1cf962309de488fc8de8142020197dd5943aab09c77f130247c159"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyProjection.h",
+      "sha256": "93114a62bc8cc93f1296fa6af3e4e3f0ed99ff2e457441580654c6fa91faad34"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyToolbar.cpp",
+      "sha256": "9fada43c08af32953767638147763fb3b4ea2f9be7651c19af6cab4bb750376b"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyToolbar.h",
+      "sha256": "184c5a195047ed2ff7e477557d337cbee6eae5800ffb51dc12edf44fd692ae1d"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyVisibility.cpp",
+      "sha256": "b5383229314b13fd4bb8511d9b1341c461b95e0777ba5adaa8ceeabca4410445"
+    },
+    {
+      "path": "src/Hierarchy/HierarchyVisibility.h",
+      "sha256": "e1bb206c24db6637e6263f9466bb37bc88ed81467c3b80bfb58c90ef0b9ece77"
+    },
+    {
+      "path": "src/Lists/List.cpp",
+      "sha256": "f9ac33fa1d3b7f1261ffa4f4b5650d728108f1cc40cbab32a35639cf95917d13"
+    },
+    {
+      "path": "src/Lists/List.h",
+      "sha256": "0d951f762eb03f2b1c667f3d3ab2be2ac57ac10650bfe77d273dee80cf37dc8b"
+    },
+    {
+      "path": "src/Lists/ListFooter.cpp",
+      "sha256": "8d8aca9823146a3e2a606ce24738c7f4fb22c844fa9a53ff1ae471a08c407d89"
+    },
+    {
+      "path": "src/Lists/ListFooter.h",
+      "sha256": "aafbac7ac0b630887ee5e1065501b18d8b9b7f9cfb0936adbb987d6733224ccf"
+    },
+    {
+      "path": "src/Lists/ListModel.cpp",
+      "sha256": "7aacd55a11950cdc6362d88104c24378b77eeb632b69552e2981612db5eb78cb"
+    },
+    {
+      "path": "src/Lists/ListModel.h",
+      "sha256": "876733d2af52201e8bedc430ec2f251e2e9619ace6277a45a5fe0195e15d4de7"
+    },
+    {
+      "path": "src/Lists/ListToolbar.cpp",
+      "sha256": "bd0ab4f1f5133102b0bf6855b1bddc029dd05055097d642b7c438c84c8ddfa81"
+    },
+    {
+      "path": "src/Lists/ListToolbar.h",
+      "sha256": "ce28f97e9fe5ba20cea43e1c7cdc9109e5b5f0f1a18ceb8781e7a618313c95db"
+    },
+    {
+      "path": "src/Media/Icons.cpp",
+      "sha256": "b2136c62671c44322dabcdec6b49f734bdc11c745dc263a4012057f262b49c3f"
+    },
+    {
+      "path": "src/Media/Icons.h",
+      "sha256": "ecce1e99d3a09d6648613ed8943f826e054a6f689937de6c5241af1916033a9e"
+    },
+    {
+      "path": "src/Media/Image.cpp",
+      "sha256": "de665bc0543654a5fb27d5066516a1f057a2e088618b5b01ee3aabf424e832a5"
+    },
+    {
+      "path": "src/Media/Image.h",
+      "sha256": "8abee92a03499c7cde8c59d0186746d98ed60d322408003dbd4287cdcf1bb8c2"
+    },
+    {
+      "path": "src/Media/SvgManager.cpp",
+      "sha256": "489d77162754d0ee4d535268eb7f3045729dff2327367c4f52854b944bd76004"
+    },
+    {
+      "path": "src/Media/SvgManager.h",
+      "sha256": "9f74d0b152cadc284e5744682bb76f97b57a81757ac3416d2f5e26ab4a2f3ab0"
+    },
+    {
+      "path": "src/Media/SvgSource.cpp",
+      "sha256": "4f26c3eaa913e25c3fba49e3280658fc78205c84ad0d51d27d121005d2a28e16"
+    },
+    {
+      "path": "src/Media/SvgSource.h",
+      "sha256": "e441cbd2d2854750c7047f6ca1bbb0ba3897add27786ec7bb743abc6703ae284"
+    },
+    {
+      "path": "src/Models/ModelAdapter.cpp",
+      "sha256": "13a5aa74298c6740a341243584a8ed583c528d47ad79265f57ce502781f6fd74"
+    },
+    {
+      "path": "src/Models/ModelAdapter.h",
+      "sha256": "37f9e2786c9d2db943183e51b15ed15f86aec830fb3704e13ba5d9193b88fa75"
+    },
+    {
+      "path": "src/Models/ModelProperties.cpp",
+      "sha256": "a0cfd91ca1fef24841ec93863df0c256c76c1a4d4d9b163e209a0b6ef870468e"
+    },
+    {
+      "path": "src/Models/ModelProperties.h",
+      "sha256": "4dc1a72de43cb598aaf35370dd35780176a640713f15f7b7443e76f08564eaba"
+    },
+    {
+      "path": "src/Models/ModelSource.cpp",
+      "sha256": "6cf5501c10dc203bbc51994ee20217f445579a1d7b86e80407e462cfe3dc7cf1"
+    },
+    {
+      "path": "src/Models/ModelSource.h",
+      "sha256": "8ea0ba1629782b24e48c623f1f55b87d82926375ebaa7eaae14e34ecf0d204ad"
+    },
+    {
+      "path": "src/Models/ModelUndoStack.cpp",
+      "sha256": "0cdc720239dc7162f95b00894cdc0ce32371b3cdb033294246527ee5489163b1"
+    },
+    {
+      "path": "src/Models/ModelUndoStack.h",
+      "sha256": "0ca5ce00b6e88a852cb14620bcaead23eb40d9f517b367cdbfe9aa49db299960"
+    },
+    {
+      "path": "src/Models/PresentationDetail.cpp",
+      "sha256": "7a64b8d5fb766f6608dee66ec1ece5cf4fc0fd2f3a98164f3c859206c48679c0"
+    },
+    {
+      "path": "src/Models/PresentationDetail.h",
+      "sha256": "f8098b363bde5e084c1c460702a5286bcef8a32a0d8eae55d1c4db715a1edb1d"
+    },
+    {
+      "path": "src/Models/ProgressModel.cpp",
+      "sha256": "9b1a0e2a037a91e2982778a3a15d9babe139fb338360dce656ff91bfaa92e37b"
+    },
+    {
+      "path": "src/Models/ProgressModel.h",
+      "sha256": "6a0255131c8b9ea08329b7d2a5f553bc05b9be519f68a01fb33b09b9de6b78ac"
+    },
+    {
+      "path": "src/Models/StateModel.cpp",
+      "sha256": "3bcfd032ad80609e3cd141c721e67ada8946a7d115b7ca15d837228936fc9b8a"
+    },
+    {
+      "path": "src/Models/StateModel.h",
+      "sha256": "39dce7d8377c94a1521df3a53ce50820b4ea01ef3762db9349711c659d0eab34"
+    },
+    {
+      "path": "src/Models/StateSource.cpp",
+      "sha256": "836ce1a14200406024535b543f623ac2aa3e4dcb7ffe88039e5fad56455f5577"
+    },
+    {
+      "path": "src/Models/StateSource.h",
+      "sha256": "61cc439ea34cc77fb453cd663b9d3cfaf72338b4b6361389a570536568af1b94"
+    },
+    {
+      "path": "src/Models/ViewModel.cpp",
+      "sha256": "e50fc76295339580e0525da38a74c07a7179f791793cbde035148a1b4d9e2d20"
+    },
+    {
+      "path": "src/Models/ViewModel.h",
+      "sha256": "ddb1fbce80ef0afca4ac668629e7dbc26b9cf082cb79e2c9e03f0759a5db4df7"
+    },
+    {
+      "path": "src/Models/ViewModelDetail.cpp",
+      "sha256": "2e5374befa801e3be7ed6a73ae136c0fdd0d21a53287d53063804d7cc00a4d0d"
+    },
+    {
+      "path": "src/Models/ViewModelDetail.h",
+      "sha256": "3177e1a5b8f307641782e0a1492647cc6a0b1703b72fcf95fb28d997ac5d6b55"
+    },
+    {
+      "path": "src/Models/ViewModelRegistry.cpp",
+      "sha256": "eafd2f2ca2842acef086406024c416ba48f805e2731a18756438f65d3484039d"
+    },
+    {
+      "path": "src/Models/ViewModelRegistry.h",
+      "sha256": "dd8ac39365fb3adcd389efc185ac9f44cd46743a9217e0ce40e4f1237e65f44e"
+    },
+    {
+      "path": "src/Monitoring/PageMonitor.cpp",
+      "sha256": "831709567267a82b008944059779809e41a36561293bd2935a485b2b81a905ab"
+    },
+    {
+      "path": "src/Monitoring/PageMonitor.h",
+      "sha256": "5f951c1416f0e1c2c74ba80301b909f4f1246bacdec6e19faf618e04e3b51eb1"
+    },
+    {
+      "path": "src/Monitoring/RenderMonitor.cpp",
+      "sha256": "3cfffb7316c0a3ee7d3cb50a9ce2ee977f491dcec11987061b1696335dae5a62"
+    },
+    {
+      "path": "src/Monitoring/RenderMonitor.h",
+      "sha256": "3120a126f7a4f85043ce302c03d4d05018e0a28a29329bd8b8d837eb806b0540"
+    },
+    {
+      "path": "src/Monitoring/TrackingDetail.cpp",
+      "sha256": "b3621a9c4fbff5f9f40c89c947a206cc5e055d92de36f8d92a4f25b2f3f3d246"
+    },
+    {
+      "path": "src/Monitoring/TrackingDetail.h",
+      "sha256": "78962eabb4c68365a2b2f73b430721f71f32081979db41f42562d6778e66023c"
+    },
+    {
+      "path": "src/Monitoring/ViewStateTracker.cpp",
+      "sha256": "b2f307b0776db2e2412ff06281973ee7d40fb8a601a897bc357451bdf8076b77"
+    },
+    {
+      "path": "src/Monitoring/ViewStateTracker.h",
+      "sha256": "9e4fbbdf1cb5e4cabfb16c67e82183acfae37518d7c2e580a3d6d6ad4e87e7cc"
+    },
+    {
+      "path": "src/Navigation/NavigationStackModel.cpp",
+      "sha256": "8e2b08181b1c9f0a08b7d128b4e3a641513b288637119e2f1bc9e23bed50c36b"
+    },
+    {
+      "path": "src/Navigation/NavigationStackModel.h",
+      "sha256": "dd89946d629591f885327f06443b3cf6cf8b2c70362bcf9ccb95afc79c3f7f97"
+    },
+    {
+      "path": "src/Navigation/NavigationTarget.cpp",
+      "sha256": "3a258d2d48a9bf6789f1a2a619942625a5340115a962dd5de3b2ae1f0639c4a2"
+    },
+    {
+      "path": "src/Navigation/NavigationTarget.h",
+      "sha256": "11b20d993838d67c42de0b4722953a6c125af8c8dacffedee1a221b21a02aa71"
+    },
+    {
+      "path": "src/Navigation/Navigator.cpp",
+      "sha256": "e21dee9d1eefe69799eda2cbcdd858cc6503fcb4d20a768623e7d0a27dbc3772"
+    },
+    {
+      "path": "src/Navigation/Navigator.h",
+      "sha256": "29e1700a792bac50ceac54492cf9c3c0630e651874793d885ed744dce00aac7b"
+    },
+    {
+      "path": "src/Navigation/PageRouter.cpp",
+      "sha256": "2170fccd60126e87aa521a578109d537f7dec514971b44006c6934da55958db8"
+    },
+    {
+      "path": "src/Navigation/PageRouter.h",
+      "sha256": "5b17194664e0c9cad63c7509dcbb4178428ef42ee0956594febff2e57d7cb790"
+    },
+    {
+      "path": "src/Navigation/RouteMatcher.cpp",
+      "sha256": "8e0283c23a913175a596d7d0c94df7f62f9e06f82154ea34cb2a6a3ab8d1311d"
+    },
+    {
+      "path": "src/Navigation/RouteMatcher.h",
+      "sha256": "7105f85a1d563810a0e8a9859cfcddb518d1dadd7a267efbe9f2aa6841a95aaf"
+    },
+    {
+      "path": "src/Navigation/RouteResolver.cpp",
+      "sha256": "11d116756375a278fa21b9e5c9290e56815144cc53ae8dc6217fdd274125b710"
+    },
+    {
+      "path": "src/Navigation/RouteResolver.h",
+      "sha256": "12e95601659ddd0b70b72977550ec2048f14e6cf58eba980e39dca4087ebda4b"
+    },
+    {
+      "path": "src/Navigation/RoutingDetail.cpp",
+      "sha256": "c25bd725fd56e72a35680b1f8a708375699690098ad7507acc53b9d8b2b258f3"
+    },
+    {
+      "path": "src/Navigation/RoutingDetail.h",
+      "sha256": "3a6ca884be1b5a10f643cacd8f408fe148af96205b1b73273f362f6cf185e0d0"
+    },
+    {
+      "path": "src/Overlays/Alert.cpp",
+      "sha256": "5a4b9936ab43537b3cbdef4533f628c1627ab10144de28cb35f4c62a0fe92b7a"
+    },
+    {
+      "path": "src/Overlays/Alert.h",
+      "sha256": "bd4fa8577f2567fe88f48caa567c680fff3de5a7bee4a3daf368506c5aaa023d"
+    },
+    {
+      "path": "src/Overlays/AlertButton.cpp",
+      "sha256": "0d561fce1a42a25487c97fd35b4ba46446b56e9536b060a880d6e92a70a29e8e"
+    },
+    {
+      "path": "src/Overlays/AlertButton.h",
+      "sha256": "1774fcc132e6a11b1f4c97b7c73217e5e7044b8a49d8da698a8553a030706141"
+    },
+    {
+      "path": "src/Overlays/Modal.cpp",
+      "sha256": "005530c4a7b4f281e1b325d93f912793e402b7ef27f3226c7564d334335f2a03"
+    },
+    {
+      "path": "src/Overlays/Modal.h",
+      "sha256": "26465e6d147e463e110102d57586337468495300a0d87739b190fa4a6030a4b8"
+    },
+    {
+      "path": "src/Overlays/Sheet.cpp",
+      "sha256": "b154faab1a3b9c789f798e87d12d38aad7d21f5b88fbea6b82fbeb70025a906b"
+    },
+    {
+      "path": "src/Overlays/Sheet.h",
+      "sha256": "e705122716ddb165a6f24a256a05d2489b85b083b1a7dacfec1b9239c3a3a17f"
+    },
+    {
+      "path": "src/Overlays/Tooltip.cpp",
+      "sha256": "04b4ae07728215de7a9b078e34d99a4258236ebbb11ef6968d4b7710877bfd79"
+    },
+    {
+      "path": "src/Overlays/Tooltip.h",
+      "sha256": "855879e5fde667a86e488989b562a9655d9c1e5ad38727348921b8cc3b216b00"
+    },
+    {
+      "path": "src/Overlays/TooltipLayout.cpp",
+      "sha256": "dd3efdfb211a7c14de32e62b001b540769e8d8f36e2110b54cbe751798cea5e8"
+    },
+    {
+      "path": "src/Overlays/TooltipLayout.h",
       "sha256": "71b800d5e500f85477c7dcf95395bdd3fb9fb2220956b5f98174cdfb05b221aa"
     },
     {
-      "path": "src/LVRS/TrackingDetail.cpp",
-      "sha256": "67b5835e4a7438d296b362def0c954fa5e12a5cfa8ac6c13e1d6cf50ef3aa8c1"
+      "path": "src/Platform/PlatformInfo.cpp",
+      "sha256": "49ba709752ee94f4f8734f3a8248311e050458d00cbdbf266c82e36c6651a943"
     },
     {
-      "path": "src/LVRS/TrackingDetail.h",
-      "sha256": "957fb9159be74f60641839db054205691302e96dc2547839d10039b8d615ee61"
+      "path": "src/Platform/PlatformInfo.h",
+      "sha256": "7d970c5b58af69c84f3f5a25267eff2b862a4193a09c854f8bd8c6fdcfdfed90"
     },
     {
-      "path": "src/LVRS/ViewModel.cpp",
-      "sha256": "146a3d91e1d06af390508ef0290cf96b52c1599116b44a7167855805096548aa"
+      "path": "src/Styling/ColorPicker.cpp",
+      "sha256": "1dac6b630a95a1d3cf1f2a2147f09f240f25c832d5bc2b13efd375b5460c07fb"
     },
     {
-      "path": "src/LVRS/ViewModel.h",
-      "sha256": "a64508c28d549c8f15fa71c12b71d7471bb69ffdf324efb683882d7cd57d0319"
+      "path": "src/Styling/ColorPicker.h",
+      "sha256": "4a6e5d4f9940d2aeba994c4ab50bad0f43e46158f806c97be70cda5f840f46c2"
     },
     {
-      "path": "src/LVRS/ViewModelDetail.cpp",
-      "sha256": "3ad6f3938d020b1648abfc4ef25dde8cd1074f363933080d0e4a60595b18a406"
+      "path": "src/Styling/ColorPickerButton.cpp",
+      "sha256": "e15b9fc0c9e8da2f26d2738965d0ede6bdf981cca695c91fda8db65a929f477a"
     },
     {
-      "path": "src/LVRS/ViewModelDetail.h",
-      "sha256": "cc52643ec849e87d8b2b2b5f26adb928c73bf2583c361a7e6ea99de7df6d946e"
+      "path": "src/Styling/ColorPickerButton.h",
+      "sha256": "2bdbb2cd87ba0cbd703ff3eefe72d2c895df112b7db4e9c0493cc6571eddfa11"
     },
     {
-      "path": "src/LVRS/ViewModelRegistry.cpp",
-      "sha256": "46f86100c1d9e9a3691c327328fdf6e5ac22442ae06c3b2760b6944795e3cc88"
+      "path": "src/Styling/FontPolicy.cpp",
+      "sha256": "90eca0b5c3b84873009db7eb0526d395df815c192f50f23987145f895171ff6a"
     },
     {
-      "path": "src/LVRS/ViewModelRegistry.h",
-      "sha256": "8731a3c20f7742e0ea7cefbda91e95ea0ee66229ae3329d7432fd03b2e53a863"
+      "path": "src/Styling/FontPolicy.h",
+      "sha256": "d1709f7c0f3e844d483bce1489fc6ceded66ea13a29989406d2ed31d6d34d88b"
     },
     {
-      "path": "src/LVRS/ViewStateTracker.cpp",
-      "sha256": "08b86adfa2bc56b2c9191219b29d1d99934706ee7476d055f144ecb41c6824ad"
+      "path": "src/Styling/MaterialDetail.cpp",
+      "sha256": "8c270a474427de50990aa8d3bb1934a23fe90ae76cb22ca06119267601a16367"
     },
     {
-      "path": "src/LVRS/ViewStateTracker.h",
-      "sha256": "339e763fe404425a6618bc1d25bc50f84371624c98ad58faaf012f9818e6f2df"
+      "path": "src/Styling/MaterialDetail.h",
+      "sha256": "70c6bdcb935e2e707af3185c977f8cbb3db7d574656e56be86f2648f701f14b8"
     },
     {
-      "path": "src/LVRS/Widgets.cpp",
-      "sha256": "105522f50e4fbc865ca8281c04fe207db5fdc0acb40b16ed99dfbb53e5b0d5d0"
+      "path": "src/Styling/MaterialSurface.cpp",
+      "sha256": "25019fa194c6b08804ea72e3a3a1fd316dcbb636d7aa103be2a8dfce34b062a0"
     },
     {
-      "path": "src/LVRS/Widgets.h",
-      "sha256": "f86baec2e363a83a306f7b67c3c6908a982ba783426c58326484f363dbae2470"
+      "path": "src/Styling/MaterialSurface.h",
+      "sha256": "15057f963c2dff72282eba248cf3944ca6f61855b663ba704a99a541f8def1c9"
     },
     {
-      "path": "src/LVRS/WindowMaterial.cpp",
-      "sha256": "218dc37b456bd7563d9773e5e59ae476c7f81c1f50e29ddb2885e7acc9398b98"
+      "path": "src/Styling/Motion.cpp",
+      "sha256": "e1a1ff360762bfc02f6fd4af1e4658157d88d91d23ccf93f63378a0c12f301f7"
     },
     {
-      "path": "src/LVRS/WindowMaterial.h",
-      "sha256": "5a9dc92f237374b97750dd4308e787bed068c482992b5cd490157b3c42f26b9e"
+      "path": "src/Styling/Motion.h",
+      "sha256": "92da284131e38fffdd652f7d37a30ebdaed2fdfc30a832e2e94547e58b695a1f"
+    },
+    {
+      "path": "src/Styling/PanelMaterial.cpp",
+      "sha256": "807755edc4a1dde57357bbf171c4c3df7f17ba56afcce6a3797a14f01e4c0437"
+    },
+    {
+      "path": "src/Styling/PanelMaterial.h",
+      "sha256": "686959937b3e13ad7ae6115f05bcbfe997c271110b13cb0be59b4b8e427cac26"
+    },
+    {
+      "path": "src/Styling/SurfaceDetail.cpp",
+      "sha256": "e921ad132f756c5f867b5adfd00d47092e55d1cac0265c3737db1de0b167f99c"
+    },
+    {
+      "path": "src/Styling/SurfaceDetail.h",
+      "sha256": "7f814e74b3b9cca3cc7925eb47c282328f170d8068ec33af16319b7a94f3b35f"
+    },
+    {
+      "path": "src/Styling/Theme.cpp",
+      "sha256": "b603388c545186acc27fdcf512c43cdf1a6a4611d5a825741df855db510b1638"
+    },
+    {
+      "path": "src/Styling/Theme.h",
+      "sha256": "b4b8b8fc067e578693a41d6ca5882dfe6b24f1c0d9a4a901aeee7af835db8af2"
+    },
+    {
+      "path": "src/Styling/WindowMaterial.cpp",
+      "sha256": "8f1941791cafb79a7b08b41e2ec8230dcb57eb4b1507e06d509efb0b1c493125"
+    },
+    {
+      "path": "src/Styling/WindowMaterial.h",
+      "sha256": "566103f160e62e7c322e9259860bbb6bb94a04eb75e8f75db21ca33dde0328ed"
+    },
+    {
+      "path": "src/Tables/Table.cpp",
+      "sha256": "85c82d02524241912a3ed3d46a2ffadf733d4c07669227827552eb951761c3b0"
+    },
+    {
+      "path": "src/Tables/Table.h",
+      "sha256": "fc78d94a7a979ecb16bea893a1d63fdcb3c7ef6659dca67ecab35b4b2eea0750"
+    },
+    {
+      "path": "src/Tables/TableCellItem.cpp",
+      "sha256": "06343b67139668d4a529c59c09002a3b5827bbaa073e4fc99abe9cbbadbab953"
+    },
+    {
+      "path": "src/Tables/TableCellItem.h",
+      "sha256": "24d6193162d641af45a0ed8e023f5c8dd72cb6014bae1f3459a7ab91e3e13ae8"
+    },
+    {
+      "path": "src/Tables/TableDetail.cpp",
+      "sha256": "d8a549166f2eb638d1ff9507f837ac9f876fbbf6b7d340b3c0c1e36998f29a28"
+    },
+    {
+      "path": "src/Tables/TableDetail.h",
+      "sha256": "6f79082a252e18f9ab26539fbea88dd133556594a9a1edcfd260067e048be498"
+    },
+    {
+      "path": "src/Tables/TableHeader.cpp",
+      "sha256": "50a68c145470b80cd726d77bc5b15edd5e90a4ed3ef504d7d6d1a2b507025222"
+    },
+    {
+      "path": "src/Tables/TableHeader.h",
+      "sha256": "47e8efbfa2aa41a83d3b7b6083c09b4fca5c13ec073f22d127bd06dc4055aba9"
+    },
+    {
+      "path": "src/Tables/TableHeaderModel.cpp",
+      "sha256": "eebafd96a8587389b59296be7d231aa4148264f2b0ac57032efcff1e450fc84c"
+    },
+    {
+      "path": "src/Tables/TableHeaderModel.h",
+      "sha256": "527dd3d003f438a1ff5f1d1b14b00e0ca8ad00698a71ad4204b8d924df475aae"
+    },
+    {
+      "path": "src/Tables/TableModel.cpp",
+      "sha256": "b2268870279c457281b6953682a7693533be594d1a39d86329b7e1baf3947df1"
+    },
+    {
+      "path": "src/Tables/TableModel.h",
+      "sha256": "969ed88391b997e93d7cab1fec930a90ab5aa3d9c30cb29396734f4b7649894c"
+    },
+    {
+      "path": "src/Tables/TableRow.cpp",
+      "sha256": "478e86e231bcc07c9be3558da9f4f2055c2411e42f7de3641567d54c542c519f"
+    },
+    {
+      "path": "src/Tables/TableRow.h",
+      "sha256": "9543193f6d341d9df2431b82d71f3c1ebab00af194f4b7aca9233567abd3c498"
+    },
+    {
+      "path": "src/Tables/TableTransfer.cpp",
+      "sha256": "95d98835b527ecd415a3ff1730ff39ff333409d7baf44ddef56b199464616669"
+    },
+    {
+      "path": "src/Tables/TableTransfer.h",
+      "sha256": "2b8b752477ed4961b1672188b54a9cd14a86e955bd5543621ec4c90ea693b326"
+    },
+    {
+      "path": "src/Tables/TableValue.cpp",
+      "sha256": "bf1aeaa109c739f2720cb57b96f994ff6abe53e196580490a15858224385f41c"
+    },
+    {
+      "path": "src/Tables/TableValue.h",
+      "sha256": "168cd6c4301d76f4e1c8b9ffb7f6d4d4f659fec8a11d43b23c3cf0551fc5dbf0"
+    },
+    {
+      "path": "src/Text/CodeEditor.cpp",
+      "sha256": "1deabe1a0a6a7b41aeaa1454a2cd428ddf5e055c88c6c2e0fd2f708c0a8ca6b2"
+    },
+    {
+      "path": "src/Text/CodeEditor.h",
+      "sha256": "903b2ba0d36713a313e8afa91c1f8b7ee54a58f72a3d353e7d68c827ea9519d3"
+    },
+    {
+      "path": "src/Text/CodeEditorDetail.cpp",
+      "sha256": "e20ffc0eecba4fe2a74d20bba4cb517e92c4f223e19f88cb4a9223eb323cf97c"
+    },
+    {
+      "path": "src/Text/CodeEditorDetail.h",
+      "sha256": "c4d79168f81474720b207680f88403c7272a5420c63f217f0d41e322eaec2ef0"
+    },
+    {
+      "path": "src/Text/TextDocumentDetail.cpp",
+      "sha256": "46f3b7047e1bf5190800978bd6f4b8063f6c26deb5241f70aca4ce792326c619"
+    },
+    {
+      "path": "src/Text/TextDocumentDetail.h",
+      "sha256": "d7dd5a808bf19c84ffe07df6a3d1db60819d379c5f8c8674bdffc93432bdd140"
+    },
+    {
+      "path": "src/Text/TextDocumentEdit.cpp",
+      "sha256": "52a9090b73c3edc8dd34a85c65ee094773694c7f16117ede9ec848dc9f572222"
+    },
+    {
+      "path": "src/Text/TextDocumentEdit.h",
+      "sha256": "668953b5af7ab2f991a4973d483e218f097f01d03524f45b272229131159c27c"
+    },
+    {
+      "path": "src/Text/TextDocumentModel.cpp",
+      "sha256": "bd377518ffbd24de4254317cdd1ce8482fc07da9eec1ff9f48bec84ee2c2d311"
+    },
+    {
+      "path": "src/Text/TextDocumentModel.h",
+      "sha256": "7c3e4e7a75230ca0e6d6d520131a6c6e77a0e25c60abb374aa0e334622395e0f"
+    },
+    {
+      "path": "src/Text/TextDocumentStorage.cpp",
+      "sha256": "b306d59d5ae80edfe3a393182352f09a92e4056e24035fd123246af2baad65c5"
+    },
+    {
+      "path": "src/Text/TextDocumentStorage.h",
+      "sha256": "e738c742057ce3f2d3528c973d22ba1bbc69601277f6f048834a352a51c154c8"
+    },
+    {
+      "path": "src/Text/TextMarkup.cpp",
+      "sha256": "3474631a797bf581e2e040e37e90277ddf00941b5581a1d1de3005e97e7460c2"
+    },
+    {
+      "path": "src/Text/TextMarkup.h",
+      "sha256": "32b7f52dd5137b333f7faaaca5679e5c06ffc089fe9852bd0bf9c42609897fc5"
     }
   ],
   "counts": {
@@ -7585,1068 +7593,1083 @@
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted",
+          "declaration": "readonly property color primaryHover: usingDefaultPrimary ? accentRoleColor(\"Blue\", \"Hover\") : Qt.darker(primary, 1.12)",
           "line": 179
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary",
+          "declaration": "readonly property color primaryPressed: usingDefaultPrimary ? accentRoleColor(\"Blue\", \"Pressed\") : Qt.darker(primary, 1.2)",
+          "line": 180
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted",
           "line": 181
         },
         {
           "kind": "property",
-          "declaration": "readonly property color success: accentGreen",
-          "line": 182
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color warning: accentYellow",
+          "declaration": "readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary",
           "line": 183
         },
         {
           "kind": "property",
-          "declaration": "readonly property color danger: accentRed",
+          "declaration": "readonly property color success: accentGreen",
           "line": 184
         },
         {
           "kind": "property",
-          "declaration": "readonly property color surface: \"#38383c\"",
+          "declaration": "readonly property color warning: accentYellow",
           "line": 185
         },
         {
           "kind": "property",
-          "declaration": "readonly property color darkGrey10: \"#b4b8bf\"",
+          "declaration": "readonly property color danger: accentRed",
           "line": 186
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentTint: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (31 / 255))",
+          "declaration": "readonly property color surface: \"#38383c\"",
           "line": 187
         },
         {
           "kind": "property",
-          "declaration": "readonly property color dangerTint: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (31 / 255))",
+          "declaration": "readonly property color darkGrey10: \"#b4b8bf\"",
           "line": 188
         },
         {
           "kind": "property",
-          "declaration": "readonly property color primaryOverlay: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (64 / 255))",
+          "declaration": "readonly property color accentTint: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (31 / 255))",
           "line": 189
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentOverlay: primaryOverlay",
+          "declaration": "readonly property color dangerTint: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (31 / 255))",
           "line": 190
         },
         {
           "kind": "property",
-          "declaration": "readonly property color dangerOverlay: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (89 / 255))",
+          "declaration": "readonly property color primaryOverlay: Qt.rgba(primary.r, primary.g, primary.b, primary.a * (64 / 255))",
           "line": 191
         },
         {
           "kind": "property",
-          "declaration": "readonly property color overlayBackdrop: \"#59000000\"",
+          "declaration": "readonly property color accentOverlay: primaryOverlay",
           "line": 192
         },
         {
           "kind": "property",
-          "declaration": "readonly property color shadowStrong: \"#40000000\"",
+          "declaration": "readonly property color dangerOverlay: Qt.rgba(danger.r, danger.g, danger.b, danger.a * (89 / 255))",
           "line": 193
         },
         {
           "kind": "property",
+          "declaration": "readonly property color overlayBackdrop: \"#59000000\"",
+          "line": 194
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color shadowStrong: \"#40000000\"",
+          "line": 195
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color materialTint: \"#141414\"",
-          "line": 196
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color materialWindowFill: \"#0B0B0B\"",
-          "line": 197
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real materialWindowOpacity: 0.50",
           "line": 198
         },
         {
           "kind": "property",
-          "declaration": "readonly property color applicationWindowFill: window",
+          "declaration": "readonly property color materialWindowFill: \"#0B0B0B\"",
+          "line": 199
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real materialWindowOpacity: 0.50",
           "line": 200
         },
         {
           "kind": "property",
-          "declaration": "readonly property real applicationWindowOpacity: 1.0",
-          "line": 201
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real applicationWindowAccentOpacity: 0.02",
+          "declaration": "readonly property color applicationWindowFill: window",
           "line": 202
         },
         {
           "kind": "property",
-          "declaration": "readonly property real applicationWindowGrainStrength: 2 / 255",
+          "declaration": "readonly property real applicationWindowOpacity: 1.0",
           "line": 203
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialDenseOpacity: 0.75",
+          "declaration": "readonly property real applicationWindowAccentOpacity: 0.02",
           "line": 204
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialGlassOpacity: 0.25",
+          "declaration": "readonly property real applicationWindowGrainStrength: 2 / 255",
           "line": 205
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialDenseBlur: scaleRealMetric(64)",
+          "declaration": "readonly property real materialDenseOpacity: 0.75",
           "line": 206
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialGlassBlur: scaleRealMetric(16)",
+          "declaration": "readonly property real materialGlassOpacity: 0.25",
           "line": 207
         },
         {
           "kind": "property",
-          "declaration": "readonly property real contextMenuOpacity: 0.12",
+          "declaration": "readonly property real materialDenseBlur: scaleRealMetric(64)",
+          "line": 208
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real materialGlassBlur: scaleRealMetric(16)",
           "line": 209
         },
         {
           "kind": "property",
-          "declaration": "readonly property real contextMenuBlur: materialDenseBlur",
-          "line": 210
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real contextMenuAccentStrength: 0.08",
+          "declaration": "readonly property real contextMenuOpacity: 0.12",
           "line": 211
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialIntenseOpacity: 0.40",
+          "declaration": "readonly property real contextMenuBlur: materialDenseBlur",
           "line": 212
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialFaintOpacity: 0.11",
+          "declaration": "readonly property real contextMenuAccentStrength: 0.08",
           "line": 213
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialPanelRadius: scaleRealMetric(12)",
+          "declaration": "readonly property real materialIntenseOpacity: 0.40",
           "line": 214
         },
         {
           "kind": "property",
-          "declaration": "readonly property real materialWindowRadius: scaleRealMetric(16)",
+          "declaration": "readonly property real materialFaintOpacity: 0.11",
           "line": 215
         },
         {
           "kind": "property",
-          "declaration": "readonly property color materialDenseEdge: Qt.rgba(1, 1, 1, 0.12)",
+          "declaration": "readonly property real materialPanelRadius: scaleRealMetric(12)",
           "line": 216
         },
         {
           "kind": "property",
-          "declaration": "readonly property color materialGlassEdge: Qt.rgba(1, 1, 1, 0.22)",
+          "declaration": "readonly property real materialWindowRadius: scaleRealMetric(16)",
           "line": 217
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertGlassTint: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)",
+          "declaration": "readonly property color materialDenseEdge: Qt.rgba(1, 1, 1, 0.12)",
+          "line": 218
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color materialGlassEdge: Qt.rgba(1, 1, 1, 0.22)",
           "line": 219
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)",
-          "line": 220
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color alertTitleColor: \"#F4F5F7\"",
+          "declaration": "readonly property color alertGlassTint: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)",
           "line": 221
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertBodyColor: \"#D6D9DF\"",
+          "declaration": "readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)",
           "line": 222
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertActionPrimary: primary",
+          "declaration": "readonly property color alertTitleColor: \"#F4F5F7\"",
           "line": 223
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertActionBorder: \"#596168\"",
+          "declaration": "readonly property color alertBodyColor: \"#D6D9DF\"",
           "line": 224
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertDivider: \"#363B3F\"",
+          "declaration": "readonly property color alertActionPrimary: primary",
           "line": 225
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertIconSurface: usingDefaultPrimary ? Qt.rgba(0.13158102384735557, 0.20018439999748677, 0.27858823529411764, 1)",
+          "declaration": "readonly property color alertActionBorder: \"#596168\"",
           "line": 226
         },
         {
           "kind": "property",
-          "declaration": "readonly property color alertIconBorder: usingDefaultPrimary ? Qt.rgba(0.1195867154212559, 0.27394431175905115, 0.45035294117647057, 1)",
+          "declaration": "readonly property color alertDivider: \"#363B3F\"",
+          "line": 227
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color alertIconSurface: usingDefaultPrimary ? Qt.rgba(0.13158102384735557, 0.20018439999748677, 0.27858823529411764, 1)",
           "line": 228
         },
         {
           "kind": "property",
-          "declaration": "readonly property color inputFieldGlassTint: Qt.rgba(surfaceInput.r, surfaceInput.g,",
-          "line": 231
+          "declaration": "readonly property color alertIconBorder: usingDefaultPrimary ? Qt.rgba(0.1195867154212559, 0.27394431175905115, 0.45035294117647057, 1)",
+          "line": 230
         },
         {
           "kind": "property",
-          "declaration": "readonly property color inputFieldGlassTintDisabled: Qt.rgba(surfaceInput.r, surfaceInput.g,",
+          "declaration": "readonly property color inputFieldGlassTint: Qt.rgba(surfaceInput.r, surfaceInput.g,",
           "line": 233
         },
         {
           "kind": "property",
-          "declaration": "readonly property color inputFieldGlassTintInline: Qt.rgba(surfaceInput.r, surfaceInput.g,",
+          "declaration": "readonly property color inputFieldGlassTintDisabled: Qt.rgba(surfaceInput.r, surfaceInput.g,",
           "line": 235
         },
         {
           "kind": "property",
-          "declaration": "readonly property color inputFieldGlassReflection: Qt.rgba(1, 1, 1, 0.018)",
+          "declaration": "readonly property color inputFieldGlassTintInline: Qt.rgba(surfaceInput.r, surfaceInput.g,",
           "line": 237
         },
         {
           "kind": "property",
+          "declaration": "readonly property color inputFieldGlassReflection: Qt.rgba(1, 1, 1, 0.018)",
+          "line": 239
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color strokeSoft: \"#D0D7E2\"",
-          "line": 238
+          "line": 240
         },
         {
           "kind": "property",
           "declaration": "readonly property color accentPaletteBlue: accentBlue",
-          "line": 241
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentPalettePurple: accentPurple",
-          "line": 242
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentPalettePink: accentRose",
           "line": 243
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentPaletteRed: accentRed",
+          "declaration": "readonly property color accentPalettePurple: accentPurple",
           "line": 244
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentPaletteOrange: accentOrange",
+          "declaration": "readonly property color accentPalettePink: accentRose",
           "line": 245
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentPaletteYellow: accentYellow",
+          "declaration": "readonly property color accentPaletteRed: accentRed",
           "line": 246
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentPaletteGreen: accentGreen",
+          "declaration": "readonly property color accentPaletteOrange: accentOrange",
           "line": 247
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentPaletteGray: \"#8C8C8C\"",
+          "declaration": "readonly property color accentPaletteYellow: accentYellow",
           "line": 248
         },
         {
           "kind": "property",
+          "declaration": "readonly property color accentPaletteGreen: accentGreen",
+          "line": 249
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentPaletteGray: \"#8C8C8C\"",
+          "line": 250
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color accentOrange: Qt.rgba(1, 0.47672274708747864, 0.15144230425357819, 1)",
-          "line": 251
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentBrown: Qt.rgba(0.2616060674190521, 0.13824503123760223, 0.09279626607894897, 1)",
-          "line": 252
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentCyan: Qt.rgba(0.12926307320594788, 0.8258525729179382, 1, 1)",
           "line": 253
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentTeal: Qt.rgba(0, 0.7790151238441467, 0.8655723929405212, 1)",
+          "declaration": "readonly property color accentBrown: Qt.rgba(0.2616060674190521, 0.13824503123760223, 0.09279626607894897, 1)",
           "line": 254
         },
         {
           "kind": "property",
+          "declaration": "readonly property color accentCyan: Qt.rgba(0.12926307320594788, 0.8258525729179382, 1, 1)",
+          "line": 255
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentTeal: Qt.rgba(0, 0.7790151238441467, 0.8655723929405212, 1)",
+          "line": 256
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color accentTransparent: \"transparent\" // none",
-          "line": 257
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentWhite: \"#FFFFFF\"",
-          "line": 258
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGrayLight: \"#CED0D6\"",
           "line": 259
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)",
+          "declaration": "readonly property color accentWhite: \"#FFFFFF\"",
           "line": 260
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)",
+          "declaration": "readonly property color accentGrayLight: \"#CED0D6\"",
           "line": 261
         },
         {
-          "kind": "property",
-          "declaration": "readonly property color accentSlate: \"#43454A\"",
-          "line": 262
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGreen: Qt.rgba(0, 0.9058823585510254, 0.12156862765550613, 1)",
-          "line": 263
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentBlueMuted: Qt.rgba(0.12618358505561073, 0.23337636029019077, 0.3558823529411765, 1)",
+          "kind": "function",
+          "declaration": "function accentRoleColor(colorName, roleName) {",
           "line": 264
         },
         {
           "kind": "property",
-          "declaration": "readonly property color accentOrangeMuted: accentOrange",
-          "line": 265
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGreenMuted: \"#253627\"",
-          "line": 266
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentYellow: Qt.rgba(1, 0.8303598165512085, 0.15179912745952606, 1)",
-          "line": 267
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRedBrownDark: \"#402929\"",
-          "line": 268
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGray: \"#868A91\"",
-          "line": 269
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentYellowMuted: \"#D6AE58\"",
-          "line": 270
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentBrownMuted: accentBrown",
-          "line": 271
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentPurple: Qt.rgba(0.5275065302848816, 0.291259765625, 1, 1)",
-          "line": 272
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentBrownDarker: \"#3D3223\"",
-          "line": 273
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentCharcoal: \"#1E1F22\"",
-          "line": 274
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGrayPale: \"#B4B8BF\"",
-          "line": 275
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentBlueBright: \"#3574F0\"",
-          "line": 276
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentPurpleDarker: \"#2F2936\"",
-          "line": 277
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGrayBright: \"#F0F1F2\"",
-          "line": 278
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRose: Qt.rgba(0.975510835647583, 0.26653972268104553, 0.4437825083732605, 1)",
-          "line": 279
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRoseDarker: \"#5E3838\"",
-          "line": 280
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGrayMuted: \"#5A5D63\"",
-          "line": 281
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGreenBright: \"#55A76A\"",
-          "line": 282
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRedMuted: \"#BD5757\"",
-          "line": 283
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRedDark: \"#9C4E4E\"",
-          "line": 284
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentRedDarker: \"#7A4343\"",
-          "line": 285
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentSlateMuted: \"#6F737A\"",
-          "line": 286
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentSlateDarker: \"#6C707E\"",
-          "line": 287
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color accentGreenDarker: \"#375239\"",
-          "line": 288
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property var accentPaletteTokens: [",
+          "declaration": "readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)",
           "line": 292
         },
         {
           "kind": "property",
+          "declaration": "readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)",
+          "line": 293
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentSlate: \"#43454A\"",
+          "line": 294
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGreen: Qt.rgba(0, 0.9058823585510254, 0.12156862765550613, 1)",
+          "line": 295
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentBlueMuted: Qt.rgba(0.12618358505561073, 0.23337636029019077, 0.3558823529411765, 1)",
+          "line": 296
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentOrangeMuted: accentOrange",
+          "line": 297
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGreenMuted: \"#253627\"",
+          "line": 298
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentYellow: Qt.rgba(1, 0.8303598165512085, 0.15179912745952606, 1)",
+          "line": 299
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRedBrownDark: \"#402929\"",
+          "line": 300
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGray: \"#868A91\"",
+          "line": 301
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentYellowMuted: \"#D6AE58\"",
+          "line": 302
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentBrownMuted: accentBrown",
+          "line": 303
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentPurple: Qt.rgba(0.5275065302848816, 0.291259765625, 1, 1)",
+          "line": 304
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentBrownDarker: \"#3D3223\"",
+          "line": 305
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentCharcoal: \"#1E1F22\"",
+          "line": 306
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGrayPale: \"#B4B8BF\"",
+          "line": 307
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentBlueBright: \"#3574F0\"",
+          "line": 308
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentPurpleDarker: \"#2F2936\"",
+          "line": 309
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGrayBright: \"#F0F1F2\"",
+          "line": 310
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRose: Qt.rgba(0.975510835647583, 0.26653972268104553, 0.4437825083732605, 1)",
+          "line": 311
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRoseDarker: \"#5E3838\"",
+          "line": 312
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGrayMuted: \"#5A5D63\"",
+          "line": 313
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGreenBright: \"#55A76A\"",
+          "line": 314
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRedMuted: \"#BD5757\"",
+          "line": 315
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRedDark: \"#9C4E4E\"",
+          "line": 316
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentRedDarker: \"#7A4343\"",
+          "line": 317
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentSlateMuted: \"#6F737A\"",
+          "line": 318
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentSlateDarker: \"#6C707E\"",
+          "line": 319
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color accentGreenDarker: \"#375239\"",
+          "line": 320
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property var accentPaletteTokens: [",
+          "line": 324
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property int accentPaletteTokenCount: accentPaletteTokens.length",
-          "line": 681
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color contextMenuSurface: materialTint",
-          "line": 685
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color menuDivider: surfacePanel",
-          "line": 686
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color contextMenuDivider: disabledColor",
-          "line": 687
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color contextMenuItemSelectedBackground: primary",
-          "line": 688
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color contextMenuItemInactiveBackground: surfacePanel",
-          "line": 689
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real radiusHairline: scaleRealMetric(0.5)",
-          "line": 693
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusXs: scaleMetric(2)",
-          "line": 694
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusSm: scaleMetric(4)",
-          "line": 695
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusBase: scaleMetric(6)",
-          "line": 696
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusMd: scaleMetric(8)",
-          "line": 697
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusLg: scaleMetric(12)",
-          "line": 698
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int radiusXl: scaleMetric(16)",
-          "line": 699
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gapNone: 0",
-          "line": 703
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap2: scaleMetric(2)",
-          "line": 704
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap3: scaleMetric(3)",
-          "line": 705
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap4: scaleMetric(4)",
-          "line": 706
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap5: scaleMetric(5)",
-          "line": 707
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap6: scaleMetric(6)",
-          "line": 708
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap7: scaleMetric(7)",
-          "line": 709
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap8: scaleMetric(8)",
-          "line": 710
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap10: scaleMetric(10)",
-          "line": 711
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap12: scaleMetric(12)",
-          "line": 712
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap14: scaleMetric(14)",
           "line": 713
         },
         {
           "kind": "property",
-          "declaration": "readonly property int gap16: scaleMetric(16)",
-          "line": 714
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap18: scaleMetric(18)",
-          "line": 715
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap20: scaleMetric(20)",
-          "line": 716
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int gap24: scaleMetric(24)",
+          "declaration": "readonly property color contextMenuSurface: materialTint",
           "line": 717
         },
         {
           "kind": "property",
-          "declaration": "readonly property real strokeHairline: scaleRealMetric(0.5)",
+          "declaration": "readonly property color menuDivider: surfacePanel",
+          "line": 718
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color contextMenuDivider: disabledColor",
+          "line": 719
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color contextMenuItemSelectedBackground: primary",
+          "line": 720
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color contextMenuItemInactiveBackground: surfacePanel",
           "line": 721
         },
         {
           "kind": "property",
-          "declaration": "readonly property real strokeThin: scaleRealMetric(1.0)",
-          "line": 722
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real strokeRegular: scaleRealMetric(1.5)",
-          "line": 723
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int controlHeightSm: scaleMetric(22)",
+          "declaration": "readonly property real radiusHairline: scaleRealMetric(0.5)",
           "line": 725
         },
         {
           "kind": "property",
-          "declaration": "readonly property int controlHeightMd: scaleMetric(36)",
+          "declaration": "readonly property int radiusXs: scaleMetric(2)",
           "line": 726
         },
         {
           "kind": "property",
-          "declaration": "readonly property int inputMinWidth: scaleMetric(180)",
+          "declaration": "readonly property int radiusSm: scaleMetric(4)",
           "line": 727
         },
         {
           "kind": "property",
-          "declaration": "readonly property int inputWidthMd: scaleMetric(206)",
+          "declaration": "readonly property int radiusBase: scaleMetric(6)",
           "line": 728
         },
         {
           "kind": "property",
-          "declaration": "readonly property int buttonMinWidth: scaleMetric(100)",
+          "declaration": "readonly property int radiusMd: scaleMetric(8)",
           "line": 729
         },
         {
           "kind": "property",
-          "declaration": "readonly property int dialogMinWidth: scaleMetric(280)",
+          "declaration": "readonly property int radiusLg: scaleMetric(12)",
           "line": 730
         },
         {
           "kind": "property",
-          "declaration": "readonly property int dialogMaxWidth: scaleMetric(360)",
+          "declaration": "readonly property int radiusXl: scaleMetric(16)",
           "line": 731
         },
         {
           "kind": "property",
-          "declaration": "readonly property int iconSm: scaleMetric(18)",
-          "line": 732
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int controlIndicatorSize: iconSm",
-          "line": 733
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int toggleTrackWidth: scaleMetric(38)",
-          "line": 734
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int toggleTransitionDuration: 320",
+          "declaration": "readonly property int gapNone: 0",
           "line": 735
         },
         {
           "kind": "property",
-          "declaration": "readonly property int headerMinHeight: scaleMetric(56)",
+          "declaration": "readonly property int gap2: scaleMetric(2)",
           "line": 736
         },
         {
           "kind": "property",
-          "declaration": "readonly property int headerExtraHeight: scaleMetric(32)",
+          "declaration": "readonly property int gap3: scaleMetric(3)",
           "line": 737
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobPrimarySize: scaleMetric(520)",
+          "declaration": "readonly property int gap4: scaleMetric(4)",
           "line": 738
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobPrimaryRadius: scaleMetric(260)",
+          "declaration": "readonly property int gap5: scaleMetric(5)",
           "line": 739
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobPrimaryRightMargin: scaleMetric(-140)",
+          "declaration": "readonly property int gap6: scaleMetric(6)",
           "line": 740
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobPrimaryTopMargin: scaleMetric(-200)",
+          "declaration": "readonly property int gap7: scaleMetric(7)",
           "line": 741
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobSecondaryWidth: scaleMetric(640)",
+          "declaration": "readonly property int gap8: scaleMetric(8)",
           "line": 742
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobSecondaryHeight: scaleMetric(380)",
+          "declaration": "readonly property int gap10: scaleMetric(10)",
           "line": 743
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobSecondaryRadius: scaleMetric(220)",
+          "declaration": "readonly property int gap12: scaleMetric(12)",
           "line": 744
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobSecondaryLeftMargin: scaleMetric(-200)",
+          "declaration": "readonly property int gap14: scaleMetric(14)",
           "line": 745
         },
         {
           "kind": "property",
-          "declaration": "readonly property int scaffoldBlobSecondaryBottomMargin: scaleMetric(-180)",
+          "declaration": "readonly property int gap16: scaleMetric(16)",
           "line": 746
         },
         {
           "kind": "property",
-          "declaration": "readonly property real scaffoldBlobSecondaryOpacity: 0.3",
+          "declaration": "readonly property int gap18: scaleMetric(18)",
           "line": 747
         },
         {
           "kind": "property",
-          "declaration": "readonly property int radiusControl: scaleMetric(5)",
+          "declaration": "readonly property int gap20: scaleMetric(20)",
+          "line": 748
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int gap24: scaleMetric(24)",
           "line": 749
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitle: scaleTextMetric(26)",
+          "declaration": "readonly property real strokeHairline: scaleRealMetric(0.5)",
           "line": 753
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitleWeight: Font.Bold",
+          "declaration": "readonly property real strokeThin: scaleRealMetric(1.0)",
           "line": 754
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textTitleStyleName: \"Bold\"",
+          "declaration": "readonly property real strokeRegular: scaleRealMetric(1.5)",
           "line": 755
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitleLineHeight: scaleTextMetric(26)",
-          "line": 756
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real textTitleLetterSpacing: 0",
+          "declaration": "readonly property int controlHeightSm: scaleMetric(22)",
           "line": 757
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubtitle: scaleTextMetric(22)",
+          "declaration": "readonly property int controlHeightMd: scaleMetric(36)",
           "line": 758
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubtitleWeight: Font.Bold",
+          "declaration": "readonly property int inputMinWidth: scaleMetric(180)",
           "line": 759
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textSubtitleStyleName: \"Bold\"",
+          "declaration": "readonly property int inputWidthMd: scaleMetric(206)",
           "line": 760
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubtitleLineHeight: scaleTextMetric(22)",
+          "declaration": "readonly property int buttonMinWidth: scaleMetric(100)",
           "line": 761
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textSubtitleLetterSpacing: 0",
+          "declaration": "readonly property int dialogMinWidth: scaleMetric(280)",
           "line": 762
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeader: scaleTextMetric(17)",
+          "declaration": "readonly property int dialogMaxWidth: scaleMetric(360)",
           "line": 763
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeaderWeight: Font.DemiBold",
+          "declaration": "readonly property int iconSm: scaleMetric(18)",
           "line": 764
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textHeaderStyleName: \"SemiBold\"",
+          "declaration": "readonly property int controlIndicatorSize: iconSm",
           "line": 765
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeaderLineHeight: scaleTextMetric(17)",
+          "declaration": "readonly property int toggleTrackWidth: scaleMetric(38)",
           "line": 766
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textHeaderLetterSpacing: 0",
+          "declaration": "readonly property int toggleTransitionDuration: 320",
           "line": 767
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubheader: scaleTextMetric(15)",
+          "declaration": "readonly property int headerMinHeight: scaleMetric(56)",
           "line": 768
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubheaderWeight: Font.DemiBold",
+          "declaration": "readonly property int headerExtraHeight: scaleMetric(32)",
           "line": 769
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textSubheaderStyleName: \"SemiBold\"",
+          "declaration": "readonly property int scaffoldBlobPrimarySize: scaleMetric(520)",
           "line": 770
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textSubheaderLineHeight: scaleTextMetric(15)",
+          "declaration": "readonly property int scaffoldBlobPrimaryRadius: scaleMetric(260)",
           "line": 771
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textSubheaderLetterSpacing: 0",
+          "declaration": "readonly property int scaffoldBlobPrimaryRightMargin: scaleMetric(-140)",
           "line": 772
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textBody: 13",
+          "declaration": "readonly property int scaffoldBlobPrimaryTopMargin: scaleMetric(-200)",
           "line": 773
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textBodyWeight: Font.Medium",
+          "declaration": "readonly property int scaffoldBlobSecondaryWidth: scaleMetric(640)",
           "line": 774
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textBodyStyleName: \"Medium\"",
+          "declaration": "readonly property int scaffoldBlobSecondaryHeight: scaleMetric(380)",
           "line": 775
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textBodyLineHeight: 13",
+          "declaration": "readonly property int scaffoldBlobSecondaryRadius: scaleMetric(220)",
           "line": 776
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textBodyLetterSpacing: 0",
+          "declaration": "readonly property int scaffoldBlobSecondaryLeftMargin: scaleMetric(-200)",
           "line": 777
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDescription: scaleTextMetric(12)",
+          "declaration": "readonly property int scaffoldBlobSecondaryBottomMargin: scaleMetric(-180)",
           "line": 778
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDescriptionWeight: Font.DemiBold",
+          "declaration": "readonly property real scaffoldBlobSecondaryOpacity: 0.3",
           "line": 779
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textDescriptionStyleName: \"SemiBold\"",
-          "line": 780
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int textDescriptionLineHeight: scaleTextMetric(12)",
+          "declaration": "readonly property int radiusControl: scaleMetric(5)",
           "line": 781
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textDescriptionLetterSpacing: 0",
-          "line": 782
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int textCaption: scaleTextMetric(11)",
-          "line": 783
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int textCaptionWeight: Font.Normal",
-          "line": 784
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property string textCaptionStyleName: \"Regular\"",
+          "declaration": "readonly property int textTitle: scaleTextMetric(26)",
           "line": 785
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textCaptionLineHeight: scaleTextMetric(11)",
+          "declaration": "readonly property int textTitleWeight: Font.Bold",
           "line": 786
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textCaptionLetterSpacing: 0",
+          "declaration": "readonly property string textTitleStyleName: \"Bold\"",
           "line": 787
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitle2: textSubtitle",
+          "declaration": "readonly property int textTitleLineHeight: scaleTextMetric(26)",
+          "line": 788
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real textTitleLetterSpacing: 0",
+          "line": 789
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textSubtitle: scaleTextMetric(22)",
           "line": 790
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitle2Weight: textSubtitleWeight",
+          "declaration": "readonly property int textSubtitleWeight: Font.Bold",
           "line": 791
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textTitle2StyleName: textSubtitleStyleName",
+          "declaration": "readonly property string textSubtitleStyleName: \"Bold\"",
           "line": 792
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textTitle2LineHeight: textSubtitleLineHeight",
+          "declaration": "readonly property int textSubtitleLineHeight: scaleTextMetric(22)",
           "line": 793
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textTitle2LetterSpacing: textSubtitleLetterSpacing",
+          "declaration": "readonly property real textSubtitleLetterSpacing: 0",
           "line": 794
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeader2: textSubheader",
+          "declaration": "readonly property int textHeader: scaleTextMetric(17)",
           "line": 795
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeader2Weight: textSubheaderWeight",
+          "declaration": "readonly property int textHeaderWeight: Font.DemiBold",
           "line": 796
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textHeader2StyleName: textSubheaderStyleName",
+          "declaration": "readonly property string textHeaderStyleName: \"SemiBold\"",
           "line": 797
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textHeader2LineHeight: textSubheaderLineHeight",
+          "declaration": "readonly property int textHeaderLineHeight: scaleTextMetric(17)",
           "line": 798
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textHeader2LetterSpacing: textSubheaderLetterSpacing",
+          "declaration": "readonly property real textHeaderLetterSpacing: 0",
           "line": 799
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisabled: textCaption",
+          "declaration": "readonly property int textSubheader: scaleTextMetric(15)",
+          "line": 800
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textSubheaderWeight: Font.DemiBold",
           "line": 801
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisabledWeight: textCaptionWeight",
+          "declaration": "readonly property string textSubheaderStyleName: \"SemiBold\"",
           "line": 802
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textDisabledStyleName: textCaptionStyleName",
+          "declaration": "readonly property int textSubheaderLineHeight: scaleTextMetric(15)",
           "line": 803
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisabledLineHeight: textCaptionLineHeight",
+          "declaration": "readonly property real textSubheaderLetterSpacing: 0",
           "line": 804
         },
         {
           "kind": "property",
-          "declaration": "readonly property real textDisabledLetterSpacing: textCaptionLetterSpacing",
+          "declaration": "readonly property int textBody: 13",
           "line": 805
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textOverline: textCaption",
+          "declaration": "readonly property int textBodyWeight: Font.Medium",
+          "line": 806
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textBodyStyleName: \"Medium\"",
           "line": 807
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textOverlineWeight: textCaptionWeight",
+          "declaration": "readonly property int textBodyLineHeight: 13",
           "line": 808
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textOverlineStyleName: textCaptionStyleName",
+          "declaration": "readonly property real textBodyLetterSpacing: 0",
           "line": 809
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisplay: textSubtitle",
+          "declaration": "readonly property int textDescription: scaleTextMetric(12)",
           "line": 810
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisplayWeight: textSubtitleWeight",
+          "declaration": "readonly property int textDescriptionWeight: Font.DemiBold",
           "line": 811
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textDisplayStyleName: textSubtitleStyleName",
+          "declaration": "readonly property string textDescriptionStyleName: \"SemiBold\"",
           "line": 812
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisplaySm: textHeader",
+          "declaration": "readonly property int textDescriptionLineHeight: scaleTextMetric(12)",
           "line": 813
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textDisplaySmWeight: textHeaderWeight",
+          "declaration": "readonly property real textDescriptionLetterSpacing: 0",
           "line": 814
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textDisplaySmStyleName: textHeaderStyleName",
+          "declaration": "readonly property int textCaption: scaleTextMetric(11)",
           "line": 815
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textBodyLg: textSubheader",
+          "declaration": "readonly property int textCaptionWeight: Font.Normal",
           "line": 816
         },
         {
           "kind": "property",
-          "declaration": "readonly property int textBodyLgWeight: textSubheaderWeight",
+          "declaration": "readonly property string textCaptionStyleName: \"Regular\"",
           "line": 817
         },
         {
           "kind": "property",
-          "declaration": "readonly property string textBodyLgStyleName: textSubheaderStyleName",
+          "declaration": "readonly property int textCaptionLineHeight: scaleTextMetric(11)",
           "line": 818
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real textCaptionLetterSpacing: 0",
+          "line": 819
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textTitle2: textSubtitle",
+          "line": 822
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textTitle2Weight: textSubtitleWeight",
+          "line": 823
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textTitle2StyleName: textSubtitleStyleName",
+          "line": 824
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textTitle2LineHeight: textSubtitleLineHeight",
+          "line": 825
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real textTitle2LetterSpacing: textSubtitleLetterSpacing",
+          "line": 826
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textHeader2: textSubheader",
+          "line": 827
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textHeader2Weight: textSubheaderWeight",
+          "line": 828
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textHeader2StyleName: textSubheaderStyleName",
+          "line": 829
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textHeader2LineHeight: textSubheaderLineHeight",
+          "line": 830
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real textHeader2LetterSpacing: textSubheaderLetterSpacing",
+          "line": 831
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisabled: textCaption",
+          "line": 833
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisabledWeight: textCaptionWeight",
+          "line": 834
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textDisabledStyleName: textCaptionStyleName",
+          "line": 835
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisabledLineHeight: textCaptionLineHeight",
+          "line": 836
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real textDisabledLetterSpacing: textCaptionLetterSpacing",
+          "line": 837
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textOverline: textCaption",
+          "line": 839
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textOverlineWeight: textCaptionWeight",
+          "line": 840
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textOverlineStyleName: textCaptionStyleName",
+          "line": 841
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisplay: textSubtitle",
+          "line": 842
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisplayWeight: textSubtitleWeight",
+          "line": 843
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textDisplayStyleName: textSubtitleStyleName",
+          "line": 844
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisplaySm: textHeader",
+          "line": 845
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textDisplaySmWeight: textHeaderWeight",
+          "line": 846
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textDisplaySmStyleName: textHeaderStyleName",
+          "line": 847
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textBodyLg: textSubheader",
+          "line": 848
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int textBodyLgWeight: textSubheaderWeight",
+          "line": 849
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property string textBodyLgStyleName: textSubheaderStyleName",
+          "line": 850
         },
         {
           "kind": "function",
           "declaration": "function weightForTextSize(pixelSize) {",
-          "line": 820
+          "line": 852
         },
         {
           "kind": "function",
           "declaration": "function styleNameForTextSize(pixelSize) {",
-          "line": 824
+          "line": 856
         },
         {
           "kind": "function",
           "declaration": "function isThemeTextStyleCompliant(pixelSize, weight, styleName) {",
-          "line": 828
+          "line": 860
         }
       ],
       "status": "partial",
@@ -13117,113 +13140,133 @@
         },
         {
           "kind": "property",
-          "declaration": "property Component cellDelegate: null",
+          "declaration": "property string defaultLeadingIcon: \"generalchevronDown\"",
           "line": 18
         },
         {
           "kind": "property",
-          "declaration": "property bool interactive: false",
+          "declaration": "property string defaultTrailingIcon: \"\"",
           "line": 19
         },
         {
           "kind": "property",
-          "declaration": "property int sortColumn: -1",
+          "declaration": "property int iconSize: Theme.scaleMetric(18)",
           "line": 20
         },
         {
           "kind": "property",
-          "declaration": "property int sortOrder: Qt.AscendingOrder",
+          "declaration": "property int iconSpacing: Theme.gap7",
           "line": 21
         },
         {
           "kind": "property",
-          "declaration": "readonly property Component resolvedCellDelegate: cellDelegate || defaultCellDelegate",
+          "declaration": "property Component cellDelegate: null",
           "line": 22
         },
         {
-          "kind": "signal",
-          "declaration": "signal columnClicked(int columnIndex, var columnData)",
+          "kind": "property",
+          "declaration": "property bool interactive: false",
+          "line": 23
+        },
+        {
+          "kind": "property",
+          "declaration": "property int sortColumn: -1",
           "line": 24
         },
         {
           "kind": "property",
+          "declaration": "property int sortOrder: Qt.AscendingOrder",
+          "line": 25
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property Component resolvedCellDelegate: cellDelegate || defaultCellDelegate",
+          "line": 26
+        },
+        {
+          "kind": "signal",
+          "declaration": "signal columnClicked(int columnIndex, var columnData)",
+          "line": 28
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property var resolvedColumnSource: headerModel.resolvedColumnSource()",
-          "line": 64
+          "line": 110
         },
         {
           "kind": "property",
           "declaration": "readonly property int resolvedColumnCount: headerModel.columnCount",
-          "line": 65
+          "line": 111
         },
         {
           "kind": "property",
           "declaration": "readonly property var headerDescriptors: headerModel.descriptors",
-          "line": 66
+          "line": 112
         },
         {
           "kind": "property",
           "declaration": "readonly property var cellDelegateItems: buildCellDelegateItems()",
-          "line": 67
+          "line": 113
         },
         {
           "kind": "function",
           "declaration": "function columnAt(index) {",
-          "line": 69
+          "line": 115
         },
         {
           "kind": "function",
           "declaration": "function normalizeColumnType(value) {",
-          "line": 73
+          "line": 119
         },
         {
           "kind": "function",
           "declaration": "function inferredColumnType(value) {",
-          "line": 77
+          "line": 123
         },
         {
           "kind": "function",
           "declaration": "function columnType(index) {",
-          "line": 81
+          "line": 127
         },
         {
           "kind": "function",
           "declaration": "function columnText(index) {",
-          "line": 85
+          "line": 131
         },
         {
           "kind": "function",
           "declaration": "function columnPadding(index) {",
-          "line": 89
+          "line": 135
         },
         {
           "kind": "function",
           "declaration": "function numericWidth(value, fallbackValue) {",
-          "line": 93
+          "line": 139
         },
         {
           "kind": "function",
           "declaration": "function autoColumnWidth() {",
-          "line": 97
+          "line": 143
         },
         {
           "kind": "function",
           "declaration": "function columnWidth(index) {",
-          "line": 101
+          "line": 147
         },
         {
           "kind": "function",
           "declaration": "function columnX(index) {",
-          "line": 105
+          "line": 151
         },
         {
           "kind": "function",
           "declaration": "function buildCellDelegateItems() {",
-          "line": 109
+          "line": 155
         },
         {
           "kind": "function",
           "declaration": "function createCellDelegate(parentItem, descriptor) {",
-          "line": 133
+          "line": 179
         }
       ],
       "status": "partial",
@@ -14648,203 +14691,213 @@
       "declared_members": [
         {
           "kind": "property",
-          "declaration": "readonly property int defaultMode: 0",
+          "declaration": "readonly property int textMode: 0",
           "line": 10
         },
         {
           "kind": "property",
-          "declaration": "readonly property int searchMode: 1",
+          "declaration": "readonly property int defaultMode: textMode",
           "line": 11
         },
         {
           "kind": "property",
-          "declaration": "readonly property int roundedStyle: 0",
+          "declaration": "readonly property int searchMode: 1",
           "line": 12
         },
         {
           "kind": "property",
-          "declaration": "readonly property int filledStyle: roundedStyle",
+          "declaration": "readonly property int passwordMode: 2",
           "line": 13
         },
         {
           "kind": "property",
-          "declaration": "readonly property int inlineStyle: 1",
+          "declaration": "readonly property int roundedStyle: 0",
           "line": 14
         },
         {
           "kind": "property",
-          "declaration": "readonly property int cylinderStyle: 2",
+          "declaration": "readonly property int filledStyle: roundedStyle",
           "line": 15
         },
         {
           "kind": "property",
-          "declaration": "property int mode: defaultMode",
+          "declaration": "readonly property int inlineStyle: 1",
+          "line": 16
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property int cylinderStyle: 2",
           "line": 17
         },
         {
           "kind": "property",
-          "declaration": "property bool search: mode === searchMode",
-          "line": 18
-        },
-        {
-          "kind": "property",
-          "declaration": "property int style: filledStyle",
+          "declaration": "property int mode: defaultMode",
           "line": 19
         },
         {
           "kind": "property",
-          "declaration": "property alias placeholder: control.placeholderText",
+          "declaration": "property bool search: mode === searchMode",
           "line": 20
         },
         {
           "kind": "property",
-          "declaration": "property bool clearButtonVisible: true",
+          "declaration": "property int style: filledStyle",
           "line": 21
         },
         {
           "kind": "property",
-          "declaration": "readonly property bool searchIconVisible: search || mode === searchMode",
+          "declaration": "property alias placeholder: control.placeholderText",
           "line": 22
         },
         {
           "kind": "property",
-          "declaration": "property color searchIconColor: Theme.accentGrayLight",
+          "declaration": "property bool clearButtonVisible: true",
           "line": 23
         },
         {
           "kind": "property",
-          "declaration": "property real searchIconStrokeWidth: Theme.scaleRealMetric(1.5)",
+          "declaration": "readonly property bool searchIconVisible: mode !== passwordMode && (search || mode === searchMode)",
+          "line": 24
+        },
+        {
+          "kind": "property",
+          "declaration": "property color searchIconColor: Theme.accentGrayLight",
           "line": 25
         },
         {
           "kind": "property",
-          "declaration": "property color clearIconBackgroundColor: Theme.descriptionColor",
-          "line": 26
-        },
-        {
-          "kind": "property",
-          "declaration": "property color clearIconBackgroundColorHover: Qt.lighter(clearIconBackgroundColor, 1.08)",
+          "declaration": "property real searchIconStrokeWidth: Theme.scaleRealMetric(1.5)",
           "line": 27
         },
         {
           "kind": "property",
-          "declaration": "property color clearIconBackgroundColorPressed: Qt.darker(clearIconBackgroundColor, 1.14)",
+          "declaration": "property color clearIconBackgroundColor: Theme.descriptionColor",
           "line": 28
         },
         {
           "kind": "property",
-          "declaration": "property color clearIconBackgroundColorDisabled: Theme.disabledColor",
+          "declaration": "property color clearIconBackgroundColorHover: Qt.lighter(clearIconBackgroundColor, 1.08)",
           "line": 29
         },
         {
           "kind": "property",
-          "declaration": "property color clearIconForegroundColor: Theme.panelBackground10",
+          "declaration": "property color clearIconBackgroundColorPressed: Qt.darker(clearIconBackgroundColor, 1.14)",
           "line": 30
         },
         {
           "kind": "property",
-          "declaration": "readonly property real searchIconSupersampleScale: RenderQuality.enabled",
+          "declaration": "property color clearIconBackgroundColorDisabled: Theme.disabledColor",
           "line": 31
         },
         {
           "kind": "property",
+          "declaration": "property color clearIconForegroundColor: Theme.panelBackground10",
+          "line": 32
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real searchIconSupersampleScale: RenderQuality.enabled",
+          "line": 33
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property real searchIconHiDpiScale: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0",
-          "line": 34
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property real searchIconRasterScale: Math.max(1.0, searchIconSupersampleScale * searchIconHiDpiScale)",
-          "line": 35
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property int searchIconSize: Theme.scaleMetric(12)",
           "line": 36
         },
         {
           "kind": "property",
-          "declaration": "readonly property url searchIconSource: Theme.iconPath(\"inputFieldSearch\")",
+          "declaration": "readonly property real searchIconRasterScale: Math.max(1.0, searchIconSupersampleScale * searchIconHiDpiScale)",
           "line": 37
         },
         {
           "kind": "property",
-          "declaration": "readonly property url renderedSearchIconSource: RenderQuality.resolveTextureSource(searchIconSource)",
+          "declaration": "readonly property int searchIconSize: Theme.scaleMetric(12)",
           "line": 38
         },
         {
           "kind": "property",
-          "declaration": "readonly property int searchIconSourceSize: Math.max(1, Math.ceil(searchIconSize * searchIconRasterScale))",
+          "declaration": "readonly property url searchIconSource: Theme.iconPath(\"inputFieldSearch\")",
           "line": 39
         },
         {
           "kind": "property",
-          "declaration": "readonly property int clearIconSize: Theme.scaleMetric(12)",
+          "declaration": "readonly property url renderedSearchIconSource: RenderQuality.resolveTextureSource(searchIconSource)",
           "line": 40
         },
         {
           "kind": "property",
-          "declaration": "readonly property real clearIconMarkLength: clearIconSize * (8.0 / 14.0)",
+          "declaration": "readonly property int searchIconSourceSize: Math.max(1, Math.ceil(searchIconSize * searchIconRasterScale))",
           "line": 41
         },
         {
           "kind": "property",
-          "declaration": "readonly property real clearIconMarkThickness: clearIconSize * (1.4 / 14.0)",
+          "declaration": "readonly property int clearIconSize: Theme.scaleMetric(12)",
           "line": 42
         },
         {
           "kind": "property",
-          "declaration": "readonly property int resolvedStyle: style === inlineStyle",
+          "declaration": "readonly property real clearIconMarkLength: clearIconSize * (8.0 / 14.0)",
+          "line": 43
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real clearIconMarkThickness: clearIconSize * (1.4 / 14.0)",
           "line": 44
         },
         {
           "kind": "property",
+          "declaration": "readonly property int resolvedStyle: style === inlineStyle",
+          "line": 46
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color frameFillColor: resolvedStyle === inlineStyle",
-          "line": 49
+          "line": 51
         },
         {
           "kind": "property",
           "declaration": "readonly property color frameFillColorHover: frameFillColor",
-          "line": 52
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color frameFillColorPressed: frameFillColor",
-          "line": 53
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property color frameFillColorDisabled: resolvedStyle === inlineStyle",
           "line": 54
         },
         {
           "kind": "property",
+          "declaration": "readonly property color frameFillColorPressed: frameFillColor",
+          "line": 55
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color frameFillColorDisabled: resolvedStyle === inlineStyle",
+          "line": 56
+        },
+        {
+          "kind": "property",
           "declaration": "property bool glassEnabled: true",
-          "line": 57
+          "line": 59
         },
         {
           "kind": "property",
           "declaration": "property real glassBlurRadius: Theme.scaleRealMetric(resolvedStyle === inlineStyle ? 6 : 8)",
-          "line": 58
-        },
-        {
-          "kind": "property",
-          "declaration": "property Item backdropSource: Controls.ApplicationWindow.window",
           "line": 60
         },
         {
           "kind": "property",
-          "declaration": "readonly property Item resolvedBackdropSource: {",
+          "declaration": "property Item backdropSource: Controls.ApplicationWindow.window",
           "line": 62
         },
         {
           "kind": "property",
+          "declaration": "readonly property Item resolvedBackdropSource: {",
+          "line": 64
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property bool glassActive: visible && enabled && glassEnabled",
-          "line": 77
+          "line": 79
         },
         {
           "kind": "property",
           "declaration": "readonly property bool showClearButton: clearButtonVisible",
-          "line": 79
+          "line": 81
         }
       ],
       "status": "partial",
@@ -14879,67 +14932,67 @@
         {
           "kind": "property",
           "declaration": "required property color tintColor",
-          "line": 123
-        },
-        {
-          "kind": "property",
-          "declaration": "property real cornerRadius: 0",
-          "line": 124
-        },
-        {
-          "kind": "property",
-          "declaration": "property bool inlineStyle: false",
-          "line": 125
-        },
-        {
-          "kind": "property",
-          "declaration": "property bool recessed: true",
           "line": 126
         },
         {
           "kind": "property",
-          "declaration": "property Item backdropSource: null",
+          "declaration": "property real cornerRadius: 0",
           "line": 127
         },
         {
           "kind": "property",
-          "declaration": "property real blurRadius: 8",
+          "declaration": "property bool inlineStyle: false",
           "line": 128
         },
         {
           "kind": "property",
-          "declaration": "property bool blurActive: false",
+          "declaration": "property bool recessed: true",
           "line": 129
         },
         {
           "kind": "property",
-          "declaration": "readonly property real effectScale: Theme.metricScaleFactor",
+          "declaration": "property Item backdropSource: null",
           "line": 130
         },
         {
           "kind": "property",
-          "declaration": "readonly property real capturePadding: Math.max(0, Math.min(64, blurRadius))",
+          "declaration": "property real blurRadius: 8",
           "line": 131
         },
         {
           "kind": "property",
-          "declaration": "readonly property real rasterScale: Math.max(1,",
+          "declaration": "property bool blurActive: false",
+          "line": 132
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real effectScale: Theme.metricScaleFactor",
           "line": 133
         },
         {
           "kind": "property",
+          "declaration": "readonly property real capturePadding: Math.max(0, Math.min(64, blurRadius))",
+          "line": 134
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real rasterScale: Math.max(1,",
+          "line": 136
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property real gradientTopAlpha: inlineStyle ? 0.06 : recessed ? 0.20 : 0.045",
-          "line": 135
+          "line": 138
         },
         {
           "kind": "property",
           "declaration": "readonly property real gradientBottomAlpha: inlineStyle || !recessed ? 0.015 : 0.035",
-          "line": 136
+          "line": 139
         },
         {
           "kind": "function",
           "declaration": "function mappedCaptureRect(): rect {",
-          "line": 139
+          "line": 142
         }
       ],
       "status": "pending",

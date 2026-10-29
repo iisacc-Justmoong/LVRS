@@ -88,11 +88,12 @@ LV.VStack {
         && field.implicitHeight === 22 && field.height === 22
         && field.insetVertical === 4.5 && field.inputItem.y === 4.5
         && field.inputItem.height === 13
-        && field.placeholderColor === LV.Theme.disabledColor
+        && field.placeholderColor === LV.Theme.titleHeaderColor
         && labels.resolvedCornerRadius === 12 && icons.resolvedCornerRadius === 12
         && form.implicitHeight === 154
     property string diagnostics: JSON.stringify({
         inputHeight: field.height, inputY: field.inputItem.y,
+        placeholderColor: String(field.placeholderColor),
         labelRadius: labels.resolvedCornerRadius, iconRadius: icons.resolvedCornerRadius,
         formHeight: form.implicitHeight
     })

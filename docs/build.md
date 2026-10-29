@@ -28,6 +28,15 @@ Windows PowerShell에서:
 - Linux: `linux`
 - macOS: `macos;ios;android;wasm`
 - Windows: `windows;android;wasm`
+
+정적 Qt 패키지에는 LVRS 라이브러리와 함께 QML 모듈 디렉터리에
+`LVRSCoreplugin` 아카이브가 설치됩니다. `lvrs_configure_qml_app()`은 설치된
+네임스페이스 대상의 실제 아카이브를 연결하고 `LVRSPlugin` 가져오기를 추가합니다.
+정적 `LVRS::LVRS` 대상은 함께 설치된 `iiFileProvider::iiFileProvider` 의존성도 전파합니다.
+공유 라이브러리 패키지와 플러그인이 없는 이전 패키지는 기존 동작을 유지합니다.
+`tests/cmake/static_plugin_consumer`는 빌드 트리 대상과 설치된 대상의 연결,
+중복 없는 가져오기 및 설치 패키지의 파일 제공 의존성을 각각 확인합니다.
+
 일치하는 Qt 키트가 없는 플랫폼은 부트스트랩 타겟 생성 중에 건너뜁니다. `./install.sh --platforms linux,android,wasm` (쉼표/분리부호 목록) 를 사용하여 플랫폼 집합을 제한하거나 덮어씁니다. Linux 호스트에서는 설치자가 정리/빌드 전에 의존성 사전 검사 를 실행합니다. 호스트 C++ 툴체인, 필수 Qt 6.5 + 모듈, 및 Qt 호스트 도구를 검증한 후, 사용 가능한 경우 공통 Qt 레이아웃에서 `Qt6_DIR` / `LVRS_BOOTSTRAP_QT_PREFIX_LINUX` 를 자동으로 해결합니다. 그 Linux 의존성이 누락되어 있고 배포판 패키지 관리자가 인식되면, CLI 는 정확한 설치 명령을 출력하고 `./install.sh --install-linux-deps` 로 실행할 수 있습니다. `lvrs doctor --fix` 는 설치 시작 없이 동일한 호스트 측 의존성 확인/수정 흐름을 실행합니다. `lvrs doctor --bootstrap [--with-wasm|--platforms ...]` 는 또한 `src/main.cpp` 부트스트랩 엔트리 마커를 추가로 검증하고 누락된 크로스 플랫폼 Qt / Android / WASM 자동 감지 힌트를 보고하며, 요청된 부트스트랩 타겟 세트가 준비되지 않았을 때0 가 아닌 상태로 종료합니다. 설치된 패키지는 `<prefix>/platforms/<platform>` ( `macos` , `linux` , `windows` , `ios` , `android` , `wasm` ) 에 기록된 후, 호스트 플랫폼 경로가 CMake 사용자 패키지 레지스트리에 등록됩니다. 체크아웃 루트는 `Workspace/SDK/LVRS` 입니다; 기본 설치 루트는 `~/.local/SDK/LVRS` 입니다. CMake 은 동일한 기본값을 사용하며, 명시적인 `CMAKE_INSTALL_PREFIX` , `--prefix` , 및 `LVRS_INSTALL_PREFIX` 오버라이드가 계속 지원됩니다. 체크아웃을 이동한 후 `./install.sh` 를 재실행하면 `build/` 를 재생성하고 설치된 스냅샷에 새로운 절대 소스 경로를 기록합니다. 설치기는 또한 실행 중인 CLI 를 `<prefix>/bin/lvrs` ( `lvrs.exe` 에서 Windows ) 로 복사하며, `env.sh` 는 해당 디렉토리를 `PATH` 에 추가합니다. 셸 래퍼는 `CARGO_TARGET_DIR` 가 명시적으로 설정되지 않는 한 Cargo 출력을 `build/rust-cli/` 아래로 유지하므로, CMake 깨끗한 재설치는 실행 중인 CLI 를 제거하지 않습니다. 설치기는 항상 깨끗한 재설정을 수행합니다: 이전 CMake 빌드 상태를 제거한 후 구성을 수행하여 `build/rust-cli/` 를 보존하므로 실행 중인 CLI 가 설치에 사용 가능하게 유지된 후, 구성이 성공적으로 완료되면 설치된 LVRS 아티팩트만 제거합니다. 소스 스냅샷은 숨겨진 `.build.lvrs-stale-*` 정리 잔여물과 `src/rust-cli/build` 및 레거시 `src/rust-cli/target` 디렉토리를 모두 제외합니다. `install.sh` 는 기본적으로 호스트 빌드에서 예제/테스트를 구성합니다; `--without-examples --without-tests` 를 전달하여 이를 비활성화할 수 있습니다. 호스트 예제가 활성화되면 설치기는 `lvrs_host_examples_all` 타겟을 먼저 빌드합니다. 각 빌드 트리 예제는 `build/example/<ExampleName>/bin` 하에 실행 가능 파일을 생성하며, Linux 는 추가로 `bin/lvrs-runtime/` 를 LVRS 공유 라이브러리 및 QML 모듈과 함께 빌드합니다. 검출된 `example/*/bin/LVRSExample*` 경로는 런처 스크립트입니다: 저장소 런처는 `build/example/.../bin` 로 되돌아가고, 설치된 소스 스냅샷은 해당 런처 옆에 새로 갱신된 데스크톱 런타임인 `*.real` 파일로 받습니다. `--without-examples` 가 사용되면 해당 스냅샷 런타임 페이로드가 제거됩니다.
 
 <a id="rust-cli-entry-points"></a>
@@ -391,8 +400,14 @@ ctest --test-dir build/installed-consumer --output-on-failure
 
 `cmake --build build` 는 완료된 구성 단계와 `build/CMakeCache.txt` 를 요구합니다. 툴체인 환경 소스는 변수만 내보내며 캐시를 생성하지 않습니다. 구성이 중단되었으면 `./install.sh` 를 다시 실행하거나 (또는 쉘의 `lvrs install` 래퍼를) 다시 실행합니다. 설치기는 빌드 전에 고정된 `build/` 디렉토리를 구성합니다. 시스템 위치에 `Workspace/SDK` 외부의 제 3 자 툴 체인을 설치합니다. 유닉스 래퍼는 시스템 셸 환경에서 `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_NDK_ROOT`, 및 `EMSDK` 를 상속받으며; 형제 툴체인 디렉토리를 절대 자동 로드하지 않습니다. `LVRS_TOOLCHAIN_ENV_FILE` 를 명시적인 환경 파일 오버라이드에만 설정합니다. 명시적인 누락된 파일은 오류입니다.
 
-이 macOS 워크스테이션의 Java 는 Homebrew (`openjdk@21`), Android SDK 는 `/opt/homebrew/share/android-commandlinetools`, Emscripten SDK 는 `/opt/homebrew/share/emsdk` 에 설치되어 있습니다. iiFileProvider 의 C++23 표준 라이브러리와 스레드를 위해 Android 빌드는 `<stop_token>` 및 `<expected>` 가 있는 NDK 를 선택하며, 현재 설치 검증에는 `/opt/homebrew/share/android-ndk` 의 r30 을 사용합니다. 구형 NDK 를 가리키는 환경 변수는 호환 가능한 설치본이 있으면 건너뛰고, 명시적인 `LVRS_BOOTSTRAP_ANDROID_NDK` 가 호환되지 않으면 원인을 보고합니다. WASM 은 Qt 6.8.3 의 multithread kit 와 Emscripten 3.1.70 을 사용합니다. iOS·Android·WASM 은 같은 대상 툴체인으로 iiFileProvider 를 먼저 빌드하여 각 LVRS 플랫폼 패키지의 `deps/iiFileProvider` 에 설치합니다. CMake 패키지는 Native·Catalog·Objects·Temporary·SQLite 를 포함한 대상 의존성 전체를 해당 위치에서 찾으므로 root-only 탐색에서도 호스트 라이브러리를 섞지 않습니다. 설치 소스 스냅샷에는 iiFileProvider 소스도 함께 보존합니다. 이 과정은 대상 라이브러리의 빌드·설치를 검증하며 기기 실행 검증과 구분합니다. 컴파일러를 이동한 후에는 고정된 `build/` 아래의 해당 크로스 플랫폼 캐시를 다시 생성합니다.
+이 macOS 워크스테이션의 Java 는 Homebrew (`openjdk@21`), Android SDK 는 `/opt/homebrew/share/android-commandlinetools`, Emscripten SDK 는 `/opt/homebrew/share/emsdk` 에 설치되어 있습니다. iiFileProvider 의 C++23 표준 라이브러리와 스레드를 위해 Android 빌드는 `<stop_token>` 및 `<expected>` 가 있는 NDK 를 선택하며, 현재 설치 검증에는 `/opt/homebrew/share/android-ndk` 의 r30 을 사용합니다. 구형 NDK 를 가리키는 환경 변수는 호환 가능한 설치본이 있으면 건너뛰고, 명시적인 `LVRS_BOOTSTRAP_ANDROID_NDK` 가 호환되지 않으면 원인을 보고합니다. WASM 은 Qt 6.8.3 의 multithread kit 와 해당 키트에 맞는 Emscripten 3.1.56 을 사용합니다. iOS·Android·WASM 은 같은 대상 툴체인으로 iiFileProvider 를 먼저 빌드하여 각 LVRS 플랫폼 패키지의 `deps/iiFileProvider` 에 설치합니다. CMake 패키지는 Native·Catalog·Objects·Temporary·SQLite 를 포함한 대상 의존성 전체를 해당 위치에서 찾으므로 root-only 탐색에서도 호스트 라이브러리를 섞지 않습니다. 설치 소스 스냅샷에는 iiFileProvider 소스도 함께 보존합니다. 이 과정은 대상 라이브러리의 빌드·설치를 검증하며 기기 실행 검증과 구분합니다. 컴파일러를 이동한 후에는 고정된 `build/` 아래의 해당 크로스 플랫폼 캐시를 다시 생성합니다.
 
 NDK 의 명시적 설정은 CMake 명령줄의 `-DLVRS_BOOTSTRAP_ANDROID_NDK=...` 를 뜻합니다. 셸의 같은 이름 환경 변수는 호환성을 검사하는 힌트입니다. 상위 CMake 와 Rust CLI 모두 호환되지 않는 셸 값을 하위 빌드의 명시적 설정으로 승격하지 않으며, 설치된 C++23 NDK 를 탐색합니다.
+
+이 워크스테이션의 Emscripten 3.1.56 스크립트는 Clang 19 백엔드와 함께 설치되어 있다.
+이 조합에서 WebAssembly LTO는 `TextDocumentModel::roleNames()`의 함수 시그니처 경고를
+만들었다. 현재 WebAssembly 패키지는 `-DLVRS_ENABLE_IPO=OFF`로 빌드했으며, 동일한
+정적 소비자 링크에서 해당 경고가 없어지는 것을 확인했다. 일반 Release 최적화는 유지한다.
+부트스트랩으로 이 환경을 재현할 때는 `LVRS_BOOTSTRAP_LVRS_ENABLE_IPO=OFF`를 설정한다.
 
 회귀 검사: `sh tests/test_install_wrapper.sh` 및 `cargo test --manifest-path src/rust-cli/Cargo.toml --target-dir build/rust-cli`. 여기에는 시스템 환경 상속, 무시된 형제 툴체인, 명시적 재정의, 인수 경계, CMake 정리 중 Cargo 실행 파일 보존, 누락된 빌드 디렉터리 재생성 등이 포함됩니다.

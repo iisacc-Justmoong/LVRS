@@ -2,7 +2,7 @@
 
 `RouteMatcher`, `RouteResolver`, `NavigationStackModel`은 기존 Qt 객체의 경로·탐색
 로직을 C++23 값과 iiSDKCore 결과·통지 계약으로 옮긴 객체이다. 헤더와 구현은
-`src/LVRS/`에 함께 있다. 공개 API에 Qt·QML·OS 위젯 자료형이 없다.
+`src/Navigation/`에 함께 있다. 공개 API에 Qt·QML·OS 위젯 자료형이 없다.
 토큰화·공백 처리·매칭 내부 구현은 `RoutingDetail.h/.cpp` 쌍에 두고 공개 matcher와 분리한다.
 
 현재 단계의 앱·단위 테스트·설치 소비자 실행은 사용자의 지시에 따라 전체 작업의 최종

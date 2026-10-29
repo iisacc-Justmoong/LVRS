@@ -11,12 +11,12 @@ def audit(root=ROOT):
     properties=re.findall(r'Q_PROPERTY\(\w+\s+(\w+)\s',original)
     methods=re.findall(r'Q_INVOKABLE\s+\w+\s+(\w+)\s*\(',original)
     if sorted(properties)!=sorted(spec['properties']) or sorted(methods)!=sorted(spec['methods']):raise ValueError('Original render monitor API inventory changed')
-    native=(root/'src/LVRS/RenderMonitor.h').read_text()
+    native=(root/'src/Monitoring/RenderMonitor.h').read_text()
     body=re.search(r'class\s+RenderMonitor\s+final\s*\{(.*?)^\};',native,re.S|re.M)
     if not body:raise ValueError('Native RenderMonitor class missing')
     for name in properties+methods+spec['setters']:
         if not re.search(r'\b'+name+r'\s*\(',body[1]):raise ValueError('Missing native render monitor API: '+name)
-    implementation=(root/'src/LVRS/RenderMonitor.cpp').read_text()
+    implementation=(root/'src/Monitoring/RenderMonitor.cpp').read_text()
     for key,value in spec['native_defaults'].items():
         match=re.search(r'\b'+key+r'\s*=\s*(true|false|[0-9]+)',implementation)
         if not match or match[1]!=str(value).lower():raise ValueError('Native render monitor default differs: '+key)

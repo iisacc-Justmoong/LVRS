@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "AGENT.md",
-    "sha256": "07884675f0f5b300db5a4b3d9e7e4ab1212b9666d0183bddae1a7be2dc3842d7",
-    "bytes": 3717,
+    "sha256": "5139198265d1c1ddc13cc5f32eedd574ef5e3b0e22664380beb4b48eaac43246",
+    "bytes": 3742,
     "line_count": 46,
     "encoding": "utf-8",
     "language": "ko"
@@ -57,11 +57,11 @@
       "kind": "list",
       "start_line": 6,
       "end_line": 16,
-      "raw": "- 네이티브 공개 API와 구현은 `src/LVRS/`에 같은 이름의 헤더·소스 쌍으로 둔다.\n- LVUI는 AOT 생성기이며 최종 앱의 수명과 실행 파일 진입점은 iiSDKCore가 소유한다.\n- iiGUI는 자체 C++ 위젯을 그린다. OS 위젯이나 Qt 컨트롤로 네이티브 구성 요소를 대체하지 않는다.\n- 문서·테스트를 함께 갱신한다. README.md를 제외한 docs/ 내부 문서는 한국어로 작성한다.\n- 빌드 출력 디렉터리의 이름은 `build/`로 한다. 작업용 설치 패키지도 Workspace 안에 둔다.\n- 현재 작업의 사용자 지시에 따라 앱·테스트·self-test 실행은 전체 작업의 최종 일괄 단계에 모은다.\n  중간 컴파일·링크·코드 생성·정적 검사는 실행 통과 증거와 구분한다.\n- 새 독립 앱 예제는 `example/` 아래에 두며 앱 소스는 그 예제의 `App/`에 둔다.\n  기존 `examples/`와 레거시 예제는 별도 요청 없이 이동하거나 삭제하지 않는다.\n- `catalog/native/parity.json`과 `docs/native/Parity.md`는 원본 선언·지원 범위·남은 계약을 기록한다.\n  원본과 상속 API, 시각 상태, 플랫폼과 실행 검증을 모두 충족하기 전에는 complete로 표시하지 않는다.\n",
+      "raw": "- 네이티브 공개 API와 구현은 책임별 `src/` 하위 디렉터리에 같은 이름의 헤더·소스 쌍으로 둔다.\n- LVUI는 AOT 생성기이며 최종 앱의 수명과 실행 파일 진입점은 iiSDKCore가 소유한다.\n- iiGUI는 자체 C++ 위젯을 그린다. OS 위젯이나 Qt 컨트롤로 네이티브 구성 요소를 대체하지 않는다.\n- 문서·테스트를 함께 갱신한다. README.md를 제외한 docs/ 내부 문서는 한국어로 작성한다.\n- 빌드 출력 디렉터리의 이름은 `build/`로 한다. 작업용 설치 패키지도 Workspace 안에 둔다.\n- 현재 작업의 사용자 지시에 따라 앱·테스트·self-test 실행은 전체 작업의 최종 일괄 단계에 모은다.\n  중간 컴파일·링크·코드 생성·정적 검사는 실행 통과 증거와 구분한다.\n- 새 독립 앱 예제는 `example/` 아래에 두며 앱 소스는 그 예제의 `App/`에 둔다.\n  기존 `examples/`와 레거시 예제는 별도 요청 없이 이동하거나 삭제하지 않는다.\n- `catalog/native/parity.json`과 `docs/native/Parity.md`는 원본 선언·지원 범위·남은 계약을 기록한다.\n  원본과 상속 API, 시각 상태, 플랫폼과 실행 검증을 모두 충족하기 전에는 complete로 표시하지 않는다.\n",
       "items": [
         {
           "marker": "-",
-          "text": "네이티브 공개 API와 구현은 `src/LVRS/`에 같은 이름의 헤더·소스 쌍으로 둔다.",
+          "text": "네이티브 공개 API와 구현은 책임별 `src/` 하위 디렉터리에 같은 이름의 헤더·소스 쌍으로 둔다.",
           "checked": null
         },
         {

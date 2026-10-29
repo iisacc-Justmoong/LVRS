@@ -192,10 +192,12 @@ for d in baseline['declarations']:
     entries.append(entry)
 source_files=[{'path':x['path'],'sha256':digest(root/x['path'])} for x in baseline['files']]
 inventory=subprocess.check_output(['git','-C',str(root),'ls-files','-z','--cached','--others','--exclude-standard','--','src']).decode().split('\0')
-current={p for p in inventory if p and not p.startswith('src/LVRS/')}
+native_dirs=('Overlays','Components','Hierarchy','Lists','Tables','Text','Models','Navigation','Monitoring','Platform','Styling','Media','Controls')
+native_prefixes=('src/LVRS/',)+tuple('src/'+name+'/' for name in native_dirs)
+current={p for p in inventory if p and not p.startswith(native_prefixes)}
 expected={x['path'] for x in source_files}
 if current!=expected: raise SystemExit('Legacy source inventory changed; refresh the audited baseline: '+str(sorted(current^expected)[:20]))
-api_files=[{'path':p.relative_to(root).as_posix(),'sha256':digest(p)} for p in sorted((root/'src/LVRS').glob('*'),key=lambda p:p.relative_to(root).as_posix()) if p.suffix in {'.h','.cpp'}]
+api_files=[{'path':p.relative_to(root).as_posix(),'sha256':digest(p)} for p in sorted((p for area in native_dirs for p in (root/'src'/area).iterdir()),key=lambda p:p.relative_to(root).as_posix()) if p.suffix in {'.h','.cpp'}]
 result={'schema':1,'source_revision':baseline['source_revision'],'renderer':'iiGUI self-rendered C++ widgets','runtime':'iiSDKCore',
         'remaining_global_contracts':['Read-only AX value-attribute metadata for virtual peers','Full IME replacement ranges, selection, copy/cut and validators','Glyph/icon atlas, damage tracking and large-view performance parity','All platform input/presentation adapters and original LVRS behavior'],
         'legacy_source_files':source_files,'native_api_files':api_files,

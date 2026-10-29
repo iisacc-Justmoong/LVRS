@@ -46,7 +46,7 @@
 | ApplicationWindow | view | partial | Core Application + iiGUI Host | 174 |
 | AdaptiveLayoutHost | view (internal) | pending | — | 85 |
 | Motion | nonvisual | partial | lvrs::Motion / MotionTokens / explicit AOT Alert/Modal/Sheet model | 13 |
-| Theme | nonvisual | partial | lvrs::Theme + lvrs::Icons | 293 |
+| Theme | nonvisual | partial | lvrs::Theme + lvrs::Icons | 296 |
 | Window | view | partial | Core Application + iiGUI Host | 58 |
 | WindowChromeInteraction | view | pending | — | 25 |
 | AbstractButton | view | partial | lvrs::Widgets::button | 36 |
@@ -71,7 +71,7 @@
 | ProgressBar | view | partial | lvrs::ProgressBar + lvrs::Widgets::progress_bar | 40 |
 | Table | view | partial | lvrs::Table / Widgets::table / AOT | 227 |
 | TableCellItem | view | partial | lvrs::TableCellItem / Widgets::table_cell_item / AOT | 45 |
-| TableHeader | view | partial | lvrs::TableHeader / Widgets::table_header / AOT | 32 |
+| TableHeader | view | partial | lvrs::TableHeader / Widgets::table_header / AOT | 36 |
 | TableRow | view | partial | lvrs::TableRow / Widgets::table_row / AOT | 16 |
 | AbstractInputBar | view | pending | — | 93 |
 | CodeEditor | view | partial | lvrs::CodeEditor / Widgets::code_editor / LVUI AOT | 99 |
@@ -80,7 +80,7 @@
 | Swatch | view (internal) | pending | — | 3 |
 | ChannelRow | view (internal) | pending | — | 3 |
 | ColorField | view (internal) | partial | lvrs::Widgets::color_surface | 0 |
-| InputField | view | partial | lvrs::Widgets::input_field | 40 |
+| InputField | view | partial | lvrs::Widgets::input_field | 42 |
 | MaterialSurface | view (internal) | pending | — | 13 |
 | Slider | view | partial | lvrs::Widgets::slider | 50 |
 | Endpoint | view (internal) | pending | — | 6 |

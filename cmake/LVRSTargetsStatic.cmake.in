@@ -14,7 +14,7 @@ if(NOT TARGET LVRS::LVRS)
         IMPORTED_LOCATION "${_IMPORT_PREFIX}/@CMAKE_INSTALL_LIBDIR@/@CMAKE_STATIC_LIBRARY_PREFIX@LVRS@CMAKE_STATIC_LIBRARY_SUFFIX@"
         INTERFACE_COMPILE_DEFINITIONS "LVRS_USE_STATIC_QML_PLUGIN=1"
         INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@/LVRS"
-        INTERFACE_LINK_LIBRARIES "Qt6::Quick;Qt6::QuickControls2;Qt6::Qml;Qt6::Svg;Qt6::Network"
+        INTERFACE_LINK_LIBRARIES "iiFileProvider::iiFileProvider;Qt6::Quick;Qt6::QuickControls2;Qt6::Qml;Qt6::Svg;Qt6::Network"
         _qt_qml_module_installed_plugin_target "LVRSCoreplugin"
         _qt_qml_module_plugin_target "LVRSCoreplugin"
     )

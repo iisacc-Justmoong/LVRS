@@ -18,7 +18,7 @@ def audit(root=ROOT):
         if hashlib.sha256(data).hexdigest() != fixture['legacy_' + label + '_sha256']:
             raise ValueError('Legacy platform ' + label + ' changed; review the complete fixture before updating its hash')
     keys = set(re.findall(r'profile\.insert\(QStringLiteral\("([^"]+)"\)', source.decode()))
-    native = (root / 'src/LVRS/PlatformInfo.cpp').read_text()
+    native = (root / 'src/Platform/PlatformInfo.cpp').read_text()
     if keys != set(re.findall(r'put\("([^"]+)"', native)):
         raise ValueError('Native platform metadata keys differ from the original profile')
     if len(keys) != 41 or any(set(row) != keys for row in fixture['profiles'].values()):
@@ -29,7 +29,7 @@ def audit(root=ROOT):
         raise ValueError('Native platform aliases differ from the original aliases')
     properties = re.findall(r'Q_PROPERTY\([^\n]*?\bREAD\s+(\w+)', header.decode())
     queries = re.findall(r'Q_INVOKABLE\s+\w+\s+(\w+)\(', header.decode())
-    public = (root / 'src/LVRS/PlatformInfo.h').read_text()
+    public = (root / 'src/Platform/PlatformInfo.h').read_text()
     if any(not re.search(r'\b' + name + r'\s*\(', public) for name in properties + queries):
         raise ValueError('A declared platform property or query is missing from the native API')
     return fixture, {'legacy_properties': len(properties), 'legacy_queries': len(queries),

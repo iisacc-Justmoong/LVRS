@@ -11,12 +11,12 @@ def audit(root=ROOT):
     properties=re.findall(r'Q_PROPERTY\(\w+\s+(\w+)\s',original)
     methods=re.findall(r'Q_INVOKABLE\s+\w+\s+(\w+)\s*\(',original)
     if sorted(properties)!=sorted(spec['properties']) or sorted(methods)!=sorted(spec['methods']):raise ValueError('Original SVG API inventory changed')
-    native=(root/'src/LVRS/SvgManager.h').read_text()
+    native=(root/'src/Media/SvgManager.h').read_text()
     body=re.search(r'class\s+SvgManager\s+final\s*\{(.*?)^\};',native,re.S|re.M)
     if not body:raise ValueError('Native SvgManager class missing')
     for name in properties+methods+spec['setters']:
         if not re.search(r'\b'+name+r'\s*\(',body[1]):raise ValueError('Missing native SVG API: '+name)
-    implementation=(root/'src/LVRS/SvgManager.cpp').read_text()
+    implementation=(root/'src/Media/SvgManager.cpp').read_text()
     for key,value in spec['native_defaults'].items():
         match=re.search(r'\b'+key+r'\s*=\s*(true|false|[0-9]+)',implementation)
         if not match or match[1]!=str(value).lower():raise ValueError('Native SVG default differs: '+key)

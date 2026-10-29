@@ -1,7 +1,7 @@
 # Card·Avatar의 C++23 네이티브 구현
 
 기존 QML Card와 Avatar의 선언·기하·색상·전용 SVG를 기준으로 한다. 공개 헤더와 구현은
-src/LVRS/Card.h·Card.cpp, Avatar.h·Avatar.cpp에 함께 있다. AppCard와 일반 Card는 별개이다.
+src/Components/Card.h·Card.cpp, Avatar.h·Avatar.cpp에 함께 있다. AppCard와 일반 Card는 별개이다.
 LVUI는 빌드 시 이 객체를 생성하는 C++를 만들며 Core가 앱 진입점·작업·프레임·수명을
 소유한다. iiGUI 자체 ActionSurface·Image·Panel·Text가 그리며 OS 컨트롤은 생성하지 않는다.
 

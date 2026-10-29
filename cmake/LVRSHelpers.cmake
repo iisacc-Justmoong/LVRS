@@ -113,31 +113,22 @@ endfunction()
 
 function(_lvrs_internal_maybe_link_static_lvrs_plugin target)
     set(_lvrs_plugin_target "")
-    if(TARGET LVRSCoreplugin)
-        set(_lvrs_plugin_target LVRSCoreplugin)
-    elseif(TARGET LVRS::LVRSCoreplugin)
-        set(_lvrs_plugin_target LVRS::LVRSCoreplugin)
-    endif()
-
-    if(_lvrs_plugin_target STREQUAL "")
-        return()
-    endif()
-
-    set(_lvrs_is_static_plugin FALSE)
-    get_target_property(_lvrs_plugin_type "${_lvrs_plugin_target}" TYPE)
-    if(_lvrs_plugin_type STREQUAL "STATIC_LIBRARY")
-        set(_lvrs_is_static_plugin TRUE)
-    endif()
-
-    if(NOT _lvrs_is_static_plugin)
-        get_target_property(_lvrs_plugin_location "${_lvrs_plugin_target}" IMPORTED_LOCATION)
-        if(_lvrs_plugin_location
-           AND _lvrs_plugin_location MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$")
-            set(_lvrs_is_static_plugin TRUE)
+    # Installed packages expose a plain interface wrapper as well as the
+    # namespaced imported archive. Inspect both instead of stopping at the
+    # wrapper, which has no IMPORTED_LOCATION of its own.
+    foreach(_lvrs_candidate LVRSCoreplugin LVRS::LVRSCoreplugin)
+        if(TARGET "${_lvrs_candidate}")
+            get_target_property(_lvrs_plugin_type "${_lvrs_candidate}" TYPE)
+            get_target_property(_lvrs_plugin_location "${_lvrs_candidate}" IMPORTED_LOCATION)
+            if(_lvrs_plugin_type STREQUAL "STATIC_LIBRARY"
+               OR (_lvrs_plugin_location AND _lvrs_plugin_location MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$"))
+                set(_lvrs_plugin_target "${_lvrs_candidate}")
+                break()
+            endif()
         endif()
-    endif()
+    endforeach()
 
-    if(_lvrs_is_static_plugin)
+    if(NOT _lvrs_plugin_target STREQUAL "")
         target_link_libraries("${target}" PRIVATE "${_lvrs_plugin_target}")
 
         get_target_property(_lvrs_plugin_import_injected "${target}" _LVRS_STATIC_PLUGIN_IMPORT_INJECTED)

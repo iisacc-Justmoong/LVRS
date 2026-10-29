@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/native/Navigation.md",
-    "sha256": "cb12bc3c139e2df13397d139356c65d04c0a9b97f50382fe8c0f0c281260d9c7",
-    "bytes": 11090,
+    "sha256": "212e339b7b54f1a97943413809b6e28277afc3f7d87bd7649127a4240929bcc5",
+    "bytes": 11096,
     "line_count": 152,
     "encoding": "utf-8",
     "language": "ko"
@@ -43,7 +43,7 @@
       "kind": "paragraph",
       "start_line": 3,
       "end_line": 6,
-      "raw": "`RouteMatcher`, `RouteResolver`, `NavigationStackModel`은 기존 Qt 객체의 경로·탐색\n로직을 C++23 값과 iiSDKCore 결과·통지 계약으로 옮긴 객체이다. 헤더와 구현은\n`src/LVRS/`에 함께 있다. 공개 API에 Qt·QML·OS 위젯 자료형이 없다.\n토큰화·공백 처리·매칭 내부 구현은 `RoutingDetail.h/.cpp` 쌍에 두고 공개 matcher와 분리한다.\n"
+      "raw": "`RouteMatcher`, `RouteResolver`, `NavigationStackModel`은 기존 Qt 객체의 경로·탐색\n로직을 C++23 값과 iiSDKCore 결과·통지 계약으로 옮긴 객체이다. 헤더와 구현은\n`src/Navigation/`에 함께 있다. 공개 API에 Qt·QML·OS 위젯 자료형이 없다.\n토큰화·공백 처리·매칭 내부 구현은 `RoutingDetail.h/.cpp` 쌍에 두고 공개 matcher와 분리한다.\n"
     },
     {
       "id": "b000004",

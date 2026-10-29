@@ -592,6 +592,16 @@ else()
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
     )
 
+    # Static consumers import LVRSPlugin by name; the module directory must
+    # therefore include the companion archive as well as the LVRS library.
+    if(LVRS_INSTALL_QML_MODULE AND TARGET LVRSCoreplugin)
+        install(TARGETS LVRSCoreplugin
+            ARCHIVE DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+            LIBRARY DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+            RUNTIME DESTINATION ${LVRS_QML_MODULE_INSTALL_DIR}
+        )
+    endif()
+
     configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSTargetsStatic.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/LVRSTargets.cmake"

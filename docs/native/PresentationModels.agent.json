@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/native/PresentationModels.md",
-    "sha256": "6e4061624c3cbe2f3d6df1b6315c30db49237309b26c2a59dd5b17d0f0e00264",
-    "bytes": 5354,
+    "sha256": "c5e2da05344d1465f8f7ad294d9f1eeb504b62d3887373b21fe161a983b7cd1d",
+    "bytes": 5356,
     "line_count": 73,
     "encoding": "utf-8",
     "language": "ko"
@@ -43,7 +43,7 @@
       "kind": "paragraph",
       "start_line": 3,
       "end_line": 5,
-      "raw": "원본은 `src/backend/state/viewmodel.*`, `statemodel.*`와\n`src/backend/model/progressmodel.*`이다. 네이티브 API는 `src/LVRS/`에 같은 이름의\n헤더·소스 쌍으로 제공한다. Qt 객체·QML 엔진·JS 배열이나 OS 컨트롤을 사용하지 않는다.\n"
+      "raw": "원본은 `src/backend/state/viewmodel.*`, `statemodel.*`와\n`src/backend/model/progressmodel.*`이다. 네이티브 API는 `src/Models/`에 같은 이름의\n헤더·소스 쌍으로 제공한다. Qt 객체·QML 엔진·JS 배열이나 OS 컨트롤을 사용하지 않는다.\n"
     },
     {
       "id": "b000004",

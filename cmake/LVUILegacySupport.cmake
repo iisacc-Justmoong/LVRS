@@ -1,0 +1,12 @@
+# Old LVUI packages predate capability reporting and retain their prior behavior.
+function(lvrs_lvui_legacy_aot_available output)
+    if(DEFINED LVUI_AOT_FRAMEWORKS)
+        if("LVRS" IN_LIST LVUI_AOT_FRAMEWORKS)
+            set(${output} TRUE PARENT_SCOPE)
+        else()
+            set(${output} FALSE PARENT_SCOPE)
+        endif()
+    else()
+        set(${output} TRUE PARENT_SCOPE)
+    endif()
+endfunction()

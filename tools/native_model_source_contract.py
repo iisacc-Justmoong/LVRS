@@ -9,8 +9,8 @@ def audit(root=ROOT):
     for relative,digest in spec['original_sha256'].items():
         if hashlib.sha256((root/relative).read_bytes()).hexdigest()!=digest:
             raise ValueError('Original source drift: '+relative)
-    native=(root/'src/LVRS/ModelSource.h').read_text()
-    adapter=(root/'src/LVRS/ModelAdapter.h').read_text()
+    native=(root/'src/Models/ModelSource.h').read_text()
+    adapter=(root/'src/Models/ModelAdapter.h').read_text()
     for model,header,original in [('ModelSource',native,'src/backend/model/modelsource.h'),('ModelAdapter',adapter,'src/backend/navigation/modeladapter.h')]:
         declaration=re.search(r'\bclass\s+'+re.escape(model)+r'\s+final\s*\{(.*?)^\};',header,re.S|re.M)
         if not declaration:raise ValueError('Missing native class: '+model)

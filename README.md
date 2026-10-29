@@ -657,6 +657,8 @@ LVUI controls with retained C++ canvas/timeline providers and real procedural
 frame generation on iiSDKCore. Its final self-test checks GPU pixels, native input,
 result selection and retirement; build-only evidence is not a runtime pass.
 
+Native sources and adjacent headers are grouped by responsibility under `src/`; the installed `<LVRS/...>` include paths remain stable. See [native source layout](docs/native/SourceLayout.md).
+
 <!-- workspace-docs:readme:start -->
 ## Documentation entry points
 

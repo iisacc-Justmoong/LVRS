@@ -1,7 +1,7 @@
 # 네이티브 ViewModel·StateModel·ProgressModel
 
 원본은 `src/backend/state/viewmodel.*`, `statemodel.*`와
-`src/backend/model/progressmodel.*`이다. 네이티브 API는 `src/LVRS/`에 같은 이름의
+`src/backend/model/progressmodel.*`이다. 네이티브 API는 `src/Models/`에 같은 이름의
 헤더·소스 쌍으로 제공한다. Qt 객체·QML 엔진·JS 배열이나 OS 컨트롤을 사용하지 않는다.
 
 ## 값과 실행 영역

@@ -127,8 +127,8 @@ Figma는 열 가지 Accent 각각에 `Default`, `Hover`, `Pressed`, `Selected`, 
 
 Hover와 Pressed는 기본 RGB의 `1/1.12`, `1/1.2`, Disabled는 기본 알파의 30%, Overlay는
 `64/255`이다. Selected·Subtle·Outline은 interactive 표면에 각각 25%·16%·36%를 합성한다.
-Text는 기본적으로 흰색을 30% 혼합하고 Brown은 45%를 혼합하며, Blue는 Figma의 별도
-`#5AAAFF` 값을 사용한다. 원본 90개 RGBA 값과 변수 ID는
+Text는 기본적으로 흰색을 30% 혼합하고 Brown과 Blue는 Figma에 저장된 별도 값을 사용한다.
+Blue는 `#5AAAFF`다. 원본 90개 RGBA 값과 변수 ID는
 `tests/fixtures/figma-accent-roles.json`에 보관하고 QML과 C++ 테스트가 각각 대조한다.
 
 <a id="eight-attached-palette-colors"></a>

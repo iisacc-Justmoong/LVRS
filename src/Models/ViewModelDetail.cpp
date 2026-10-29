@@ -1,0 +1,1 @@
+#include <LVRS/ViewModelDetail.h>

@@ -277,7 +277,8 @@ QtObject {
         if (role === "overlay") return Qt.rgba(color.r, color.g, color.b, color.a * (64 / 255))
         if (role === "text") {
             if (name === "blue") return Qt.rgba(0.3529411852359772, 0.6666666865348816, 1, color.a)
-            const white = name === "brown" ? 0.45 : 0.3
+            if (name === "brown") return Qt.rgba(0.595413088798523, 0.5278200507164001, 0.5029174089431763, color.a)
+            const white = 0.3
             return Qt.rgba(color.r * (1 - white) + white, color.g * (1 - white) + white,
                            color.b * (1 - white) + white, color.a)
         }
