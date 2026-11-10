@@ -67,6 +67,10 @@ Controls.AbstractButton {
     readonly property int shapeCylinder: 1
 
     property int tone: AbstractButton.Default
+    // A segment may supply its borderless presentation without changing tone.
+    property var _segmentStyleOwner: null
+    readonly property int effectiveTone: tone !== AbstractButton.Disabled && _segmentStyleOwner && _segmentStyleOwner.forceBorderlessTone
+        ? AbstractButton.Borderless : tone
     property int shapeStyle: shapeRoundRect
     property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled
     property alias method: methodRegistry.method
@@ -74,36 +78,36 @@ Controls.AbstractButton {
     readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
 
     readonly property color toneTextColor: {
-        if (tone === AbstractButton.Borderless)
+        if (effectiveTone === AbstractButton.Borderless)
             return Theme.primary
         return Theme.textPrimary
     }
     readonly property color toneBackgroundColor: {
-        if (tone === AbstractButton.Primary)
+        if (effectiveTone === AbstractButton.Primary)
             return Theme.primary
-        if (tone === AbstractButton.Destructive)
+        if (effectiveTone === AbstractButton.Destructive)
             return Theme.danger
-        if (tone === AbstractButton.Borderless)
+        if (effectiveTone === AbstractButton.Borderless)
             return "transparent"
-        if (tone === AbstractButton.Disabled)
+        if (effectiveTone === AbstractButton.Disabled)
             return Theme.panelBackground04
         return Theme.panelBackground12
     }
     readonly property color toneBackgroundColorHover: {
-        if (tone === AbstractButton.Primary)
+        if (effectiveTone === AbstractButton.Primary)
             return Theme.primaryHover
-        if (tone === AbstractButton.Destructive)
+        if (effectiveTone === AbstractButton.Destructive)
             return Theme.accentRoleColor("Red", "Hover")
-        if (tone === AbstractButton.Borderless)
+        if (effectiveTone === AbstractButton.Borderless)
             return Theme.surfaceAlt
         return Theme.surfaceAlt
     }
     readonly property color toneBackgroundColorPressed: {
-        if (tone === AbstractButton.Primary)
+        if (effectiveTone === AbstractButton.Primary)
             return Theme.primaryPressed
-        if (tone === AbstractButton.Destructive)
+        if (effectiveTone === AbstractButton.Destructive)
             return Theme.accentRoleColor("Red", "Pressed")
-        if (tone === AbstractButton.Borderless)
+        if (effectiveTone === AbstractButton.Borderless)
             return Theme.accentMuted
         return Theme.accentMuted
     }
@@ -121,6 +125,7 @@ Controls.AbstractButton {
     property color backgroundColorHover: control.toneBackgroundColorHover
     property color backgroundColorPressed: control.toneBackgroundColorPressed
     property color backgroundColorDisabled: Theme.panelBackground04
+    readonly property color selectedBackgroundColor: Theme.accentMuted
 
     hoverEnabled: control.effectiveEnabled
     focusPolicy: control.effectiveEnabled ? Qt.StrongFocus : Qt.NoFocus
@@ -217,7 +222,7 @@ Controls.AbstractButton {
             : control.interaction.surfacePhase === "press"
                 ? control.backgroundColorPressed
                 : control.checked
-                    ? Theme.accentMuted
+                    ? control.selectedBackgroundColor
                     : control.interaction.surfacePhase === "hover"
                     ? control.backgroundColorHover
                     : control.backgroundColor

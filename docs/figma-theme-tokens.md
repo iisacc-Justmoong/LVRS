@@ -1,33 +1,25 @@
 # Figma theme token contract
 
-This document records the Figma-first color and typography contract for the LVRS
-GUI theme. The authoritative captured data is
-[`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json),
-from the [LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS).
-The 2026-10-19 accent revision uses the ten user-selected swatches on the Color page as its color authority. The fixture retains **77 variables: 41 colors and 36 typography variables**, plus **seven text styles**. All 41 color variables were read back after the update. Existing variable IDs and names, typography and style bindings are retained. Component bounds are retained; ColorPicker recent-color cells share the same row width across ten swatches. The authored RGBA values and source-node mapping are also recorded in [`accent-palette.json`](../tests/fixtures/accent-palette.json).
+This document records the Figma-first color and typography contract for the LVRS GUI theme. The current color authority is the 2026-10-31 readback of [the LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS), stored at [`resources/figma-color-tokens.json`](../resources/figma-color-tokens.json). It contains 90 accent-state colors, 29 derived icon colors and 22 window, panel and material colors. Typography and compatibility details are retained in [`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json); the earlier 2026-10-19 capture is historical.
 
-The source mapping is `src/qml/Theme.qml`. Hex values below are rounded display values; the canonical QML properties use original floating-point `Qt.rgba` values. Tests compare those channels at QColor precision. Building and testing this checkout is separate from updating an installed SDK. The user performs `lvrs install` for this revision.
+`scripts/sync_figma_tokens.py` generates the C++ color table and updates the generated sections of `src/qml/Theme.qml` and the window-noise defaults. Its `--check` option verifies those outputs against the checked-in snapshot. Hexadecimal values are rounded for display; exact comparisons use the captured floating-point RGBA channels. The palette rendering test compares pixels in memory; an optional `LVRS_ACCENT_CAPTURE_PATH` can be supplied explicitly for a capture under `resources/`. Source builds and tests do not install the SDK. The user performs `lvrs install` for this revision.
 
 ## Scope and naming
 
-- `Theme Colors` contains 13 panel/window colors, six text colors, four action
-  colors and 18 named accent properties: ten canonical colors, seven compatibility
-  aliases and one neutral Gray. Names express roles and color names.
-- `Theme Typography` contains a shared family and seven five-property recipes.
+- The theme exposes 13 panel/window properties, six text colors, ten canonical
+  accent colors, compatibility aliases and neutral Gray. Names express roles.
+- The QML typography API retains a shared family and seven five-property recipes;
+  the current Figma styles use 20 shared typography variables.
 - Existing IDs are retained when an existing variable or style is renamed. Old
   QML panel and typography property names remain compatibility aliases.
-- Existing control-specific fills, pressed/selected state overrides, materials,
-  icon-derived colors and platform-specific tokens are outside the core inventory.
-  Their absence from the core set does not authorize deleting them. Existing
-  paints that used the replaced accents, including their opacity stops and
-  composites, follow the new colors while retaining their state behavior.
+- The current snapshot also contains the nine accent states per color, 29 derived icon colors and material/background roles. Unrelated platform and control-specific tokens retain their existing behavior.
 - The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**
   `Theme.<property>` references. It is not CSS syntax or a web-only implementation.
 
-| Collection | ID | Active core inventory |
+| Collection | ID | Recorded contract |
 | --- | --- | ---: |
-| Theme Colors | `VariableCollectionId:44:457` | 41; 33 in the initial snapshot |
-| Theme Typography | `VariableCollectionId:1305:73` | 36 |
+| Theme Colors | `VariableCollectionId:44:457` | Core roles and the Figma color snapshot |
+| Theme Typography | `VariableCollectionId:1305:73` | 20 current Figma variables; 36 QML recipe properties |
 | Compatibility Icon Colors | `VariableCollectionId:963:2` | 0; 1,548 retained hidden variables |
 
 Colors use the captured `Dark` mode. Typography uses its captured mode; the
@@ -43,19 +35,19 @@ monotonic brightness ramp; do not recalculate steps 07 and 08 to match their nam
 
 | Figma variable | QML property | Normalized RGB | Retained ID |
 | --- | --- | --- | --- |
-| `Panel/canvas` | `Theme.canvas` | `(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)` | `VariableID:44:467` |
-| `Panel/surfaceGhost` | `Theme.surfaceGhost` | `(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)` | `VariableID:44:468` |
-| `Panel/windowAlt` | `Theme.windowAlt` | `(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)` | `VariableID:44:469` |
-| `Panel/subSurface` | `Theme.subSurface` | `(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)` | `VariableID:44:470` |
-| `Panel/surfaceSolid` | `Theme.surfaceSolid` | `(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)` | `VariableID:215:9618` |
-| `Panel/surfaceAlt` | `Theme.surfaceAlt` | `(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)` | `VariableID:215:9620` |
-| `Panel/surfaceInteractive` | `Theme.surfaceInteractive` | `(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)` | `VariableID:215:9621` |
-| `Panel/surfacePanel` | `Theme.surfacePanel` | `(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)` | `VariableID:215:9622` |
-| `Panel/surfaceControl` | `Theme.surfaceControl` | `(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)` | `VariableID:215:9623` |
-| `Panel/surfaceInput` | `Theme.surfaceInput` | `(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)` | `VariableID:215:9624` |
-| `Panel/surfaceInputHover` | `Theme.surfaceInputHover` | `(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)` | `VariableID:215:9625` |
-| `Panel/surfaceRaised` | `Theme.surfaceRaised` | `(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)` | `VariableID:215:9626` |
-| `Panel/window` | `Theme.window` | `(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)` | `VariableID:1305:74` |
+| `Panel/canvas` | `Theme.canvas` | `(0.06189476698637009, 0.06189476698637009, 0.06373938918113708)` | `VariableID:44:467` |
+| `Panel/surfaceGhost` | `Theme.surfaceGhost` | `(0.0696646124124527, 0.06979759782552719, 0.07046254724264145)` | `VariableID:44:468` |
+| `Panel/windowAlt` | `Theme.windowAlt` | `(0.1061861664056778, 0.1061861664056778, 0.1091860681772232)` | `VariableID:44:469` |
+| `Panel/subSurface` | `Theme.subSurface` | `(0.12038286030292511, 0.12213718146085739, 0.12389150261878967)` | `VariableID:44:470` |
+| `Panel/surfaceSolid` | `Theme.surfaceSolid` | `(0.14418363571166992, 0.1475532352924347, 0.1475532352924347)` | `VariableID:215:9618` |
+| `Panel/surfaceAlt` | `Theme.surfaceAlt` | `(0.15562701225280762, 0.15847958624362946, 0.1613321751356125)` | `VariableID:215:9620` |
+| `Panel/surfaceInteractive` | `Theme.surfaceInteractive` | `(0.17858824133872986, 0.17858824133872986, 0.17858824133872986)` | `VariableID:215:9621` |
+| `Panel/surfacePanel` | `Theme.surfacePanel` | `(0.17342455685138702, 0.17747892439365387, 0.1795060932636261)` | `VariableID:215:9622` |
+| `Panel/surfaceControl` | `Theme.surfaceControl` | `(0.18747973442077637, 0.192999929189682, 0.192999929189682)` | `VariableID:215:9623` |
+| `Panel/surfaceInput` | `Theme.surfaceInput` | `(0.19681522250175476, 0.1986967921257019, 0.20057833194732666)` | `VariableID:215:9624` |
+| `Panel/surfaceInputHover` | `Theme.surfaceInputHover` | `(0.2218484729528427, 0.23012775182724, 0.23288752138614655)` | `VariableID:215:9625` |
+| `Panel/surfaceRaised` | `Theme.surfaceRaised` | `(0.24484941363334656, 0.25022611021995544, 0.2529144883155823)` | `VariableID:215:9626` |
+| `Panel/window` | `Theme.window` | `(0.09921568632125854, 0.09921568632125854, 0.09921568632125854)` | `VariableID:1305:74` |
 
 The twelve legacy properties alias the corresponding role without creating a
 second color authority. `window` remains independent of the twelve legacy steps.
@@ -103,18 +95,18 @@ The ten swatches supplied by the user replace the previous canonical palette in 
 
 | Figma variable / QML property | HEX display | Source node | Retained variable ID |
 | --- | --- | --- | --- |
-| `Accent/Blue/Default` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |
-| `Accent/Red/Default` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |
-| `Accent/Green/Default` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |
-| `Accent/Yellow/Default` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |
-| `Accent/Purple/Default` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |
-| `Accent/Rose/Default` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |
-| `Accent/Orange/Default` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |
-| `Accent/Brown/Default` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |
-| `Accent/Cyan/Default` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |
-| `Accent/Teal/Default` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |
+| `Accent/Blue/Default` / `Theme.accentBlue` | `#2880E5` | `1477:30` | `VariableID:1305:76` |
+| `Accent/Red/Default` / `Theme.accentRed` | `#E55050` | `1477:31` | `VariableID:1305:77` |
+| `Accent/Green/Default` / `Theme.accentGreen` | `#15D02E` | `1477:32` | `VariableID:1305:78` |
+| `Accent/Yellow/Default` / `Theme.accentYellow` | `#E5C236` | `1477:33` | `VariableID:1305:79` |
+| `Accent/Purple/Default` / `Theme.accentPurple` | `#8453E5` | `1477:34` | `VariableID:1305:80` |
+| `Accent/Rose/Default` / `Theme.accentRose` | `#E04D72` | `1477:36` | `VariableID:1305:81` |
+| `Accent/Orange/Default` / `Theme.accentOrange` | `#E57936` | `1477:35` | `VariableID:1305:82` |
+| `Accent/Brown/Default` / `Theme.accentBrown` | `#3C2319` | `1477:37` | `VariableID:1305:83` |
+| `Accent/Cyan/Default` / `Theme.accentCyan` | `#32C2E5` | `1477:38` | `VariableID:1305:84` |
+| `Accent/Teal/Default` / `Theme.accentTeal` | `#14B5C7` | `1477:40` | `VariableID:1305:85` |
 
-`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.
+`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` follows the captured `Accent/Blue/Selected` role. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.
 
 ## Accent 역할 토큰
 
@@ -125,15 +117,11 @@ Figma는 열 가지 Accent 각각에 `Default`, `Hover`, `Pressed`, `Selected`, 
 `AccentRole::standard`이다. 기본 Blue 버튼과 위험 Red 버튼의 호버·눌림 색상도 이 역할을
 사용한다. 앱이 `primaryColor`를 별도로 지정하면 기존 사용자 정의 primary 동작을 유지한다.
 
-Hover와 Pressed는 기본 RGB의 `1/1.12`, `1/1.2`, Disabled는 기본 알파의 30%, Overlay는
-`64/255`이다. Selected·Subtle·Outline은 interactive 표면에 각각 25%·16%·36%를 합성한다.
-Text는 기본적으로 흰색을 30% 혼합하고 Brown과 Blue는 Figma에 저장된 별도 값을 사용한다.
-Blue는 `#5AAAFF`다. 원본 90개 RGBA 값과 변수 ID는
-`tests/fixtures/figma-accent-roles.json`에 보관하고 QML과 C++ 테스트가 각각 대조한다.
+각 상태값은 현재 Figma 변수에 저장된 RGBA를 그대로 사용한다. 배경이 바뀌었다고 Selected·Subtle·Outline을 새 배경 위에서 다시 합성하지 않는다. 기본 아이콘의 Default 연결은 해당 색상의 Hover, Hover 연결은 Pressed를 사용한다. Figma가 명시한 `Icon/Accent/.../Darker` 29개는 각각 실제 저장값을 읽으며, 현재 값은 원래 역할의 RGB를 90%로 낮추고 알파를 유지한다. 명시된 아이콘 변수가 없는 나머지 역할에는 같은 90% 규칙을 대체값으로 사용한다. QML `Theme.iconAccentRoleColor`와 C++ `Theme::icon_accent_role`은 이 연결을 제공한다. 90개 상태, 29개 아이콘 및 22개 배경의 값과 ID는 `tests/fixtures/figma-accent-roles.json`에서 검증한다.
 
 <a id="eight-attached-palette-colors"></a>
 
-On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,
+Historically, on 2026-10-21, the user set `accentGreen` to **#00E71F**; the current 2026-10-31 value is shown above. The canonical variable,
 the compatibility Green alias, and the Green gradient stops
 retain their IDs. The stops retain their existing alpha. Matching SVG paints
 and their current manifest hashes follow the new Green while geometry remains
@@ -254,8 +242,8 @@ Source validation covers:
 - SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.
 - ColorPicker defaults and recent colors from the same canonical palette.
 
-The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.
+The 2026-10-19 audit and runtime capture described an earlier revision; build directories are not long-term evidence storage.
 
-The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.
+The original 2026-10-08/09 69-variable and eight-color extension records are historical snapshots. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.
 
-The final macOS source build succeeded. A fresh focused CTest run passed **12/12 targets** with **0 failures** in **64.29 seconds** after the final helper-resource update. The JUnit report is [`final-ctest.xml`](../build/accent-palette-20261019/final-ctest.xml), with a machine-readable summary in [`verification.json`](../build/accent-palette-20261019/verification.json). Six conditional cases for native RHI, hover delivery and optional captures remain skipped and are recorded in `final-qt-tests.log`; this run does not claim all-platform native execution or installation.
+The 2026-10-19 macOS focused run reported 12/12 CTest targets; it is historical and does not certify the 2026-10-31 changes or an installation.

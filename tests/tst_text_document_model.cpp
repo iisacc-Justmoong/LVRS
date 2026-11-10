@@ -3,10 +3,60 @@
 #include <QtTest>
 #include <QPersistentModelIndex>
 #include <QTemporaryDir>
+#include <QAbstractItemModelTester>
 
 class TextDocumentStorageTests : public QObject {
     Q_OBJECT
 private slots:
+    void provider_chunked_load_and_cancellation() {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const auto path = directory.filePath("chunked.txt");
+        const QString expected = QString::fromUtf8("한글 line\n").repeated(300);
+        {
+            iiFileProvider::FileDevice file(path);
+            QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+            QCOMPARE(file.write(expected.toUtf8()), expected.toUtf8().size());
+        }
+        TextDocumentModel model;
+        model.setLoadChunkSize(1024);
+        QSignalSpy loaded(&model, &TextDocumentModel::fileLoaded);
+        QVERIFY(model.loadFile(path));
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 5000);
+        QCOMPARE(model.text(), expected);
+        QVERIFY(!model.loading());
+        QVERIFY(model.loadFile(path));
+        model.cancelLoad();
+        QVERIFY(!model.loading());
+    }
+    void range_edits_preserve_unaffected_rows_and_counts() {
+        TextDocumentModel model;
+        QAbstractItemModelTester contract(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+        model.setText(QString::fromUtf8("head\nalpha\nbravo\n한글 🎵\ntail"));
+        QPersistentModelIndex tail(model.index(4));
+        QSignalSpy reset(&model,&QAbstractItemModel::modelReset);
+        QSignalSpy inserted(&model,&QAbstractItemModel::rowsInserted);
+        QSignalSpy removed(&model,&QAbstractItemModel::rowsRemoved);
+        model.replaceRange(6,14,QStringLiteral("X\r\nY"));
+        QCOMPARE(model.text(),QString::fromUtf8("head\naX\nYvo\n한글 🎵\ntail"));
+        QCOMPARE(model.characterCount(),qint64(model.text().size()));
+        QCOMPARE(reset.size(),0);QCOMPARE(inserted.size(),0);QCOMPARE(removed.size(),0);
+        QVERIFY(tail.isValid());QCOMPARE(tail.row(),4);QCOMPARE(tail.data(TextDocumentModel::TextRole).toString(),QStringLiteral("tail"));
+
+        model.replaceRange(5,9,QStringLiteral("Z"));
+        QCOMPARE(model.text(),QString::fromUtf8("head\nZvo\n한글 🎵\ntail"));
+        QCOMPARE(model.characterCount(),qint64(model.text().size()));
+        QCOMPARE(reset.size(),0);QCOMPARE(removed.size(),1);
+        QVERIFY(tail.isValid());QCOMPARE(tail.row(),3);
+
+        model.moveCursor(1,1);model.insertText(QStringLiteral("a\r\nb"));
+        QCOMPARE(model.text(),QString::fromUtf8("head\nZa\nbvo\n한글 🎵\ntail"));
+        QCOMPARE(model.characterCount(),qint64(model.text().size()));
+        QVERIFY(tail.isValid());QCOMPARE(tail.row(),4);
+        QVERIFY(model.removePreviousCharacter());
+        QCOMPARE(model.characterCount(),qint64(model.text().size()));
+        QCOMPARE(reset.size(),0);
+    }
     void saving_preserves_rows_indexes_and_text() {
         QTemporaryDir directory;
         QVERIFY(directory.isValid());

@@ -13,24 +13,27 @@ PLAN = json.loads((ROOT / 'tests/fixtures/accent-palette.json').read_text())
 class AccentPaletteTests(unittest.TestCase):
     def test_authored_precision_and_retained_names(self):
         source = (ROOT / 'src/qml/Theme.qml').read_text()
+        snapshot = json.loads((ROOT / 'resources/figma-color-tokens.json').read_text())
+        tokens = {row['name']: row['value'] for row in snapshot['variables']}
         self.assertEqual(len(PLAN['colors']), 10)
         self.assertEqual(len({r['nodeId'] for r in PLAN['colors']}), 10)
         for row in PLAN['colors']:
             with self.subTest(property=row['property']):
-                match = re.search(r'property color ' + row['property'] + r': Qt\.rgba\(([^)]+)\)', source)
-                self.assertIsNotNone(match, 'Use original RGBA, not rounded HEX')
-                actual = [float(x.strip()) for x in match[1].split(',')]
-                self.assertEqual(actual, [row['rgba'][k] for k in ('r', 'g', 'b', 'a')])
+                color = row['property'].removeprefix('accent')
+                self.assertRegex(source, r'property color ' + re.escape(row['property'])
+                                 + r': accentRoleColor\("' + re.escape(color) + r'", "Default"\)')
+                self.assertEqual(tokens['Accent/' + color + '/Default'], row['rgba'])
         for legacy, target in PLAN['legacyAliases'].items():
             self.assertRegex(source, r'property color ' + legacy + ': ' + target + r'\b')
         self.assertRegex(source, r'property color defaultPrimary: accentBlue\b')
 
     def test_retired_accent_paints_are_absent(self):
         retired = set(PLAN['replacements']) | set(PLAN['derivedReplacements'])
-        for path in (ROOT / 'resources').rglob('*.svg'):
-            with self.subTest(icon=str(path.relative_to(ROOT / 'resources'))):
-                colors = set(re.findall(r'#[0-9a-fA-F]{6}\b', path.read_text()))
-                self.assertFalse({c.upper() for c in colors} & retired)
+        for folder in ('iconset', 'images'):
+            for path in (ROOT / 'resources' / folder).rglob('*.svg'):
+                with self.subTest(icon=str(path.relative_to(ROOT / 'resources'))):
+                    colors = set(re.findall(r'#[0-9a-fA-F]{6}\b', path.read_text()))
+                    self.assertFalse({c.upper() for c in colors} & retired)
 
     def test_icon_manifest_and_geometry_are_verified(self):
         manifest = json.loads((ROOT / 'docs/figma-iconset-manifest.json').read_text())

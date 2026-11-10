@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/components/control/InputField.md",
-    "sha256": "2a3dd9062dc986bff027a12f0c3f246b55f9c1d8e7f83e153f4e3006869d7526",
-    "bytes": 12814,
-    "line_count": 181,
+    "sha256": "6601e190dd44e7e38ff04635b59f702a9903d9af2776b2ba157b3b5ecfa6987b",
+    "bytes": 13150,
+    "line_count": 185,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -883,151 +883,165 @@
     },
     {
       "id": "b000079",
-      "kind": "html",
+      "kind": "paragraph",
       "start_line": 129,
-      "end_line": 129,
-      "raw": "<a id=\"usage\"></a>\n"
+      "end_line": 131,
+      "raw": "내측 그림자 래스터화에는 `Canvas.Threaded`를 요청해 여러 필드가 동시에 생성될 때\nGUI 이벤트 루프가 블러 계산을 직접 수행하지 않도록 한다. 렌더러가 해당 전략을\n지원하지 않으면 Qt가 지원 가능한 전략을 선택한다. 재료의 색·기하·편집 동작은 같다.\n"
     },
     {
       "id": "b000080",
-      "kind": "blank",
-      "start_line": 130,
-      "end_line": 130,
-      "raw": "\n"
-    },
-    {
-      "id": "b000081",
-      "kind": "heading",
-      "start_line": 131,
-      "end_line": 131,
-      "raw": "## 사용법\n",
-      "level": 2,
-      "title": "사용법"
-    },
-    {
-      "id": "b000082",
       "kind": "blank",
       "start_line": 132,
       "end_line": 132,
       "raw": "\n"
     },
     {
-      "id": "b000083",
-      "kind": "fenced_code",
+      "id": "b000081",
+      "kind": "html",
       "start_line": 133,
-      "end_line": 141,
+      "end_line": 133,
+      "raw": "<a id=\"usage\"></a>\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "## 사용법\n",
+      "level": 2,
+      "title": "사용법"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "fenced_code",
+      "start_line": 137,
+      "end_line": 145,
       "raw": "```qml\nimport LVRS 1.0 as LV\n\nLV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Filter\"\n}\n```\n",
       "language": "qml",
       "code": "import LVRS 1.0 as LV\n\nLV.InputField {\n    style: cylinderStyle\n    search: true\n    placeholderText: \"Filter\"\n}\n",
       "closed": true
     },
     {
-      "id": "b000084",
+      "id": "b000086",
       "kind": "blank",
-      "start_line": 142,
-      "end_line": 142,
+      "start_line": 146,
+      "end_line": 146,
       "raw": "\n"
     },
     {
-      "id": "b000085",
+      "id": "b000087",
       "kind": "fenced_code",
-      "start_line": 143,
-      "end_line": 158,
+      "start_line": 147,
+      "end_line": 162,
       "raw": "```qml\nItem {\n    Rectangle {\n        id: panelBackdrop\n        anchors.fill: parent\n        gradient: Gradient {\n            GradientStop { position: 0; color: \"#31425b\" }\n            GradientStop { position: 1; color: \"#252629\" }\n        }\n    }\n    LV.InputField {\n        backdropSource: panelBackdrop\n        placeholderText: \"Filter\"\n    }\n}\n```\n",
       "language": "qml",
       "code": "Item {\n    Rectangle {\n        id: panelBackdrop\n        anchors.fill: parent\n        gradient: Gradient {\n            GradientStop { position: 0; color: \"#31425b\" }\n            GradientStop { position: 1; color: \"#252629\" }\n        }\n    }\n    LV.InputField {\n        backdropSource: panelBackdrop\n        placeholderText: \"Filter\"\n    }\n}\n",
       "closed": true
     },
     {
-      "id": "b000086",
+      "id": "b000088",
       "kind": "blank",
-      "start_line": 159,
-      "end_line": 159,
+      "start_line": 163,
+      "end_line": 163,
       "raw": "\n"
     },
     {
-      "id": "b000087",
+      "id": "b000089",
       "kind": "fenced_code",
-      "start_line": 160,
-      "end_line": 165,
+      "start_line": 164,
+      "end_line": 169,
       "raw": "```qml\nLV.InputField {\n    style: inlineStyle\n    text: \"Editable value\"\n}\n```\n",
       "language": "qml",
       "code": "LV.InputField {\n    style: inlineStyle\n    text: \"Editable value\"\n}\n",
       "closed": true
     },
     {
-      "id": "b000088",
+      "id": "b000090",
       "kind": "blank",
-      "start_line": 166,
-      "end_line": 166,
+      "start_line": 170,
+      "end_line": 170,
       "raw": "\n"
     },
     {
-      "id": "b000089",
+      "id": "b000091",
       "kind": "fenced_code",
-      "start_line": 167,
-      "end_line": 173,
+      "start_line": 171,
+      "end_line": 177,
       "raw": "```qml\nLV.InputField {\n    style: roundedStyle\n    mode: passwordMode\n    placeholderText: \"Password\"\n}\n```\n",
       "language": "qml",
       "code": "LV.InputField {\n    style: roundedStyle\n    mode: passwordMode\n    placeholderText: \"Password\"\n}\n",
       "closed": true
     },
     {
-      "id": "b000090",
-      "kind": "blank",
-      "start_line": 174,
-      "end_line": 174,
-      "raw": "\n"
-    },
-    {
-      "id": "b000091",
-      "kind": "paragraph",
-      "start_line": 175,
-      "end_line": 175,
-      "raw": "세 모드와 세 모양은 비활성화, 활성화, 커서 활성화, 입력, 선택 드래그, 키보드 포커스 상태에서 같은 편집기를 사용한다. 상태는 별도 시각 모드 지정이 아니라 실제 입력과 포커스에 따라 결정된다.\n"
-    },
-    {
       "id": "b000092",
-      "kind": "blank",
-      "start_line": 176,
-      "end_line": 176,
-      "raw": "\n"
-    },
-    {
-      "id": "b000093",
-      "kind": "html",
-      "start_line": 177,
-      "end_line": 177,
-      "raw": "<a id=\"shared-motion\"></a>\n"
-    },
-    {
-      "id": "b000094",
       "kind": "blank",
       "start_line": 178,
       "end_line": 178,
       "raw": "\n"
     },
     {
-      "id": "b000095",
-      "kind": "heading",
+      "id": "b000093",
+      "kind": "paragraph",
       "start_line": 179,
       "end_line": 179,
-      "raw": "## 공유 모션\n",
-      "level": 2,
-      "title": "공유 모션"
+      "raw": "세 모드와 세 모양은 비활성화, 활성화, 커서 활성화, 입력, 선택 드래그, 키보드 포커스 상태에서 같은 편집기를 사용한다. 상태는 별도 시각 모드 지정이 아니라 실제 입력과 포커스에 따라 결정된다.\n"
     },
     {
-      "id": "b000096",
+      "id": "b000094",
       "kind": "blank",
       "start_line": 180,
       "end_line": 180,
       "raw": "\n"
     },
     {
-      "id": "b000097",
-      "kind": "paragraph",
+      "id": "b000095",
+      "kind": "html",
       "start_line": 181,
       "end_line": 181,
+      "raw": "<a id=\"shared-motion\"></a>\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 182,
+      "end_line": 182,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "heading",
+      "start_line": 183,
+      "end_line": 183,
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 184,
+      "end_line": 184,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 185,
+      "end_line": 185,
       "raw": "초점 윤곽이 다시 나타납니다. 상속된 액세서리는 자체 버튼 피드백을 사용합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
     }
   ],
@@ -1081,20 +1095,20 @@
       "start_line": 105
     },
     {
-      "block_id": "b000081",
+      "block_id": "b000083",
       "parent_id": "b000001",
       "level": 2,
       "title": "사용법",
       "anchor": "사용법",
-      "start_line": 131
+      "start_line": 135
     },
     {
-      "block_id": "b000095",
+      "block_id": "b000097",
       "parent_id": "b000001",
       "level": 2,
       "title": "공유 모션",
       "anchor": "공유-모션",
-      "start_line": 179
+      "start_line": 183
     }
   ],
   "indexes": {
@@ -1131,11 +1145,11 @@
         "line": 127
       },
       {
-        "block_id": "b000097",
+        "block_id": "b000099",
         "label": "모션 정책",
         "target": "../../motion.md",
         "kind": "relative",
-        "line": 181
+        "line": 185
       }
     ],
     "tables": [

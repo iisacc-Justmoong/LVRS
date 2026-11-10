@@ -63,6 +63,6 @@ LV.ListItem {
 
 `LVRSTests_instance_state` 는 Qt 를 사용하여 실제 Qt 와 빠른 창을 통해 포인터 및 키보드 단계를 연습하고, 소유권을 분리하며, 모든 17 ListItem 타입, 릴리스 시 활성화, 취소, 재 누름, 감소된 동작, 비활성화 게이트, 초점 유지 및 고정 타격 기하학을 실행합니다. 그는 `tests/fixtures/figma-instance-state.json` 에서 기록된 Figma 계약을 확인하며, 픽스처 는 날짜가 있는 디자인 감사이며, Figma 쿼리가 아닙니다. `ctest --test-dir build -R instance_state --output-on-failure` 를 실행합니다. 기존 동작, Figma 동등성, 합성 목록 및 계층 구조 수트는 시각적 값, 액세서리 라우팅 및 모델 동작을 다룹니다. 생성 출력은 설치된 LVRS 패키지에 독립적입니다; 재설치는 별도의 소비자 작업입니다.
 
-네이티브 렌더링된 초점 증명에 대해 `build/` 하위의 디렉토리에 `LVRS_STATE_CAPTURE_DIR` 를 설정하고, 네이티브 플랫폼과 이 빌드의 라이브러리/수입 경로를 사용하여 `build/tests/LVRSTests_instance_state native_focus_capture` 를 실행합니다. 캡처는 각 6 컴포넌트 계열 외부의 실제 기본 색상 픽셀을 확인하고 초점 프레임을 저장합니다. 이 확인은 일반적인 오프스크린 수트에서 옵트-인입니다.
+네이티브 렌더링된 초점 증명에 대해 `resources/.state/state-captures/` 하위의 디렉토리에 `LVRS_STATE_CAPTURE_DIR` 를 설정하고, 네이티브 플랫폼과 이 빌드의 라이브러리/수입 경로를 사용하여 `build/tests/LVRSTests_instance_state native_focus_capture` 를 실행합니다. 캡처는 각 6 컴포넌트 계열 외부의 실제 기본 색상 픽셀을 확인하고 초점 프레임을 저장합니다. 이 확인은 일반적인 오프스크린 수트에서 옵트-인입니다.
 
 macOS 에서 Qt 6.8.3 로 검증: 전체 빌드가 통과했습니다. 모든 56 CTest 타겟이 실행되었으며, 초기 실행은 53를 통과했고, 3 실패 (예시/플랫폼 통합 및 애니메이션 시작 타이밍 주장을 포함한 카탈로그 카운트) 는 수정 및 타겟 재실행 후 통과했습니다. 인스턴스 상태 수트와 네이티브 렌더링된 초점 확인이 통과했습니다. `build/figma-instance-state/verification.json` 는 이러한 별도 실행, Figma 감사 및 네이티브 캡처를 기록합니다. 설치는 사용자의 요청한 재설치 단계에 맡겨둡니다.

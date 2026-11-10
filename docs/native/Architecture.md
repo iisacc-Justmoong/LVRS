@@ -40,8 +40,7 @@ CheckBox·RadioButton·ToggleSwitch, InputField, Slider·ProgressBar,
 VStack·HStack·ZStack·Spacer·Label과 창을 포함한다. 콜백은 원래 C++ 객체의
 메서드로 컴파일되며 컴포넌트 문자열을 런타임에 해석하지 않는다.
 
-12개 악센트의 기본·hover·pressed 값과 2% 창 혼합을 네이티브 Theme로 제공한다.
-기본 값은 현재 QML 소스에서 옮겼으며 green은 `#00E71F`이다.
+네이티브 Theme는 Figma의 열 가지 악센트에 대한 상태별 값 90개, 29개 아이콘 어두운 역할, 22개 배경 역할과 2% 창 혼합을 제공한다. Gray와 White는 기존 호환 색상이다. 값은 QML과 같은 `resources/figma-color-tokens.json`에서 생성하며 현재 Green Default의 8비트 표시는 `#15D02E`이다.
 
 ## 내장 아이콘과 탭
 
@@ -122,10 +121,10 @@ primary·borderless 톤, upDown·up·down 화살표, 텍스트·너비·활성 �
 포커스 이동은 캡처를 취소한다. 해제 콜백이 트리를 제거하면 후속 클릭은 실행하지 않는다.
 방향키는 키 입력마다 한 번 방출하며 자체 반복 타이머를 시작하지 않는다.
 
-두 `SegmentedControl`은 원본처럼 독립 자식 버튼을 감싼 행이다. 자동 선택 그룹이나
+두 `SegmentedControl`은 원본처럼 독립 자식 버튼을 감싼 컨테이너다. 네이티브 `icon_segmented_control`은 `ii::gui::SegmentedOptions::vertical`로 세로형을 생성하며 2–15개 디자인을 지원한다. 자동 선택 그룹이나
 currentIndex를 추가하지 않는다. label 행은 수평 4·수직 3.5, icon 행은 수평·수직 4,
-간격 2, 테두리 2, 반경 12를 기본으로 한다. cylinder 모양과 borderless 톤 강제를
-지원한다. 강제 옵션을 끄면 각 버튼의 명시적 톤을 유지한다. 정적 자식 View와 불투명
+간격 2, 테두리 2, 반경 12를 기본으로 한다. cylinder 모양과 borderless 외관을
+지원한다. 자식의 명시적 톤은 유지하며 선택 상태는 일반 버튼의 앱 악센트 Selected 색상을 사용한다. 강제 옵션을 끄면 각 버튼의 명시적 외관을 사용한다. 정적 자식 View와 불투명
 C++ 배경·테두리 색상만 지원하며, 반응형 스타일·동적 자식·반투명 테두리와 모션은 남아 있다.
 스테퍼의 원본 흰색 SVG 글리프는 네이티브 자산 캐시를 공유하고 배경은 현재 악센트로 그린다.
 

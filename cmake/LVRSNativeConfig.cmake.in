@@ -1,4 +1,8 @@
 @PACKAGE_INIT@
+if(EMSCRIPTEN AND @LVRS_BUILD_SHARED_LIBS@)
+    # The installed target is an Emscripten side module.
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif()
 include(CMakeFindDependencyMacro)
 find_dependency(iiGUI 0.4 CONFIG)
 get_target_property(_lvrs_gui_abi iiGUI::iiGUI IIGUI_NATIVE_ABI_ID)

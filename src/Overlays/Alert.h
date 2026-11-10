@@ -1,6 +1,7 @@
 #pragma once
 #include <LVRS/AlertButton.h>
 #include <LVRS/Motion.h>
+#include <LVRS/Theme.h>
 #include <array>
 namespace lvrs {
 enum class AlertIcon { adjustments,file_text };
@@ -15,7 +16,8 @@ struct AlertOptions final {
     bool dismiss_on_background=false,dismiss_on_escape=false;
     double minimum_width=280,maximum_width=500,preferred_width=500,side_padding=24,corner_radius=36;
     AlertShape shape=AlertShape::round_rect;
-    ii::gui::WidgetColor backdrop_color{0,0,0,89./255},card_color{29./255,31./255,33./255,.72};
+    ii::gui::WidgetColor backdrop_color{0,0,0,89./255};
+    ii::gui::WidgetColor card_color=Theme::background(BackgroundRole::glass_fill);
     bool glass_enabled=true;
     double glass_blur_radius=28;
     bool shadow_enabled=true;

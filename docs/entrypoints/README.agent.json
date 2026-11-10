@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "README.md",
-    "sha256": "0c1357a1fe9c79358ca78168283a62fe7b76477ac8dced8556d6bfe1b1fb165a",
-    "bytes": 49204,
+    "sha256": "43d92f4da819a9cbfb0082fc18e405a95ade5504a3dcfd79a5e84c56aa43b472",
+    "bytes": 49412,
     "line_count": 669,
     "encoding": "utf-8",
     "language": "ko"
@@ -701,7 +701,7 @@
       "kind": "paragraph",
       "start_line": 227,
       "end_line": 227,
-      "raw": "`build.sh` configures `build/` with `LVRS_BUILD_EXAMPLES=ON` and `LVRS_BUILD_TESTS=ON`, builds the host outputs, and fails if any checked-in example launcher no longer matches its build-tree runtime.\n"
+      "raw": "`build.sh` configures the fixed `build/` directory with tests enabled and example applications disabled. `--without-tests` disables tests for both native and legacy backends. `--clean` asks the configured build system to clean its generated outputs; it does not delete arbitrary files in the directory. See [Build layout](docs/BuildLayout.md) for resource and test isolation.\n"
     },
     {
       "id": "b000085",
@@ -731,9 +731,9 @@
       "kind": "fenced_code",
       "start_line": 231,
       "end_line": 233,
-      "raw": "```bash\n./build.sh\n```\n",
+      "raw": "```bash\n./build.sh --with-examples\n```\n",
       "language": "bash",
-      "code": "./build.sh\n",
+      "code": "./build.sh --with-examples\n",
       "closed": true
     },
     {
@@ -762,9 +762,9 @@
       "kind": "fenced_code",
       "start_line": 237,
       "end_line": 239,
-      "raw": "```bash\n./build.sh --without-tests\n```\n",
+      "raw": "```bash\n./build.sh --with-examples --without-tests\n```\n",
       "language": "bash",
-      "code": "./build.sh --without-tests\n",
+      "code": "./build.sh --with-examples --without-tests\n",
       "closed": true
     },
     {
@@ -2992,12 +2992,12 @@
       {
         "block_id": "b000088",
         "language": "bash",
-        "code": "./build.sh\n"
+        "code": "./build.sh --with-examples\n"
       },
       {
         "block_id": "b000092",
         "language": "bash",
-        "code": "./build.sh --without-tests\n"
+        "code": "./build.sh --with-examples --without-tests\n"
       },
       {
         "block_id": "b000096",
@@ -3174,6 +3174,13 @@
         "target": "docs/Windows-validation.md",
         "kind": "relative",
         "line": 137
+      },
+      {
+        "block_id": "b000084",
+        "label": "Build layout",
+        "target": "docs/BuildLayout.md",
+        "kind": "relative",
+        "line": 227
       },
       {
         "block_id": "b000104",

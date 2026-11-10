@@ -49,7 +49,7 @@
 | Theme | nonvisual | partial | lvrs::Theme + lvrs::Icons | 296 |
 | Window | view | partial | Core Application + iiGUI Host | 58 |
 | WindowChromeInteraction | view | pending | — | 25 |
-| AbstractButton | view | partial | lvrs::Widgets::button | 36 |
+| AbstractButton | view | partial | lvrs::Widgets::button | 39 |
 | ButtonMethodRegistry | nonvisual | pending | — | 10 |
 | ColorPickerButton | view | partial | lvrs::Widgets::color_picker_button / iiGUI native button | 4 |
 | ComboBox | view | partial | lvrs::Widgets::combo_box | 38 |
@@ -57,7 +57,7 @@
 | HelpButton | view | partial | lvrs::Widgets::help_button | 0 |
 | IconButton | view | partial | lvrs::Widgets::icon_button | 0 |
 | IconMenuButton | view | partial | lvrs::Widgets::icon_menu_button | 0 |
-| IconSegmentedControl | view | partial | lvrs::Widgets::icon_segmented_control | 26 |
+| IconSegmentedControl | view | partial | lvrs::Widgets::icon_segmented_control | 27 |
 | LabelButton | view | partial | lvrs::Widgets::button | 0 |
 | LabelMenuButton | view | partial | lvrs::Widgets::dropdown_button | 0 |
 | LabelSegmentedControl | view | partial | lvrs::Widgets::label_segmented_control | 26 |

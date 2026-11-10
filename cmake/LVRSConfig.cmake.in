@@ -1,4 +1,8 @@
 @PACKAGE_INIT@
+if(EMSCRIPTEN AND @LVRS_BUILD_SHARED_LIBS@)
+    # The installed target is an Emscripten side module.
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif()
 
 set(LVRS_LAYOUT_VERSION "1")
 set(LVRS_RUNTIME_PLATFORMS

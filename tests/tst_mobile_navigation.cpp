@@ -37,6 +37,28 @@ LV.MobileNavigationBar {
 })").arg(motion ? "true" : "false", withSearch ? "search: ({})" : "").toUtf8());
     }
 private slots:
+    void selected_icons_use_darker_accent_token()
+    {
+        QQmlEngine engine;
+        engine.addImportPath(TestUtils::qmlImportBase());
+        QScopedPointer<QObject> root(TestUtils::createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+Item {
+    property color iconAccent: LV.Theme.primaryHover
+    property color textAccent: LV.Theme.primary
+    LV.MobileNavigationTab { objectName: "navigation"; iconName: "home-1"; selected: true }
+    LV.MobileTab { objectName: "mobile"; iconName: "home-1"; selected: true; platformStyle: LV.MobileTab.IOS }
+})"));
+        QVERIFY(root);
+        auto *navigation = root->findChild<QObject *>("navigation");
+        auto *mobile = root->findChild<QObject *>("mobile");
+        QVERIFY(navigation && mobile);
+        QCOMPARE(navigation->property("foreground"), root->property("iconAccent"));
+        QCOMPARE(mobile->property("iconForeground"), root->property("iconAccent"));
+        QCOMPARE(mobile->property("foreground"), root->property("textAccent"));
+        QVERIFY(root->property("iconAccent") != root->property("textAccent"));
+    }
     void source_icon_colors_and_artwork_geometry()
     {
         QQmlEngine engine;
@@ -72,13 +94,13 @@ private slots:
         QTest::mouseMove(&window, QPoint(959,1019)); QTest::qWait(300);
         const auto capture=window.grabWindow(); QVERIFY(!capture.isNull()); QVERIFY(capture.save(output));
         if (window.rendererInterface()->graphicsApi() != QSGRendererInterface::Software) {
-            // Figma applies a solid primary tint, not luminance-preserving colorization.
+            // Figma binds selected icons to the darker Blue Hover token.
             int primaryPixels = 0;
             for (int y=0;y<capture.height();++y) for (int x=0;x<capture.width();++x) {
                 const QColor pixel=capture.pixelColor(x,y);
-                if (qAbs(pixel.red()-10)<3 && qAbs(pixel.green()-132)<3 && pixel.blue()>252) ++primaryPixels;
+                if (qAbs(pixel.red()-35)<3 && qAbs(pixel.green()-115)<3 && qAbs(pixel.blue()-205)<3) ++primaryPixels;
             }
-            QVERIFY2(primaryPixels > 20, "Selected icons must render at the LVRS primary color.");
+            QVERIFY2(primaryPixels > 20, "Selected icons must render at the LVRS icon accent token.");
         }
         gallery->setParentItem(nullptr);
     }

@@ -1,0 +1,113 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:6b95494b01a33e003bdc7295878ff8fccc7682dcff5113f0add6d8c91f0c2ab3",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/BuildLayout.md",
+    "sha256": "0e73587acf092e31d76101a7047e408f9cc9c3036dc2a66987010af7b110be82",
+    "bytes": 1614,
+    "line_count": 26,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Build and resource layout",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Build and resource layout\n",
+      "level": 1,
+      "title": "Build and resource layout"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "Windows SDK의 `min`·`max` 매크로가 켜진 상태에서도 계층 모델의 인덱스\n상수를 선언할 수 있도록 표준 극한값 호출을 보호한다. 네이티브 테스트 빌드에는\n해당 공개 헤더의 컴파일 전용 검사가 포함된다. 이번 변경의 Windows 빌드와\n설치는 수행하지 않았다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 13,
+      "raw": "The supported CMake build directory is the repository's `build/`. The default\nnative and legacy configurations compile the module without examples. The\nroot `build.sh` adds tests by default; `--without-tests` disables them, and\n`--with-examples` explicitly opts into example application targets. `--clean`\nuses the configured build system's clean target and does not recursively erase\nunrecognized files.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 15,
+      "end_line": 21,
+      "raw": "Test fixtures, temporary package installations and consumer sources belong to\nthe project `resources/` directory. The native package tests reserve isolated\nshort-lived directories in `resources/.t`, with consumer compiler output\nconfined to uniquely owned directories inside `build/`. They clean these\ndirectories after use and leave the regular install manifest intact. Existing\nuser data and reference materials recovered from older builds are retained\nunder ignored resource directories; they are not inputs to the default build.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 26,
+      "raw": "`LVRS.native_presentation_package_build` validates a relocated installed package\nthrough compilation without starting a GUI application. The separate\n`LVRS.native_presentation_package` additionally runs the installed consumer.\nInstallation into the user's SDK and application execution are separate actions.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Build and resource layout",
+      "anchor": "build-and-resource-layout",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

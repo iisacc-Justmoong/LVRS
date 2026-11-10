@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/README.md",
-    "sha256": "c2b73ddf37da1889656aecb6995d093b977f5ad0ef36907177062df422ec4738",
-    "bytes": 34187,
-    "line_count": 444,
+    "sha256": "337fed8bdc16fb7323e5681901957dfe9fdb71c14482e917f369eacdc52e6412",
+    "bytes": 34350,
+    "line_count": 446,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -1561,8 +1561,8 @@
       "id": "b000112",
       "kind": "table",
       "start_line": 229,
-      "end_line": 443,
-      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`AGENTS.md`](../AGENTS.md) | [JSON](entrypoints/AGENTS.agent.json) |\n| [`Chnagelog.md`](../Chnagelog.md) | [JSON](entrypoints/Chnagelog.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`docs/Chnagelog.md`](Chnagelog.md) | [JSON](Chnagelog.agent.json) |\n| [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md) | [JSON](FILE_PROVIDER.agent.json) |\n| [`docs/NATIVE_LISTS.md`](NATIVE_LISTS.md) | [JSON](NATIVE_LISTS.agent.json) |\n| [`docs/PERFORMANCE.md`](PERFORMANCE.md) | [JSON](PERFORMANCE.agent.json) |\n| [`docs/Windows-validation.md`](Windows-validation.md) | [JSON](Windows-validation.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/WindowsValidation.md`](WindowsValidation.md) | [JSON](WindowsValidation.agent.json) |\n| [`docs/architecture/event-pipeline.md`](architecture/event-pipeline.md) | [JSON](architecture/event-pipeline.agent.json) |\n| [`docs/architecture/performance-observability.md`](architecture/performance-observability.md) | [JSON](architecture/performance-observability.agent.json) |\n| [`docs/architecture/rendering-backend.md`](architecture/rendering-backend.md) | [JSON](architecture/rendering-backend.agent.json) |\n| [`docs/backend/AppBootstrap.md`](backend/AppBootstrap.md) | [JSON](backend/AppBootstrap.agent.json) |\n| [`docs/backend/Backend.md`](backend/Backend.md) | [JSON](backend/Backend.agent.json) |\n| [`docs/backend/BootstrapParallel.md`](backend/BootstrapParallel.md) | [JSON](backend/BootstrapParallel.agent.json) |\n| [`docs/backend/Debug.md`](backend/Debug.md) | [JSON](backend/Debug.agent.json) |\n| [`docs/backend/DebugOutput.md`](backend/DebugOutput.md) | [JSON](backend/DebugOutput.agent.json) |\n| [`docs/backend/ForegroundServices.md`](backend/ForegroundServices.md) | [JSON](backend/ForegroundServices.agent.json) |\n| [`docs/backend/GestureEvents.md`](backend/GestureEvents.md) | [JSON](backend/GestureEvents.agent.json) |\n| [`docs/backend/HierarchyModel.md`](backend/HierarchyModel.md) | [JSON](backend/HierarchyModel.agent.json) |\n| [`docs/backend/ModelAdapter.md`](backend/ModelAdapter.md) | [JSON](backend/ModelAdapter.agent.json) |\n| [`docs/backend/ModelSource.md`](backend/ModelSource.md) | [JSON](backend/ModelSource.agent.json) |\n| [`docs/backend/ModelUndoStack.md`](backend/ModelUndoStack.md) | [JSON](backend/ModelUndoStack.agent.json) |\n| [`docs/backend/NativeWindowInteraction.md`](backend/NativeWindowInteraction.md) | [JSON](backend/NativeWindowInteraction.agent.json) |\n| [`docs/backend/NavigationStackModel.md`](backend/NavigationStackModel.md) | [JSON](backend/NavigationStackModel.agent.json) |\n| [`docs/backend/PageMonitor.md`](backend/PageMonitor.md) | [JSON](backend/PageMonitor.agent.json) |\n| [`docs/backend/PermissionSequencer.md`](backend/PermissionSequencer.md) | [JSON](backend/PermissionSequencer.agent.json) |\n| [`docs/backend/Platform.md`](backend/Platform.md) | [JSON](backend/Platform.agent.json) |\n| [`docs/backend/ProgressModel.md`](backend/ProgressModel.md) | [JSON](backend/ProgressModel.agent.json) |\n| [`docs/backend/QmlContextBinder.md`](backend/QmlContextBinder.md) | [JSON](backend/QmlContextBinder.agent.json) |\n| [`docs/backend/QmlTypeRegistrar.md`](backend/QmlTypeRegistrar.md) | [JSON](backend/QmlTypeRegistrar.agent.json) |\n| [`docs/backend/RenderMonitor.md`](backend/RenderMonitor.md) | [JSON](backend/RenderMonitor.agent.json) |\n| [`docs/backend/RenderQuality.md`](backend/RenderQuality.md) | [JSON](backend/RenderQuality.agent.json) |\n| [`docs/backend/RouteMatcher.md`](backend/RouteMatcher.md) | [JSON](backend/RouteMatcher.agent.json) |\n| [`docs/backend/RuntimeEvents.md`](backend/RuntimeEvents.md) | [JSON](backend/RuntimeEvents.agent.json) |\n| [`docs/backend/StateModel.md`](backend/StateModel.md) | [JSON](backend/StateModel.agent.json) |\n| [`docs/backend/TableHeaderModel.md`](backend/TableHeaderModel.md) | [JSON](backend/TableHeaderModel.agent.json) |\n| [`docs/backend/TableModel.md`](backend/TableModel.md) | [JSON](backend/TableModel.agent.json) |\n| [`docs/backend/TextDocumentModel.md`](backend/TextDocumentModel.md) | [JSON](backend/TextDocumentModel.agent.json) |\n| [`docs/backend/ViewModels.md`](backend/ViewModels.md) | [JSON](backend/ViewModels.agent.json) |\n| [`docs/backend/ViewStateTracker.md`](backend/ViewStateTracker.md) | [JSON](backend/ViewStateTracker.agent.json) |\n| [`docs/build.md`](build.md) | [JSON](build.agent.json) |\n| [`docs/components/app/AppBootstrapWindow.md`](components/app/AppBootstrapWindow.md) | [JSON](components/app/AppBootstrapWindow.agent.json) |\n| [`docs/components/app/AppShell.md`](components/app/AppShell.md) | [JSON](components/app/AppShell.agent.json) |\n| [`docs/components/app/ApplicationWindow.md`](components/app/ApplicationWindow.md) | [JSON](components/app/ApplicationWindow.agent.json) |\n| [`docs/components/app/Window.md`](components/app/Window.md) | [JSON](components/app/Window.agent.json) |\n| [`docs/components/app/WindowChromeInteraction.md`](components/app/WindowChromeInteraction.md) | [JSON](components/app/WindowChromeInteraction.agent.json) |\n| [`docs/components/app/WindowSafeAreaObserver.md`](components/app/WindowSafeAreaObserver.md) | [JSON](components/app/WindowSafeAreaObserver.agent.json) |\n| [`docs/components/control/AbstractButton.md`](components/control/AbstractButton.md) | [JSON](components/control/AbstractButton.agent.json) |\n| [`docs/components/control/Avatar.md`](components/control/Avatar.md) | [JSON](components/control/Avatar.agent.json) |\n| [`docs/components/control/ButtonMethodRegistry.md`](components/control/ButtonMethodRegistry.md) | [JSON](components/control/ButtonMethodRegistry.agent.json) |\n| [`docs/components/control/CheckBox.md`](components/control/CheckBox.md) | [JSON](components/control/CheckBox.agent.json) |\n| [`docs/components/control/CodeEditor.md`](components/control/CodeEditor.md) | [JSON](components/control/CodeEditor.agent.json) |\n| [`docs/components/control/ColorPicker.md`](components/control/ColorPicker.md) | [JSON](components/control/ColorPicker.agent.json) |\n| [`docs/components/control/ColorPickerButton.md`](components/control/ColorPickerButton.md) | [JSON](components/control/ColorPickerButton.agent.json) |\n| [`docs/components/control/ComboBox.md`](components/control/ComboBox.md) | [JSON](components/control/ComboBox.agent.json) |\n| [`docs/components/control/DropdownButton.md`](components/control/DropdownButton.md) | [JSON](components/control/DropdownButton.agent.json) |\n| [`docs/components/control/EventListener.md`](components/control/EventListener.md) | [JSON](components/control/EventListener.agent.json) |\n| [`docs/components/control/HelpButton.md`](components/control/HelpButton.md) | [JSON](components/control/HelpButton.agent.json) |\n| [`docs/components/control/IconButton.md`](components/control/IconButton.md) | [JSON](components/control/IconButton.agent.json) |\n| [`docs/components/control/IconMenuButton.md`](components/control/IconMenuButton.md) | [JSON](components/control/IconMenuButton.agent.json) |\n| [`docs/components/control/IconSegmentedControl.md`](components/control/IconSegmentedControl.md) | [JSON](components/control/IconSegmentedControl.agent.json) |\n| [`docs/components/control/InputField.md`](components/control/InputField.md) | [JSON](components/control/InputField.agent.json) |\n| [`docs/components/control/InputMethodGuard.md`](components/control/InputMethodGuard.md) | [JSON](components/control/InputMethodGuard.agent.json) |\n| [`docs/components/control/Label.md`](components/control/Label.md) | [JSON](components/control/Label.agent.json) |\n| [`docs/components/control/LabelButton.md`](components/control/LabelButton.md) | [JSON](components/control/LabelButton.agent.json) |\n| [`docs/components/control/LabelMenuButton.md`](components/control/LabelMenuButton.md) | [JSON](components/control/LabelMenuButton.agent.json) |\n| [`docs/components/control/LabelSegmentedControl.md`](components/control/LabelSegmentedControl.md) | [JSON](components/control/LabelSegmentedControl.agent.json) |\n| [`docs/components/control/ProgressBar.md`](components/control/ProgressBar.md) | [JSON](components/control/ProgressBar.agent.json) |\n| [`docs/components/control/PushButton.md`](components/control/PushButton.md) | [JSON](components/control/PushButton.agent.json) |\n| [`docs/components/control/RadioButton.md`](components/control/RadioButton.md) | [JSON](components/control/RadioButton.agent.json) |\n| [`docs/components/control/Slider.md`](components/control/Slider.md) | [JSON](components/control/Slider.agent.json) |\n| [`docs/components/control/Stepper.md`](components/control/Stepper.md) | [JSON](components/control/Stepper.agent.json) |\n| [`docs/components/control/Table.md`](components/control/Table.md) | [JSON](components/control/Table.agent.json) |\n| [`docs/components/control/TableCellItem.md`](components/control/TableCellItem.md) | [JSON](components/control/TableCellItem.agent.json) |\n| [`docs/components/control/TableHeader.md`](components/control/TableHeader.md) | [JSON](components/control/TableHeader.agent.json) |\n| [`docs/components/control/TableRow.md`](components/control/TableRow.md) | [JSON](components/control/TableRow.agent.json) |\n| [`docs/components/control/TextEditor.md`](components/control/TextEditor.md) | [JSON](components/control/TextEditor.agent.json) |\n| [`docs/components/control/ToggleSwitch.md`](components/control/ToggleSwitch.md) | [JSON](components/control/ToggleSwitch.agent.json) |\n| [`docs/components/control/WheelScrollGuard.md`](components/control/WheelScrollGuard.md) | [JSON](components/control/WheelScrollGuard.agent.json) |\n| [`docs/components/layout/AppHeader.md`](components/layout/AppHeader.md) | [JSON](components/layout/AppHeader.agent.json) |\n| [`docs/components/layout/HStack.md`](components/layout/HStack.md) | [JSON](components/layout/HStack.agent.json) |\n| [`docs/components/layout/Spacer.md`](components/layout/Spacer.md) | [JSON](components/layout/Spacer.agent.json) |\n| [`docs/components/layout/VStack.md`](components/layout/VStack.md) | [JSON](components/layout/VStack.agent.json) |\n| [`docs/components/layout/ZStack.md`](components/layout/ZStack.md) | [JSON](components/layout/ZStack.agent.json) |\n| [`docs/components/navigation/ContextMenu.md`](components/navigation/ContextMenu.md) | [JSON](components/navigation/ContextMenu.agent.json) |\n| [`docs/components/navigation/ContextMenuDivider.md`](components/navigation/ContextMenuDivider.md) | [JSON](components/navigation/ContextMenuDivider.agent.json) |\n| [`docs/components/navigation/ContextMenuItem.md`](components/navigation/ContextMenuItem.md) | [JSON](components/navigation/ContextMenuItem.agent.json) |\n| [`docs/components/navigation/Hierarchy.md`](components/navigation/Hierarchy.md) | [JSON](components/navigation/Hierarchy.agent.json) |\n| [`docs/components/navigation/HierarchyItem.md`](components/navigation/HierarchyItem.md) | [JSON](components/navigation/HierarchyItem.agent.json) |\n| [`docs/components/navigation/HierarchyList.md`](components/navigation/HierarchyList.md) | [JSON](components/navigation/HierarchyList.agent.json) |\n| [`docs/components/navigation/HierarchyToolbar.md`](components/navigation/HierarchyToolbar.md) | [JSON](components/navigation/HierarchyToolbar.agent.json) |\n| [`docs/components/navigation/Link.md`](components/navigation/Link.md) | [JSON](components/navigation/Link.agent.json) |\n| [`docs/components/navigation/List.md`](components/navigation/List.md) | [JSON](components/navigation/List.agent.json) |\n| [`docs/components/navigation/ListFooter.md`](components/navigation/ListFooter.md) | [JSON](components/navigation/ListFooter.agent.json) |\n| [`docs/components/navigation/ListItem.md`](components/navigation/ListItem.md) | [JSON](components/navigation/ListItem.agent.json) |\n| [`docs/components/navigation/Menu.md`](components/navigation/Menu.md) | [JSON](components/navigation/Menu.agent.json) |\n| [`docs/components/navigation/MenuDivider.md`](components/navigation/MenuDivider.md) | [JSON](components/navigation/MenuDivider.agent.json) |\n| [`docs/components/navigation/MenuItem.md`](components/navigation/MenuItem.md) | [JSON](components/navigation/MenuItem.agent.json) |\n| [`docs/components/navigation/MobileNavigationBar.md`](components/navigation/MobileNavigationBar.md) | [JSON](components/navigation/MobileNavigationBar.agent.json) |\n| [`docs/components/navigation/Navigator.md`](components/navigation/Navigator.md) | [JSON](components/navigation/Navigator.agent.json) |\n| [`docs/components/navigation/PageRouter.md`](components/navigation/PageRouter.md) | [JSON](components/navigation/PageRouter.agent.json) |\n| [`docs/components/navigation/PageTransitionController.md`](components/navigation/PageTransitionController.md) | [JSON](components/navigation/PageTransitionController.agent.json) |\n| [`docs/components/navigation/Tabs.md`](components/navigation/Tabs.md) | [JSON](components/navigation/Tabs.agent.json) |\n| [`docs/components/surfaces/Alert.md`](components/surfaces/Alert.md) | [JSON](components/surfaces/Alert.agent.json) |\n| [`docs/components/surfaces/AppCard.md`](components/surfaces/AppCard.md) | [JSON](components/surfaces/AppCard.agent.json) |\n| [`docs/components/surfaces/Card.md`](components/surfaces/Card.md) | [JSON](components/surfaces/Card.agent.json) |\n| [`docs/components/surfaces/Materials.md`](components/surfaces/Materials.md) | [JSON](components/surfaces/Materials.agent.json) |\n| [`docs/components/surfaces/Modal.md`](components/surfaces/Modal.md) | [JSON](components/surfaces/Modal.agent.json) |\n| [`docs/components/surfaces/Popover.md`](components/surfaces/Popover.md) | [JSON](components/surfaces/Popover.agent.json) |\n| [`docs/components/surfaces/Sheet.md`](components/surfaces/Sheet.md) | [JSON](components/surfaces/Sheet.agent.json) |\n| [`docs/components/surfaces/Tooltip.md`](components/surfaces/Tooltip.md) | [JSON](components/surfaces/Tooltip.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n| [`docs/figma-iconset-import.md`](figma-iconset-import.md) | [JSON](figma-iconset-import.agent.json) |\n| [`docs/figma-parity.md`](figma-parity.md) | [JSON](figma-parity.agent.json) |\n| [`docs/figma-theme-tokens.md`](figma-theme-tokens.md) | [JSON](figma-theme-tokens.agent.json) |\n| [`docs/hierarchy-ux-plan.md`](hierarchy-ux-plan.md) | [JSON](hierarchy-ux-plan.agent.json) |\n| [`docs/instance-states.md`](instance-states.md) | [JSON](instance-states.agent.json) |\n| [`docs/motion.md`](motion.md) | [JSON](motion.agent.json) |\n| [`docs/mvvm.md`](mvvm.md) | [JSON](mvvm.agent.json) |\n| [`docs/native/ActivationContent.md`](native/ActivationContent.md) | [JSON](native/ActivationContent.agent.json) |\n| [`docs/native/Alert.md`](native/Alert.md) | [JSON](native/Alert.agent.json) |\n| [`docs/native/AppSurfaces.md`](native/AppSurfaces.md) | [JSON](native/AppSurfaces.agent.json) |\n| [`docs/native/Architecture.md`](native/Architecture.md) | [JSON](native/Architecture.agent.json) |\n| [`docs/native/CodeEditor.md`](native/CodeEditor.md) | [JSON](native/CodeEditor.agent.json) |\n| [`docs/native/ColorPicker.md`](native/ColorPicker.md) | [JSON](native/ColorPicker.agent.json) |\n| [`docs/native/ColorPickerButton.md`](native/ColorPickerButton.md) | [JSON](native/ColorPickerButton.agent.json) |\n| [`docs/native/EditorAppearance.md`](native/EditorAppearance.md) | [JSON](native/EditorAppearance.agent.json) |\n| [`docs/native/FontPolicy.md`](native/FontPolicy.md) | [JSON](native/FontPolicy.agent.json) |\n| [`docs/native/Hierarchy.md`](native/Hierarchy.md) | [JSON](native/Hierarchy.agent.json) |\n| [`docs/native/HierarchyController.md`](native/HierarchyController.md) | [JSON](native/HierarchyController.agent.json) |\n| [`docs/native/HierarchyDelegate.md`](native/HierarchyDelegate.md) | [JSON](native/HierarchyDelegate.agent.json) |\n| [`docs/native/HierarchyViews.md`](native/HierarchyViews.md) | [JSON](native/HierarchyViews.agent.json) |\n| [`docs/native/InputField.md`](native/InputField.md) | [JSON](native/InputField.agent.json) |\n| [`docs/native/Link.md`](native/Link.md) | [JSON](native/Link.agent.json) |\n| [`docs/native/Materials.md`](native/Materials.md) | [JSON](native/Materials.agent.json) |\n| [`docs/native/Media.md`](native/Media.md) | [JSON](native/Media.agent.json) |\n| [`docs/native/Modal.md`](native/Modal.md) | [JSON](native/Modal.agent.json) |\n| [`docs/native/ModelSources.md`](native/ModelSources.md) | [JSON](native/ModelSources.agent.json) |\n| [`docs/native/ModelUndoStack.md`](native/ModelUndoStack.md) | [JSON](native/ModelUndoStack.agent.json) |\n| [`docs/native/Navigation.md`](native/Navigation.md) | [JSON](native/Navigation.agent.json) |\n| [`docs/native/NavigationTracking.md`](native/NavigationTracking.md) | [JSON](native/NavigationTracking.agent.json) |\n| [`docs/native/Navigator.md`](native/Navigator.md) | [JSON](native/Navigator.agent.json) |\n| [`docs/native/Opacity.md`](native/Opacity.md) | [JSON](native/Opacity.agent.json) |\n| [`docs/native/PageRouter.md`](native/PageRouter.md) | [JSON](native/PageRouter.agent.json) |\n| [`docs/native/Parity.md`](native/Parity.md) | [JSON](native/Parity.agent.json) |\n| [`docs/native/ParityPaths.md`](native/ParityPaths.md) | [JSON](native/ParityPaths.agent.json) |\n| [`docs/native/PlatformInfo.md`](native/PlatformInfo.md) | [JSON](native/PlatformInfo.agent.json) |\n| [`docs/native/Popover.md`](native/Popover.md) | [JSON](native/Popover.agent.json) |\n| [`docs/native/PresentationModels.md`](native/PresentationModels.md) | [JSON](native/PresentationModels.agent.json) |\n| [`docs/native/ProgressBar.md`](native/ProgressBar.md) | [JSON](native/ProgressBar.agent.json) |\n| [`docs/native/RenderMonitor.md`](native/RenderMonitor.md) | [JSON](native/RenderMonitor.agent.json) |\n| [`docs/native/Sheet.md`](native/Sheet.md) | [JSON](native/Sheet.agent.json) |\n| [`docs/native/SourceLayout.md`](native/SourceLayout.md) | [JSON](native/SourceLayout.agent.json) |\n| [`docs/native/SvgManager.md`](native/SvgManager.md) | [JSON](native/SvgManager.agent.json) |\n| [`docs/native/TableModel.md`](native/TableModel.md) | [JSON](native/TableModel.agent.json) |\n| [`docs/native/TableTransfer.md`](native/TableTransfer.md) | [JSON](native/TableTransfer.agent.json) |\n| [`docs/native/TableView.md`](native/TableView.md) | [JSON](native/TableView.agent.json) |\n| [`docs/native/Tables.md`](native/Tables.md) | [JSON](native/Tables.agent.json) |\n| [`docs/native/TextDocuments.md`](native/TextDocuments.md) | [JSON](native/TextDocuments.agent.json) |\n| [`docs/native/Toolbars.md`](native/Toolbars.md) | [JSON](native/Toolbars.agent.json) |\n| [`docs/native/Tooltip.md`](native/Tooltip.md) | [JSON](native/Tooltip.agent.json) |\n| [`docs/native/Verification.md`](native/Verification.md) | [JSON](native/Verification.agent.json) |\n| [`docs/native/ViewModelRegistry.md`](native/ViewModelRegistry.md) | [JSON](native/ViewModelRegistry.agent.json) |\n| [`docs/native/WindowsValidation.md`](native/WindowsValidation.md) | [JSON](native/WindowsValidation.agent.json) |\n| [`docs/overview.md`](overview.md) | [JSON](overview.agent.json) |\n| [`docs/performance-baseline-p0.md`](performance-baseline-p0.md) | [JSON](performance-baseline-p0.agent.json) |\n| [`docs/policies/debug.md`](policies/debug.md) | [JSON](policies/debug.agent.json) |\n| [`docs/policies/event.md`](policies/event.md) | [JSON](policies/event.agent.json) |\n| [`docs/policies/routing.md`](policies/routing.md) | [JSON](policies/routing.agent.json) |\n| [`docs/quality-automation-p4.md`](quality-automation-p4.md) | [JSON](quality-automation-p4.agent.json) |\n| [`docs/theme.md`](theme.md) | [JSON](theme.agent.json) |\n| [`example/AndroidHello/README.md`](../example/AndroidHello/README.md) | [JSON](mirrors/example/AndroidHello/README.agent.json) |\n| [`example/EventListener/README.md`](../example/EventListener/README.md) | [JSON](mirrors/example/EventListener/README.agent.json) |\n| [`example/NativeAppSurfaces/AGENT.md`](../example/NativeAppSurfaces/AGENT.md) | [JSON](mirrors/example/NativeAppSurfaces/AGENT.agent.json) |\n| [`example/NativeAppSurfaces/README.md`](../example/NativeAppSurfaces/README.md) | [JSON](mirrors/example/NativeAppSurfaces/README.agent.json) |\n| [`example/NativeAppSurfaces/docs/Usage.md`](../example/NativeAppSurfaces/docs/Usage.md) | [JSON](mirrors/example/NativeAppSurfaces/docs/Usage.agent.json) |\n| [`example/NativeCodeEditorGallery/AGENT.md`](../example/NativeCodeEditorGallery/AGENT.md) | [JSON](mirrors/example/NativeCodeEditorGallery/AGENT.agent.json) |\n| [`example/NativeCodeEditorGallery/README.md`](../example/NativeCodeEditorGallery/README.md) | [JSON](mirrors/example/NativeCodeEditorGallery/README.agent.json) |\n| [`example/NativeCodeEditorGallery/docs/Usage.md`](../example/NativeCodeEditorGallery/docs/Usage.md) | [JSON](mirrors/example/NativeCodeEditorGallery/docs/Usage.agent.json) |\n| [`example/NativeCreationWorkbench/AGENT.md`](../example/NativeCreationWorkbench/AGENT.md) | [JSON](mirrors/example/NativeCreationWorkbench/AGENT.agent.json) |\n| [`example/NativeCreationWorkbench/README.md`](../example/NativeCreationWorkbench/README.md) | [JSON](mirrors/example/NativeCreationWorkbench/README.agent.json) |\n| [`example/NativeCreationWorkbench/docs/Behavior.md`](../example/NativeCreationWorkbench/docs/Behavior.md) | [JSON](mirrors/example/NativeCreationWorkbench/docs/Behavior.agent.json) |\n| [`example/NativeCreationWorkbench/example/README.md`](../example/NativeCreationWorkbench/example/README.md) | [JSON](mirrors/example/NativeCreationWorkbench/example/README.agent.json) |\n| [`example/NativeMaterialGallery/AGENT.md`](../example/NativeMaterialGallery/AGENT.md) | [JSON](mirrors/example/NativeMaterialGallery/AGENT.agent.json) |\n| [`example/NativeMaterialGallery/README.md`](../example/NativeMaterialGallery/README.md) | [JSON](mirrors/example/NativeMaterialGallery/README.agent.json) |\n| [`example/NativeMaterialGallery/docs/Usage.md`](../example/NativeMaterialGallery/docs/Usage.md) | [JSON](mirrors/example/NativeMaterialGallery/docs/Usage.agent.json) |\n| [`example/NativeMediaGallery/AGENT.md`](../example/NativeMediaGallery/AGENT.md) | [JSON](mirrors/example/NativeMediaGallery/AGENT.agent.json) |\n| [`example/NativeMediaGallery/README.md`](../example/NativeMediaGallery/README.md) | [JSON](mirrors/example/NativeMediaGallery/README.agent.json) |\n| [`example/NativeMediaGallery/docs/Usage.md`](../example/NativeMediaGallery/docs/Usage.md) | [JSON](mirrors/example/NativeMediaGallery/docs/Usage.agent.json) |\n| [`example/NativeNavigationGallery/AGENT.md`](../example/NativeNavigationGallery/AGENT.md) | [JSON](mirrors/example/NativeNavigationGallery/AGENT.agent.json) |\n| [`example/NativeNavigationGallery/README.md`](../example/NativeNavigationGallery/README.md) | [JSON](mirrors/example/NativeNavigationGallery/README.agent.json) |\n| [`example/NativeNavigationGallery/docs/Usage.md`](../example/NativeNavigationGallery/docs/Usage.md) | [JSON](mirrors/example/NativeNavigationGallery/docs/Usage.agent.json) |\n| [`example/NativePageRouterGallery/AGENT.md`](../example/NativePageRouterGallery/AGENT.md) | [JSON](mirrors/example/NativePageRouterGallery/AGENT.agent.json) |\n| [`example/NativePageRouterGallery/README.md`](../example/NativePageRouterGallery/README.md) | [JSON](mirrors/example/NativePageRouterGallery/README.agent.json) |\n| [`example/NativePageRouterGallery/docs/Usage.md`](../example/NativePageRouterGallery/docs/Usage.md) | [JSON](mirrors/example/NativePageRouterGallery/docs/Usage.agent.json) |\n| [`example/NativeTextDocumentGallery/AGENT.md`](../example/NativeTextDocumentGallery/AGENT.md) | [JSON](mirrors/example/NativeTextDocumentGallery/AGENT.agent.json) |\n| [`example/NativeTextDocumentGallery/README.md`](../example/NativeTextDocumentGallery/README.md) | [JSON](mirrors/example/NativeTextDocumentGallery/README.agent.json) |\n| [`example/NativeTextDocumentGallery/docs/Usage.md`](../example/NativeTextDocumentGallery/docs/Usage.md) | [JSON](mirrors/example/NativeTextDocumentGallery/docs/Usage.agent.json) |\n| [`example/NativeTooltipGallery/AGENT.md`](../example/NativeTooltipGallery/AGENT.md) | [JSON](mirrors/example/NativeTooltipGallery/AGENT.agent.json) |\n| [`example/NativeTooltipGallery/README.md`](../example/NativeTooltipGallery/README.md) | [JSON](mirrors/example/NativeTooltipGallery/README.agent.json) |\n| [`example/NativeTooltipGallery/docs/Usage.md`](../example/NativeTooltipGallery/docs/Usage.md) | [JSON](mirrors/example/NativeTooltipGallery/docs/Usage.agent.json) |\n| [`example/README.md`](../example/README.md) | [JSON](mirrors/example/README.agent.json) |\n| [`example/TypingPractice/README.md`](../example/TypingPractice/README.md) | [JSON](mirrors/example/TypingPractice/README.agent.json) |\n| [`example/VisualCatalog/README.md`](../example/VisualCatalog/README.md) | [JSON](mirrors/example/VisualCatalog/README.agent.json) |\n| [`example/VisualCatalog/assets/cards/README.md`](../example/VisualCatalog/assets/cards/README.md) | [JSON](mirrors/example/VisualCatalog/assets/cards/README.agent.json) |\n| [`example/iOSHello/README.md`](../example/iOSHello/README.md) | [JSON](mirrors/example/iOSHello/README.agent.json) |\n| [`example/mvvm/README.md`](../example/mvvm/README.md) | [JSON](mirrors/example/mvvm/README.agent.json) |\n| [`resources/images/card/README.md`](../resources/images/card/README.md) | [JSON](mirrors/resources/images/card/README.agent.json) |\n| [`resources/images/colorpicker/README.md`](../resources/images/colorpicker/README.md) | [JSON](mirrors/resources/images/colorpicker/README.agent.json) |\n| [`src/rust-cli/README.md`](../src/rust-cli/README.md) | [JSON](mirrors/src/rust-cli/README.agent.json) |\n",
+      "end_line": 445,
+      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`AGENTS.md`](../AGENTS.md) | [JSON](entrypoints/AGENTS.agent.json) |\n| [`Chnagelog.md`](../Chnagelog.md) | [JSON](entrypoints/Chnagelog.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`docs/BuildLayout.md`](BuildLayout.md) | [JSON](BuildLayout.agent.json) |\n| [`docs/Chnagelog.md`](Chnagelog.md) | [JSON](Chnagelog.agent.json) |\n| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |\n| [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md) | [JSON](FILE_PROVIDER.agent.json) |\n| [`docs/NATIVE_LISTS.md`](NATIVE_LISTS.md) | [JSON](NATIVE_LISTS.agent.json) |\n| [`docs/PERFORMANCE.md`](PERFORMANCE.md) | [JSON](PERFORMANCE.agent.json) |\n| [`docs/Windows-validation.md`](Windows-validation.md) | [JSON](Windows-validation.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/WindowsValidation.md`](WindowsValidation.md) | [JSON](WindowsValidation.agent.json) |\n| [`docs/architecture/event-pipeline.md`](architecture/event-pipeline.md) | [JSON](architecture/event-pipeline.agent.json) |\n| [`docs/architecture/performance-observability.md`](architecture/performance-observability.md) | [JSON](architecture/performance-observability.agent.json) |\n| [`docs/architecture/rendering-backend.md`](architecture/rendering-backend.md) | [JSON](architecture/rendering-backend.agent.json) |\n| [`docs/backend/AppBootstrap.md`](backend/AppBootstrap.md) | [JSON](backend/AppBootstrap.agent.json) |\n| [`docs/backend/Backend.md`](backend/Backend.md) | [JSON](backend/Backend.agent.json) |\n| [`docs/backend/BootstrapParallel.md`](backend/BootstrapParallel.md) | [JSON](backend/BootstrapParallel.agent.json) |\n| [`docs/backend/Debug.md`](backend/Debug.md) | [JSON](backend/Debug.agent.json) |\n| [`docs/backend/DebugOutput.md`](backend/DebugOutput.md) | [JSON](backend/DebugOutput.agent.json) |\n| [`docs/backend/ForegroundServices.md`](backend/ForegroundServices.md) | [JSON](backend/ForegroundServices.agent.json) |\n| [`docs/backend/GestureEvents.md`](backend/GestureEvents.md) | [JSON](backend/GestureEvents.agent.json) |\n| [`docs/backend/HierarchyModel.md`](backend/HierarchyModel.md) | [JSON](backend/HierarchyModel.agent.json) |\n| [`docs/backend/ModelAdapter.md`](backend/ModelAdapter.md) | [JSON](backend/ModelAdapter.agent.json) |\n| [`docs/backend/ModelSource.md`](backend/ModelSource.md) | [JSON](backend/ModelSource.agent.json) |\n| [`docs/backend/ModelUndoStack.md`](backend/ModelUndoStack.md) | [JSON](backend/ModelUndoStack.agent.json) |\n| [`docs/backend/NativeWindowInteraction.md`](backend/NativeWindowInteraction.md) | [JSON](backend/NativeWindowInteraction.agent.json) |\n| [`docs/backend/NavigationStackModel.md`](backend/NavigationStackModel.md) | [JSON](backend/NavigationStackModel.agent.json) |\n| [`docs/backend/PageMonitor.md`](backend/PageMonitor.md) | [JSON](backend/PageMonitor.agent.json) |\n| [`docs/backend/PermissionSequencer.md`](backend/PermissionSequencer.md) | [JSON](backend/PermissionSequencer.agent.json) |\n| [`docs/backend/Platform.md`](backend/Platform.md) | [JSON](backend/Platform.agent.json) |\n| [`docs/backend/ProgressModel.md`](backend/ProgressModel.md) | [JSON](backend/ProgressModel.agent.json) |\n| [`docs/backend/QmlContextBinder.md`](backend/QmlContextBinder.md) | [JSON](backend/QmlContextBinder.agent.json) |\n| [`docs/backend/QmlTypeRegistrar.md`](backend/QmlTypeRegistrar.md) | [JSON](backend/QmlTypeRegistrar.agent.json) |\n| [`docs/backend/RenderMonitor.md`](backend/RenderMonitor.md) | [JSON](backend/RenderMonitor.agent.json) |\n| [`docs/backend/RenderQuality.md`](backend/RenderQuality.md) | [JSON](backend/RenderQuality.agent.json) |\n| [`docs/backend/RouteMatcher.md`](backend/RouteMatcher.md) | [JSON](backend/RouteMatcher.agent.json) |\n| [`docs/backend/RuntimeEvents.md`](backend/RuntimeEvents.md) | [JSON](backend/RuntimeEvents.agent.json) |\n| [`docs/backend/StateModel.md`](backend/StateModel.md) | [JSON](backend/StateModel.agent.json) |\n| [`docs/backend/TableHeaderModel.md`](backend/TableHeaderModel.md) | [JSON](backend/TableHeaderModel.agent.json) |\n| [`docs/backend/TableModel.md`](backend/TableModel.md) | [JSON](backend/TableModel.agent.json) |\n| [`docs/backend/TextDocumentModel.md`](backend/TextDocumentModel.md) | [JSON](backend/TextDocumentModel.agent.json) |\n| [`docs/backend/ViewModels.md`](backend/ViewModels.md) | [JSON](backend/ViewModels.agent.json) |\n| [`docs/backend/ViewStateTracker.md`](backend/ViewStateTracker.md) | [JSON](backend/ViewStateTracker.agent.json) |\n| [`docs/build.md`](build.md) | [JSON](build.agent.json) |\n| [`docs/components/app/AppBootstrapWindow.md`](components/app/AppBootstrapWindow.md) | [JSON](components/app/AppBootstrapWindow.agent.json) |\n| [`docs/components/app/AppShell.md`](components/app/AppShell.md) | [JSON](components/app/AppShell.agent.json) |\n| [`docs/components/app/ApplicationWindow.md`](components/app/ApplicationWindow.md) | [JSON](components/app/ApplicationWindow.agent.json) |\n| [`docs/components/app/Window.md`](components/app/Window.md) | [JSON](components/app/Window.agent.json) |\n| [`docs/components/app/WindowChromeInteraction.md`](components/app/WindowChromeInteraction.md) | [JSON](components/app/WindowChromeInteraction.agent.json) |\n| [`docs/components/app/WindowSafeAreaObserver.md`](components/app/WindowSafeAreaObserver.md) | [JSON](components/app/WindowSafeAreaObserver.agent.json) |\n| [`docs/components/control/AbstractButton.md`](components/control/AbstractButton.md) | [JSON](components/control/AbstractButton.agent.json) |\n| [`docs/components/control/Avatar.md`](components/control/Avatar.md) | [JSON](components/control/Avatar.agent.json) |\n| [`docs/components/control/ButtonMethodRegistry.md`](components/control/ButtonMethodRegistry.md) | [JSON](components/control/ButtonMethodRegistry.agent.json) |\n| [`docs/components/control/CheckBox.md`](components/control/CheckBox.md) | [JSON](components/control/CheckBox.agent.json) |\n| [`docs/components/control/CodeEditor.md`](components/control/CodeEditor.md) | [JSON](components/control/CodeEditor.agent.json) |\n| [`docs/components/control/ColorPicker.md`](components/control/ColorPicker.md) | [JSON](components/control/ColorPicker.agent.json) |\n| [`docs/components/control/ColorPickerButton.md`](components/control/ColorPickerButton.md) | [JSON](components/control/ColorPickerButton.agent.json) |\n| [`docs/components/control/ComboBox.md`](components/control/ComboBox.md) | [JSON](components/control/ComboBox.agent.json) |\n| [`docs/components/control/DropdownButton.md`](components/control/DropdownButton.md) | [JSON](components/control/DropdownButton.agent.json) |\n| [`docs/components/control/EventListener.md`](components/control/EventListener.md) | [JSON](components/control/EventListener.agent.json) |\n| [`docs/components/control/HelpButton.md`](components/control/HelpButton.md) | [JSON](components/control/HelpButton.agent.json) |\n| [`docs/components/control/IconButton.md`](components/control/IconButton.md) | [JSON](components/control/IconButton.agent.json) |\n| [`docs/components/control/IconMenuButton.md`](components/control/IconMenuButton.md) | [JSON](components/control/IconMenuButton.agent.json) |\n| [`docs/components/control/IconSegmentedControl.md`](components/control/IconSegmentedControl.md) | [JSON](components/control/IconSegmentedControl.agent.json) |\n| [`docs/components/control/InputField.md`](components/control/InputField.md) | [JSON](components/control/InputField.agent.json) |\n| [`docs/components/control/InputMethodGuard.md`](components/control/InputMethodGuard.md) | [JSON](components/control/InputMethodGuard.agent.json) |\n| [`docs/components/control/Label.md`](components/control/Label.md) | [JSON](components/control/Label.agent.json) |\n| [`docs/components/control/LabelButton.md`](components/control/LabelButton.md) | [JSON](components/control/LabelButton.agent.json) |\n| [`docs/components/control/LabelMenuButton.md`](components/control/LabelMenuButton.md) | [JSON](components/control/LabelMenuButton.agent.json) |\n| [`docs/components/control/LabelSegmentedControl.md`](components/control/LabelSegmentedControl.md) | [JSON](components/control/LabelSegmentedControl.agent.json) |\n| [`docs/components/control/ProgressBar.md`](components/control/ProgressBar.md) | [JSON](components/control/ProgressBar.agent.json) |\n| [`docs/components/control/PushButton.md`](components/control/PushButton.md) | [JSON](components/control/PushButton.agent.json) |\n| [`docs/components/control/RadioButton.md`](components/control/RadioButton.md) | [JSON](components/control/RadioButton.agent.json) |\n| [`docs/components/control/Slider.md`](components/control/Slider.md) | [JSON](components/control/Slider.agent.json) |\n| [`docs/components/control/Stepper.md`](components/control/Stepper.md) | [JSON](components/control/Stepper.agent.json) |\n| [`docs/components/control/Table.md`](components/control/Table.md) | [JSON](components/control/Table.agent.json) |\n| [`docs/components/control/TableCellItem.md`](components/control/TableCellItem.md) | [JSON](components/control/TableCellItem.agent.json) |\n| [`docs/components/control/TableHeader.md`](components/control/TableHeader.md) | [JSON](components/control/TableHeader.agent.json) |\n| [`docs/components/control/TableRow.md`](components/control/TableRow.md) | [JSON](components/control/TableRow.agent.json) |\n| [`docs/components/control/TextEditor.md`](components/control/TextEditor.md) | [JSON](components/control/TextEditor.agent.json) |\n| [`docs/components/control/ToggleSwitch.md`](components/control/ToggleSwitch.md) | [JSON](components/control/ToggleSwitch.agent.json) |\n| [`docs/components/control/WheelScrollGuard.md`](components/control/WheelScrollGuard.md) | [JSON](components/control/WheelScrollGuard.agent.json) |\n| [`docs/components/layout/AppHeader.md`](components/layout/AppHeader.md) | [JSON](components/layout/AppHeader.agent.json) |\n| [`docs/components/layout/HStack.md`](components/layout/HStack.md) | [JSON](components/layout/HStack.agent.json) |\n| [`docs/components/layout/Spacer.md`](components/layout/Spacer.md) | [JSON](components/layout/Spacer.agent.json) |\n| [`docs/components/layout/VStack.md`](components/layout/VStack.md) | [JSON](components/layout/VStack.agent.json) |\n| [`docs/components/layout/ZStack.md`](components/layout/ZStack.md) | [JSON](components/layout/ZStack.agent.json) |\n| [`docs/components/navigation/ContextMenu.md`](components/navigation/ContextMenu.md) | [JSON](components/navigation/ContextMenu.agent.json) |\n| [`docs/components/navigation/ContextMenuDivider.md`](components/navigation/ContextMenuDivider.md) | [JSON](components/navigation/ContextMenuDivider.agent.json) |\n| [`docs/components/navigation/ContextMenuItem.md`](components/navigation/ContextMenuItem.md) | [JSON](components/navigation/ContextMenuItem.agent.json) |\n| [`docs/components/navigation/Hierarchy.md`](components/navigation/Hierarchy.md) | [JSON](components/navigation/Hierarchy.agent.json) |\n| [`docs/components/navigation/HierarchyItem.md`](components/navigation/HierarchyItem.md) | [JSON](components/navigation/HierarchyItem.agent.json) |\n| [`docs/components/navigation/HierarchyList.md`](components/navigation/HierarchyList.md) | [JSON](components/navigation/HierarchyList.agent.json) |\n| [`docs/components/navigation/HierarchyToolbar.md`](components/navigation/HierarchyToolbar.md) | [JSON](components/navigation/HierarchyToolbar.agent.json) |\n| [`docs/components/navigation/Link.md`](components/navigation/Link.md) | [JSON](components/navigation/Link.agent.json) |\n| [`docs/components/navigation/List.md`](components/navigation/List.md) | [JSON](components/navigation/List.agent.json) |\n| [`docs/components/navigation/ListFooter.md`](components/navigation/ListFooter.md) | [JSON](components/navigation/ListFooter.agent.json) |\n| [`docs/components/navigation/ListItem.md`](components/navigation/ListItem.md) | [JSON](components/navigation/ListItem.agent.json) |\n| [`docs/components/navigation/Menu.md`](components/navigation/Menu.md) | [JSON](components/navigation/Menu.agent.json) |\n| [`docs/components/navigation/MenuDivider.md`](components/navigation/MenuDivider.md) | [JSON](components/navigation/MenuDivider.agent.json) |\n| [`docs/components/navigation/MenuItem.md`](components/navigation/MenuItem.md) | [JSON](components/navigation/MenuItem.agent.json) |\n| [`docs/components/navigation/MobileNavigationBar.md`](components/navigation/MobileNavigationBar.md) | [JSON](components/navigation/MobileNavigationBar.agent.json) |\n| [`docs/components/navigation/Navigator.md`](components/navigation/Navigator.md) | [JSON](components/navigation/Navigator.agent.json) |\n| [`docs/components/navigation/PageRouter.md`](components/navigation/PageRouter.md) | [JSON](components/navigation/PageRouter.agent.json) |\n| [`docs/components/navigation/PageTransitionController.md`](components/navigation/PageTransitionController.md) | [JSON](components/navigation/PageTransitionController.agent.json) |\n| [`docs/components/navigation/Tabs.md`](components/navigation/Tabs.md) | [JSON](components/navigation/Tabs.agent.json) |\n| [`docs/components/surfaces/Alert.md`](components/surfaces/Alert.md) | [JSON](components/surfaces/Alert.agent.json) |\n| [`docs/components/surfaces/AppCard.md`](components/surfaces/AppCard.md) | [JSON](components/surfaces/AppCard.agent.json) |\n| [`docs/components/surfaces/Card.md`](components/surfaces/Card.md) | [JSON](components/surfaces/Card.agent.json) |\n| [`docs/components/surfaces/Materials.md`](components/surfaces/Materials.md) | [JSON](components/surfaces/Materials.agent.json) |\n| [`docs/components/surfaces/Modal.md`](components/surfaces/Modal.md) | [JSON](components/surfaces/Modal.agent.json) |\n| [`docs/components/surfaces/Popover.md`](components/surfaces/Popover.md) | [JSON](components/surfaces/Popover.agent.json) |\n| [`docs/components/surfaces/Sheet.md`](components/surfaces/Sheet.md) | [JSON](components/surfaces/Sheet.agent.json) |\n| [`docs/components/surfaces/Tooltip.md`](components/surfaces/Tooltip.md) | [JSON](components/surfaces/Tooltip.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n| [`docs/figma-iconset-import.md`](figma-iconset-import.md) | [JSON](figma-iconset-import.agent.json) |\n| [`docs/figma-parity.md`](figma-parity.md) | [JSON](figma-parity.agent.json) |\n| [`docs/figma-theme-tokens.md`](figma-theme-tokens.md) | [JSON](figma-theme-tokens.agent.json) |\n| [`docs/hierarchy-ux-plan.md`](hierarchy-ux-plan.md) | [JSON](hierarchy-ux-plan.agent.json) |\n| [`docs/instance-states.md`](instance-states.md) | [JSON](instance-states.agent.json) |\n| [`docs/motion.md`](motion.md) | [JSON](motion.agent.json) |\n| [`docs/mvvm.md`](mvvm.md) | [JSON](mvvm.agent.json) |\n| [`docs/native/ActivationContent.md`](native/ActivationContent.md) | [JSON](native/ActivationContent.agent.json) |\n| [`docs/native/Alert.md`](native/Alert.md) | [JSON](native/Alert.agent.json) |\n| [`docs/native/AppSurfaces.md`](native/AppSurfaces.md) | [JSON](native/AppSurfaces.agent.json) |\n| [`docs/native/Architecture.md`](native/Architecture.md) | [JSON](native/Architecture.agent.json) |\n| [`docs/native/CodeEditor.md`](native/CodeEditor.md) | [JSON](native/CodeEditor.agent.json) |\n| [`docs/native/ColorPicker.md`](native/ColorPicker.md) | [JSON](native/ColorPicker.agent.json) |\n| [`docs/native/ColorPickerButton.md`](native/ColorPickerButton.md) | [JSON](native/ColorPickerButton.agent.json) |\n| [`docs/native/EditorAppearance.md`](native/EditorAppearance.md) | [JSON](native/EditorAppearance.agent.json) |\n| [`docs/native/FontPolicy.md`](native/FontPolicy.md) | [JSON](native/FontPolicy.agent.json) |\n| [`docs/native/Hierarchy.md`](native/Hierarchy.md) | [JSON](native/Hierarchy.agent.json) |\n| [`docs/native/HierarchyController.md`](native/HierarchyController.md) | [JSON](native/HierarchyController.agent.json) |\n| [`docs/native/HierarchyDelegate.md`](native/HierarchyDelegate.md) | [JSON](native/HierarchyDelegate.agent.json) |\n| [`docs/native/HierarchyViews.md`](native/HierarchyViews.md) | [JSON](native/HierarchyViews.agent.json) |\n| [`docs/native/InputField.md`](native/InputField.md) | [JSON](native/InputField.agent.json) |\n| [`docs/native/Link.md`](native/Link.md) | [JSON](native/Link.agent.json) |\n| [`docs/native/Materials.md`](native/Materials.md) | [JSON](native/Materials.agent.json) |\n| [`docs/native/Media.md`](native/Media.md) | [JSON](native/Media.agent.json) |\n| [`docs/native/Modal.md`](native/Modal.md) | [JSON](native/Modal.agent.json) |\n| [`docs/native/ModelSources.md`](native/ModelSources.md) | [JSON](native/ModelSources.agent.json) |\n| [`docs/native/ModelUndoStack.md`](native/ModelUndoStack.md) | [JSON](native/ModelUndoStack.agent.json) |\n| [`docs/native/Navigation.md`](native/Navigation.md) | [JSON](native/Navigation.agent.json) |\n| [`docs/native/NavigationTracking.md`](native/NavigationTracking.md) | [JSON](native/NavigationTracking.agent.json) |\n| [`docs/native/Navigator.md`](native/Navigator.md) | [JSON](native/Navigator.agent.json) |\n| [`docs/native/Opacity.md`](native/Opacity.md) | [JSON](native/Opacity.agent.json) |\n| [`docs/native/PageRouter.md`](native/PageRouter.md) | [JSON](native/PageRouter.agent.json) |\n| [`docs/native/Parity.md`](native/Parity.md) | [JSON](native/Parity.agent.json) |\n| [`docs/native/ParityPaths.md`](native/ParityPaths.md) | [JSON](native/ParityPaths.agent.json) |\n| [`docs/native/PlatformInfo.md`](native/PlatformInfo.md) | [JSON](native/PlatformInfo.agent.json) |\n| [`docs/native/Popover.md`](native/Popover.md) | [JSON](native/Popover.agent.json) |\n| [`docs/native/PresentationModels.md`](native/PresentationModels.md) | [JSON](native/PresentationModels.agent.json) |\n| [`docs/native/ProgressBar.md`](native/ProgressBar.md) | [JSON](native/ProgressBar.agent.json) |\n| [`docs/native/RenderMonitor.md`](native/RenderMonitor.md) | [JSON](native/RenderMonitor.agent.json) |\n| [`docs/native/Sheet.md`](native/Sheet.md) | [JSON](native/Sheet.agent.json) |\n| [`docs/native/SourceLayout.md`](native/SourceLayout.md) | [JSON](native/SourceLayout.agent.json) |\n| [`docs/native/SvgManager.md`](native/SvgManager.md) | [JSON](native/SvgManager.agent.json) |\n| [`docs/native/TableModel.md`](native/TableModel.md) | [JSON](native/TableModel.agent.json) |\n| [`docs/native/TableTransfer.md`](native/TableTransfer.md) | [JSON](native/TableTransfer.agent.json) |\n| [`docs/native/TableView.md`](native/TableView.md) | [JSON](native/TableView.agent.json) |\n| [`docs/native/Tables.md`](native/Tables.md) | [JSON](native/Tables.agent.json) |\n| [`docs/native/TextDocuments.md`](native/TextDocuments.md) | [JSON](native/TextDocuments.agent.json) |\n| [`docs/native/Toolbars.md`](native/Toolbars.md) | [JSON](native/Toolbars.agent.json) |\n| [`docs/native/Tooltip.md`](native/Tooltip.md) | [JSON](native/Tooltip.agent.json) |\n| [`docs/native/Verification.md`](native/Verification.md) | [JSON](native/Verification.agent.json) |\n| [`docs/native/ViewModelRegistry.md`](native/ViewModelRegistry.md) | [JSON](native/ViewModelRegistry.agent.json) |\n| [`docs/native/WindowsValidation.md`](native/WindowsValidation.md) | [JSON](native/WindowsValidation.agent.json) |\n| [`docs/overview.md`](overview.md) | [JSON](overview.agent.json) |\n| [`docs/performance-baseline-p0.md`](performance-baseline-p0.md) | [JSON](performance-baseline-p0.agent.json) |\n| [`docs/policies/debug.md`](policies/debug.md) | [JSON](policies/debug.agent.json) |\n| [`docs/policies/event.md`](policies/event.md) | [JSON](policies/event.agent.json) |\n| [`docs/policies/routing.md`](policies/routing.md) | [JSON](policies/routing.agent.json) |\n| [`docs/quality-automation-p4.md`](quality-automation-p4.md) | [JSON](quality-automation-p4.agent.json) |\n| [`docs/theme.md`](theme.md) | [JSON](theme.agent.json) |\n| [`example/AndroidHello/README.md`](../example/AndroidHello/README.md) | [JSON](mirrors/example/AndroidHello/README.agent.json) |\n| [`example/EventListener/README.md`](../example/EventListener/README.md) | [JSON](mirrors/example/EventListener/README.agent.json) |\n| [`example/NativeAppSurfaces/AGENT.md`](../example/NativeAppSurfaces/AGENT.md) | [JSON](mirrors/example/NativeAppSurfaces/AGENT.agent.json) |\n| [`example/NativeAppSurfaces/README.md`](../example/NativeAppSurfaces/README.md) | [JSON](mirrors/example/NativeAppSurfaces/README.agent.json) |\n| [`example/NativeAppSurfaces/docs/Usage.md`](../example/NativeAppSurfaces/docs/Usage.md) | [JSON](mirrors/example/NativeAppSurfaces/docs/Usage.agent.json) |\n| [`example/NativeCodeEditorGallery/AGENT.md`](../example/NativeCodeEditorGallery/AGENT.md) | [JSON](mirrors/example/NativeCodeEditorGallery/AGENT.agent.json) |\n| [`example/NativeCodeEditorGallery/README.md`](../example/NativeCodeEditorGallery/README.md) | [JSON](mirrors/example/NativeCodeEditorGallery/README.agent.json) |\n| [`example/NativeCodeEditorGallery/docs/Usage.md`](../example/NativeCodeEditorGallery/docs/Usage.md) | [JSON](mirrors/example/NativeCodeEditorGallery/docs/Usage.agent.json) |\n| [`example/NativeCreationWorkbench/AGENT.md`](../example/NativeCreationWorkbench/AGENT.md) | [JSON](mirrors/example/NativeCreationWorkbench/AGENT.agent.json) |\n| [`example/NativeCreationWorkbench/README.md`](../example/NativeCreationWorkbench/README.md) | [JSON](mirrors/example/NativeCreationWorkbench/README.agent.json) |\n| [`example/NativeCreationWorkbench/docs/Behavior.md`](../example/NativeCreationWorkbench/docs/Behavior.md) | [JSON](mirrors/example/NativeCreationWorkbench/docs/Behavior.agent.json) |\n| [`example/NativeCreationWorkbench/example/README.md`](../example/NativeCreationWorkbench/example/README.md) | [JSON](mirrors/example/NativeCreationWorkbench/example/README.agent.json) |\n| [`example/NativeMaterialGallery/AGENT.md`](../example/NativeMaterialGallery/AGENT.md) | [JSON](mirrors/example/NativeMaterialGallery/AGENT.agent.json) |\n| [`example/NativeMaterialGallery/README.md`](../example/NativeMaterialGallery/README.md) | [JSON](mirrors/example/NativeMaterialGallery/README.agent.json) |\n| [`example/NativeMaterialGallery/docs/Usage.md`](../example/NativeMaterialGallery/docs/Usage.md) | [JSON](mirrors/example/NativeMaterialGallery/docs/Usage.agent.json) |\n| [`example/NativeMediaGallery/AGENT.md`](../example/NativeMediaGallery/AGENT.md) | [JSON](mirrors/example/NativeMediaGallery/AGENT.agent.json) |\n| [`example/NativeMediaGallery/README.md`](../example/NativeMediaGallery/README.md) | [JSON](mirrors/example/NativeMediaGallery/README.agent.json) |\n| [`example/NativeMediaGallery/docs/Usage.md`](../example/NativeMediaGallery/docs/Usage.md) | [JSON](mirrors/example/NativeMediaGallery/docs/Usage.agent.json) |\n| [`example/NativeNavigationGallery/AGENT.md`](../example/NativeNavigationGallery/AGENT.md) | [JSON](mirrors/example/NativeNavigationGallery/AGENT.agent.json) |\n| [`example/NativeNavigationGallery/README.md`](../example/NativeNavigationGallery/README.md) | [JSON](mirrors/example/NativeNavigationGallery/README.agent.json) |\n| [`example/NativeNavigationGallery/docs/Usage.md`](../example/NativeNavigationGallery/docs/Usage.md) | [JSON](mirrors/example/NativeNavigationGallery/docs/Usage.agent.json) |\n| [`example/NativePageRouterGallery/AGENT.md`](../example/NativePageRouterGallery/AGENT.md) | [JSON](mirrors/example/NativePageRouterGallery/AGENT.agent.json) |\n| [`example/NativePageRouterGallery/README.md`](../example/NativePageRouterGallery/README.md) | [JSON](mirrors/example/NativePageRouterGallery/README.agent.json) |\n| [`example/NativePageRouterGallery/docs/Usage.md`](../example/NativePageRouterGallery/docs/Usage.md) | [JSON](mirrors/example/NativePageRouterGallery/docs/Usage.agent.json) |\n| [`example/NativeTextDocumentGallery/AGENT.md`](../example/NativeTextDocumentGallery/AGENT.md) | [JSON](mirrors/example/NativeTextDocumentGallery/AGENT.agent.json) |\n| [`example/NativeTextDocumentGallery/README.md`](../example/NativeTextDocumentGallery/README.md) | [JSON](mirrors/example/NativeTextDocumentGallery/README.agent.json) |\n| [`example/NativeTextDocumentGallery/docs/Usage.md`](../example/NativeTextDocumentGallery/docs/Usage.md) | [JSON](mirrors/example/NativeTextDocumentGallery/docs/Usage.agent.json) |\n| [`example/NativeTooltipGallery/AGENT.md`](../example/NativeTooltipGallery/AGENT.md) | [JSON](mirrors/example/NativeTooltipGallery/AGENT.agent.json) |\n| [`example/NativeTooltipGallery/README.md`](../example/NativeTooltipGallery/README.md) | [JSON](mirrors/example/NativeTooltipGallery/README.agent.json) |\n| [`example/NativeTooltipGallery/docs/Usage.md`](../example/NativeTooltipGallery/docs/Usage.md) | [JSON](mirrors/example/NativeTooltipGallery/docs/Usage.agent.json) |\n| [`example/README.md`](../example/README.md) | [JSON](mirrors/example/README.agent.json) |\n| [`example/TypingPractice/README.md`](../example/TypingPractice/README.md) | [JSON](mirrors/example/TypingPractice/README.agent.json) |\n| [`example/VisualCatalog/README.md`](../example/VisualCatalog/README.md) | [JSON](mirrors/example/VisualCatalog/README.agent.json) |\n| [`example/VisualCatalog/assets/cards/README.md`](../example/VisualCatalog/assets/cards/README.md) | [JSON](mirrors/example/VisualCatalog/assets/cards/README.agent.json) |\n| [`example/iOSHello/README.md`](../example/iOSHello/README.md) | [JSON](mirrors/example/iOSHello/README.agent.json) |\n| [`example/mvvm/README.md`](../example/mvvm/README.md) | [JSON](mirrors/example/mvvm/README.agent.json) |\n| [`resources/images/card/README.md`](../resources/images/card/README.md) | [JSON](mirrors/resources/images/card/README.agent.json) |\n| [`resources/images/colorpicker/README.md`](../resources/images/colorpicker/README.md) | [JSON](mirrors/resources/images/colorpicker/README.agent.json) |\n| [`src/rust-cli/README.md`](../src/rust-cli/README.md) | [JSON](mirrors/src/rust-cli/README.agent.json) |\n",
       "columns": [
         "Document",
         "Agent JSON"
@@ -1585,8 +1585,16 @@
           "[JSON](entrypoints/README.agent.json)"
         ],
         [
+          "[`docs/BuildLayout.md`](BuildLayout.md)",
+          "[JSON](BuildLayout.agent.json)"
+        ],
+        [
           "[`docs/Chnagelog.md`](Chnagelog.md)",
           "[JSON](Chnagelog.agent.json)"
+        ],
+        [
+          "[`docs/DynamicLinking.md`](DynamicLinking.md)",
+          "[JSON](DynamicLinking.agent.json)"
         ],
         [
           "[`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md)",
@@ -2425,8 +2433,8 @@
     {
       "id": "b000113",
       "kind": "html",
-      "start_line": 444,
-      "end_line": 444,
+      "start_line": 446,
+      "end_line": 446,
       "raw": "<!-- workspace-docs:document-map:end -->\n"
     }
   ],
@@ -2761,2929 +2769,2957 @@
       },
       {
         "block_id": "b000112",
+        "label": "`docs/BuildLayout.md`",
+        "target": "BuildLayout.md",
+        "kind": "relative",
+        "line": 235
+      },
+      {
+        "block_id": "b000112",
+        "label": "JSON",
+        "target": "BuildLayout.agent.json",
+        "kind": "relative",
+        "line": 235
+      },
+      {
+        "block_id": "b000112",
         "label": "`docs/Chnagelog.md`",
         "target": "Chnagelog.md",
         "kind": "relative",
-        "line": 235
+        "line": 236
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "Chnagelog.agent.json",
         "kind": "relative",
-        "line": 235
+        "line": 236
+      },
+      {
+        "block_id": "b000112",
+        "label": "`docs/DynamicLinking.md`",
+        "target": "DynamicLinking.md",
+        "kind": "relative",
+        "line": 237
+      },
+      {
+        "block_id": "b000112",
+        "label": "JSON",
+        "target": "DynamicLinking.agent.json",
+        "kind": "relative",
+        "line": 237
       },
       {
         "block_id": "b000112",
         "label": "`docs/FILE_PROVIDER.md`",
         "target": "FILE_PROVIDER.md",
         "kind": "relative",
-        "line": 236
+        "line": 238
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "FILE_PROVIDER.agent.json",
         "kind": "relative",
-        "line": 236
+        "line": 238
       },
       {
         "block_id": "b000112",
         "label": "`docs/NATIVE_LISTS.md`",
         "target": "NATIVE_LISTS.md",
         "kind": "relative",
-        "line": 237
+        "line": 239
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "NATIVE_LISTS.agent.json",
         "kind": "relative",
-        "line": 237
+        "line": 239
       },
       {
         "block_id": "b000112",
         "label": "`docs/PERFORMANCE.md`",
         "target": "PERFORMANCE.md",
         "kind": "relative",
-        "line": 238
+        "line": 240
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "PERFORMANCE.agent.json",
         "kind": "relative",
-        "line": 238
+        "line": 240
       },
       {
         "block_id": "b000112",
         "label": "`docs/Windows-validation.md`",
         "target": "Windows-validation.md",
         "kind": "relative",
-        "line": 239
+        "line": 241
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "Windows-validation.agent.json",
         "kind": "relative",
-        "line": 239
+        "line": 241
       },
       {
         "block_id": "b000112",
         "label": "`docs/WindowsBuildAndRun.md`",
         "target": "WindowsBuildAndRun.md",
         "kind": "relative",
-        "line": 240
+        "line": 242
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "WindowsBuildAndRun.agent.json",
         "kind": "relative",
-        "line": 240
+        "line": 242
       },
       {
         "block_id": "b000112",
         "label": "`docs/WindowsValidation.md`",
         "target": "WindowsValidation.md",
         "kind": "relative",
-        "line": 241
+        "line": 243
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "WindowsValidation.agent.json",
         "kind": "relative",
-        "line": 241
+        "line": 243
       },
       {
         "block_id": "b000112",
         "label": "`docs/architecture/event-pipeline.md`",
         "target": "architecture/event-pipeline.md",
         "kind": "relative",
-        "line": 242
+        "line": 244
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "architecture/event-pipeline.agent.json",
         "kind": "relative",
-        "line": 242
+        "line": 244
       },
       {
         "block_id": "b000112",
         "label": "`docs/architecture/performance-observability.md`",
         "target": "architecture/performance-observability.md",
         "kind": "relative",
-        "line": 243
+        "line": 245
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "architecture/performance-observability.agent.json",
         "kind": "relative",
-        "line": 243
+        "line": 245
       },
       {
         "block_id": "b000112",
         "label": "`docs/architecture/rendering-backend.md`",
         "target": "architecture/rendering-backend.md",
         "kind": "relative",
-        "line": 244
+        "line": 246
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "architecture/rendering-backend.agent.json",
         "kind": "relative",
-        "line": 244
+        "line": 246
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/AppBootstrap.md`",
         "target": "backend/AppBootstrap.md",
         "kind": "relative",
-        "line": 245
+        "line": 247
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/AppBootstrap.agent.json",
         "kind": "relative",
-        "line": 245
+        "line": 247
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/Backend.md`",
         "target": "backend/Backend.md",
         "kind": "relative",
-        "line": 246
+        "line": 248
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/Backend.agent.json",
         "kind": "relative",
-        "line": 246
+        "line": 248
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/BootstrapParallel.md`",
         "target": "backend/BootstrapParallel.md",
         "kind": "relative",
-        "line": 247
+        "line": 249
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/BootstrapParallel.agent.json",
         "kind": "relative",
-        "line": 247
+        "line": 249
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/Debug.md`",
         "target": "backend/Debug.md",
         "kind": "relative",
-        "line": 248
+        "line": 250
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/Debug.agent.json",
         "kind": "relative",
-        "line": 248
+        "line": 250
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/DebugOutput.md`",
         "target": "backend/DebugOutput.md",
         "kind": "relative",
-        "line": 249
+        "line": 251
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/DebugOutput.agent.json",
         "kind": "relative",
-        "line": 249
+        "line": 251
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ForegroundServices.md`",
         "target": "backend/ForegroundServices.md",
         "kind": "relative",
-        "line": 250
+        "line": 252
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ForegroundServices.agent.json",
         "kind": "relative",
-        "line": 250
+        "line": 252
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/GestureEvents.md`",
         "target": "backend/GestureEvents.md",
         "kind": "relative",
-        "line": 251
+        "line": 253
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/GestureEvents.agent.json",
         "kind": "relative",
-        "line": 251
+        "line": 253
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/HierarchyModel.md`",
         "target": "backend/HierarchyModel.md",
         "kind": "relative",
-        "line": 252
+        "line": 254
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/HierarchyModel.agent.json",
         "kind": "relative",
-        "line": 252
+        "line": 254
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ModelAdapter.md`",
         "target": "backend/ModelAdapter.md",
         "kind": "relative",
-        "line": 253
+        "line": 255
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ModelAdapter.agent.json",
         "kind": "relative",
-        "line": 253
+        "line": 255
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ModelSource.md`",
         "target": "backend/ModelSource.md",
         "kind": "relative",
-        "line": 254
+        "line": 256
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ModelSource.agent.json",
         "kind": "relative",
-        "line": 254
+        "line": 256
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ModelUndoStack.md`",
         "target": "backend/ModelUndoStack.md",
         "kind": "relative",
-        "line": 255
+        "line": 257
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ModelUndoStack.agent.json",
         "kind": "relative",
-        "line": 255
+        "line": 257
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/NativeWindowInteraction.md`",
         "target": "backend/NativeWindowInteraction.md",
         "kind": "relative",
-        "line": 256
+        "line": 258
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/NativeWindowInteraction.agent.json",
         "kind": "relative",
-        "line": 256
+        "line": 258
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/NavigationStackModel.md`",
         "target": "backend/NavigationStackModel.md",
         "kind": "relative",
-        "line": 257
+        "line": 259
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/NavigationStackModel.agent.json",
         "kind": "relative",
-        "line": 257
+        "line": 259
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/PageMonitor.md`",
         "target": "backend/PageMonitor.md",
         "kind": "relative",
-        "line": 258
+        "line": 260
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/PageMonitor.agent.json",
         "kind": "relative",
-        "line": 258
+        "line": 260
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/PermissionSequencer.md`",
         "target": "backend/PermissionSequencer.md",
         "kind": "relative",
-        "line": 259
+        "line": 261
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/PermissionSequencer.agent.json",
         "kind": "relative",
-        "line": 259
+        "line": 261
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/Platform.md`",
         "target": "backend/Platform.md",
         "kind": "relative",
-        "line": 260
+        "line": 262
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/Platform.agent.json",
         "kind": "relative",
-        "line": 260
+        "line": 262
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ProgressModel.md`",
         "target": "backend/ProgressModel.md",
         "kind": "relative",
-        "line": 261
+        "line": 263
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ProgressModel.agent.json",
         "kind": "relative",
-        "line": 261
+        "line": 263
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/QmlContextBinder.md`",
         "target": "backend/QmlContextBinder.md",
         "kind": "relative",
-        "line": 262
+        "line": 264
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/QmlContextBinder.agent.json",
         "kind": "relative",
-        "line": 262
+        "line": 264
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/QmlTypeRegistrar.md`",
         "target": "backend/QmlTypeRegistrar.md",
         "kind": "relative",
-        "line": 263
+        "line": 265
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/QmlTypeRegistrar.agent.json",
         "kind": "relative",
-        "line": 263
+        "line": 265
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/RenderMonitor.md`",
         "target": "backend/RenderMonitor.md",
         "kind": "relative",
-        "line": 264
+        "line": 266
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/RenderMonitor.agent.json",
         "kind": "relative",
-        "line": 264
+        "line": 266
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/RenderQuality.md`",
         "target": "backend/RenderQuality.md",
         "kind": "relative",
-        "line": 265
+        "line": 267
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/RenderQuality.agent.json",
         "kind": "relative",
-        "line": 265
+        "line": 267
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/RouteMatcher.md`",
         "target": "backend/RouteMatcher.md",
         "kind": "relative",
-        "line": 266
+        "line": 268
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/RouteMatcher.agent.json",
         "kind": "relative",
-        "line": 266
+        "line": 268
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/RuntimeEvents.md`",
         "target": "backend/RuntimeEvents.md",
         "kind": "relative",
-        "line": 267
+        "line": 269
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/RuntimeEvents.agent.json",
         "kind": "relative",
-        "line": 267
+        "line": 269
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/StateModel.md`",
         "target": "backend/StateModel.md",
         "kind": "relative",
-        "line": 268
+        "line": 270
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/StateModel.agent.json",
         "kind": "relative",
-        "line": 268
+        "line": 270
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/TableHeaderModel.md`",
         "target": "backend/TableHeaderModel.md",
         "kind": "relative",
-        "line": 269
+        "line": 271
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/TableHeaderModel.agent.json",
         "kind": "relative",
-        "line": 269
+        "line": 271
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/TableModel.md`",
         "target": "backend/TableModel.md",
         "kind": "relative",
-        "line": 270
+        "line": 272
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/TableModel.agent.json",
         "kind": "relative",
-        "line": 270
+        "line": 272
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/TextDocumentModel.md`",
         "target": "backend/TextDocumentModel.md",
         "kind": "relative",
-        "line": 271
+        "line": 273
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/TextDocumentModel.agent.json",
         "kind": "relative",
-        "line": 271
+        "line": 273
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ViewModels.md`",
         "target": "backend/ViewModels.md",
         "kind": "relative",
-        "line": 272
+        "line": 274
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ViewModels.agent.json",
         "kind": "relative",
-        "line": 272
+        "line": 274
       },
       {
         "block_id": "b000112",
         "label": "`docs/backend/ViewStateTracker.md`",
         "target": "backend/ViewStateTracker.md",
         "kind": "relative",
-        "line": 273
+        "line": 275
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "backend/ViewStateTracker.agent.json",
         "kind": "relative",
-        "line": 273
+        "line": 275
       },
       {
         "block_id": "b000112",
         "label": "`docs/build.md`",
         "target": "build.md",
         "kind": "relative",
-        "line": 274
+        "line": 276
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "build.agent.json",
         "kind": "relative",
-        "line": 274
+        "line": 276
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/AppBootstrapWindow.md`",
         "target": "components/app/AppBootstrapWindow.md",
         "kind": "relative",
-        "line": 275
+        "line": 277
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/AppBootstrapWindow.agent.json",
         "kind": "relative",
-        "line": 275
+        "line": 277
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/AppShell.md`",
         "target": "components/app/AppShell.md",
         "kind": "relative",
-        "line": 276
+        "line": 278
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/AppShell.agent.json",
         "kind": "relative",
-        "line": 276
+        "line": 278
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/ApplicationWindow.md`",
         "target": "components/app/ApplicationWindow.md",
         "kind": "relative",
-        "line": 277
+        "line": 279
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/ApplicationWindow.agent.json",
         "kind": "relative",
-        "line": 277
+        "line": 279
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/Window.md`",
         "target": "components/app/Window.md",
         "kind": "relative",
-        "line": 278
+        "line": 280
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/Window.agent.json",
         "kind": "relative",
-        "line": 278
+        "line": 280
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/WindowChromeInteraction.md`",
         "target": "components/app/WindowChromeInteraction.md",
         "kind": "relative",
-        "line": 279
+        "line": 281
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/WindowChromeInteraction.agent.json",
         "kind": "relative",
-        "line": 279
+        "line": 281
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/app/WindowSafeAreaObserver.md`",
         "target": "components/app/WindowSafeAreaObserver.md",
         "kind": "relative",
-        "line": 280
+        "line": 282
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/app/WindowSafeAreaObserver.agent.json",
         "kind": "relative",
-        "line": 280
+        "line": 282
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/AbstractButton.md`",
         "target": "components/control/AbstractButton.md",
         "kind": "relative",
-        "line": 281
+        "line": 283
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/AbstractButton.agent.json",
         "kind": "relative",
-        "line": 281
+        "line": 283
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/Avatar.md`",
         "target": "components/control/Avatar.md",
         "kind": "relative",
-        "line": 282
+        "line": 284
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/Avatar.agent.json",
         "kind": "relative",
-        "line": 282
+        "line": 284
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ButtonMethodRegistry.md`",
         "target": "components/control/ButtonMethodRegistry.md",
         "kind": "relative",
-        "line": 283
+        "line": 285
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ButtonMethodRegistry.agent.json",
         "kind": "relative",
-        "line": 283
+        "line": 285
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/CheckBox.md`",
         "target": "components/control/CheckBox.md",
         "kind": "relative",
-        "line": 284
+        "line": 286
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/CheckBox.agent.json",
         "kind": "relative",
-        "line": 284
+        "line": 286
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/CodeEditor.md`",
         "target": "components/control/CodeEditor.md",
         "kind": "relative",
-        "line": 285
+        "line": 287
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/CodeEditor.agent.json",
         "kind": "relative",
-        "line": 285
+        "line": 287
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ColorPicker.md`",
         "target": "components/control/ColorPicker.md",
         "kind": "relative",
-        "line": 286
+        "line": 288
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ColorPicker.agent.json",
         "kind": "relative",
-        "line": 286
+        "line": 288
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ColorPickerButton.md`",
         "target": "components/control/ColorPickerButton.md",
         "kind": "relative",
-        "line": 287
+        "line": 289
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ColorPickerButton.agent.json",
         "kind": "relative",
-        "line": 287
+        "line": 289
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ComboBox.md`",
         "target": "components/control/ComboBox.md",
         "kind": "relative",
-        "line": 288
+        "line": 290
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ComboBox.agent.json",
         "kind": "relative",
-        "line": 288
+        "line": 290
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/DropdownButton.md`",
         "target": "components/control/DropdownButton.md",
         "kind": "relative",
-        "line": 289
+        "line": 291
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/DropdownButton.agent.json",
         "kind": "relative",
-        "line": 289
+        "line": 291
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/EventListener.md`",
         "target": "components/control/EventListener.md",
         "kind": "relative",
-        "line": 290
+        "line": 292
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/EventListener.agent.json",
         "kind": "relative",
-        "line": 290
+        "line": 292
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/HelpButton.md`",
         "target": "components/control/HelpButton.md",
         "kind": "relative",
-        "line": 291
+        "line": 293
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/HelpButton.agent.json",
         "kind": "relative",
-        "line": 291
+        "line": 293
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/IconButton.md`",
         "target": "components/control/IconButton.md",
         "kind": "relative",
-        "line": 292
+        "line": 294
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/IconButton.agent.json",
         "kind": "relative",
-        "line": 292
+        "line": 294
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/IconMenuButton.md`",
         "target": "components/control/IconMenuButton.md",
         "kind": "relative",
-        "line": 293
+        "line": 295
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/IconMenuButton.agent.json",
         "kind": "relative",
-        "line": 293
+        "line": 295
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/IconSegmentedControl.md`",
         "target": "components/control/IconSegmentedControl.md",
         "kind": "relative",
-        "line": 294
+        "line": 296
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/IconSegmentedControl.agent.json",
         "kind": "relative",
-        "line": 294
+        "line": 296
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/InputField.md`",
         "target": "components/control/InputField.md",
         "kind": "relative",
-        "line": 295
+        "line": 297
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/InputField.agent.json",
         "kind": "relative",
-        "line": 295
+        "line": 297
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/InputMethodGuard.md`",
         "target": "components/control/InputMethodGuard.md",
         "kind": "relative",
-        "line": 296
+        "line": 298
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/InputMethodGuard.agent.json",
         "kind": "relative",
-        "line": 296
+        "line": 298
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/Label.md`",
         "target": "components/control/Label.md",
         "kind": "relative",
-        "line": 297
+        "line": 299
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/Label.agent.json",
         "kind": "relative",
-        "line": 297
+        "line": 299
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/LabelButton.md`",
         "target": "components/control/LabelButton.md",
         "kind": "relative",
-        "line": 298
+        "line": 300
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/LabelButton.agent.json",
         "kind": "relative",
-        "line": 298
+        "line": 300
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/LabelMenuButton.md`",
         "target": "components/control/LabelMenuButton.md",
         "kind": "relative",
-        "line": 299
+        "line": 301
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/LabelMenuButton.agent.json",
         "kind": "relative",
-        "line": 299
+        "line": 301
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/LabelSegmentedControl.md`",
         "target": "components/control/LabelSegmentedControl.md",
         "kind": "relative",
-        "line": 300
+        "line": 302
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/LabelSegmentedControl.agent.json",
         "kind": "relative",
-        "line": 300
+        "line": 302
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ProgressBar.md`",
         "target": "components/control/ProgressBar.md",
         "kind": "relative",
-        "line": 301
+        "line": 303
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ProgressBar.agent.json",
         "kind": "relative",
-        "line": 301
+        "line": 303
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/PushButton.md`",
         "target": "components/control/PushButton.md",
         "kind": "relative",
-        "line": 302
+        "line": 304
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/PushButton.agent.json",
         "kind": "relative",
-        "line": 302
+        "line": 304
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/RadioButton.md`",
         "target": "components/control/RadioButton.md",
         "kind": "relative",
-        "line": 303
+        "line": 305
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/RadioButton.agent.json",
         "kind": "relative",
-        "line": 303
+        "line": 305
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/Slider.md`",
         "target": "components/control/Slider.md",
         "kind": "relative",
-        "line": 304
+        "line": 306
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/Slider.agent.json",
         "kind": "relative",
-        "line": 304
+        "line": 306
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/Stepper.md`",
         "target": "components/control/Stepper.md",
         "kind": "relative",
-        "line": 305
+        "line": 307
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/Stepper.agent.json",
         "kind": "relative",
-        "line": 305
+        "line": 307
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/Table.md`",
         "target": "components/control/Table.md",
         "kind": "relative",
-        "line": 306
+        "line": 308
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/Table.agent.json",
         "kind": "relative",
-        "line": 306
+        "line": 308
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/TableCellItem.md`",
         "target": "components/control/TableCellItem.md",
         "kind": "relative",
-        "line": 307
+        "line": 309
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/TableCellItem.agent.json",
         "kind": "relative",
-        "line": 307
+        "line": 309
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/TableHeader.md`",
         "target": "components/control/TableHeader.md",
         "kind": "relative",
-        "line": 308
+        "line": 310
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/TableHeader.agent.json",
         "kind": "relative",
-        "line": 308
+        "line": 310
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/TableRow.md`",
         "target": "components/control/TableRow.md",
         "kind": "relative",
-        "line": 309
+        "line": 311
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/TableRow.agent.json",
         "kind": "relative",
-        "line": 309
+        "line": 311
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/TextEditor.md`",
         "target": "components/control/TextEditor.md",
         "kind": "relative",
-        "line": 310
+        "line": 312
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/TextEditor.agent.json",
         "kind": "relative",
-        "line": 310
+        "line": 312
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/ToggleSwitch.md`",
         "target": "components/control/ToggleSwitch.md",
         "kind": "relative",
-        "line": 311
+        "line": 313
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/ToggleSwitch.agent.json",
         "kind": "relative",
-        "line": 311
+        "line": 313
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/control/WheelScrollGuard.md`",
         "target": "components/control/WheelScrollGuard.md",
         "kind": "relative",
-        "line": 312
+        "line": 314
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/control/WheelScrollGuard.agent.json",
         "kind": "relative",
-        "line": 312
+        "line": 314
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/layout/AppHeader.md`",
         "target": "components/layout/AppHeader.md",
         "kind": "relative",
-        "line": 313
+        "line": 315
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/layout/AppHeader.agent.json",
         "kind": "relative",
-        "line": 313
+        "line": 315
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/layout/HStack.md`",
         "target": "components/layout/HStack.md",
         "kind": "relative",
-        "line": 314
+        "line": 316
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/layout/HStack.agent.json",
         "kind": "relative",
-        "line": 314
+        "line": 316
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/layout/Spacer.md`",
         "target": "components/layout/Spacer.md",
         "kind": "relative",
-        "line": 315
+        "line": 317
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/layout/Spacer.agent.json",
         "kind": "relative",
-        "line": 315
+        "line": 317
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/layout/VStack.md`",
         "target": "components/layout/VStack.md",
         "kind": "relative",
-        "line": 316
+        "line": 318
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/layout/VStack.agent.json",
         "kind": "relative",
-        "line": 316
+        "line": 318
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/layout/ZStack.md`",
         "target": "components/layout/ZStack.md",
         "kind": "relative",
-        "line": 317
+        "line": 319
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/layout/ZStack.agent.json",
         "kind": "relative",
-        "line": 317
+        "line": 319
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/ContextMenu.md`",
         "target": "components/navigation/ContextMenu.md",
         "kind": "relative",
-        "line": 318
+        "line": 320
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/ContextMenu.agent.json",
         "kind": "relative",
-        "line": 318
+        "line": 320
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/ContextMenuDivider.md`",
         "target": "components/navigation/ContextMenuDivider.md",
         "kind": "relative",
-        "line": 319
+        "line": 321
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/ContextMenuDivider.agent.json",
         "kind": "relative",
-        "line": 319
+        "line": 321
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/ContextMenuItem.md`",
         "target": "components/navigation/ContextMenuItem.md",
         "kind": "relative",
-        "line": 320
+        "line": 322
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/ContextMenuItem.agent.json",
         "kind": "relative",
-        "line": 320
+        "line": 322
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/Hierarchy.md`",
         "target": "components/navigation/Hierarchy.md",
         "kind": "relative",
-        "line": 321
+        "line": 323
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/Hierarchy.agent.json",
         "kind": "relative",
-        "line": 321
+        "line": 323
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/HierarchyItem.md`",
         "target": "components/navigation/HierarchyItem.md",
         "kind": "relative",
-        "line": 322
+        "line": 324
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/HierarchyItem.agent.json",
         "kind": "relative",
-        "line": 322
+        "line": 324
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/HierarchyList.md`",
         "target": "components/navigation/HierarchyList.md",
         "kind": "relative",
-        "line": 323
+        "line": 325
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/HierarchyList.agent.json",
         "kind": "relative",
-        "line": 323
+        "line": 325
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/HierarchyToolbar.md`",
         "target": "components/navigation/HierarchyToolbar.md",
         "kind": "relative",
-        "line": 324
+        "line": 326
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/HierarchyToolbar.agent.json",
         "kind": "relative",
-        "line": 324
+        "line": 326
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/Link.md`",
         "target": "components/navigation/Link.md",
         "kind": "relative",
-        "line": 325
+        "line": 327
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/Link.agent.json",
         "kind": "relative",
-        "line": 325
+        "line": 327
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/List.md`",
         "target": "components/navigation/List.md",
         "kind": "relative",
-        "line": 326
+        "line": 328
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/List.agent.json",
         "kind": "relative",
-        "line": 326
+        "line": 328
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/ListFooter.md`",
         "target": "components/navigation/ListFooter.md",
         "kind": "relative",
-        "line": 327
+        "line": 329
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/ListFooter.agent.json",
         "kind": "relative",
-        "line": 327
+        "line": 329
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/ListItem.md`",
         "target": "components/navigation/ListItem.md",
         "kind": "relative",
-        "line": 328
+        "line": 330
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/ListItem.agent.json",
         "kind": "relative",
-        "line": 328
+        "line": 330
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/Menu.md`",
         "target": "components/navigation/Menu.md",
         "kind": "relative",
-        "line": 329
+        "line": 331
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/Menu.agent.json",
         "kind": "relative",
-        "line": 329
+        "line": 331
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/MenuDivider.md`",
         "target": "components/navigation/MenuDivider.md",
         "kind": "relative",
-        "line": 330
+        "line": 332
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/MenuDivider.agent.json",
         "kind": "relative",
-        "line": 330
+        "line": 332
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/MenuItem.md`",
         "target": "components/navigation/MenuItem.md",
         "kind": "relative",
-        "line": 331
+        "line": 333
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/MenuItem.agent.json",
         "kind": "relative",
-        "line": 331
+        "line": 333
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/MobileNavigationBar.md`",
         "target": "components/navigation/MobileNavigationBar.md",
         "kind": "relative",
-        "line": 332
+        "line": 334
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/MobileNavigationBar.agent.json",
         "kind": "relative",
-        "line": 332
+        "line": 334
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/Navigator.md`",
         "target": "components/navigation/Navigator.md",
         "kind": "relative",
-        "line": 333
+        "line": 335
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/Navigator.agent.json",
         "kind": "relative",
-        "line": 333
+        "line": 335
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/PageRouter.md`",
         "target": "components/navigation/PageRouter.md",
         "kind": "relative",
-        "line": 334
+        "line": 336
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/PageRouter.agent.json",
         "kind": "relative",
-        "line": 334
+        "line": 336
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/PageTransitionController.md`",
         "target": "components/navigation/PageTransitionController.md",
         "kind": "relative",
-        "line": 335
+        "line": 337
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/PageTransitionController.agent.json",
         "kind": "relative",
-        "line": 335
+        "line": 337
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/navigation/Tabs.md`",
         "target": "components/navigation/Tabs.md",
         "kind": "relative",
-        "line": 336
+        "line": 338
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/navigation/Tabs.agent.json",
         "kind": "relative",
-        "line": 336
+        "line": 338
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Alert.md`",
         "target": "components/surfaces/Alert.md",
         "kind": "relative",
-        "line": 337
+        "line": 339
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Alert.agent.json",
         "kind": "relative",
-        "line": 337
+        "line": 339
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/AppCard.md`",
         "target": "components/surfaces/AppCard.md",
         "kind": "relative",
-        "line": 338
+        "line": 340
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/AppCard.agent.json",
         "kind": "relative",
-        "line": 338
+        "line": 340
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Card.md`",
         "target": "components/surfaces/Card.md",
         "kind": "relative",
-        "line": 339
+        "line": 341
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Card.agent.json",
         "kind": "relative",
-        "line": 339
+        "line": 341
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Materials.md`",
         "target": "components/surfaces/Materials.md",
         "kind": "relative",
-        "line": 340
+        "line": 342
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Materials.agent.json",
         "kind": "relative",
-        "line": 340
+        "line": 342
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Modal.md`",
         "target": "components/surfaces/Modal.md",
         "kind": "relative",
-        "line": 341
+        "line": 343
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Modal.agent.json",
         "kind": "relative",
-        "line": 341
+        "line": 343
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Popover.md`",
         "target": "components/surfaces/Popover.md",
         "kind": "relative",
-        "line": 342
+        "line": 344
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Popover.agent.json",
         "kind": "relative",
-        "line": 342
+        "line": 344
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Sheet.md`",
         "target": "components/surfaces/Sheet.md",
         "kind": "relative",
-        "line": 343
+        "line": 345
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Sheet.agent.json",
         "kind": "relative",
-        "line": 343
+        "line": 345
       },
       {
         "block_id": "b000112",
         "label": "`docs/components/surfaces/Tooltip.md`",
         "target": "components/surfaces/Tooltip.md",
         "kind": "relative",
-        "line": 344
+        "line": 346
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "components/surfaces/Tooltip.agent.json",
         "kind": "relative",
-        "line": 344
+        "line": 346
       },
       {
         "block_id": "b000112",
         "label": "`docs/documentation-structure.md`",
         "target": "documentation-structure.md",
         "kind": "relative",
-        "line": 345
+        "line": 347
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "documentation-structure.agent.json",
         "kind": "relative",
-        "line": 345
+        "line": 347
       },
       {
         "block_id": "b000112",
         "label": "`docs/figma-iconset-import.md`",
         "target": "figma-iconset-import.md",
         "kind": "relative",
-        "line": 346
+        "line": 348
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "figma-iconset-import.agent.json",
         "kind": "relative",
-        "line": 346
+        "line": 348
       },
       {
         "block_id": "b000112",
         "label": "`docs/figma-parity.md`",
         "target": "figma-parity.md",
         "kind": "relative",
-        "line": 347
+        "line": 349
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "figma-parity.agent.json",
         "kind": "relative",
-        "line": 347
+        "line": 349
       },
       {
         "block_id": "b000112",
         "label": "`docs/figma-theme-tokens.md`",
         "target": "figma-theme-tokens.md",
         "kind": "relative",
-        "line": 348
+        "line": 350
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "figma-theme-tokens.agent.json",
         "kind": "relative",
-        "line": 348
+        "line": 350
       },
       {
         "block_id": "b000112",
         "label": "`docs/hierarchy-ux-plan.md`",
         "target": "hierarchy-ux-plan.md",
         "kind": "relative",
-        "line": 349
+        "line": 351
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "hierarchy-ux-plan.agent.json",
         "kind": "relative",
-        "line": 349
+        "line": 351
       },
       {
         "block_id": "b000112",
         "label": "`docs/instance-states.md`",
         "target": "instance-states.md",
         "kind": "relative",
-        "line": 350
+        "line": 352
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "instance-states.agent.json",
         "kind": "relative",
-        "line": 350
+        "line": 352
       },
       {
         "block_id": "b000112",
         "label": "`docs/motion.md`",
         "target": "motion.md",
         "kind": "relative",
-        "line": 351
+        "line": 353
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "motion.agent.json",
         "kind": "relative",
-        "line": 351
+        "line": 353
       },
       {
         "block_id": "b000112",
         "label": "`docs/mvvm.md`",
         "target": "mvvm.md",
         "kind": "relative",
-        "line": 352
+        "line": 354
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mvvm.agent.json",
         "kind": "relative",
-        "line": 352
+        "line": 354
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ActivationContent.md`",
         "target": "native/ActivationContent.md",
         "kind": "relative",
-        "line": 353
+        "line": 355
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ActivationContent.agent.json",
         "kind": "relative",
-        "line": 353
+        "line": 355
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Alert.md`",
         "target": "native/Alert.md",
         "kind": "relative",
-        "line": 354
+        "line": 356
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Alert.agent.json",
         "kind": "relative",
-        "line": 354
+        "line": 356
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/AppSurfaces.md`",
         "target": "native/AppSurfaces.md",
         "kind": "relative",
-        "line": 355
+        "line": 357
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/AppSurfaces.agent.json",
         "kind": "relative",
-        "line": 355
+        "line": 357
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Architecture.md`",
         "target": "native/Architecture.md",
         "kind": "relative",
-        "line": 356
+        "line": 358
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Architecture.agent.json",
         "kind": "relative",
-        "line": 356
+        "line": 358
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/CodeEditor.md`",
         "target": "native/CodeEditor.md",
         "kind": "relative",
-        "line": 357
+        "line": 359
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/CodeEditor.agent.json",
         "kind": "relative",
-        "line": 357
+        "line": 359
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ColorPicker.md`",
         "target": "native/ColorPicker.md",
         "kind": "relative",
-        "line": 358
+        "line": 360
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ColorPicker.agent.json",
         "kind": "relative",
-        "line": 358
+        "line": 360
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ColorPickerButton.md`",
         "target": "native/ColorPickerButton.md",
         "kind": "relative",
-        "line": 359
+        "line": 361
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ColorPickerButton.agent.json",
         "kind": "relative",
-        "line": 359
+        "line": 361
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/EditorAppearance.md`",
         "target": "native/EditorAppearance.md",
         "kind": "relative",
-        "line": 360
+        "line": 362
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/EditorAppearance.agent.json",
         "kind": "relative",
-        "line": 360
+        "line": 362
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/FontPolicy.md`",
         "target": "native/FontPolicy.md",
         "kind": "relative",
-        "line": 361
+        "line": 363
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/FontPolicy.agent.json",
         "kind": "relative",
-        "line": 361
+        "line": 363
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Hierarchy.md`",
         "target": "native/Hierarchy.md",
         "kind": "relative",
-        "line": 362
+        "line": 364
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Hierarchy.agent.json",
         "kind": "relative",
-        "line": 362
+        "line": 364
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/HierarchyController.md`",
         "target": "native/HierarchyController.md",
         "kind": "relative",
-        "line": 363
+        "line": 365
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/HierarchyController.agent.json",
         "kind": "relative",
-        "line": 363
+        "line": 365
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/HierarchyDelegate.md`",
         "target": "native/HierarchyDelegate.md",
         "kind": "relative",
-        "line": 364
+        "line": 366
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/HierarchyDelegate.agent.json",
         "kind": "relative",
-        "line": 364
+        "line": 366
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/HierarchyViews.md`",
         "target": "native/HierarchyViews.md",
         "kind": "relative",
-        "line": 365
+        "line": 367
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/HierarchyViews.agent.json",
         "kind": "relative",
-        "line": 365
+        "line": 367
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/InputField.md`",
         "target": "native/InputField.md",
         "kind": "relative",
-        "line": 366
+        "line": 368
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/InputField.agent.json",
         "kind": "relative",
-        "line": 366
+        "line": 368
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Link.md`",
         "target": "native/Link.md",
         "kind": "relative",
-        "line": 367
+        "line": 369
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Link.agent.json",
         "kind": "relative",
-        "line": 367
+        "line": 369
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Materials.md`",
         "target": "native/Materials.md",
         "kind": "relative",
-        "line": 368
+        "line": 370
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Materials.agent.json",
         "kind": "relative",
-        "line": 368
+        "line": 370
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Media.md`",
         "target": "native/Media.md",
         "kind": "relative",
-        "line": 369
+        "line": 371
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Media.agent.json",
         "kind": "relative",
-        "line": 369
+        "line": 371
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Modal.md`",
         "target": "native/Modal.md",
         "kind": "relative",
-        "line": 370
+        "line": 372
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Modal.agent.json",
         "kind": "relative",
-        "line": 370
+        "line": 372
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ModelSources.md`",
         "target": "native/ModelSources.md",
         "kind": "relative",
-        "line": 371
+        "line": 373
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ModelSources.agent.json",
         "kind": "relative",
-        "line": 371
+        "line": 373
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ModelUndoStack.md`",
         "target": "native/ModelUndoStack.md",
         "kind": "relative",
-        "line": 372
+        "line": 374
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ModelUndoStack.agent.json",
         "kind": "relative",
-        "line": 372
+        "line": 374
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Navigation.md`",
         "target": "native/Navigation.md",
         "kind": "relative",
-        "line": 373
+        "line": 375
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Navigation.agent.json",
         "kind": "relative",
-        "line": 373
+        "line": 375
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/NavigationTracking.md`",
         "target": "native/NavigationTracking.md",
         "kind": "relative",
-        "line": 374
+        "line": 376
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/NavigationTracking.agent.json",
         "kind": "relative",
-        "line": 374
+        "line": 376
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Navigator.md`",
         "target": "native/Navigator.md",
         "kind": "relative",
-        "line": 375
+        "line": 377
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Navigator.agent.json",
         "kind": "relative",
-        "line": 375
+        "line": 377
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Opacity.md`",
         "target": "native/Opacity.md",
         "kind": "relative",
-        "line": 376
+        "line": 378
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Opacity.agent.json",
         "kind": "relative",
-        "line": 376
+        "line": 378
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/PageRouter.md`",
         "target": "native/PageRouter.md",
         "kind": "relative",
-        "line": 377
+        "line": 379
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/PageRouter.agent.json",
         "kind": "relative",
-        "line": 377
+        "line": 379
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Parity.md`",
         "target": "native/Parity.md",
         "kind": "relative",
-        "line": 378
+        "line": 380
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Parity.agent.json",
         "kind": "relative",
-        "line": 378
+        "line": 380
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ParityPaths.md`",
         "target": "native/ParityPaths.md",
         "kind": "relative",
-        "line": 379
+        "line": 381
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ParityPaths.agent.json",
         "kind": "relative",
-        "line": 379
+        "line": 381
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/PlatformInfo.md`",
         "target": "native/PlatformInfo.md",
         "kind": "relative",
-        "line": 380
+        "line": 382
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/PlatformInfo.agent.json",
         "kind": "relative",
-        "line": 380
+        "line": 382
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Popover.md`",
         "target": "native/Popover.md",
         "kind": "relative",
-        "line": 381
+        "line": 383
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Popover.agent.json",
         "kind": "relative",
-        "line": 381
+        "line": 383
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/PresentationModels.md`",
         "target": "native/PresentationModels.md",
         "kind": "relative",
-        "line": 382
+        "line": 384
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/PresentationModels.agent.json",
         "kind": "relative",
-        "line": 382
+        "line": 384
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ProgressBar.md`",
         "target": "native/ProgressBar.md",
         "kind": "relative",
-        "line": 383
+        "line": 385
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ProgressBar.agent.json",
         "kind": "relative",
-        "line": 383
+        "line": 385
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/RenderMonitor.md`",
         "target": "native/RenderMonitor.md",
         "kind": "relative",
-        "line": 384
+        "line": 386
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/RenderMonitor.agent.json",
         "kind": "relative",
-        "line": 384
+        "line": 386
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Sheet.md`",
         "target": "native/Sheet.md",
         "kind": "relative",
-        "line": 385
+        "line": 387
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Sheet.agent.json",
         "kind": "relative",
-        "line": 385
+        "line": 387
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/SourceLayout.md`",
         "target": "native/SourceLayout.md",
         "kind": "relative",
-        "line": 386
+        "line": 388
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/SourceLayout.agent.json",
         "kind": "relative",
-        "line": 386
+        "line": 388
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/SvgManager.md`",
         "target": "native/SvgManager.md",
         "kind": "relative",
-        "line": 387
+        "line": 389
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/SvgManager.agent.json",
         "kind": "relative",
-        "line": 387
+        "line": 389
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/TableModel.md`",
         "target": "native/TableModel.md",
         "kind": "relative",
-        "line": 388
+        "line": 390
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/TableModel.agent.json",
         "kind": "relative",
-        "line": 388
+        "line": 390
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/TableTransfer.md`",
         "target": "native/TableTransfer.md",
         "kind": "relative",
-        "line": 389
+        "line": 391
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/TableTransfer.agent.json",
         "kind": "relative",
-        "line": 389
+        "line": 391
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/TableView.md`",
         "target": "native/TableView.md",
         "kind": "relative",
-        "line": 390
+        "line": 392
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/TableView.agent.json",
         "kind": "relative",
-        "line": 390
+        "line": 392
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Tables.md`",
         "target": "native/Tables.md",
         "kind": "relative",
-        "line": 391
+        "line": 393
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Tables.agent.json",
         "kind": "relative",
-        "line": 391
+        "line": 393
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/TextDocuments.md`",
         "target": "native/TextDocuments.md",
         "kind": "relative",
-        "line": 392
+        "line": 394
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/TextDocuments.agent.json",
         "kind": "relative",
-        "line": 392
+        "line": 394
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Toolbars.md`",
         "target": "native/Toolbars.md",
         "kind": "relative",
-        "line": 393
+        "line": 395
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Toolbars.agent.json",
         "kind": "relative",
-        "line": 393
+        "line": 395
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Tooltip.md`",
         "target": "native/Tooltip.md",
         "kind": "relative",
-        "line": 394
+        "line": 396
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Tooltip.agent.json",
         "kind": "relative",
-        "line": 394
+        "line": 396
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/Verification.md`",
         "target": "native/Verification.md",
         "kind": "relative",
-        "line": 395
+        "line": 397
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/Verification.agent.json",
         "kind": "relative",
-        "line": 395
+        "line": 397
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/ViewModelRegistry.md`",
         "target": "native/ViewModelRegistry.md",
         "kind": "relative",
-        "line": 396
+        "line": 398
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/ViewModelRegistry.agent.json",
         "kind": "relative",
-        "line": 396
+        "line": 398
       },
       {
         "block_id": "b000112",
         "label": "`docs/native/WindowsValidation.md`",
         "target": "native/WindowsValidation.md",
         "kind": "relative",
-        "line": 397
+        "line": 399
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "native/WindowsValidation.agent.json",
         "kind": "relative",
-        "line": 397
+        "line": 399
       },
       {
         "block_id": "b000112",
         "label": "`docs/overview.md`",
         "target": "overview.md",
         "kind": "relative",
-        "line": 398
+        "line": 400
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "overview.agent.json",
         "kind": "relative",
-        "line": 398
+        "line": 400
       },
       {
         "block_id": "b000112",
         "label": "`docs/performance-baseline-p0.md`",
         "target": "performance-baseline-p0.md",
         "kind": "relative",
-        "line": 399
+        "line": 401
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "performance-baseline-p0.agent.json",
         "kind": "relative",
-        "line": 399
+        "line": 401
       },
       {
         "block_id": "b000112",
         "label": "`docs/policies/debug.md`",
         "target": "policies/debug.md",
         "kind": "relative",
-        "line": 400
+        "line": 402
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "policies/debug.agent.json",
         "kind": "relative",
-        "line": 400
+        "line": 402
       },
       {
         "block_id": "b000112",
         "label": "`docs/policies/event.md`",
         "target": "policies/event.md",
         "kind": "relative",
-        "line": 401
+        "line": 403
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "policies/event.agent.json",
         "kind": "relative",
-        "line": 401
+        "line": 403
       },
       {
         "block_id": "b000112",
         "label": "`docs/policies/routing.md`",
         "target": "policies/routing.md",
         "kind": "relative",
-        "line": 402
+        "line": 404
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "policies/routing.agent.json",
         "kind": "relative",
-        "line": 402
+        "line": 404
       },
       {
         "block_id": "b000112",
         "label": "`docs/quality-automation-p4.md`",
         "target": "quality-automation-p4.md",
         "kind": "relative",
-        "line": 403
+        "line": 405
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "quality-automation-p4.agent.json",
         "kind": "relative",
-        "line": 403
+        "line": 405
       },
       {
         "block_id": "b000112",
         "label": "`docs/theme.md`",
         "target": "theme.md",
         "kind": "relative",
-        "line": 404
+        "line": 406
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "theme.agent.json",
         "kind": "relative",
-        "line": 404
+        "line": 406
       },
       {
         "block_id": "b000112",
         "label": "`example/AndroidHello/README.md`",
         "target": "../example/AndroidHello/README.md",
         "kind": "relative",
-        "line": 405
+        "line": 407
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/AndroidHello/README.agent.json",
         "kind": "relative",
-        "line": 405
+        "line": 407
       },
       {
         "block_id": "b000112",
         "label": "`example/EventListener/README.md`",
         "target": "../example/EventListener/README.md",
         "kind": "relative",
-        "line": 406
+        "line": 408
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/EventListener/README.agent.json",
         "kind": "relative",
-        "line": 406
+        "line": 408
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeAppSurfaces/AGENT.md`",
         "target": "../example/NativeAppSurfaces/AGENT.md",
         "kind": "relative",
-        "line": 407
+        "line": 409
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeAppSurfaces/AGENT.agent.json",
         "kind": "relative",
-        "line": 407
+        "line": 409
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeAppSurfaces/README.md`",
         "target": "../example/NativeAppSurfaces/README.md",
         "kind": "relative",
-        "line": 408
+        "line": 410
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeAppSurfaces/README.agent.json",
         "kind": "relative",
-        "line": 408
+        "line": 410
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeAppSurfaces/docs/Usage.md`",
         "target": "../example/NativeAppSurfaces/docs/Usage.md",
         "kind": "relative",
-        "line": 409
+        "line": 411
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeAppSurfaces/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 409
+        "line": 411
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCodeEditorGallery/AGENT.md`",
         "target": "../example/NativeCodeEditorGallery/AGENT.md",
         "kind": "relative",
-        "line": 410
+        "line": 412
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCodeEditorGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 410
+        "line": 412
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCodeEditorGallery/README.md`",
         "target": "../example/NativeCodeEditorGallery/README.md",
         "kind": "relative",
-        "line": 411
+        "line": 413
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCodeEditorGallery/README.agent.json",
         "kind": "relative",
-        "line": 411
+        "line": 413
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCodeEditorGallery/docs/Usage.md`",
         "target": "../example/NativeCodeEditorGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 412
+        "line": 414
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCodeEditorGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 412
+        "line": 414
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCreationWorkbench/AGENT.md`",
         "target": "../example/NativeCreationWorkbench/AGENT.md",
         "kind": "relative",
-        "line": 413
+        "line": 415
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCreationWorkbench/AGENT.agent.json",
         "kind": "relative",
-        "line": 413
+        "line": 415
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCreationWorkbench/README.md`",
         "target": "../example/NativeCreationWorkbench/README.md",
         "kind": "relative",
-        "line": 414
+        "line": 416
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCreationWorkbench/README.agent.json",
         "kind": "relative",
-        "line": 414
+        "line": 416
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCreationWorkbench/docs/Behavior.md`",
         "target": "../example/NativeCreationWorkbench/docs/Behavior.md",
         "kind": "relative",
-        "line": 415
+        "line": 417
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCreationWorkbench/docs/Behavior.agent.json",
         "kind": "relative",
-        "line": 415
+        "line": 417
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeCreationWorkbench/example/README.md`",
         "target": "../example/NativeCreationWorkbench/example/README.md",
         "kind": "relative",
-        "line": 416
+        "line": 418
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeCreationWorkbench/example/README.agent.json",
         "kind": "relative",
-        "line": 416
+        "line": 418
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMaterialGallery/AGENT.md`",
         "target": "../example/NativeMaterialGallery/AGENT.md",
         "kind": "relative",
-        "line": 417
+        "line": 419
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMaterialGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 417
+        "line": 419
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMaterialGallery/README.md`",
         "target": "../example/NativeMaterialGallery/README.md",
         "kind": "relative",
-        "line": 418
+        "line": 420
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMaterialGallery/README.agent.json",
         "kind": "relative",
-        "line": 418
+        "line": 420
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMaterialGallery/docs/Usage.md`",
         "target": "../example/NativeMaterialGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 419
+        "line": 421
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMaterialGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 419
+        "line": 421
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMediaGallery/AGENT.md`",
         "target": "../example/NativeMediaGallery/AGENT.md",
         "kind": "relative",
-        "line": 420
+        "line": 422
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMediaGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 420
+        "line": 422
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMediaGallery/README.md`",
         "target": "../example/NativeMediaGallery/README.md",
         "kind": "relative",
-        "line": 421
+        "line": 423
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMediaGallery/README.agent.json",
         "kind": "relative",
-        "line": 421
+        "line": 423
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeMediaGallery/docs/Usage.md`",
         "target": "../example/NativeMediaGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 422
+        "line": 424
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeMediaGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 422
+        "line": 424
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeNavigationGallery/AGENT.md`",
         "target": "../example/NativeNavigationGallery/AGENT.md",
         "kind": "relative",
-        "line": 423
+        "line": 425
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeNavigationGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 423
+        "line": 425
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeNavigationGallery/README.md`",
         "target": "../example/NativeNavigationGallery/README.md",
         "kind": "relative",
-        "line": 424
+        "line": 426
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeNavigationGallery/README.agent.json",
         "kind": "relative",
-        "line": 424
+        "line": 426
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeNavigationGallery/docs/Usage.md`",
         "target": "../example/NativeNavigationGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 425
+        "line": 427
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeNavigationGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 425
+        "line": 427
       },
       {
         "block_id": "b000112",
         "label": "`example/NativePageRouterGallery/AGENT.md`",
         "target": "../example/NativePageRouterGallery/AGENT.md",
         "kind": "relative",
-        "line": 426
+        "line": 428
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativePageRouterGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 426
+        "line": 428
       },
       {
         "block_id": "b000112",
         "label": "`example/NativePageRouterGallery/README.md`",
         "target": "../example/NativePageRouterGallery/README.md",
         "kind": "relative",
-        "line": 427
+        "line": 429
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativePageRouterGallery/README.agent.json",
         "kind": "relative",
-        "line": 427
+        "line": 429
       },
       {
         "block_id": "b000112",
         "label": "`example/NativePageRouterGallery/docs/Usage.md`",
         "target": "../example/NativePageRouterGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 428
+        "line": 430
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativePageRouterGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 428
+        "line": 430
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTextDocumentGallery/AGENT.md`",
         "target": "../example/NativeTextDocumentGallery/AGENT.md",
         "kind": "relative",
-        "line": 429
+        "line": 431
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTextDocumentGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 429
+        "line": 431
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTextDocumentGallery/README.md`",
         "target": "../example/NativeTextDocumentGallery/README.md",
         "kind": "relative",
-        "line": 430
+        "line": 432
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTextDocumentGallery/README.agent.json",
         "kind": "relative",
-        "line": 430
+        "line": 432
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTextDocumentGallery/docs/Usage.md`",
         "target": "../example/NativeTextDocumentGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 431
+        "line": 433
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTextDocumentGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 431
+        "line": 433
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTooltipGallery/AGENT.md`",
         "target": "../example/NativeTooltipGallery/AGENT.md",
         "kind": "relative",
-        "line": 432
+        "line": 434
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTooltipGallery/AGENT.agent.json",
         "kind": "relative",
-        "line": 432
+        "line": 434
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTooltipGallery/README.md`",
         "target": "../example/NativeTooltipGallery/README.md",
         "kind": "relative",
-        "line": 433
+        "line": 435
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTooltipGallery/README.agent.json",
         "kind": "relative",
-        "line": 433
+        "line": 435
       },
       {
         "block_id": "b000112",
         "label": "`example/NativeTooltipGallery/docs/Usage.md`",
         "target": "../example/NativeTooltipGallery/docs/Usage.md",
         "kind": "relative",
-        "line": 434
+        "line": 436
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/NativeTooltipGallery/docs/Usage.agent.json",
         "kind": "relative",
-        "line": 434
+        "line": 436
       },
       {
         "block_id": "b000112",
         "label": "`example/README.md`",
         "target": "../example/README.md",
         "kind": "relative",
-        "line": 435
+        "line": 437
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/README.agent.json",
         "kind": "relative",
-        "line": 435
+        "line": 437
       },
       {
         "block_id": "b000112",
         "label": "`example/TypingPractice/README.md`",
         "target": "../example/TypingPractice/README.md",
         "kind": "relative",
-        "line": 436
+        "line": 438
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/TypingPractice/README.agent.json",
         "kind": "relative",
-        "line": 436
+        "line": 438
       },
       {
         "block_id": "b000112",
         "label": "`example/VisualCatalog/README.md`",
         "target": "../example/VisualCatalog/README.md",
         "kind": "relative",
-        "line": 437
+        "line": 439
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/VisualCatalog/README.agent.json",
         "kind": "relative",
-        "line": 437
+        "line": 439
       },
       {
         "block_id": "b000112",
         "label": "`example/VisualCatalog/assets/cards/README.md`",
         "target": "../example/VisualCatalog/assets/cards/README.md",
         "kind": "relative",
-        "line": 438
+        "line": 440
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/VisualCatalog/assets/cards/README.agent.json",
         "kind": "relative",
-        "line": 438
+        "line": 440
       },
       {
         "block_id": "b000112",
         "label": "`example/iOSHello/README.md`",
         "target": "../example/iOSHello/README.md",
         "kind": "relative",
-        "line": 439
+        "line": 441
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/iOSHello/README.agent.json",
         "kind": "relative",
-        "line": 439
+        "line": 441
       },
       {
         "block_id": "b000112",
         "label": "`example/mvvm/README.md`",
         "target": "../example/mvvm/README.md",
         "kind": "relative",
-        "line": 440
+        "line": 442
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/example/mvvm/README.agent.json",
         "kind": "relative",
-        "line": 440
+        "line": 442
       },
       {
         "block_id": "b000112",
         "label": "`resources/images/card/README.md`",
         "target": "../resources/images/card/README.md",
         "kind": "relative",
-        "line": 441
+        "line": 443
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/resources/images/card/README.agent.json",
         "kind": "relative",
-        "line": 441
+        "line": 443
       },
       {
         "block_id": "b000112",
         "label": "`resources/images/colorpicker/README.md`",
         "target": "../resources/images/colorpicker/README.md",
         "kind": "relative",
-        "line": 442
+        "line": 444
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/resources/images/colorpicker/README.agent.json",
         "kind": "relative",
-        "line": 442
+        "line": 444
       },
       {
         "block_id": "b000112",
         "label": "`src/rust-cli/README.md`",
         "target": "../src/rust-cli/README.md",
         "kind": "relative",
-        "line": 443
+        "line": 445
       },
       {
         "block_id": "b000112",
         "label": "JSON",
         "target": "mirrors/src/rust-cli/README.agent.json",
         "kind": "relative",
-        "line": 443
+        "line": 445
       }
     ],
     "tables": [
@@ -5711,8 +5747,16 @@
             "[JSON](entrypoints/README.agent.json)"
           ],
           [
+            "[`docs/BuildLayout.md`](BuildLayout.md)",
+            "[JSON](BuildLayout.agent.json)"
+          ],
+          [
             "[`docs/Chnagelog.md`](Chnagelog.md)",
             "[JSON](Chnagelog.agent.json)"
+          ],
+          [
+            "[`docs/DynamicLinking.md`](DynamicLinking.md)",
+            "[JSON](DynamicLinking.agent.json)"
           ],
           [
             "[`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md)",

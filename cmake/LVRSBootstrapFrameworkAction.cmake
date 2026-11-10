@@ -245,12 +245,6 @@ if(NOT DEFINED LVRS_BOOTSTRAP_EMSCRIPTEN_TOOLCHAIN_FILE)
 endif()
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
-    string(TOUPPER "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" _lvrs_ios_shared_libs_upper)
-    if(NOT _lvrs_ios_shared_libs_upper MATCHES "^(0|OFF|NO|FALSE)$")
-        message(STATUS "LVRS framework bootstrap: forcing LVRS_BUILD_SHARED_LIBS=OFF for iOS.")
-        set(LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS "OFF")
-    endif()
-
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
         _lvrs_bootstrap_filter_apple_x86_architectures(
             "${LVRS_BOOTSTRAP_IOS_ARCHITECTURES}"
@@ -276,12 +270,6 @@ if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "ios")
 endif()
 
 if(LVRS_BOOTSTRAP_PLATFORM STREQUAL "wasm")
-    string(TOUPPER "${LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS}" _lvrs_wasm_shared_libs_upper)
-    if(NOT _lvrs_wasm_shared_libs_upper MATCHES "^(0|OFF|NO|FALSE)$")
-        message(STATUS "LVRS framework bootstrap: forcing LVRS_BUILD_SHARED_LIBS=OFF for WASM.")
-        set(LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS "OFF")
-    endif()
-
     if(LVRS_BOOTSTRAP_EMSDK_ROOT STREQUAL "")
         _lvrs_bootstrap_detect_emsdk_root(_lvrs_detected_emsdk_root)
         set(LVRS_BOOTSTRAP_EMSDK_ROOT "${_lvrs_detected_emsdk_root}")

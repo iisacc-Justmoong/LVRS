@@ -227,8 +227,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--readback-dir', type=Path, required=True)
     parser.add_argument('--captured-on', required=True)
+    parser.add_argument('--preserve-geometry', action='store_true',
+                        help='never replace unmatched artwork with a full SVG export')
+    parser.add_argument('--require-complete', action='store_true',
+                        help='refuse to change files if any icon is missing or unresolved')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
+    try:
+        import ii_file_provider as provider
+    except ModuleNotFoundError:
+        import sys
+        sys.path.insert(0, str(Path.home() / '.local/SDK/iiFileProvider/share/iiFileProvider/python'))
+        import ii_file_provider as provider
     manifest_path = root / 'docs/figma-iconset-manifest.json'
     manifest = json.loads(manifest_path.read_text())
     by_id = {icon['nodeId']: icon for icon in manifest['icons']}
@@ -300,14 +310,15 @@ def main():
             prepared = [item for item in prepared if item[0]['nodeId'] != bitmap['id']]
             unresolved = [item for item in unresolved if item != bitmap['id']]
             prepared.append((icon, path, original, updated, None,
-                             {'bitmapPngSha256': digest(png), 'vars': rows.get(bitmap['id'], {}).get('vars', [])}))
+                             {'bitmapPngSha256': digest(png), 'vars': rows.get(bitmap['id'], {}).get('vars', []),
+                              'bindings': rows.get(bitmap['id'], {}).get('bindings', [])}))
     # A few current vectors cannot be paired path-by-path. Their Figma SVG is
     # still authoritative; retain the established responsive viewport and skip
     # any effect or external reference requiring separate renderer handling.
     still_unresolved = []
     for node_id in unresolved:
         row, icon = rows[node_id], by_id[node_id]
-        if 'svg' not in row:
+        if args.preserve_geometry or 'svg' not in row:
             still_unresolved.append(node_id)
             continue
         path = root / 'resources/iconset' / icon['filename']
@@ -320,6 +331,9 @@ def main():
             continue
         prepared.append((icon, path, original, updated, export, {**row, 'fullVectorExport': True}))
     unresolved = still_unresolved
+    if args.require_complete and (unresolved or len(rows) != len(by_id)):
+        raise ValueError(f'Incomplete Figma readback: {len(rows)}/{len(by_id)}, '
+                         f'{len(unresolved)} unresolved')
     fixture_path = root / 'tests/fixtures/figma-contract.json'
     fixture = json.loads(fixture_path.read_text())
     changed_hashes = {'iconset/' + icon['filename']: (digest(original), digest(updated))
@@ -332,15 +346,20 @@ def main():
             if len(matches) != 1 or previous != matches[0][0]:
                 raise ValueError('Fixture hash did not match the previous icon: ' + asset)
             fixture['assets'][asset] = matches[0][1]
+    token_ids = {v['id'] for v in json.loads((root / 'resources/figma-color-tokens.json').read_text())['variables']}
     for icon, path, original, updated, export, row in prepared:
         if path.read_bytes() != original:
             raise ValueError('The icon changed during reconciliation: ' + icon['filename'])
         if updated != original:
-            path.write_bytes(updated)
+            provider.write_bytes(path, updated)
         icon['sha256'] = digest(updated)
         was_changed = icon.get('colorReadback', {}).get('changed', False)
         evidence = {'capturedOn': args.captured_on, 'variableIds': sorted(set(row.get('vars', []))),
                     'changed': was_changed or updated != original}
+        if 'bindings' in row:
+            evidence['tokenBindings'] = [binding for binding in row['bindings'] if binding[4] in token_ids]
+        if 'geometryEvidence' in row:
+            evidence['geometryEvidence'] = row['geometryEvidence']
         if export is not None:
             evidence['nativeExportSha256'] = digest(export)
             if row.get('fullVectorExport') or icon.get('colorReadback', {}).get('fullVectorExport'):
@@ -365,13 +384,10 @@ def main():
     manifest.pop('partialColorReadback', None)
     manifest['colorReadbackCoverage'] = {'capturedOn': args.captured_on, 'captured': len(rows),
         'verified': len(prepared), 'changed': sum(icon['colorReadback']['changed'] for icon, _, _, _, _, _ in prepared),
+        'changedThisReadback': len(changed_hashes),
         'unresolvedNodeIds': sorted(unresolved), 'notCaptured': len(by_id) - len(rows)}
-    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
-    fixture_path.write_text(json.dumps(fixture, ensure_ascii=False, indent=2) + '\n')
-    if bitmap_path.exists():
-        translate = next((row for row in json.loads(bitmap_path.read_text()) if row['id'] == '222:11373'), None)
-        if translate:
-            (root / 'tests/fixtures/translate-object-mask.png').write_bytes(base64.b64decode(translate['png'], validate=True))
+    provider.write_text(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+    provider.write_text(fixture_path, json.dumps(fixture, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(manifest['colorReadbackCoverage'], ensure_ascii=False))
 
 

@@ -495,6 +495,8 @@ void TextDocumentModel::insertText(const QString &value)
 
     cancelLoad();
     const QStringList insertLines = splitLines(value);
+    qint64 insertedCharacters = insertLines.size() - 1;
+    for (const QString &line : insertLines) insertedCharacters += line.size();
     const QString current = lineTextForRecord(m_lines.at(m_cursorLine));
     const QString before = current.left(m_cursorColumn);
     const QString after = current.mid(m_cursorColumn);
@@ -520,7 +522,7 @@ void TextDocumentModel::insertText(const QString &value)
     }
 
     setDirty(true);
-    updateCharacterCountFromLines();
+    setCharacterCount(m_characterCount + insertedCharacters);
     emit textChanged();
     emit cursorChanged();
 }
@@ -553,9 +555,9 @@ void TextDocumentModel::replaceRange(int start, int end, const QString &value)
     const QStringList insertedLines = splitLines(value);
 
     QVector<LineRecord> records;
-    records.reserve(m_lines.size() - (endLine - startLine) + insertedLines.size());
-    for (int i = 0; i < startLine; ++i)
-        records.append(m_lines.at(i));
+    records.reserve(insertedLines.size());
+    qint64 insertedCharacters = insertedLines.size() - 1;
+    for (const QString &line : insertedLines) insertedCharacters += line.size();
 
     if (insertedLines.size() == 1) {
         records.append(memoryLine(prefix + insertedLines.first() + suffix));
@@ -570,19 +572,29 @@ void TextDocumentModel::replaceRange(int start, int end, const QString &value)
         m_cursorColumn = insertedLines.last().size();
     }
 
-    for (int i = endLine + 1; i < m_lines.size(); ++i)
-        records.append(m_lines.at(i));
-    if (records.isEmpty())
-        records.append(memoryLine(QString()));
-
-    beginResetModel();
-    m_lines = records;
+    const int oldRows = endLine - startLine + 1;
+    const int newRows = records.size();
+    const int sharedRows = qMin(oldRows, newRows);
+    if (newRows > oldRows) m_lines.reserve(m_lines.size() + newRows - oldRows);
+    for (int i = 0; i < sharedRows; ++i) m_lines[startLine + i] = records.at(i);
+    emit dataChanged(index(startLine), index(startLine + sharedRows - 1),
+                     { TextRole, LengthRole, Qt::DisplayRole, Qt::EditRole });
+    if (newRows < oldRows) {
+        beginRemoveRows(QModelIndex(), startLine + newRows, endLine);
+        m_lines.remove(startLine + newRows, oldRows - newRows);
+        endRemoveRows();
+    } else if (newRows > oldRows) {
+        beginInsertRows(QModelIndex(), startLine + oldRows, startLine + newRows - 1);
+        for (int i = oldRows; i < newRows; ++i) m_lines.insert(startLine + i, records.at(i));
+        endInsertRows();
+    }
+    if (newRows != oldRows && startLine + newRows < m_lines.size())
+        emit dataChanged(index(startLine + newRows), index(m_lines.size() - 1), { LineIndexRole, LineNumberRole });
     clampCursor();
-    endResetModel();
-    updateCharacterCountFromLines();
+    setCharacterCount(m_characterCount + insertedCharacters - (boundedEnd - boundedStart));
     setDirty(true);
     emit textChanged();
-    emit lineCountChanged();
+    if (newRows != oldRows) emit lineCountChanged();
     emit lineStorageChanged();
     emit cursorChanged();
 }
@@ -590,13 +602,16 @@ void TextDocumentModel::replaceRange(int start, int end, const QString &value)
 bool TextDocumentModel::removePreviousCharacter()
 {
     cancelLoad();
+    int removedCharacters = 0;
     if (m_cursorColumn > 0) {
         QString line = lineTextForRecord(m_lines.at(m_cursorLine));
         const int removeStart = previousGraphemeBoundary(line, m_cursorColumn);
+        removedCharacters = m_cursorColumn - removeStart;
         line.remove(removeStart, m_cursorColumn - removeStart);
         replaceLineRecord(m_cursorLine, memoryLine(line));
         m_cursorColumn = removeStart;
     } else if (m_cursorLine > 0) {
+        removedCharacters = 1;
         const int previousLine = m_cursorLine - 1;
         const int previousLength = lineLength(previousLine);
         const QString merged = lineTextForRecord(m_lines.at(previousLine)) + lineTextForRecord(m_lines.at(m_cursorLine));
@@ -609,7 +624,7 @@ bool TextDocumentModel::removePreviousCharacter()
     }
 
     setDirty(true);
-    updateCharacterCountFromLines();
+    setCharacterCount(m_characterCount - removedCharacters);
     emit textChanged();
     emit cursorChanged();
     return true;
@@ -618,12 +633,15 @@ bool TextDocumentModel::removePreviousCharacter()
 bool TextDocumentModel::removeNextCharacter()
 {
     cancelLoad();
+    int removedCharacters = 0;
     if (m_cursorColumn < lineLength(m_cursorLine)) {
         QString line = lineTextForRecord(m_lines.at(m_cursorLine));
         const int removeEnd = nextGraphemeBoundary(line, m_cursorColumn);
+        removedCharacters = removeEnd - m_cursorColumn;
         line.remove(m_cursorColumn, removeEnd - m_cursorColumn);
         replaceLineRecord(m_cursorLine, memoryLine(line));
     } else if (m_cursorLine < lineCount() - 1) {
+        removedCharacters = 1;
         const QString merged = lineTextForRecord(m_lines.at(m_cursorLine)) + lineTextForRecord(m_lines.at(m_cursorLine + 1));
         replaceLineRecord(m_cursorLine, memoryLine(merged));
         removeLineRecord(m_cursorLine + 1);
@@ -632,7 +650,7 @@ bool TextDocumentModel::removeNextCharacter()
     }
 
     setDirty(true);
-    updateCharacterCountFromLines();
+    setCharacterCount(m_characterCount - removedCharacters);
     emit textChanged();
     emit cursorChanged();
     return true;
@@ -811,7 +829,7 @@ void TextDocumentModel::loadNextChunk()
 
     const qint64 chunkStartOffset = m_loadingFile->pos();
     const QByteArray chunk = m_loadingFile->read(m_loadChunkSize);
-    if (chunk.isEmpty() && m_loadingFile->error() != QFileDevice::NoError) {
+    if (chunk.isEmpty() && m_loadingFile->error() != iiFileProvider::FileDevice::NoError) {
         failLoad(m_loadingPath, m_loadingFile->errorString());
         return;
     }

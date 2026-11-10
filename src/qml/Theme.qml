@@ -94,21 +94,28 @@ QtObject {
 
     //Window
 
-    readonly property color window: "#141414"
-
-    // Purpose-named panel surfaces preserve the authored RGBA values.
-    readonly property color canvas: Qt.rgba(0.04892867058515549, 0.04892867058515549, 0.05038686841726303, 1)
-    readonly property color surfaceGhost: Qt.rgba(0.05507083609700203, 0.05517596751451492, 0.05570162087678909, 1)
-    readonly property color windowAlt: Qt.rgba(0.08394163101911545, 0.08394163101911545, 0.08631309866905212, 1)
-    readonly property color subSurface: Qt.rgba(0.09516431391239166, 0.09655113518238068, 0.09793794900178909, 1)
-    readonly property color surfaceSolid: Qt.rgba(0.11397916078567505, 0.11664287745952606, 0.11664287745952606, 1)
-    readonly property color surfaceAlt: Qt.rgba(0.12302529811859131, 0.12528030574321747, 0.12753531336784363, 1)
-    readonly property color surfaceInteractive: Qt.rgba(0.1411764770746231, 0.1411764770746231, 0.1411764770746231, 1)
-    readonly property color surfacePanel: Qt.rgba(0.13709451258182526, 0.14029954373836517, 0.14190204441547394, 1)
-    readonly property color surfaceControl: Qt.rgba(0.14820532500743866, 0.15256911516189575, 0.15256911516189575, 1)
-    readonly property color surfaceInput: Qt.rgba(0.1555851548910141, 0.15707255899906158, 0.15855994820594788, 1)
-    readonly property color surfaceInputHover: Qt.rgba(0.17537428438663483, 0.1819191724061966, 0.18410080671310425, 1)
-    readonly property color surfaceRaised: Qt.rgba(0.19355684518814087, 0.1978072077035904, 0.19993239641189575, 1)
+    // BEGIN FIGMA BACKGROUND TOKENS
+    // Generated from resources/figma-color-tokens.json.
+    readonly property color canvas: Qt.rgba(0.06189476698637009, 0.06189476698637009, 0.06373938918113708, 1)
+    readonly property color surfaceGhost: Qt.rgba(0.0696646124124527, 0.06979759782552719, 0.07046254724264145, 1)
+    readonly property color windowAlt: Qt.rgba(0.1061861664056778, 0.1061861664056778, 0.1091860681772232, 1)
+    readonly property color subSurface: Qt.rgba(0.12038286030292511, 0.12213718146085739, 0.12389150261878967, 1)
+    readonly property color surfaceSolid: Qt.rgba(0.14418363571166992, 0.1475532352924347, 0.1475532352924347, 1)
+    readonly property color surfaceAlt: Qt.rgba(0.15562701225280762, 0.15847958624362946, 0.1613321751356125, 1)
+    readonly property color surfaceInteractive: Qt.rgba(0.17858824133872986, 0.17858824133872986, 0.17858824133872986, 1)
+    readonly property color surfacePanel: Qt.rgba(0.17342455685138702, 0.17747892439365387, 0.1795060932636261, 1)
+    readonly property color surfaceControl: Qt.rgba(0.18747973442077637, 0.192999929189682, 0.192999929189682, 1)
+    readonly property color surfaceInput: Qt.rgba(0.19681522250175476, 0.1986967921257019, 0.20057833194732666, 1)
+    readonly property color surfaceInputHover: Qt.rgba(0.2218484729528427, 0.23012775182724, 0.23288752138614655, 1)
+    readonly property color surfaceRaised: Qt.rgba(0.24484941363334656, 0.25022611021995544, 0.2529144883155823, 1)
+    readonly property color window: Qt.rgba(0.09921568632125854, 0.09921568632125854, 0.09921568632125854, 1)
+    readonly property color alertGlassTint: Qt.rgba(0.1438627392053604, 0.15378431975841522, 0.16370590031147003, 0.7200000286102295)
+    readonly property color materialDenseFill: Qt.rgba(0.09921568632125854, 0.09921568632125854, 0.09921568632125854, 0.75)
+    readonly property color materialGlassFill: Qt.rgba(0.09921568632125854, 0.09921568632125854, 0.09921568632125854, 0.25)
+    readonly property color materialBackdropBase: Qt.rgba(0.05456862971186638, 0.08929412066936493, 0.15874511003494263, 1)
+    readonly property color alertCanvas: Qt.rgba(0.0694509819149971, 0.0744117721915245, 0.07937255501747131, 1)
+    readonly property color alertSurface: Qt.rgba(0.1438627392053604, 0.15378431975841522, 0.16370590031147003, 1)
+    // END FIGMA BACKGROUND TOKENS
 
     // Compatibility names remain available to existing consumers.
     readonly property color panelBackground01: canvas
@@ -180,7 +187,7 @@ QtObject {
     readonly property color primaryPressed: usingDefaultPrimary ? accentRoleColor("Blue", "Pressed") : Qt.darker(primary, 1.2)
     readonly property color accentMuted: usingDefaultPrimary ? accentBlueMuted
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.25))
-    readonly property color accentDetail: usingDefaultPrimary ? accentBlue : primary
+    readonly property color accentDetail: primaryHover
     readonly property color success: accentGreen
     readonly property color warning: accentYellow
     readonly property color danger: accentRed
@@ -195,8 +202,8 @@ QtObject {
     readonly property color shadowStrong: "#40000000"
     // Standard Material/Window and Material/Panel, Figma 944:31 and 944:28.
     // Primary radial opacity is halved from the original 80% / 22% design.
-    readonly property color materialTint: "#141414"
-    readonly property color materialWindowFill: "#0B0B0B"
+    readonly property color materialTint: Qt.rgba(materialDenseFill.r, materialDenseFill.g, materialDenseFill.b, 1)
+    readonly property color materialWindowFill: materialTint
     readonly property real materialWindowOpacity: 0.50
     // ApplicationWindow: an opaque 98% window / 2% app-accent mix with fine grain.
     readonly property color applicationWindowFill: window
@@ -218,16 +225,15 @@ QtObject {
     readonly property color materialDenseEdge: Qt.rgba(1, 1, 1, 0.12)
     readonly property color materialGlassEdge: Qt.rgba(1, 1, 1, 0.22)
     // Alert / Material tokens from Figma 106:283. Typography stays on Title/Body.
-    readonly property color alertGlassTint: Qt.rgba(29 / 255, 31 / 255, 33 / 255, 0.72)
     readonly property color alertGlassEdge: Qt.rgba(1, 1, 1, 0.2)
     readonly property color alertTitleColor: "#F4F5F7"
     readonly property color alertBodyColor: "#D6D9DF"
     readonly property color alertActionPrimary: primary
     readonly property color alertActionBorder: "#596168"
     readonly property color alertDivider: "#363B3F"
-    readonly property color alertIconSurface: usingDefaultPrimary ? Qt.rgba(0.13158102384735557, 0.20018439999748677, 0.27858823529411764, 1)
+    readonly property color alertIconSurface: usingDefaultPrimary ? accentRoleColor("Blue", "Subtle")
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.16))
-    readonly property color alertIconBorder: usingDefaultPrimary ? Qt.rgba(0.1195867154212559, 0.27394431175905115, 0.45035294117647057, 1)
+    readonly property color alertIconBorder: usingDefaultPrimary ? accentRoleColor("Blue", "Outline")
         : Qt.tint(surfaceInteractive, Qt.rgba(primary.r, primary.g, primary.b, primary.a * 0.36))
     // Material/TextField semantic fills, Figma 114:179.
     readonly property color inputFieldGlassTint: Qt.rgba(surfaceInput.r, surfaceInput.g,
@@ -249,66 +255,217 @@ QtObject {
     readonly property color accentPaletteGreen: accentGreen
     readonly property color accentPaletteGray: "#8C8C8C"
 
-    // Authored Figma swatches 1477:30..40; retain their original RGBA precision.
-    readonly property color accentOrange: Qt.rgba(1, 0.47672274708747864, 0.15144230425357819, 1)
-    readonly property color accentBrown: Qt.rgba(0.2616060674190521, 0.13824503123760223, 0.09279626607894897, 1)
-    readonly property color accentCyan: Qt.rgba(0.12926307320594788, 0.8258525729179382, 1, 1)
-    readonly property color accentTeal: Qt.rgba(0, 0.7790151238441467, 0.8655723929405212, 1)
+    // Authored Figma swatches 1477:30..40, resolved through the role tokens.
+    readonly property color accentOrange: accentRoleColor("Orange", "Default")
+    readonly property color accentBrown: accentRoleColor("Brown", "Default")
+    readonly property color accentCyan: accentRoleColor("Cyan", "Default")
+    readonly property color accentTeal: accentRoleColor("Teal", "Default")
 
     // Canonical accents and retained artwork-specific color names.
     readonly property color accentTransparent: "transparent" // none
     readonly property color accentWhite: "#FFFFFF"
     readonly property color accentGrayLight: "#CED0D6"
-    // Figma Accent/<color>/<role> values. The shared formulas reproduce the
-    // authored states while retaining the two explicitly authored Text colors.
+    // BEGIN FIGMA ACCENT TOKENS
+    // Generated from resources/figma-color-tokens.json; do not derive states from surfaces.
+    readonly property var figmaAccentRoles: ({
+        "blue": {
+            "default": [0.1557759940624237, 0.5030806064605713, 0.8999999761581421, 1],
+            "hover": [0.13908571004867554, 0.449179083108902, 0.8035714030265808, 1],
+            "pressed": [0.1298133283853531, 0.4192337989807129, 0.75, 1],
+            "selected": [0.1342381089925766, 0.2210642546415329, 0.3202941119670868, 1],
+            "disabled": [0.1557759940624237, 0.5030806064605713, 0.8999999761581421, 0.30000001192092896],
+            "subtle": [0.1316535770893097, 0.18722230195999146, 0.25072941184043884, 1],
+            "outline": [0.13739700615406036, 0.2624266743659973, 0.40531763434410095, 1],
+            "overlay": [0.1557759940624237, 0.5030806064605713, 0.8999999761581421, 0.250980406999588],
+            "text": [0.3758823573589325, 0.6299999952316284, 0.8999999761581421, 1],
+        },
+        "red": {
+            "default": [0.8999999761581421, 0.31362923979759216, 0.31362923979759216, 1],
+            "hover": [0.8035714030265808, 0.2800261080265045, 0.2800261080265045, 1],
+            "pressed": [0.75, 0.26135769486427307, 0.26135769486427307, 1],
+            "selected": [0.3202941119670868, 0.1737014353275299, 0.1737014353275299, 1],
+            "disabled": [0.8999999761581421, 0.31362923979759216, 0.31362923979759216, 0.30000001192092896],
+            "subtle": [0.25072941184043884, 0.15691010653972626, 0.15691010653972626, 1],
+            "outline": [0.40531763434410095, 0.19422417879104614, 0.19422417879104614, 1],
+            "overlay": [0.8999999761581421, 0.31362923979759216, 0.31362923979759216, 0.250980406999588],
+            "text": [0.8999999761581421, 0.4895404875278473, 0.4895404875278473, 1],
+        },
+        "green": {
+            "default": [0.0815294086933136, 0.8152941465377808, 0.18000000715255737, 1],
+            "hover": [0.0727941170334816, 0.7279411554336548, 0.1607142835855484, 1],
+            "pressed": [0.06794117391109467, 0.679411768913269, 0.15000000596046448, 1],
+            "selected": [0.11567647755146027, 0.29911765456199646, 0.1402941197156906, 1],
+            "disabled": [0.0815294086933136, 0.8152941465377808, 0.18000000715255737, 0.30000001192092896],
+            "subtle": [0.11977411806583405, 0.23717647790908813, 0.13552941381931305, 1],
+            "outline": [0.11066824197769165, 0.37482354044914246, 0.14611764252185822, 1],
+            "overlay": [0.0815294086933136, 0.8152941465377808, 0.18000000715255737, 0.250980406999588],
+            "text": [0.32707059383392334, 0.840705931186676, 0.3959999978542328, 1],
+        },
+        "yellow": {
+            "default": [0.8999999761581421, 0.7625914812088013, 0.21295729279518127, 1],
+            "hover": [0.8035714030265808, 0.6808851957321167, 0.19014044106006622, 1],
+            "pressed": [0.75, 0.6354928612709045, 0.17746439576148987, 1],
+            "selected": [0.3202941119670868, 0.2859419882297516, 0.14853344857692719, 1],
+            "disabled": [0.8999999761581421, 0.7625914812088013, 0.21295729279518127, 0.30000001192092896],
+            "subtle": [0.25072941184043884, 0.2287440448999405, 0.14080259203910828, 1],
+            "outline": [0.40531763434410095, 0.35585054755210876, 0.15798227488994598, 1],
+            "overlay": [0.8999999761581421, 0.7625914812088013, 0.21295729279518127, 0.250980406999588],
+            "text": [0.8999999761581421, 0.8038139939308167, 0.4190700948238373, 1],
+        },
+        "purple": {
+            "default": [0.5172802805900574, 0.3259204030036926, 0.8999999761581421, 1],
+            "hover": [0.461857408285141, 0.2910003662109375, 0.8035714030265808, 1],
+            "pressed": [0.4310669004917145, 0.2716003358364105, 0.75, 1],
+            "selected": [0.2246142029762268, 0.17677423357963562, 0.3202941119670868, 1],
+            "disabled": [0.5172802805900574, 0.3259204030036926, 0.8999999761581421, 0.30000001192092896],
+            "subtle": [0.18949425220489502, 0.1588766872882843, 0.25072941184043884, 1],
+            "outline": [0.26753854751586914, 0.19864900410175323, 0.40531763434410095, 1],
+            "overlay": [0.5172802805900574, 0.3259204030036926, 0.8999999761581421, 0.250980406999588],
+            "text": [0.6320961713790894, 0.498144268989563, 0.8999999761581421, 1],
+        },
+        "rose": {
+            "default": [0.8779597282409668, 0.30369314551353455, 0.4472598135471344, 1],
+            "hover": [0.7838926315307617, 0.27115461230278015, 0.39933910965919495, 1],
+            "pressed": [0.7316331267356873, 0.2530776262283325, 0.37271648645401, 1],
+            "selected": [0.31478404998779297, 0.1712174117565155, 0.20710907876491547, 1],
+            "disabled": [0.8779597282409668, 0.30369314551353455, 0.4472598135471344, 0.30000001192092896],
+            "subtle": [0.24720297753810883, 0.15532033145427704, 0.17829099297523499, 1],
+            "outline": [0.3973831534385681, 0.1906471848487854, 0.24233117699623108, 1],
+            "overlay": [0.8779597282409668, 0.30369314551353455, 0.4472598135471344, 0.250980406999588],
+            "text": [0.8845718502998352, 0.48258522152900696, 0.583081841468811, 1],
+        },
+        "orange": {
+            "default": [0.8999999761581421, 0.4761454164981842, 0.2126682698726654, 1],
+            "hover": [0.8035714030265808, 0.42512986063957214, 0.18988238275051117, 1],
+            "pressed": [0.75, 0.3967878520488739, 0.1772235631942749, 1],
+            "selected": [0.3202941119670868, 0.21433047950267792, 0.14846119284629822, 1],
+            "disabled": [0.8999999761581421, 0.4761454164981842, 0.2126682698726654, 0.30000001192092896],
+            "subtle": [0.25072941184043884, 0.1829126924276352, 0.14075633883476257, 1],
+            "outline": [0.40531763434410095, 0.25273001194000244, 0.15787822008132935, 1],
+            "overlay": [0.8999999761581421, 0.4761454164981842, 0.2126682698726654, 0.250980406999588],
+            "text": [0.8999999761581421, 0.6033017635345459, 0.4188677966594696, 1],
+        },
+        "brown": {
+            "default": [0.23544545471668243, 0.1355230212211609, 0.09870952367782593, 1],
+            "hover": [0.21021915972232819, 0.121002696454525, 0.08813349902629852, 1],
+            "pressed": [0.1962045580148697, 0.11293584853410721, 0.08225793391466141, 1],
+            "selected": [0.15415547788143158, 0.12917488813400269, 0.11997150629758835, 1],
+            "disabled": [0.23544545471668243, 0.1355230212211609, 0.09870952367782593, 0.30000001192092896],
+            "subtle": [0.1444006860256195, 0.1284130960702896, 0.12252293527126312, 1],
+            "outline": [0.16607801616191864, 0.13010594248771667, 0.11685307323932648, 1],
+            "overlay": [0.23544545471668243, 0.1355230212211609, 0.09870952367782593, 0.250980406999588],
+            "text": [0.5358718037605286, 0.4811214208602905, 0.4609502851963043, 1],
+        },
+        "cyan": {
+            "default": [0.1947030872106552, 0.758940577507019, 0.8999999761581421, 1],
+            "hover": [0.17384204268455505, 0.6776254773139954, 0.8035714030265808, 1],
+            "pressed": [0.16225257515907288, 0.632450520992279, 0.75, 1],
+            "selected": [0.14396989345550537, 0.28502926230430603, 0.3202941119670868, 1],
+            "disabled": [0.1947030872106552, 0.758940577507019, 0.8999999761581421, 0.30000001192092896],
+            "subtle": [0.13788191974163055, 0.22815990447998047, 0.25072941184043884, 1],
+            "outline": [0.1514107584953308, 0.3545362651348114, 0.40531763434410095, 1],
+            "overlay": [0.1947030872106552, 0.758940577507019, 0.8999999761581421, 0.250980406999588],
+            "text": [0.4062921702861786, 0.8012584447860718, 0.8999999761581421, 1],
+        },
+        "teal": {
+            "default": [0.07790151238441467, 0.7089037895202637, 0.7790151834487915, 1],
+            "hover": [0.06955492496490479, 0.6329497694969177, 0.6955492496490479, 1],
+            "pressed": [0.06491792947053909, 0.5907531380653381, 0.6491792798042297, 1],
+            "selected": [0.11476950347423553, 0.2725200653076172, 0.29004791378974915, 1],
+            "disabled": [0.07790151238441467, 0.7089037895202637, 0.7790151834487915, 0.30000001192092896],
+            "subtle": [0.1191936582326889, 0.2201540172100067, 0.23137183487415314, 1],
+            "outline": [0.10936219245195389, 0.33652299642562866, 0.3617630898952484, 1],
+            "overlay": [0.07790151238441467, 0.7089037895202637, 0.7790151834487915, 0.250980406999588],
+            "text": [0.32453107833862305, 0.7662326097488403, 0.8153105974197388, 1],
+        },
+    })
+    readonly property var figmaIconAccentRoles: ({
+        "blue": {
+            "pressed": [0.11683199554681778, 0.3773104250431061, 0.675000011920929, 1],
+            "selected": [0.12081430107355118, 0.19895783066749573, 0.2882646918296814, 1],
+            "subtle": [0.11848821491003036, 0.16850008070468903, 0.22565646469593048, 1],
+        },
+        "red": {
+            "pressed": [0.675000011920929, 0.23522193729877472, 0.23522193729877472, 1],
+            "selected": [0.2882646918296814, 0.15633128583431244, 0.15633128583431244, 1],
+            "disabled": [0.8100000023841858, 0.2822663187980652, 0.2822663187980652, 0.30000001192092896],
+            "subtle": [0.22565646469593048, 0.1412190943956375, 0.1412190943956375, 1],
+            "text": [0.8100000023841858, 0.4405864179134369, 0.4405864179134369, 1],
+        },
+        "green": {
+            "pressed": [0.0611470565199852, 0.6114705801010132, 0.13500000536441803, 1],
+            "selected": [0.10410883277654648, 0.26920586824417114, 0.12626470625400543, 1],
+            "subtle": [0.10779670625925064, 0.2134588360786438, 0.12197647243738174, 1],
+            "outline": [0.09960141777992249, 0.33734118938446045, 0.13150587677955627, 1],
+        },
+        "yellow": {
+            "pressed": [0.675000011920929, 0.5719435811042786, 0.15971796214580536, 1],
+            "selected": [0.2882646918296814, 0.2573477625846863, 0.13368010520935059, 1],
+            "subtle": [0.22565646469593048, 0.2058696299791336, 0.1267223209142685, 1],
+            "text": [0.8100000023841858, 0.7234326004981995, 0.3771630823612213, 1],
+        },
+        "purple": {
+            "pressed": [0.3879602253437042, 0.24444030225276947, 0.675000011920929, 1],
+            "selected": [0.2021527737379074, 0.15909680724143982, 0.2882646918296814, 1],
+            "subtle": [0.17054483294487, 0.14298900961875916, 0.22565646469593048, 1],
+            "text": [0.5688865780830383, 0.4483298361301422, 0.8100000023841858, 1],
+        },
+        "rose": {
+            "pressed": [0.6584697961807251, 0.2277698665857315, 0.335444837808609, 1],
+            "selected": [0.28330564498901367, 0.15409566462039948, 0.18639816343784332, 1],
+            "subtle": [0.22248268127441406, 0.13978829979896545, 0.160461887717247, 1],
+        },
+        "orange": {
+            "pressed": [0.675000011920929, 0.35710906982421875, 0.15950120985507965, 1],
+            "selected": [0.2882646918296814, 0.19289742410182953, 0.13361506164073944, 1],
+            "subtle": [0.22565646469593048, 0.16462141275405884, 0.12668070197105408, 1],
+            "text": [0.8100000023841858, 0.5429716110229492, 0.3769810199737549, 1],
+        },
+        "brown": {
+        },
+        "cyan": {
+            "pressed": [0.1460273116827011, 0.5692054629325867, 0.675000011920929, 1],
+        },
+        "teal": {
+            "pressed": [0.058426134288311005, 0.5316778421401978, 0.5842613577842712, 1],
+        },
+    })
     function accentRoleColor(colorName, roleName) {
-        const name = String(colorName || "").toLowerCase()
-        const role = String(roleName || "Default").toLowerCase()
-        const palette = { blue: accentBlue, red: accentRed, green: accentGreen,
-            yellow: accentYellow, purple: accentPurple, rose: accentRose,
-            orange: accentOrange, brown: accentBrown, cyan: accentCyan, teal: accentTeal }
-        const color = palette[name]
-        if (color === undefined)
-            return undefined
-        if (role === "default") return color
-        if (role === "hover") return Qt.rgba(color.r / 1.12, color.g / 1.12, color.b / 1.12, color.a)
-        if (role === "pressed") return Qt.rgba(color.r / 1.2, color.g / 1.2, color.b / 1.2, color.a)
-        if (role === "disabled") return Qt.rgba(color.r, color.g, color.b, color.a * 0.3)
-        if (role === "overlay") return Qt.rgba(color.r, color.g, color.b, color.a * (64 / 255))
-        if (role === "text") {
-            if (name === "blue") return Qt.rgba(0.3529411852359772, 0.6666666865348816, 1, color.a)
-            if (name === "brown") return Qt.rgba(0.595413088798523, 0.5278200507164001, 0.5029174089431763, color.a)
-            const white = 0.3
-            return Qt.rgba(color.r * (1 - white) + white, color.g * (1 - white) + white,
-                           color.b * (1 - white) + white, color.a)
-        }
-        const amount = role === "selected" ? 0.25 : role === "subtle" ? 0.16
-            : role === "outline" ? 0.36 : -1
-        if (amount < 0) return undefined
-        return Qt.rgba(surfaceInteractive.r * (1 - amount) + color.r * amount,
-                       surfaceInteractive.g * (1 - amount) + color.g * amount,
-                       surfaceInteractive.b * (1 - amount) + color.b * amount, color.a)
+        const palette = figmaAccentRoles[String(colorName || "").toLowerCase()]
+        const channels = palette === undefined ? undefined : palette[String(roleName || "Default").toLowerCase()]
+        return channels === undefined ? undefined : Qt.rgba(channels[0], channels[1], channels[2], channels[3])
     }
-    readonly property color accentBlue: Qt.rgba(0.08120492845773697, 0.5099760293960571, 1, 1)
-    readonly property color accentRed: Qt.rgba(1, 0.2760854959487915, 0.2760854959487915, 1)
+    function iconAccentRoleColor(colorName, sourceRole) {
+        const role = String(sourceRole || "Default").toLowerCase()
+        if (role === "default") return accentRoleColor(colorName, "Hover")
+        if (role === "hover") return accentRoleColor(colorName, "Pressed")
+        const palette = figmaIconAccentRoles[String(colorName || "").toLowerCase()]
+        const channels = palette === undefined ? undefined : palette[role]
+        if (channels !== undefined) return Qt.rgba(channels[0], channels[1], channels[2], channels[3])
+        const c = accentRoleColor(colorName, sourceRole)
+        return c === undefined ? undefined : Qt.rgba(c.r * 0.9, c.g * 0.9, c.b * 0.9, c.a)
+    }
+    // END FIGMA ACCENT TOKENS
+    readonly property color accentBlue: accentRoleColor("Blue", "Default")
+    readonly property color accentRed: accentRoleColor("Red", "Default")
     readonly property color accentSlate: "#43454A"
-    readonly property color accentGreen: Qt.rgba(0, 0.9058823585510254, 0.12156862765550613, 1)
-    readonly property color accentBlueMuted: Qt.rgba(0.12618358505561073, 0.23337636029019077, 0.3558823529411765, 1)
+    readonly property color accentGreen: accentRoleColor("Green", "Default")
+    readonly property color accentBlueMuted: accentRoleColor("Blue", "Selected")
     readonly property color accentOrangeMuted: accentOrange
     readonly property color accentGreenMuted: "#253627"
-    readonly property color accentYellow: Qt.rgba(1, 0.8303598165512085, 0.15179912745952606, 1)
+    readonly property color accentYellow: accentRoleColor("Yellow", "Default")
     readonly property color accentRedBrownDark: "#402929"
     readonly property color accentGray: "#868A91"
     readonly property color accentYellowMuted: "#D6AE58"
     readonly property color accentBrownMuted: accentBrown
-    readonly property color accentPurple: Qt.rgba(0.5275065302848816, 0.291259765625, 1, 1)
+    readonly property color accentPurple: accentRoleColor("Purple", "Default")
     readonly property color accentBrownDarker: "#3D3223"
     readonly property color accentCharcoal: "#1E1F22"
     readonly property color accentGrayPale: "#B4B8BF"
     readonly property color accentBlueBright: "#3574F0"
     readonly property color accentPurpleDarker: "#2F2936"
     readonly property color accentGrayBright: "#F0F1F2"
-    readonly property color accentRose: Qt.rgba(0.975510835647583, 0.26653972268104553, 0.4437825083732605, 1)
+    readonly property color accentRose: accentRoleColor("Rose", "Default")
     readonly property color accentRoseDarker: "#5E3838"
     readonly property color accentGrayMuted: "#5A5D63"
     readonly property color accentGreenBright: "#55A76A"
@@ -324,21 +481,21 @@ QtObject {
     readonly property var accentPaletteTokens: [
         { name: "accentTransparent", color: "transparent" },
         { name: "accentGrayLight", color: "#CED0D6" },
-        { name: "accentBlue", color: "#1582FF" },
+        { name: "accentBlue", color: "#2880E5" },
         { name: "accentSlate", color: "#43454A" },
-        { name: "accentGreen", color: "#00E71F" },
-        { name: "accentRed", color: "#FF4646" },
+        { name: "accentGreen", color: "#15D02E" },
+        { name: "accentRed", color: "#E55050" },
         { name: "accentWhite", color: "#FFFFFF" },
-        { name: "accentOrangeMuted", color: "#FF7A27" },
-        { name: "accentBlueMuted", color: "#203C5B" },
+        { name: "accentOrangeMuted", color: "#E57936" },
+        { name: "accentBlueMuted", color: "#223852" },
         { name: "accentGreenMuted", color: "#253627" },
-        { name: "accentBrownMuted", color: "#432318" },
+        { name: "accentBrownMuted", color: "#3C2319" },
         { name: "accentLightYellowVivid", color: "#F4EC4F" },
         { name: "accentRedBrownDark", color: "#402929" },
-        { name: "accentPurple", color: "#874AFF" },
+        { name: "accentPurple", color: "#8453E5" },
         { name: "accentYellowMuted", color: "#D6AE58" },
         { name: "accentPurpleDarker", color: "#2F2936" },
-        { name: "accentYellow", color: "#FFD427" },
+        { name: "accentYellow", color: "#E5C236" },
         { name: "accentDeepestBlack", color: "#000000" },
         { name: "accentLighterIndigo", color: "#B589EC" },
         { name: "accentBrownDarker", color: "#3D3223" },
@@ -357,7 +514,7 @@ QtObject {
         { name: "accentSlateDarker", color: "#6C707E" },
         { name: "accentPaleBlueVivid", color: "#999DF7" },
         { name: "accentLightRose", color: "#DD507B" },
-        { name: "accentDimTeal", color: "#00C7DD" },
+        { name: "accentDimTeal", color: "#14B5C7" },
         { name: "accentLightCyanVividBirch", color: "#29B6F6" },
         { name: "accentBaseSkyMuted", color: "#5D87A1" },
         { name: "accentDimOrange", color: "#9C5121" },
@@ -367,7 +524,7 @@ QtObject {
         { name: "accentDarkerIndigo", color: "#2C2255" },
         { name: "accentBaseSky", color: "#3592C4" },
         { name: "accentDarkerRoseMuted", color: "#392A31" },
-        { name: "accentLightCyan", color: "#21D3FF" },
+        { name: "accentLightCyan", color: "#32C2E5" },
         { name: "accentLightYellowVividBirch", color: "#FDEE21" },
         { name: "accentBaseRedVivid", color: "#FF0D2A" },
         { name: "accentLightAmberVivid", color: "#FFA72A" },
@@ -393,7 +550,7 @@ QtObject {
         { name: "accentBaseAmber", color: "#BA9752" },
         { name: "accentBaseRedBirch", color: "#C62E53" },
         { name: "accentBrightPearl", color: "#E4E6E6" },
-        { name: "accentRose", color: "#F94471" },
+        { name: "accentRose", color: "#E04D72" },
         { name: "accentBaseOrangeVivid", color: "#E97826" },
         { name: "accentBrightBlueMuted", color: "#EBECF0" },
         { name: "accentGrayBright", color: "#F0F1F2" },
@@ -450,7 +607,7 @@ QtObject {
         { name: "accentLightOrangeVividEmber", color: "#FE9133" },
         { name: "accentLightOrangeVividFlint", color: "#FF9235" },
         { name: "accentDeepestGreenVivid", color: "#004300" },
-        { name: "accentBaseSkyVivid", color: "#1582FF" },
+        { name: "accentBaseSkyVivid", color: "#2880E5" },
         { name: "accentDimCyanVivid", color: "#0097CB" },
         { name: "accentDimCyanVividBirch", color: "#00ADD7" },
         { name: "accentBaseCyanVivid", color: "#00AEFF" },

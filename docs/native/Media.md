@@ -9,7 +9,7 @@ Card는 File·FilePreview·Folder·Project·Device·Model·Member·Link를 제�
 140×160·210×240·360×280, FilePreview는 480×320, 정보 카드는 폭 256/최소 높이 280을
 기본값으로 한다. 정보 영역은 행·진행률에 따라 늘어난다. 소스의 기본 글꼴·행 높이,
 테두리 1/선택 2, 일반 inset 18+border와 Small File 12+border, 사진 자르기·그라데이션·
-선택 표시를 적용한다. 자체 사진은 둥근 마스크를 갖는다. preview-only는 선택 표시와
+선택 표시를 적용한다. Folder·Project·Device·Model·Member·Link는 모든 상태에서 외곽 배경이 투명하고 반경이 0이며 테두리는 유지한다. File의 사진은 둥근 마스크를 갖는다. preview-only는 선택 표시와
 탭·포인터 포커스가 없다. display_state는 표시만 덮어쓰며 원본 selected는 바꾸지 않는다.
 
 파일명·설명·상세·메타데이터·상태·요약·각주·도메인·프리뷰 제목, label/value/icon 행,

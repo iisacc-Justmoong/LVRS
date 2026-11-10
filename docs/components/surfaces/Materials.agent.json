@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/components/surfaces/Materials.md",
-    "sha256": "628e858c2ff9b3f911d1b8f1af6af9928fbebc61c525e69f997da5024e383f57",
-    "bytes": 12597,
-    "line_count": 118,
+    "sha256": "b7aedcff8e321e25de90590c5f27bd6563710b1e9d6b8edeaad046b18d3c3491",
+    "bytes": 12850,
+    "line_count": 120,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -87,7 +87,7 @@
       "kind": "paragraph",
       "start_line": 9,
       "end_line": 9,
-      "raw": "`ApplicationWindow`의 기본 배경은 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.\n"
+      "raw": "`ApplicationWindow`의 기본 배경은 `Theme.window` (`#191919`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.\n"
     },
     {
       "id": "b000010",
@@ -101,7 +101,7 @@
       "kind": "table",
       "start_line": 11,
       "end_line": 17,
-      "raw": "| 재질 | 채우기 | 배경 흐림 | 기본 사용 |\n| --- | --- | --- | --- |\n| ApplicationWindow | `Theme.window` (`#141414`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |\n| 독립 WindowMaterial | #0B0B0B 50%와 강조색 방사형 그레디언트 | 64 논리 px | 명시적인 창 재질 |\n| ContextMenu / 메뉴 | 창 채색 12%와 옅은 강조색 | 64 논리 px | 컴팩트 및 일반 메뉴 |\n| Dense 75 MaterialSurface / PanelMaterial | #141414 75%와 강조색 방사형 그레디언트 | 64 논리 px | 조밀한 패널 |\n| Glass 25 | #141414 25%와 강조색 방사형 그레디언트 | 16 논리 px | 툴팁, 팝오버, 기본 패널 |\n",
+      "raw": "| 재질 | 채우기 | 배경 흐림 | 기본 사용 |\n| --- | --- | --- | --- |\n| ApplicationWindow | `Theme.window` (`#191919`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |\n| 독립 WindowMaterial | Figma Dense Fill RGB `#191919` 50%와 강조색 방사형 그레디언트 | 64 논리 px | 명시적인 창 재질 |\n| ContextMenu / 메뉴 | 창 채색 12%와 옅은 강조색 | 64 논리 px | 컴팩트 및 일반 메뉴 |\n| Dense 75 MaterialSurface / PanelMaterial | #191919 75%와 강조색 방사형 그레디언트 | 64 논리 px | 조밀한 패널 |\n| Glass 25 | #191919 25%와 강조색 방사형 그레디언트 | 16 논리 px | 툴팁, 팝오버, 기본 패널 |\n",
       "columns": [
         "재질",
         "채우기",
@@ -111,13 +111,13 @@
       "rows": [
         [
           "ApplicationWindow",
-          "`Theme.window` (`#141414`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1",
+          "`Theme.window` (`#191919`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1",
           "없음",
           "기본 및 보조 창"
         ],
         [
           "독립 WindowMaterial",
-          "#0B0B0B 50%와 강조색 방사형 그레디언트",
+          "Figma Dense Fill RGB `#191919` 50%와 강조색 방사형 그레디언트",
           "64 논리 px",
           "명시적인 창 재질"
         ],
@@ -129,13 +129,13 @@
         ],
         [
           "Dense 75 MaterialSurface / PanelMaterial",
-          "#141414 75%와 강조색 방사형 그레디언트",
+          "#191919 75%와 강조색 방사형 그레디언트",
           "64 논리 px",
           "조밀한 패널"
         ],
         [
           "Glass 25",
-          "#141414 25%와 강조색 방사형 그레디언트",
+          "#191919 25%와 강조색 방사형 그레디언트",
           "16 논리 px",
           "툴팁, 팝오버, 기본 패널"
         ]
@@ -281,7 +281,7 @@
       "kind": "list",
       "start_line": 38,
       "end_line": 46,
-      "raw": "- `density`: `MaterialSurface.Dense75` 또는 `MaterialSurface.Glass25`.\n- `primaryColor`: WindowMaterial은 소속 창의 `primaryColor`를 동적으로 상속한다. 창에 연결되지 않았거나 창에 해당 속성이 없으면 `Theme.primaryColor`를 사용한다. PanelMaterial의 기본값은 `Theme.primary`이다. 명시적인 재질 색상 지정은 계속 우선한다.\n- `color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 #0B0B0B / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.\n- `blurRadius`, `blurEnabled`: 배경 확산 반경 및 스위치.\n- `radius`, `borderWidth`, `borderColor`: 표면 실루엣과 가장자리.\n- `intenseOpacity`, `faintOpacity`: 독립 재질의 방사형 강도이며 기본값은 0.40 / 0.11이다. 둘 다 0이면 방사형 모양이 생성되지 않는다.\n- `backdropSource`, `backdropBackground`: 과도 표면 뒤에서 캡처할 명시적인 형제 항목입니다. 팝업은 애플리케이션 콘텐츠와 배경을 별도로 캡처하므로 오버레이가 자체 캡처에 들어가지 않습니다.\n- `outlinePath`: 로컬 좌표의 선택적 SVG 경로; 도구 설명은 기존 몸체와 꼬리 윤곽선을 사용합니다.\n- `effectsActive`, `captureActive`, `resolvedBackdropSource`: 읽기 전용 렌더링/캡처 진단.\n",
+      "raw": "- `density`: `MaterialSurface.Dense75` 또는 `MaterialSurface.Glass25`.\n- `primaryColor`: WindowMaterial은 소속 창의 `primaryColor`를 동적으로 상속한다. 창에 연결되지 않았거나 창에 해당 속성이 없으면 `Theme.primaryColor`를 사용한다. PanelMaterial의 기본값은 `Theme.primary`이다. 명시적인 재질 색상 지정은 계속 우선한다.\n- `color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 Figma Dense Fill의 RGB `#191919` / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.\n- `blurRadius`, `blurEnabled`: 배경 확산 반경 및 스위치.\n- `radius`, `borderWidth`, `borderColor`: 표면 실루엣과 가장자리.\n- `intenseOpacity`, `faintOpacity`: 독립 재질의 방사형 강도이며 기본값은 0.40 / 0.11이다. 둘 다 0이면 방사형 모양이 생성되지 않는다.\n- `backdropSource`, `backdropBackground`: 과도 표면 뒤에서 캡처할 명시적인 형제 항목입니다. 팝업은 애플리케이션 콘텐츠와 배경을 별도로 캡처하므로 오버레이가 자체 캡처에 들어가지 않습니다.\n- `outlinePath`: 로컬 좌표의 선택적 SVG 경로; 도구 설명은 기존 몸체와 꼬리 윤곽선을 사용합니다.\n- `effectsActive`, `captureActive`, `resolvedBackdropSource`: 읽기 전용 렌더링/캡처 진단.\n",
       "items": [
         {
           "marker": "-",
@@ -295,7 +295,7 @@
         },
         {
           "marker": "-",
-          "text": "`color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 #0B0B0B / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.",
+          "text": "`color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 Figma Dense Fill의 RGB `#191919` / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.",
           "checked": null
         },
         {
@@ -372,9 +372,9 @@
       "kind": "fenced_code",
       "start_line": 52,
       "end_line": 64,
-      "raw": "```qml\nimport LVRS as LV\n\nLV.ApplicationWindow {\n    primaryColor: \"#A571E6\"\n    // `Theme.window` (`#141414`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.\n    LV.Popover {\n        id: details\n        width: 320; height: 180\n        contentItem: DetailsView {}\n    }\n}\n```\n",
+      "raw": "```qml\nimport LVRS as LV\n\nLV.ApplicationWindow {\n    primaryColor: \"#A571E6\"\n    // `Theme.window` (`#191919`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.\n    LV.Popover {\n        id: details\n        width: 320; height: 180\n        contentItem: DetailsView {}\n    }\n}\n```\n",
       "language": "qml",
-      "code": "import LVRS as LV\n\nLV.ApplicationWindow {\n    primaryColor: \"#A571E6\"\n    // `Theme.window` (`#141414`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.\n    LV.Popover {\n        id: details\n        width: 320; height: 180\n        contentItem: DetailsView {}\n    }\n}\n",
+      "code": "import LVRS as LV\n\nLV.ApplicationWindow {\n    primaryColor: \"#A571E6\"\n    // `Theme.window` (`#191919`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.\n    LV.Popover {\n        id: details\n        width: 320; height: 180\n        contentItem: DetailsView {}\n    }\n}\n",
       "closed": true
     },
     {
@@ -389,7 +389,7 @@
       "kind": "paragraph",
       "start_line": 66,
       "end_line": 66,
-      "raw": "`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 `Theme.window` (`#141414`)이다. `Theme.applicationWindowAccentOpacity`의 0.02를 사용하여 `바탕 RGB × 0.98 + primaryColor RGB × 0.02`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.\n"
+      "raw": "`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 `Theme.window` (`#191919`)이다. `Theme.applicationWindowAccentOpacity`의 0.02를 사용하여 `바탕 RGB × 0.98 + primaryColor RGB × 0.02`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.\n"
     },
     {
       "id": "b000032",
@@ -561,7 +561,7 @@
       "kind": "table",
       "start_line": 90,
       "end_line": 96,
-      "raw": "| 속성 | 기본값 | 동작 |\n|---|---|---|\n| `color` | `#141414` | RGB 바탕색이며 알파는 항상 1로 정규화한다. |\n| `primaryColor` | `#1582FF` | 노이즈의 강조색이며 알파는 항상 1로 정규화한다. |\n| `noiseStrength` | `0.32` | 배경과 강조색 사이의 혼합 강도이며 0~1 범위이다. |\n| `blurRadius` | `1.5` | 가우시안 표준편차이며 0~50 논리 px 범위이다. 0은 선명한 노이즈이다. |\n| `grainStrength` | `0` | 블러 이후 더하는 단색 입자의 진폭이며 0~1 범위이다. ApplicationWindow는 `2 / 255`를 사용한다. |\n",
+      "raw": "| 속성 | 기본값 | 동작 |\n|---|---|---|\n| `color` | `#191919` | RGB 바탕색이며 알파는 항상 1로 정규화한다. |\n| `primaryColor` | `#2880E5` (표시 반올림) | 노이즈의 강조색이며 알파는 항상 1로 정규화한다. |\n| `noiseStrength` | `0.32` | 배경과 강조색 사이의 혼합 강도이며 0~1 범위이다. |\n| `blurRadius` | `1.5` | 가우시안 표준편차이며 0~50 논리 px 범위이다. 0은 선명한 노이즈이다. |\n| `grainStrength` | `0` | 블러 이후 더하는 단색 입자의 진폭이며 0~1 범위이다. ApplicationWindow는 `2 / 255`를 사용한다. |\n",
       "columns": [
         "속성",
         "기본값",
@@ -570,12 +570,12 @@
       "rows": [
         [
           "`color`",
-          "`#141414`",
+          "`#191919`",
           "RGB 바탕색이며 알파는 항상 1로 정규화한다."
         ],
         [
           "`primaryColor`",
-          "`#1582FF`",
+          "`#2880E5` (표시 반올림)",
           "노이즈의 강조색이며 알파는 항상 1로 정규화한다."
         ],
         [
@@ -607,7 +607,7 @@
       "kind": "paragraph",
       "start_line": 98,
       "end_line": 98,
-      "raw": "유효하지 않은 색상과 유한하지 않은 수치는 기존 설정을 유지한다. 입자 강도가 0보다 크면 캐시된 타일은 페인트 대상의 물리 픽셀에 맞춰 반복한다. 각 RGB 채널에 같은 난수 값을 더하고 0~255로 제한한다. 입자는 블러 이후에 적용하므로 뭉개지지 않는다. 타일의 생성·블러·입자 처리는 설정 변경 때만 실행하며, 정적인 화면에는 타이머나 프레임별 난수 생성이 없다.\n"
+      "raw": "`WindowNoiseTexture`의 기본 창 및 강조색은 `resources/figma-color-tokens.json`에서 생성한 원본 RGBA를 사용한다. 표의 HEX는 표시용 반올림값이다.\n"
     },
     {
       "id": "b000058",
@@ -618,10 +618,10 @@
     },
     {
       "id": "b000059",
-      "kind": "html",
+      "kind": "paragraph",
       "start_line": 100,
       "end_line": 100,
-      "raw": "<a id=\"shared-motion\"></a>\n"
+      "raw": "유효하지 않은 색상과 유한하지 않은 수치는 기존 설정을 유지한다. 입자 강도가 0보다 크면 캐시된 타일은 페인트 대상의 물리 픽셀에 맞춰 반복한다. 각 RGB 채널에 같은 난수 값을 더하고 0~255로 제한한다. 입자는 블러 이후에 적용하므로 뭉개지지 않는다. 타일의 생성·블러·입자 처리는 설정 변경 때만 실행하며, 정적인 화면에는 타이머나 프레임별 난수 생성이 없다.\n"
     },
     {
       "id": "b000060",
@@ -632,12 +632,10 @@
     },
     {
       "id": "b000061",
-      "kind": "heading",
+      "kind": "html",
       "start_line": 102,
       "end_line": 102,
-      "raw": "## 공유 모션\n",
-      "level": 2,
-      "title": "공유 모션"
+      "raw": "<a id=\"shared-motion\"></a>\n"
     },
     {
       "id": "b000062",
@@ -648,10 +646,12 @@
     },
     {
       "id": "b000063",
-      "kind": "paragraph",
+      "kind": "heading",
       "start_line": 104,
       "end_line": 104,
-      "raw": "MaterialSurface를 통한 색조 및 불투명도 혼합; 호스트 창은 네이티브 이동 및 크기 조정 동작을 유지합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
+      "raw": "## 공유 모션\n",
+      "level": 2,
+      "title": "공유 모션"
     },
     {
       "id": "b000064",
@@ -665,7 +665,7 @@
       "kind": "paragraph",
       "start_line": 106,
       "end_line": 106,
-      "raw": "Figma 확산 레이어는 (0, 1) 좌표에 0블러 흰색 내장 하이라이트를 포함하며, 밀집 6%, 유리 14%입니다. `innerHighlightOpacity` 와 `innerHighlightOffsetY` 는 이 작성된 값을 노출합니다. 네이티브 RHI 렌더링은 기존 마스크를 사용하여 이동된 실루엣을 뺍니다; 커스텀 꼬리를 포함하며, 소프트웨어 렌더러는 기존 효과 없는 대체 경로 를 유지합니다.\n"
+      "raw": "MaterialSurface를 통한 색조 및 불투명도 혼합; 호스트 창은 네이티브 이동 및 크기 조정 동작을 유지합니다. 전역 속도, 모션 감소, 로컬 오버라이드 및 구성요소별 VisualCatalog 레시피는 [모션 정책](../../motion.md)를 참조하세요.\n"
     },
     {
       "id": "b000066",
@@ -679,7 +679,7 @@
       "kind": "paragraph",
       "start_line": 108,
       "end_line": 108,
-      "raw": "ContextMenu 및 메뉴는 명시적 반투명 코팅이 있는 WindowMaterial를 사용합니다. 창 채우기 색상의 12%, 흐림 효과의 64px 및 일반 방사형 악센트 강도의 8%입니다. 도구 설명 및 팝오버는 PanelMaterial 유리 25를 유지합니다. [ContextMenu](../navigation/ContextMenu.md#window-derived-frosted-menu)를 참조하세요.\n"
+      "raw": "Figma 확산 레이어는 (0, 1) 좌표에 0블러 흰색 내장 하이라이트를 포함하며, 밀집 6%, 유리 14%입니다. `innerHighlightOpacity` 와 `innerHighlightOffsetY` 는 이 작성된 값을 노출합니다. 네이티브 RHI 렌더링은 기존 마스크를 사용하여 이동된 실루엣을 뺍니다; 커스텀 꼬리를 포함하며, 소프트웨어 렌더러는 기존 효과 없는 대체 경로 를 유지합니다.\n"
     },
     {
       "id": "b000068",
@@ -693,7 +693,7 @@
       "kind": "paragraph",
       "start_line": 110,
       "end_line": 110,
-      "raw": "메뉴는 창의 `materialBackdropSource` 컨텐츠 호스트와 배경을 별도의 소스로 사용합니다. 호스트는 팝업 오버레이를 제외하여 기존 상위/하위 캡처 가드를 유지하면서 메뉴 뒤의 전경 콘텐츠가 확산되도록 허용합니다.\n"
+      "raw": "ContextMenu 및 메뉴는 명시적 반투명 코팅이 있는 WindowMaterial를 사용합니다. 창 채우기 색상의 12%, 흐림 효과의 64px 및 일반 방사형 악센트 강도의 8%입니다. 도구 설명 및 팝오버는 PanelMaterial 유리 25를 유지합니다. [ContextMenu](../navigation/ContextMenu.md#window-derived-frosted-menu)를 참조하세요.\n"
     },
     {
       "id": "b000070",
@@ -707,7 +707,7 @@
       "kind": "paragraph",
       "start_line": 112,
       "end_line": 112,
-      "raw": "`backdropBaseColor` 는 기본적으로 투명합니다. 윈도우 내 메뉴는 불투명 중립 테마를 사용합니다. materialTint 를 캡처 기반으로 하여 흐릿한 합성 가 덮은 픽셀을 대체합니다; 그렇지 않으면 캡처된 윈도우 알파가 원래 날카로운 텍스트가 새어 나오게 합니다. 가시 메뉴 코팅은 12%로 유지됩니다.\n"
+      "raw": "메뉴는 창의 `materialBackdropSource` 컨텐츠 호스트와 배경을 별도의 소스로 사용합니다. 호스트는 팝업 오버레이를 제외하여 기존 상위/하위 캡처 가드를 유지하면서 메뉴 뒤의 전경 콘텐츠가 확산되도록 허용합니다.\n"
     },
     {
       "id": "b000072",
@@ -721,7 +721,7 @@
       "kind": "paragraph",
       "start_line": 114,
       "end_line": 114,
-      "raw": "이전의 균일한 채색 구현은 2026-09-12에 macOS/Metal에서 검증했다. 해당 결과는 그레디언트 복원 전의 기록이다. 53개의 LVRS CTest 사례와 9개의 네이티브 재질 검사가 통과했다. 렌더링한 채우기 샘플은 50% 알파에서 #0B0B0B를 유지했고, 900×600와 1600×1000에서 파란색·보라색 강조색을 사용했다. 설치된 83개의 QML 리소스 전체가 현재 소스와 일치했다. Society는 16개 테스트를, Dreamscapes는 5개를 통과했으며, 검정에 가까운 채우기와 앱 강조색의 별도 기대값을 포함했다. Society, Dreamscapes, VisualCatalog를 갱신한 Workspace 런타임으로 다시 빌드하고 재실행했으며, 두 앱 창을 시각적으로 확인했다.\n"
+      "raw": "`backdropBaseColor` 는 기본적으로 투명합니다. 윈도우 내 메뉴는 불투명 중립 테마를 사용합니다. materialTint 를 캡처 기반으로 하여 흐릿한 합성 가 덮은 픽셀을 대체합니다; 그렇지 않으면 캡처된 윈도우 알파가 원래 날카로운 텍스트가 새어 나오게 합니다. 가시 메뉴 코팅은 12%로 유지됩니다.\n"
     },
     {
       "id": "b000074",
@@ -735,7 +735,7 @@
       "kind": "paragraph",
       "start_line": 116,
       "end_line": 116,
-      "raw": "2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#141414`) 98%와 강조색 2%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.\n"
+      "raw": "이전의 균일한 채색 구현은 2026-09-12에 macOS/Metal에서 검증했다. 해당 결과는 그레디언트 복원 전의 기록이다. 53개의 LVRS CTest 사례와 9개의 네이티브 재질 검사가 통과했다. 당시 렌더링한 채우기 샘플은 50% 알파에서 #0B0B0B를 유지했고, 900×600와 1600×1000에서 파란색·보라색 강조색을 사용했다. 설치된 83개의 QML 리소스 전체가 현재 소스와 일치했다. Society는 16개 테스트를, Dreamscapes는 5개를 통과했으며, 검정에 가까운 채우기와 앱 강조색의 별도 기대값을 포함했다. Society, Dreamscapes, VisualCatalog를 갱신한 Workspace 런타임으로 다시 빌드하고 재실행했으며, 두 앱 창을 시각적으로 확인했다.\n"
     },
     {
       "id": "b000076",
@@ -749,6 +749,20 @@
       "kind": "paragraph",
       "start_line": 118,
       "end_line": 118,
+      "raw": "2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#191919`) 98%와 강조색 2%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 120,
+      "end_line": 120,
       "raw": "`window_material_inherits_owning_window_accent`는 같은 QML 엔진의 창 두 개가 서로 다른 강조색을 유지하는지 검사한다. ApplicationWindow의 기본 중심색과 미세 노이즈도 기존 창 강조색 상속을 사용한다.\n"
     }
   ],
@@ -802,12 +816,12 @@
       "start_line": 86
     },
     {
-      "block_id": "b000061",
+      "block_id": "b000063",
       "parent_id": "b000003",
       "level": 2,
       "title": "공유 모션",
       "anchor": "공유-모션",
-      "start_line": 102
+      "start_line": 104
     }
   ],
   "indexes": {
@@ -815,7 +829,7 @@
       {
         "block_id": "b000009",
         "line": 9,
-        "text": "`ApplicationWindow`의 기본 배경은 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.",
+        "text": "`ApplicationWindow`의 기본 배경은 `Theme.window` (`#191919`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
@@ -886,18 +900,18 @@
         "line": 80
       },
       {
-        "block_id": "b000063",
+        "block_id": "b000065",
         "label": "모션 정책",
         "target": "../../motion.md",
         "kind": "relative",
-        "line": 104
+        "line": 106
       },
       {
-        "block_id": "b000067",
+        "block_id": "b000069",
         "label": "ContextMenu",
         "target": "../navigation/ContextMenu.md#window-derived-frosted-menu",
         "kind": "relative",
-        "line": 108
+        "line": 110
       }
     ],
     "tables": [
@@ -912,13 +926,13 @@
         "rows": [
           [
             "ApplicationWindow",
-            "`Theme.window` (`#141414`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1",
+            "`Theme.window` (`#191919`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1",
             "없음",
             "기본 및 보조 창"
           ],
           [
             "독립 WindowMaterial",
-            "#0B0B0B 50%와 강조색 방사형 그레디언트",
+            "Figma Dense Fill RGB `#191919` 50%와 강조색 방사형 그레디언트",
             "64 논리 px",
             "명시적인 창 재질"
           ],
@@ -930,13 +944,13 @@
           ],
           [
             "Dense 75 MaterialSurface / PanelMaterial",
-            "#141414 75%와 강조색 방사형 그레디언트",
+            "#191919 75%와 강조색 방사형 그레디언트",
             "64 논리 px",
             "조밀한 패널"
           ],
           [
             "Glass 25",
-            "#141414 25%와 강조색 방사형 그레디언트",
+            "#191919 25%와 강조색 방사형 그레디언트",
             "16 논리 px",
             "툴팁, 팝오버, 기본 패널"
           ]
@@ -1011,12 +1025,12 @@
         "rows": [
           [
             "`color`",
-            "`#141414`",
+            "`#191919`",
             "RGB 바탕색이며 알파는 항상 1로 정규화한다."
           ],
           [
             "`primaryColor`",
-            "`#1582FF`",
+            "`#2880E5` (표시 반올림)",
             "노이즈의 강조색이며 알파는 항상 1로 정규화한다."
           ],
           [

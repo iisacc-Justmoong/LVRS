@@ -8,7 +8,7 @@
 namespace lvrs::card_detail {
 using namespace ii;
 namespace {
-constexpr gui::WidgetColor bg03{.083941631,.083941631,.086313099,1},solid{.1139791608,.1166428775,.1166428775,1},alt{.1230252981,.1252803057,.1275353134,1},interactive{.1411764771,.1411764771,.1411764771,1},input{.1555851549,.157072559,.1585599482,1},raised{.1935568452,.1978072077,.1999323964,1};
+constexpr gui::WidgetColor bg03{.083941631,.083941631,.086313099,1},input{.1555851549,.157072559,.1585599482,1},raised{.1935568452,.1978072077,.1999323964,1};
 constexpr const char* names[]{"File","FilePreview","Folder","Project","Device","Model","Member","Link"};
 constexpr const char* icons[]{"image","image","folder","project","device","model","member","link"};
 constexpr const char* actions[]{"","","Open","View","Manage","Use","Profile","Visit"};
@@ -53,7 +53,7 @@ CardState resolve(const CardOptions& o,const Prepared& p,const gui::WidgetPaintS
     state.effective_selected=!state.preview_only&&(o.display_state==CardDisplayState::automatic?actual.checked:o.display_state==CardDisplayState::selected);
     state.effective_hovered=!state.preview_only&&(o.display_state==CardDisplayState::automatic?(actual.enabled&&(actual.hovered||actual.focused)):o.display_state==CardDisplayState::hover);
     state.border_width=state.preview_only?0:state.effective_selected?2:1;state.content_inset=(o.type==CardType::file&&o.size==CardSize::small?12:18)+state.border_width;
-    state.border=state.effective_selected?p.primary:state.image_card&&state.effective_hovered?gui::WidgetColor{1,1,1,.9}:input;state.surface=state.image_card?bg03:state.effective_selected?alt:state.effective_hovered?interactive:solid;
+    state.border=state.effective_selected?p.primary:state.image_card&&state.effective_hovered?gui::WidgetColor{1,1,1,.9}:input;state.surface=state.image_card?bg03:gui::WidgetColor{0,0,0,0};
     state.implicit_size=state.preview_only?gui::Size{480,320}:o.type==CardType::file?o.size==CardSize::small?gui::Size{140,160}:o.size==CardSize::large?gui::Size{360,280}:gui::Size{210,240}:gui::Size{256,std::max(280.,information_height(o,state.content_inset))};
     state.preview_status=state.image_card&&(preview_custom||o.preview_source)?gui::ImageStatus::ready:gui::ImageStatus::empty;return state;
 }
@@ -67,14 +67,14 @@ Layout layout(const CardOptions& o,const Prepared& p,const CardState& state,gui:
     return l;
 }
 std::shared_ptr<const gui::WidgetDrawing> background(const CardOptions& o,const Prepared& p,const CardState& state,const Layout& l,bool preview_custom,bool icon_custom,bool enabled){
-    auto d=std::make_shared<gui::WidgetDrawing>();d->images_before_text=true;if(l.width<=0||l.height<=0)return d;const auto opacity=enabled?1.:.4;const auto radius=state.preview_only?0:std::min({12.,l.width/2,l.height/2});panel(*d,box(0,0,l.width,l.height),state.surface,radius);
+    auto d=std::make_shared<gui::WidgetDrawing>();d->images_before_text=true;if(l.width<=0||l.height<=0)return d;const auto opacity=enabled?1.:.4;const auto radius=state.preview_only||!state.image_card?0:std::min({12.,l.width/2,l.height/2});if(state.image_card)panel(*d,box(0,0,l.width,l.height),state.surface,radius);
     if(state.image_card){if(!preview_custom&&o.preview_source){gui::ImageRun run{.bounds=box(0,0,l.width,l.height),.image=o.preview_source,.opacity=float(opacity),.source=cover({l.width,l.height},*o.preview_source),.radius=float(radius)};d->images.push_back(std::move(run));}else if(!preview_custom)image(*d,box((l.width-36)/2,(l.height-36)/2,36,36),p.placeholder,opacity);}
     else{panel(*d,box(l.inset,l.inset,36,36),bg03,6,opacity);if(!icon_custom)image(*d,l.icon,p.icon,opacity);if(o.type==CardType::link)panel(*d,box(l.inset,l.preview_y,std::max(0.,l.width-2*l.inset),61),bg03,6,opacity);}
     return d;
 }
 std::shared_ptr<const gui::WidgetDrawing> foreground(const CardOptions& o,const Prepared& p,const CardState& state,const Layout& l,bool enabled){
     auto d=std::make_shared<gui::WidgetDrawing>();d->images_before_text=true;if(l.width<=0||l.height<=0||state.preview_only)return d;
-    const auto opacity=enabled?1.:.4,w=l.width,h=l.height,inset=l.inset,inner=std::max(0.,w-2*inset);const auto radius=std::min({12.,w/2,h/2});
+    const auto opacity=enabled?1.:.4,w=l.width,h=l.height,inset=l.inset,inner=std::max(0.,w-2*inset);const auto radius=state.image_card?std::min({12.,w/2,h/2}):0;
     gui::ImageRun frame{.bounds=box(0,0,w,h),.image=p.transparent,.opacity=float(opacity),.radius=float(radius),.border_width=float(std::min(state.border_width,std::min(w,h)/2)),.border=surface_detail::linear(state.border)};
     if(state.image_card)frame.gradient=gui::ImageGradient{.height=float(std::min(h,l.caption_height+inset+64)),.middle_position=.36f,.middle={0,0,0,214.f/255},.bottom={0,0,0,245.f/255}};
     if(state.image_card)d->images.push_back(std::move(frame));else{const auto border=surface_detail::linear(state.border);d->panels.push_back({box(0,0,w,h),border,border,float(radius),float(std::min(state.border_width,std::min(w,h)/2))});}

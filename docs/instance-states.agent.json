@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/instance-states.md",
-    "sha256": "38db647df933d2fa8593d6903af97a1bda7dccebfc1b209955e697ae69da6efd",
-    "bytes": 9577,
+    "sha256": "4395fc52db7c9b20b7f86dad991c703bb2f6e184cb830162e2c800af2323acb2",
+    "bytes": 9603,
     "line_count": 68,
     "encoding": "utf-8",
     "language": "ko"
@@ -416,7 +416,7 @@
       "kind": "paragraph",
       "start_line": 66,
       "end_line": 66,
-      "raw": "네이티브 렌더링된 초점 증명에 대해 `build/` 하위의 디렉토리에 `LVRS_STATE_CAPTURE_DIR` 를 설정하고, 네이티브 플랫폼과 이 빌드의 라이브러리/수입 경로를 사용하여 `build/tests/LVRSTests_instance_state native_focus_capture` 를 실행합니다. 캡처는 각 6 컴포넌트 계열 외부의 실제 기본 색상 픽셀을 확인하고 초점 프레임을 저장합니다. 이 확인은 일반적인 오프스크린 수트에서 옵트-인입니다.\n"
+      "raw": "네이티브 렌더링된 초점 증명에 대해 `resources/.state/state-captures/` 하위의 디렉토리에 `LVRS_STATE_CAPTURE_DIR` 를 설정하고, 네이티브 플랫폼과 이 빌드의 라이브러리/수입 경로를 사용하여 `build/tests/LVRSTests_instance_state native_focus_capture` 를 실행합니다. 캡처는 각 6 컴포넌트 계열 외부의 실제 기본 색상 픽셀을 확인하고 초점 프레임을 저장합니다. 이 확인은 일반적인 오프스크린 수트에서 옵트-인입니다.\n"
     },
     {
       "id": "b000046",

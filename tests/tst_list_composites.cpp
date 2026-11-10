@@ -174,8 +174,20 @@ Item {
     QTRY_VERIFY(!quantity->property("checked").toBool());
     click(window, visibleItem(task, "listItem_selection"));
     QTRY_VERIFY(task->property("checked").toBool());
-    click(window, visibleItem(settings, "listItem_segment_1"));
+    auto *firstSegment = visibleItem(settings, "listItem_segment_0");
+    auto *secondSegment = visibleItem(settings, "listItem_segment_1");
+    QVERIFY(firstSegment && secondSegment);
+    QVERIFY(firstSegment->property("checked").toBool());
+    const auto originalTone = secondSegment->property("tone").toInt();
+    click(window, secondSegment);
     QTRY_COMPARE(settings->property("segmentIndex").toInt(), 1);
+    QTRY_VERIFY(secondSegment->property("checked").toBool());
+    QTRY_VERIFY(!firstSegment->property("checked").toBool());
+    QCOMPARE(secondSegment->property("tone").toInt(), originalTone);
+    QCOMPARE(firstSegment->property("tone").toInt(), originalTone);
+    const auto surface = secondSegment->property("background").value<QObject *>();
+    QVERIFY(surface);
+    QTRY_COMPARE(surface->property("color").value<QColor>(), secondSegment->property("selectedBackgroundColor").value<QColor>());
 
     click(window, visibleItem(quantity, "listItem_selector"));
     auto *selectorMenu = quantity->findChild<QObject *>("listItem_selectorMenu");

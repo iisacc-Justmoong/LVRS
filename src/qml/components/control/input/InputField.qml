@@ -212,6 +212,8 @@ AbstractInputBar {
             transformOrigin: Item.TopLeft
             antialiasing: true
             renderTarget: Canvas.Image
+            // Blurred inset strokes are rasterized away from the GUI thread.
+            renderStrategy: Canvas.Threaded
             canvasSize: Qt.size(Math.max(1, Math.ceil(width)), Math.max(1, Math.ceil(height)))
 
             function innerShadow(ctx, w, h, radius, color, dx, dy, blur) {

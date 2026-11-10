@@ -1,5 +1,6 @@
 #include <LVRS/MaterialDetail.h>
 #include <LVRS/SurfaceDetail.h>
+#include <LVRS/Theme.h>
 #include <iiSDKCore/Core/Text/Number.h>
 #include <array>
 #include <algorithm>
@@ -34,7 +35,8 @@ core::Result<Prepared> prepare(const MaterialOptions& o,MaterialVariant variant,
     s.tint_opacity=o.tint_opacity.value_or(variant==MaterialVariant::window?.5:dense?.75:.25);const auto configured_blur=o.blur_radius.value_or(dense?64:16);s.blur_radius=o.blur_enabled?std::clamp(std::ceil(configured_blur),2.,64.):0;s.capture_padding=std::clamp(std::ceil(configured_blur),2.,64.);
     s.radius=o.radius.value_or(variant==MaterialVariant::window?16:12);s.inner_highlight_opacity=o.inner_highlight_opacity.value_or(dense?.06:.14);s.shadow_radius=std::clamp(std::ceil(o.shadow_radius.value_or(variant==MaterialVariant::window?48:24)),2.,64.);s.shadow_offset_y=o.shadow_offset_y.value_or(variant==MaterialVariant::window?16:8);s.shadow_opacity=o.shadow_opacity.value_or(variant==MaterialVariant::window?.30:.22);
     s.border=o.border_color.value_or(gui::WidgetColor{1,1,1,dense?.12:.22});s.implicit_size=variant==MaterialVariant::panel?gui::Size{380,204}:variant==MaterialVariant::window?gui::Size{500,272}:gui::Size{};
-    p.target.tint=o.color.value_or(variant==MaterialVariant::window?gui::WidgetColor{11./255,11./255,11./255,1}:gui::WidgetColor{20./255,20./255,20./255,1});p.target.tint.alpha*=s.tint_opacity;p.target.primary=o.primary_color.value_or(appearance.primary);p.target.base=o.backdrop_base_color;
+    auto material_tint=Theme::background(BackgroundRole::dense_fill);material_tint.alpha=1;
+    p.target.tint=o.color.value_or(material_tint);p.target.tint.alpha*=s.tint_opacity;p.target.primary=o.primary_color.value_or(appearance.primary);p.target.base=o.backdrop_base_color;
     return p;
 }
 core::Result<std::shared_ptr<const gui::WidgetDrawing>> paint(const MaterialOptions& o,const Prepared& prepared,const Colors& colors,const gui::WidgetPaintState& state,RasterCache& cache){

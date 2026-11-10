@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/components/navigation/ListItem.md",
-    "sha256": "7d68623b5ce03069f388c43a341c290e8b1cbeae69135c7a685a6e67df3c7a02",
-    "bytes": 11740,
+    "sha256": "5cb0337bd5c75425116adbf49d1d2fdd36f78f5eec96253f46aa9b5f5e3d4737",
+    "bytes": 11882,
     "line_count": 130,
     "encoding": "utf-8",
     "language": "ko"
@@ -293,7 +293,7 @@
       "kind": "list",
       "start_line": 43,
       "end_line": 50,
-      "raw": "- 공통: `label`, `description`, `iconName` / `iconSource`, `value`, `selected`.\n- 세부 정보: `detail`, `dateText`, `folderLabel1/2`, `tagLabel1/2`, `bookmarkIconName`, `folderIconName`, `tagIconName`.\n- 화합물: `metadata1`, `metadata2`, `statusText`, `quantityLabel`, `optionLabel`, `modeLabel`, `scopeLabel`, `durationText`, `mediaDetail`, `fieldLabel1/2`.\n- 미리보기: 이미지 URL의 경우 `previewSource`, 테마 자산의 경우 `previewIconName`. 아이콘은 48px 타일 내부 중앙에 네이티브 18px 크기로 유지됩니다.\n- 선택: `checked`, `toggleEnabled`, `selectionEnabled`. `selected`는 확인란/스위치 값과 관계없이 행 강조 표시를 제어합니다.\n- 수량: `quantity`, `minimumQuantity`(0), `maximumQuantity`(무제한), `stepSize`(1). 사용자 편집은 제한되어 있으며 구성된 범위로 고정됩니다.\n- 선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0).\n- 입력 상태: `inputText1`, `inputText2`(둘 다 `\"Value\"`). 이는 레거시 Mini `inputResult`와는 별개입니다.\n",
+      "raw": "- 공통: `label`, `description`, `iconName` / `iconSource`, `value`, `selected`.\n- 세부 정보: `detail`, `dateText`, `folderLabel1/2`, `tagLabel1/2`, `bookmarkIconName`, `folderIconName`, `tagIconName`.\n- 화합물: `metadata1`, `metadata2`, `statusText`, `quantityLabel`, `optionLabel`, `modeLabel`, `scopeLabel`, `durationText`, `mediaDetail`, `fieldLabel1/2`.\n- 미리보기: 이미지 URL의 경우 `previewSource`, 테마 자산의 경우 `previewIconName`. 아이콘은 48px 타일 내부 중앙에 네이티브 18px 크기로 유지됩니다.\n- 선택: `checked`, `toggleEnabled`, `selectionEnabled`. `selected`는 확인란/스위치 값과 관계없이 행 강조 표시를 제어합니다.\n- 수량: `quantity`, `minimumQuantity`(0), `maximumQuantity`(무제한), `stepSize`(1). 사용자 편집은 제한되어 있으며 구성된 범위로 고정됩니다.\n- 선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0). Segment 버튼은 모두 무테 타입을 유지하며 선택된 항목만 일반 버튼의 앱 악센트 Selected 배경을 사용합니다.\n- 입력 상태: `inputText1`, `inputText2`(둘 다 `\"Value\"`). 이는 레거시 Mini `inputResult`와는 별개입니다.\n",
       "items": [
         {
           "marker": "-",
@@ -327,7 +327,7 @@
         },
         {
           "marker": "-",
-          "text": "선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0).",
+          "text": "선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0). Segment 버튼은 모두 무테 타입을 유지하며 선택된 항목만 일반 버튼의 앱 악센트 Selected 배경을 사용합니다.",
           "checked": null
         },
         {

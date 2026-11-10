@@ -1,0 +1,7 @@
+file(READ "${ACTION}" _action)
+if(NOT _action MATCHES "LVRS_BUILD_SHARED_LIBS")
+    message(FATAL_ERROR "The bootstrap must forward the requested shared-library mode")
+endif()
+if(_action MATCHES "set\\(LVRS_BOOTSTRAP_LVRS_BUILD_SHARED_LIBS[ \t\r\n]+\"?OFF")
+    message(FATAL_ERROR "A target platform must not force static linkage")
+endif()

@@ -35,18 +35,39 @@ inline QColor blueWithAlpha(qreal alpha)
     return value;
 }
 
-inline QColor blueComposite(qreal opacity)
+inline QColor background(const QString &name)
 {
-    for (const auto &entry : colors()) {
+    QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-accent-roles.json"));
+    if (!file.open(QIODevice::ReadOnly)) return {};
+    for (const auto &entry : QJsonDocument::fromJson(file.readAll()).object()["backgroundVariables"].toArray()) {
         const auto row = entry.toObject();
-        if (row["property"].toString() == QStringLiteral("accentBlue")) {
-            const auto rgba = row["rgba"].toObject();
-            constexpr qreal base = 36.0 / 255.0;
-            return QColor::fromRgbF(base * (1 - opacity) + rgba["r"].toDouble() * opacity,
-                                    base * (1 - opacity) + rgba["g"].toDouble() * opacity,
-                                    base * (1 - opacity) + rgba["b"].toDouble() * opacity);
-        }
+        if (row["name"].toString() != name) continue;
+        const auto rgba = row["value"].toObject();
+        return QColor::fromRgbF(rgba["r"].toDouble(), rgba["g"].toDouble(),
+                                rgba["b"].toDouble(), rgba["a"].toDouble());
     }
     return {};
+}
+
+inline QColor role(const QString &colorName, const QString &roleName)
+{
+    QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-accent-roles.json"));
+    if (!file.open(QIODevice::ReadOnly)) return {};
+    for (const auto &entry : QJsonDocument::fromJson(file.readAll()).object()["variables"].toArray()) {
+        const auto row = entry.toObject();
+        if (row["name"].toString() != "Accent/" + colorName + "/" + roleName) continue;
+        const auto rgba = row["value"].toObject();
+        return QColor::fromRgbF(rgba["r"].toDouble(), rgba["g"].toDouble(),
+                                rgba["b"].toDouble(), rgba["a"].toDouble());
+    }
+    return {};
+}
+
+inline QColor blueComposite(qreal opacity)
+{
+    const QString state = qFuzzyCompare(opacity, qreal(.25)) ? "Selected"
+        : qFuzzyCompare(opacity, qreal(.16)) ? "Subtle"
+        : qFuzzyCompare(opacity, qreal(.36)) ? "Outline" : QString();
+    return role(QStringLiteral("Blue"), state);
 }
 } // namespace AccentFixture

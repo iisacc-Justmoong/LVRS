@@ -197,8 +197,6 @@ uifw_add_test(LVRSTests_toggle_switch tst_toggle_switch.cpp)
 uifw_add_test(LVRSTests_motion tst_motion.cpp)
 uifw_add_test(LVRSTests_instance_state tst_instance_state.cpp)
 uifw_add_test(LVRSTests_figma_parity tst_figma_parity.cpp)
-set_property(TEST LVRSTests_figma_parity APPEND PROPERTY ENVIRONMENT
-    "LVRS_ACCENT_CAPTURE_PATH=${CMAKE_BINARY_DIR}/accent-palette-preview.png")
 uifw_add_test(LVRSTests_colorpicker tst_colorpicker.cpp)
 uifw_add_test(LVRSTests_sheet tst_sheet.cpp)
 uifw_add_test(LVRSTests_tooltip tst_tooltip.cpp)
@@ -213,15 +211,19 @@ uifw_add_test(LVRSTests_runtime_services tst_runtime_services.cpp)
 uifw_add_test(LVRSTests_svg_manager tst_svg_manager.cpp)
 # Embed exact, unnormalized source bytes once instead of reopening thousands of
 # external-storage files during each geometry/raster check.
-file(GLOB_RECURSE _lvrs_test_svg_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../resources/*.svg")
+file(GLOB_RECURSE _lvrs_test_svg_sources CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/../resources/iconset/*.svg"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../resources/images/*.svg")
 qt_add_resources(LVRSTests_svg_manager lvrs_test_source_svg
     PREFIX "/lvrs-test-source-svg" BASE "${CMAKE_CURRENT_SOURCE_DIR}/../resources"
     FILES ${_lvrs_test_svg_sources})
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_test(NAME LVRSTests_figma_color_tokens
+    COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_figma_color_tokens.py")
 add_test(NAME LVRSTests_figma_iconset_import
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_figma_iconset_import.py")
+    COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_figma_iconset_import.py")
 add_test(NAME LVRSTests_accent_palette
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_accent_palette.py")
+    COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_accent_palette.py")
 add_executable(LVRSNormalizeSvgIcons EXCLUDE_FROM_ALL ../scripts/normalize_svg_icons.cpp)
 target_compile_features(LVRSNormalizeSvgIcons PRIVATE cxx_std_23)
 target_link_libraries(LVRSNormalizeSvgIcons PRIVATE Qt6::Core Qt6::Gui Qt6::Svg)
@@ -257,3 +259,6 @@ add_test(
         "-DLVRS_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_install_defaults.cmake"
 )
+add_test(NAME LVRSTests_bootstrap_shared_policy COMMAND "${CMAKE_COMMAND}"
+    "-DACTION=${CMAKE_SOURCE_DIR}/cmake/LVRSBootstrapFrameworkAction.cmake"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_bootstrap_shared_policy.cmake")

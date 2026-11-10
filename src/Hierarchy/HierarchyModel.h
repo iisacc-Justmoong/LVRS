@@ -13,7 +13,7 @@
 #include <vector>
 namespace ii::gui {class RasterImage;}
 namespace lvrs {
-inline constexpr std::size_t hierarchy_npos=std::numeric_limits<std::size_t>::max();
+inline constexpr std::size_t hierarchy_npos=(std::numeric_limits<std::size_t>::max)();
 struct HierarchyRow final {
     std::string key,label,icon_name,icon_glyph;
     std::int64_t item_id=-1,count=-1;

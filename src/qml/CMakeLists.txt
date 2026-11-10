@@ -46,4 +46,8 @@ set(LVRS_RESOURCE_FILES
     ${LVRS_IMAGE_RESOURCE_FILES}
     ${LVRS_FONT_RESOURCE_FILES}
 )
+# iiFileProvider presentation sidecars and locks are metadata, not LVRS assets.
+# They can coexist with source resources but must not be bundled into the SDK.
+list(FILTER LVRS_RESOURCE_FILES EXCLUDE REGEX "(^|/)\\.[^/]+\\.iisacc-preview$")
+list(FILTER LVRS_RESOURCE_FILES EXCLUDE REGEX "(^|/)\\.iisacc-temporary\\.lock$")
 list(REMOVE_DUPLICATES LVRS_RESOURCE_FILES)

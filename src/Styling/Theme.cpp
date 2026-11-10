@@ -1,31 +1,24 @@
 #include <LVRS/Theme.h>
 #include <LVRS/FontPolicy.h>
+#include "FigmaColors.h"
 #include <iiSDKCore/Core/Property/ObservableReadScope.h>
 #include <cmath>
 #include <stdexcept>
 
 namespace lvrs {
 ii::gui::WidgetColor Theme::accent_color(Accent accent) {
-    using C=ii::gui::WidgetColor;
-    constexpr std::array<C,12> palette{{
-        {.08120492845773697,.5099760293960571,1,1},
-        {.5275065302848816,.291259765625,1,1},
-        {.975510835647583,.26653972268104553,.4437825083732605,1},
-        {1,.2760854959487915,.2760854959487915,1},
-        {1,.47672274708747864,.15144230425357819,1},
-        {1,.8303598165512085,.15179912745952606,1},
-        {0,.9058823585510254,.12156862765550613,1},
-        {140.0/255,140.0/255,140.0/255,1},
-        {.2616060674190521,.13824503123760223,.09279626607894897,1},
-        {.12926307320594788,.8258525729179382,1,1},
-        {0,.7790151238441467,.8655723929405212,1},
-        {1,1,1,1}}};
-    const auto index=static_cast<unsigned>(accent);
-    if(index>=palette.size()) throw std::invalid_argument("Unknown LVRS accent");
-    return palette[index];
+    return accent_role(accent, AccentRole::standard);
 }
 ii::gui::WidgetColor Theme::accent_role(Accent accent,AccentRole role) {
-    auto color=accent_color(accent);
+    constexpr std::array<int,12> rows{0,4,5,1,6,3,2,-1,7,8,9,-1};
+    const auto index=static_cast<unsigned>(accent), state=static_cast<unsigned>(role);
+    if(index>=rows.size()) throw std::invalid_argument("Unknown LVRS accent");
+    if(state>=figma_colors::accents.front().size()) throw std::invalid_argument("Unknown LVRS accent role");
+    if(rows[index]>=0) return figma_colors::accents[std::size_t(rows[index])][state];
+    // Gray and white remain legacy neutral choices; Figma defines no Accent roles for them.
+    ii::gui::WidgetColor color=accent==Accent::gray
+        ? ii::gui::WidgetColor{140.0/255,140.0/255,140.0/255,1}
+        : ii::gui::WidgetColor{1,1,1,1};
     const auto multiply=[&](double value){color.red*=value;color.green*=value;color.blue*=value;};
     const auto mix=[&](double base,double amount){color.red=base*(1-amount)+color.red*amount;
         color.green=base*(1-amount)+color.green*amount;color.blue=base*(1-amount)+color.blue*amount;};
@@ -39,14 +32,26 @@ ii::gui::WidgetColor Theme::accent_role(Accent accent,AccentRole role) {
     case AccentRole::subtle: mix(surface,.16);break;
     case AccentRole::outline: mix(surface,.36);break;
     case AccentRole::overlay: color.alpha*=64./255.;break;
-    case AccentRole::text:
-        if(accent==Accent::blue) {color.red=.3529411852359772;color.green=.6666666865348816;color.blue=1;}
-        else if(accent==Accent::brown) {color.red=.595413088798523;color.green=.5278200507164001;color.blue=.5029174089431763;}
-        else mix(1,.7);
-        break;
+    case AccentRole::text: mix(1,.7);break;
     default: throw std::invalid_argument("Unknown LVRS accent role");
     }
     return color;
+}
+ii::gui::WidgetColor Theme::icon_accent_role(Accent accent,AccentRole source) {
+    if(source==AccentRole::standard) return accent_role(accent,AccentRole::hover);
+    if(source==AccentRole::hover) return accent_role(accent,AccentRole::pressed);
+    auto color=accent_role(accent,source);
+    constexpr std::array<int,12> rows{0,4,5,1,6,3,2,-1,7,8,9,-1};
+    const auto index=rows[static_cast<unsigned>(accent)];
+    for(const auto& token:figma_colors::icon_accents)
+        if(index>=0 && token.color==std::size_t(index) && token.role==static_cast<unsigned>(source)) return token.value;
+    color.red*=.9;color.green*=.9;color.blue*=.9;
+    return color;
+}
+ii::gui::WidgetColor Theme::background(BackgroundRole role) {
+    const auto index=static_cast<unsigned>(role);
+    if(index>=figma_colors::backgrounds.size()) throw std::invalid_argument("Unknown LVRS background role");
+    return figma_colors::backgrounds[index];
 }
 ii::gui::WidgetAppearance Theme::appearance() const {
     static thread_local const bool fonts_ready=ii::core::ObservableReadScope::pause([]{FontPolicy policy;return true;});
@@ -59,8 +64,9 @@ ii::gui::WidgetAppearance Theme::appearance() const {
         if(!found){const auto application=fonts->application_font();result.font_family=application?application->family:fonts->system_family();}
     }
     const auto c=result.primary;
-    const auto mix=[](double v) { return std::round((20.0*.98+v*255*.02))/255; };
-    result.window={mix(c.red),mix(c.green),mix(c.blue),1};
+    const auto base=background(BackgroundRole::window);
+    const auto mix=[](double b,double v) { return std::round((b*.98+v*.02)*255)/255; };
+    result.window={mix(base.red,c.red),mix(base.green,c.green),mix(base.blue,c.blue),1};
     result.hover=accent_role(accent_,AccentRole::hover);
     result.pressed=accent_role(accent_,AccentRole::pressed);
     return result;

@@ -80,6 +80,12 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+/resources/.recovery/
+/resources/.state/
+/resources/.t/
+__pycache__/
+.iisacc-temporary.lock
+.*.iisacc-preview
 /.build*/
 
 # Figma source icons whose names collide with Makefile ignore patterns.

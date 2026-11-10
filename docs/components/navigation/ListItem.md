@@ -46,7 +46,7 @@
 - 미리보기: 이미지 URL의 경우 `previewSource`, 테마 자산의 경우 `previewIconName`. 아이콘은 48px 타일 내부 중앙에 네이티브 18px 크기로 유지됩니다.
 - 선택: `checked`, `toggleEnabled`, `selectionEnabled`. `selected`는 확인란/스위치 값과 관계없이 행 강조 표시를 제어합니다.
 - 수량: `quantity`, `minimumQuantity`(0), `maximumQuantity`(무제한), `stepSize`(1). 사용자 편집은 제한되어 있으며 구성된 범위로 고정됩니다.
-- 선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0).
+- 선택기 상태: `selectorIndex`, `unitIndex`(둘 다 0), `segmentIndex`(0). Segment 버튼은 모두 무테 타입을 유지하며 선택된 항목만 일반 버튼의 앱 악센트 Selected 배경을 사용합니다.
 - 입력 상태: `inputText1`, `inputText2`(둘 다 `"Value"`). 이는 레거시 Mini `inputResult`와는 별개입니다.
 
 선택적 요소는 `showLeadingIcon` , `showDescription` , `showValue` , `showTrailingIcon` , `showBookmark` , `showDate` , `showFolders` , `showTags` , `showMetadata` , `showPrimaryAction` , `showSecondaryAction` , `showMoreMenu` , `showStepper` , `showSelector` , `showUnitSelector` , `showToggle` , `showSelection` , `showSegments` , `showInput1` , `showInput2` , `showPreview` 를 사용합니다. 모두 기본값이 참입니다. 플래그는 해당 요소를 포함하는 변형에만 영향을 미칩니다.

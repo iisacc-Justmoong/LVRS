@@ -276,7 +276,10 @@ Column {
                         implicitWidth: Theme.scaleMetric(56)
                         text: root.listItem.optionText(modelData, "")
                         enabled: root.listItem.effectiveEnabled && root.listItem.configValue(modelData, "enabled", true)
-                        tone: index === root.listItem.segmentIndex ? AbstractButton.Primary : AbstractButton.Borderless
+                        tone: AbstractButton.Borderless
+                        checkable: true
+                        autoExclusive: true
+                        checked: index === root.listItem.segmentIndex
                         onClicked: {
                             root.listItem.editValue("segmentIndex", index);
                             const method = root.listItem.configValue(modelData, "method", null);

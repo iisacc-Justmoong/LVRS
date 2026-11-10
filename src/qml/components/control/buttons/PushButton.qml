@@ -49,7 +49,7 @@ AbstractButton {
     horizontalPadding: iconMode ? Theme.gap2 : Theme.gap8
     verticalPadding: iconMode ? Theme.gap2
         : Math.max(0, (figmaButtonHeight - Theme.textBodyLineHeight) / 2)
-    spacing: iconMode ? (tone === AbstractButton.Primary ? Theme.gapNone : Theme.gap7) : Theme.gap10
+    spacing: iconMode ? (effectiveTone === AbstractButton.Primary ? Theme.gapNone : Theme.gap7) : Theme.gap10
     cornerRadius: Theme.radiusMd
     height: figmaButtonHeight
     implicitHeight: figmaButtonHeight

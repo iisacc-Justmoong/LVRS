@@ -3,7 +3,7 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 BUILD_DIR="${SCRIPT_DIR}/build"
-BUILD_EXAMPLES=ON
+BUILD_EXAMPLES=OFF
 BUILD_TESTS=ON
 CLEAN_BUILD=0
 
@@ -21,16 +21,17 @@ usage() {
 Usage: ./build.sh [options] [-- <extra-cmake-configure-args...>]
 
 Options:
-  --build-dir <path>      Use a custom CMake build directory. Default: ./build
+  --build-dir <path>      Select ./build (the only supported build directory)
+  --with-examples         Also build the runnable example applications
   --without-examples      Configure with LVRS_BUILD_EXAMPLES=OFF
   --without-tests         Configure with LVRS_BUILD_TESTS=OFF
-  --clean                 Remove the build directory before configuring
+  --clean                 Clean generated outputs with the existing build system
   --help                  Show this help
 
 Examples:
   ./build.sh
   ./build.sh --without-tests
-  ./build.sh --build-dir build-proof -- -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  ./build.sh --with-examples -- -DCMAKE_BUILD_TYPE=RelWithDebInfo
 EOF
 }
 
@@ -43,6 +44,10 @@ while [ $# -gt 0 ]; do
             ;;
         --without-examples)
             BUILD_EXAMPLES=OFF
+            shift
+            ;;
+        --with-examples)
+            BUILD_EXAMPLES=ON
             shift
             ;;
         --without-tests)
@@ -72,29 +77,33 @@ case "${BUILD_DIR}" in
     *) BUILD_DIR="${SCRIPT_DIR}/${BUILD_DIR}" ;;
 esac
 
+[ "${BUILD_DIR}" = "${SCRIPT_DIR}/build" ] || fail "The build directory must be ${SCRIPT_DIR}/build."
+
 for extra_cmake_arg in "$@"; do
     case "${extra_cmake_arg}" in
-        -DLVRS_BUILD_EXAMPLES*|-DLVRS_BUILD_TESTS*)
-            fail "Do not override LVRS_BUILD_EXAMPLES/LVRS_BUILD_TESTS through extra CMake args. Use --without-examples or --without-tests."
+        -DLVRS_BUILD_EXAMPLES*|-DLVRS_BUILD_TESTS*|-DBUILD_TESTING*)
+            fail "Do not override LVRS_BUILD_EXAMPLES/LVRS_BUILD_TESTS through extra CMake args. Use the corresponding build.sh options."
             ;;
     esac
 done
 
 if [ "${CLEAN_BUILD}" -eq 1 ] && [ -d "${BUILD_DIR}" ]; then
-    log "Removing existing build directory: ${BUILD_DIR}"
-    rm -rf "${BUILD_DIR}"
+    [ -f "${BUILD_DIR}/CMakeCache.txt" ] || fail "Cannot clean an unconfigured build directory; inspect it first."
+    log "Cleaning generated build outputs: ${BUILD_DIR}"
+    cmake --build "${BUILD_DIR}" --target clean
 fi
 
 log "Configuring ${BUILD_DIR}"
 cmake -S "${SCRIPT_DIR}" -B "${BUILD_DIR}" \
     -DLVRS_BUILD_EXAMPLES="${BUILD_EXAMPLES}" \
     -DLVRS_BUILD_TESTS="${BUILD_TESTS}" \
+    -DBUILD_TESTING="${BUILD_TESTS}" \
     "$@"
 
 log "Building default targets"
 cmake --build "${BUILD_DIR}" --parallel
 
-if [ "${BUILD_EXAMPLES}" = "ON" ]; then
+if [ "${BUILD_EXAMPLES}" = "ON" ] && grep -q '^LVRS_BACKEND:STRING=qt$' "${BUILD_DIR}/CMakeCache.txt"; then
     log "Ensuring host example outputs are populated"
     cmake --build "${BUILD_DIR}" --target lvrs_host_examples_all --parallel
 fi
@@ -114,14 +123,9 @@ check_macos_runtime() {
 }
 
 check_launcher_consistency() {
-    launcher_count=0
-    launcher_list=$(mktemp "${TMPDIR:-/tmp}/lvrs-build-launchers.XXXXXX")
-    trap 'rm -f "${launcher_list}"' EXIT INT TERM HUP
-
-    find "${SCRIPT_DIR}/example" -type f -path '*/bin/LVRSExample*' | sort > "${launcher_list}"
-
-    while IFS= read -r launcher; do
-        launcher_count=$((launcher_count + 1))
+    find "${SCRIPT_DIR}/example" -type f -path '*/bin/LVRSExample*' -print -quit | grep -q . \
+        || fail "No checked-in example launchers were found under ${SCRIPT_DIR}/example."
+    find "${SCRIPT_DIR}/example" -type f -path '*/bin/LVRSExample*' | while IFS= read -r launcher; do
         first_line=$(sed -n '1p' "${launcher}")
         [ "${first_line}" = "#!/bin/sh" ] \
             || fail "Launcher is not a shell script: ${launcher}"
@@ -140,15 +144,12 @@ check_launcher_consistency() {
         if [ "$(uname -s)" = "Darwin" ]; then
             check_macos_runtime "${build_binary}"
         fi
-    done < "${launcher_list}"
-
-    [ "${launcher_count}" -gt 0 ] || fail "No checked-in example launchers were found under ${SCRIPT_DIR}/example."
-
-    rm -f "${launcher_list}"
-    trap - EXIT INT TERM HUP
+    done
 }
 
-log "Checking launcher and build output consistency"
-check_launcher_consistency
+if [ "${BUILD_EXAMPLES}" = "ON" ] && grep -q '^LVRS_BACKEND:STRING=qt$' "${BUILD_DIR}/CMakeCache.txt"; then
+    log "Checking launcher and build output consistency"
+    check_launcher_consistency
+fi
 
 log "Build consistency checks passed"

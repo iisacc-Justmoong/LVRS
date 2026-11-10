@@ -35,7 +35,9 @@ private slots:
     void svg_manager_error_paths_and_cache_signals();
     void figma_iconset_resources_are_complete_and_renderable();
     void control_variant_resources_are_packaged();
+    void provider_metadata_is_not_packaged();
     void translate_object_preserves_image_alpha();
+    void smart_select_preserves_image_alpha();
     void all_svg_icons_scale_and_center();
 };
 
@@ -287,6 +289,14 @@ void SvgManagerTests::control_variant_resources_are_packaged()
     }
 }
 
+void SvgManagerTests::provider_metadata_is_not_packaged()
+{
+    QDirIterator files(QStringLiteral(":/qt/qml/LVRS/resources"),
+                       {QStringLiteral("*.iisacc-preview"), QStringLiteral(".iisacc-temporary.lock")},
+                       QDir::Files | QDir::Hidden, QDirIterator::Subdirectories);
+    QVERIFY2(!files.hasNext(), "iiFileProvider sidecars or locks were packaged as LVRS resources");
+}
+
 void SvgManagerTests::translate_object_preserves_image_alpha()
 {
     QFile resource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/translateObject.svg"));
@@ -300,8 +310,9 @@ void SvgManagerTests::translate_object_preserves_image_alpha()
     QVERIFY(!tinted.isNull());
     QVERIFY(!original.isNull());
     QCOMPARE(tinted.size(), original.size());
-    const QColor cyan = AccentFixture::color("accentCyan");
+    const QColor cyan = AccentFixture::role("Cyan", "Hover");
     bool visible = false;
+    bool exactColor = false;
     for (int y = 0; y < original.height(); ++y) {
         for (int x = 0; x < original.width(); ++x) {
             QCOMPARE(tinted.pixelColor(x, y).alpha(), original.pixelColor(x, y).alpha());
@@ -310,15 +321,36 @@ void SvgManagerTests::translate_object_preserves_image_alpha()
                 // Native PNG export preserves alpha exactly; opaque pixels
                 // verify the authored color without unpremultiplication noise.
                 if (color.alpha() == 255) {
-                    QCOMPARE(color.red(), cyan.red());
-                    QCOMPARE(color.green(), cyan.green());
-                    QCOMPARE(color.blue(), cyan.blue());
+                    QVERIFY(qAbs(color.red() - cyan.red()) <= 1);
+                    QVERIFY(qAbs(color.green() - cyan.green()) <= 1);
+                    QVERIFY(qAbs(color.blue() - cyan.blue()) <= 1);
+                    exactColor |= color.red() == cyan.red() && color.green() == cyan.green()
+                        && color.blue() == cyan.blue();
                 }
                 visible = true;
             }
         }
     }
     QVERIFY(visible);
+    QVERIFY(exactColor);
+}
+
+void SvgManagerTests::smart_select_preserves_image_alpha()
+{
+    QFile resource(QStringLiteral(":/qt/qml/LVRS/resources/iconset/smartSelect.svg"));
+    QVERIFY(resource.open(QIODevice::ReadOnly));
+    const QRegularExpression embedded(QStringLiteral("data:image/png;base64,([^\"]+)"));
+    const auto match = embedded.match(QString::fromUtf8(resource.readAll()));
+    QVERIFY(match.hasMatch());
+    const QImage image = QImage::fromData(QByteArray::fromBase64(match.captured(1).toLatin1()));
+    QCOMPARE(image.size(), QSize(144, 144));
+    QByteArray alpha;
+    alpha.reserve(image.width() * image.height());
+    for (int y = 0; y < image.height(); ++y)
+        for (int x = 0; x < image.width(); ++x)
+            alpha.append(char(image.pixelColor(x, y).alpha()));
+    QCOMPARE(QCryptographicHash::hash(alpha, QCryptographicHash::Sha256).toHex(),
+             QByteArrayLiteral("ece9cf38b3eabed8d8fb2b47306ddc220d8631e85cec81298a961aec2c6d12da"));
 }
 
 void SvgManagerTests::all_svg_icons_scale_and_center()

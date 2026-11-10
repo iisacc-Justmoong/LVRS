@@ -13,7 +13,7 @@ void good(core::Result<void> r){if(!r)throw BuildError{r.error()};}
 bool text(std::string_view s){return s.size()<=65536&&s.find('\0')==s.npos&&core::valid_utf8(s);}
 bool metric(double v){return std::isfinite(v)&&v>=0&&v<=8192;}
 bool rgba(gui::WidgetColor c){for(auto n:{c.red,c.green,c.blue,c.alpha})if(!std::isfinite(n)||n<0||n>1)return false;return true;}
-gui::WidgetColor tint(gui::WidgetColor c,double a){const auto alpha=c.alpha*a;return {.1411764771*(1-alpha)+c.red*alpha,.1411764771*(1-alpha)+c.green*alpha,.1411764771*(1-alpha)+c.blue*alpha,1};}
+gui::WidgetColor tint(gui::WidgetColor c,double a){const auto alpha=c.alpha*a;const auto base=Theme::background(BackgroundRole::surface_interactive);return {base.red*(1-alpha)+c.red*alpha,base.green*(1-alpha)+c.green*alpha,base.blue*(1-alpha)+c.blue*alpha,1};}
 auto solid(){static auto image=gui::rgba_image(1,1,{54,59,63,255});if(!image)throw BuildError{image.error()};return *image;}
 auto builtin(AlertIcon i){static auto adjustments=gui::svg_image(take(alert_icon_source(AlertIcon::adjustments)),128,128);static auto file=gui::svg_image(take(alert_icon_source(AlertIcon::file_text)),128,128);return take(i==AlertIcon::adjustments?adjustments:file);}
 }
@@ -32,7 +32,7 @@ struct Alert::Impl final {
     ii::gui::ImageOptions icon_options()const{
         using namespace ii::gui;const auto side=options.icon_size.value_or(count()==3?56:64),frame=options.icon_frame_size.value_or(std::max(86.,side));const bool standard=primary==Theme::accent_color(Accent::blue);
         auto image=options.image_source?options.image_source:options.use_builtin_image?(options.builtin_icon.value_or(count()==3?AlertIcon::file_text:AlertIcon::adjustments)==AlertIcon::file_text?file:adjustments):placeholder;
-        return {.image=image,.width=frame,.height=frame,.accessibility_name="Application icon",.padding=(frame-(options.image_source||options.use_builtin_image?side:32))/2,.corner_radius=28,.border_width=1,.background=options.icon_background.value_or(standard?WidgetColor{.1315810238,.2001844,.2785882353,1}:tint(primary,.16)),.border=options.icon_border.value_or(standard?WidgetColor{.1195867154,.2739443118,.4503529412,1}:tint(primary,.36)),.preserve_aspect=true};
+        return {.image=image,.width=frame,.height=frame,.accessibility_name="Application icon",.padding=(frame-(options.image_source||options.use_builtin_image?side:32))/2,.corner_radius=28,.border_width=1,.background=options.icon_background.value_or(standard?Theme::accent_role(Accent::blue,AccentRole::subtle):tint(primary,.16)),.border=options.icon_border.value_or(standard?Theme::accent_role(Accent::blue,AccentRole::outline):tint(primary,.36)),.preserve_aspect=true};
     }
     ii::core::Result<void> apply(){
         using namespace ii;if(updating)return core::fail(core::ErrorCode::busy,"Alert update is reentrant");updating=true;struct Guard final {bool& flag;~Guard(){flag=false;}} guard{updating};

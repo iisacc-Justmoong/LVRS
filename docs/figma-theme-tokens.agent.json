@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/figma-theme-tokens.md",
-    "sha256": "566ab4bde3be199c3cabb8c1fcba108c2a6bdc8b119ad8c0498e283b8b094480",
-    "bytes": 18350,
-    "line_count": 261,
+    "sha256": "847d15438033686518dec5d358b0118856e11543eaaa6572a1cd1dcf3b8f2deb",
+    "bytes": 17840,
+    "line_count": 249,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -42,35 +42,35 @@
       "id": "b000003",
       "kind": "paragraph",
       "start_line": 3,
-      "end_line": 7,
-      "raw": "This document records the Figma-first color and typography contract for the LVRS\nGUI theme. The authoritative captured data is\n[`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json),\nfrom the [LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS).\nThe 2026-10-19 accent revision uses the ten user-selected swatches on the Color page as its color authority. The fixture retains **77 variables: 41 colors and 36 typography variables**, plus **seven text styles**. All 41 color variables were read back after the update. Existing variable IDs and names, typography and style bindings are retained. Component bounds are retained; ColorPicker recent-color cells share the same row width across ten swatches. The authored RGBA values and source-node mapping are also recorded in [`accent-palette.json`](../tests/fixtures/accent-palette.json).\n"
+      "end_line": 3,
+      "raw": "This document records the Figma-first color and typography contract for the LVRS GUI theme. The current color authority is the 2026-10-31 readback of [the LVRS Figma file](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS), stored at [`resources/figma-color-tokens.json`](../resources/figma-color-tokens.json). It contains 90 accent-state colors, 29 derived icon colors and 22 window, panel and material colors. Typography and compatibility details are retained in [`tests/fixtures/figma-theme-contract.json`](../tests/fixtures/figma-theme-contract.json); the earlier 2026-10-19 capture is historical.\n"
     },
     {
       "id": "b000004",
       "kind": "blank",
-      "start_line": 8,
-      "end_line": 8,
+      "start_line": 4,
+      "end_line": 4,
       "raw": "\n"
     },
     {
       "id": "b000005",
       "kind": "paragraph",
-      "start_line": 9,
-      "end_line": 9,
-      "raw": "The source mapping is `src/qml/Theme.qml`. Hex values below are rounded display values; the canonical QML properties use original floating-point `Qt.rgba` values. Tests compare those channels at QColor precision. Building and testing this checkout is separate from updating an installed SDK. The user performs `lvrs install` for this revision.\n"
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`scripts/sync_figma_tokens.py` generates the C++ color table and updates the generated sections of `src/qml/Theme.qml` and the window-noise defaults. Its `--check` option verifies those outputs against the checked-in snapshot. Hexadecimal values are rounded for display; exact comparisons use the captured floating-point RGBA channels. The palette rendering test compares pixels in memory; an optional `LVRS_ACCENT_CAPTURE_PATH` can be supplied explicitly for a capture under `resources/`. Source builds and tests do not install the SDK. The user performs `lvrs install` for this revision.\n"
     },
     {
       "id": "b000006",
       "kind": "blank",
-      "start_line": 10,
-      "end_line": 10,
+      "start_line": 6,
+      "end_line": 6,
       "raw": "\n"
     },
     {
       "id": "b000007",
       "kind": "heading",
-      "start_line": 11,
-      "end_line": 11,
+      "start_line": 7,
+      "end_line": 7,
       "raw": "## Scope and naming\n",
       "level": 2,
       "title": "Scope and naming"
@@ -78,25 +78,25 @@
     {
       "id": "b000008",
       "kind": "blank",
-      "start_line": 12,
-      "end_line": 12,
+      "start_line": 8,
+      "end_line": 8,
       "raw": "\n"
     },
     {
       "id": "b000009",
       "kind": "list",
-      "start_line": 13,
-      "end_line": 25,
-      "raw": "- `Theme Colors` contains 13 panel/window colors, six text colors, four action\n  colors and 18 named accent properties: ten canonical colors, seven compatibility\n  aliases and one neutral Gray. Names express roles and color names.\n- `Theme Typography` contains a shared family and seven five-property recipes.\n- Existing IDs are retained when an existing variable or style is renamed. Old\n  QML panel and typography property names remain compatibility aliases.\n- Existing control-specific fills, pressed/selected state overrides, materials,\n  icon-derived colors and platform-specific tokens are outside the core inventory.\n  Their absence from the core set does not authorize deleting them. Existing\n  paints that used the replaced accents, including their opacity stops and\n  composites, follow the new colors while retaining their state behavior.\n- The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**\n  `Theme.<property>` references. It is not CSS syntax or a web-only implementation.\n",
+      "start_line": 9,
+      "end_line": 17,
+      "raw": "- The theme exposes 13 panel/window properties, six text colors, ten canonical\n  accent colors, compatibility aliases and neutral Gray. Names express roles.\n- The QML typography API retains a shared family and seven five-property recipes;\n  the current Figma styles use 20 shared typography variables.\n- Existing IDs are retained when an existing variable or style is renamed. Old\n  QML panel and typography property names remain compatibility aliases.\n- The current snapshot also contains the nine accent states per color, 29 derived icon colors and material/background roles. Unrelated platform and control-specific tokens retain their existing behavior.\n- The collection metadata slot `codeSyntax.WEB` intentionally contains **QML**\n  `Theme.<property>` references. It is not CSS syntax or a web-only implementation.\n",
       "items": [
         {
           "marker": "-",
-          "text": "`Theme Colors` contains 13 panel/window colors, six text colors, four action",
+          "text": "The theme exposes 13 panel/window properties, six text colors, ten canonical",
           "checked": null
         },
         {
           "marker": "-",
-          "text": "`Theme Typography` contains a shared family and seven five-property recipes.",
+          "text": "The QML typography API retains a shared family and seven five-property recipes;",
           "checked": null
         },
         {
@@ -106,7 +106,7 @@
         },
         {
           "marker": "-",
-          "text": "Existing control-specific fills, pressed/selected state overrides, materials,",
+          "text": "The current snapshot also contains the nine accent states per color, 29 derived icon colors and material/background roles. Unrelated platform and control-specific tokens retain their existing behavior.",
           "checked": null
         },
         {
@@ -119,31 +119,31 @@
     {
       "id": "b000010",
       "kind": "blank",
-      "start_line": 26,
-      "end_line": 26,
+      "start_line": 18,
+      "end_line": 18,
       "raw": "\n"
     },
     {
       "id": "b000011",
       "kind": "table",
-      "start_line": 27,
-      "end_line": 31,
-      "raw": "| Collection | ID | Active core inventory |\n| --- | --- | ---: |\n| Theme Colors | `VariableCollectionId:44:457` | 41; 33 in the initial snapshot |\n| Theme Typography | `VariableCollectionId:1305:73` | 36 |\n| Compatibility Icon Colors | `VariableCollectionId:963:2` | 0; 1,548 retained hidden variables |\n",
+      "start_line": 19,
+      "end_line": 23,
+      "raw": "| Collection | ID | Recorded contract |\n| --- | --- | ---: |\n| Theme Colors | `VariableCollectionId:44:457` | Core roles and the Figma color snapshot |\n| Theme Typography | `VariableCollectionId:1305:73` | 20 current Figma variables; 36 QML recipe properties |\n| Compatibility Icon Colors | `VariableCollectionId:963:2` | 0; 1,548 retained hidden variables |\n",
       "columns": [
         "Collection",
         "ID",
-        "Active core inventory"
+        "Recorded contract"
       ],
       "rows": [
         [
           "Theme Colors",
           "`VariableCollectionId:44:457`",
-          "41; 33 in the initial snapshot"
+          "Core roles and the Figma color snapshot"
         ],
         [
           "Theme Typography",
           "`VariableCollectionId:1305:73`",
-          "36"
+          "20 current Figma variables; 36 QML recipe properties"
         ],
         [
           "Compatibility Icon Colors",
@@ -155,29 +155,29 @@
     {
       "id": "b000012",
       "kind": "blank",
-      "start_line": 32,
-      "end_line": 32,
+      "start_line": 24,
+      "end_line": 24,
       "raw": "\n"
     },
     {
       "id": "b000013",
       "kind": "paragraph",
-      "start_line": 33,
-      "end_line": 35,
+      "start_line": 25,
+      "end_line": 27,
       "raw": "Colors use the captured `Dark` mode. Typography uses its captured mode; the\nfixture records every mode ID. Variable scopes are compared as sets, not by\narray ordering. Each variable has `codeSyntax.WEB: \"Theme.<property>\"`.\n"
     },
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 36,
-      "end_line": 36,
+      "start_line": 28,
+      "end_line": 28,
       "raw": "\n"
     },
     {
       "id": "b000015",
       "kind": "heading",
-      "start_line": 37,
-      "end_line": 37,
+      "start_line": 29,
+      "end_line": 29,
       "raw": "## Panel roles and exact values\n",
       "level": 2,
       "title": "Panel roles and exact values"
@@ -185,30 +185,30 @@
     {
       "id": "b000016",
       "kind": "blank",
-      "start_line": 38,
-      "end_line": 38,
+      "start_line": 30,
+      "end_line": 30,
       "raw": "\n"
     },
     {
       "id": "b000017",
       "kind": "paragraph",
-      "start_line": 39,
-      "end_line": 42,
+      "start_line": 31,
+      "end_line": 34,
       "raw": "These normalized RGB channels are copied from actual Figma `resolved` values.\nEvery panel alpha is `1`. Preserve the floating values rather than replacing\nthem with rounded hexadecimal colors. The order is a role inventory, not a\nmonotonic brightness ramp; do not recalculate steps 07 and 08 to match their names.\n"
     },
     {
       "id": "b000018",
       "kind": "blank",
-      "start_line": 43,
-      "end_line": 43,
+      "start_line": 35,
+      "end_line": 35,
       "raw": "\n"
     },
     {
       "id": "b000019",
       "kind": "table",
-      "start_line": 44,
-      "end_line": 58,
-      "raw": "| Figma variable | QML property | Normalized RGB | Retained ID |\n| --- | --- | --- | --- |\n| `Panel/canvas` | `Theme.canvas` | `(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)` | `VariableID:44:467` |\n| `Panel/surfaceGhost` | `Theme.surfaceGhost` | `(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)` | `VariableID:44:468` |\n| `Panel/windowAlt` | `Theme.windowAlt` | `(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)` | `VariableID:44:469` |\n| `Panel/subSurface` | `Theme.subSurface` | `(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)` | `VariableID:44:470` |\n| `Panel/surfaceSolid` | `Theme.surfaceSolid` | `(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)` | `VariableID:215:9618` |\n| `Panel/surfaceAlt` | `Theme.surfaceAlt` | `(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)` | `VariableID:215:9620` |\n| `Panel/surfaceInteractive` | `Theme.surfaceInteractive` | `(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)` | `VariableID:215:9621` |\n| `Panel/surfacePanel` | `Theme.surfacePanel` | `(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)` | `VariableID:215:9622` |\n| `Panel/surfaceControl` | `Theme.surfaceControl` | `(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)` | `VariableID:215:9623` |\n| `Panel/surfaceInput` | `Theme.surfaceInput` | `(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)` | `VariableID:215:9624` |\n| `Panel/surfaceInputHover` | `Theme.surfaceInputHover` | `(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)` | `VariableID:215:9625` |\n| `Panel/surfaceRaised` | `Theme.surfaceRaised` | `(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)` | `VariableID:215:9626` |\n| `Panel/window` | `Theme.window` | `(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)` | `VariableID:1305:74` |\n",
+      "start_line": 36,
+      "end_line": 50,
+      "raw": "| Figma variable | QML property | Normalized RGB | Retained ID |\n| --- | --- | --- | --- |\n| `Panel/canvas` | `Theme.canvas` | `(0.06189476698637009, 0.06189476698637009, 0.06373938918113708)` | `VariableID:44:467` |\n| `Panel/surfaceGhost` | `Theme.surfaceGhost` | `(0.0696646124124527, 0.06979759782552719, 0.07046254724264145)` | `VariableID:44:468` |\n| `Panel/windowAlt` | `Theme.windowAlt` | `(0.1061861664056778, 0.1061861664056778, 0.1091860681772232)` | `VariableID:44:469` |\n| `Panel/subSurface` | `Theme.subSurface` | `(0.12038286030292511, 0.12213718146085739, 0.12389150261878967)` | `VariableID:44:470` |\n| `Panel/surfaceSolid` | `Theme.surfaceSolid` | `(0.14418363571166992, 0.1475532352924347, 0.1475532352924347)` | `VariableID:215:9618` |\n| `Panel/surfaceAlt` | `Theme.surfaceAlt` | `(0.15562701225280762, 0.15847958624362946, 0.1613321751356125)` | `VariableID:215:9620` |\n| `Panel/surfaceInteractive` | `Theme.surfaceInteractive` | `(0.17858824133872986, 0.17858824133872986, 0.17858824133872986)` | `VariableID:215:9621` |\n| `Panel/surfacePanel` | `Theme.surfacePanel` | `(0.17342455685138702, 0.17747892439365387, 0.1795060932636261)` | `VariableID:215:9622` |\n| `Panel/surfaceControl` | `Theme.surfaceControl` | `(0.18747973442077637, 0.192999929189682, 0.192999929189682)` | `VariableID:215:9623` |\n| `Panel/surfaceInput` | `Theme.surfaceInput` | `(0.19681522250175476, 0.1986967921257019, 0.20057833194732666)` | `VariableID:215:9624` |\n| `Panel/surfaceInputHover` | `Theme.surfaceInputHover` | `(0.2218484729528427, 0.23012775182724, 0.23288752138614655)` | `VariableID:215:9625` |\n| `Panel/surfaceRaised` | `Theme.surfaceRaised` | `(0.24484941363334656, 0.25022611021995544, 0.2529144883155823)` | `VariableID:215:9626` |\n| `Panel/window` | `Theme.window` | `(0.09921568632125854, 0.09921568632125854, 0.09921568632125854)` | `VariableID:1305:74` |\n",
       "columns": [
         "Figma variable",
         "QML property",
@@ -219,79 +219,79 @@
         [
           "`Panel/canvas`",
           "`Theme.canvas`",
-          "`(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)`",
+          "`(0.06189476698637009, 0.06189476698637009, 0.06373938918113708)`",
           "`VariableID:44:467`"
         ],
         [
           "`Panel/surfaceGhost`",
           "`Theme.surfaceGhost`",
-          "`(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)`",
+          "`(0.0696646124124527, 0.06979759782552719, 0.07046254724264145)`",
           "`VariableID:44:468`"
         ],
         [
           "`Panel/windowAlt`",
           "`Theme.windowAlt`",
-          "`(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)`",
+          "`(0.1061861664056778, 0.1061861664056778, 0.1091860681772232)`",
           "`VariableID:44:469`"
         ],
         [
           "`Panel/subSurface`",
           "`Theme.subSurface`",
-          "`(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)`",
+          "`(0.12038286030292511, 0.12213718146085739, 0.12389150261878967)`",
           "`VariableID:44:470`"
         ],
         [
           "`Panel/surfaceSolid`",
           "`Theme.surfaceSolid`",
-          "`(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)`",
+          "`(0.14418363571166992, 0.1475532352924347, 0.1475532352924347)`",
           "`VariableID:215:9618`"
         ],
         [
           "`Panel/surfaceAlt`",
           "`Theme.surfaceAlt`",
-          "`(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)`",
+          "`(0.15562701225280762, 0.15847958624362946, 0.1613321751356125)`",
           "`VariableID:215:9620`"
         ],
         [
           "`Panel/surfaceInteractive`",
           "`Theme.surfaceInteractive`",
-          "`(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)`",
+          "`(0.17858824133872986, 0.17858824133872986, 0.17858824133872986)`",
           "`VariableID:215:9621`"
         ],
         [
           "`Panel/surfacePanel`",
           "`Theme.surfacePanel`",
-          "`(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)`",
+          "`(0.17342455685138702, 0.17747892439365387, 0.1795060932636261)`",
           "`VariableID:215:9622`"
         ],
         [
           "`Panel/surfaceControl`",
           "`Theme.surfaceControl`",
-          "`(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)`",
+          "`(0.18747973442077637, 0.192999929189682, 0.192999929189682)`",
           "`VariableID:215:9623`"
         ],
         [
           "`Panel/surfaceInput`",
           "`Theme.surfaceInput`",
-          "`(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)`",
+          "`(0.19681522250175476, 0.1986967921257019, 0.20057833194732666)`",
           "`VariableID:215:9624`"
         ],
         [
           "`Panel/surfaceInputHover`",
           "`Theme.surfaceInputHover`",
-          "`(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)`",
+          "`(0.2218484729528427, 0.23012775182724, 0.23288752138614655)`",
           "`VariableID:215:9625`"
         ],
         [
           "`Panel/surfaceRaised`",
           "`Theme.surfaceRaised`",
-          "`(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)`",
+          "`(0.24484941363334656, 0.25022611021995544, 0.2529144883155823)`",
           "`VariableID:215:9626`"
         ],
         [
           "`Panel/window`",
           "`Theme.window`",
-          "`(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)`",
+          "`(0.09921568632125854, 0.09921568632125854, 0.09921568632125854)`",
           "`VariableID:1305:74`"
         ]
       ]
@@ -299,29 +299,29 @@
     {
       "id": "b000020",
       "kind": "blank",
-      "start_line": 59,
-      "end_line": 59,
+      "start_line": 51,
+      "end_line": 51,
       "raw": "\n"
     },
     {
       "id": "b000021",
       "kind": "paragraph",
-      "start_line": 60,
-      "end_line": 61,
+      "start_line": 52,
+      "end_line": 53,
       "raw": "The twelve legacy properties alias the corresponding role without creating a\nsecond color authority. `window` remains independent of the twelve legacy steps.\n"
     },
     {
       "id": "b000022",
       "kind": "blank",
-      "start_line": 62,
-      "end_line": 62,
+      "start_line": 54,
+      "end_line": 54,
       "raw": "\n"
     },
     {
       "id": "b000023",
       "kind": "table",
-      "start_line": 63,
-      "end_line": 76,
+      "start_line": 55,
+      "end_line": 68,
       "raw": "| Legacy QML property | Role |\n| --- | --- |\n| `panelBackground01` | `canvas` |\n| `panelBackground02` | `surfaceGhost` |\n| `panelBackground03` | `windowAlt` |\n| `panelBackground04` | `subSurface` |\n| `panelBackground05` | `surfaceSolid` |\n| `panelBackground06` | `surfaceAlt` |\n| `panelBackground07` | `surfaceInteractive` |\n| `panelBackground08` | `surfacePanel` |\n| `panelBackground09` | `surfaceControl` |\n| `panelBackground10` | `surfaceInput` |\n| `panelBackground11` | `surfaceInputHover` |\n| `panelBackground12` | `surfaceRaised` |\n",
       "columns": [
         "Legacy QML property",
@@ -381,15 +381,15 @@
     {
       "id": "b000024",
       "kind": "blank",
-      "start_line": 77,
-      "end_line": 77,
+      "start_line": 69,
+      "end_line": 69,
       "raw": "\n"
     },
     {
       "id": "b000025",
       "kind": "heading",
-      "start_line": 78,
-      "end_line": 78,
+      "start_line": 70,
+      "end_line": 70,
       "raw": "## Text colors and accent-backed roles\n",
       "level": 2,
       "title": "Text colors and accent-backed roles"
@@ -397,29 +397,29 @@
     {
       "id": "b000026",
       "kind": "blank",
-      "start_line": 79,
-      "end_line": 79,
+      "start_line": 71,
+      "end_line": 71,
       "raw": "\n"
     },
     {
       "id": "b000027",
       "kind": "paragraph",
-      "start_line": 80,
-      "end_line": 81,
+      "start_line": 72,
+      "end_line": 73,
       "raw": "Text colors use white RGB `(1,1,1)` with the actual alpha values below. The base\nis fully opaque. They describe text opacity independently from a text-size recipe.\n"
     },
     {
       "id": "b000028",
       "kind": "blank",
-      "start_line": 82,
-      "end_line": 82,
+      "start_line": 74,
+      "end_line": 74,
       "raw": "\n"
     },
     {
       "id": "b000029",
       "kind": "table",
-      "start_line": 83,
-      "end_line": 90,
+      "start_line": 75,
+      "end_line": 82,
       "raw": "| Figma variable | QML property | Normalized alpha | Retained ID |\n| --- | --- | --- | --- |\n| `Text/titleHeaderColor` | `Theme.titleHeaderColor` | `0.8999999761581421` | `VariableID:44:458` |\n| `Text/bodyColor` | `Theme.bodyColor` | `0.800000011920929` | `VariableID:44:459` |\n| `Text/descriptionColor` | `Theme.descriptionColor` | `0.6000000238418579` | `VariableID:44:460` |\n| `Text/captionColor` | `Theme.captionColor` | `0.5` | `VariableID:44:461` |\n| `Text/disabledColor` | `Theme.disabledColor` | `0.30000001192092896` | `VariableID:44:462` |\n| `Text/textTokenBase` | `Theme.textTokenBase` | `1` | `VariableID:1305:75` |\n",
       "columns": [
         "Figma variable",
@@ -469,43 +469,43 @@
     {
       "id": "b000030",
       "kind": "blank",
-      "start_line": 91,
-      "end_line": 91,
+      "start_line": 83,
+      "end_line": 83,
       "raw": "\n"
     },
     {
       "id": "b000031",
       "kind": "paragraph",
-      "start_line": 92,
-      "end_line": 96,
+      "start_line": 84,
+      "end_line": 88,
       "raw": "2026-10-29 확인 기준 Figma의 `Action/*` 변수는 삭제되었다. 컴포넌트의 기본 역할은\nAccent Blue, Green, Yellow, Red를 사용한다. 기존 QML 사용자를 위해 `Theme.primary`,\n`success`, `warning`, `danger` 속성은 유지하며 각각 기본 Blue와 Green, Yellow, Red를\n참조한다. `ApplicationWindow.primaryColor`는 앱별 primary 오버라이드를 계속 제공한다.\n고정 Accent 팔레트와 상태 색상은 앱별 오버라이드로 바뀌지 않는다.\n"
     },
     {
       "id": "b000032",
       "kind": "blank",
-      "start_line": 97,
-      "end_line": 97,
+      "start_line": 89,
+      "end_line": 89,
       "raw": "\n"
     },
     {
       "id": "b000033",
       "kind": "html",
-      "start_line": 98,
-      "end_line": 98,
+      "start_line": 90,
+      "end_line": 90,
       "raw": "<a id=\"ten-original-accent-colors\"></a>\n"
     },
     {
       "id": "b000034",
       "kind": "blank",
-      "start_line": 99,
-      "end_line": 99,
+      "start_line": 91,
+      "end_line": 91,
       "raw": "\n"
     },
     {
       "id": "b000035",
       "kind": "heading",
-      "start_line": 100,
-      "end_line": 100,
+      "start_line": 92,
+      "end_line": 92,
       "raw": "## Ten authored accent colors\n",
       "level": 2,
       "title": "Ten authored accent colors"
@@ -513,30 +513,30 @@
     {
       "id": "b000036",
       "kind": "blank",
-      "start_line": 101,
-      "end_line": 101,
+      "start_line": 93,
+      "end_line": 93,
       "raw": "\n"
     },
     {
       "id": "b000037",
       "kind": "paragraph",
-      "start_line": 102,
-      "end_line": 102,
+      "start_line": 94,
+      "end_line": 94,
       "raw": "The ten swatches supplied by the user replace the previous canonical palette in place. Existing variable IDs and public property names are retained. Every alpha is 1. The exact floating-point oracle is `authoredAccentPalette.colors` in the fixture; HEX is for display and static SVG paints.\n"
     },
     {
       "id": "b000038",
       "kind": "blank",
-      "start_line": 103,
-      "end_line": 103,
+      "start_line": 95,
+      "end_line": 95,
       "raw": "\n"
     },
     {
       "id": "b000039",
       "kind": "table",
-      "start_line": 104,
-      "end_line": 115,
-      "raw": "| Figma variable / QML property | HEX display | Source node | Retained variable ID |\n| --- | --- | --- | --- |\n| `Accent/Blue/Default` / `Theme.accentBlue` | `#1582FF` | `1477:30` | `VariableID:1305:76` |\n| `Accent/Red/Default` / `Theme.accentRed` | `#FF4646` | `1477:31` | `VariableID:1305:77` |\n| `Accent/Green/Default` / `Theme.accentGreen` | `#00E71F` | `1477:32` | `VariableID:1305:78` |\n| `Accent/Yellow/Default` / `Theme.accentYellow` | `#FFD427` | `1477:33` | `VariableID:1305:79` |\n| `Accent/Purple/Default` / `Theme.accentPurple` | `#874AFF` | `1477:34` | `VariableID:1305:80` |\n| `Accent/Rose/Default` / `Theme.accentRose` | `#F94471` | `1477:36` | `VariableID:1305:81` |\n| `Accent/Orange/Default` / `Theme.accentOrange` | `#FF7A27` | `1477:35` | `VariableID:1305:82` |\n| `Accent/Brown/Default` / `Theme.accentBrown` | `#432318` | `1477:37` | `VariableID:1305:83` |\n| `Accent/Cyan/Default` / `Theme.accentCyan` | `#21D3FF` | `1477:38` | `VariableID:1305:84` |\n| `Accent/Teal/Default` / `Theme.accentTeal` | `#00C7DD` | `1477:40` | `VariableID:1305:85` |\n",
+      "start_line": 96,
+      "end_line": 107,
+      "raw": "| Figma variable / QML property | HEX display | Source node | Retained variable ID |\n| --- | --- | --- | --- |\n| `Accent/Blue/Default` / `Theme.accentBlue` | `#2880E5` | `1477:30` | `VariableID:1305:76` |\n| `Accent/Red/Default` / `Theme.accentRed` | `#E55050` | `1477:31` | `VariableID:1305:77` |\n| `Accent/Green/Default` / `Theme.accentGreen` | `#15D02E` | `1477:32` | `VariableID:1305:78` |\n| `Accent/Yellow/Default` / `Theme.accentYellow` | `#E5C236` | `1477:33` | `VariableID:1305:79` |\n| `Accent/Purple/Default` / `Theme.accentPurple` | `#8453E5` | `1477:34` | `VariableID:1305:80` |\n| `Accent/Rose/Default` / `Theme.accentRose` | `#E04D72` | `1477:36` | `VariableID:1305:81` |\n| `Accent/Orange/Default` / `Theme.accentOrange` | `#E57936` | `1477:35` | `VariableID:1305:82` |\n| `Accent/Brown/Default` / `Theme.accentBrown` | `#3C2319` | `1477:37` | `VariableID:1305:83` |\n| `Accent/Cyan/Default` / `Theme.accentCyan` | `#32C2E5` | `1477:38` | `VariableID:1305:84` |\n| `Accent/Teal/Default` / `Theme.accentTeal` | `#14B5C7` | `1477:40` | `VariableID:1305:85` |\n",
       "columns": [
         "Figma variable / QML property",
         "HEX display",
@@ -546,61 +546,61 @@
       "rows": [
         [
           "`Accent/Blue/Default` / `Theme.accentBlue`",
-          "`#1582FF`",
+          "`#2880E5`",
           "`1477:30`",
           "`VariableID:1305:76`"
         ],
         [
           "`Accent/Red/Default` / `Theme.accentRed`",
-          "`#FF4646`",
+          "`#E55050`",
           "`1477:31`",
           "`VariableID:1305:77`"
         ],
         [
           "`Accent/Green/Default` / `Theme.accentGreen`",
-          "`#00E71F`",
+          "`#15D02E`",
           "`1477:32`",
           "`VariableID:1305:78`"
         ],
         [
           "`Accent/Yellow/Default` / `Theme.accentYellow`",
-          "`#FFD427`",
+          "`#E5C236`",
           "`1477:33`",
           "`VariableID:1305:79`"
         ],
         [
           "`Accent/Purple/Default` / `Theme.accentPurple`",
-          "`#874AFF`",
+          "`#8453E5`",
           "`1477:34`",
           "`VariableID:1305:80`"
         ],
         [
           "`Accent/Rose/Default` / `Theme.accentRose`",
-          "`#F94471`",
+          "`#E04D72`",
           "`1477:36`",
           "`VariableID:1305:81`"
         ],
         [
           "`Accent/Orange/Default` / `Theme.accentOrange`",
-          "`#FF7A27`",
+          "`#E57936`",
           "`1477:35`",
           "`VariableID:1305:82`"
         ],
         [
           "`Accent/Brown/Default` / `Theme.accentBrown`",
-          "`#432318`",
+          "`#3C2319`",
           "`1477:37`",
           "`VariableID:1305:83`"
         ],
         [
           "`Accent/Cyan/Default` / `Theme.accentCyan`",
-          "`#21D3FF`",
+          "`#32C2E5`",
           "`1477:38`",
           "`VariableID:1305:84`"
         ],
         [
           "`Accent/Teal/Default` / `Theme.accentTeal`",
-          "`#00C7DD`",
+          "`#14B5C7`",
           "`1477:40`",
           "`VariableID:1305:85`"
         ]
@@ -609,29 +609,29 @@
     {
       "id": "b000040",
       "kind": "blank",
-      "start_line": 116,
-      "end_line": 116,
+      "start_line": 108,
+      "end_line": 108,
       "raw": "\n"
     },
     {
       "id": "b000041",
       "kind": "paragraph",
-      "start_line": 117,
-      "end_line": 117,
-      "raw": "`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` is the new Blue composited at 25% over the interactive surface. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.\n"
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "`accentOrangeMuted` and `accentBrownMuted` retain their public names as aliases of the corresponding canonical colors. `accentBlueMuted` follows the captured `Accent/Blue/Selected` role. The **386** extracted `accentPaletteTokens` entries retain their names, order and `{ name: string, color: string }` schema. Their matching accent and composite strings are recolored; unrelated artwork colors remain. `accentPaletteTokenCount` remains `386`.\n"
     },
     {
       "id": "b000042",
       "kind": "blank",
-      "start_line": 118,
-      "end_line": 118,
+      "start_line": 110,
+      "end_line": 110,
       "raw": "\n"
     },
     {
       "id": "b000043",
       "kind": "heading",
-      "start_line": 119,
-      "end_line": 119,
+      "start_line": 111,
+      "end_line": 111,
       "raw": "## Accent 역할 토큰\n",
       "level": 2,
       "title": "Accent 역할 토큰"
@@ -639,71 +639,71 @@
     {
       "id": "b000044",
       "kind": "blank",
-      "start_line": 120,
-      "end_line": 120,
+      "start_line": 112,
+      "end_line": 112,
       "raw": "\n"
     },
     {
       "id": "b000045",
       "kind": "paragraph",
-      "start_line": 121,
-      "end_line": 126,
+      "start_line": 113,
+      "end_line": 118,
       "raw": "Figma는 열 가지 Accent 각각에 `Default`, `Hover`, `Pressed`, `Selected`, `Disabled`,\n`Subtle`, `Outline`, `Overlay`, `Text`를 제공한다. QML에서는\n`Theme.accentRoleColor(\"Green\", \"Hover\")`, 네이티브 C++에서는\n`Theme::accent_role(Accent::green, AccentRole::hover)`로 조회한다. 네이티브 기본 역할은\n`AccentRole::standard`이다. 기본 Blue 버튼과 위험 Red 버튼의 호버·눌림 색상도 이 역할을\n사용한다. 앱이 `primaryColor`를 별도로 지정하면 기존 사용자 정의 primary 동작을 유지한다.\n"
     },
     {
       "id": "b000046",
       "kind": "blank",
-      "start_line": 127,
-      "end_line": 127,
+      "start_line": 119,
+      "end_line": 119,
       "raw": "\n"
     },
     {
       "id": "b000047",
       "kind": "paragraph",
-      "start_line": 128,
-      "end_line": 132,
-      "raw": "Hover와 Pressed는 기본 RGB의 `1/1.12`, `1/1.2`, Disabled는 기본 알파의 30%, Overlay는\n`64/255`이다. Selected·Subtle·Outline은 interactive 표면에 각각 25%·16%·36%를 합성한다.\nText는 기본적으로 흰색을 30% 혼합하고 Brown과 Blue는 Figma에 저장된 별도 값을 사용한다.\nBlue는 `#5AAAFF`다. 원본 90개 RGBA 값과 변수 ID는\n`tests/fixtures/figma-accent-roles.json`에 보관하고 QML과 C++ 테스트가 각각 대조한다.\n"
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "각 상태값은 현재 Figma 변수에 저장된 RGBA를 그대로 사용한다. 배경이 바뀌었다고 Selected·Subtle·Outline을 새 배경 위에서 다시 합성하지 않는다. 기본 아이콘의 Default 연결은 해당 색상의 Hover, Hover 연결은 Pressed를 사용한다. Figma가 명시한 `Icon/Accent/.../Darker` 29개는 각각 실제 저장값을 읽으며, 현재 값은 원래 역할의 RGB를 90%로 낮추고 알파를 유지한다. 명시된 아이콘 변수가 없는 나머지 역할에는 같은 90% 규칙을 대체값으로 사용한다. QML `Theme.iconAccentRoleColor`와 C++ `Theme::icon_accent_role`은 이 연결을 제공한다. 90개 상태, 29개 아이콘 및 22개 배경의 값과 ID는 `tests/fixtures/figma-accent-roles.json`에서 검증한다.\n"
     },
     {
       "id": "b000048",
       "kind": "blank",
-      "start_line": 133,
-      "end_line": 133,
+      "start_line": 121,
+      "end_line": 121,
       "raw": "\n"
     },
     {
       "id": "b000049",
       "kind": "html",
-      "start_line": 134,
-      "end_line": 134,
+      "start_line": 122,
+      "end_line": 122,
       "raw": "<a id=\"eight-attached-palette-colors\"></a>\n"
     },
     {
       "id": "b000050",
       "kind": "blank",
-      "start_line": 135,
-      "end_line": 135,
+      "start_line": 123,
+      "end_line": 123,
       "raw": "\n"
     },
     {
       "id": "b000051",
       "kind": "paragraph",
-      "start_line": 136,
-      "end_line": 140,
-      "raw": "On 2026-10-21, the user set `accentGreen` to **#00E71F**. The canonical variable,\nthe compatibility Green alias, and the Green gradient stops\nretain their IDs. The stops retain their existing alpha. Matching SVG paints\nand their current manifest hashes follow the new Green while geometry remains\nunchanged. The authored fixture records this per-color revision.\n"
+      "start_line": 124,
+      "end_line": 128,
+      "raw": "Historically, on 2026-10-21, the user set `accentGreen` to **#00E71F**; the current 2026-10-31 value is shown above. The canonical variable,\nthe compatibility Green alias, and the Green gradient stops\nretain their IDs. The stops retain their existing alpha. Matching SVG paints\nand their current manifest hashes follow the new Green while geometry remains\nunchanged. The authored fixture records this per-color revision.\n"
     },
     {
       "id": "b000052",
       "kind": "blank",
-      "start_line": 141,
-      "end_line": 141,
+      "start_line": 129,
+      "end_line": 129,
       "raw": "\n"
     },
     {
       "id": "b000053",
       "kind": "heading",
-      "start_line": 142,
-      "end_line": 142,
+      "start_line": 130,
+      "end_line": 130,
       "raw": "## Compatibility accent aliases\n",
       "level": 2,
       "title": "Compatibility accent aliases"
@@ -711,29 +711,29 @@
     {
       "id": "b000054",
       "kind": "blank",
-      "start_line": 143,
-      "end_line": 143,
+      "start_line": 131,
+      "end_line": 131,
       "raw": "\n"
     },
     {
       "id": "b000055",
       "kind": "paragraph",
-      "start_line": 144,
-      "end_line": 146,
+      "start_line": 132,
+      "end_line": 134,
       "raw": "기존의 독립 팔레트는 열 가지 Accent로 대체되었다. Figma에서 일곱 호환 별칭 변수는\n삭제되었으나, 기존 QML 호출을 위해 아래 일곱 속성은 정식 Accent를 계속 참조한다.\nGray 변수는 Figma의 `Neutral/Gray`로 유지된다.\n"
     },
     {
       "id": "b000056",
       "kind": "blank",
-      "start_line": 147,
-      "end_line": 147,
+      "start_line": 135,
+      "end_line": 135,
       "raw": "\n"
     },
     {
       "id": "b000057",
       "kind": "table",
-      "start_line": 148,
-      "end_line": 157,
+      "start_line": 136,
+      "end_line": 145,
       "raw": "| Compatibility property | Canonical property / value | Figma status |\n| --- | --- | --- |\n| `accentPaletteBlue` | `accentBlue` | removed |\n| `accentPalettePurple` | `accentPurple` | removed |\n| `accentPalettePink` | `accentRose` | removed |\n| `accentPaletteRed` | `accentRed` | removed |\n| `accentPaletteOrange` | `accentOrange` | removed |\n| `accentPaletteYellow` | `accentYellow` | removed |\n| `accentPaletteGreen` | `accentGreen` | removed |\n| `accentPaletteGray` | neutral `#8C8C8C` | `Neutral/Gray`, `VariableID:1325:9` |\n",
       "columns": [
         "Compatibility property",
@@ -786,29 +786,29 @@
     {
       "id": "b000058",
       "kind": "blank",
-      "start_line": 158,
-      "end_line": 158,
+      "start_line": 146,
+      "end_line": 146,
       "raw": "\n"
     },
     {
       "id": "b000059",
       "kind": "paragraph",
-      "start_line": 159,
-      "end_line": 159,
+      "start_line": 147,
+      "end_line": 147,
       "raw": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.\n"
     },
     {
       "id": "b000060",
       "kind": "blank",
-      "start_line": 160,
-      "end_line": 160,
+      "start_line": 148,
+      "end_line": 148,
       "raw": "\n"
     },
     {
       "id": "b000061",
       "kind": "heading",
-      "start_line": 161,
-      "end_line": 161,
+      "start_line": 149,
+      "end_line": 149,
       "raw": "## Typography variables and recipes\n",
       "level": 2,
       "title": "Typography variables and recipes"
@@ -816,29 +816,29 @@
     {
       "id": "b000062",
       "kind": "blank",
-      "start_line": 162,
-      "end_line": 162,
+      "start_line": 150,
+      "end_line": 150,
       "raw": "\n"
     },
     {
       "id": "b000063",
       "kind": "paragraph",
-      "start_line": 163,
-      "end_line": 167,
+      "start_line": 151,
+      "end_line": 155,
       "raw": "The shared `Font/fontBody` STRING variable is `Pretendard` and maps to\n`Theme.fontBody`. Its ID is `VariableID:1305:86`. QML retains\n`FontPolicy.resolveFamily(FontPolicy.preferredFamily)`, so a runtime fallback does\nnot change the preferred Figma family contract. Pixel sizes, line heights and\nletter spacing are authored logical pixels with no mobile multiplier.\n"
     },
     {
       "id": "b000064",
       "kind": "blank",
-      "start_line": 168,
-      "end_line": 168,
+      "start_line": 156,
+      "end_line": 156,
       "raw": "\n"
     },
     {
       "id": "b000065",
       "kind": "table",
-      "start_line": 169,
-      "end_line": 177,
+      "start_line": 157,
+      "end_line": 165,
       "raw": "| Text style | QML recipe prefix | Size / line height | Weight | Style name | Letter spacing |\n| --- | --- | --- | --- | --- | --- |\n| Title | `textTitle` | 26 / 26 | 700 | Bold | 0 |\n| Subtitle | `textSubtitle` | 22 / 22 | 700 | Bold | 0 |\n| Header | `textHeader` | 17 / 17 | 600 | SemiBold | 0 |\n| Subheader | `textSubheader` | 15 / 15 | 600 | SemiBold | 0 |\n| Body | `textBody` | 13 / 13 | 500 | Medium | 0 |\n| Description | `textDescription` | 12 / 12 | 600 | SemiBold | 0 |\n| Caption | `textCaption` | 11 / 11 | 400 | Regular | 0 |\n",
       "columns": [
         "Text style",
@@ -910,29 +910,29 @@
     {
       "id": "b000066",
       "kind": "blank",
-      "start_line": 178,
-      "end_line": 178,
+      "start_line": 166,
+      "end_line": 166,
       "raw": "\n"
     },
     {
       "id": "b000067",
       "kind": "paragraph",
-      "start_line": 179,
-      "end_line": 181,
+      "start_line": 167,
+      "end_line": 169,
       "raw": "각 QML 레시피의 `Weight`, `StyleName`, `LineHeight`, `LetterSpacing` 공개 속성은\n호환성을 위해 유지한다. 현재 Figma 타이포그래피는 글꼴 1개, 일곱 쌍의 크기와\n행 높이 14개, 공유 굵기 4개, 공유 자간 1개로 모두 20개 변수를 사용한다.\n"
     },
     {
       "id": "b000068",
       "kind": "blank",
-      "start_line": 182,
-      "end_line": 182,
+      "start_line": 170,
+      "end_line": 170,
       "raw": "\n"
     },
     {
       "id": "b000069",
       "kind": "table",
-      "start_line": 183,
-      "end_line": 190,
+      "start_line": 171,
+      "end_line": 178,
       "raw": "| Figma 공유 변수 | 값 | ID |\n| --- | --- | --- |\n| `Font/fontBody` | Pretendard | `VariableID:1305:86` |\n| `Weight/Bold` | 700 | `VariableID:1305:90` |\n| `Weight/SemiBold` | 600 | `VariableID:1305:100` |\n| `Weight/Medium` | 500 | `VariableID:1305:110` |\n| `Weight/Regular` | 400 | `VariableID:1305:120` |\n| `Tracking/Normal` | 0 | `VariableID:1305:91` |\n",
       "columns": [
         "Figma 공유 변수",
@@ -975,15 +975,15 @@
     {
       "id": "b000070",
       "kind": "blank",
-      "start_line": 191,
-      "end_line": 191,
+      "start_line": 179,
+      "end_line": 179,
       "raw": "\n"
     },
     {
       "id": "b000071",
       "kind": "heading",
-      "start_line": 192,
-      "end_line": 192,
+      "start_line": 180,
+      "end_line": 180,
       "raw": "### Actual style bindings\n",
       "level": 3,
       "title": "Actual style bindings"
@@ -991,43 +991,43 @@
     {
       "id": "b000072",
       "kind": "blank",
-      "start_line": 193,
-      "end_line": 193,
+      "start_line": 181,
+      "end_line": 181,
       "raw": "\n"
     },
     {
       "id": "b000073",
       "kind": "paragraph",
-      "start_line": 194,
-      "end_line": 197,
+      "start_line": 182,
+      "end_line": 185,
       "raw": "일곱 Figma 텍스트 스타일은 공유 글꼴, 해당 스타일의 크기와 행 높이, 공유 굵기와\n자간을 각각 바인딩한다. `fontWeight`가 실제 글꼴 스타일을 선택하며 별도의\n`fontStyle` 바인딩은 없다. 이전 개별 굵기·자간·스타일 이름 변수는 Figma에서\n삭제되었고, 대응하는 QML 속성은 앱 호환성을 위해 남아 있다.\n"
     },
     {
       "id": "b000074",
       "kind": "blank",
-      "start_line": 198,
-      "end_line": 198,
+      "start_line": 186,
+      "end_line": 186,
       "raw": "\n"
     },
     {
       "id": "b000075",
       "kind": "paragraph",
-      "start_line": 199,
-      "end_line": 199,
+      "start_line": 187,
+      "end_line": 187,
       "raw": "Existing text-style IDs are retained:\n"
     },
     {
       "id": "b000076",
       "kind": "blank",
-      "start_line": 200,
-      "end_line": 200,
+      "start_line": 188,
+      "end_line": 188,
       "raw": "\n"
     },
     {
       "id": "b000077",
       "kind": "table",
-      "start_line": 201,
-      "end_line": 209,
+      "start_line": 189,
+      "end_line": 197,
       "raw": "| Style | ID |\n| --- | --- |\n| Title | `S:9be61cca334d9c7ad10f6748611727c4fc6340a5,` |\n| Subtitle | `S:3e4074fd4df418ade1039a2b0184720c6c2ffbe5,` |\n| Header | `S:62f4d4aa9883bcf345b9273542940cb7e312a6aa,` |\n| Subheader | `S:1bb19003757942c30f3fafada1b8400cab71cf0e,` |\n| Body | `S:cc3cf61d5106b1d70f4ce271776b7f93fc3ae046,` |\n| Description | `S:85e5273ae601efad5b2a9d337177cc9d9762eae1,` |\n| Caption | `S:1fad39b1005ddd0b4ed008f63820dcd864b00ba4,` |\n",
       "columns": [
         "Style",
@@ -1067,15 +1067,15 @@
     {
       "id": "b000078",
       "kind": "blank",
-      "start_line": 210,
-      "end_line": 210,
+      "start_line": 198,
+      "end_line": 198,
       "raw": "\n"
     },
     {
       "id": "b000079",
       "kind": "heading",
-      "start_line": 211,
-      "end_line": 211,
+      "start_line": 199,
+      "end_line": 199,
       "raw": "### Typography compatibility\n",
       "level": 3,
       "title": "Typography compatibility"
@@ -1083,29 +1083,29 @@
     {
       "id": "b000080",
       "kind": "blank",
-      "start_line": 212,
-      "end_line": 212,
+      "start_line": 200,
+      "end_line": 200,
       "raw": "\n"
     },
     {
       "id": "b000081",
       "kind": "paragraph",
-      "start_line": 213,
-      "end_line": 218,
+      "start_line": 201,
+      "end_line": 206,
       "raw": "`textTitle2` aliases `textSubtitle`; `textHeader2` aliases `textSubheader`.\nTheir `Weight`, `StyleName`, `LineHeight` and `LetterSpacing` companions follow\nexactly the same mapping, preserving all ten old public properties. Existing\nLabel `title2`/`header2` enum names and unrelated consumer files are unchanged.\n`textDisabled` and its four companions continue to use Caption metrics; Disabled\nhas a separate text color, not an eighth size recipe.\n"
     },
     {
       "id": "b000082",
       "kind": "blank",
-      "start_line": 219,
-      "end_line": 219,
+      "start_line": 207,
+      "end_line": 207,
       "raw": "\n"
     },
     {
       "id": "b000083",
       "kind": "heading",
-      "start_line": 220,
-      "end_line": 220,
+      "start_line": 208,
+      "end_line": 208,
       "raw": "## Hidden icon-color compatibility\n",
       "level": 2,
       "title": "Hidden icon-color compatibility"
@@ -1113,29 +1113,29 @@
     {
       "id": "b000084",
       "kind": "blank",
-      "start_line": 221,
-      "end_line": 221,
+      "start_line": 209,
+      "end_line": 209,
       "raw": "\n"
     },
     {
       "id": "b000085",
       "kind": "paragraph",
-      "start_line": 222,
-      "end_line": 227,
+      "start_line": 210,
+      "end_line": 215,
       "raw": "`Compatibility Icon Colors` retains **1,548** existing variables. The collection\nand every variable are hidden from publishing; every variable has an empty\nscope set. This removes the extracted palette from normal token selection\nwithout deleting IDs or severing existing paint bindings. Hiding is not removal.\nOlder icon-specific values and gradient-stop variables remain available to their\nexisting consumers. The captured selected original-color aliases are:\n"
     },
     {
       "id": "b000086",
       "kind": "blank",
-      "start_line": 228,
-      "end_line": 228,
+      "start_line": 216,
+      "end_line": 216,
       "raw": "\n"
     },
     {
       "id": "b000087",
       "kind": "table",
-      "start_line": 229,
-      "end_line": 242,
+      "start_line": 217,
+      "end_line": 230,
       "raw": "| Compatibility variable | Retained ID | Core target ID |\n| --- | --- | --- |\n| `Primitive/defaultPrimary` | `VariableID:964:2` | `VariableID:44:463` |\n| `Primitive/accentWhite` | `VariableID:964:10` | `VariableID:1305:75` |\n| `Primitive/accentBlue` | `VariableID:964:18` | `VariableID:1305:76` |\n| `Primitive/accentRed` | `VariableID:964:22` | `VariableID:1305:77` |\n| `Primitive/accentGreen` | `VariableID:964:30` | `VariableID:1305:78` |\n| `Primitive/accentOrangeMuted` | `VariableID:964:38` | `VariableID:1305:82` |\n| `Primitive/accentYellow` | `VariableID:964:46` | `VariableID:1305:79` |\n| `Primitive/accentBrownMuted` | `VariableID:964:62` | `VariableID:1305:83` |\n| `Primitive/accentPurple` | `VariableID:964:66` | `VariableID:1305:80` |\n| `Primitive/accentRose` | `VariableID:964:94` | `VariableID:1305:81` |\n| `Primitive/accentDimTeal` | `VariableID:964:186` | `VariableID:1305:85` |\n| `Primitive/accentLightCyan` | `VariableID:964:222` | `VariableID:1305:84` |\n",
       "columns": [
         "Compatibility variable",
@@ -1208,15 +1208,15 @@
     {
       "id": "b000088",
       "kind": "blank",
-      "start_line": 243,
-      "end_line": 243,
+      "start_line": 231,
+      "end_line": 231,
       "raw": "\n"
     },
     {
       "id": "b000089",
       "kind": "heading",
-      "start_line": 244,
-      "end_line": 244,
+      "start_line": 232,
+      "end_line": 232,
       "raw": "## Accent revision verification — 2026-10-19\n",
       "level": 2,
       "title": "Accent revision verification — 2026-10-19"
@@ -1224,43 +1224,43 @@
     {
       "id": "b000090",
       "kind": "blank",
-      "start_line": 245,
-      "end_line": 245,
+      "start_line": 233,
+      "end_line": 233,
       "raw": "\n"
     },
     {
       "id": "b000091",
       "kind": "paragraph",
-      "start_line": 246,
-      "end_line": 246,
+      "start_line": 234,
+      "end_line": 234,
       "raw": "The Figma update preserves all ten source-node bounds and binds them to the existing canonical variables. It updates matching variables, unbound component paints, gradient stops, shared paint styles and reference labels across the file. The ColorPicker current-color variable is an alias of canonical Purple. Its six master views and six existing instances expose all ten colors inside their existing row bounds. Both the design reference and source examples use the new system.\n"
     },
     {
       "id": "b000092",
       "kind": "blank",
-      "start_line": 247,
-      "end_line": 247,
+      "start_line": 235,
+      "end_line": 235,
       "raw": "\n"
     },
     {
       "id": "b000093",
       "kind": "paragraph",
-      "start_line": 248,
-      "end_line": 248,
+      "start_line": 236,
+      "end_line": 236,
       "raw": "Source validation covers:\n"
     },
     {
       "id": "b000094",
       "kind": "blank",
-      "start_line": 249,
-      "end_line": 249,
+      "start_line": 237,
+      "end_line": 237,
       "raw": "\n"
     },
     {
       "id": "b000095",
       "kind": "list",
-      "start_line": 250,
-      "end_line": 255,
+      "start_line": 238,
+      "end_line": 243,
       "raw": "- Original RGBA precision, ten source-node IDs and seven fixed compatibility aliases.\n- The 50 retained Figma variables, all 90 accent roles, and shared typography/style contracts.\n- Rendered pixel samples for all ten canonical swatches.\n- Default and custom app Primary propagation, controls, overlays, and ten catalog choices.\n- SVG resource hashes, unchanged non-paint geometry, raster alpha silhouettes, and legacy resource aliases.\n- ColorPicker defaults and recent colors from the same canonical palette.\n",
       "items": [
         {
@@ -1298,44 +1298,44 @@
     {
       "id": "b000096",
       "kind": "blank",
-      "start_line": 256,
-      "end_line": 256,
+      "start_line": 244,
+      "end_line": 244,
       "raw": "\n"
     },
     {
       "id": "b000097",
       "kind": "paragraph",
-      "start_line": 257,
-      "end_line": 257,
-      "raw": "The audit files are in `build/accent-palette-20261019/`: `figma-readback.json`, `figma-variable-update.json`, `figma-page-updates.json`, `figma-extra-page-updates.json`, `source-icon-updates.json`, build and test logs. The current runtime swatch capture is `build/accent-palette-preview.png`.\n"
+      "start_line": 245,
+      "end_line": 245,
+      "raw": "The 2026-10-19 audit and runtime capture described an earlier revision; build directories are not long-term evidence storage.\n"
     },
     {
       "id": "b000098",
       "kind": "blank",
-      "start_line": 258,
-      "end_line": 258,
+      "start_line": 246,
+      "end_line": 246,
       "raw": "\n"
     },
     {
       "id": "b000099",
       "kind": "paragraph",
-      "start_line": 259,
-      "end_line": 259,
-      "raw": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.\n"
+      "start_line": 247,
+      "end_line": 247,
+      "raw": "The original 2026-10-08/09 69-variable and eight-color extension records are historical snapshots. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.\n"
     },
     {
       "id": "b000100",
       "kind": "blank",
-      "start_line": 260,
-      "end_line": 260,
+      "start_line": 248,
+      "end_line": 248,
       "raw": "\n"
     },
     {
       "id": "b000101",
       "kind": "paragraph",
-      "start_line": 261,
-      "end_line": 261,
-      "raw": "The final macOS source build succeeded. A fresh focused CTest run passed **12/12 targets** with **0 failures** in **64.29 seconds** after the final helper-resource update. The JUnit report is [`final-ctest.xml`](../build/accent-palette-20261019/final-ctest.xml), with a machine-readable summary in [`verification.json`](../build/accent-palette-20261019/verification.json). Six conditional cases for native RHI, hover delivery and optional captures remain skipped and are recorded in `final-qt-tests.log`; this run does not claim all-platform native execution or installation.\n"
+      "start_line": 249,
+      "end_line": 249,
+      "raw": "The 2026-10-19 macOS focused run reported 12/12 CTest targets; it is historical and does not certify the 2026-10-31 changes or an installation.\n"
     }
   ],
   "outline": [
@@ -1353,7 +1353,7 @@
       "level": 2,
       "title": "Scope and naming",
       "anchor": "scope-and-naming",
-      "start_line": 11
+      "start_line": 7
     },
     {
       "block_id": "b000015",
@@ -1361,7 +1361,7 @@
       "level": 2,
       "title": "Panel roles and exact values",
       "anchor": "panel-roles-and-exact-values",
-      "start_line": 37
+      "start_line": 29
     },
     {
       "block_id": "b000025",
@@ -1369,7 +1369,7 @@
       "level": 2,
       "title": "Text colors and accent-backed roles",
       "anchor": "text-colors-and-accent-backed-roles",
-      "start_line": 78
+      "start_line": 70
     },
     {
       "block_id": "b000035",
@@ -1377,7 +1377,7 @@
       "level": 2,
       "title": "Ten authored accent colors",
       "anchor": "ten-authored-accent-colors",
-      "start_line": 100
+      "start_line": 92
     },
     {
       "block_id": "b000043",
@@ -1385,7 +1385,7 @@
       "level": 2,
       "title": "Accent 역할 토큰",
       "anchor": "accent-역할-토큰",
-      "start_line": 119
+      "start_line": 111
     },
     {
       "block_id": "b000053",
@@ -1393,7 +1393,7 @@
       "level": 2,
       "title": "Compatibility accent aliases",
       "anchor": "compatibility-accent-aliases",
-      "start_line": 142
+      "start_line": 130
     },
     {
       "block_id": "b000061",
@@ -1401,7 +1401,7 @@
       "level": 2,
       "title": "Typography variables and recipes",
       "anchor": "typography-variables-and-recipes",
-      "start_line": 161
+      "start_line": 149
     },
     {
       "block_id": "b000071",
@@ -1409,7 +1409,7 @@
       "level": 3,
       "title": "Actual style bindings",
       "anchor": "actual-style-bindings",
-      "start_line": 192
+      "start_line": 180
     },
     {
       "block_id": "b000079",
@@ -1417,7 +1417,7 @@
       "level": 3,
       "title": "Typography compatibility",
       "anchor": "typography-compatibility",
-      "start_line": 211
+      "start_line": 199
     },
     {
       "block_id": "b000083",
@@ -1425,7 +1425,7 @@
       "level": 2,
       "title": "Hidden icon-color compatibility",
       "anchor": "hidden-icon-color-compatibility",
-      "start_line": 220
+      "start_line": 208
     },
     {
       "block_id": "b000089",
@@ -1433,29 +1433,43 @@
       "level": 2,
       "title": "Accent revision verification — 2026-10-19",
       "anchor": "accent-revision-verification--2026-10-19",
-      "start_line": 244
+      "start_line": 232
     }
   ],
   "indexes": {
     "directive_candidates": [
       {
+        "block_id": "b000005",
+        "line": 5,
+        "text": "`scripts/sync_figma_tokens.py` generates the C++ color table and updates the generated sections of `src/qml/Theme.qml` and the window-noise defaults. Its `--check` option verifies those outputs against the checked-in snapshot. Hexadecimal values are rounded for display; exact comparisons use the captured floating-point RGBA channels. The palette rendering test compares pixels in memory; an optional `LVRS_ACCENT_CAPTURE_PATH` can be supplied explicitly for a capture under `resources/`. Source builds and tests do not install the SDK. The user performs `lvrs install` for this revision.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
         "block_id": "b000017",
-        "line": 42,
+        "line": 34,
         "text": "monotonic brightness ramp; do not recalculate steps 07 and 08 to match their names.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
+        "block_id": "b000047",
+        "line": 120,
+        "text": "각 상태값은 현재 Figma 변수에 저장된 RGBA를 그대로 사용한다. 배경이 바뀌었다고 Selected·Subtle·Outline을 새 배경 위에서 다시 합성하지 않는다. 기본 아이콘의 Default 연결은 해당 색상의 Hover, Hover 연결은 Pressed를 사용한다. Figma가 명시한 `Icon/Accent/.../Darker` 29개는 각각 실제 저장값을 읽으며, 현재 값은 원래 역할의 RGB를 90%로 낮추고 알파를 유지한다. 명시된 아이콘 변수가 없는 나머지 역할에는 같은 90% 규칙을 대체값으로 사용한다. QML `Theme.iconAccentRoleColor`와 C++ `Theme::icon_accent_role`은 이 연결을 제공한다. 90개 상태, 29개 아이콘 및 22개 배경의 값과 ID는 `tests/fixtures/figma-accent-roles.json`에서 검증한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
         "block_id": "b000059",
-        "line": 159,
+        "line": 147,
         "text": "Purple and Rose remain distinct colors; the old Pink name points to Rose. `defaultPrimary`, `accentBlue` and `accentPaletteBlue` now share the authored Blue. App Primary overrides do not mutate these fixed colors. No numbered shade scale is introduced.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
         "block_id": "b000099",
-        "line": 259,
-        "text": "The original 2026-10-08/09 69-variable and eight-color extension records remain historical snapshots under `build/theme-token-refresh-20261008/` and `build/accent-palette-20261009/`. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.",
+        "line": 247,
+        "text": "The original 2026-10-08/09 69-variable and eight-color extension records are historical snapshots. Their former separate palette values and earlier pass counts do not describe this revision. Installation, consumer rebuilds and library publication have separate evidence; no installation is performed by this task.",
         "basis": "lexical_match",
         "context": "paragraph"
       }
@@ -1464,38 +1478,24 @@
     "links": [
       {
         "block_id": "b000003",
+        "label": "the LVRS Figma file",
+        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS",
+        "kind": "external",
+        "line": 3
+      },
+      {
+        "block_id": "b000003",
+        "label": "`resources/figma-color-tokens.json`",
+        "target": "../resources/figma-color-tokens.json",
+        "kind": "relative",
+        "line": 3
+      },
+      {
+        "block_id": "b000003",
         "label": "`tests/fixtures/figma-theme-contract.json`",
         "target": "../tests/fixtures/figma-theme-contract.json",
         "kind": "relative",
-        "line": 5
-      },
-      {
-        "block_id": "b000003",
-        "label": "LVRS Figma file",
-        "target": "https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc/LVRS",
-        "kind": "external",
-        "line": 6
-      },
-      {
-        "block_id": "b000003",
-        "label": "`accent-palette.json`",
-        "target": "../tests/fixtures/accent-palette.json",
-        "kind": "relative",
-        "line": 7
-      },
-      {
-        "block_id": "b000101",
-        "label": "`final-ctest.xml`",
-        "target": "../build/accent-palette-20261019/final-ctest.xml",
-        "kind": "relative",
-        "line": 261
-      },
-      {
-        "block_id": "b000101",
-        "label": "`verification.json`",
-        "target": "../build/accent-palette-20261019/verification.json",
-        "kind": "relative",
-        "line": 261
+        "line": 3
       }
     ],
     "tables": [
@@ -1504,18 +1504,18 @@
         "columns": [
           "Collection",
           "ID",
-          "Active core inventory"
+          "Recorded contract"
         ],
         "rows": [
           [
             "Theme Colors",
             "`VariableCollectionId:44:457`",
-            "41; 33 in the initial snapshot"
+            "Core roles and the Figma color snapshot"
           ],
           [
             "Theme Typography",
             "`VariableCollectionId:1305:73`",
-            "36"
+            "20 current Figma variables; 36 QML recipe properties"
           ],
           [
             "Compatibility Icon Colors",
@@ -1536,79 +1536,79 @@
           [
             "`Panel/canvas`",
             "`Theme.canvas`",
-            "`(0.04892867058515549, 0.04892867058515549, 0.05038686841726303)`",
+            "`(0.06189476698637009, 0.06189476698637009, 0.06373938918113708)`",
             "`VariableID:44:467`"
           ],
           [
             "`Panel/surfaceGhost`",
             "`Theme.surfaceGhost`",
-            "`(0.05507083609700203, 0.05517596751451492, 0.05570162087678909)`",
+            "`(0.0696646124124527, 0.06979759782552719, 0.07046254724264145)`",
             "`VariableID:44:468`"
           ],
           [
             "`Panel/windowAlt`",
             "`Theme.windowAlt`",
-            "`(0.08394163101911545, 0.08394163101911545, 0.08631309866905212)`",
+            "`(0.1061861664056778, 0.1061861664056778, 0.1091860681772232)`",
             "`VariableID:44:469`"
           ],
           [
             "`Panel/subSurface`",
             "`Theme.subSurface`",
-            "`(0.09516431391239166, 0.09655113518238068, 0.09793794900178909)`",
+            "`(0.12038286030292511, 0.12213718146085739, 0.12389150261878967)`",
             "`VariableID:44:470`"
           ],
           [
             "`Panel/surfaceSolid`",
             "`Theme.surfaceSolid`",
-            "`(0.11397916078567505, 0.11664287745952606, 0.11664287745952606)`",
+            "`(0.14418363571166992, 0.1475532352924347, 0.1475532352924347)`",
             "`VariableID:215:9618`"
           ],
           [
             "`Panel/surfaceAlt`",
             "`Theme.surfaceAlt`",
-            "`(0.12302529811859131, 0.12528030574321747, 0.12753531336784363)`",
+            "`(0.15562701225280762, 0.15847958624362946, 0.1613321751356125)`",
             "`VariableID:215:9620`"
           ],
           [
             "`Panel/surfaceInteractive`",
             "`Theme.surfaceInteractive`",
-            "`(0.1411764770746231, 0.1411764770746231, 0.1411764770746231)`",
+            "`(0.17858824133872986, 0.17858824133872986, 0.17858824133872986)`",
             "`VariableID:215:9621`"
           ],
           [
             "`Panel/surfacePanel`",
             "`Theme.surfacePanel`",
-            "`(0.13709451258182526, 0.14029954373836517, 0.14190204441547394)`",
+            "`(0.17342455685138702, 0.17747892439365387, 0.1795060932636261)`",
             "`VariableID:215:9622`"
           ],
           [
             "`Panel/surfaceControl`",
             "`Theme.surfaceControl`",
-            "`(0.14820532500743866, 0.15256911516189575, 0.15256911516189575)`",
+            "`(0.18747973442077637, 0.192999929189682, 0.192999929189682)`",
             "`VariableID:215:9623`"
           ],
           [
             "`Panel/surfaceInput`",
             "`Theme.surfaceInput`",
-            "`(0.1555851548910141, 0.15707255899906158, 0.15855994820594788)`",
+            "`(0.19681522250175476, 0.1986967921257019, 0.20057833194732666)`",
             "`VariableID:215:9624`"
           ],
           [
             "`Panel/surfaceInputHover`",
             "`Theme.surfaceInputHover`",
-            "`(0.17537428438663483, 0.1819191724061966, 0.18410080671310425)`",
+            "`(0.2218484729528427, 0.23012775182724, 0.23288752138614655)`",
             "`VariableID:215:9625`"
           ],
           [
             "`Panel/surfaceRaised`",
             "`Theme.surfaceRaised`",
-            "`(0.19355684518814087, 0.1978072077035904, 0.19993239641189575)`",
+            "`(0.24484941363334656, 0.25022611021995544, 0.2529144883155823)`",
             "`VariableID:215:9626`"
           ],
           [
             "`Panel/window`",
             "`Theme.window`",
-            "`(0.0784313753247261, 0.0784313753247261, 0.0784313753247261)`",
+            "`(0.09921568632125854, 0.09921568632125854, 0.09921568632125854)`",
             "`VariableID:1305:74`"
           ]
         ]
@@ -1728,61 +1728,61 @@
         "rows": [
           [
             "`Accent/Blue/Default` / `Theme.accentBlue`",
-            "`#1582FF`",
+            "`#2880E5`",
             "`1477:30`",
             "`VariableID:1305:76`"
           ],
           [
             "`Accent/Red/Default` / `Theme.accentRed`",
-            "`#FF4646`",
+            "`#E55050`",
             "`1477:31`",
             "`VariableID:1305:77`"
           ],
           [
             "`Accent/Green/Default` / `Theme.accentGreen`",
-            "`#00E71F`",
+            "`#15D02E`",
             "`1477:32`",
             "`VariableID:1305:78`"
           ],
           [
             "`Accent/Yellow/Default` / `Theme.accentYellow`",
-            "`#FFD427`",
+            "`#E5C236`",
             "`1477:33`",
             "`VariableID:1305:79`"
           ],
           [
             "`Accent/Purple/Default` / `Theme.accentPurple`",
-            "`#874AFF`",
+            "`#8453E5`",
             "`1477:34`",
             "`VariableID:1305:80`"
           ],
           [
             "`Accent/Rose/Default` / `Theme.accentRose`",
-            "`#F94471`",
+            "`#E04D72`",
             "`1477:36`",
             "`VariableID:1305:81`"
           ],
           [
             "`Accent/Orange/Default` / `Theme.accentOrange`",
-            "`#FF7A27`",
+            "`#E57936`",
             "`1477:35`",
             "`VariableID:1305:82`"
           ],
           [
             "`Accent/Brown/Default` / `Theme.accentBrown`",
-            "`#432318`",
+            "`#3C2319`",
             "`1477:37`",
             "`VariableID:1305:83`"
           ],
           [
             "`Accent/Cyan/Default` / `Theme.accentCyan`",
-            "`#21D3FF`",
+            "`#32C2E5`",
             "`1477:38`",
             "`VariableID:1305:84`"
           ],
           [
             "`Accent/Teal/Default` / `Theme.accentTeal`",
-            "`#00C7DD`",
+            "`#14B5C7`",
             "`1477:40`",
             "`VariableID:1305:85`"
           ]

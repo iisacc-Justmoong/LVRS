@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 #include <QByteArray>
-#include <QFile>
+#include <iiFileProviderDevice.h>
 #include <QStringDecoder>
 #include <QStringList>
 #include <QVector>
@@ -176,7 +176,7 @@ private:
     qint64 m_totalByteCount = 0;
     int m_loadChunkSize = 64 * 1024;
     QString m_loadingPath;
-    std::unique_ptr<QFile> m_loadingFile;
+    std::unique_ptr<iiFileProvider::FileDevice> m_loadingFile;
     bool m_loadPendingCarriageReturn = false;
     QByteArray m_pendingLineBytes;
     qint64 m_pendingLineStartOffset = 0;

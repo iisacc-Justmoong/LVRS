@@ -4,6 +4,8 @@ import LVRS 1.0
 Item {
     id: control
     property bool motionEnabled: true
+    // Qt.Horizontal remains the default; Qt.Vertical stacks icon buttons.
+    property int orientation: Qt.Horizontal
 
     readonly property int shapeRoundRect: 0
     readonly property int shapeCylinder: 1
@@ -18,6 +20,7 @@ Item {
     property color borderColor: Theme.panelBackground12
     property bool forceBorderlessTone: true
     property bool _syncScheduled: false
+    property var _styledSegments: []
     property alias method: methodRegistry.method
     property alias methods: methodRegistry.methods
     readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods
@@ -39,17 +42,19 @@ Item {
         return result
     }
 
-    function applySegmentStyle(button) {
-        if (!button)
-            return
-        if (control.forceBorderlessTone && button.tone !== undefined)
-            button.tone = AbstractButton.Borderless
-    }
-
     function syncSegmentStyles() {
         const segments = collectSegmentButtons()
-        for (let i = 0; i < segments.length; i++)
-            applySegmentStyle(segments[i])
+        for (let i = 0; i < _styledSegments.length; i++) {
+            const old = _styledSegments[i]
+            if (old && segments.indexOf(old) < 0 && old._segmentStyleOwner === control)
+                old._segmentStyleOwner = null
+        }
+        for (let i = 0; i < segments.length; i++) {
+            const button = segments[i]
+            if (button._segmentStyleOwner !== undefined)
+                button._segmentStyleOwner = control
+        }
+        _styledSegments = segments
         segmentRow.forceLayout()
     }
 
@@ -93,8 +98,9 @@ Item {
         antialiasing: true
     }
 
-    Row {
+    Grid {
         id: segmentRow
+        columns: control.orientation === Qt.Vertical ? 1 : Math.max(1, control.segmentCount)
         anchors.fill: parent
         anchors.leftMargin: control.horizontalPadding
         anchors.rightMargin: control.horizontalPadding
@@ -104,6 +110,7 @@ Item {
         SpringBehavior on spacing { motionEnabled: control.motionEnabled }
     }
 
+    onOrientationChanged: scheduleSyncSegmentStyles()
     onForceBorderlessToneChanged: scheduleSyncSegmentStyles()
     onHorizontalPaddingChanged: scheduleSyncSegmentStyles()
     onVerticalPaddingChanged: scheduleSyncSegmentStyles()
@@ -113,6 +120,14 @@ Item {
         target: segmentRow
         function onChildrenChanged() {
             control.scheduleSyncSegmentStyles()
+        }
+    }
+
+    Component.onDestruction: {
+        for (let i = 0; i < _styledSegments.length; i++) {
+            const button = _styledSegments[i]
+            if (button && button._segmentStyleOwner === control)
+                button._segmentStyleOwner = null
         }
     }
 

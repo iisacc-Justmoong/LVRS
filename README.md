@@ -224,18 +224,18 @@ For repository-local development, prefer the root build helper:
 ./build.sh
 ```
 
-`build.sh` configures `build/` with `LVRS_BUILD_EXAMPLES=ON` and `LVRS_BUILD_TESTS=ON`, builds the host outputs, and fails if any checked-in example launcher no longer matches its build-tree runtime.
+`build.sh` configures the fixed `build/` directory with tests enabled and example applications disabled. `--without-tests` disables tests for both native and legacy backends. `--clean` asks the configured build system to clean its generated outputs; it does not delete arbitrary files in the directory. See [Build layout](docs/BuildLayout.md) for resource and test isolation.
 
 ## Build and Run Examples
 
 ```bash
-./build.sh
+./build.sh --with-examples
 ```
 
 Populate every example `bin/` directory in one pass:
 
 ```bash
-./build.sh --without-tests
+./build.sh --with-examples --without-tests
 ```
 
 Run visual-catalog demo:

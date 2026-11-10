@@ -30,6 +30,8 @@ private slots:
     void compatibility_accent_aliases_remain_fixed();
     void authored_accent_palette_is_rendered();
     void accent_role_tokens_match_figma();
+    void icon_accent_tokens_match_figma();
+    void material_background_tokens_match_figma();
     void legacy_theme_aliases_data();
     void legacy_theme_aliases();
     void saved_text_style_bindings_data();
@@ -301,6 +303,79 @@ void FigmaParityTests::accent_role_tokens_match_figma()
             QVERIFY2(qAbs(channels[index] - expected[keys[index]].toDouble()) <= 1.0 / 65535.0,
                      qPrintable(token["name"].toString() + "." + keys[index]));
     }
+}
+
+void FigmaParityTests::icon_accent_tokens_match_figma()
+{
+    QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-accent-roles.json"));
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const auto variables = QJsonDocument::fromJson(file.readAll()).object()["iconVariables"].toArray();
+    QCOMPARE(variables.size(), 29);
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine,
+        "import QtQuick; import LVRS as LV; Item { function role(c, r) { return LV.Theme.iconAccentRoleColor(c, r) } }"));
+    QVERIFY(root);
+    for (const auto &entry : variables) {
+        const auto token = entry.toObject();
+        const auto path = token["name"].toString().split('/');
+        QCOMPARE(path.size(), 5);
+        QVariant result;
+        QVERIFY(QMetaObject::invokeMethod(root.data(), "role", Q_RETURN_ARG(QVariant, result),
+                                          Q_ARG(QVariant, path[2]), Q_ARG(QVariant, path[3])));
+        const QColor actual = result.value<QColor>();
+        QVERIFY2(actual.isValid(), qPrintable(token["name"].toString()));
+        const auto expected = token["value"].toObject();
+        const QList<qreal> channels{actual.redF(), actual.greenF(), actual.blueF(), actual.alphaF()};
+        const QStringList keys{"r", "g", "b", "a"};
+        for (int i = 0; i < keys.size(); ++i)
+            QVERIFY2(qAbs(channels[i] - expected[keys[i]].toDouble()) <= 2.0 / 65535.0,
+                     qPrintable(token["name"].toString() + "." + keys[i]));
+    }
+}
+
+void FigmaParityTests::material_background_tokens_match_figma()
+{
+    QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-accent-roles.json"));
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const auto variables = QJsonDocument::fromJson(file.readAll()).object()["backgroundVariables"].toArray();
+    QCOMPARE(variables.size(), 22);
+    const QHash<QString, QString> mapping{
+        {"Glass/Fill", "alertGlassTint"}, {"TextField/Fill", "inputFieldGlassTint"},
+        {"TextField/Disabled", "inputFieldGlassTintDisabled"}, {"TextField/Inline", "inputFieldGlassTintInline"},
+        {"Surface/Dense/Fill", "materialDenseFill"}, {"Surface/Glass/Fill", "materialGlassFill"},
+        {"Backdrop/Base", "materialBackdropBase"}, {"Alert/canvas", "alertCanvas"}, {"Alert/surface", "alertSurface"}
+    };
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine,
+        "import QtQuick; import LVRS as LV; Item { property var theme: LV.Theme }"));
+    QVERIFY(root);
+    auto *theme = qvariant_cast<QObject *>(root->property("theme"));
+    QVERIFY(theme);
+    int checked = 0;
+    for (const auto &entry : variables) {
+        const auto token = entry.toObject();
+        const QString name = token["name"].toString();
+        if (!mapping.contains(name)) continue;
+        const auto property = mapping.value(name).toUtf8();
+        const QColor actual = theme->property(property.constData()).value<QColor>();
+        QVERIFY2(actual.isValid(), qPrintable(name));
+        const auto expected = token["value"].toObject();
+        const QList<qreal> channels{actual.redF(), actual.greenF(), actual.blueF(), actual.alphaF()};
+        const QStringList keys{"r", "g", "b", "a"};
+        for (int i = 0; i < keys.size(); ++i)
+            QVERIFY2(qAbs(channels[i] - expected[keys[i]].toDouble()) <= 1.0 / 65535.0,
+                     qPrintable(name + "." + keys[i]));
+        ++checked;
+    }
+    QCOMPARE(checked, mapping.size());
+    const QColor windowFill = theme->property("materialWindowFill").value<QColor>();
+    const QColor denseFill = theme->property("materialDenseFill").value<QColor>();
+    QCOMPARE(windowFill.red(), denseFill.red());
+    QCOMPARE(windowFill.green(), denseFill.green());
+    QCOMPARE(windowFill.blue(), denseFill.blue());
+    QCOMPARE(windowFill.alpha(), 255);
 }
 
 void FigmaParityTests::legacy_theme_aliases_data()

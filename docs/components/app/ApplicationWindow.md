@@ -32,7 +32,7 @@ LV.ApplicationWindow {
 }
 ```
 
-초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(`#1582FF`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.
+초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(표시값 약 `#2880E5`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.
 
 같은 QML 엔진의 창들이 테마 색상을 공유합니다. 기본 앱 루트에서 색상을 설정하면, `primaryColor` 를 생략하는 보조 창들은 현재 테마를 재설정하지 않고 이를 상속받습니다. 여러 개의 명시적인 입력은 동일한 테마를 업데이트하며, 독립적인 창 팔레트를 설정하지 않습니다. 별도의 QML 엔진들은 별도의 테마를 유지합니다. `AppBootstrapWindow` 와 `AppShell` 도 입력을 상속받습니다.
 
@@ -75,7 +75,7 @@ LV.ApplicationWindow {
 
 ### 창 및 플랫폼 재정의
 
-- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#1582FF`)
+- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, 표시값 약 `#2880E5`)
 - `windowColor`(기본값 검정이며 배경 혼합의 RGB 바탕색이다)
 - `windowBackgroundOpacity`(기본값 1.0인 호환성 입력이며, 기본 솔리드 배경의 알파를 변경하지 않는다)
 - `backgroundBlurEnabled`(기본값 `false`인 호환성 입력이며, 불투명 기본 배경에는 블러를 적용하지 않는다)
@@ -281,9 +281,9 @@ LV.ApplicationWindow {
 
 ## 기본 배경 자료
 
-기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#141414`)이고 앱 `primaryColor`를 2% 혼합한다. RGB 채널을 `windowColor × 0.98 + primaryColor × 0.02`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 예를 들어 강조색 `#0A84FF`는 중심색 `#141619`가 되고, `#00E71F`는 `#141814`가 된다. 이 중심색에 미세 입자가 더해진다.
+기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#191919`)이고 앱 `primaryColor`를 2% 혼합한다. RGB 채널을 `windowColor × 0.98 + primaryColor × 0.02`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 이 중심색에 미세 입자가 더해진다.
 
-`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#141414`이다. `Theme.applicationWindowAccentOpacity`는 0.02, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 98% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.
+`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#191919`이다. `Theme.applicationWindowAccentOpacity`는 0.02, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 98% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.
 
 이 중심색 위에는 `WindowNoiseTexture`가 매우 고운 단색 노이즈를 불투명하게 그린다. `Theme.applicationWindowGrainStrength`의 기본값은 `2 / 255`이다. 각 채널에 같은 난수 밝기 값을 더하며 최대 변화는 8비트 RGB 기준 ±2단계이다. 검정 근처의 값은 0에서 제한한다. 입자 크기는 물리 픽셀 1개이며 Retina에서도 2×2 픽셀로 커지지 않는다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. `windowBackgroundOpacity`와 `backgroundBlurEnabled`는 호환성 입력으로 남지만 기본 불투명 표면을 바꾸지 않는다. `backgroundBlurSupported`와 `backgroundBlurActive`는 false이다. 표준 `background`를 재정의하면 앱이 해당 배경을 소유한다.
 

@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/components/app/ApplicationWindow.md",
-    "sha256": "584967a90262d46c870328390a4ab68a5fea9d34f64d751d64abfc25c56be436",
-    "bytes": 23466,
+    "sha256": "c6374bbdf69388771987516b4898386968c88e2e6553b0704a995b42fbca84c6",
+    "bytes": 23392,
     "line_count": 301,
     "encoding": "utf-8",
     "language": "ko"
@@ -203,7 +203,7 @@
       "kind": "paragraph",
       "start_line": 35,
       "end_line": 35,
-      "raw": "초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(`#1582FF`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.\n"
+      "raw": "초기 대체 경로는 LVRS 파란색, `Theme.defaultPrimary`(표시값 약 `#2880E5`)입니다. 입력은 또한 QML 색상 바인딩 또는 `QQmlApplicationEngine::setInitialProperties()`의 `primaryColor` 항목을 허용합니다. 런타임에서 `app.primaryColor`를 변경하면 기존 컨트롤과 나중에 생성된 컨트롤이 업데이트됩니다. 파란색을 복원하려면 `LV.Theme.defaultPrimary`를 할당하세요.\n"
     },
     {
       "id": "b000022",
@@ -496,11 +496,11 @@
       "kind": "list",
       "start_line": 78,
       "end_line": 117,
-      "raw": "- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#1582FF`)\n- `windowColor`(기본값 검정이며 배경 혼합의 RGB 바탕색이다)\n- `windowBackgroundOpacity`(기본값 1.0인 호환성 입력이며, 기본 솔리드 배경의 알파를 변경하지 않는다)\n- `backgroundBlurEnabled`(기본값 `false`인 호환성 입력이며, 불투명 기본 배경에는 블러를 적용하지 않는다)\n- read-only `backgroundBlurSupported`, `backgroundBlurActive`(불투명 기본 배경에서 모두 `false`)\n- `forceNativeDarkTitleBar`\n- `nativeTitleBarHeight`: 선택적으로 활성화하는 macOS 제목 표시줄 행의 높이이며 논리 픽셀 단위이다. `0`는 네이티브 기본값을 유지한다.\n- `nativeTitleBarLeftMargin`: 네이티브 버튼 그룹의 시작 여백이며 기본값은 `Theme.gap12`이다.\n- `nativeTitleBarControlsRect` (읽기 전용): 창 콘텐츠 좌표의 실제 네이티브 버튼 경계. 비활성화되거나 지원되지 않거나 전체 화면인 경우 비어 있습니다.\n- `solidChrome`\n- 시스템 크롬 상호작용:\n  - `windowChromeInteractionsEnabled`\n  - `windowDragHandleEnabled`, `windowDragHandleHeight`\n  - `windowDragHandleTopMargin/LeftMargin/RightMargin`\n  - `windowDragExclusionItems`\n  - `windowResizeHandlesEnabled`, `windowResizeEdges`\n  - `windowResizeBorderThickness`, `windowResizeCornerSize`\n  - `windowChromeInteractionZ`\n  - read-only `windowChromeInteractionLayer`, `windowDragHandleItem`\n- 프로필 기반 모바일 정책 도우미:\n  - `runtimeEventsAutoAttachRecommended`\n  - `mobileSystemWindowDelegationRecommended`\n  - `mobileSystemInsetsDelegationRecommended`\n  - `mobileDisplayCoverageOverrideRecommended`\n  - `mobileFullscreenVisibilityRecommended`\n  - `mobileFullscreenGeometryHintRecommended`\n- OS-위임 기본값:\n  - `delegateMobileWindowingToSystem`\n  - `delegateMobileInsetsToSystem`\n- 모바일 범위 재정의:\n  - `forceFullWindowAreaOnMobile`(모바일에서는 기본값이 `true`이므로 렌더 표면이 풀 블리드 상태로 유지됨)\n  - `mobileDisplayCoverageOverrideEnabled`(프로파일 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨)\n  - `mobileFullscreenVisibilityOverride`(프로필 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨, iOS에서는 상태 표시줄을 숨기는 대신 가장자리 간 적용 범위를 최대화합니다)\n  - `mobileFullscreenGeometryHintOverride`(프로파일 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨)\n  - `mobileOversizedHeightEnabled`(기본값 `false`, 명시적인 대형 표면 해결 방법에만 선택)\n  - `mobileOversizedHeight`\n  - `mobileLayoutHeightHint`\n  - `mobileOversizedHeightActive`\n  - `mobileLayoutViewportHeight`\n  - `mobileTopMarginFill`, `mobileBottomMarginFill`\n",
+      "raw": "- `primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, 표시값 약 `#2880E5`)\n- `windowColor`(기본값 검정이며 배경 혼합의 RGB 바탕색이다)\n- `windowBackgroundOpacity`(기본값 1.0인 호환성 입력이며, 기본 솔리드 배경의 알파를 변경하지 않는다)\n- `backgroundBlurEnabled`(기본값 `false`인 호환성 입력이며, 불투명 기본 배경에는 블러를 적용하지 않는다)\n- read-only `backgroundBlurSupported`, `backgroundBlurActive`(불투명 기본 배경에서 모두 `false`)\n- `forceNativeDarkTitleBar`\n- `nativeTitleBarHeight`: 선택적으로 활성화하는 macOS 제목 표시줄 행의 높이이며 논리 픽셀 단위이다. `0`는 네이티브 기본값을 유지한다.\n- `nativeTitleBarLeftMargin`: 네이티브 버튼 그룹의 시작 여백이며 기본값은 `Theme.gap12`이다.\n- `nativeTitleBarControlsRect` (읽기 전용): 창 콘텐츠 좌표의 실제 네이티브 버튼 경계. 비활성화되거나 지원되지 않거나 전체 화면인 경우 비어 있습니다.\n- `solidChrome`\n- 시스템 크롬 상호작용:\n  - `windowChromeInteractionsEnabled`\n  - `windowDragHandleEnabled`, `windowDragHandleHeight`\n  - `windowDragHandleTopMargin/LeftMargin/RightMargin`\n  - `windowDragExclusionItems`\n  - `windowResizeHandlesEnabled`, `windowResizeEdges`\n  - `windowResizeBorderThickness`, `windowResizeCornerSize`\n  - `windowChromeInteractionZ`\n  - read-only `windowChromeInteractionLayer`, `windowDragHandleItem`\n- 프로필 기반 모바일 정책 도우미:\n  - `runtimeEventsAutoAttachRecommended`\n  - `mobileSystemWindowDelegationRecommended`\n  - `mobileSystemInsetsDelegationRecommended`\n  - `mobileDisplayCoverageOverrideRecommended`\n  - `mobileFullscreenVisibilityRecommended`\n  - `mobileFullscreenGeometryHintRecommended`\n- OS-위임 기본값:\n  - `delegateMobileWindowingToSystem`\n  - `delegateMobileInsetsToSystem`\n- 모바일 범위 재정의:\n  - `forceFullWindowAreaOnMobile`(모바일에서는 기본값이 `true`이므로 렌더 표면이 풀 블리드 상태로 유지됨)\n  - `mobileDisplayCoverageOverrideEnabled`(프로파일 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨)\n  - `mobileFullscreenVisibilityOverride`(프로필 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨, iOS에서는 상태 표시줄을 숨기는 대신 가장자리 간 적용 범위를 최대화합니다)\n  - `mobileFullscreenGeometryHintOverride`(프로파일 기반 기능, `delegateMobileWindowingToSystem=true` 동안 마스크됨)\n  - `mobileOversizedHeightEnabled`(기본값 `false`, 명시적인 대형 표면 해결 방법에만 선택)\n  - `mobileOversizedHeight`\n  - `mobileLayoutHeightHint`\n  - `mobileOversizedHeightActive`\n  - `mobileLayoutViewportHeight`\n  - `mobileTopMarginFill`, `mobileBottomMarginFill`\n",
       "items": [
         {
           "marker": "-",
-          "text": "`primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, `#1582FF`)",
+          "text": "`primaryColor`(앱 액센트, 초기에는 `Theme.defaultPrimary`, 표시값 약 `#2880E5`)",
           "checked": null
         },
         {
@@ -1678,7 +1678,7 @@
       "kind": "paragraph",
       "start_line": 284,
       "end_line": 284,
-      "raw": "기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#141414`)이고 앱 `primaryColor`를 2% 혼합한다. RGB 채널을 `windowColor × 0.98 + primaryColor × 0.02`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 예를 들어 강조색 `#0A84FF`는 중심색 `#141619`가 되고, `#00E71F`는 `#141814`가 된다. 이 중심색에 미세 입자가 더해진다.\n"
+      "raw": "기본 배경의 중심색은 불투명한 Rectangle이 정의한다. 기본 바탕색은 `Theme.window` (`#191919`)이고 앱 `primaryColor`를 2% 혼합한다. RGB 채널을 `windowColor × 0.98 + primaryColor × 0.02`로 직접 계산하며, 최종 알파는 1이다. 채널은 8비트 색상으로 반올림한다. 이 중심색에 미세 입자가 더해진다.\n"
     },
     {
       "id": "b000122",
@@ -1692,7 +1692,7 @@
       "kind": "paragraph",
       "start_line": 286,
       "end_line": 286,
-      "raw": "`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#141414`이다. `Theme.applicationWindowAccentOpacity`는 0.02, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 98% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.\n"
+      "raw": "`Theme.applicationWindowFill`은 `Theme.window`를 참조하며 기본값은 `#191919`이다. `Theme.applicationWindowAccentOpacity`는 0.02, `Theme.applicationWindowOpacity`는 1.0이다. `applicationWindowAccentOpacity`는 RGB 혼합 비율이며 창이나 레이어의 투명도가 아니다. `windowColor`를 명시적으로 바꾸면 해당 RGB가 98% 바탕색으로 사용된다. 바탕색과 강조색의 알파는 혼합 결과를 투명하게 만들지 않는다.\n"
     },
     {
       "id": "b000124",

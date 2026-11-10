@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/backend/TextDocumentModel.md",
-    "sha256": "5eb5b36ae0e6c0e23a3ff1001137c9c47b70e3ebc6103314153dfc4c5890d9c1",
-    "bytes": 5510,
-    "line_count": 90,
+    "sha256": "5fabd5f2f43b224bfa5ffb4421c18936c7dc8f519de196cb2183dc31d1e88376",
+    "bytes": 5837,
+    "line_count": 91,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -452,8 +452,8 @@
       "id": "b000035",
       "kind": "list",
       "start_line": 64,
-      "end_line": 83,
-      "raw": "- 파일은 UTF-8 텍스트로 읽혀집니다.\n- `loadFile()`는 대상 파일을 열고 청크 로드를 예약한 후 반환합니다. 하나의 전체 문서 `QString`를 미리 작성하지 않습니다.\n- `loadFile()`는 존재하지 않는 대상 경로를 빈 연결된 문서로 처리하므로 `LV.TextEditor`는 첫 번째 편집 시 파일을 생성할 수 있습니다.\n- 로드는 이벤트 루프 턴당 최대 `loadChunkSize` 바이트를 읽고 청크가 도착할 때 디코딩된 라인을 목록 모델에 추가합니다.\n- 깔끔하게 로드된 라인은 `(byteOffset, byteLength, length)` 레코드로 저장되며 `lineText()`, 모델 대표 또는 `text`가 콘텐츠를 요청할 때만 디코딩됩니다.\n- 편집은 터치된 라인 레코드만 메모리 지원 텍스트 레코드로 승격시킵니다. 손대지 않은 파일 기반 라인은 소스 파일에 연결된 상태로 유지됩니다.\n- `loading`는 최종 청크가 디코딩되거나 `cancelLoad()`/failure가 스트림을 중지할 때까지 true입니다.\n- `loadedByteCount`, `totalByteCount` 및 `loadProgress`는 바이트 수준 로드 진행 상황을 보고합니다.\n- `text` 속성은 내부 엔진 표면이며 읽을 때 로드된 모든 라인을 구체화합니다. 대용량 문서 UI는 모델 행, `lineText(line)` 및 진행/저장 속성을 선호해야 합니다.\n- 저장은 `QSaveFile`를 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.\n- 뉴라인은 모델 내부에서 `\\n`로 정규화됩니다.\n- 빈 문서인 경우에도 모델에는 항상 최소한 한 줄이 포함됩니다.\n- 편집 작업은 라인 스토리지를 변경하고 `dirty`를 설정합니다.\n- `replaceRange()`는 `LV.TextEditor` 선택 및 IME 커밋 처리에 사용됩니다. 가능한 경우 손대지 않은 라인 레코드를 보존하고 변경된 범위만 메모리 지원 레코드로 승격합니다.\n- `textRange()`는 관련 없는 문서 텍스트를 구체화하지 않고 모델 기반 클립보드 복사에 사용됩니다.\n- 단어 경계 이동은 한글 음절을 포함한 Unicode 문자와 숫자를 단어 문자로 취급하고, 문서 전체를 구체화하는 대신 라인 레코드를 통해 경계를 해결합니다.\n- 단일 문자 이동 및 삭제는 Unicode 문자소 경계를 사용하므로 대리 쌍 문자는 커서 이동, 백스페이스 또는 삭제로 인해 분할되지 않습니다.\n- `loadFile()`는 라인 스토리지를 재설정하고, 커서를 문서 시작으로 재설정하고, `dirty`를 지우고, 파일 콘텐츠를 행으로 스트리밍하고, 스트림이 완료되면 `fileLoaded`를 내보냅니다.\n- 편집 작업은 로드된 텍스트를 변경하기 전에 `cancelLoad()`를 호출합니다. 부분 문서를 작성하는 대신 `loading`가 실패하는 동안 저장이 실패합니다.\n- `saveFile()`는 현재 라인 레코드를 `QSaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.\n",
+      "end_line": 84,
+      "raw": "- 파일은 UTF-8 텍스트로 읽혀집니다.\n- `loadFile()`는 대상 파일을 열고 청크 로드를 예약한 후 반환합니다. 하나의 전체 문서 `QString`를 미리 작성하지 않습니다.\n- `loadFile()`는 존재하지 않는 대상 경로를 빈 연결된 문서로 처리하므로 `LV.TextEditor`는 첫 번째 편집 시 파일을 생성할 수 있습니다.\n- 로드는 이벤트 루프 턴당 최대 `loadChunkSize` 바이트를 읽고 청크가 도착할 때 디코딩된 라인을 목록 모델에 추가합니다.\n- 깔끔하게 로드된 라인은 `(byteOffset, byteLength, length)` 레코드로 저장되며 `lineText()`, 모델 대표 또는 `text`가 콘텐츠를 요청할 때만 디코딩됩니다.\n- 편집은 터치된 라인 레코드만 메모리 지원 텍스트 레코드로 승격시킵니다. 손대지 않은 파일 기반 라인은 소스 파일에 연결된 상태로 유지됩니다.\n- 범위 편집은 바뀐 행의 데이터와 실제로 삽입·삭제된 행만 알리며 전체 모델을 초기화하지 않는다. 영향받지 않은 영속 모델 인덱스는 유지한다. 편집 후 문자 수는 전체 행 재순회가 아니라 UTF-16 길이 차이로 갱신한다.\n- `loading`는 최종 청크가 디코딩되거나 `cancelLoad()`/failure가 스트림을 중지할 때까지 true입니다.\n- `loadedByteCount`, `totalByteCount` 및 `loadProgress`는 바이트 수준 로드 진행 상황을 보고합니다.\n- `text` 속성은 내부 엔진 표면이며 읽을 때 로드된 모든 라인을 구체화합니다. 대용량 문서 UI는 모델 행, `lineText(line)` 및 진행/저장 속성을 선호해야 합니다.\n- 저장은 iiFileProvider의 `SaveFile`을 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.\n- 뉴라인은 모델 내부에서 `\\n`로 정규화됩니다.\n- 빈 문서인 경우에도 모델에는 항상 최소한 한 줄이 포함됩니다.\n- 편집 작업은 라인 스토리지를 변경하고 `dirty`를 설정합니다.\n- `replaceRange()`는 `LV.TextEditor` 선택 및 IME 커밋 처리에 사용됩니다. 가능한 경우 손대지 않은 라인 레코드를 보존하고 변경된 범위만 메모리 지원 레코드로 승격합니다.\n- `textRange()`는 관련 없는 문서 텍스트를 구체화하지 않고 모델 기반 클립보드 복사에 사용됩니다.\n- 단어 경계 이동은 한글 음절을 포함한 Unicode 문자와 숫자를 단어 문자로 취급하고, 문서 전체를 구체화하는 대신 라인 레코드를 통해 경계를 해결합니다.\n- 단일 문자 이동 및 삭제는 Unicode 문자소 경계를 사용하므로 대리 쌍 문자는 커서 이동, 백스페이스 또는 삭제로 인해 분할되지 않습니다.\n- `loadFile()`는 라인 스토리지를 재설정하고, 커서를 문서 시작으로 재설정하고, `dirty`를 지우고, 파일 콘텐츠를 행으로 스트리밍하고, 스트림이 완료되면 `fileLoaded`를 내보냅니다.\n- 편집 작업은 로드된 텍스트를 변경하기 전에 `cancelLoad()`를 호출합니다. 부분 문서를 작성하는 대신 `loading`가 실패하는 동안 저장이 실패합니다.\n- `saveFile()`는 현재 라인 레코드를 iiFileProvider의 `SaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.\n",
       "items": [
         {
           "marker": "-",
@@ -487,6 +487,11 @@
         },
         {
           "marker": "-",
+          "text": "범위 편집은 바뀐 행의 데이터와 실제로 삽입·삭제된 행만 알리며 전체 모델을 초기화하지 않는다. 영향받지 않은 영속 모델 인덱스는 유지한다. 편집 후 문자 수는 전체 행 재순회가 아니라 UTF-16 길이 차이로 갱신한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
           "text": "`loading`는 최종 청크가 디코딩되거나 `cancelLoad()`/failure가 스트림을 중지할 때까지 true입니다.",
           "checked": null
         },
@@ -502,7 +507,7 @@
         },
         {
           "marker": "-",
-          "text": "저장은 `QSaveFile`를 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.",
+          "text": "저장은 iiFileProvider의 `SaveFile`을 사용하므로 성공적인 쓰기는 호출자 관점에서 원자적입니다.",
           "checked": null
         },
         {
@@ -552,7 +557,7 @@
         },
         {
           "marker": "-",
-          "text": "`saveFile()`는 현재 라인 레코드를 `QSaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.",
+          "text": "`saveFile()`는 현재 라인 레코드를 iiFileProvider의 `SaveFile`로 스트리밍하고, 저장된 파일에 대한 파일 지원 라인 레코드를 다시 작성하고, `dirty`를 지우고, `fileSaved`를 내보냅니다.",
           "checked": null
         }
       ]
@@ -560,29 +565,29 @@
     {
       "id": "b000036",
       "kind": "blank",
-      "start_line": 84,
-      "end_line": 84,
+      "start_line": 85,
+      "end_line": 85,
       "raw": "\n"
     },
     {
       "id": "b000037",
       "kind": "html",
-      "start_line": 85,
-      "end_line": 85,
+      "start_line": 86,
+      "end_line": 86,
       "raw": "<a id=\"consumer\"></a>\n"
     },
     {
       "id": "b000038",
       "kind": "blank",
-      "start_line": 86,
-      "end_line": 86,
+      "start_line": 87,
+      "end_line": 87,
       "raw": "\n"
     },
     {
       "id": "b000039",
       "kind": "heading",
-      "start_line": 87,
-      "end_line": 87,
+      "start_line": 88,
+      "end_line": 88,
       "raw": "## 소비자\n",
       "level": 2,
       "title": "소비자"
@@ -590,15 +595,15 @@
     {
       "id": "b000040",
       "kind": "blank",
-      "start_line": 88,
-      "end_line": 88,
+      "start_line": 89,
+      "end_line": 89,
       "raw": "\n"
     },
     {
       "id": "b000041",
       "kind": "list",
-      "start_line": 89,
-      "end_line": 90,
+      "start_line": 90,
+      "end_line": 91,
       "raw": "- `LV.TextEditor`는 하나의 `TextDocumentModel` 인스턴스를 소유하고 이를 QML `ListView`의 지원 모델로 사용합니다.\n- 애플리케이션 코드는 이 모델에 연결하는 대신 더 작은 `LV.TextEditor` 파일 API(`filePath`, 선택적 `read()`, 자동 동기화 신호)를 사용해야 합니다.\n",
       "items": [
         {
@@ -653,11 +658,19 @@
       "level": 2,
       "title": "소비자",
       "anchor": "소비자",
-      "start_line": 87
+      "start_line": 88
     }
   ],
   "indexes": {
-    "directive_candidates": [],
+    "directive_candidates": [
+      {
+        "block_id": "b000035",
+        "line": 70,
+        "text": "- 범위 편집은 바뀐 행의 데이터와 실제로 삽입·삭제된 행만 알리며 전체 모델을 초기화하지 않는다. 영향받지 않은 영속 모델 인덱스는 유지한다. 편집 후 문자 수는 전체 행 재순회가 아니라 UTF-16 길이 차이로 갱신한다.",
+        "basis": "lexical_match",
+        "context": "list"
+      }
+    ],
     "commands": [],
     "links": [],
     "tables": []

@@ -27,15 +27,9 @@ include(GNUInstallDirs)
 install(FILES docs/PERFORMANCE.md DESTINATION ${CMAKE_INSTALL_DATADIR}/LVRS/docs)
 include(CMakePackageConfigHelpers)
 
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(LVRS_DEFAULT_BUILD_EXAMPLES ON)
-    set(LVRS_DEFAULT_INSTALL_EXAMPLES ON)
-else()
-    # When LVRS is pulled as a subproject (e.g., standalone example builds),
-    # default to library-only to avoid recursive example target definitions.
-    set(LVRS_DEFAULT_BUILD_EXAMPLES OFF)
-    set(LVRS_DEFAULT_INSTALL_EXAMPLES OFF)
-endif()
+# Example applications are opt-in for both top-level and subproject builds.
+set(LVRS_DEFAULT_BUILD_EXAMPLES OFF)
+set(LVRS_DEFAULT_INSTALL_EXAMPLES OFF)
 
 option(LVRS_BUILD_SHARED_LIBS "Build LVRS as shared library for dynamic consumption" ON)
 option(LVRS_BUILD_EXAMPLES "Build runnable example applications" ${LVRS_DEFAULT_BUILD_EXAMPLES})
@@ -339,6 +333,9 @@ if(APPLE)
 endif()
 
 if(LVRS_BUILD_SHARED_LIBS)
+    if(EMSCRIPTEN)
+        set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+    endif()
     set(_lvrs_library_type SHARED)
 else()
     set(_lvrs_library_type STATIC)
@@ -350,6 +347,15 @@ set_target_properties(LVRSCore PROPERTIES
     EXPORT_NAME "LVRS"
 )
 add_library(LVRS::LVRS ALIAS LVRSCore)
+if(LVRS_BUILD_SHARED_LIBS)
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set_target_properties(LVRSCore PROPERTIES FRAMEWORK TRUE FRAMEWORK_VERSION A
+            MACOSX_FRAMEWORK_IDENTIFIER "com.iisacc.LVRS")
+    elseif(EMSCRIPTEN)
+        target_compile_options(LVRSCore PRIVATE -fPIC -sSIDE_MODULE=1)
+        target_link_options(LVRSCore PRIVATE -sSIDE_MODULE=1)
+    endif()
+endif()
 include(GenerateExportHeader)
 generate_export_header(LVRSCore BASE_NAME LVRS EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/lvrs_export.h")
 target_include_directories(LVRSCore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -568,6 +574,7 @@ if(LVRS_BUILD_SHARED_LIBS)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LVRS
     )
 

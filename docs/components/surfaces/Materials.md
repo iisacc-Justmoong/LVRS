@@ -6,15 +6,15 @@
 
 ## 목적
 
-`ApplicationWindow`의 기본 배경은 `Theme.window` (`#141414`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.
+`ApplicationWindow`의 기본 배경은 `Theme.window` (`#191919`) 98%와 앱 강조색 2%를 RGB로 직접 혼합한 중심색에 매우 고운 단색 노이즈를 더한 불투명 표면이다. 노이즈는 물리 픽셀 1개 크기이며 RGB 밝기 변화가 최대 ±2단계이다. 유리 레이어, Overlay 합성과 블러는 사용하지 않는다. 독립 `WindowMaterial`과 `PanelMaterial`은 기존 방사형 재질과 반투명 블러를 유지한다. ContextMenu와 메뉴는 더 옅은 코팅을 사용하고, 툴팁과 팝오버는 Glass 25를 사용한다.
 
 | 재질 | 채우기 | 배경 흐림 | 기본 사용 |
 | --- | --- | --- | --- |
-| ApplicationWindow | `Theme.window` (`#141414`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |
-| 독립 WindowMaterial | #0B0B0B 50%와 강조색 방사형 그레디언트 | 64 논리 px | 명시적인 창 재질 |
+| ApplicationWindow | `Theme.window` (`#191919`) 98% + 앱 강조색 2% 중심색과 미세 입자, 알파 1 | 없음 | 기본 및 보조 창 |
+| 독립 WindowMaterial | Figma Dense Fill RGB `#191919` 50%와 강조색 방사형 그레디언트 | 64 논리 px | 명시적인 창 재질 |
 | ContextMenu / 메뉴 | 창 채색 12%와 옅은 강조색 | 64 논리 px | 컴팩트 및 일반 메뉴 |
-| Dense 75 MaterialSurface / PanelMaterial | #141414 75%와 강조색 방사형 그레디언트 | 64 논리 px | 조밀한 패널 |
-| Glass 25 | #141414 25%와 강조색 방사형 그레디언트 | 16 논리 px | 툴팁, 팝오버, 기본 패널 |
+| Dense 75 MaterialSurface / PanelMaterial | #191919 75%와 강조색 방사형 그레디언트 | 64 논리 px | 조밀한 패널 |
+| Glass 25 | #191919 25%와 강조색 방사형 그레디언트 | 16 논리 px | 툴팁, 팝오버, 기본 패널 |
 
 WindowMaterial과 PanelMaterial은 `Theme.materialIntenseOpacity` / `Theme.materialFaintOpacity`의 0.40 / 0.11을 사용한다. 여덟 그레디언트는 크기 조정에 맞춰 중앙과 가장자리를 따른다. WindowMaterial의 Dense 75 설정은 64px 블러와 테두리 기본값을 공급하고, 독립 창 재질의 채색 불투명도는 50%이다. ApplicationWindow의 기본 Rectangle과 미세 노이즈는 이 독립 재질과 별도로 그린다.
 
@@ -37,7 +37,7 @@ WindowMaterial과 PanelMaterial은 `Theme.materialIntenseOpacity` / `Theme.mater
 
 - `density`: `MaterialSurface.Dense75` 또는 `MaterialSurface.Glass25`.
 - `primaryColor`: WindowMaterial은 소속 창의 `primaryColor`를 동적으로 상속한다. 창에 연결되지 않았거나 창에 해당 속성이 없으면 `Theme.primaryColor`를 사용한다. PanelMaterial의 기본값은 `Theme.primary`이다. 명시적인 재질 색상 지정은 계속 우선한다.
-- `color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 #0B0B0B / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.
+- `color`, `tintOpacity`: 독립 재질의 표면 색상과 불투명도이다. 독립 WindowMaterial은 Figma Dense Fill의 RGB `#191919` / 0.50을 사용한다. ApplicationWindow의 기본 배경은 별도 Rectangle이며, RGB 혼합색과 알파 1을 사용한다.
 - `blurRadius`, `blurEnabled`: 배경 확산 반경 및 스위치.
 - `radius`, `borderWidth`, `borderColor`: 표면 실루엣과 가장자리.
 - `intenseOpacity`, `faintOpacity`: 독립 재질의 방사형 강도이며 기본값은 0.40 / 0.11이다. 둘 다 0이면 방사형 모양이 생성되지 않는다.
@@ -54,7 +54,7 @@ import LVRS as LV
 
 LV.ApplicationWindow {
     primaryColor: "#A571E6"
-    // `Theme.window` (`#141414`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.
+    // `Theme.window` (`#191919`) 98%와 앱 강조색 2%의 중심색에 고운 단색 입자를 더한다.
     LV.Popover {
         id: details
         width: 320; height: 180
@@ -63,7 +63,7 @@ LV.ApplicationWindow {
 }
 ```
 
-`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 `Theme.window` (`#141414`)이다. `Theme.applicationWindowAccentOpacity`의 0.02를 사용하여 `바탕 RGB × 0.98 + primaryColor RGB × 0.02`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.
+`ApplicationWindow.windowColor`의 RGB가 배경 혼합의 바탕색이며 기본값은 `Theme.window` (`#191919`)이다. `Theme.applicationWindowAccentOpacity`의 0.02를 사용하여 `바탕 RGB × 0.98 + primaryColor RGB × 0.02`를 계산한다. 최종 알파는 1이고, 표준 `background`는 계속 재정의할 수 있다. 기존 네이티브 프레임을 유지한다.
 
 <a id="how-it-works"></a>
 
@@ -89,11 +89,13 @@ Figma 참조: [Window](https://www.figma.com/design/0GkItQYSNIR0lZ3iJhfJzc?node-
 
 | 속성 | 기본값 | 동작 |
 |---|---|---|
-| `color` | `#141414` | RGB 바탕색이며 알파는 항상 1로 정규화한다. |
-| `primaryColor` | `#1582FF` | 노이즈의 강조색이며 알파는 항상 1로 정규화한다. |
+| `color` | `#191919` | RGB 바탕색이며 알파는 항상 1로 정규화한다. |
+| `primaryColor` | `#2880E5` (표시 반올림) | 노이즈의 강조색이며 알파는 항상 1로 정규화한다. |
 | `noiseStrength` | `0.32` | 배경과 강조색 사이의 혼합 강도이며 0~1 범위이다. |
 | `blurRadius` | `1.5` | 가우시안 표준편차이며 0~50 논리 px 범위이다. 0은 선명한 노이즈이다. |
 | `grainStrength` | `0` | 블러 이후 더하는 단색 입자의 진폭이며 0~1 범위이다. ApplicationWindow는 `2 / 255`를 사용한다. |
+
+`WindowNoiseTexture`의 기본 창 및 강조색은 `resources/figma-color-tokens.json`에서 생성한 원본 RGBA를 사용한다. 표의 HEX는 표시용 반올림값이다.
 
 유효하지 않은 색상과 유한하지 않은 수치는 기존 설정을 유지한다. 입자 강도가 0보다 크면 캐시된 타일은 페인트 대상의 물리 픽셀에 맞춰 반복한다. 각 RGB 채널에 같은 난수 값을 더하고 0~255로 제한한다. 입자는 블러 이후에 적용하므로 뭉개지지 않는다. 타일의 생성·블러·입자 처리는 설정 변경 때만 실행하며, 정적인 화면에는 타이머나 프레임별 난수 생성이 없다.
 
@@ -111,8 +113,8 @@ ContextMenu 및 메뉴는 명시적 반투명 코팅이 있는 WindowMaterial를
 
 `backdropBaseColor` 는 기본적으로 투명합니다. 윈도우 내 메뉴는 불투명 중립 테마를 사용합니다. materialTint 를 캡처 기반으로 하여 흐릿한 합성 가 덮은 픽셀을 대체합니다; 그렇지 않으면 캡처된 윈도우 알파가 원래 날카로운 텍스트가 새어 나오게 합니다. 가시 메뉴 코팅은 12%로 유지됩니다.
 
-이전의 균일한 채색 구현은 2026-09-12에 macOS/Metal에서 검증했다. 해당 결과는 그레디언트 복원 전의 기록이다. 53개의 LVRS CTest 사례와 9개의 네이티브 재질 검사가 통과했다. 렌더링한 채우기 샘플은 50% 알파에서 #0B0B0B를 유지했고, 900×600와 1600×1000에서 파란색·보라색 강조색을 사용했다. 설치된 83개의 QML 리소스 전체가 현재 소스와 일치했다. Society는 16개 테스트를, Dreamscapes는 5개를 통과했으며, 검정에 가까운 채우기와 앱 강조색의 별도 기대값을 포함했다. Society, Dreamscapes, VisualCatalog를 갱신한 Workspace 런타임으로 다시 빌드하고 재실행했으며, 두 앱 창을 시각적으로 확인했다.
+이전의 균일한 채색 구현은 2026-09-12에 macOS/Metal에서 검증했다. 해당 결과는 그레디언트 복원 전의 기록이다. 53개의 LVRS CTest 사례와 9개의 네이티브 재질 검사가 통과했다. 당시 렌더링한 채우기 샘플은 50% 알파에서 #0B0B0B를 유지했고, 900×600와 1600×1000에서 파란색·보라색 강조색을 사용했다. 설치된 83개의 QML 리소스 전체가 현재 소스와 일치했다. Society는 16개 테스트를, Dreamscapes는 5개를 통과했으며, 검정에 가까운 채우기와 앱 강조색의 별도 기대값을 포함했다. Society, Dreamscapes, VisualCatalog를 갱신한 Workspace 런타임으로 다시 빌드하고 재실행했으며, 두 앱 창을 시각적으로 확인했다.
 
-2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#141414`) 98%와 강조색 2%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.
+2026-10-15의 균일한 4% 강조색 오버레이와 이후 노이즈·검은 유리 시안은 이전 구현의 기록이다. 현재 ApplicationWindow는 `Theme.window` (`#191919`) 98%와 강조색 2%의 중심색에 미세 단색 입자를 더한다. 독립 WindowMaterial은 `window_gradient_tracks_accent_and_resize`가 계속 검사한다.
 
 `window_material_inherits_owning_window_accent`는 같은 QML 엔진의 창 두 개가 서로 다른 강조색을 유지하는지 검사한다. ApplicationWindow의 기본 중심색과 미세 노이즈도 기존 창 강조색 상속을 사용한다.

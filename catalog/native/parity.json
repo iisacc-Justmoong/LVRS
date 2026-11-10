@@ -448,7 +448,7 @@
     },
     {
       "path": "src/qml/components/control/buttons/AbstractButton.qml",
-      "sha256": "83a074e8202056e82b844e1e4b2c3f2ec9f62b63bb2afcacb9f668493c9c2f3b"
+      "sha256": "a436815d38d1d5f11e556a5ea51be582b8e266a274b7570ad8bd20c3483a37b2"
     },
     {
       "path": "src/qml/components/control/buttons/ButtonMethodRegistry.qml",
@@ -484,7 +484,7 @@
     },
     {
       "path": "src/qml/components/control/buttons/IconSegmentedControl.qml",
-      "sha256": "1f917e290ce550195fde17e23818fd1f85617d72e59ed0db4d9742d2abfc97bc"
+      "sha256": "434dc2a09b27c22cc4f5a6bd649b19ac2864d49d846dda223d1a8965c6c75550"
     },
     {
       "path": "src/qml/components/control/buttons/LabelButton.qml",
@@ -496,11 +496,11 @@
     },
     {
       "path": "src/qml/components/control/buttons/LabelSegmentedControl.qml",
-      "sha256": "71e46fbd453e5d6b99ea168bb4eef3db3eb53e5238c6e8cd6b253560dc60822f"
+      "sha256": "2f2dedd2afd6b74a719268297cb60c70e65c4f8457f7ca70f83e9ecc96a6ef6b"
     },
     {
       "path": "src/qml/components/control/buttons/PushButton.qml",
-      "sha256": "783026b48922ec9d3470d8578bc1ac8f1d265b94130b7d4b2887e42fd6e4e66b"
+      "sha256": "557b3377ac228729d508ba4f47732ac1f843406a21ba0648f055010e17d559bf"
     },
     {
       "path": "src/qml/components/control/buttons/Stepper.qml",
@@ -692,7 +692,7 @@
     },
     {
       "path": "src/qml/components/navigation/ListItemComposite.qml",
-      "sha256": "54eed0a83d19950087fa4b57141130b971744e5011542b410685636e4a4d1e72"
+      "sha256": "d0159206cdfc4116c65b0fed7f0616bed010632083f26501da02e9aa9f90ad2e"
     },
     {
       "path": "src/qml/components/navigation/ListItemSelector.qml",
@@ -776,7 +776,7 @@
     },
     {
       "path": "src/qml/components/surfaces/Card.qml",
-      "sha256": "3f0afefdb2f6e5ec3d11ba5a7a693b127bf126d73250d12052025a2500468ac3"
+      "sha256": "35b238b4d2581fdca6fc91804c80a55068883aa1f8ddf7bb153b5b117bae72a8"
     },
     {
       "path": "src/qml/components/surfaces/CardImageContent.qml",
@@ -902,7 +902,7 @@
     },
     {
       "path": "src/Components/CardDetail.cpp",
-      "sha256": "bff888e84a4ca22704718b0330f40684cf488485f44f9d7698acea4f3d27dc5d"
+      "sha256": "b311c71e74327b87ef218647c62d70d7eb41ff09ad1b06eaffdc8221415e6ef9"
     },
     {
       "path": "src/Components/CardDetail.h",
@@ -9238,103 +9238,118 @@
         },
         {
           "kind": "property",
-          "declaration": "property int shapeStyle: shapeRoundRect",
-          "line": 70
-        },
-        {
-          "kind": "property",
-          "declaration": "property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled",
+          "declaration": "property var _segmentStyleOwner: null",
           "line": 71
         },
         {
           "kind": "property",
-          "declaration": "property alias method: methodRegistry.method",
+          "declaration": "readonly property int effectiveTone: tone !== AbstractButton.Disabled && _segmentStyleOwner && _segmentStyleOwner.forceBorderlessTone",
           "line": 72
         },
         {
           "kind": "property",
-          "declaration": "property alias methods: methodRegistry.methods",
-          "line": 73
-        },
-        {
-          "kind": "property",
-          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
+          "declaration": "property int shapeStyle: shapeRoundRect",
           "line": 74
         },
         {
           "kind": "property",
-          "declaration": "readonly property color toneTextColor: {",
+          "declaration": "property bool effectiveEnabled: enabled && tone !== AbstractButton.Disabled",
+          "line": 75
+        },
+        {
+          "kind": "property",
+          "declaration": "property alias method: methodRegistry.method",
           "line": 76
         },
         {
           "kind": "property",
+          "declaration": "property alias methods: methodRegistry.methods",
+          "line": 77
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
+          "line": 78
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color toneTextColor: {",
+          "line": 80
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property color toneBackgroundColor: {",
-          "line": 81
+          "line": 85
         },
         {
           "kind": "property",
           "declaration": "readonly property color toneBackgroundColorHover: {",
-          "line": 92
+          "line": 96
         },
         {
           "kind": "property",
           "declaration": "readonly property color toneBackgroundColorPressed: {",
-          "line": 101
+          "line": 105
         },
         {
           "kind": "property",
           "declaration": "property int cornerRadius: Theme.radiusMd",
-          "line": 112
+          "line": 116
         },
         {
           "kind": "property",
           "declaration": "readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder",
-          "line": 113
-        },
-        {
-          "kind": "property",
-          "declaration": "property color textColor: control.toneTextColor",
           "line": 117
         },
         {
           "kind": "property",
-          "declaration": "property color textColorDisabled: Theme.textOctonary",
-          "line": 118
-        },
-        {
-          "kind": "property",
-          "declaration": "property color backgroundColor: control.toneBackgroundColor",
-          "line": 120
-        },
-        {
-          "kind": "property",
-          "declaration": "property color backgroundColorHover: control.toneBackgroundColorHover",
+          "declaration": "property color textColor: control.toneTextColor",
           "line": 121
         },
         {
           "kind": "property",
-          "declaration": "property color backgroundColorPressed: control.toneBackgroundColorPressed",
+          "declaration": "property color textColorDisabled: Theme.textOctonary",
           "line": 122
         },
         {
           "kind": "property",
+          "declaration": "property color backgroundColor: control.toneBackgroundColor",
+          "line": 124
+        },
+        {
+          "kind": "property",
+          "declaration": "property color backgroundColorHover: control.toneBackgroundColorHover",
+          "line": 125
+        },
+        {
+          "kind": "property",
+          "declaration": "property color backgroundColorPressed: control.toneBackgroundColorPressed",
+          "line": 126
+        },
+        {
+          "kind": "property",
           "declaration": "property color backgroundColorDisabled: Theme.panelBackground04",
-          "line": 123
+          "line": 127
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property color selectedBackgroundColor: Theme.accentMuted",
+          "line": 128
         },
         {
           "kind": "function",
           "declaration": "function createMethodEvent(triggerName) {",
-          "line": 173
+          "line": 178
         },
         {
           "kind": "function",
           "declaration": "function invokeMethod(candidate, eventData) {",
-          "line": 177
+          "line": 182
         },
         {
           "kind": "function",
           "declaration": "function invokeMethods(eventData) {",
-          "line": 181
+          "line": 186
         }
       ],
       "status": "partial",
@@ -9916,128 +9931,133 @@
         },
         {
           "kind": "property",
-          "declaration": "readonly property int shapeRoundRect: 0",
+          "declaration": "property int orientation: Qt.Horizontal",
           "line": 8
         },
         {
           "kind": "property",
-          "declaration": "readonly property int shapeCylinder: 1",
-          "line": 9
+          "declaration": "readonly property int shapeRoundRect: 0",
+          "line": 10
         },
         {
           "kind": "property",
-          "declaration": "property int shapeStyle: shapeRoundRect",
+          "declaration": "readonly property int shapeCylinder: 1",
           "line": 11
         },
         {
           "kind": "property",
-          "declaration": "property int horizontalPadding: Theme.gap4",
-          "line": 12
-        },
-        {
-          "kind": "property",
-          "declaration": "property int verticalPadding: Theme.gap4",
+          "declaration": "property int shapeStyle: shapeRoundRect",
           "line": 13
         },
         {
           "kind": "property",
-          "declaration": "property int spacing: Theme.gap2",
+          "declaration": "property int horizontalPadding: Theme.gap4",
           "line": 14
         },
         {
           "kind": "property",
-          "declaration": "property int borderWidth: Theme.scaleMetric(2)",
+          "declaration": "property int verticalPadding: Theme.gap4",
           "line": 15
         },
         {
           "kind": "property",
-          "declaration": "property int cornerRadius: Theme.radiusLg",
+          "declaration": "property int spacing: Theme.gap2",
           "line": 16
         },
         {
           "kind": "property",
-          "declaration": "property color backgroundColor: Theme.panelBackground08",
+          "declaration": "property int borderWidth: Theme.scaleMetric(2)",
           "line": 17
         },
         {
           "kind": "property",
-          "declaration": "property color borderColor: Theme.panelBackground12",
+          "declaration": "property int cornerRadius: Theme.radiusLg",
           "line": 18
         },
         {
           "kind": "property",
-          "declaration": "property bool forceBorderlessTone: true",
+          "declaration": "property color backgroundColor: Theme.panelBackground08",
           "line": 19
         },
         {
           "kind": "property",
-          "declaration": "property bool _syncScheduled: false",
+          "declaration": "property color borderColor: Theme.panelBackground12",
           "line": 20
         },
         {
           "kind": "property",
-          "declaration": "property alias method: methodRegistry.method",
+          "declaration": "property bool forceBorderlessTone: true",
           "line": 21
         },
         {
           "kind": "property",
-          "declaration": "property alias methods: methodRegistry.methods",
+          "declaration": "property bool _syncScheduled: false",
           "line": 22
         },
         {
           "kind": "property",
-          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
+          "declaration": "property var _styledSegments: []",
           "line": 23
         },
         {
           "kind": "property",
-          "declaration": "readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder",
+          "declaration": "property alias method: methodRegistry.method",
           "line": 24
         },
         {
           "kind": "property",
+          "declaration": "property alias methods: methodRegistry.methods",
+          "line": 25
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
+          "line": 26
+        },
+        {
+          "kind": "property",
+          "declaration": "readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder",
+          "line": 27
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property int segmentCount: collectSegmentButtons().length",
-          "line": 28
+          "line": 31
         },
         {
           "kind": "property",
           "declaration": "default property alias buttons: segmentRow.data",
-          "line": 29
+          "line": 32
         },
         {
           "kind": "function",
           "declaration": "function collectSegmentButtons() {",
-          "line": 31
-        },
-        {
-          "kind": "function",
-          "declaration": "function applySegmentStyle(button) {",
-          "line": 42
+          "line": 34
         },
         {
           "kind": "function",
           "declaration": "function syncSegmentStyles() {",
-          "line": 49
+          "line": 45
         },
         {
           "kind": "function",
           "declaration": "function scheduleSyncSegmentStyles() {",
-          "line": 56
+          "line": 61
         },
         {
           "kind": "function",
           "declaration": "function createMethodEvent(triggerName) {",
-          "line": 66
+          "line": 71
         },
         {
           "kind": "function",
           "declaration": "function invokeMethod(candidate, eventData) {",
-          "line": 70
+          "line": 75
         },
         {
           "kind": "function",
           "declaration": "function invokeMethods(eventData) {",
-          "line": 74
+          "line": 79
         }
       ],
       "status": "partial",
@@ -10184,68 +10204,68 @@
         },
         {
           "kind": "property",
-          "declaration": "property alias method: methodRegistry.method",
+          "declaration": "property var _styledSegments: []",
           "line": 21
         },
         {
           "kind": "property",
-          "declaration": "property alias methods: methodRegistry.methods",
+          "declaration": "property alias method: methodRegistry.method",
           "line": 22
         },
         {
           "kind": "property",
-          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
+          "declaration": "property alias methods: methodRegistry.methods",
           "line": 23
         },
         {
           "kind": "property",
-          "declaration": "readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder",
+          "declaration": "readonly property alias hasInjectedMethods: methodRegistry.hasInjectedMethods",
           "line": 24
         },
         {
           "kind": "property",
+          "declaration": "readonly property real resolvedCornerRadius: shapeStyle === shapeCylinder",
+          "line": 25
+        },
+        {
+          "kind": "property",
           "declaration": "readonly property int segmentCount: collectSegmentButtons().length",
-          "line": 28
+          "line": 29
         },
         {
           "kind": "property",
           "declaration": "default property alias buttons: segmentRow.data",
-          "line": 29
+          "line": 30
         },
         {
           "kind": "function",
           "declaration": "function collectSegmentButtons() {",
-          "line": 31
-        },
-        {
-          "kind": "function",
-          "declaration": "function applySegmentStyle(button) {",
-          "line": 42
+          "line": 32
         },
         {
           "kind": "function",
           "declaration": "function syncSegmentStyles() {",
-          "line": 49
+          "line": 43
         },
         {
           "kind": "function",
           "declaration": "function scheduleSyncSegmentStyles() {",
-          "line": 56
+          "line": 59
         },
         {
           "kind": "function",
           "declaration": "function createMethodEvent(triggerName) {",
-          "line": 66
+          "line": 69
         },
         {
           "kind": "function",
           "declaration": "function invokeMethod(candidate, eventData) {",
-          "line": 70
+          "line": 73
         },
         {
           "kind": "function",
           "declaration": "function invokeMethods(eventData) {",
-          "line": 74
+          "line": 77
         }
       ],
       "status": "partial",
@@ -24968,7 +24988,7 @@
         },
         {
           "kind": "property",
-          "declaration": "readonly property color surfaceColor: imageCard ? Theme.panelBackground03 : effectiveSelected ? Theme.panelBackground06 : effectiveHovered ? Theme.panelBackground07 : Theme.panelBackground05",
+          "declaration": "readonly property color surfaceColor: imageCard ? Theme.panelBackground03 : \"transparent\"",
           "line": 84
         },
         {

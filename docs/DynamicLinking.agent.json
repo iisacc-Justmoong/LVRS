@@ -1,0 +1,86 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:39ec47e3f8d96a4309771d2c1c28294f6174b3ea48a73bd2e42488b29509f335",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FLVRS",
+    "name": "LVRS",
+    "root": "SDK/LVRS",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/DynamicLinking.md",
+    "sha256": "89dc2ce280d9a468bde060b93b59c794e7055473b291c168e83bd0fb8233d6f4",
+    "bytes": 908,
+    "line_count": 14,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Dynamic linking",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Dynamic linking\n",
+      "level": 1,
+      "title": "Dynamic linking"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 14,
+      "raw": "The native LVRS library defaults to a shared target, like the legacy Qt build.\nSet `LVRS_BUILD_SHARED_LIBS=OFF` for an explicit static build. Shared iOS and\nWebAssembly configurations select a framework and side module respectively.\nApplications must package the matching iiGUI and other selected runtime libraries.\nNative render-monitor tests clear inherited dynamic-loader overrides so they\nexercise the library selected by the build rather than an older installation.\nThe iOS and WebAssembly bootstraps forward the requested shared-library mode;\nsupport in each Qt toolchain must be validated separately.\nThe Emscripten package configuration permits shared side-module imports;\napplications supply the main-module flags when compiling and linking.\nThe legacy text model retains its active provider file device across chunked\nloads and releases it when loading finishes or is cancelled.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Dynamic linking",
+      "anchor": "dynamic-linking",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 6,
+        "text": "Applications must package the matching iiGUI and other selected runtime libraries.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000003",
+        "line": 10,
+        "text": "support in each Qt toolchain must be validated separately.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -50,6 +50,7 @@ private slots:
     void window_material_inherits_owning_window_accent();
     void application_window_theme_accent_mix();
     void application_window_custom_background();
+    void noise_texture_defaults_match_figma();
     void noise_texture_inputs_are_bounded_and_opaque();
     void window_gradient_tracks_accent_and_resize();
     void transient_defaults_and_capture_safety();
@@ -77,7 +78,7 @@ LV.ApplicationWindow {
     auto *theme = engine.singletonInstance<QObject *>("LVRS", "Theme");
     QVERIFY(theme);
     const QColor windowBase = theme->property("window").value<QColor>();
-    QCOMPARE(windowBase, QColor("#141414"));
+    QCOMPARE(windowBase, AccentFixture::background("Panel/window"));
     QCOMPARE(theme->property("applicationWindowFill").value<QColor>(), windowBase);
     QCOMPARE(theme->property("applicationWindowAccentOpacity").toReal(), 0.02);
     QCOMPARE(root->property("windowColor").value<QColor>(), windowBase);
@@ -181,7 +182,7 @@ LV.ApplicationWindow {
             QVERIFY(window->setProperty("primaryColor", accent));
             QTRY_COMPARE(material->property("primaryColor").value<QColor>(), accent);
             QTRY_COMPARE(auxiliaryMaterial->property("primaryColor").value<QColor>(), accent);
-            const QColor expected = accent2Mix(QColor("#141414"), accent);
+            const QColor expected = accent2Mix(AccentFixture::background("Panel/window"), accent);
             QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
             QTRY_COMPARE(grain->property("color").value<QColor>().rgba(), expected.rgba());
             QTRY_COMPARE(auxiliaryGrain->property("color").value<QColor>().rgba(), expected.rgba());
@@ -223,7 +224,7 @@ LV.ApplicationWindow {
                 QVERIFY(!window->property("backgroundBlurActive").toBool());
                 QCOMPARE(material->property("color").value<QColor>().rgba(), expected.rgba());
             }
-            QCOMPARE(window->color(), QColor("#141414"));
+            QCOMPARE(window->color(), AccentFixture::background("Panel/window"));
             QCOMPARE(window->opacity(), 1.0);
         }
     }
@@ -270,6 +271,17 @@ LV.ApplicationWindow {
     QVERIFY(!root->property("backgroundBlurSupported").toBool());
     QVERIFY(!root->property("backgroundBlurActive").toBool());
     QCOMPARE(qobject_cast<QQuickWindow *>(root.data())->color().alpha(), 255);
+}
+
+void MaterialTests::noise_texture_defaults_match_figma()
+{
+    QQmlEngine engine;
+    engine.addImportPath(TestUtils::qmlImportBase());
+    QScopedPointer<QObject> root(TestUtils::createFromQml(engine,
+        "import LVRS as LV; LV.WindowNoiseTexture {}"));
+    QVERIFY(root);
+    QCOMPARE(root->property("color").value<QColor>(), AccentFixture::background("Panel/window"));
+    QCOMPARE(root->property("primaryColor").value<QColor>(), AccentFixture::color("accentBlue"));
 }
 
 void MaterialTests::noise_texture_inputs_are_bounded_and_opaque()
@@ -322,7 +334,8 @@ ApplicationWindow {
     QVERIFY(window && surface);
     QVERIFY(QTest::qWaitForWindowExposed(window));
     QCOMPARE(surface->property("tintOpacity").toReal(), 0.5);
-    const QColor windowFill("#0B0B0B");
+    QColor windowFill = AccentFixture::background("Surface/Dense/Fill");
+    windowFill.setAlpha(255);
     const QString directory = qEnvironmentVariable("LVRS_MATERIAL_CAPTURE_DIR");
     for (const QSize size : {QSize(900, 600), QSize(1600, 1000)}) {
         window->resize(size);

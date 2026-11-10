@@ -16,6 +16,8 @@ Tab {
     readonly property color foreground: !effectiveEnabled ? Theme.disabledColor
         : iosStyle ? (effectiveSelected ? Theme.primary : Theme.titleHeaderColor)
         : effectiveSelected ? Theme.mobileTabAndroidSelectedText : Theme.mobileTabAndroidText
+    readonly property color iconForeground: effectiveEnabled && iosStyle && effectiveSelected
+        ? Theme.primaryHover : foreground
     iconSize: iosStyle ? 28 : 24
     implicitHeight: iosStyle ? 54 : 64
     implicitWidth: iosStyle ? 76 : 80
@@ -38,7 +40,7 @@ Tab {
             fillMode: Image.PreserveAspectFit
             opacity: control.effectiveEnabled ? 1 : 0.3
             layer.enabled: GraphicsInfo.api !== GraphicsInfo.Software
-            layer.effect: MultiEffect { colorization: 1; colorizationColor: control.foreground }
+            layer.effect: MultiEffect { colorization: 1; colorizationColor: control.iconForeground }
             Accessible.ignored: true
         }
         Label {

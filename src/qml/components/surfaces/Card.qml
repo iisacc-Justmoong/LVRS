@@ -81,7 +81,7 @@ AbstractButton {
     readonly property real borderWidth: previewOnly ? 0 : effectiveSelected ? Theme.scaleRealMetric(2) : Theme.scaleRealMetric(1)
     readonly property real contentInset: (type === Card.File && size === Card.Small ? Theme.gap12 : Theme.gap18) + borderWidth
     readonly property color borderColor: effectiveSelected ? Theme.primary : imageCard && effectiveHovered ? Theme.titleHeaderColor : Theme.panelBackground10
-    readonly property color surfaceColor: imageCard ? Theme.panelBackground03 : effectiveSelected ? Theme.panelBackground06 : effectiveHovered ? Theme.panelBackground07 : Theme.panelBackground05
+    readonly property color surfaceColor: imageCard ? Theme.panelBackground03 : "transparent"
     readonly property url resolvedIconSource: iconSource.toString().length ? iconSource : iconName.length ? Theme.iconPath(iconName) : cardIcon(["image", "image", "folder", "project", "device", "model", "member", "link"][type] || "image")
     readonly property int previewStatus: {
         const preview = bodyLoader.item as Private.CardImageContent;
@@ -104,7 +104,7 @@ AbstractButton {
     checkable: selectable
     focusPolicy: effectiveEnabled && !previewOnly ? Qt.StrongFocus : Qt.NoFocus
     activeFocusOnTab: effectiveEnabled && !previewOnly
-    cornerRadius: previewOnly ? 0 : Theme.radiusLg
+    cornerRadius: imageCard && !previewOnly ? Theme.radiusLg : 0
     horizontalPadding: 0
     verticalPadding: 0
     spacing: 0

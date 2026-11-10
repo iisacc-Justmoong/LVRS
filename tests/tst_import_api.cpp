@@ -16,12 +16,14 @@
 #include <QCursor>
 #include <QScopeGuard>
 #include <QMetaMethod>
+#include <QMetaEnum>
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickWindow>
 #include <QSGRendererInterface>
 #include <QVector>
 #include <QtPlugin>
+#include <memory>
 #include "accent_fixture.h"
 
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
@@ -65,6 +67,26 @@ QQuickItem *visualChildByObjectName(QQuickItem *root, const QString &objectName)
             return match;
     }
     return nullptr;
+}
+
+bool waitForInputMaterials(const QList<QQuickItem *> &fields)
+{
+    QList<std::shared_ptr<QSignalSpy>> paints;
+    for (auto *field : fields) {
+        auto *canvas = visualChildByObjectName(field, QStringLiteral("inputFieldMaterial"));
+        if (!canvas) return false;
+        auto spy = std::make_shared<QSignalSpy>(canvas, SIGNAL(painted()));
+        if (!spy->isValid() || !QMetaObject::invokeMethod(canvas, "requestPaint")) return false;
+        paints.append(std::move(spy));
+    }
+    QElapsedTimer elapsed; elapsed.start();
+    while (elapsed.elapsed() < 20000) {
+        bool ready = true;
+        for (const auto &paint : paints) ready = ready && !paint->isEmpty();
+        if (ready) return true;
+        QTest::qWait(10);
+    }
+    return false;
 }
 
 class NativeListModel : public QAbstractListModel
@@ -428,6 +450,7 @@ private slots:
     void button_default_tone_matches_figma_accent_loads();
     void segmented_control_figma_contract_loads_data();
     void segmented_control_figma_contract_loads();
+    void segmented_button_selected_color();
     void button_injected_methods_contract_loads();
     void stepper_figma_contract_loads();
     void combo_box_figma_contract_loads();
@@ -4549,7 +4572,7 @@ void ImportApiTests::segmented_control_figma_contract_loads()
                                 .arg(expected.width()).arg(expected.height())));
     };
 
-    for (int count = 2; count <= 7; ++count) {
+    for (int count = 2; count <= 15; ++count) {
         QString labelButtons;
         QString iconButtons;
         for (int index = 0; index < count; ++index) {
@@ -4563,12 +4586,14 @@ void ImportApiTests::segmented_control_figma_contract_loads()
 
         const int expectedLabelWidth = (count * 56) + ((count - 1) * 2) + 8;
         const int expectedIconWidth = (count * 22) + ((count - 1) * 2) + 8;
+        QString verticalButtons = iconButtons;
+        verticalButtons.replace("iconSegmentButton_", "verticalSegmentButton_");
         const QByteArray qml = QStringLiteral(R"(
 import QtQuick
 import LVRS as LV
 
 Item {
-    width: 460
+    width: 1000
     height: 120
     property int borderlessTone: LV.AbstractButton.Borderless
     Component.onCompleted: LV.Theme.targetOverride = testMobile ? "ios" : "macos"
@@ -4591,8 +4616,20 @@ Item {
         %5
     }
 
+    LV.IconSegmentedControl {
+        id: verticalSegment
+        objectName: "verticalIconSegment"
+        orientation: Qt.Vertical
+        x: 930
+        y: 20
+        %6
+    }
+
     property bool contractReady:
-        labelSegment.segmentCount === %1
+        verticalSegment.segmentCount === %1
+        && verticalSegment.width === 30
+        && verticalSegment.height === %3
+        && labelSegment.segmentCount === %1
         && iconSegment.segmentCount === %1
         && labelSegment.horizontalPadding === 4
         && Math.abs(labelSegment.verticalPadding - 3.5) < 0.01
@@ -4639,6 +4676,7 @@ Item {
                                    .arg(expectedIconWidth)
                                    .arg(labelButtons)
                                    .arg(iconButtons)
+                                   .arg(verticalButtons)
                                    .toUtf8();
 
         QScopedPointer<QObject> root(createFromQml(engine, qml));
@@ -4652,6 +4690,8 @@ Item {
             root->findChild<QObject *>(QStringLiteral("figmaIconSegment")));
         QVERIFY(labelSegment);
         QVERIFY(iconSegment);
+        auto *verticalSegment = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("verticalIconSegment")));
+        QVERIFY(verticalSegment);
         const int borderlessTone = root->property("borderlessTone").toInt();
 
         for (int index = 0; index < count; ++index) {
@@ -4661,8 +4701,15 @@ Item {
                 root->findChild<QObject *>(QStringLiteral("iconSegmentButton_%1").arg(index)));
             QVERIFY(labelButton);
             QVERIFY(iconButton);
-            QCOMPARE(labelButton->property("tone").toInt(), borderlessTone);
-            QCOMPARE(iconButton->property("tone").toInt(), borderlessTone);
+            auto *verticalButton = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("verticalSegmentButton_%1").arg(index)));
+            QVERIFY(verticalButton);
+            verifyBounds(verticalButton, verticalSegment, QRectF(4.0, 4.0 + (index * 24.0), 22.0, 22.0));
+            QCOMPARE(verticalButton->property("effectiveTone").toInt(), borderlessTone);
+            QCOMPARE(verticalButton->property("tone").toInt(), 0);
+            QCOMPARE(labelButton->property("effectiveTone").toInt(), borderlessTone);
+            QCOMPARE(iconButton->property("effectiveTone").toInt(), borderlessTone);
+            QCOMPARE(labelButton->property("tone").toInt(), 0);
+            QCOMPARE(iconButton->property("tone").toInt(), 0);
             QCOMPARE(labelButton->property("resolvedCornerRadius").toReal(), 8.0);
             QCOMPARE(iconButton->property("resolvedCornerRadius").toReal(), 8.0);
             verifyBounds(labelButton,
@@ -4672,6 +4719,18 @@ Item {
                          iconSegment,
                          QRectF(4.0 + (index * 24.0), 4.0, 22.0, 22.0));
         }
+
+        // Reorient an existing control and verify both geometry and child order.
+        QVERIFY(iconSegment->setProperty("orientation", int(Qt::Vertical)));
+        QTRY_COMPARE(iconSegment->width(), 30.0);
+        QTRY_COMPARE(iconSegment->height(), double(expectedIconWidth));
+        for (int index = 0; index < count; ++index) {
+            auto *button = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("iconSegmentButton_%1").arg(index)));
+            verifyBounds(button, iconSegment, QRectF(4.0, 4.0 + index * 24.0, 22.0, 22.0));
+        }
+        QVERIFY(iconSegment->setProperty("orientation", int(Qt::Horizontal)));
+        QTRY_COMPARE(iconSegment->width(), double(expectedIconWidth));
+        QTRY_COMPARE(iconSegment->height(), 30.0);
 
         const QString captureDir = qEnvironmentVariable("LVRS_SEGMENT_CAPTURE_DIR");
         if (!captureDir.isEmpty()) {
@@ -4695,6 +4754,60 @@ Item {
             host->setParentItem(nullptr);
         }
     }
+}
+
+void ImportApiTests::segmented_button_selected_color()
+{
+    QQmlEngine engine;
+    engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
+    QScopedPointer<QObject> root(createFromQml(engine, R"(
+import QtQuick
+import LVRS as LV
+Item {
+    id: root
+    property color expectedSelected: LV.Theme.accentMuted
+    property int originalTone: LV.AbstractButton.Destructive
+    LV.IconSegmentedControl {
+        id: group
+        objectName: "segmentGroup"
+        orientation: Qt.Vertical
+        LV.IconButton { objectName: "segmentButton"; iconName: "projectStructure"; motionEnabled: false;
+            tone: LV.AbstractButton.Destructive; checkable: true }
+    }
+    Component.onCompleted: LV.Theme.primaryColor = "#ef5123"
+}
+)"));
+    QVERIFY(root);
+    auto *button = root->findChild<QObject *>(QStringLiteral("segmentButton"));
+    auto *group = root->findChild<QObject *>(QStringLiteral("segmentGroup"));
+    QVERIFY(button && group);
+    QTRY_COMPARE(button->property("effectiveTone").toInt(), 2); // Borderless presentation
+    QCOMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
+    QVERIFY(QMetaObject::invokeMethod(button, "click"));
+    QTRY_VERIFY(button->property("checked").toBool());
+    QCOMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
+    auto *background=button->property("background").value<QObject *>();
+    QVERIFY(background);
+    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    const auto oldColor=root->property("expectedSelected").value<QColor>();
+    // The selected fill follows the app accent, including subsequent changes.
+    auto *theme=engine.singletonInstance<QObject *>("LVRS", "Theme");
+    QVERIFY(theme); QVERIFY(theme->setProperty("primaryColor", QColor("#31bb75")));
+    QTRY_VERIFY(root->property("expectedSelected").value<QColor>()!=oldColor);
+    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    QVERIFY(group->setProperty("forceBorderlessTone",false));
+    QTRY_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
+    QCOMPARE(button->property("tone").toInt(),root->property("originalTone").toInt());
+    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    QVERIFY(QMetaObject::invokeMethod(button, "click"));
+    QTRY_VERIFY(!button->property("checked").toBool());
+    QVERIFY(group->setProperty("forceBorderlessTone",true));
+    QTRY_COMPARE(button->property("effectiveTone").toInt(),2);
+    auto *buttonItem=qobject_cast<QQuickItem *>(button);
+    auto *rootItem=qobject_cast<QQuickItem *>(root.data());
+    QVERIFY(buttonItem && rootItem);
+    buttonItem->setParentItem(rootItem);
+    QTRY_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
 }
 
 void ImportApiTests::button_injected_methods_contract_loads()
@@ -5422,6 +5535,8 @@ Item {
     rootItem->setVisible(true);
     captureWindow.show();
     QCoreApplication::processEvents();
+    QVERIFY2(waitForInputMaterials({roundedItem, cylinderItem, inlineItem, searchItem}),
+             "Input field material painting did not complete");
 
     QTest::qWait(120);
     const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(698, 84));
@@ -5552,6 +5667,12 @@ Controls.ApplicationWindow {
                                              QStringLiteral("materialField%1").arg(i));
         QVERIFY(field);
         fields.append(field);
+        auto *materialCanvas = visualChildByObjectName(field, QStringLiteral("inputFieldMaterial"));
+        QVERIFY(materialCanvas);
+        const auto strategyIndex = materialCanvas->metaObject()->indexOfEnumerator("RenderStrategy");
+        QVERIFY(strategyIndex >= 0);
+        const auto strategy = materialCanvas->metaObject()->enumerator(strategyIndex);
+        QCOMPARE(materialCanvas->property("renderStrategy").toInt(), strategy.keyToValue("Threaded"));
         QCOMPARE(field->size(), QSizeF(206, 22));
         auto *input = field->property("inputItem").value<QQuickItem *>();
         QVERIFY(input);
@@ -5572,6 +5693,7 @@ Controls.ApplicationWindow {
         QCOMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
         QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
     }
+    QVERIFY2(waitForInputMaterials(fields), "Input field material painting did not complete");
     const auto grab = [window]() -> QImage {
         QTest::qWait(120);
         const auto result = window->contentItem()->grabToImage(window->size());

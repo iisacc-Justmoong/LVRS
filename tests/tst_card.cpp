@@ -73,6 +73,11 @@ LV.Card {
     QTRY_COMPARE(card->size(), QSizeF(dimensions));
     QCOMPARE(card->property("effectiveSelected").toBool(), type != 1 && displayState == 3);
     QCOMPARE(card->property("borderWidth").toReal(), type == 1 ? 0.0 : displayState == 3 ? 2.0 : 1.0);
+    QCOMPARE(card->property("resolvedCornerRadius").toReal(), type == 0 ? 12.0 : 0.0);
+    if (type >= 2)
+        QCOMPARE(card->property("surfaceColor").value<QColor>().alpha(), 0);
+    else
+        QVERIFY(card->property("surfaceColor").value<QColor>().alpha() > 0);
     if (type == 0) {
         auto *caption = card->findChild<QQuickItem *>("card_caption");
         QVERIFY(caption);

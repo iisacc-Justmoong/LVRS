@@ -46,8 +46,10 @@ signals:
 private:
     void rebuildTexture();
 
-    QColor m_color = QColor("#141414");
-    QColor m_primaryColor = QColor("#1582FF");
+    // BEGIN FIGMA WINDOW NOISE DEFAULTS
+    QColor m_color = QColor::fromRgbF(0.09921568632125854, 0.09921568632125854, 0.09921568632125854, 1);
+    QColor m_primaryColor = QColor::fromRgbF(0.1557759940624237, 0.5030806064605713, 0.8999999761581421, 1);
+    // END FIGMA WINDOW NOISE DEFAULTS
     qreal m_noiseStrength = 0.32;
     qreal m_blurRadius = 1.5;
     qreal m_grainStrength = 0;

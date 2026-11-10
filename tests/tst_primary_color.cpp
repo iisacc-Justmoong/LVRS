@@ -112,7 +112,7 @@ void PrimaryColorTests::default_blue_is_compatible()
     QCOMPARE(color(tokens, "accentTint"), AccentFixture::blueWithAlpha(31.0 / 255));
     QCOMPARE(color(tokens, "primaryOverlay"), AccentFixture::blueWithAlpha(64.0 / 255));
     QCOMPARE(color(tokens, "accentMuted"), AccentFixture::blueComposite(0.25));
-    QCOMPARE(color(tokens, "accentDetail"), blue);
+    QCOMPARE(color(tokens, "accentDetail"), AccentFixture::role("Blue", "Hover"));
     QCOMPARE(color(tokens, "alertActionPrimary"), blue);
     QCOMPARE(color(tokens, "alertIconSurface"), AccentFixture::blueComposite(0.16));
     QCOMPARE(color(tokens, "alertIconBorder"), AccentFixture::blueComposite(0.36));

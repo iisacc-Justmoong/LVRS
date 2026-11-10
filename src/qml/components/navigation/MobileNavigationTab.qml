@@ -12,7 +12,7 @@ Tab {
     property bool preserveIconColors: false
     property size iconArtworkSize: Qt.size(iconSize, iconSize)
     readonly property color foreground: !effectiveEnabled ? Theme.disabledColor
-        : effectiveSelected ? Theme.primary : Theme.bodyColor
+        : effectiveSelected ? Theme.primaryHover : Theme.bodyColor
     iconSize: Theme.mobileNavigationIconSize
     implicitWidth: Theme.mobileNavigationTabWidth
     implicitHeight: Theme.mobileNavigationTouchSize
