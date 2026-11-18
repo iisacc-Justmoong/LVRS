@@ -91,3 +91,5 @@ __pycache__/
 # Figma source icons whose names collide with Makefile ignore patterns.
 !resources/iconset/makefile*.svg
 resources/
+/tests/installed-consumer/build/
+resources/
