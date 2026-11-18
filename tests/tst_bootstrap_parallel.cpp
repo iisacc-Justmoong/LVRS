@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
@@ -12,9 +13,7 @@
 
 class BootstrapParallelTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void parallel_tasks_run_concurrently_and_apply_on_receiver_thread();
     void parallel_runner_reports_load_and_apply_failures();
 };
@@ -82,18 +81,18 @@ void BootstrapParallelTests::parallel_tasks_run_concurrently_and_apply_on_receiv
         makeTask(QStringLiteral("first"), 10)
     }, options);
 
-    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
-    QVERIFY(!result.fatalFailure());
-    QCOMPARE(result.taskResults.size(), 2);
-    QCOMPARE(startedCount, 2);
-    QVERIFY(applyThreadOk);
-    QCOMPARE(applyOrder, (QStringList {QStringLiteral("first"), QStringLiteral("second")}));
-    QCOMPARE(workerThreadFlags, (QList<bool> {true, true}));
-    QCOMPARE(result.taskResults.at(0).metadata.value(QStringLiteral("domain")).toString(),
+    CTEST_CHECK_MESSAGE(result.ok, qPrintable(result.errorMessage()));
+    CTEST_CHECK(!result.fatalFailure());
+    CTEST_COMPARE(result.taskResults.size(), 2);
+    CTEST_COMPARE(startedCount, 2);
+    CTEST_CHECK(applyThreadOk);
+    CTEST_COMPARE(applyOrder, (QStringList {QStringLiteral("first"), QStringLiteral("second")}));
+    CTEST_COMPARE(workerThreadFlags, (QList<bool> {true, true}));
+    CTEST_COMPARE(result.taskResults.at(0).metadata.value(QStringLiteral("domain")).toString(),
              QStringLiteral("first"));
-    QVERIFY(result.taskResults.at(0).loadElapsedMs >= 0);
-    QVERIFY(result.taskResults.at(0).applied);
-    QVERIFY(result.diagnostics().size() == 2);
+    CTEST_CHECK(result.taskResults.at(0).loadElapsedMs >= 0);
+    CTEST_CHECK(result.taskResults.at(0).applied);
+    CTEST_CHECK(result.diagnostics().size() == 2);
 }
 
 void BootstrapParallelTests::parallel_runner_reports_load_and_apply_failures()
@@ -143,19 +142,26 @@ void BootstrapParallelTests::parallel_runner_reports_load_and_apply_failures()
         missingLoad
     }, options);
 
-    QVERIFY(!result.ok);
-    QVERIFY(result.fatalFailure());
-    QCOMPARE(result.taskResults.size(), 3);
-    QVERIFY(!skippedApplyCalled);
-    QVERIFY(result.errorMessage().contains(QStringLiteral("missing-load")));
-    QVERIFY(result.errorMessage().contains(QStringLiteral("domain load failed")));
-    QVERIFY(result.errorMessage().contains(QStringLiteral("main-thread apply failed")));
-    QVERIFY(!result.taskResults.at(0).ok);
-    QVERIFY(result.taskResults.at(0).fatal);
-    QVERIFY(!result.taskResults.at(1).applied);
-    QVERIFY(result.taskResults.at(2).applied);
-    QVERIFY(!result.taskResults.at(2).applyOk);
+    CTEST_CHECK(!result.ok);
+    CTEST_CHECK(result.fatalFailure());
+    CTEST_COMPARE(result.taskResults.size(), 3);
+    CTEST_CHECK(!skippedApplyCalled);
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("missing-load")));
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("domain load failed")));
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("main-thread apply failed")));
+    CTEST_CHECK(!result.taskResults.at(0).ok);
+    CTEST_CHECK(result.taskResults.at(0).fatal);
+    CTEST_CHECK(!result.taskResults.at(1).applied);
+    CTEST_CHECK(result.taskResults.at(2).applied);
+    CTEST_CHECK(!result.taskResults.at(2).applyOk);
 }
 
-QTEST_MAIN(BootstrapParallelTests)
-#include "tst_bootstrap_parallel.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    BootstrapParallelTests tests;
+    runner.run("parallel_tasks_run_concurrently_and_apply_on_receiver_thread", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.parallel_tasks_run_concurrently_and_apply_on_receiver_thread(); });
+    runner.run("parallel_runner_reports_load_and_apply_failures", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.parallel_runner_reports_load_and_apply_failures(); });
+    return runner.result();
+}

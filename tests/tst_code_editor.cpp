@@ -1,4 +1,6 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
+#include <QMouseEvent>
 
 #include <QCoreApplication>
 #include <QInputMethodEvent>
@@ -17,6 +19,33 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 namespace {
 constexpr int kFlickableStopAtBounds = 0;
+
+void sendMouse(QQuickWindow *window, QEvent::Type type, const QPoint &point,
+               Qt::MouseButton button, Qt::MouseButtons buttons)
+{
+    static ulong timestamp = 10000;
+    timestamp += 10;
+    const QPointF local(point);
+    const QPointF global(window->mapToGlobal(point));
+    QMouseEvent event(type, local, local, global, button, buttons, Qt::NoModifier);
+    event.setTimestamp(timestamp);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+
+void mouseClick(QQuickWindow *window, const QPoint &point)
+{
+    sendMouse(window, QEvent::MouseButtonPress, point, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseButtonRelease, point, Qt::LeftButton, Qt::NoButton);
+}
+
+void mouseDoubleClick(QQuickWindow *window, const QPoint &point)
+{
+    mouseClick(window, point);
+    sendMouse(window, QEvent::MouseButtonPress, point, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseButtonDblClick, point, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseButtonRelease, point, Qt::LeftButton, Qt::NoButton);
+}
 
 QPoint scenePoint(QQuickItem *item, const QPointF &localPoint)
 {
@@ -41,11 +70,9 @@ bool mouseAreaContainsScenePoint(QObject *root, const QPoint &scenePoint)
 }
 }
 
-class CodeEditorTests : public QObject
+class CodeEditorTests
 {
-    Q_OBJECT
-
-private slots:
+public:
     void code_editor_default_contract_and_utility_api();
     void code_editor_submit_signal_and_fixed_plain_text_mode();
     void code_editor_ios_native_text_interaction_contract();
@@ -86,20 +113,20 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("defaultContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("defaultContractReady").toBool());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
-    QVERIFY(editor);
-    QVERIFY(editor->property("empty").toBool());
+    CTEST_CHECK(editor);
+    CTEST_CHECK(editor->property("empty").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(editor, "insertText", Q_ARG(QVariant, QVariant(QStringLiteral("const value = 1;")))));
-    QCOMPARE(editor->property("text").toString(), QStringLiteral("const value = 1;"));
-    QVERIFY(!editor->property("empty").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "insertText", Q_ARG(QVariant, QVariant(QStringLiteral("const value = 1;")))));
+    CTEST_COMPARE(editor->property("text").toString(), QStringLiteral("const value = 1;"));
+    CTEST_CHECK(!editor->property("empty").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(editor, "clear"));
-    QCOMPARE(editor->property("text").toString(), QString());
-    QVERIFY(editor->property("empty").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "clear"));
+    CTEST_COMPARE(editor->property("text").toString(), QString());
+    CTEST_CHECK(editor->property("empty").toBool());
 }
 
 void CodeEditorTests::code_editor_submit_signal_and_fixed_plain_text_mode()
@@ -136,27 +163,27 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("fixedModeReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("fixedModeReady").toBool());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     QObject *textEdit = root->findChild<QObject *>(QStringLiteral("codeTextEdit"));
-    QVERIFY(textEdit);
+    CTEST_CHECK(textEdit);
 
-    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
     const QString beforeReturnText = editor->property("text").toString();
     const int submitBeforeReturn = root->property("submitCount").toInt();
     QKeyEvent returnEvent(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, QStringLiteral("\n"));
     QCoreApplication::sendEvent(textEdit, &returnEvent);
     const QString afterReturnText = editor->property("text").toString();
-    QTRY_COMPARE(afterReturnText.size(), beforeReturnText.size() + 1);
-    QVERIFY(afterReturnText.contains(QLatin1Char('\n')));
-    QCOMPARE(root->property("submitCount").toInt(), submitBeforeReturn);
+    CTEST_WAIT_COMPARE(afterReturnText.size(), beforeReturnText.size() + 1);
+    CTEST_CHECK(afterReturnText.contains(QLatin1Char('\n')));
+    CTEST_COMPARE(root->property("submitCount").toInt(), submitBeforeReturn);
 
     QKeyEvent submitEvent(QEvent::KeyPress, Qt::Key_Return, Qt::ControlModifier, QStringLiteral("\n"));
     QCoreApplication::sendEvent(textEdit, &submitEvent);
-    QTRY_COMPARE(root->property("submitCount").toInt(), 1);
+    CTEST_WAIT_COMPARE(root->property("submitCount").toInt(), 1);
 }
 
 void CodeEditorTests::code_editor_ios_native_text_interaction_contract()
@@ -193,8 +220,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("iosNativeTextReady").toBool());
 }
 
 void CodeEditorTests::code_editor_native_event_input_matrix()
@@ -233,59 +260,62 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     auto *textEdit = root->findChild<QQuickItem *>(QStringLiteral("codeTextEdit"));
-    QVERIFY(textEdit);
+    CTEST_CHECK(textEdit);
     QObject *viewport = root->findChild<QObject *>(QStringLiteral("codeEditorViewportFlickable"));
-    QVERIFY(viewport);
-    QVERIFY(!viewport->property("interactive").toBool());
+    CTEST_CHECK(viewport);
+    CTEST_CHECK(!viewport->property("interactive").toBool());
 
     const QPoint wordPoint = scenePoint(textEdit, QPointF(26.0, 8.0));
     const QPoint dragStart = scenePoint(textEdit, QPointF(8.0, 8.0));
     const QPoint dragEnd = scenePoint(textEdit, QPointF(128.0, 8.0));
 
-    QVERIFY(!mouseAreaContainsScenePoint(root.data(), wordPoint));
+    CTEST_CHECK(!mouseAreaContainsScenePoint(root.data(), wordPoint));
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(textEdit->property("activeFocus").toBool());
+    mouseClick(window, wordPoint);
+    CTEST_WAIT_DEFAULT(textEdit->property("activeFocus").toBool());
 
     textEdit->setProperty("cursorPosition", 0);
-    QTest::keyClick(window, Qt::Key_Z, Qt::NoModifier, 10);
-    QTRY_VERIFY(editor->property("text").toString().startsWith(QStringLiteral("z")));
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Z, Qt::NoModifier, QStringLiteral("z"));
+    QCoreApplication::sendEvent(window, &keyPress);
+    QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_Z, Qt::NoModifier, QStringLiteral("z"));
+    QCoreApplication::sendEvent(window, &keyRelease);
+    CTEST_WAIT_DEFAULT(editor->property("text").toString().startsWith(QStringLiteral("z")));
 
     QInputMethodEvent preeditEvent(QStringLiteral("preedit"), {});
     QCoreApplication::sendEvent(textEdit, &preeditEvent);
-    QTRY_COMPARE(textEdit->property("preeditText").toString(), QStringLiteral("preedit"));
+    CTEST_WAIT_COMPARE(textEdit->property("preeditText").toString(), QStringLiteral("preedit"));
 
     QInputMethodEvent commitEvent;
     commitEvent.setCommitString(QStringLiteral("한"));
     QCoreApplication::sendEvent(textEdit, &commitEvent);
-    QTRY_VERIFY(editor->property("text").toString().contains(QStringLiteral("한")));
+    CTEST_WAIT_DEFAULT(editor->property("text").toString().contains(QStringLiteral("한")));
 
     textEdit->setProperty("text", QStringLiteral("alpha beta gamma\nsecond line words\nthird paragraph text"));
     textEdit->setProperty("cursorPosition", 0);
-    QVERIFY(QMetaObject::invokeMethod(editor, "deselect"));
-    QTest::mouseDClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(textEdit->property("selectedText").toString().contains(QStringLiteral("alpha")));
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "deselect"));
+    mouseDoubleClick(window, wordPoint);
+    CTEST_WAIT_DEFAULT(textEdit->property("selectedText").toString().contains(QStringLiteral("alpha")));
     const QString doubleClickSelection = textEdit->property("selectedText").toString();
-    QVERIFY(!doubleClickSelection.isEmpty());
+    CTEST_CHECK(!doubleClickSelection.isEmpty());
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(textEdit->property("selectedText").toString() != doubleClickSelection);
+    mouseClick(window, wordPoint);
+    CTEST_WAIT_DEFAULT(textEdit->property("selectedText").toString() != doubleClickSelection);
 
-    QVERIFY(QMetaObject::invokeMethod(editor, "deselect"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, dragStart, 10);
-    QTest::mouseMove(window, dragEnd, 10);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, dragEnd, 10);
-    QTRY_VERIFY(textEdit->property("selectedText").toString().size() > 0);
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "deselect"));
+    sendMouse(window, QEvent::MouseButtonPress, dragStart, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseMove, dragEnd, Qt::NoButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseButtonRelease, dragEnd, Qt::LeftButton, Qt::NoButton);
+    CTEST_WAIT_DEFAULT(textEdit->property("selectedText").toString().size() > 0);
 }
 
 void CodeEditorTests::code_editor_ios_scroll_physics_contract()
@@ -321,21 +351,31 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("codeEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     QObject *viewport = root->findChild<QObject *>(QStringLiteral("codeEditorViewportFlickable"));
-    QVERIFY(viewport);
+    CTEST_CHECK(viewport);
 
-    QCOMPARE(viewport->property("boundsBehavior").toInt(), kFlickableStopAtBounds);
-    QCOMPARE(viewport->property("boundsMovement").toInt(), kFlickableStopAtBounds);
-    QCOMPARE(viewport->property("boundsBehavior").toInt(), editor->property("viewportBoundsBehavior").toInt());
-    QCOMPARE(viewport->property("boundsMovement").toInt(), editor->property("viewportBoundsMovement").toInt());
-    QCOMPARE(viewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
-    QCOMPARE(viewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
-    QVERIFY(!viewport->property("interactive").toBool());
+    CTEST_COMPARE(viewport->property("boundsBehavior").toInt(), kFlickableStopAtBounds);
+    CTEST_COMPARE(viewport->property("boundsMovement").toInt(), kFlickableStopAtBounds);
+    CTEST_COMPARE(viewport->property("boundsBehavior").toInt(), editor->property("viewportBoundsBehavior").toInt());
+    CTEST_COMPARE(viewport->property("boundsMovement").toInt(), editor->property("viewportBoundsMovement").toInt());
+    CTEST_COMPARE(viewport->property("flickDeceleration").toInt(), editor->property("viewportFlickDeceleration").toInt());
+    CTEST_COMPARE(viewport->property("maximumFlickVelocity").toInt(), editor->property("viewportMaximumFlickVelocity").toInt());
+    CTEST_CHECK(!viewport->property("interactive").toBool());
 }
 
-QTEST_MAIN(CodeEditorTests)
-#include "tst_code_editor.moc"
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    CodeEditorTests tests;
+    runner.run("code_editor_default_contract_and_utility_api", [&] { tests.code_editor_default_contract_and_utility_api(); });
+    runner.run("code_editor_submit_signal_and_fixed_plain_text_mode", [&] { tests.code_editor_submit_signal_and_fixed_plain_text_mode(); });
+    runner.run("code_editor_ios_native_text_interaction_contract", [&] { tests.code_editor_ios_native_text_interaction_contract(); });
+    runner.run("code_editor_native_event_input_matrix", [&] { tests.code_editor_native_event_input_matrix(); });
+    runner.run("code_editor_ios_scroll_physics_contract", [&] { tests.code_editor_ios_scroll_physics_contract(); });
+    return runner.result();
+}

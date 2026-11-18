@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQmlProperty>
@@ -13,9 +14,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class LayoutTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void vstack_default_spacing();
     void hstack_default_spacing();
     void vstack_alignment_name();
@@ -55,7 +54,7 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     const auto children = root->children().first()->children();
     QObject *layout = nullptr;
@@ -66,8 +65,8 @@ Item {
             break;
         }
     }
-    QVERIFY(layout);
-    QCOMPARE(layout->property("spacing").toInt(), 8);
+    CTEST_CHECK(layout);
+    CTEST_COMPARE(layout->property("spacing").toInt(), 8);
 }
 
 void LayoutTests::hstack_default_spacing()
@@ -89,7 +88,7 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     const auto children = root->children().first()->children();
     QObject *layout = nullptr;
@@ -100,8 +99,8 @@ Item {
             break;
         }
     }
-    QVERIFY(layout);
-    QCOMPARE(layout->property("spacing").toInt(), 8);
+    CTEST_CHECK(layout);
+    CTEST_COMPARE(layout->property("spacing").toInt(), 8);
 }
 
 void LayoutTests::vstack_alignment_name()
@@ -128,9 +127,9 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const int align = root->property("childAlign").toInt();
-    QCOMPARE(align, int(Qt::AlignLeft));
+    CTEST_COMPARE(align, int(Qt::AlignLeft));
 }
 
 void LayoutTests::hstack_alignment_name()
@@ -157,9 +156,9 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const int align = root->property("childAlign").toInt();
-    QCOMPARE(align, int(Qt::AlignBottom));
+    CTEST_COMPARE(align, int(Qt::AlignBottom));
 }
 
 void LayoutTests::spacer_min_length_vertical()
@@ -186,10 +185,20 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("fillHeight").toBool());
-    QTRY_COMPARE(root->property("minHeight").toInt(), 12);
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("fillHeight").toBool());
+    CTEST_WAIT_COMPARE(root->property("minHeight").toInt(), 12);
 }
 
-QTEST_MAIN(LayoutTests)
-#include "tst_layout.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    LayoutTests tests;
+    runner.run("vstack_default_spacing", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.vstack_default_spacing(); });
+    runner.run("hstack_default_spacing", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.hstack_default_spacing(); });
+    runner.run("vstack_alignment_name", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.vstack_alignment_name(); });
+    runner.run("hstack_alignment_name", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.hstack_alignment_name(); });
+    runner.run("spacer_min_length_vertical", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.spacer_min_length_vertical(); });
+    return runner.result();
+}

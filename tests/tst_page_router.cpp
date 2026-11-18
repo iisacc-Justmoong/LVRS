@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QScopedPointer>
 #include <QQmlEngine>
@@ -12,9 +13,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class PageRouterTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void route_params_are_passed_to_target_component();
     void default_initial_path_does_not_override_bound_path();
     void component_navigation_keeps_path_stack_in_sync();
@@ -84,21 +83,21 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("pathLength").toInt(), 1);
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 1);
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openRun"));
-    QTRY_COMPARE(root->property("capturedRunId").toString(), QStringLiteral("42"));
-    QTRY_COMPARE(root->property("capturedMode").toString(), QStringLiteral("push"));
-    QCOMPARE(root->property("depth").toInt(), 2);
-    QCOMPARE(root->property("pathLength").toInt(), 2);
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/runs/42"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openRun"));
+    CTEST_WAIT_COMPARE(root->property("capturedRunId").toString(), QStringLiteral("42"));
+    CTEST_WAIT_COMPARE(root->property("capturedMode").toString(), QStringLiteral("push"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 2);
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/runs/42"));
 
     const QVariantMap currentParams = root->property("currentParams").toMap();
-    QCOMPARE(currentParams.value(QStringLiteral("runId")).toString(), QStringLiteral("42"));
-    QCOMPARE(currentParams.value(QStringLiteral("mode")).toString(), QStringLiteral("push"));
+    CTEST_COMPARE(currentParams.value(QStringLiteral("runId")).toString(), QStringLiteral("42"));
+    CTEST_COMPARE(currentParams.value(QStringLiteral("mode")).toString(), QStringLiteral("push"));
 }
 
 void PageRouterTests::default_initial_path_does_not_override_bound_path()
@@ -149,13 +148,13 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
-    QCOMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("pathLength").toInt(), 1);
-    QCOMPARE(root->property("firstPath").toString(), QStringLiteral("/reports"));
-    QCOMPARE(root->property("reportsLoaded").toBool(), true);
-    QCOMPARE(root->property("homeLoaded").toBool(), false);
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 1);
+    CTEST_COMPARE(root->property("firstPath").toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(root->property("reportsLoaded").toBool(), true);
+    CTEST_COMPARE(root->property("homeLoaded").toBool(), false);
 }
 
 void PageRouterTests::component_navigation_keeps_path_stack_in_sync()
@@ -216,33 +215,33 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("pathLength").toInt(), 1);
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 1);
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "pushComponent"));
-    QTRY_COMPARE(root->property("componentTag").toString(), QStringLiteral("push"));
-    QCOMPARE(root->property("depth").toInt(), 2);
-    QCOMPARE(root->property("pathLength").toInt(), 2);
-    QCOMPARE(root->property("currentPath").toString(), QString());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "pushComponent"));
+    CTEST_WAIT_COMPARE(root->property("componentTag").toString(), QStringLiteral("push"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 2);
+    CTEST_COMPARE(root->property("currentPath").toString(), QString());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "replaceComponent"));
-    QTRY_COMPARE(root->property("componentTag").toString(), QStringLiteral("replace"));
-    QCOMPARE(root->property("depth").toInt(), 2);
-    QCOMPARE(root->property("pathLength").toInt(), 2);
-    QCOMPARE(root->property("currentPath").toString(), QString());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "replaceComponent"));
+    CTEST_WAIT_COMPARE(root->property("componentTag").toString(), QStringLiteral("replace"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 2);
+    CTEST_COMPARE(root->property("currentPath").toString(), QString());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "setComponentRoot"));
-    QTRY_COMPARE(root->property("componentTag").toString(), QStringLiteral("root"));
-    QCOMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("pathLength").toInt(), 1);
-    QCOMPARE(root->property("currentPath").toString(), QString());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "setComponentRoot"));
+    CTEST_WAIT_COMPARE(root->property("componentTag").toString(), QStringLiteral("root"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 1);
+    CTEST_COMPARE(root->property("currentPath").toString(), QString());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "clearExternalPath"));
-    QTRY_COMPARE(root->property("depth").toInt(), 0);
-    QCOMPARE(root->property("pathLength").toInt(), 0);
-    QCOMPARE(root->property("currentPath").toString(), QString());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "clearExternalPath"));
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 0);
+    CTEST_COMPARE(root->property("pathLength").toInt(), 0);
+    CTEST_COMPARE(root->property("currentPath").toString(), QString());
 }
 
 void PageRouterTests::route_pages_are_isolated_and_forced_to_viewport()
@@ -308,16 +307,16 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("depth").toInt(), 1);
-    QTRY_VERIFY(root->property("firstVisibleAtRoot").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_WAIT_DEFAULT(root->property("firstVisibleAtRoot").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openNotes"));
-    QTRY_COMPARE(root->property("depth").toInt(), 2);
-    QTRY_VERIFY(root->property("firstHiddenAfterPush").toBool());
-    QTRY_VERIFY(root->property("secondVisibleAfterPush").toBool());
-    QTRY_VERIFY(root->property("secondFillsViewport").toBool());
-    QTRY_VERIFY(root->property("secondAnchoredToOrigin").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openNotes"));
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_WAIT_DEFAULT(root->property("firstHiddenAfterPush").toBool());
+    CTEST_WAIT_DEFAULT(root->property("secondVisibleAfterPush").toBool());
+    CTEST_WAIT_DEFAULT(root->property("secondFillsViewport").toBool());
+    CTEST_WAIT_DEFAULT(root->property("secondAnchoredToOrigin").toBool());
 }
 
 void PageRouterTests::page_router_retain_inactive_depth_contract()
@@ -381,15 +380,15 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 1);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openB"));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openC"));
-    QTRY_COMPARE(root->property("depth").toInt(), 3);
-    QTRY_VERIFY(root->property("pageAHiddenOnDepth3").toBool());
-    QTRY_VERIFY(root->property("pageBVisibleOnDepth3").toBool());
-    QTRY_VERIFY(root->property("pageCVisibleOnDepth3").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openB"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openC"));
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 3);
+    CTEST_WAIT_DEFAULT(root->property("pageAHiddenOnDepth3").toBool());
+    CTEST_WAIT_DEFAULT(root->property("pageBVisibleOnDepth3").toBool());
+    CTEST_WAIT_DEFAULT(root->property("pageCVisibleOnDepth3").toBool());
 }
 
 void PageRouterTests::page_router_updates_view_state_tracker_from_stack()
@@ -453,24 +452,24 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "resetTracker"));
+    CTEST_CHECK(root);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "resetTracker"));
 
-    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
-    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
-    QTRY_COMPARE(root->property("loadedCount").toInt(), 1);
+    CTEST_WAIT_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
+    CTEST_WAIT_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
+    CTEST_WAIT_COMPARE(root->property("loadedCount").toInt(), 1);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openRun"));
-    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/runs/42"));
-    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Inactive"));
-    QTRY_COMPARE(root->property("runState").toString(), QStringLiteral("Active"));
-    QTRY_COMPARE(root->property("loadedCount").toInt(), 2);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openRun"));
+    CTEST_WAIT_COMPARE(root->property("activeView").toString(), QStringLiteral("/runs/42"));
+    CTEST_WAIT_COMPARE(root->property("rootState").toString(), QStringLiteral("Inactive"));
+    CTEST_WAIT_COMPARE(root->property("runState").toString(), QStringLiteral("Active"));
+    CTEST_WAIT_COMPARE(root->property("loadedCount").toInt(), 2);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBack"));
-    QTRY_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
-    QTRY_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
-    QTRY_COMPARE(root->property("runState").toString(), QString());
-    QTRY_COMPARE(root->property("loadedCount").toInt(), 1);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goBack"));
+    CTEST_WAIT_COMPARE(root->property("activeView").toString(), QStringLiteral("/"));
+    CTEST_WAIT_COMPARE(root->property("rootState").toString(), QStringLiteral("Active"));
+    CTEST_WAIT_COMPARE(root->property("runState").toString(), QString());
+    CTEST_WAIT_COMPARE(root->property("loadedCount").toInt(), 1);
 }
 
 void PageRouterTests::global_navigator_allows_one_line_navigation()
@@ -526,21 +525,21 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
-    QCOMPARE(root->property("depth").toInt(), 1);
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReportsInOneLine"));
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
-    QCOMPARE(root->property("depth").toInt(), 2);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goReportsInOneLine"));
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goSettingsByLink"));
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/settings"));
-    QCOMPARE(root->property("depth").toInt(), 3);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goSettingsByLink"));
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/settings"));
+    CTEST_COMPARE(root->property("depth").toInt(), 3);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBackInOneLine"));
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
-    QCOMPARE(root->property("depth").toInt(), 2);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goBackInOneLine"));
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
 }
 
 void PageRouterTests::global_navigator_falls_back_to_previous_router()
@@ -597,16 +596,16 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
-    QTRY_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(root);
+    CTEST_WAIT_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
+    CTEST_WAIT_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goSecondary"));
-    QTRY_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/secondary"));
-    QCOMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goSecondary"));
+    CTEST_WAIT_COMPARE(root->property("secondCurrentPath").toString(), QStringLiteral("/secondary"));
+    CTEST_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "fallbackToFirstAndGoPrimary"));
-    QTRY_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/primary"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "fallbackToFirstAndGoPrimary"));
+    CTEST_WAIT_COMPARE(root->property("firstCurrentPath").toString(), QStringLiteral("/primary"));
 }
 
 void PageRouterTests::interactive_navigation_transitions_hold_route_commit_until_finish()
@@ -699,79 +698,79 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QCOMPARE(root->property("settleDuration").toInt(), 360);
-    QTRY_COMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(root);
+    CTEST_COMPARE(root->property("settleDuration").toInt(), 360);
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "openDetail"));
-    QTRY_COMPARE(root->property("depth").toInt(), 2);
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "openDetail"));
+    CTEST_WAIT_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginBack"));
-    QTRY_VERIFY(root->property("interactiveActive").toBool());
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginBack"));
+    CTEST_WAIT_DEFAULT(root->property("interactiveActive").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.5)),
                                       Q_ARG(QVariant, QVariant(0.0))));
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
-    QCOMPARE(root->property("depth").toInt(), 2);
-    QVERIFY(root->property("homeVisible").toBool());
-    QVERIFY(root->property("currentPageX").toReal() > 100.0);
-    QVERIFY(root->property("homePageX").toReal() < -40.0);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "forcePresentationSync"));
-    QTRY_VERIFY(root->property("homeVisible").toBool());
-    QTRY_VERIFY(!root->property("homeEnabled").toBool());
-    QTRY_VERIFY(!root->property("currentPageEnabled").toBool());
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_CHECK(root->property("homeVisible").toBool());
+    CTEST_CHECK(root->property("currentPageX").toReal() > 100.0);
+    CTEST_CHECK(root->property("homePageX").toReal() < -40.0);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "forcePresentationSync"));
+    CTEST_WAIT_DEFAULT(root->property("homeVisible").toBool());
+    CTEST_WAIT_DEFAULT(!root->property("homeEnabled").toBool());
+    CTEST_WAIT_DEFAULT(!root->property("currentPageEnabled").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
-    QCOMPARE(root->property("depth").toInt(), 2);
-    QVERIFY(qAbs(root->property("currentPageX").toReal()) < 0.5);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    CTEST_WAIT_DEFAULT(!root->property("interactiveActive").toBool());
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
+    CTEST_CHECK(qAbs(root->property("currentPageX").toReal()) < 0.5);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginBack"));
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginBack"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.65)),
                                       Q_ARG(QVariant, QVariant(0.0))));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
-    QCOMPARE(root->property("depth").toInt(), 1);
-    QVERIFY(!root->property("currentStackBusy").toBool());
-    QVERIFY(qAbs(root->property("currentPageX").toReal()) < 0.5);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
+    CTEST_WAIT_DEFAULT(!root->property("interactiveActive").toBool());
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_CHECK(!root->property("currentStackBusy").toBool());
+    CTEST_CHECK(qAbs(root->property("currentPageX").toReal()) < 0.5);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
-    QTRY_VERIFY(root->property("interactiveActive").toBool());
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
-    QCOMPARE(root->property("depth").toInt(), 1);
-    QCOMPARE(root->property("interactiveToPath").toString(), QStringLiteral("/detail"));
-    QVERIFY(root->property("previewVisible").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    CTEST_WAIT_DEFAULT(root->property("interactiveActive").toBool());
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("interactiveToPath").toString(), QStringLiteral("/detail"));
+    CTEST_CHECK(root->property("previewVisible").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.4)),
                                       Q_ARG(QVariant, QVariant(-200.0))));
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
-    QCOMPARE(root->property("depth").toInt(), 1);
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
-    QCOMPARE(root->property("depth").toInt(), 1);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    CTEST_WAIT_DEFAULT(!root->property("interactiveActive").toBool());
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_COMPARE(root->property("depth").toInt(), 1);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.7)),
                                       Q_ARG(QVariant, QVariant(-200.0))));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
-    QTRY_VERIFY(!root->property("interactiveActive").toBool());
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
-    QCOMPARE(root->property("depth").toInt(), 2);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "finishTransition", Q_ARG(QVariant, QVariant(true))));
+    CTEST_WAIT_DEFAULT(!root->property("interactiveActive").toBool());
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    CTEST_COMPARE(root->property("depth").toInt(), 2);
     const QVariantMap currentParams = root->property("currentParams").toMap();
-    QCOMPARE(currentParams.value(QStringLiteral("token")).toString(), QStringLiteral("preview"));
+    CTEST_COMPARE(currentParams.value(QStringLiteral("token")).toString(), QStringLiteral("preview"));
 }
 
 void PageRouterTests::page_transition_controller_proxies_application_window_router()
@@ -833,32 +832,32 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("controllerAvailable").toBool());
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("controllerAvailable").toBool());
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
-    QTRY_VERIFY(root->property("transitionActive").toBool());
-    QCOMPARE(root->property("pendingPath").toString(), QStringLiteral("/detail"));
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    CTEST_WAIT_DEFAULT(root->property("transitionActive").toBool());
+    CTEST_COMPARE(root->property("pendingPath").toString(), QStringLiteral("/detail"));
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.15)),
                                       Q_ARG(QVariant, QVariant(-1400.0))));
-    QTRY_VERIFY(root->property("transitionCanCommit").toBool());
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
-    QTRY_VERIFY(!root->property("transitionActive").toBool());
-    QCOMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
+    CTEST_WAIT_DEFAULT(root->property("transitionCanCommit").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "cancelTransition"));
+    CTEST_WAIT_DEFAULT(!root->property("transitionActive").toBool());
+    CTEST_COMPARE(root->property("currentPath").toString(), QStringLiteral("/"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "beginForward"));
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "beginForward"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "updateTransition",
                                       Q_ARG(QVariant, QVariant(0.15)),
                                       Q_ARG(QVariant, QVariant(-1400.0))));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "finishAuto"));
-    QTRY_VERIFY(!root->property("transitionActive").toBool());
-    QTRY_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "finishAuto"));
+    CTEST_WAIT_DEFAULT(!root->property("transitionActive").toBool());
+    CTEST_WAIT_COMPARE(root->property("currentPath").toString(), QStringLiteral("/detail"));
 }
 
 void PageRouterTests::route_mvvm_binding_and_write_ownership_are_applied()
@@ -943,21 +942,21 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "prepare"));
+    CTEST_CHECK(root);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "prepare"));
 
-    QTRY_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
-    QCOMPARE(root->property("ownerReports").toString(), QString());
-    QCOMPARE(root->property("canWriteOverview").toBool(), true);
-    QCOMPARE(root->property("canWriteReports").toBool(), false);
+    CTEST_WAIT_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
+    CTEST_COMPARE(root->property("ownerReports").toString(), QString());
+    CTEST_COMPARE(root->property("canWriteOverview").toBool(), true);
+    CTEST_COMPARE(root->property("canWriteReports").toBool(), false);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "writeOverviewStatus",
                                       Q_ARG(QVariant, QVariant(QStringLiteral("Working")))));
-    QTRY_COMPARE(root->property("overviewStatus").toString(), QStringLiteral("Working"));
+    CTEST_WAIT_COMPARE(root->property("overviewStatus").toString(), QStringLiteral("Working"));
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReports"));
-    QTRY_COMPARE(root->property("canWriteReports").toBool(), false);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goReports"));
+    CTEST_WAIT_COMPARE(root->property("canWriteReports").toBool(), false);
 }
 
 void PageRouterTests::route_mvvm_ownership_is_released_when_view_is_popped()
@@ -1022,20 +1021,37 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "prepare"));
+    CTEST_CHECK(root);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "prepare"));
 
-    QTRY_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
-    QCOMPARE(root->property("ownerReports").toString(), QString());
+    CTEST_WAIT_COMPARE(root->property("ownerOverview").toString(), QStringLiteral("/overview"));
+    CTEST_COMPARE(root->property("ownerReports").toString(), QString());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goReports"));
-    QTRY_COMPARE(root->property("ownerReports").toString(), QStringLiteral("/reports"));
-    QCOMPARE(root->property("canWriteReports").toBool(), true);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goReports"));
+    CTEST_WAIT_COMPARE(root->property("ownerReports").toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(root->property("canWriteReports").toBool(), true);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "goBack"));
-    QTRY_COMPARE(root->property("ownerReports").toString(), QString());
-    QCOMPARE(root->property("canWriteReports").toBool(), false);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "goBack"));
+    CTEST_WAIT_COMPARE(root->property("ownerReports").toString(), QString());
+    CTEST_COMPARE(root->property("canWriteReports").toBool(), false);
 }
 
-QTEST_MAIN(PageRouterTests)
-#include "tst_page_router.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    PageRouterTests tests;
+    runner.run("route_params_are_passed_to_target_component", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.route_params_are_passed_to_target_component(); });
+    runner.run("default_initial_path_does_not_override_bound_path", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.default_initial_path_does_not_override_bound_path(); });
+    runner.run("component_navigation_keeps_path_stack_in_sync", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.component_navigation_keeps_path_stack_in_sync(); });
+    runner.run("route_pages_are_isolated_and_forced_to_viewport", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.route_pages_are_isolated_and_forced_to_viewport(); });
+    runner.run("page_router_retain_inactive_depth_contract", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.page_router_retain_inactive_depth_contract(); });
+    runner.run("page_router_updates_view_state_tracker_from_stack", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.page_router_updates_view_state_tracker_from_stack(); });
+    runner.run("global_navigator_allows_one_line_navigation", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.global_navigator_allows_one_line_navigation(); });
+    runner.run("global_navigator_falls_back_to_previous_router", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.global_navigator_falls_back_to_previous_router(); });
+    runner.run("interactive_navigation_transitions_hold_route_commit_until_finish", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.interactive_navigation_transitions_hold_route_commit_until_finish(); });
+    runner.run("page_transition_controller_proxies_application_window_router", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.page_transition_controller_proxies_application_window_router(); });
+    runner.run("route_mvvm_binding_and_write_ownership_are_applied", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.route_mvvm_binding_and_write_ownership_are_applied(); });
+    runner.run("route_mvvm_ownership_is_released_when_view_is_popped", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.route_mvvm_ownership_is_released_when_view_is_popped(); });
+    return runner.result();
+}

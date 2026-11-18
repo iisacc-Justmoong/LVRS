@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "CTestSupport.h"
+#include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QCoreApplication>
@@ -11,9 +12,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class DebugTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void debug_enabled_toggle();
 };
 
@@ -38,8 +37,14 @@ Item {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> obj(component.create());
-    QVERIFY(obj);
+    CTEST_CHECK(obj);
 }
 
-QTEST_MAIN(DebugTests)
-#include "tst_debug.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner;
+    DebugTests tests;
+    runner.run("debug_enabled_toggle", [&] { tests.debug_enabled_toggle(); });
+    return runner.result();
+}

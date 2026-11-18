@@ -1,0 +1,4 @@
+set(__QT_DEPLOY_TARGET_lvrs_installed_consumer_FILE /Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_consumer)
+set(__QT_DEPLOY_TARGET_lvrs_installed_consumer_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_lvrs_installed_avatar_FILE /Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_avatar)
+set(__QT_DEPLOY_TARGET_lvrs_installed_avatar_TYPE EXECUTABLE)

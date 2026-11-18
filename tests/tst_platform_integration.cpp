@@ -1,6 +1,10 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
+#include <type_traits>
 
 #include <QCursor>
+#include <QDir>
+#include <QFileInfo>
 #include <QMouseEvent>
 #include <QScopedPointer>
 #include <QQmlEngine>
@@ -17,11 +21,22 @@
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
 
-class PlatformIntegrationTests : public QObject
+namespace {
+template <typename Actual, typename Expected>
+bool platformEqual(const Actual &actual, const Expected &expected)
 {
-    Q_OBJECT
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+}
+#define PLATFORM_COMPARE(actual, expected) CTEST_CHECK(platformEqual((actual), (expected)))
 
-private slots:
+class PlatformIntegrationTests
+{
+public:
     void safe_area_tracks_window_lifetime();
     void platform_flags_consistency();
     void platform_runtime_profiles_are_exposed();
@@ -35,36 +50,36 @@ private slots:
 void PlatformIntegrationTests::safe_area_tracks_window_lifetime()
 {
     WindowSafeAreaObserver observer;
-    QVERIFY(!observer.resolved());
-    QCOMPARE(observer.bottomCornerRadius(), -1.0);
+    CTEST_CHECK(!observer.resolved());
+    PLATFORM_COMPARE(observer.bottomCornerRadius(), -1.0);
     QWindow window;
     window.resize(400, 700);
     observer.setWindow(&window);
     window.show();
-    QTRY_VERIFY(observer.resolved());
-    QVERIFY(observer.leftInset() >= 0 && observer.topInset() >= 0);
-    QVERIFY(observer.rightInset() >= 0 && observer.bottomInset() >= 0);
-    QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
-    QVERIFY(observer.bottomCornerRadius() >= -1.0);
+    CTEST_WAIT_DEFAULT(observer.resolved());
+    CTEST_CHECK(observer.leftInset() >= 0 && observer.topInset() >= 0);
+    CTEST_CHECK(observer.rightInset() >= 0 && observer.bottomInset() >= 0);
+    CTEST_CHECK(observer.topInset() + observer.bottomInset() < window.height());
+    CTEST_CHECK(observer.bottomCornerRadius() >= -1.0);
 #ifndef Q_OS_ANDROID
-    QCOMPARE(observer.bottomCornerRadius(), -1.0);
+    PLATFORM_COMPARE(observer.bottomCornerRadius(), -1.0);
 #endif
     window.resize(700, 400);
     QCoreApplication::processEvents();
-    QVERIFY(observer.topInset() + observer.bottomInset() < window.height());
+    CTEST_CHECK(observer.topInset() + observer.bottomInset() < window.height());
     observer.setWindow(nullptr);
-    QVERIFY(!observer.resolved());
-    QCOMPARE(observer.topInset(), 0);
-    QCOMPARE(observer.bottomInset(), 0);
-    QCOMPARE(observer.bottomCornerRadius(), -1.0);
+    CTEST_CHECK(!observer.resolved());
+    PLATFORM_COMPARE(observer.topInset(), 0);
+    PLATFORM_COMPARE(observer.bottomInset(), 0);
+    PLATFORM_COMPARE(observer.bottomCornerRadius(), -1.0);
 }
 
 void PlatformIntegrationTests::platform_flags_consistency()
 {
     PlatformInfo platform;
-    QVERIFY(!platform.os().isEmpty());
-    QVERIFY(!platform.arch().isEmpty());
-    QVERIFY(platform.desktop() || platform.mobile());
+    CTEST_CHECK(!platform.os().isEmpty());
+    CTEST_CHECK(!platform.arch().isEmpty());
+    CTEST_CHECK(platform.desktop() || platform.mobile());
 
     const int explicitPlatformCount = (platform.android() ? 1 : 0)
         + (platform.ios() ? 1 : 0)
@@ -72,14 +87,14 @@ void PlatformIntegrationTests::platform_flags_consistency()
         + (platform.windows() ? 1 : 0)
         + (platform.linux() ? 1 : 0)
         + (platform.wasm() ? 1 : 0);
-    QCOMPARE(explicitPlatformCount, 1);
+    PLATFORM_COMPARE(explicitPlatformCount, 1);
 
     if (platform.macos())
-        QCOMPARE(platform.os(), QStringLiteral("osx"));
+        PLATFORM_COMPARE(platform.os(), QStringLiteral("osx"));
     if (platform.windows())
-        QCOMPARE(platform.os(), QStringLiteral("windows"));
+        PLATFORM_COMPARE(platform.os(), QStringLiteral("windows"));
     if (platform.linux())
-        QCOMPARE(platform.os(), QStringLiteral("linux"));
+        PLATFORM_COMPARE(platform.os(), QStringLiteral("linux"));
 }
 
 void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
@@ -94,185 +109,185 @@ void PlatformIntegrationTests::platform_runtime_profiles_are_exposed()
         QStringLiteral("android"),
         QStringLiteral("wasm")
     };
-    QCOMPARE(platform.runtimeTargets(), expectedTargets);
-    QCOMPARE(platform.desktopTargets(),
+    PLATFORM_COMPARE(platform.runtimeTargets(), expectedTargets);
+    PLATFORM_COMPARE(platform.desktopTargets(),
              QStringList({QStringLiteral("macos"), QStringLiteral("linux"), QStringLiteral("windows"), QStringLiteral("wasm")}));
-    QCOMPARE(platform.mobileTargets(), QStringList({QStringLiteral("ios"), QStringLiteral("android")}));
+    PLATFORM_COMPARE(platform.mobileTargets(), QStringList({QStringLiteral("ios"), QStringLiteral("android")}));
 
-    QVERIFY(expectedTargets.contains(platform.canonicalOs()));
-    QVERIFY(!platform.graphicsBackend().isEmpty());
-    QVERIFY(platform.targetMatchesCurrent(platform.canonicalOs()));
-    QVERIFY(platform.supportsTargetGeneration(platform.canonicalOs()));
+    CTEST_CHECK(expectedTargets.contains(platform.canonicalOs()));
+    CTEST_CHECK(!platform.graphicsBackend().isEmpty());
+    CTEST_CHECK(platform.targetMatchesCurrent(platform.canonicalOs()));
+    CTEST_CHECK(platform.supportsTargetGeneration(platform.canonicalOs()));
 
-    QCOMPARE(platform.normalizeTarget(QStringLiteral("osx")), QStringLiteral("macos"));
-    QCOMPARE(platform.normalizeTarget(QStringLiteral("win32")), QStringLiteral("windows"));
-    QVERIFY(platform.normalizeTarget(QStringLiteral("unknown-target")).isEmpty());
-    QVERIFY(!platform.isKnownTarget(QStringLiteral("unknown-target")));
+    PLATFORM_COMPARE(platform.normalizeTarget(QStringLiteral("osx")), QStringLiteral("macos"));
+    PLATFORM_COMPARE(platform.normalizeTarget(QStringLiteral("win32")), QStringLiteral("windows"));
+    CTEST_CHECK(platform.normalizeTarget(QStringLiteral("unknown-target")).isEmpty());
+    CTEST_CHECK(!platform.isKnownTarget(QStringLiteral("unknown-target")));
 
     const QVariantMap currentProfile = platform.runtimeProfile();
-    QVERIFY(currentProfile.value(QStringLiteral("known")).toBool());
-    QCOMPARE(currentProfile.value(QStringLiteral("target")).toString(), platform.canonicalOs());
-    QVERIFY(currentProfile.contains(QStringLiteral("backend")));
-    QVERIFY(currentProfile.contains(QStringLiteral("generationSupported")));
-    QVERIFY(currentProfile.contains(QStringLiteral("backendFeatureReady")));
-    QVERIFY(currentProfile.contains(QStringLiteral("cmakeSystemName")));
-    QVERIFY(currentProfile.contains(QStringLiteral("runtimeEventsAutoAttachRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("mobileSystemWindowDelegationRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("mobileSystemInsetsDelegationRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("mobileDisplayCoverageOverrideRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("mobileFullscreenVisibilityRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("mobileFullscreenGeometryHintRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapMsaaSamples")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapFramesInFlight")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapPartialUpdateRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapBatchRenderingRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapPipelineCacheRecommended")));
-    QVERIFY(currentProfile.contains(QStringLiteral("bootstrapTextureAtlasEdge")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveWideBreakpoint")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveNavWidth")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveNavDrawerWidth")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveMobileDesktopMinWidth")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveBottomNavigationMaxItems")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveCompactSpacingBreakpoint")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveNavRailMaxWidthRatio")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveDrawerMarginSafety")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveDrawerEnterDuration")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveDrawerExitDuration")));
-    QVERIFY(currentProfile.contains(QStringLiteral("adaptiveAnimatedTransitions")));
+    CTEST_CHECK(currentProfile.value(QStringLiteral("known")).toBool());
+    PLATFORM_COMPARE(currentProfile.value(QStringLiteral("target")).toString(), platform.canonicalOs());
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("backend")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("generationSupported")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("backendFeatureReady")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("cmakeSystemName")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("runtimeEventsAutoAttachRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("mobileSystemWindowDelegationRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("mobileSystemInsetsDelegationRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("mobileDisplayCoverageOverrideRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("mobileFullscreenVisibilityRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("mobileFullscreenGeometryHintRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapMsaaSamples")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapFramesInFlight")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapPartialUpdateRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapBatchRenderingRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapPipelineCacheRecommended")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("bootstrapTextureAtlasEdge")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveWideBreakpoint")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveNavWidth")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveNavDrawerWidth")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveMobileDesktopMinWidth")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveBottomNavigationMaxItems")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveCompactSpacingBreakpoint")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveNavRailMaxWidthRatio")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveDrawerMarginSafety")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveDrawerEnterDuration")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveDrawerExitDuration")));
+    CTEST_CHECK(currentProfile.contains(QStringLiteral("adaptiveAnimatedTransitions")));
 
     const QVariantList allProfiles = platform.runtimeProfiles();
-    QCOMPARE(allProfiles.size(), expectedTargets.size());
+    PLATFORM_COMPARE(allProfiles.size(), expectedTargets.size());
     for (const QVariant &profileVariant : allProfiles) {
         const QVariantMap profile = profileVariant.toMap();
-        QVERIFY(profile.value(QStringLiteral("known")).toBool());
-        QVERIFY(expectedTargets.contains(profile.value(QStringLiteral("target")).toString()));
-        QVERIFY(profile.contains(QStringLiteral("backend")));
-        QVERIFY(profile.contains(QStringLiteral("directRunSupported")));
+        CTEST_CHECK(profile.value(QStringLiteral("known")).toBool());
+        CTEST_CHECK(expectedTargets.contains(profile.value(QStringLiteral("target")).toString()));
+        CTEST_CHECK(profile.contains(QStringLiteral("backend")));
+        CTEST_CHECK(profile.contains(QStringLiteral("directRunSupported")));
     }
 
     const QVariantMap iosProfile = platform.runtimeProfile(QStringLiteral("ios"));
-    QVERIFY(iosProfile.value(QStringLiteral("mobile")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("ios")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("android")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
-    QVERIFY(!iosProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
-    QCOMPARE(iosProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
-    QCOMPARE(iosProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
-    QVERIFY(iosProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
-    QVERIFY(iosProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
-    QCOMPARE(iosProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 948);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 216);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 264);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1180);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 860);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.33);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 24);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 185);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 145);
-    QCOMPARE(iosProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool(),
+    CTEST_CHECK(iosProfile.value(QStringLiteral("mobile")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("ios")).toBool());
+    CTEST_CHECK(!iosProfile.value(QStringLiteral("android")).toBool());
+    CTEST_CHECK(!iosProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
+    CTEST_CHECK(!iosProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
+    CTEST_CHECK(!iosProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
+    CTEST_CHECK(iosProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
+    CTEST_CHECK(iosProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 948);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 216);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 264);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1180);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 860);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.33);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 24);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 185);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 145);
+    PLATFORM_COMPARE(iosProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool(),
              iosProfile.value(QStringLiteral("backendFeatureReady")).toBool());
 
     const QVariantMap androidProfile = platform.runtimeProfile(QStringLiteral("android"));
-    QVERIFY(androidProfile.value(QStringLiteral("mobile")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("android")).toBool());
-    QVERIFY(!androidProfile.value(QStringLiteral("ios")).toBool());
-    QVERIFY(!androidProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
-    QCOMPARE(androidProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
-    QCOMPARE(androidProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
-    QVERIFY(androidProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
-    QVERIFY(androidProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
-    QCOMPARE(androidProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 940);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 208);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 252);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1080);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 4);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 840);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.34);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 20);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 170);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 130);
-    QCOMPARE(androidProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool(),
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobile")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("android")).toBool());
+    CTEST_CHECK(!androidProfile.value(QStringLiteral("ios")).toBool());
+    CTEST_CHECK(!androidProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobileFullscreenVisibilityRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("mobileFullscreenGeometryHintRecommended")).toBool());
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
+    CTEST_CHECK(androidProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
+    CTEST_CHECK(androidProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 940);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 208);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 252);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1080);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 4);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 840);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.34);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 20);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 170);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 130);
+    PLATFORM_COMPARE(androidProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool(),
              androidProfile.value(QStringLiteral("backendFeatureReady")).toBool());
 
     const QVariantMap windowsProfile = platform.runtimeProfile(QStringLiteral("windows"));
-    QVERIFY(windowsProfile.value(QStringLiteral("desktop")).toBool());
-    QCOMPARE(windowsProfile.value(QStringLiteral("backend")).toString(), QStringLiteral("d3d11"));
-    QCOMPARE(windowsProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
-    QCOMPARE(windowsProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
-    QVERIFY(windowsProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
-    QVERIFY(windowsProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
-    QVERIFY(windowsProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
-    QCOMPARE(windowsProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 2048);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 1000);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 224);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 248);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1240);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 920);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.31);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 155);
-    QCOMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 115);
-    QVERIFY(windowsProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
+    CTEST_CHECK(windowsProfile.value(QStringLiteral("desktop")).toBool());
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("backend")).toString(), QStringLiteral("d3d11"));
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
+    CTEST_CHECK(windowsProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
+    CTEST_CHECK(windowsProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
+    CTEST_CHECK(windowsProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 2048);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 1000);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 224);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 248);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1240);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 920);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.31);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 155);
+    PLATFORM_COMPARE(windowsProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 115);
+    CTEST_CHECK(windowsProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
 
     const QVariantMap desktopProfile = platform.runtimeProfile(QStringLiteral("linux"));
-    QVERIFY(desktopProfile.value(QStringLiteral("desktop")).toBool());
-    QVERIFY(!desktopProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
-    QVERIFY(!desktopProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
-    QVERIFY(!desktopProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
-    QVERIFY(!desktopProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
-    QCOMPARE(desktopProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
-    QCOMPARE(desktopProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
-    QVERIFY(desktopProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
-    QVERIFY(desktopProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
-    QVERIFY(desktopProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
-    QCOMPARE(desktopProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 2048);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 980);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 220);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 240);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1200);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 900);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.32);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 160);
-    QCOMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 120);
-    QVERIFY(desktopProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
+    CTEST_CHECK(desktopProfile.value(QStringLiteral("desktop")).toBool());
+    CTEST_CHECK(!desktopProfile.value(QStringLiteral("runtimeEventsAutoAttachRecommended")).toBool());
+    CTEST_CHECK(!desktopProfile.value(QStringLiteral("mobileSystemWindowDelegationRecommended")).toBool());
+    CTEST_CHECK(!desktopProfile.value(QStringLiteral("mobileSystemInsetsDelegationRecommended")).toBool());
+    CTEST_CHECK(!desktopProfile.value(QStringLiteral("mobileDisplayCoverageOverrideRecommended")).toBool());
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 4);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 2);
+    CTEST_CHECK(desktopProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
+    CTEST_CHECK(desktopProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
+    CTEST_CHECK(desktopProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 2048);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 980);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 220);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 240);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1200);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 5);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 900);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.32);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 160);
+    PLATFORM_COMPARE(desktopProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 120);
+    CTEST_CHECK(desktopProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
 
     const QVariantMap wasmProfile = platform.runtimeProfile(QStringLiteral("wasm"));
-    QVERIFY(wasmProfile.value(QStringLiteral("desktop")).toBool());
-    QCOMPARE(wasmProfile.value(QStringLiteral("backend")).toString(), QStringLiteral("default"));
-    QCOMPARE(wasmProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 2);
-    QCOMPARE(wasmProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 1);
-    QVERIFY(!wasmProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
-    QVERIFY(!wasmProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
-    QVERIFY(!wasmProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
-    QCOMPARE(wasmProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 960);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 216);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 236);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1120);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 4);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 880);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.34);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 140);
-    QCOMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 100);
-    QVERIFY(!wasmProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
+    CTEST_CHECK(wasmProfile.value(QStringLiteral("desktop")).toBool());
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("backend")).toString(), QStringLiteral("default"));
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("bootstrapMsaaSamples")).toInt(), 2);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("bootstrapFramesInFlight")).toInt(), 1);
+    CTEST_CHECK(!wasmProfile.value(QStringLiteral("bootstrapPartialUpdateRecommended")).toBool());
+    CTEST_CHECK(!wasmProfile.value(QStringLiteral("bootstrapBatchRenderingRecommended")).toBool());
+    CTEST_CHECK(!wasmProfile.value(QStringLiteral("bootstrapPipelineCacheRecommended")).toBool());
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("bootstrapTextureAtlasEdge")).toInt(), 1024);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveWideBreakpoint")).toInt(), 960);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveNavWidth")).toInt(), 216);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveNavDrawerWidth")).toInt(), 236);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveMobileDesktopMinWidth")).toInt(), 1120);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveBottomNavigationMaxItems")).toInt(), 4);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveCompactSpacingBreakpoint")).toInt(), 880);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveNavRailMaxWidthRatio")).toDouble(), 0.34);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerMarginSafety")).toInt(), 16);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerEnterDuration")).toInt(), 140);
+    PLATFORM_COMPARE(wasmProfile.value(QStringLiteral("adaptiveDrawerExitDuration")).toInt(), 100);
+    CTEST_CHECK(!wasmProfile.value(QStringLiteral("adaptiveAnimatedTransitions")).toBool());
 }
 
 void PlatformIntegrationTests::application_window_and_main_metrics_are_exposed()
@@ -326,56 +341,59 @@ LV.ApplicationWindow {
 )";
 
         QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-        QVERIFY(root);
-        QVERIFY(root->property("compactRule").toBool());
-        QVERIFY(!root->property("expandedRule").toBool());
-        QVERIFY(!root->property("unknownRule").toBool());
-        QVERIFY(!root->property("mobileOversizedHeightEnabled").toBool());
-        QVERIFY(root->property("backendAdaptiveContractReady").toBool());
-        QTRY_VERIFY(root->property("runtimeRunning").toBool());
-        QVERIFY(root->property("tokenCompliant").toBool());
+        CTEST_CHECK(root);
+        CTEST_CHECK(root->property("compactRule").toBool());
+        CTEST_CHECK(!root->property("expandedRule").toBool());
+        CTEST_CHECK(!root->property("unknownRule").toBool());
+        CTEST_CHECK(!root->property("mobileOversizedHeightEnabled").toBool());
+        CTEST_CHECK(root->property("backendAdaptiveContractReady").toBool());
+        CTEST_WAIT_DEFAULT(root->property("runtimeRunning").toBool());
+        CTEST_CHECK(root->property("tokenCompliant").toBool());
 
         const double effectiveScale = root->property("effectiveSupersampleScale").toDouble();
-        QVERIFY(effectiveScale >= 1.0);
-        QVERIFY(effectiveScale <= 4.0);
+        CTEST_CHECK(effectiveScale >= 1.0);
+        CTEST_CHECK(effectiveScale <= 4.0);
 
         root->setProperty("width", 1400);
         root->setProperty("height", 1020);
-        QTRY_VERIFY(root->property("expandedRule").toBool());
+        CTEST_WAIT_DEFAULT(root->property("expandedRule").toBool());
     }
 
     {
         QQmlEngine engine;
         engine.addImportPath(TestUtils::qmlImportBase());
-        QString mainPath = QFINDTESTDATA("../example/VisualCatalog/qml/Main.qml");
-        if (mainPath.isEmpty())
-            mainPath = QFINDTESTDATA("../src/qml/Main.qml");
-        QVERIFY2(!mainPath.isEmpty(),
+        const QDir testSource(QStringLiteral(LVRS_TEST_SOURCE_DIR));
+        QString mainPath = testSource.filePath("../example/VisualCatalog/qml/Main.qml");
+        if (!QFileInfo::exists(mainPath))
+            mainPath = testSource.filePath("../src/qml/Main.qml");
+        if (!QFileInfo::exists(mainPath))
+            mainPath.clear();
+        CTEST_CHECK_MESSAGE(!mainPath.isEmpty(),
                  "Failed to locate ../example/VisualCatalog/qml/Main.qml");
 
         QScopedPointer<QObject> root(TestUtils::loadQmlFile(engine, mainPath));
-        QVERIFY(root);
-        QTRY_VERIFY(root->property("metricsPass").toBool());
-        QCOMPARE(root->property("metricsTotalChecks").toInt(), 6);
-        QCOMPARE(root->property("metricsPassedChecks").toInt(), 6);
-        QVERIFY(root->property("metricsRenderScaleCompliant").toBool());
-        QVERIFY(root->property("metricsFontFallbackCompliant").toBool());
-        QVERIFY(root->property("metricsThemeTextCompliant").toBool());
-        QVERIFY(root->property("metricsRuntimeCompliant").toBool());
-        QVERIFY(root->property("metricsSvgCompliant").toBool());
-        QVERIFY(root->property("metricsPageCompliant").toBool());
-        QVERIFY(root->property("metricsSummary").toString().contains('/'));
-        QVERIFY(root->property("runtimeSnapshot").isValid());
+        CTEST_CHECK(root);
+        CTEST_WAIT_DEFAULT(root->property("metricsPass").toBool());
+        PLATFORM_COMPARE(root->property("metricsTotalChecks").toInt(), 6);
+        PLATFORM_COMPARE(root->property("metricsPassedChecks").toInt(), 6);
+        CTEST_CHECK(root->property("metricsRenderScaleCompliant").toBool());
+        CTEST_CHECK(root->property("metricsFontFallbackCompliant").toBool());
+        CTEST_CHECK(root->property("metricsThemeTextCompliant").toBool());
+        CTEST_CHECK(root->property("metricsRuntimeCompliant").toBool());
+        CTEST_CHECK(root->property("metricsSvgCompliant").toBool());
+        CTEST_CHECK(root->property("metricsPageCompliant").toBool());
+        CTEST_CHECK(root->property("metricsSummary").toString().contains('/'));
+        CTEST_CHECK(root->property("runtimeSnapshot").isValid());
         const QVariantMap snapshot = root->property("runtimeSnapshot").toMap();
-        QVERIFY(snapshot.contains(QStringLiteral("pid")));
-        QVERIFY(snapshot.contains(QStringLiteral("uptimeMs")));
-        QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
-        QTRY_VERIFY(root->property("catalogViewportReady").toBool());
-        QVERIFY(root->property("catalogSafeAreaEntryReady").toBool());
-    QCOMPARE(root->property("catalogComponentCount").toInt(), 92);
-        QVERIFY(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
-        QCOMPARE(root->property("activeEntryKey").toString(), QStringLiteral("motion"));
-        QVERIFY(root->property("activeEntry").isValid());
+        CTEST_CHECK(snapshot.contains(QStringLiteral("pid")));
+        CTEST_CHECK(snapshot.contains(QStringLiteral("uptimeMs")));
+        CTEST_CHECK(snapshot.contains(QStringLiteral("rssBytes")));
+        CTEST_WAIT_DEFAULT(root->property("catalogViewportReady").toBool());
+        CTEST_CHECK(root->property("catalogSafeAreaEntryReady").toBool());
+    PLATFORM_COMPARE(root->property("catalogComponentCount").toInt(), 92);
+        CTEST_CHECK(root->property("catalogDocumentCount").toInt() > root->property("catalogComponentCount").toInt());
+        PLATFORM_COMPARE(root->property("activeEntryKey").toString(), QStringLiteral("motion"));
+        CTEST_CHECK(root->property("activeEntry").isValid());
     }
 }
 
@@ -870,10 +888,10 @@ Item {
 
         qml.replace("@TARGET@", target);
         QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-        QVERIFY(root);
-        QTRY_VERIFY(root->property("tokenContract").toBool());
-        QCOMPARE(root->property("listDelegateBodyPixelSize").toInt(), 13);
-        QVERIFY2(root->property("componentContract").toBool(),
+        CTEST_CHECK(root);
+        CTEST_WAIT_DEFAULT(root->property("tokenContract").toBool());
+        PLATFORM_COMPARE(root->property("listDelegateBodyPixelSize").toInt(), 13);
+        CTEST_CHECK_MESSAGE(root->property("componentContract").toBool(),
                  qPrintable(root->property("componentDebug").toString()));
     }
 
@@ -900,8 +918,8 @@ QtObject {
 )";
 
         QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-        QVERIFY(root);
-        QTRY_VERIFY(root->property("desktopContract").toBool());
+        CTEST_CHECK(root);
+        CTEST_WAIT_DEFAULT(root->property("desktopContract").toBool());
     }
 }
 
@@ -910,47 +928,47 @@ void PlatformIntegrationTests::native_window_style_mobile_coverage_flags()
     NativeWindowStyle nativeWindowStyle;
     QWindow window;
 
-    QVERIFY(nativeWindowStyle.applyMobileCoverageFlags(&window, true, true));
+    CTEST_CHECK(nativeWindowStyle.applyMobileCoverageFlags(&window, true, true));
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    QVERIFY(window.flags().testFlag(Qt::ExpandedClientAreaHint));
-    QVERIFY(window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
+    CTEST_CHECK(window.flags().testFlag(Qt::ExpandedClientAreaHint));
+    CTEST_CHECK(window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
 #endif
-    QVERIFY(window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
+    CTEST_CHECK(window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
 
-    QVERIFY(nativeWindowStyle.applyMobileCoverageFlags(&window, false, false));
+    CTEST_CHECK(nativeWindowStyle.applyMobileCoverageFlags(&window, false, false));
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    QVERIFY(!window.flags().testFlag(Qt::ExpandedClientAreaHint));
-    QVERIFY(!window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
+    CTEST_CHECK(!window.flags().testFlag(Qt::ExpandedClientAreaHint));
+    CTEST_CHECK(!window.flags().testFlag(Qt::NoTitleBarBackgroundHint));
 #endif
-    QVERIFY(!window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
+    CTEST_CHECK(!window.flags().testFlag(Qt::MaximizeUsingFullscreenGeometryHint));
 }
 
 void PlatformIntegrationTests::native_window_interaction_validates_system_resize_edges()
 {
     NativeWindowInteraction interaction;
 
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::LeftEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::TopEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::RightEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::BottomEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::RightEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::RightEdge | Qt::BottomEdge)));
-    QVERIFY(interaction.isValidResizeEdges(int(Qt::BottomEdge | Qt::LeftEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::LeftEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::TopEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::RightEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::BottomEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::RightEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::RightEdge | Qt::BottomEdge)));
+    CTEST_CHECK(interaction.isValidResizeEdges(int(Qt::BottomEdge | Qt::LeftEdge)));
 
-    QVERIFY(!interaction.isValidResizeEdges(0));
-    QVERIFY(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::RightEdge)));
-    QVERIFY(!interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::BottomEdge)));
-    QVERIFY(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge | Qt::RightEdge)));
-    QVERIFY(!interaction.isValidResizeEdges(1 << 20));
+    CTEST_CHECK(!interaction.isValidResizeEdges(0));
+    CTEST_CHECK(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::RightEdge)));
+    CTEST_CHECK(!interaction.isValidResizeEdges(int(Qt::TopEdge | Qt::BottomEdge)));
+    CTEST_CHECK(!interaction.isValidResizeEdges(int(Qt::LeftEdge | Qt::TopEdge | Qt::RightEdge)));
+    CTEST_CHECK(!interaction.isValidResizeEdges(1 << 20));
 
     QObject notAWindow;
-    QVERIFY(!interaction.requestSystemMove(&notAWindow));
-    QVERIFY(!interaction.requestSystemResize(&notAWindow, int(Qt::LeftEdge)));
+    CTEST_CHECK(!interaction.requestSystemMove(&notAWindow));
+    CTEST_CHECK(!interaction.requestSystemResize(&notAWindow, int(Qt::LeftEdge)));
 
     QWindow window;
-    QVERIFY(!interaction.requestSystemResize(&window, 0));
-    QVERIFY(!interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::RightEdge)));
+    CTEST_CHECK(!interaction.requestSystemResize(&window, 0));
+    CTEST_CHECK(!interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::RightEdge)));
 }
 
 void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_system_resize_is_unavailable()
@@ -960,14 +978,14 @@ void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_s
     window.setGeometry(100, 100, 480, 360);
     window.setMinimumSize(QSize(360, 240));
     window.show();
-    QTRY_VERIFY(window.isVisible());
+    CTEST_WAIT_DEFAULT(window.isVisible());
 
     const QRect initialGeometry = window.geometry();
     const QPoint initialPointer(400, 300);
     QCursor::setPos(QPoint(20, 20));
 
     NativeWindowInteraction interaction;
-    QVERIFY(interaction.requestSystemResizeAt(&window,
+    CTEST_CHECK(interaction.requestSystemResizeAt(&window,
                                               int(Qt::RightEdge | Qt::BottomEdge),
                                               initialPointer));
 
@@ -980,8 +998,8 @@ void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_s
                            Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &resizeMove);
 
-    QCOMPARE(window.geometry().topLeft(), initialGeometry.topLeft());
-    QCOMPARE(window.size(), initialGeometry.size() + QSize(120, 90));
+    PLATFORM_COMPARE(window.geometry().topLeft(), initialGeometry.topLeft());
+    PLATFORM_COMPARE(window.size(), initialGeometry.size() + QSize(120, 90));
 
     QMouseEvent resizeRelease(QEvent::MouseButtonRelease,
                               QPointF(window.width() - 1, window.height() - 1),
@@ -999,12 +1017,12 @@ void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_s
                                 Qt::LeftButton,
                                 Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &postReleaseMove);
-    QCOMPARE(window.geometry(), releasedGeometry);
+    PLATFORM_COMPARE(window.geometry(), releasedGeometry);
 
     window.setGeometry(initialGeometry);
     QCursor::setPos(QPoint(400, 300));
     const QPoint constrainedInitialPointer = QCursor::pos();
-    QVERIFY(interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::TopEdge)));
+    CTEST_CHECK(interaction.requestSystemResize(&window, int(Qt::LeftEdge | Qt::TopEdge)));
 
     const QPoint constrainedPointer = constrainedInitialPointer + QPoint(200, 180);
     QMouseEvent constrainedMove(QEvent::MouseMove,
@@ -1015,8 +1033,8 @@ void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_s
                                 Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &constrainedMove);
 
-    QCOMPARE(window.geometry().topLeft(), initialGeometry.topLeft() + QPoint(120, 120));
-    QCOMPARE(window.size(), QSize(360, 240));
+    PLATFORM_COMPARE(window.geometry().topLeft(), initialGeometry.topLeft() + QPoint(120, 120));
+    PLATFORM_COMPARE(window.size(), QSize(360, 240));
 
     QMouseEvent constrainedRelease(QEvent::MouseButtonRelease,
                                    QPointF(0, 0),
@@ -1026,9 +1044,22 @@ void PlatformIntegrationTests::native_window_interaction_resizes_manually_when_s
                                    Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &constrainedRelease);
 #else
-    QSKIP("The manual fallback is specific to the Cocoa platform gap.");
+    lvrs_ctest::skip("The manual fallback is specific to the Cocoa platform gap.");
 #endif
 }
 
-QTEST_MAIN(PlatformIntegrationTests)
-#include "tst_platform_integration.moc"
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    PlatformIntegrationTests tests;
+    runner.run("safe_area_tracks_window_lifetime", [&] { tests.safe_area_tracks_window_lifetime(); });
+    runner.run("platform_flags_consistency", [&] { tests.platform_flags_consistency(); });
+    runner.run("platform_runtime_profiles_are_exposed", [&] { tests.platform_runtime_profiles_are_exposed(); });
+    runner.run("application_window_and_main_metrics_are_exposed", [&] { tests.application_window_and_main_metrics_are_exposed(); });
+    runner.run("mobile_theme_scale_contract", [&] { tests.mobile_theme_scale_contract(); });
+    runner.run("native_window_interaction_resizes_manually_when_system_resize_is_unavailable", [&] { tests.native_window_interaction_resizes_manually_when_system_resize_is_unavailable(); });
+    runner.run("native_window_interaction_validates_system_resize_edges", [&] { tests.native_window_interaction_validates_system_resize_edges(); });
+    runner.run("native_window_style_mobile_coverage_flags", [&] { tests.native_window_style_mobile_coverage_flags(); });
+    return runner.result();
+}

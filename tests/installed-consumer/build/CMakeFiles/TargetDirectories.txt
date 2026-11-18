@@ -1,0 +1,7 @@
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/lvrs_installed_consumer.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/lvrs_installed_avatar.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/test.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/edit_cache.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/rebuild_cache.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/lvrs_installed_avatar_autogen_timestamp_deps.dir
+/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/CMakeFiles/lvrs_installed_avatar_autogen.dir

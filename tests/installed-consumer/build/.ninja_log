@@ -1,0 +1,14 @@
+# ninja log v7
+275	1612	1794969548983279106	lvrs_installed_avatar_autogen/timestamp	42587ff4eac69e8d
+275	1612	1794969548983279106	lvrs_installed_avatar_autogen/mocs_compilation.cpp	42587ff4eac69e8d
+275	1612	1794969548983279106	/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_avatar_autogen/timestamp	42587ff4eac69e8d
+275	1612	1794969548983279106	/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_avatar_autogen/mocs_compilation.cpp	42587ff4eac69e8d
+1615	1646	1794969548999803209	CMakeFiles/lvrs_installed_avatar.dir/lvrs_installed_avatar_autogen/mocs_compilation.cpp.o	191e43d26202c469
+1615	57110	1794969549000147250	CMakeFiles/lvrs_installed_avatar.dir/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/tst_avatar.cpp.o	5e20e2c6c4e3f122
+57114	58956	1794969604498582348	lvrs_installed_avatar	1a5e65978c5095c
+2883	3284	1794969932448799991	lvrs_installed_avatar_autogen/timestamp	42587ff4eac69e8d
+2883	3284	1794969932448799991	lvrs_installed_avatar_autogen/mocs_compilation.cpp	42587ff4eac69e8d
+2883	3284	1794969932448799991	/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_avatar_autogen/timestamp	42587ff4eac69e8d
+2883	3284	1794969932448799991	/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/installed-consumer/build/lvrs_installed_avatar_autogen/mocs_compilation.cpp	42587ff4eac69e8d
+3284	61943	1794969932850195119	CMakeFiles/lvrs_installed_avatar.dir/Volumes/Storage/Workspace/SDK/.Deprecated/LVRS/tests/tst_avatar.cpp.o	5e20e2c6c4e3f122
+61943	63178	1794969991509471517	lvrs_installed_avatar	1a5e65978c5095c

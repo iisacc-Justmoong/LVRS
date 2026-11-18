@@ -1,4 +1,7 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
+#include <QKeyEvent>
+#include <QMetaMethod>
 
 #include <QDir>
 #include <QFile>
@@ -43,11 +46,22 @@ QObject *documentModelFor(QObject *editor)
 
 }
 
-class TextEditorTests : public QObject
+class EditorSignalRecorder : public QObject
 {
     Q_OBJECT
+public:
+    QList<QPair<QString, int>> documentEvents;
+    QList<QString> readEvents;
+    QList<QString> syncEvents;
+public slots:
+    void recordDocumentEdited(const QString &text, int revision) { documentEvents.append({text, revision}); }
+    void recordReadFinished(const QString &path) { readEvents.append(path); }
+    void recordSyncFinished(const QString &path) { syncEvents.append(path); }
+};
 
-private slots:
+class TextEditorTests
+{
+public:
     void text_editor_requires_file_path_contract();
     void text_editor_rich_text_surface_contract();
     void text_editor_document_edited_emits_latest_payload_and_revision();
@@ -75,8 +89,8 @@ LV.TextEditor {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> root(component.create());
-    QVERIFY(!root);
-    QVERIFY(component.isError());
+    CTEST_CHECK(!root);
+    CTEST_CHECK(component.isError());
 }
 
 void TextEditorTests::text_editor_rich_text_surface_contract()
@@ -118,49 +132,49 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("richTextReady").toBool());
-    QVERIFY(root->property("nativeSurfaceReady").toBool());
-    QVERIFY(root->property("bodyTokenReady").toBool());
-    QVERIFY(root->property("backgroundReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("richTextReady").toBool());
+    CTEST_CHECK(root->property("nativeSurfaceReady").toBool());
+    CTEST_CHECK(root->property("bodyTokenReady").toBool());
+    CTEST_CHECK(root->property("backgroundReady").toBool());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
-    QVERIFY(editor);
-    QVERIFY(documentModelFor(editor));
+    CTEST_CHECK(editor);
+    CTEST_CHECK(documentModelFor(editor));
 
-    QVERIFY(hasMetaProperty(editor, "filePath"));
-    QVERIFY(hasMetaProperty(editor, "chunkSize"));
-    QVERIFY(hasMetaProperty(editor, "dirty"));
-    QVERIFY(hasMetaProperty(editor, "reading"));
-    QVERIFY(hasMetaProperty(editor, "bytesRead"));
-    QVERIFY(hasMetaProperty(editor, "bytesTotal"));
-    QVERIFY(hasMetaProperty(editor, "progress"));
-    QVERIFY(hasMetaProperty(editor, "error"));
-    QVERIFY(hasMetaProperty(editor, "empty"));
-    QVERIFY(hasMetaProperty(editor, "editorItem"));
-    QVERIFY(hasMetaProperty(editor, "text"));
-    QVERIFY(hasMetaProperty(editor, "textFormat"));
-    QVERIFY(hasMetaProperty(editor, "textDocument"));
-    QVERIFY(hasMetaProperty(editor, "documentRevision"));
+    CTEST_CHECK(hasMetaProperty(editor, "filePath"));
+    CTEST_CHECK(hasMetaProperty(editor, "chunkSize"));
+    CTEST_CHECK(hasMetaProperty(editor, "dirty"));
+    CTEST_CHECK(hasMetaProperty(editor, "reading"));
+    CTEST_CHECK(hasMetaProperty(editor, "bytesRead"));
+    CTEST_CHECK(hasMetaProperty(editor, "bytesTotal"));
+    CTEST_CHECK(hasMetaProperty(editor, "progress"));
+    CTEST_CHECK(hasMetaProperty(editor, "error"));
+    CTEST_CHECK(hasMetaProperty(editor, "empty"));
+    CTEST_CHECK(hasMetaProperty(editor, "editorItem"));
+    CTEST_CHECK(hasMetaProperty(editor, "text"));
+    CTEST_CHECK(hasMetaProperty(editor, "textFormat"));
+    CTEST_CHECK(hasMetaProperty(editor, "textDocument"));
+    CTEST_CHECK(hasMetaProperty(editor, "documentRevision"));
 
-    QCOMPARE(editor->property("textFormat").toInt(), 1);
-    QVERIFY(!editor->property("dirty").toBool());
-    QVERIFY(!editor->property("reading").toBool());
-    QCOMPARE(editor->property("bytesRead").toLongLong(), qint64(0));
-    QCOMPARE(editor->property("bytesTotal").toLongLong(), qint64(0));
-    QCOMPARE(editor->property("progress").toReal(), 1.0);
-    QCOMPARE(editor->property("error").toString(), QString());
-    QVERIFY(editor->property("empty").toBool());
+    CTEST_COMPARE(editor->property("textFormat").toInt(), 1);
+    CTEST_CHECK(!editor->property("dirty").toBool());
+    CTEST_CHECK(!editor->property("reading").toBool());
+    CTEST_COMPARE(editor->property("bytesRead").toLongLong(), qint64(0));
+    CTEST_COMPARE(editor->property("bytesTotal").toLongLong(), qint64(0));
+    CTEST_COMPARE(editor->property("progress").toReal(), 1.0);
+    CTEST_COMPARE(editor->property("error").toString(), QString());
+    CTEST_CHECK(editor->property("empty").toBool());
 
-    QVERIFY(hasMetaMethod(editor, "read"));
-    QVERIFY(hasMetaMethod(editor, "syncFinished"));
-    QVERIFY(hasMetaMethod(editor, "syncFailed"));
-    QVERIFY(hasMetaMethod(editor, "documentEdited"));
-    QVERIFY(hasMetaMethod(editor, "forceEditorFocus"));
-    QVERIFY(hasMetaMethod(editor, "insertText"));
-    QVERIFY(hasMetaMethod(editor, "selectAll"));
-    QVERIFY(hasMetaMethod(editor, "copy"));
-    QVERIFY(hasMetaMethod(editor, "paste"));
+    CTEST_CHECK(hasMetaMethod(editor, "read"));
+    CTEST_CHECK(hasMetaMethod(editor, "syncFinished"));
+    CTEST_CHECK(hasMetaMethod(editor, "syncFailed"));
+    CTEST_CHECK(hasMetaMethod(editor, "documentEdited"));
+    CTEST_CHECK(hasMetaMethod(editor, "forceEditorFocus"));
+    CTEST_CHECK(hasMetaMethod(editor, "insertText"));
+    CTEST_CHECK(hasMetaMethod(editor, "selectAll"));
+    CTEST_CHECK(hasMetaMethod(editor, "copy"));
+    CTEST_CHECK(hasMetaMethod(editor, "paste"));
 }
 
 void TextEditorTests::text_editor_document_edited_emits_latest_payload_and_revision()
@@ -187,34 +201,36 @@ Item {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
-    QVERIFY(editor);
-    QVERIFY(hasMetaProperty(editor, "documentRevision"));
-    QVERIFY(hasMetaMethod(editor, "documentEdited"));
+    CTEST_CHECK(editor);
+    CTEST_CHECK(hasMetaProperty(editor, "documentRevision"));
+    CTEST_CHECK(hasMetaMethod(editor, "documentEdited"));
 
-    QSignalSpy documentEditedSpy(editor, SIGNAL(documentEdited(QString,int)));
-    QVERIFY(documentEditedSpy.isValid());
-    QCOMPARE(editor->property("documentRevision").toInt(), 0);
+    EditorSignalRecorder recorder;
+    const auto documentConnection = QObject::connect(editor, SIGNAL(documentEdited(QString,int)),
+                                                       &recorder, SLOT(recordDocumentEdited(QString,int)));
+    CTEST_CHECK(documentConnection);
+    CTEST_COMPARE(editor->property("documentRevision").toInt(), 0);
 
     const QString firstPayload = QStringLiteral("안녕하세");
-    QVERIFY(editor->setProperty("text", firstPayload));
-    QTRY_COMPARE(documentEditedSpy.count(), 1);
-    const QList<QVariant> firstSignal = documentEditedSpy.takeFirst();
-    QCOMPARE(firstSignal.at(0).toString(), editor->property("text").toString());
-    QVERIFY(firstSignal.at(0).toString().contains(firstPayload));
-    QCOMPARE(firstSignal.at(1).toInt(), 1);
-    QCOMPARE(editor->property("documentRevision").toInt(), 1);
+    CTEST_CHECK(editor->setProperty("text", firstPayload));
+    CTEST_WAIT_COMPARE(recorder.documentEvents.count(), 1);
+    const auto firstSignal = recorder.documentEvents.takeFirst();
+    CTEST_COMPARE(firstSignal.first, editor->property("text").toString());
+    CTEST_CHECK(firstSignal.first.contains(firstPayload));
+    CTEST_COMPARE(firstSignal.second, 1);
+    CTEST_COMPARE(editor->property("documentRevision").toInt(), 1);
 
     const QString latestPayload = QStringLiteral("안녕하세요");
-    QVERIFY(editor->setProperty("text", latestPayload));
-    QTRY_COMPARE(documentEditedSpy.count(), 1);
-    const QList<QVariant> latestSignal = documentEditedSpy.takeFirst();
-    QCOMPARE(latestSignal.at(0).toString(), editor->property("text").toString());
-    QVERIFY(latestSignal.at(0).toString().contains(latestPayload));
-    QCOMPARE(latestSignal.at(1).toInt(), 2);
-    QCOMPARE(editor->property("documentRevision").toInt(), 2);
+    CTEST_CHECK(editor->setProperty("text", latestPayload));
+    CTEST_WAIT_COMPARE(recorder.documentEvents.count(), 1);
+    const auto latestSignal = recorder.documentEvents.takeFirst();
+    CTEST_COMPARE(latestSignal.first, editor->property("text").toString());
+    CTEST_CHECK(latestSignal.first.contains(latestPayload));
+    CTEST_COMPARE(latestSignal.second, 2);
+    CTEST_COMPARE(editor->property("documentRevision").toInt(), 2);
 }
 
 void TextEditorTests::text_editor_mobile_native_gesture_viewport_scroll_contract()
@@ -252,23 +268,23 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     QObject *viewport = root->findChild<QObject *>(QStringLiteral("editorViewportFlickable"));
-    QVERIFY(viewport);
+    CTEST_CHECK(viewport);
 
-    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
-    QTRY_VERIFY(editor->property("preferNativeGestures").toBool());
-    QTRY_VERIFY(editor->property("preferNativeTextInteraction").toBool());
-    QTRY_VERIFY(editor->property("focused").toBool());
-    QTRY_VERIFY(viewport->property("contentHeight").toReal() > viewport->property("height").toReal());
-    QTRY_VERIFY(viewport->property("interactive").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    CTEST_WAIT_DEFAULT(editor->property("preferNativeGestures").toBool());
+    CTEST_WAIT_DEFAULT(editor->property("preferNativeTextInteraction").toBool());
+    CTEST_WAIT_DEFAULT(editor->property("focused").toBool());
+    CTEST_WAIT_DEFAULT(viewport->property("contentHeight").toReal() > viewport->property("height").toReal());
+    CTEST_WAIT_DEFAULT(viewport->property("interactive").toBool());
 }
 
 void TextEditorTests::text_editor_api_usage_manual_contract()
@@ -276,37 +292,37 @@ void TextEditorTests::text_editor_api_usage_manual_contract()
     const QString docsPath = QDir(QString::fromUtf8(LVRS_TEST_SOURCE_DIR))
         .absoluteFilePath(QStringLiteral("../docs/components/control/TextEditor.md"));
     QFile docsFile(docsPath);
-    QVERIFY2(docsFile.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(docsPath));
+    CTEST_CHECK_MESSAGE(docsFile.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(docsPath));
 
     const QString docs = QString::fromUtf8(docsFile.readAll());
-    QVERIFY(docs.contains(QStringLiteral("id=\"api-usage-manual\"")));
-    QVERIFY(docs.contains(QStringLiteral("`filePath`가 필요")));
-    QVERIFY(docs.contains(QStringLiteral("TextEdit.RichText")));
-    QVERIFY(docs.contains(QStringLiteral("Mac TextEdit 스타일")));
-    QVERIFY(docs.contains(QStringLiteral("네이티브 Return/Enter 처리는 삽입된 줄에 캐럿")));
-    QVERIFY(docs.contains(QStringLiteral("id=\"read-the-connected-file\"")));
-    QVERIFY(docs.contains(QStringLiteral("공개 저장 API")));
-    QVERIFY(docs.contains(QStringLiteral("`editorItem`")));
-    QVERIFY(docs.contains(QStringLiteral("모바일 터치 드래그가 내부 뷰포트를 스크롤")));
-    QVERIFY(docs.contains(QStringLiteral("documentRevision")));
-    QVERIFY(docs.contains(QStringLiteral("documentEdited(documentText, documentRevision)")));
-    QVERIFY(docs.contains(QStringLiteral("입력 방법 구성")));
-    QVERIFY(docs.contains(QStringLiteral("커밋된 문서 페이로드")));
-    QVERIFY(docs.contains(QStringLiteral("syncFinished(path)")));
-    QVERIFY(!docs.contains(QStringLiteral("plain-text editor")));
-    QVERIFY(!docs.contains(QStringLiteral("Avoid `TextArea`/`TextEdit` as the document model")));
+    CTEST_CHECK(docs.contains(QStringLiteral("id=\"api-usage-manual\"")));
+    CTEST_CHECK(docs.contains(QStringLiteral("`filePath`가 필요")));
+    CTEST_CHECK(docs.contains(QStringLiteral("TextEdit.RichText")));
+    CTEST_CHECK(docs.contains(QStringLiteral("Mac TextEdit 스타일")));
+    CTEST_CHECK(docs.contains(QStringLiteral("네이티브 Return/Enter 처리는 삽입된 줄에 캐럿")));
+    CTEST_CHECK(docs.contains(QStringLiteral("id=\"read-the-connected-file\"")));
+    CTEST_CHECK(docs.contains(QStringLiteral("공개 저장 API")));
+    CTEST_CHECK(docs.contains(QStringLiteral("`editorItem`")));
+    CTEST_CHECK(docs.contains(QStringLiteral("모바일 터치 드래그가 내부 뷰포트를 스크롤")));
+    CTEST_CHECK(docs.contains(QStringLiteral("documentRevision")));
+    CTEST_CHECK(docs.contains(QStringLiteral("documentEdited(documentText, documentRevision)")));
+    CTEST_CHECK(docs.contains(QStringLiteral("입력 방법 구성")));
+    CTEST_CHECK(docs.contains(QStringLiteral("커밋된 문서 페이로드")));
+    CTEST_CHECK(docs.contains(QStringLiteral("syncFinished(path)")));
+    CTEST_CHECK(!docs.contains(QStringLiteral("plain-text editor")));
+    CTEST_CHECK(!docs.contains(QStringLiteral("Avoid `TextArea`/`TextEdit` as the document model")));
 
     const QString qmlPath = QDir(QString::fromUtf8(LVRS_TEST_SOURCE_DIR))
         .absoluteFilePath(QStringLiteral("../src/qml/components/control/input/TextEditor.qml"));
     QFile qmlFile(qmlPath);
-    QVERIFY2(qmlFile.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(qmlPath));
+    CTEST_CHECK_MESSAGE(qmlFile.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(qmlPath));
 
     const QString qmlSource = QString::fromUtf8(qmlFile.readAll());
-    QVERIFY(qmlSource.contains(QStringLiteral("property bool composingDocumentEditPending: false")));
-    QVERIFY(qmlSource.contains(QStringLiteral("function publishPendingComposedDocumentEdit()")));
-    QVERIFY(qmlSource.contains(QStringLiteral("if (editor.inputMethodComposing)")));
-    QVERIFY(qmlSource.contains(QStringLiteral("onInputMethodComposingChanged:")));
-    QVERIFY(qmlSource.contains(QStringLiteral("Qt.callLater(privateState.publishPendingComposedDocumentEdit)")));
+    CTEST_CHECK(qmlSource.contains(QStringLiteral("property bool composingDocumentEditPending: false")));
+    CTEST_CHECK(qmlSource.contains(QStringLiteral("function publishPendingComposedDocumentEdit()")));
+    CTEST_CHECK(qmlSource.contains(QStringLiteral("if (editor.inputMethodComposing)")));
+    CTEST_CHECK(qmlSource.contains(QStringLiteral("onInputMethodComposingChanged:")));
+    CTEST_CHECK(qmlSource.contains(QStringLiteral("Qt.callLater(privateState.publishPendingComposedDocumentEdit)")));
 }
 
 void TextEditorTests::text_editor_rich_text_file_realtime_sync_contract()
@@ -332,62 +348,69 @@ Item {
 }
 )";
 
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    const QString resourceRoot = QDir::cleanPath(QStringLiteral(LVRS_TEST_SOURCE_DIR "/../resources"));
+    CTEST_CHECK(QDir().mkpath(resourceRoot));
+    QTemporaryDir tempDir(QDir(resourceRoot).filePath(QStringLiteral("ctest-text-editor-XXXXXX")));
+    qInfo().noquote() << "Text editor test workspace:" << tempDir.path();
+    CTEST_CHECK(tempDir.isValid());
 
     const QString sourcePath = tempDir.path() + QStringLiteral("/source.html");
     QFile sourceFile(sourcePath);
-    QVERIFY(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
+    CTEST_CHECK(sourceFile.open(QIODevice::WriteOnly | QIODevice::Text));
     const QByteArray initialHtml = "<h1>Notes</h1><p>Hello <b>bold</b></p>";
-    QCOMPARE(sourceFile.write(initialHtml), qint64(initialHtml.size()));
+    CTEST_COMPARE(sourceFile.write(initialHtml), qint64(initialHtml.size()));
     sourceFile.close();
 
     engine.rootContext()->setContextProperty(QStringLiteral("initialFilePath"), sourcePath);
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     QObject *model = documentModelFor(editor);
-    QVERIFY(model);
+    CTEST_CHECK(model);
 
-    QSignalSpy readFinishedSpy(editor, SIGNAL(readFinished(QString)));
-    QSignalSpy syncFinishedSpy(editor, SIGNAL(syncFinished(QString)));
-    QVERIFY(readFinishedSpy.isValid());
-    QVERIFY(syncFinishedSpy.isValid());
+    EditorSignalRecorder recorder;
+    const auto readConnection = QObject::connect(editor, SIGNAL(readFinished(QString)),
+                                                  &recorder, SLOT(recordReadFinished(QString)));
+    const auto syncConnection = QObject::connect(editor, SIGNAL(syncFinished(QString)),
+                                                  &recorder, SLOT(recordSyncFinished(QString)));
+    CTEST_CHECK(readConnection);
+    CTEST_CHECK(syncConnection);
 
-    QCOMPARE(editor->property("filePath").toString(), sourcePath);
-    QCOMPARE(editor->property("bytesTotal").toLongLong(), QFileInfo(sourcePath).size());
-    QTRY_VERIFY(!editor->property("reading").toBool());
-    QTRY_COMPARE(readFinishedSpy.count(), 1);
-    QCOMPARE(readFinishedSpy.takeFirst().at(0).toString(), sourcePath);
+    CTEST_COMPARE(editor->property("filePath").toString(), sourcePath);
+    CTEST_COMPARE(editor->property("bytesTotal").toLongLong(), QFileInfo(sourcePath).size());
+    CTEST_WAIT_DEFAULT(!editor->property("reading").toBool());
+    CTEST_WAIT_COMPARE(recorder.readEvents.count(), 1);
+    CTEST_COMPARE(recorder.readEvents.takeFirst(), sourcePath);
 
     const QString loadedText = editor->property("text").toString();
-    QVERIFY(loadedText.contains(QStringLiteral("Notes")));
-    QVERIFY(loadedText.contains(QStringLiteral("bold")));
-    QCOMPARE(model->property("text").toString(), QString::fromUtf8(initialHtml));
-    QVERIFY(!editor->property("dirty").toBool());
-    QCOMPARE(editor->property("error").toString(), QString());
+    CTEST_CHECK(loadedText.contains(QStringLiteral("Notes")));
+    CTEST_CHECK(loadedText.contains(QStringLiteral("bold")));
+    CTEST_COMPARE(model->property("text").toString(), QString::fromUtf8(initialHtml));
+    CTEST_CHECK(!editor->property("dirty").toBool());
+    CTEST_COMPARE(editor->property("error").toString(), QString());
 
     const QString editedHtml = QStringLiteral("<h1>Notes</h1><p>Hello <b>bold</b> and <i>italic</i></p>");
-    QVERIFY(editor->setProperty("text", editedHtml));
-    QTRY_VERIFY(model->property("text").toString().contains(QStringLiteral("bold")));
-    QTRY_VERIFY(model->property("text").toString().contains(QStringLiteral("italic")));
-    QVERIFY(editor->property("dirty").toBool());
+    CTEST_CHECK(editor->setProperty("text", editedHtml));
+    CTEST_WAIT_DEFAULT(model->property("text").toString().contains(QStringLiteral("bold")));
+    CTEST_WAIT_DEFAULT(model->property("text").toString().contains(QStringLiteral("italic")));
+    CTEST_CHECK(editor->property("dirty").toBool());
 
-    QTRY_COMPARE(syncFinishedSpy.count(), 1);
-    QVERIFY(!editor->property("dirty").toBool());
-    QCOMPARE(editor->property("error").toString(), QString());
+    CTEST_WAIT_COMPARE(recorder.syncEvents.count(), 1);
+    CTEST_COMPARE(recorder.syncEvents.constFirst(), sourcePath);
+    CTEST_CHECK(!editor->property("dirty").toBool());
+    CTEST_COMPARE(editor->property("error").toString(), QString());
 
     QFile savedFile(sourcePath);
-    QVERIFY(savedFile.open(QIODevice::ReadOnly | QIODevice::Text));
+    CTEST_CHECK(savedFile.open(QIODevice::ReadOnly | QIODevice::Text));
     const QString savedText = QString::fromUtf8(savedFile.readAll());
-    QVERIFY(savedText.contains(QStringLiteral("qrichtext")));
-    QVERIFY(savedText.contains(QStringLiteral("bold")));
-    QVERIFY(savedText.contains(QStringLiteral("italic")));
-    QVERIFY(savedText.contains(QStringLiteral("font-weight")));
-    QVERIFY(savedText.contains(QStringLiteral("font-style")));
+    CTEST_CHECK(savedText.contains(QStringLiteral("qrichtext")));
+    CTEST_CHECK(savedText.contains(QStringLiteral("bold")));
+    CTEST_CHECK(savedText.contains(QStringLiteral("italic")));
+    CTEST_CHECK(savedText.contains(QStringLiteral("font-weight")));
+    CTEST_CHECK(savedText.contains(QStringLiteral("font-style")));
 }
 
 void TextEditorTests::text_editor_return_key_moves_caret_to_inserted_line()
@@ -422,31 +445,47 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     QObject *editor = root->findChild<QObject *>(QStringLiteral("textEditor"));
-    QVERIFY(editor);
+    CTEST_CHECK(editor);
     auto *editorItem = root->findChild<QQuickItem *>(QStringLiteral("textEditorRichTextEdit"));
-    QVERIFY(editorItem);
-    QVERIFY(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
-    QTRY_VERIFY(editor->property("focused").toBool());
-    QVERIFY(editor->setProperty("cursorPosition", 5));
+    CTEST_CHECK(editorItem);
+    CTEST_CHECK(QMetaObject::invokeMethod(editor, "forceEditorFocus"));
+    CTEST_WAIT_DEFAULT(editor->property("focused").toBool());
+    CTEST_CHECK(editor->setProperty("cursorPosition", 5));
 
     const QRectF firstLineCursorRect = editorItem->property("cursorRectangle").toRectF();
-    QTest::keyClick(window, Qt::Key_Return);
+    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, QStringLiteral("\r"));
+    QCoreApplication::sendEvent(window, &keyPress);
+    QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_Return, Qt::NoModifier, QStringLiteral("\r"));
+    QCoreApplication::sendEvent(window, &keyRelease);
 
-    QTRY_VERIFY(editor->property("cursorPosition").toInt() > 5);
+    CTEST_WAIT_DEFAULT(editor->property("cursorPosition").toInt() > 5);
     const QRectF insertedLineCursorRect = editorItem->property("cursorRectangle").toRectF();
-    QVERIFY2(
+    CTEST_CHECK_MESSAGE(
         insertedLineCursorRect.y() > firstLineCursorRect.y(),
         qPrintable(QStringLiteral("Return must place the caret on the inserted line: before y=%1, after y=%2")
                        .arg(firstLineCursorRect.y())
                        .arg(insertedLineCursorRect.y())));
 }
 
-QTEST_MAIN(TextEditorTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    TextEditorTests tests;
+    runner.run("text_editor_requires_file_path_contract", [&] { tests.text_editor_requires_file_path_contract(); });
+    runner.run("text_editor_rich_text_surface_contract", [&] { tests.text_editor_rich_text_surface_contract(); });
+    runner.run("text_editor_document_edited_emits_latest_payload_and_revision", [&] { tests.text_editor_document_edited_emits_latest_payload_and_revision(); });
+    runner.run("text_editor_mobile_native_gesture_viewport_scroll_contract", [&] { tests.text_editor_mobile_native_gesture_viewport_scroll_contract(); });
+    runner.run("text_editor_api_usage_manual_contract", [&] { tests.text_editor_api_usage_manual_contract(); });
+    runner.run("text_editor_rich_text_file_realtime_sync_contract", [&] { tests.text_editor_rich_text_file_realtime_sync_contract(); });
+    runner.run("text_editor_return_key_moves_caret_to_inserted_line", [&] { tests.text_editor_return_key_moves_caret_to_inserted_line(); });
+    return runner.result();
+}
 #include "tst_text_editor.moc"

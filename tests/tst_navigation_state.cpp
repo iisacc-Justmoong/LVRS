@@ -1,4 +1,7 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
+#include <QScopeGuard>
+#include <type_traits>
 
 #include <QAbstractListModel>
 #include <QAbstractTableModel>
@@ -8,7 +11,6 @@
 #include <QPointer>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QSignalSpy>
 #include <QtPlugin>
 
 #include "backend/model/hierarchymodel.h"
@@ -353,11 +355,22 @@ private:
     QString m_status = QStringLiteral("Idle");
 };
 
-class NavigationStateTests : public QObject
+namespace {
+template <typename Actual, typename Expected>
+bool navigationEqual(const Actual &actual, const Expected &expected)
 {
-    Q_OBJECT
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+}
+#define NAVIGATION_COMPARE(actual, expected) CTEST_CHECK(navigationEqual((actual), (expected)))
 
-private slots:
+class NavigationStateTests
+{
+public:
     void page_monitor_history_metrics();
     void page_monitor_signal_contract_and_normalization();
     void view_state_tracker_syncs_stack_and_status();
@@ -396,24 +409,24 @@ void NavigationStateTests::table_projection_matches_public_cell_queries()
     qsizetype i=0;
     for (int row=0;row<model.rowCount();++row) for (int column=0;column<6;++column) {
         if (model.isCoveredCell(row,column)) continue;
-        QVERIFY(i<actual.size());
+        CTEST_CHECK(i<actual.size());
         const auto value=actual[i++].toMap();
-        QCOMPARE(value["rowIndex"].toInt(),row);QCOMPARE(value["columnIndex"].toInt(),column);
-        QCOMPARE(value["cellData"],model.cellAt(row,column));QCOMPARE(value["text"].toString(),model.cellText(row,column));
-        QCOMPARE(value["x"].toInt(),model.columnX(column));QCOMPARE(value["y"].toInt(),model.rowY(row));
+        NAVIGATION_COMPARE(value["rowIndex"].toInt(),row);NAVIGATION_COMPARE(value["columnIndex"].toInt(),column);
+        NAVIGATION_COMPARE(value["cellData"],model.cellAt(row,column));NAVIGATION_COMPARE(value["text"].toString(),model.cellText(row,column));
+        NAVIGATION_COMPARE(value["x"].toInt(),model.columnX(column));NAVIGATION_COMPARE(value["y"].toInt(),model.rowY(row));
         const auto rs=model.cellRowSpan(row,column), cs=model.cellColumnSpan(row,column);
-        QCOMPARE(value["rowSpan"].toInt(),rs);QCOMPARE(value["columnSpan"].toInt(),cs);
-        QCOMPARE(value["width"].toInt(),model.columnSpanWidth(column,cs));
-        QCOMPARE(value["height"].toInt(),model.rowSpanHeight(row,rs));
+        NAVIGATION_COMPARE(value["rowSpan"].toInt(),rs);NAVIGATION_COMPARE(value["columnSpan"].toInt(),cs);
+        NAVIGATION_COMPARE(value["width"].toInt(),model.columnSpanWidth(column,cs));
+        NAVIGATION_COMPARE(value["height"].toInt(),model.rowSpanHeight(row,rs));
     }
-    QCOMPARE(i,actual.size());
+    NAVIGATION_COMPARE(i,actual.size());
     QVector<int> visiblePerRow(model.rowCount());
     for (const auto &cell : actual)
         ++visiblePerRow[cell.toMap().value("rowIndex").toInt()];
-    QCOMPARE(visiblePerRow[6], 3); // The last active span still covers columns 1–3.
-    QCOMPARE(visiblePerRow[7], 6); // Its end row immediately exposes every column.
-    QCOMPARE(visiblePerRow[8], 5); // An explicit covered marker remains hidden.
-    model.setRows(QVariantList{});QVERIFY(model.visibleCells().isEmpty());
+    NAVIGATION_COMPARE(visiblePerRow[6], 3); // The last active span still covers columns 1–3.
+    NAVIGATION_COMPARE(visiblePerRow[7], 6); // Its end row immediately exposes every column.
+    NAVIGATION_COMPARE(visiblePerRow[8], 5); // An explicit covered marker remains hidden.
+    model.setRows(QVariantList{});CTEST_CHECK(model.visibleCells().isEmpty());
 }
 
 void NavigationStateTests::table_viewport_projection_preserves_merged_anchors_and_bounds()
@@ -425,13 +438,13 @@ void NavigationStateTests::table_viewport_projection_preserves_merged_anchors_an
     model.setRows(rows);
     model.setDefaultRowHeight(24);
     const auto window = model.visibleCellsInRange(2400, 2640);
-    QCOMPARE(window.size(), 40);
-    QCOMPARE(window.first().toMap().value("rowIndex").toInt(), 100);
-    QCOMPARE(window.last().toMap().value("rowIndex").toInt(), 109);
-    QCOMPARE(window.first().toMap().value("y").toInt(), 2400);
-    QCOMPARE(model.totalBodyHeight(), 240000);
-    QVERIFY(model.visibleCellsInRange(240000, 240100).isEmpty());
-    QVERIFY(model.visibleCellsInRange(20, 10).isEmpty());
+    NAVIGATION_COMPARE(window.size(), 40);
+    NAVIGATION_COMPARE(window.first().toMap().value("rowIndex").toInt(), 100);
+    NAVIGATION_COMPARE(window.last().toMap().value("rowIndex").toInt(), 109);
+    NAVIGATION_COMPARE(window.first().toMap().value("y").toInt(), 2400);
+    NAVIGATION_COMPARE(model.totalBodyHeight(), 240000);
+    CTEST_CHECK(model.visibleCellsInRange(240000, 240100).isEmpty());
+    CTEST_CHECK(model.visibleCellsInRange(20, 10).isEmpty());
     // An anchor above the viewport must remain present until its last covered row.
     model.setRows(QVariantList{
         QVariant(QVariantList{QVariantMap{{"value", "span"}, {"rowSpan", 3}}, "a"}),
@@ -448,7 +461,7 @@ void NavigationStateTests::table_viewport_projection_preserves_merged_anchors_an
                 && map.value("y").toDouble() + map.value("height").toDouble() > bounds.first)
                 expected.append(cell);
         }
-        QCOMPARE(model.visibleCellsInRange(bounds.first, bounds.second), expected);
+        NAVIGATION_COMPARE(model.visibleCellsInRange(bounds.first, bounds.second), expected);
     }
 }
 
@@ -457,74 +470,80 @@ void NavigationStateTests::table_column_count_tracks_headers_structure_and_undo(
     TableModel model;
     model.setHeaderColumns(QVariantList{"Name", "Size"});
     model.setRows(QVariantList{QVariant(QVariantList{"a"}), QVariant(QVariantList{"b", 1, true})});
-    QCOMPARE(model.columnCount(), 3);
-    QCOMPARE(model.columnCount(), 3);
+    NAVIGATION_COMPARE(model.columnCount(), 3);
+    NAVIGATION_COMPARE(model.columnCount(), 3);
     model.setRows(QVariantList{QVariant(QVariantList{"a", 1})});
-    QCOMPARE(model.columnCount(), 2);
-    QVERIFY(model.insertColumn(1)); QCOMPARE(model.columnCount(), 3);
-    QVERIFY(model.undo()); QCOMPARE(model.columnCount(), 2);
-    QVERIFY(model.redo()); QCOMPARE(model.columnCount(), 3);
+    NAVIGATION_COMPARE(model.columnCount(), 2);
+    CTEST_CHECK(model.insertColumn(1)); NAVIGATION_COMPARE(model.columnCount(), 3);
+    CTEST_CHECK(model.undo()); NAVIGATION_COMPARE(model.columnCount(), 2);
+    CTEST_CHECK(model.redo()); NAVIGATION_COMPARE(model.columnCount(), 3);
     model.setHeaderColumns(QVariantList{"a", "b", "c", "d"});
-    QCOMPARE(model.columnCount(), 4);
+    NAVIGATION_COMPARE(model.columnCount(), 4);
 }
 
 void NavigationStateTests::page_monitor_history_metrics()
 {
     PageMonitor monitor;
-    QCOMPARE(monitor.count(), 0);
-    QCOMPARE(monitor.current(), QString());
-    QVERIFY(!monitor.canUndo());
+    NAVIGATION_COMPARE(monitor.count(), 0);
+    NAVIGATION_COMPARE(monitor.current(), QString());
+    CTEST_CHECK(!monitor.canUndo());
 
     monitor.record(QStringLiteral("/overview"));
     monitor.record(QStringLiteral("/overview"));
-    QCOMPARE(monitor.count(), 1);
-    QCOMPARE(monitor.current(), QStringLiteral("/overview"));
+    NAVIGATION_COMPARE(monitor.count(), 1);
+    NAVIGATION_COMPARE(monitor.current(), QStringLiteral("/overview"));
 
     monitor.record(QStringLiteral("/reports"));
-    QCOMPARE(monitor.count(), 2);
-    QVERIFY(monitor.canUndo());
-    QCOMPARE(monitor.undo(), QStringLiteral("/overview"));
-    QCOMPARE(monitor.count(), 1);
-    QVERIFY(!monitor.canUndo());
+    NAVIGATION_COMPARE(monitor.count(), 2);
+    CTEST_CHECK(monitor.canUndo());
+    NAVIGATION_COMPARE(monitor.undo(), QStringLiteral("/overview"));
+    NAVIGATION_COMPARE(monitor.count(), 1);
+    CTEST_CHECK(!monitor.canUndo());
 
     monitor.clear();
-    QCOMPARE(monitor.count(), 0);
-    QCOMPARE(monitor.current(), QString());
+    NAVIGATION_COMPARE(monitor.count(), 0);
+    NAVIGATION_COMPARE(monitor.current(), QString());
 }
 
 void NavigationStateTests::page_monitor_signal_contract_and_normalization()
 {
     PageMonitor monitor;
-    QSignalSpy historySpy(&monitor, &PageMonitor::historyChanged);
-    QVERIFY(historySpy.isValid());
+    QList<QVariantList> historySpyEvents;
+    const auto historySpyConnection = QObject::connect(&monitor, &PageMonitor::historyChanged,
+        [&historySpyEvents]() { historySpyEvents.append(QVariantList{}); });
+    const auto historySpyDisconnect = qScopeGuard([&] { QObject::disconnect(historySpyConnection); });
+    CTEST_CHECK(bool(historySpyConnection));
 
     monitor.record(QStringLiteral("  /overview  "));
-    QCOMPARE(monitor.current(), QStringLiteral("/overview"));
-    QCOMPARE(historySpy.count(), 1);
+    NAVIGATION_COMPARE(monitor.current(), QStringLiteral("/overview"));
+    NAVIGATION_COMPARE(historySpyEvents.size(), 1);
 
     monitor.record(QStringLiteral("/overview"));
     monitor.record(QStringLiteral("   "));
-    QCOMPARE(historySpy.count(), 1);
+    NAVIGATION_COMPARE(historySpyEvents.size(), 1);
 
-    QCOMPARE(monitor.undo(), QStringLiteral("/overview"));
-    QCOMPARE(historySpy.count(), 1);
+    NAVIGATION_COMPARE(monitor.undo(), QStringLiteral("/overview"));
+    NAVIGATION_COMPARE(historySpyEvents.size(), 1);
 
     monitor.record(QStringLiteral("/details"));
-    QCOMPARE(historySpy.count(), 2);
-    QCOMPARE(monitor.undo(), QStringLiteral("/overview"));
-    QCOMPARE(historySpy.count(), 3);
+    NAVIGATION_COMPARE(historySpyEvents.size(), 2);
+    NAVIGATION_COMPARE(monitor.undo(), QStringLiteral("/overview"));
+    NAVIGATION_COMPARE(historySpyEvents.size(), 3);
 
     monitor.clear();
-    QCOMPARE(historySpy.count(), 4);
+    NAVIGATION_COMPARE(historySpyEvents.size(), 4);
     monitor.clear();
-    QCOMPARE(historySpy.count(), 4);
+    NAVIGATION_COMPARE(historySpyEvents.size(), 4);
 }
 
 void NavigationStateTests::view_state_tracker_syncs_stack_and_status()
 {
     ViewStateTracker tracker;
-    QSignalSpy stackSpy(&tracker, &ViewStateTracker::stackChanged);
-    QVERIFY(stackSpy.isValid());
+    QList<QVariantList> stackSpyEvents;
+    const auto stackSpyConnection = QObject::connect(&tracker, &ViewStateTracker::stackChanged,
+        [&stackSpyEvents]() { stackSpyEvents.append(QVariantList{}); });
+    const auto stackSpyDisconnect = qScopeGuard([&] { QObject::disconnect(stackSpyConnection); });
+    CTEST_CHECK(bool(stackSpyConnection));
 
     const QVariantList entries = {
         QVariantMap {
@@ -545,26 +564,26 @@ void NavigationStateTests::view_state_tracker_syncs_stack_and_status()
     };
 
     tracker.syncStack(entries);
-    QCOMPARE(stackSpy.count(), 1);
-    QCOMPARE(tracker.loadedCount(), 3);
-    QCOMPARE(tracker.loadedViews(),
+    NAVIGATION_COMPARE(stackSpyEvents.size(), 1);
+    NAVIGATION_COMPARE(tracker.loadedCount(), 3);
+    NAVIGATION_COMPARE(tracker.loadedViews(),
              (QStringList { QStringLiteral("/overview"), QStringLiteral("/reports"), QStringLiteral("/settings") }));
-    QCOMPARE(tracker.activeViews(), (QStringList { QStringLiteral("/reports") }));
-    QCOMPARE(tracker.inactiveViews(), (QStringList { QStringLiteral("/overview") }));
-    QCOMPARE(tracker.disabledViews(), (QStringList { QStringLiteral("/settings") }));
-    QCOMPARE(tracker.currentActiveView(), QStringLiteral("/reports"));
+    NAVIGATION_COMPARE(tracker.activeViews(), (QStringList { QStringLiteral("/reports") }));
+    NAVIGATION_COMPARE(tracker.inactiveViews(), (QStringList { QStringLiteral("/overview") }));
+    NAVIGATION_COMPARE(tracker.disabledViews(), (QStringList { QStringLiteral("/settings") }));
+    NAVIGATION_COMPARE(tracker.currentActiveView(), QStringLiteral("/reports"));
 
-    QCOMPARE(tracker.stateOf(QStringLiteral("/overview")), QStringLiteral("Inactive"));
-    QCOMPARE(tracker.stateOf(QStringLiteral("/reports")), QStringLiteral("Active"));
-    QCOMPARE(tracker.stateOf(QStringLiteral("/settings")), QStringLiteral("Disabled"));
+    NAVIGATION_COMPARE(tracker.stateOf(QStringLiteral("/overview")), QStringLiteral("Inactive"));
+    NAVIGATION_COMPARE(tracker.stateOf(QStringLiteral("/reports")), QStringLiteral("Active"));
+    NAVIGATION_COMPARE(tracker.stateOf(QStringLiteral("/settings")), QStringLiteral("Disabled"));
 
     const QVariantMap reportView = tracker.view(QStringLiteral("/reports"));
-    QCOMPARE(reportView.value(QStringLiteral("state")).toString(), QStringLiteral("Active"));
-    QCOMPARE(reportView.value(QStringLiteral("index")).toInt(), 1);
-    QCOMPARE(reportView.value(QStringLiteral("active")).toBool(), true);
+    NAVIGATION_COMPARE(reportView.value(QStringLiteral("state")).toString(), QStringLiteral("Active"));
+    NAVIGATION_COMPARE(reportView.value(QStringLiteral("index")).toInt(), 1);
+    NAVIGATION_COMPARE(reportView.value(QStringLiteral("active")).toBool(), true);
 
     tracker.syncStack(entries);
-    QCOMPARE(stackSpy.count(), 1);
+    NAVIGATION_COMPARE(stackSpyEvents.size(), 1);
 }
 
 void NavigationStateTests::view_state_tracker_disable_override_changes_active_target()
@@ -585,50 +604,53 @@ void NavigationStateTests::view_state_tracker_disable_override_changes_active_ta
         }
     });
 
-    QCOMPARE(tracker.currentActiveView(), QStringLiteral("/c"));
+    NAVIGATION_COMPARE(tracker.currentActiveView(), QStringLiteral("/c"));
 
-    QSignalSpy stackSpy(&tracker, &ViewStateTracker::stackChanged);
-    QVERIFY(stackSpy.isValid());
+    QList<QVariantList> stackSpyEvents;
+    const auto stackSpyConnection = QObject::connect(&tracker, &ViewStateTracker::stackChanged,
+        [&stackSpyEvents]() { stackSpyEvents.append(QVariantList{}); });
+    const auto stackSpyDisconnect = qScopeGuard([&] { QObject::disconnect(stackSpyConnection); });
+    CTEST_CHECK(bool(stackSpyConnection));
 
     tracker.setViewDisabled(QStringLiteral("/c"), true);
-    QCOMPARE(tracker.currentActiveView(), QStringLiteral("/b"));
-    QCOMPARE(tracker.stateOf(QStringLiteral("/c")), QStringLiteral("Disabled"));
-    QCOMPARE(tracker.activeViews(), (QStringList { QStringLiteral("/b") }));
+    NAVIGATION_COMPARE(tracker.currentActiveView(), QStringLiteral("/b"));
+    NAVIGATION_COMPARE(tracker.stateOf(QStringLiteral("/c")), QStringLiteral("Disabled"));
+    NAVIGATION_COMPARE(tracker.activeViews(), (QStringList { QStringLiteral("/b") }));
 
     tracker.setViewEnabled(QStringLiteral("/c"), true);
-    QCOMPARE(tracker.currentActiveView(), QStringLiteral("/c"));
-    QCOMPARE(tracker.stateOf(QStringLiteral("/c")), QStringLiteral("Active"));
+    NAVIGATION_COMPARE(tracker.currentActiveView(), QStringLiteral("/c"));
+    NAVIGATION_COMPARE(tracker.stateOf(QStringLiteral("/c")), QStringLiteral("Active"));
 
     tracker.clear();
-    QCOMPARE(tracker.loadedCount(), 0);
-    QCOMPARE(tracker.currentActiveView(), QString());
-    QVERIFY(stackSpy.count() >= 3);
+    NAVIGATION_COMPARE(tracker.loadedCount(), 0);
+    NAVIGATION_COMPARE(tracker.currentActiveView(), QString());
+    CTEST_CHECK(stackSpyEvents.size() >= 3);
 }
 
 void NavigationStateTests::route_matcher_normalization_and_param_contract()
 {
     RouteMatcher matcher;
 
-    QCOMPARE(matcher.normalizePath(QString()), QStringLiteral("/"));
-    QCOMPARE(matcher.normalizePath(QStringLiteral("reports/")), QStringLiteral("/reports"));
-    QCOMPARE(matcher.normalizePath(QStringLiteral("/runs/123/")), QStringLiteral("/runs/123"));
+    NAVIGATION_COMPARE(matcher.normalizePath(QString()), QStringLiteral("/"));
+    NAVIGATION_COMPARE(matcher.normalizePath(QStringLiteral("reports/")), QStringLiteral("/reports"));
+    NAVIGATION_COMPARE(matcher.normalizePath(QStringLiteral("/runs/123/")), QStringLiteral("/runs/123"));
 
     const QVariantMap rootMatch = matcher.match(QStringLiteral("/"), QStringLiteral("/"));
-    QVERIFY(rootMatch.value(QStringLiteral("matched")).toBool());
-    QVERIFY(rootMatch.value(QStringLiteral("params")).toMap().isEmpty());
+    CTEST_CHECK(rootMatch.value(QStringLiteral("matched")).toBool());
+    CTEST_CHECK(rootMatch.value(QStringLiteral("params")).toMap().isEmpty());
 
     const QVariantMap paramMatch = matcher.match(QStringLiteral("/runs/42"), QStringLiteral("/runs/[id]"));
-    QVERIFY(paramMatch.value(QStringLiteral("matched")).toBool());
-    QCOMPARE(paramMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("id")).toString(),
+    CTEST_CHECK(paramMatch.value(QStringLiteral("matched")).toBool());
+    NAVIGATION_COMPARE(paramMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("id")).toString(),
              QStringLiteral("42"));
 
     const QVariantMap restMatch = matcher.match(QStringLiteral("/logs/a/b/c"), QStringLiteral("/logs/[...path]"));
-    QVERIFY(restMatch.value(QStringLiteral("matched")).toBool());
-    QCOMPARE(restMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("path")).toString(),
+    CTEST_CHECK(restMatch.value(QStringLiteral("matched")).toBool());
+    NAVIGATION_COMPARE(restMatch.value(QStringLiteral("params")).toMap().value(QStringLiteral("path")).toString(),
              QStringLiteral("a/b/c"));
 
     const QVariantMap noMatch = matcher.match(QStringLiteral("/runs"), QStringLiteral("/runs/[id]"));
-    QVERIFY(!noMatch.value(QStringLiteral("matched")).toBool());
+    CTEST_CHECK(!noMatch.value(QStringLiteral("matched")).toBool());
 }
 
 void NavigationStateTests::viewmodels_registry_binding_ownership_and_write_permissions()
@@ -637,63 +659,72 @@ void NavigationStateTests::viewmodels_registry_binding_ownership_and_write_permi
     auto *model = new MutableStatusModel;
     registry.set(QStringLiteral("Example"), model);
 
-    QSignalSpy viewsSpy(&registry, &ViewModelRegistry::viewsChanged);
-    QSignalSpy ownershipSpy(&registry, &ViewModelRegistry::ownershipChanged);
-    QSignalSpy errorSpy(&registry, &ViewModelRegistry::lastErrorChanged);
-    QVERIFY(viewsSpy.isValid());
-    QVERIFY(ownershipSpy.isValid());
-    QVERIFY(errorSpy.isValid());
+    QList<QVariantList> viewsSpyEvents;
+    const auto viewsSpyConnection = QObject::connect(&registry, &ViewModelRegistry::viewsChanged,
+        [&viewsSpyEvents]() { viewsSpyEvents.append(QVariantList{}); });
+    const auto viewsSpyDisconnect = qScopeGuard([&] { QObject::disconnect(viewsSpyConnection); });
+    QList<QVariantList> ownershipSpyEvents;
+    const auto ownershipSpyConnection = QObject::connect(&registry, &ViewModelRegistry::ownershipChanged,
+        [&ownershipSpyEvents]() { ownershipSpyEvents.append(QVariantList{}); });
+    const auto ownershipSpyDisconnect = qScopeGuard([&] { QObject::disconnect(ownershipSpyConnection); });
+    QList<QVariantList> errorSpyEvents;
+    const auto errorSpyConnection = QObject::connect(&registry, &ViewModelRegistry::lastErrorChanged,
+        [&errorSpyEvents]() { errorSpyEvents.append(QVariantList{}); });
+    const auto errorSpyDisconnect = qScopeGuard([&] { QObject::disconnect(errorSpyConnection); });
+    CTEST_CHECK(bool(viewsSpyConnection));
+    CTEST_CHECK(bool(ownershipSpyConnection));
+    CTEST_CHECK(bool(errorSpyConnection));
 
-    QVERIFY(registry.bindView(QStringLiteral("OverviewView"), QStringLiteral("Example"), true));
-    QCOMPARE(registry.keyForView(QStringLiteral("OverviewView")), QStringLiteral("Example"));
-    QVERIFY(registry.getForView(QStringLiteral("OverviewView")) == model);
-    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("OverviewView"));
-    QVERIFY(registry.canWrite(QStringLiteral("OverviewView")));
+    CTEST_CHECK(registry.bindView(QStringLiteral("OverviewView"), QStringLiteral("Example"), true));
+    NAVIGATION_COMPARE(registry.keyForView(QStringLiteral("OverviewView")), QStringLiteral("Example"));
+    CTEST_CHECK(registry.getForView(QStringLiteral("OverviewView")) == model);
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("OverviewView"));
+    CTEST_CHECK(registry.canWrite(QStringLiteral("OverviewView")));
 
-    QVERIFY(registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), false));
-    QCOMPARE(registry.keyForView(QStringLiteral("ReportsView")), QStringLiteral("Example"));
-    QVERIFY(!registry.canWrite(QStringLiteral("ReportsView")));
+    CTEST_CHECK(registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), false));
+    NAVIGATION_COMPARE(registry.keyForView(QStringLiteral("ReportsView")), QStringLiteral("Example"));
+    CTEST_CHECK(!registry.canWrite(QStringLiteral("ReportsView")));
 
-    QVERIFY(!registry.updateProperty(QStringLiteral("ReportsView"),
+    CTEST_CHECK(!registry.updateProperty(QStringLiteral("ReportsView"),
                                      QStringLiteral("status"),
                                      QStringLiteral("Working")));
-    QCOMPARE(registry.lastError(), QStringLiteral("View has no write permission for the model"));
-    QCOMPARE(model->status(), QStringLiteral("Idle"));
+    NAVIGATION_COMPARE(registry.lastError(), QStringLiteral("View has no write permission for the model"));
+    NAVIGATION_COMPARE(model->status(), QStringLiteral("Idle"));
 
-    QVERIFY(registry.updateProperty(QStringLiteral("OverviewView"),
+    CTEST_CHECK(registry.updateProperty(QStringLiteral("OverviewView"),
                                     QStringLiteral("status"),
                                     QStringLiteral("Working")));
-    QCOMPARE(model->status(), QStringLiteral("Working"));
-    QCOMPARE(registry.readProperty(QStringLiteral("OverviewView"), QStringLiteral("status")).toString(),
+    NAVIGATION_COMPARE(model->status(), QStringLiteral("Working"));
+    NAVIGATION_COMPARE(registry.readProperty(QStringLiteral("OverviewView"), QStringLiteral("status")).toString(),
              QStringLiteral("Working"));
 
-    QVERIFY(!registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), true));
-    QCOMPARE(registry.lastError(), QStringLiteral("ViewModel is already owned by another view"));
+    CTEST_CHECK(!registry.bindView(QStringLiteral("ReportsView"), QStringLiteral("Example"), true));
+    NAVIGATION_COMPARE(registry.lastError(), QStringLiteral("ViewModel is already owned by another view"));
 
-    QVERIFY(registry.releaseOwnership(QStringLiteral("OverviewView"), QStringLiteral("Example")));
-    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
-    QVERIFY(registry.claimOwnership(QStringLiteral("ReportsView"), QStringLiteral("Example")));
-    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("ReportsView"));
-    QVERIFY(registry.canWrite(QStringLiteral("ReportsView"), QStringLiteral("Example")));
+    CTEST_CHECK(registry.releaseOwnership(QStringLiteral("OverviewView"), QStringLiteral("Example")));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
+    CTEST_CHECK(registry.claimOwnership(QStringLiteral("ReportsView"), QStringLiteral("Example")));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("Example")), QStringLiteral("ReportsView"));
+    CTEST_CHECK(registry.canWrite(QStringLiteral("ReportsView"), QStringLiteral("Example")));
 
-    QVERIFY(registry.updateProperty(QStringLiteral("ReportsView"),
+    CTEST_CHECK(registry.updateProperty(QStringLiteral("ReportsView"),
                                     QStringLiteral("status"),
                                     QStringLiteral("Ready")));
-    QCOMPARE(model->status(), QStringLiteral("Ready"));
+    NAVIGATION_COMPARE(model->status(), QStringLiteral("Ready"));
 
     registry.unbindView(QStringLiteral("ReportsView"));
-    QCOMPARE(registry.keyForView(QStringLiteral("ReportsView")), QString());
-    QCOMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
-    QVERIFY(!registry.canWrite(QStringLiteral("ReportsView")));
+    NAVIGATION_COMPARE(registry.keyForView(QStringLiteral("ReportsView")), QString());
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("Example")), QString());
+    CTEST_CHECK(!registry.canWrite(QStringLiteral("ReportsView")));
 
-    QCOMPARE(registry.bindings().value(QStringLiteral("OverviewView")).toString(),
+    NAVIGATION_COMPARE(registry.bindings().value(QStringLiteral("OverviewView")).toString(),
              QStringLiteral("Example"));
-    QVERIFY(viewsSpy.count() >= 3);
-    QVERIFY(ownershipSpy.count() >= 3);
-    QVERIFY(errorSpy.count() >= 1);
+    CTEST_CHECK(viewsSpyEvents.size() >= 3);
+    CTEST_CHECK(ownershipSpyEvents.size() >= 3);
+    CTEST_CHECK(errorSpyEvents.size() >= 1);
 
     registry.remove(QStringLiteral("Example"));
-    QCOMPARE(registry.keyForView(QStringLiteral("OverviewView")), QString());
+    NAVIGATION_COMPARE(registry.keyForView(QStringLiteral("OverviewView")), QString());
 }
 
 void NavigationStateTests::viewmodels_registry_rebinding_clears_stale_ownership()
@@ -705,118 +736,121 @@ void NavigationStateTests::viewmodels_registry_rebinding_clears_stale_ownership(
     registry.set(QStringLiteral("ModelA"), modelA);
     registry.set(QStringLiteral("ModelB"), modelB);
 
-    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelA"), true));
-    QCOMPARE(registry.ownerOf(QStringLiteral("ModelA")), QStringLiteral("EditorView"));
-    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
-    QVERIFY(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
+    CTEST_CHECK(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelA"), true));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("ModelA")), QStringLiteral("EditorView"));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
+    CTEST_CHECK(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
 
-    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), true));
-    QCOMPARE(registry.ownerOf(QStringLiteral("ModelA")), QString());
-    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QStringLiteral("EditorView"));
-    QVERIFY(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
-    QVERIFY(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
+    CTEST_CHECK(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), true));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("ModelA")), QString());
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("ModelB")), QStringLiteral("EditorView"));
+    CTEST_CHECK(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelA")));
+    CTEST_CHECK(registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
 
-    QVERIFY(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), false));
-    QCOMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
-    QVERIFY(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
+    CTEST_CHECK(registry.bindView(QStringLiteral("EditorView"), QStringLiteral("ModelB"), false));
+    NAVIGATION_COMPARE(registry.ownerOf(QStringLiteral("ModelB")), QString());
+    CTEST_CHECK(!registry.canWrite(QStringLiteral("EditorView"), QStringLiteral("ModelB")));
 }
 
 void NavigationStateTests::viewmodels_registry_tracks_keys_and_ownership()
 {
     ViewModelRegistry registry;
-    QCOMPARE(registry.keys().size(), 0);
-    QVERIFY(registry.get(QStringLiteral("missing")) == nullptr);
+    NAVIGATION_COMPARE(registry.keys().size(), 0);
+    CTEST_CHECK(registry.get(QStringLiteral("missing")) == nullptr);
 
     auto *shared = new QObject;
     QPointer<QObject> sharedGuard(shared);
     registry.set(QStringLiteral("alpha"), shared);
     registry.set(QStringLiteral("beta"), shared);
-    QVERIFY(registry.keys().contains(QStringLiteral("alpha")));
-    QVERIFY(registry.keys().contains(QStringLiteral("beta")));
-    QVERIFY(registry.get(QStringLiteral("alpha")) == shared);
-    QVERIFY(shared->parent() == &registry);
+    CTEST_CHECK(registry.keys().contains(QStringLiteral("alpha")));
+    CTEST_CHECK(registry.keys().contains(QStringLiteral("beta")));
+    CTEST_CHECK(registry.get(QStringLiteral("alpha")) == shared);
+    CTEST_CHECK(shared->parent() == &registry);
 
     registry.remove(QStringLiteral("alpha"));
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QCoreApplication::processEvents();
-    QVERIFY(!sharedGuard.isNull());
+    CTEST_CHECK(!sharedGuard.isNull());
 
     registry.remove(QStringLiteral("beta"));
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QCoreApplication::processEvents();
-    QTRY_VERIFY(sharedGuard.isNull());
+    CTEST_WAIT_DEFAULT(sharedGuard.isNull());
 
     auto *single = new QObject;
     QPointer<QObject> singleGuard(single);
     registry.set(QStringLiteral("single"), single);
-    QCOMPARE(registry.keys().size(), 1);
+    NAVIGATION_COMPARE(registry.keys().size(), 1);
     registry.clear();
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QCoreApplication::processEvents();
-    QTRY_VERIFY(singleGuard.isNull());
-    QCOMPARE(registry.keys().size(), 0);
+    CTEST_WAIT_DEFAULT(singleGuard.isNull());
+    NAVIGATION_COMPARE(registry.keys().size(), 0);
 }
 
 void NavigationStateTests::viewmodels_registry_signal_and_prune_contract()
 {
     ViewModelRegistry registry;
-    QSignalSpy keysSpy(&registry, &ViewModelRegistry::keysChanged);
-    QVERIFY(keysSpy.isValid());
+    QList<QVariantList> keysSpyEvents;
+    const auto keysSpyConnection = QObject::connect(&registry, &ViewModelRegistry::keysChanged,
+        [&keysSpyEvents]() { keysSpyEvents.append(QVariantList{}); });
+    const auto keysSpyDisconnect = qScopeGuard([&] { QObject::disconnect(keysSpyConnection); });
+    CTEST_CHECK(bool(keysSpyConnection));
 
     auto *ignored = new QObject;
     QPointer<QObject> ignoredGuard(ignored);
     registry.set(QStringLiteral("   "), ignored);
-    QCOMPARE(keysSpy.count(), 0);
-    QVERIFY(!ignoredGuard.isNull());
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 0);
+    CTEST_CHECK(!ignoredGuard.isNull());
     delete ignored;
-    QTRY_VERIFY(ignoredGuard.isNull());
+    CTEST_WAIT_DEFAULT(ignoredGuard.isNull());
 
     QObject externalParent;
     auto *externalOwned = new QObject(&externalParent);
     registry.set(QStringLiteral("primary"), externalOwned);
-    QCOMPARE(keysSpy.count(), 1);
-    QCOMPARE(externalOwned->parent(), &externalParent);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 1);
+    NAVIGATION_COMPARE(externalOwned->parent(), &externalParent);
     registry.set(QStringLiteral("primary"), externalOwned);
-    QCOMPARE(keysSpy.count(), 1);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 1);
     registry.set(QStringLiteral("secondary"), externalOwned);
-    QCOMPARE(keysSpy.count(), 2);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 2);
 
     registry.remove(QStringLiteral("missing"));
-    QCOMPARE(keysSpy.count(), 2);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 2);
     registry.remove(QStringLiteral("primary"));
-    QCOMPARE(keysSpy.count(), 3);
-    QVERIFY(!externalOwned->parent()->inherits("ViewModelRegistry"));
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 3);
+    CTEST_CHECK(!externalOwned->parent()->inherits("ViewModelRegistry"));
 
     QPointer<QObject> externalGuard(externalOwned);
     delete externalOwned;
-    QTRY_VERIFY(externalGuard.isNull());
+    CTEST_WAIT_DEFAULT(externalGuard.isNull());
 
     auto *owned = new QObject;
     QPointer<QObject> ownedGuard(owned);
     registry.set(QStringLiteral("owned"), owned);
-    QCOMPARE(keysSpy.count(), 5);
-    QVERIFY(owned->parent() == &registry);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 5);
+    CTEST_CHECK(owned->parent() == &registry);
     registry.set(QStringLiteral("owned"), owned);
-    QCOMPARE(keysSpy.count(), 5);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 5);
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QCoreApplication::processEvents();
-    QVERIFY(!ownedGuard.isNull());
+    CTEST_CHECK(!ownedGuard.isNull());
 
     auto *trigger = new QObject;
     registry.set(QStringLiteral("trigger"), trigger);
-    QCOMPARE(keysSpy.count(), 6);
-    QVERIFY(!registry.keys().contains(QStringLiteral("secondary")));
+    NAVIGATION_COMPARE(keysSpyEvents.size(), 6);
+    CTEST_CHECK(!registry.keys().contains(QStringLiteral("secondary")));
 
     registry.remove(QStringLiteral("owned"));
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QCoreApplication::processEvents();
-    QTRY_VERIFY(ownedGuard.isNull());
+    CTEST_WAIT_DEFAULT(ownedGuard.isNull());
 
-    const int beforeClear = keysSpy.count();
+    const int beforeClear = keysSpyEvents.size();
     registry.clear();
-    QCOMPARE(keysSpy.count(), beforeClear + 1);
+    NAVIGATION_COMPARE(keysSpyEvents.size(), beforeClear + 1);
     registry.clear();
-    QCOMPARE(registry.keys().size(), 0);
+    NAVIGATION_COMPARE(registry.keys().size(), 0);
 }
 
 void NavigationStateTests::viewmodel_base_and_registry_descriptors_track_cpp_state()
@@ -827,46 +861,49 @@ void NavigationStateTests::viewmodel_base_and_registry_descriptors_track_cpp_sta
     viewModel->setDisplayName(QStringLiteral("Status"));
     viewModel->setMetadata({{QStringLiteral("domain"), QStringLiteral("navigation-test")}});
 
-    QSignalSpy descriptorSpy(&registry, &ViewModelRegistry::descriptorsChanged);
-    QVERIFY(descriptorSpy.isValid());
+    QList<QVariantList> descriptorSpyEvents;
+    const auto descriptorSpyConnection = QObject::connect(&registry, &ViewModelRegistry::descriptorsChanged,
+        [&descriptorSpyEvents]() { descriptorSpyEvents.append(QVariantList{}); });
+    const auto descriptorSpyDisconnect = qScopeGuard([&] { QObject::disconnect(descriptorSpyConnection); });
+    CTEST_CHECK(bool(descriptorSpyConnection));
 
-    QVERIFY(registry.registerViewModel(viewModel));
-    QCOMPARE(registry.get(QStringLiteral("StatusVM")), viewModel);
+    CTEST_CHECK(registry.registerViewModel(viewModel));
+    NAVIGATION_COMPARE(registry.get(QStringLiteral("StatusVM")), viewModel);
 
     QVariantMap descriptor = registry.descriptor(QStringLiteral("StatusVM"));
-    QCOMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
-    QCOMPARE(descriptor.value(QStringLiteral("viewModelKey")).toString(), QStringLiteral("StatusVM"));
-    QCOMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
-    QCOMPARE(descriptor.value(QStringLiteral("busy")).toBool(), false);
-    QCOMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), false);
-    QCOMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("viewModelKey")).toString(), QStringLiteral("StatusVM"));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("busy")).toBool(), false);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), false);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
              QStringLiteral("navigation-test"));
 
     viewModel->setBusy(true);
     viewModel->setError(QStringLiteral("loading failed"));
 
     descriptor = registry.descriptor(QStringLiteral("StatusVM"));
-    QCOMPARE(descriptor.value(QStringLiteral("busy")).toBool(), true);
-    QCOMPARE(descriptor.value(QStringLiteral("error")).toString(), QStringLiteral("loading failed"));
-    QCOMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), true);
-    QVERIFY(descriptorSpy.count() >= 3);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("busy")).toBool(), true);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("error")).toString(), QStringLiteral("loading failed"));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("hasError")).toBool(), true);
+    CTEST_CHECK(descriptorSpyEvents.size() >= 3);
 
-    const int beforeBindSignals = descriptorSpy.count();
-    QVERIFY(registry.bindView(QStringLiteral("StatusView"), QStringLiteral("StatusVM"), true));
-    QVERIFY(descriptorSpy.count() > beforeBindSignals);
+    const int beforeBindSignals = descriptorSpyEvents.size();
+    CTEST_CHECK(registry.bindView(QStringLiteral("StatusView"), QStringLiteral("StatusVM"), true));
+    CTEST_CHECK(descriptorSpyEvents.size() > beforeBindSignals);
 
     descriptor = registry.descriptor(QStringLiteral("StatusVM"));
-    QCOMPARE(descriptor.value(QStringLiteral("owner")).toString(), QStringLiteral("StatusView"));
-    QVERIFY(descriptor.value(QStringLiteral("views")).toList().contains(QStringLiteral("StatusView")));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("owner")).toString(), QStringLiteral("StatusView"));
+    CTEST_CHECK(descriptor.value(QStringLiteral("views")).toList().contains(QStringLiteral("StatusView")));
 
     QVariantMap snapshot = viewModel->snapshot();
-    QCOMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("StatusVM"));
-    QCOMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
-    QCOMPARE(snapshot.value(QStringLiteral("busy")).toBool(), true);
-    QCOMPARE(snapshot.value(QStringLiteral("hasError")).toBool(), true);
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("StatusVM"));
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("busy")).toBool(), true);
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("hasError")).toBool(), true);
 
     viewModel->clearError();
-    QCOMPARE(viewModel->hasError(), false);
+    NAVIGATION_COMPARE(viewModel->hasError(), false);
 }
 
 void NavigationStateTests::state_model_stores_state_and_registry_descriptors_track_values()
@@ -875,73 +912,85 @@ void NavigationStateTests::state_model_stores_state_and_registry_descriptors_tra
     model.setKey(QStringLiteral("ProgressState"));
     model.setDisplayName(QStringLiteral("Progress State"));
 
-    QSignalSpy valuesSpy(&model, &StateModel::valuesChanged);
-    QSignalSpy revisionSpy(&model, &StateModel::revisionChanged);
-    QSignalSpy valueSpy(&model, &StateModel::valueChanged);
-    QVERIFY(valuesSpy.isValid());
-    QVERIFY(revisionSpy.isValid());
-    QVERIFY(valueSpy.isValid());
+    QList<QVariantList> valuesSpyEvents;
+    const auto valuesSpyConnection = QObject::connect(&model, &StateModel::valuesChanged,
+        [&valuesSpyEvents]() { valuesSpyEvents.append(QVariantList{}); });
+    const auto valuesSpyDisconnect = qScopeGuard([&] { QObject::disconnect(valuesSpyConnection); });
+    QList<QVariantList> revisionSpyEvents;
+    const auto revisionSpyConnection = QObject::connect(&model, &StateModel::revisionChanged,
+        [&revisionSpyEvents]() { revisionSpyEvents.append(QVariantList{}); });
+    const auto revisionSpyDisconnect = qScopeGuard([&] { QObject::disconnect(revisionSpyConnection); });
+    QList<QVariantList> valueSpyEvents;
+    const auto valueSpyConnection = QObject::connect(&model, &StateModel::valueChanged,
+        [&valueSpyEvents](const QString &key, const QVariant &value, const QVariant &previousValue) { valueSpyEvents.append(QVariantList{key, value, previousValue}); });
+    const auto valueSpyDisconnect = qScopeGuard([&] { QObject::disconnect(valueSpyConnection); });
+    CTEST_CHECK(bool(valuesSpyConnection));
+    CTEST_CHECK(bool(revisionSpyConnection));
+    CTEST_CHECK(bool(valueSpyConnection));
 
-    QVERIFY(model.setValue(QStringLiteral(" currentValue "), 40));
-    QVERIFY(model.setValue(QStringLiteral("minimumValue"), -10));
-    QVERIFY(model.setValue(QStringLiteral("maximumValue"), 90));
-    QCOMPARE(model.value(QStringLiteral("currentValue")).toInt(), 40);
-    QCOMPARE(model.value(QStringLiteral("missing"), QStringLiteral("fallback")).toString(),
+    CTEST_CHECK(model.setValue(QStringLiteral(" currentValue "), 40));
+    CTEST_CHECK(model.setValue(QStringLiteral("minimumValue"), -10));
+    CTEST_CHECK(model.setValue(QStringLiteral("maximumValue"), 90));
+    NAVIGATION_COMPARE(model.value(QStringLiteral("currentValue")).toInt(), 40);
+    NAVIGATION_COMPARE(model.value(QStringLiteral("missing"), QStringLiteral("fallback")).toString(),
              QStringLiteral("fallback"));
-    QVERIFY(model.hasValue(QStringLiteral("minimumValue")));
-    QCOMPARE(model.stateKeys(),
+    CTEST_CHECK(model.hasValue(QStringLiteral("minimumValue")));
+    NAVIGATION_COMPARE(model.stateKeys(),
              (QStringList {
                  QStringLiteral("currentValue"),
                  QStringLiteral("maximumValue"),
                  QStringLiteral("minimumValue")
              }));
 
-    QVERIFY(model.applyPatch(QVariantMap {
+    CTEST_CHECK(model.applyPatch(QVariantMap {
         {QStringLiteral("currentValue"), 64},
         {QStringLiteral("startValue"), 10}
     }));
-    QCOMPARE(model.value(QStringLiteral("currentValue")).toInt(), 64);
-    QCOMPARE(model.value(QStringLiteral("startValue")).toInt(), 10);
+    NAVIGATION_COMPARE(model.value(QStringLiteral("currentValue")).toInt(), 64);
+    NAVIGATION_COMPARE(model.value(QStringLiteral("startValue")).toInt(), 10);
 
     const QVariantMap snapshot = model.stateSnapshot();
-    QCOMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("ProgressState"));
-    QCOMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Progress State"));
-    QCOMPARE(snapshot.value(QStringLiteral("values")).toMap().value(QStringLiteral("currentValue")).toInt(), 64);
-    QVERIFY(snapshot.value(QStringLiteral("revision")).toInt() >= 4);
-    QVERIFY(!snapshot.value(QStringLiteral("empty")).toBool());
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("key")).toString(), QStringLiteral("ProgressState"));
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("displayName")).toString(), QStringLiteral("Progress State"));
+    NAVIGATION_COMPARE(snapshot.value(QStringLiteral("values")).toMap().value(QStringLiteral("currentValue")).toInt(), 64);
+    CTEST_CHECK(snapshot.value(QStringLiteral("revision")).toInt() >= 4);
+    CTEST_CHECK(!snapshot.value(QStringLiteral("empty")).toBool());
 
-    QVERIFY(model.removeValue(QStringLiteral("minimumValue")));
-    QVERIFY(!model.hasValue(QStringLiteral("minimumValue")));
-    QVERIFY(!model.setValue(QStringLiteral(" "), 1));
-    QCOMPARE(model.error(), QStringLiteral("Empty state key"));
+    CTEST_CHECK(model.removeValue(QStringLiteral("minimumValue")));
+    CTEST_CHECK(!model.hasValue(QStringLiteral("minimumValue")));
+    CTEST_CHECK(!model.setValue(QStringLiteral(" "), 1));
+    NAVIGATION_COMPARE(model.error(), QStringLiteral("Empty state key"));
     model.clearValues();
-    QVERIFY(model.empty());
-    QVERIFY(valuesSpy.count() >= 5);
-    QVERIFY(revisionSpy.count() >= 5);
-    QVERIFY(valueSpy.count() >= 5);
+    CTEST_CHECK(model.empty());
+    CTEST_CHECK(valuesSpyEvents.size() >= 5);
+    CTEST_CHECK(revisionSpyEvents.size() >= 5);
+    CTEST_CHECK(valueSpyEvents.size() >= 5);
 
     ViewModelRegistry registry;
     auto *registered = new StateModel;
     registered->setKey(QStringLiteral("PanelState"));
-    QVERIFY(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-a")));
+    CTEST_CHECK(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-a")));
 
-    QSignalSpy descriptorSpy(&registry, &ViewModelRegistry::descriptorsChanged);
-    QVERIFY(descriptorSpy.isValid());
+    QList<QVariantList> descriptorSpyEvents;
+    const auto descriptorSpyConnection = QObject::connect(&registry, &ViewModelRegistry::descriptorsChanged,
+        [&descriptorSpyEvents]() { descriptorSpyEvents.append(QVariantList{}); });
+    const auto descriptorSpyDisconnect = qScopeGuard([&] { QObject::disconnect(descriptorSpyConnection); });
+    CTEST_CHECK(bool(descriptorSpyConnection));
 
-    QVERIFY(registry.registerViewModel(registered));
+    CTEST_CHECK(registry.registerViewModel(registered));
     QVariantMap descriptor = registry.descriptor(QStringLiteral("PanelState"));
-    QCOMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
-    QCOMPARE(descriptor.value(QStringLiteral("stateModel")).toBool(), true);
-    QCOMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("viewModel")).toBool(), true);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("stateModel")).toBool(), true);
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
              QStringLiteral("row-a"));
-    QVERIFY(descriptor.value(QStringLiteral("stateKeys")).toStringList().contains(QStringLiteral("activeKey")));
-    QCOMPARE(descriptor.value(QStringLiteral("empty")).toBool(), false);
+    CTEST_CHECK(descriptor.value(QStringLiteral("stateKeys")).toStringList().contains(QStringLiteral("activeKey")));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("empty")).toBool(), false);
 
-    const int beforeStateChange = descriptorSpy.count();
-    QVERIFY(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-b")));
-    QVERIFY(descriptorSpy.count() > beforeStateChange);
+    const int beforeStateChange = descriptorSpyEvents.size();
+    CTEST_CHECK(registered->setValue(QStringLiteral("activeKey"), QStringLiteral("row-b")));
+    CTEST_CHECK(descriptorSpyEvents.size() > beforeStateChange);
     descriptor = registry.descriptor(QStringLiteral("PanelState"));
-    QCOMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("values")).toMap().value(QStringLiteral("activeKey")).toString(),
              QStringLiteral("row-b"));
 }
 
@@ -958,10 +1007,10 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
             {QStringLiteral("enabled"), false}
         }
     });
-    QCOMPARE(listSource.count(), 2);
-    QCOMPARE(listSource.textValue(listSource.at(0), QStringList {QStringLiteral("label")}, QString()),
+    NAVIGATION_COMPARE(listSource.count(), 2);
+    NAVIGATION_COMPARE(listSource.textValue(listSource.at(0), QStringList {QStringLiteral("label")}, QString()),
              QStringLiteral("Native A"));
-    QCOMPARE(listSource.boolValue(listSource.at(1), QStringLiteral("enabled"), true), false);
+    NAVIGATION_COMPARE(listSource.boolValue(listSource.at(1), QStringLiteral("enabled"), true), false);
 
     HierarchyModel hierarchyModel;
     hierarchyModel.setLabelRole(QStringLiteral("name"));
@@ -982,13 +1031,13 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
             {QStringLiteral("counter"), 7}
         }
     });
-    QCOMPARE(hierarchyModel.count(), 2);
+    NAVIGATION_COMPARE(hierarchyModel.count(), 2);
     const QVariantMap leafDescriptor = hierarchyModel.descriptorAt(1);
-    QCOMPARE(leafDescriptor.value(QStringLiteral("itemKey")).toString(), QStringLiteral("leaf"));
-    QCOMPARE(leafDescriptor.value(QStringLiteral("label")).toString(), QStringLiteral("Leaf"));
-    QCOMPARE(leafDescriptor.value(QStringLiteral("indentLevel")).toInt(), 1);
-    QCOMPARE(leafDescriptor.value(QStringLiteral("count")).toInt(), 7);
-    QCOMPARE(leafDescriptor.value(QStringLiteral("selected")).toBool(), true);
+    NAVIGATION_COMPARE(leafDescriptor.value(QStringLiteral("itemKey")).toString(), QStringLiteral("leaf"));
+    NAVIGATION_COMPARE(leafDescriptor.value(QStringLiteral("label")).toString(), QStringLiteral("Leaf"));
+    NAVIGATION_COMPARE(leafDescriptor.value(QStringLiteral("indentLevel")).toInt(), 1);
+    NAVIGATION_COMPARE(leafDescriptor.value(QStringLiteral("count")).toInt(), 7);
+    NAVIGATION_COMPARE(leafDescriptor.value(QStringLiteral("selected")).toBool(), true);
     const QVariantList hierarchyInteractionRows {
         QVariantMap {
             {QStringLiteral("itemId"), 0},
@@ -1020,40 +1069,40 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
         }
     };
     const QVariantMap interactionState = hierarchyModel.projectInteractionState(hierarchyInteractionRows);
-    QCOMPARE(interactionState.value(QStringLiteral("visibleItemCount")).toInt(), 2);
-    QCOMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("childCount")).toInt(), 1);
-    QCOMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("pathLabel")).toString(),
+    NAVIGATION_COMPARE(interactionState.value(QStringLiteral("visibleItemCount")).toInt(), 2);
+    NAVIGATION_COMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("childCount")).toInt(), 1);
+    NAVIGATION_COMPARE(interactionState.value(QStringLiteral("metadata")).toList().at(0).toMap().value(QStringLiteral("pathLabel")).toString(),
              QStringLiteral("Root"));
     const QVariantMap childMetadata = interactionState.value(QStringLiteral("metadata")).toList().at(1).toMap();
-    QCOMPARE(childMetadata.value(QStringLiteral("ancestorItemKeys")).toList().at(0).toString(), QStringLiteral("root"));
-    QCOMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(0).toString(), QStringLiteral("Root"));
-    QCOMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(1).toString(), QStringLiteral("Child"));
-    QCOMPARE(hierarchyModel.descendantRangeEnd(hierarchyInteractionRows, 0), 2);
+    NAVIGATION_COMPARE(childMetadata.value(QStringLiteral("ancestorItemKeys")).toList().at(0).toString(), QStringLiteral("root"));
+    NAVIGATION_COMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(0).toString(), QStringLiteral("Root"));
+    NAVIGATION_COMPARE(childMetadata.value(QStringLiteral("pathItemLabels")).toList().at(1).toString(), QStringLiteral("Child"));
+    NAVIGATION_COMPARE(hierarchyModel.descendantRangeEnd(hierarchyInteractionRows, 0), 2);
     const QVariantMap dragTarget = hierarchyModel.resolveDragTarget(hierarchyInteractionRows, 1, 2, 3, 8, 8, 8);
-    QVERIFY(!dragTarget.isEmpty());
-    QVERIFY(dragTarget.value(QStringLiteral("depth")).toInt() >= 0);
+    CTEST_CHECK(!dragTarget.isEmpty());
+    CTEST_CHECK(dragTarget.value(QStringLiteral("depth")).toInt() >= 0);
     const QVariantMap moveResult = hierarchyModel.moveDescriptors(hierarchyInteractionRows, 1, 2, 0, 0);
-    QVERIFY(moveResult.value(QStringLiteral("accepted")).toBool());
-    QCOMPARE(moveResult.value(QStringLiteral("reorderedDescriptors")).toList().size(), 3);
+    CTEST_CHECK(moveResult.value(QStringLiteral("accepted")).toBool());
+    NAVIGATION_COMPARE(moveResult.value(QStringLiteral("reorderedDescriptors")).toList().size(), 3);
 
     EditableHierarchyRows editableRows;
     HierarchyModel editableHierarchyModel;
     editableHierarchyModel.setLabelRole(QStringLiteral("name"));
     editableHierarchyModel.setSource(QVariant::fromValue(static_cast<QObject *>(&editableRows)));
-    QCOMPARE(editableHierarchyModel.count(), 4);
-    QVERIFY(editableHierarchyModel.sourceSupportsEditing());
+    NAVIGATION_COMPARE(editableHierarchyModel.count(), 4);
+    CTEST_CHECK(editableHierarchyModel.sourceSupportsEditing());
     const QVariantMap sourceMoveResult = editableHierarchyModel.moveSourceRows(1, 2, 0, 0);
-    QVERIFY(sourceMoveResult.value(QStringLiteral("accepted")).toBool());
-    QVERIFY(sourceMoveResult.value(QStringLiteral("sourceWritten")).toBool());
-    QCOMPARE(editableRows.keyAt(0), QStringLiteral("branch"));
-    QCOMPARE(editableRows.depthAt(0), 0);
-    QCOMPARE(editableRows.parentKeyAt(0), QString());
-    QCOMPARE(editableRows.keyAt(1), QStringLiteral("leaf"));
-    QCOMPARE(editableRows.depthAt(1), 1);
-    QCOMPARE(editableRows.parentKeyAt(1), QStringLiteral("branch"));
-    QCOMPARE(editableRows.keyAt(2), QStringLiteral("root"));
-    QCOMPARE(editableHierarchyModel.descriptorAt(0).value(QStringLiteral("itemKey")).toString(), QStringLiteral("branch"));
-    QCOMPARE(editableHierarchyModel.descriptorAt(1).value(QStringLiteral("indentLevel")).toInt(), 1);
+    CTEST_CHECK(sourceMoveResult.value(QStringLiteral("accepted")).toBool());
+    CTEST_CHECK(sourceMoveResult.value(QStringLiteral("sourceWritten")).toBool());
+    NAVIGATION_COMPARE(editableRows.keyAt(0), QStringLiteral("branch"));
+    NAVIGATION_COMPARE(editableRows.depthAt(0), 0);
+    NAVIGATION_COMPARE(editableRows.parentKeyAt(0), QString());
+    NAVIGATION_COMPARE(editableRows.keyAt(1), QStringLiteral("leaf"));
+    NAVIGATION_COMPARE(editableRows.depthAt(1), 1);
+    NAVIGATION_COMPARE(editableRows.parentKeyAt(1), QStringLiteral("branch"));
+    NAVIGATION_COMPARE(editableRows.keyAt(2), QStringLiteral("root"));
+    NAVIGATION_COMPARE(editableHierarchyModel.descriptorAt(0).value(QStringLiteral("itemKey")).toString(), QStringLiteral("branch"));
+    NAVIGATION_COMPARE(editableHierarchyModel.descriptorAt(1).value(QStringLiteral("indentLevel")).toInt(), 1);
 
     TableHeaderModel headerModel;
     headerModel.setTableWidth(300);
@@ -1064,16 +1113,16 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
         QVariantMap {{QStringLiteral("label"), QStringLiteral("Ratio")}, {QStringLiteral("cellType"), QStringLiteral("float")}}
     });
     headerModel.setColumnWidths(QVariantList {80, 100, 120});
-    QCOMPARE(headerModel.columnCount(), 3);
-    QCOMPARE(headerModel.columnType(1), QStringLiteral("int"));
-    QCOMPARE(headerModel.columnX(2), 180);
-    QCOMPARE(headerModel.descriptorAt(2).value(QStringLiteral("width")).toInt(), 120);
+    NAVIGATION_COMPARE(headerModel.columnCount(), 3);
+    NAVIGATION_COMPARE(headerModel.columnType(1), QStringLiteral("int"));
+    NAVIGATION_COMPARE(headerModel.columnX(2), 180);
+    NAVIGATION_COMPARE(headerModel.descriptorAt(2).value(QStringLiteral("width")).toInt(), 120);
     TableHeaderModel emptyHeaderModel;
     emptyHeaderModel.setTableWidth(120);
     emptyHeaderModel.setCellItems(QVariantList {});
-    QCOMPARE(emptyHeaderModel.columnCount(), 0);
-    QCOMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("text")).toString(), QStringLiteral("Column"));
-    QCOMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("width")).toInt(), 120);
+    NAVIGATION_COMPARE(emptyHeaderModel.columnCount(), 0);
+    NAVIGATION_COMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("text")).toString(), QStringLiteral("Column"));
+    NAVIGATION_COMPARE(emptyHeaderModel.descriptorAt(0).value(QStringLiteral("width")).toInt(), 120);
 
     StateModel progressState;
     progressState.setValue(QStringLiteral("minimumValue"), 10);
@@ -1082,23 +1131,23 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     progressState.setValue(QStringLiteral("currentValue"), 80);
     ProgressModel progressModel;
     progressModel.setStateModel(&progressState);
-    QCOMPARE(progressModel.effectiveMinimumValue(), 10.0);
-    QCOMPARE(progressModel.effectiveMaximumValue(), 110.0);
-    QVERIFY(qAbs(progressModel.normalizedStart() - 0.2) < 0.001);
-    QVERIFY(qAbs(progressModel.normalizedCurrent() - 0.7) < 0.001);
-    QVERIFY(qAbs(progressModel.fillProgress() - 0.5) < 0.001);
-    QVERIFY(qFuzzyCompare(progressModel.radiusFor(1, 6, 100, 8), 4.0));
+    NAVIGATION_COMPARE(progressModel.effectiveMinimumValue(), 10.0);
+    NAVIGATION_COMPARE(progressModel.effectiveMaximumValue(), 110.0);
+    CTEST_CHECK(qAbs(progressModel.normalizedStart() - 0.2) < 0.001);
+    CTEST_CHECK(qAbs(progressModel.normalizedCurrent() - 0.7) < 0.001);
+    CTEST_CHECK(qAbs(progressModel.fillProgress() - 0.5) < 0.001);
+    CTEST_CHECK(qFuzzyCompare(progressModel.radiusFor(1, 6, 100, 8), 4.0));
 
     NavigationStackModel navigationStack;
     navigationStack.applyPathOperation(QStringLiteral("/"), QVariantMap(), QStringLiteral("set"));
     navigationStack.applyPathOperation(QStringLiteral("reports"), QVariantMap {{QStringLiteral("page"), 2}}, QStringLiteral("push"));
-    QCOMPARE(navigationStack.depth(), 2);
-    QCOMPARE(navigationStack.currentPath(), QStringLiteral("/reports"));
-    QCOMPARE(navigationStack.currentParams().toMap().value(QStringLiteral("page")).toInt(), 2);
-    QCOMPARE(navigationStack.viewTrackingEntries().size(), 2);
+    NAVIGATION_COMPARE(navigationStack.depth(), 2);
+    NAVIGATION_COMPARE(navigationStack.currentPath(), QStringLiteral("/reports"));
+    NAVIGATION_COMPARE(navigationStack.currentParams().toMap().value(QStringLiteral("page")).toInt(), 2);
+    NAVIGATION_COMPARE(navigationStack.viewTrackingEntries().size(), 2);
     navigationStack.pop();
-    QCOMPARE(navigationStack.depth(), 1);
-    QCOMPARE(navigationStack.currentPath(), QStringLiteral("/"));
+    NAVIGATION_COMPARE(navigationStack.depth(), 1);
+    NAVIGATION_COMPARE(navigationStack.currentPath(), QStringLiteral("/"));
 
     VariantListObject readOnlyRows(QVariantList {
         QVariant(QVariantList {
@@ -1106,13 +1155,13 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
             QVariantMap {{QStringLiteral("text"), QStringLiteral("Second")}}
         })
     });
-    QCOMPARE(readOnlyRows.count(), 1);
+    NAVIGATION_COMPARE(readOnlyRows.count(), 1);
     TableModel readOnlyTableModel;
     readOnlyTableModel.setRows(QVariant::fromValue(static_cast<QObject *>(&readOnlyRows)));
-    QCOMPARE(readOnlyTableModel.rowCount(), 1);
-    QCOMPARE(readOnlyTableModel.cellText(0, 0), QStringLiteral("Model Cell"));
-    QVERIFY(!readOnlyTableModel.structureMutationAvailable());
-    QVERIFY(!readOnlyTableModel.insertRow(1));
+    NAVIGATION_COMPARE(readOnlyTableModel.rowCount(), 1);
+    NAVIGATION_COMPARE(readOnlyTableModel.cellText(0, 0), QStringLiteral("Model Cell"));
+    CTEST_CHECK(!readOnlyTableModel.structureMutationAvailable());
+    CTEST_CHECK(!readOnlyTableModel.insertRow(1));
 
     EditableTableRows editableTableRows;
     TableModel editableTableModel;
@@ -1121,21 +1170,21 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
         QVariantMap {{QStringLiteral("label"), QStringLiteral("Count")}, {QStringLiteral("type"), QStringLiteral("int")}}
     });
     editableTableModel.setRows(QVariant::fromValue(static_cast<QObject *>(&editableTableRows)));
-    QCOMPARE(editableTableModel.rowCount(), 2);
-    QCOMPARE(editableTableModel.columnCount(), 2);
-    QVERIFY(editableTableModel.rowsModelBacked());
-    QVERIFY(editableTableModel.cellEditingAvailable());
-    QCOMPARE(editableTableModel.cellText(0, 0), QStringLiteral("Renderer"));
-    QCOMPARE(editableTableModel.cellText(0, 1), QStringLiteral("3"));
-    QVERIFY(editableTableModel.setCellValue(0, 1, QStringLiteral("42")));
-    QCOMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
-    QCOMPARE(editableTableModel.cellText(0, 1), QStringLiteral("42"));
-    QVERIFY(!editableTableModel.setCellValue(0, 1, QStringLiteral("42.5")));
-    QCOMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
-    QVERIFY(editableTableModel.setCellValue(1, 0, QStringLiteral("Compiler")));
-    QCOMPARE(editableTableRows.valueAt(1, 0).toString(), QStringLiteral("Compiler"));
-    QVERIFY(!editableTableModel.structureMutationAvailable());
-    QVERIFY(!editableTableModel.appendColumn());
+    NAVIGATION_COMPARE(editableTableModel.rowCount(), 2);
+    NAVIGATION_COMPARE(editableTableModel.columnCount(), 2);
+    CTEST_CHECK(editableTableModel.rowsModelBacked());
+    CTEST_CHECK(editableTableModel.cellEditingAvailable());
+    NAVIGATION_COMPARE(editableTableModel.cellText(0, 0), QStringLiteral("Renderer"));
+    NAVIGATION_COMPARE(editableTableModel.cellText(0, 1), QStringLiteral("3"));
+    CTEST_CHECK(editableTableModel.setCellValue(0, 1, QStringLiteral("42")));
+    NAVIGATION_COMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
+    NAVIGATION_COMPARE(editableTableModel.cellText(0, 1), QStringLiteral("42"));
+    CTEST_CHECK(!editableTableModel.setCellValue(0, 1, QStringLiteral("42.5")));
+    NAVIGATION_COMPARE(editableTableRows.valueAt(0, 1).toInt(), 42);
+    CTEST_CHECK(editableTableModel.setCellValue(1, 0, QStringLiteral("Compiler")));
+    NAVIGATION_COMPARE(editableTableRows.valueAt(1, 0).toString(), QStringLiteral("Compiler"));
+    CTEST_CHECK(!editableTableModel.structureMutationAvailable());
+    CTEST_CHECK(!editableTableModel.appendColumn());
 
     TableModel layoutTableModel;
     layoutTableModel.setTableWidth(300);
@@ -1160,65 +1209,65 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
     });
     layoutTableModel.setColumnWidths(QVariantList {80, 100, 120});
     layoutTableModel.setRowHeights(QVariantList {24, 30});
-    QCOMPARE(layoutTableModel.columnWidth(0), 80);
-    QCOMPARE(layoutTableModel.columnX(2), 180);
-    QCOMPARE(layoutTableModel.columnSpanWidth(1, 2), 220);
-    QCOMPARE(layoutTableModel.rowHeightAt(1), 30);
-    QCOMPARE(layoutTableModel.rowY(1), 24);
-    QCOMPARE(layoutTableModel.totalBodyHeight(), 54);
+    NAVIGATION_COMPARE(layoutTableModel.columnWidth(0), 80);
+    NAVIGATION_COMPARE(layoutTableModel.columnX(2), 180);
+    NAVIGATION_COMPARE(layoutTableModel.columnSpanWidth(1, 2), 220);
+    NAVIGATION_COMPARE(layoutTableModel.rowHeightAt(1), 30);
+    NAVIGATION_COMPARE(layoutTableModel.rowY(1), 24);
+    NAVIGATION_COMPARE(layoutTableModel.totalBodyHeight(), 54);
     const QVariantMap layoutCell = layoutTableModel.visibleCells().at(1).toMap();
-    QCOMPARE(layoutCell.value(QStringLiteral("x")).toInt(), 80);
-    QCOMPARE(layoutCell.value(QStringLiteral("width")).toInt(), 100);
-    QCOMPARE(layoutCell.value(QStringLiteral("height")).toInt(), 24);
-    QVERIFY(layoutTableModel.setColumnWidth(2, 1));
-    QCOMPARE(layoutTableModel.columnWidth(2), 40);
-    QVERIFY(layoutTableModel.undo());
-    QCOMPARE(layoutTableModel.columnWidth(2), 120);
-    QVERIFY(layoutTableModel.beginColumnResize(1, 100));
-    QVERIFY(layoutTableModel.updateColumnResize(135));
-    QCOMPARE(layoutTableModel.resizingColumnIndex(), 1);
-    QCOMPARE(layoutTableModel.columnWidth(1), 135);
+    NAVIGATION_COMPARE(layoutCell.value(QStringLiteral("x")).toInt(), 80);
+    NAVIGATION_COMPARE(layoutCell.value(QStringLiteral("width")).toInt(), 100);
+    NAVIGATION_COMPARE(layoutCell.value(QStringLiteral("height")).toInt(), 24);
+    CTEST_CHECK(layoutTableModel.setColumnWidth(2, 1));
+    NAVIGATION_COMPARE(layoutTableModel.columnWidth(2), 40);
+    CTEST_CHECK(layoutTableModel.undo());
+    NAVIGATION_COMPARE(layoutTableModel.columnWidth(2), 120);
+    CTEST_CHECK(layoutTableModel.beginColumnResize(1, 100));
+    CTEST_CHECK(layoutTableModel.updateColumnResize(135));
+    NAVIGATION_COMPARE(layoutTableModel.resizingColumnIndex(), 1);
+    NAVIGATION_COMPARE(layoutTableModel.columnWidth(1), 135);
     layoutTableModel.endColumnResize();
-    QCOMPARE(layoutTableModel.resizingColumnIndex(), -1);
-    QVERIFY(layoutTableModel.undo());
-    QCOMPARE(layoutTableModel.columnWidth(1), 100);
-    QVERIFY(layoutTableModel.beginRowResize(0, 20));
-    QVERIFY(layoutTableModel.updateRowResize(32));
-    QCOMPARE(layoutTableModel.resizingRowIndex(), 0);
-    QCOMPARE(layoutTableModel.rowHeightAt(0), 36);
+    NAVIGATION_COMPARE(layoutTableModel.resizingColumnIndex(), -1);
+    CTEST_CHECK(layoutTableModel.undo());
+    NAVIGATION_COMPARE(layoutTableModel.columnWidth(1), 100);
+    CTEST_CHECK(layoutTableModel.beginRowResize(0, 20));
+    CTEST_CHECK(layoutTableModel.updateRowResize(32));
+    NAVIGATION_COMPARE(layoutTableModel.resizingRowIndex(), 0);
+    NAVIGATION_COMPARE(layoutTableModel.rowHeightAt(0), 36);
     layoutTableModel.endRowResize();
-    QCOMPARE(layoutTableModel.resizingRowIndex(), -1);
-    QVERIFY(layoutTableModel.undo());
-    QCOMPARE(layoutTableModel.rowHeightAt(0), 24);
-    QVERIFY(layoutTableModel.setContextCell(0, 1));
-    QCOMPARE(layoutTableModel.contextRowIndex(), 0);
-    QCOMPARE(layoutTableModel.contextColumnIndex(), 1);
+    NAVIGATION_COMPARE(layoutTableModel.resizingRowIndex(), -1);
+    CTEST_CHECK(layoutTableModel.undo());
+    NAVIGATION_COMPARE(layoutTableModel.rowHeightAt(0), 24);
+    CTEST_CHECK(layoutTableModel.setContextCell(0, 1));
+    NAVIGATION_COMPARE(layoutTableModel.contextRowIndex(), 0);
+    NAVIGATION_COMPARE(layoutTableModel.contextColumnIndex(), 1);
     const QVariantList contextDescriptors = layoutTableModel.contextMenuDescriptors(0, 1);
-    QCOMPARE(contextDescriptors.size(), 3);
-    QCOMPARE(contextDescriptors.at(0).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteRow"));
-    QCOMPARE(contextDescriptors.at(2).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteColumn"));
+    NAVIGATION_COMPARE(contextDescriptors.size(), 3);
+    NAVIGATION_COMPARE(contextDescriptors.at(0).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteRow"));
+    NAVIGATION_COMPARE(contextDescriptors.at(2).toMap().value(QStringLiteral("action")).toString(), QStringLiteral("deleteColumn"));
     const QVariantMap contextResult = layoutTableModel.triggerContextAction(QStringLiteral("deleteColumn"), 0, 1);
-    QVERIFY(contextResult.value(QStringLiteral("accepted")).toBool());
-    QCOMPARE(layoutTableModel.columnCount(), 2);
-    QCOMPARE(layoutTableModel.columnWidths().toList().size(), 2);
-    QCOMPARE(layoutTableModel.contextColumnIndex(), -1);
-    QVERIFY(layoutTableModel.undo());
-    QCOMPARE(layoutTableModel.columnCount(), 3);
+    CTEST_CHECK(contextResult.value(QStringLiteral("accepted")).toBool());
+    NAVIGATION_COMPARE(layoutTableModel.columnCount(), 2);
+    NAVIGATION_COMPARE(layoutTableModel.columnWidths().toList().size(), 2);
+    NAVIGATION_COMPARE(layoutTableModel.contextColumnIndex(), -1);
+    CTEST_CHECK(layoutTableModel.undo());
+    NAVIGATION_COMPARE(layoutTableModel.columnCount(), 3);
 
     ModelUndoStack stack;
     stack.pushSnapshot(QVariantMap {{QStringLiteral("value"), 1}});
     stack.pushSnapshot(QVariantMap {{QStringLiteral("value"), 2}});
-    QCOMPARE(stack.undoDepth(), 2);
-    QVERIFY(stack.canUndo());
+    NAVIGATION_COMPARE(stack.undoDepth(), 2);
+    CTEST_CHECK(stack.canUndo());
     const QVariant firstUndo = stack.takeUndoSnapshot(QVariantMap {{QStringLiteral("value"), 3}});
-    QCOMPARE(firstUndo.toMap().value(QStringLiteral("value")).toInt(), 2);
-    QCOMPARE(stack.undoDepth(), 1);
-    QCOMPARE(stack.redoDepth(), 1);
-    QVERIFY(stack.canRedo());
+    NAVIGATION_COMPARE(firstUndo.toMap().value(QStringLiteral("value")).toInt(), 2);
+    NAVIGATION_COMPARE(stack.undoDepth(), 1);
+    NAVIGATION_COMPARE(stack.redoDepth(), 1);
+    CTEST_CHECK(stack.canRedo());
     const QVariant firstRedo = stack.takeRedoSnapshot(firstUndo);
-    QCOMPARE(firstRedo.toMap().value(QStringLiteral("value")).toInt(), 3);
-    QCOMPARE(stack.undoDepth(), 2);
-    QCOMPARE(stack.redoDepth(), 0);
+    NAVIGATION_COMPARE(firstRedo.toMap().value(QStringLiteral("value")).toInt(), 3);
+    NAVIGATION_COMPARE(stack.undoDepth(), 2);
+    NAVIGATION_COMPARE(stack.redoDepth(), 0);
 
     TableModel tableModel;
     tableModel.setInputable(true);
@@ -1243,54 +1292,54 @@ void NavigationStateTests::cpp_model_sources_own_list_hierarchy_and_table_contra
         }
     });
 
-    QCOMPARE(tableModel.rowCount(), 2);
-    QCOMPARE(tableModel.columnCount(), 4);
-    QCOMPARE(tableModel.headerCellType(0), QStringLiteral("string"));
-    QCOMPARE(tableModel.headerCellType(1), QStringLiteral("int"));
-    QCOMPARE(tableModel.headerCellType(2), QStringLiteral("float"));
-    QCOMPARE(tableModel.headerCellType(3), QStringLiteral("bool"));
-    QCOMPARE(tableModel.cellText(0, 0), QStringLiteral("Renderer"));
-    QVERIFY(tableModel.setCellValue(0, 1, QStringLiteral("42")));
-    QVERIFY(!tableModel.setCellValue(0, 1, QStringLiteral("42.5")));
-    QVERIFY(tableModel.setCellValue(0, 3, QStringLiteral("false")));
-    QCOMPARE(tableModel.cellAt(0, 1).toMap().value(QStringLiteral("value")).toInt(), 42);
-    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
-    QVERIFY(tableModel.canUndo());
-    QVERIFY(tableModel.undoDepth() >= 2);
-    QVERIFY(tableModel.undo());
-    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), true);
-    QVERIFY(tableModel.canRedo());
-    QVERIFY(tableModel.redo());
-    QCOMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
-    QVERIFY(!tableModel.canRedo());
+    NAVIGATION_COMPARE(tableModel.rowCount(), 2);
+    NAVIGATION_COMPARE(tableModel.columnCount(), 4);
+    NAVIGATION_COMPARE(tableModel.headerCellType(0), QStringLiteral("string"));
+    NAVIGATION_COMPARE(tableModel.headerCellType(1), QStringLiteral("int"));
+    NAVIGATION_COMPARE(tableModel.headerCellType(2), QStringLiteral("float"));
+    NAVIGATION_COMPARE(tableModel.headerCellType(3), QStringLiteral("bool"));
+    NAVIGATION_COMPARE(tableModel.cellText(0, 0), QStringLiteral("Renderer"));
+    CTEST_CHECK(tableModel.setCellValue(0, 1, QStringLiteral("42")));
+    CTEST_CHECK(!tableModel.setCellValue(0, 1, QStringLiteral("42.5")));
+    CTEST_CHECK(tableModel.setCellValue(0, 3, QStringLiteral("false")));
+    NAVIGATION_COMPARE(tableModel.cellAt(0, 1).toMap().value(QStringLiteral("value")).toInt(), 42);
+    NAVIGATION_COMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    CTEST_CHECK(tableModel.canUndo());
+    CTEST_CHECK(tableModel.undoDepth() >= 2);
+    CTEST_CHECK(tableModel.undo());
+    NAVIGATION_COMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), true);
+    CTEST_CHECK(tableModel.canRedo());
+    CTEST_CHECK(tableModel.redo());
+    NAVIGATION_COMPARE(tableModel.cellAt(0, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    CTEST_CHECK(!tableModel.canRedo());
 
-    QCOMPARE(tableModel.visibleCells().size(), 8);
-    QVERIFY(tableModel.mergeCells(0, 0, 1, 2));
-    QVERIFY(tableModel.isCoveredCell(0, 1));
-    QCOMPARE(tableModel.visibleCells().size(), 7);
-    QVERIFY(tableModel.splitCell(0, 1));
-    QVERIFY(!tableModel.isCoveredCell(0, 1));
-    QCOMPARE(tableModel.visibleCells().size(), 8);
+    NAVIGATION_COMPARE(tableModel.visibleCells().size(), 8);
+    CTEST_CHECK(tableModel.mergeCells(0, 0, 1, 2));
+    CTEST_CHECK(tableModel.isCoveredCell(0, 1));
+    NAVIGATION_COMPARE(tableModel.visibleCells().size(), 7);
+    CTEST_CHECK(tableModel.splitCell(0, 1));
+    CTEST_CHECK(!tableModel.isCoveredCell(0, 1));
+    NAVIGATION_COMPARE(tableModel.visibleCells().size(), 8);
 
-    QVERIFY(tableModel.insertRow(1));
-    QCOMPARE(tableModel.rowCount(), 3);
-    QCOMPARE(tableModel.cellAt(1, 1).toMap().value(QStringLiteral("value")).toInt(), 0);
-    QCOMPARE(tableModel.cellAt(1, 3).toMap().value(QStringLiteral("value")).toBool(), false);
-    QVERIFY(tableModel.insertColumn(2));
-    QCOMPARE(tableModel.columnCount(), 5);
-    QVERIFY(tableModel.deleteColumn(2));
-    QCOMPARE(tableModel.columnCount(), 4);
-    QVERIFY(tableModel.deleteRow(1));
-    QCOMPARE(tableModel.rowCount(), 2);
-    QVERIFY(tableModel.undo());
-    QCOMPARE(tableModel.rowCount(), 3);
-    QVERIFY(tableModel.redo());
-    QCOMPARE(tableModel.rowCount(), 2);
+    CTEST_CHECK(tableModel.insertRow(1));
+    NAVIGATION_COMPARE(tableModel.rowCount(), 3);
+    NAVIGATION_COMPARE(tableModel.cellAt(1, 1).toMap().value(QStringLiteral("value")).toInt(), 0);
+    NAVIGATION_COMPARE(tableModel.cellAt(1, 3).toMap().value(QStringLiteral("value")).toBool(), false);
+    CTEST_CHECK(tableModel.insertColumn(2));
+    NAVIGATION_COMPARE(tableModel.columnCount(), 5);
+    CTEST_CHECK(tableModel.deleteColumn(2));
+    NAVIGATION_COMPARE(tableModel.columnCount(), 4);
+    CTEST_CHECK(tableModel.deleteRow(1));
+    NAVIGATION_COMPARE(tableModel.rowCount(), 2);
+    CTEST_CHECK(tableModel.undo());
+    NAVIGATION_COMPARE(tableModel.rowCount(), 3);
+    CTEST_CHECK(tableModel.redo());
+    NAVIGATION_COMPARE(tableModel.rowCount(), 2);
 
     tableModel.setRows(QVariantList {QVariantList {QStringLiteral("External")}});
-    QVERIFY(!tableModel.canUndo());
-    QVERIFY(!tableModel.canRedo());
-    QCOMPARE(tableModel.rowCount(), 1);
+    CTEST_CHECK(!tableModel.canUndo());
+    CTEST_CHECK(!tableModel.canRedo());
+    NAVIGATION_COMPARE(tableModel.rowCount(), 1);
 }
 
 void NavigationStateTests::qml_context_bind_plan_exposes_context_objects_and_viewmodels()
@@ -1319,26 +1368,26 @@ void NavigationStateTests::qml_context_bind_plan_exposes_context_objects_and_vie
     plan.viewModels.append(viewModelBinding);
 
     const lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);
-    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
-    QCOMPARE(result.contextNames,
+    CTEST_CHECK_MESSAGE(result.ok, qPrintable(result.errorMessage()));
+    NAVIGATION_COMPARE(result.contextNames,
              (QStringList {QStringLiteral("statusService"), QStringLiteral("statusViewModel")}));
-    QCOMPARE(result.viewModelKeys, (QStringList {QStringLiteral("StatusVM")}));
+    NAVIGATION_COMPARE(result.viewModelKeys, (QStringList {QStringLiteral("StatusVM")}));
 
-    QCOMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusService"))),
+    NAVIGATION_COMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusService"))),
              &service);
-    QCOMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusViewModel"))),
+    NAVIGATION_COMPARE(qvariant_cast<QObject *>(engine.rootContext()->contextProperty(QStringLiteral("statusViewModel"))),
              viewModel);
 
     auto *registry = engine.singletonInstance<ViewModelRegistry *>(QStringLiteral("LVRS"),
                                                                    QStringLiteral("ViewModels"));
-    QVERIFY(registry);
-    QCOMPARE(registry->get(QStringLiteral("StatusVM")), viewModel);
-    QCOMPARE(registry->ownerOf(QStringLiteral("StatusVM")), QStringLiteral("StatusView"));
-    QVERIFY(registry->canWrite(QStringLiteral("StatusView"), QStringLiteral("StatusVM")));
+    CTEST_CHECK(registry);
+    NAVIGATION_COMPARE(registry->get(QStringLiteral("StatusVM")), viewModel);
+    NAVIGATION_COMPARE(registry->ownerOf(QStringLiteral("StatusVM")), QStringLiteral("StatusView"));
+    CTEST_CHECK(registry->canWrite(QStringLiteral("StatusView"), QStringLiteral("StatusVM")));
 
     const QVariantMap descriptor = registry->descriptor(QStringLiteral("StatusVM"));
-    QCOMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
-    QCOMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("displayName")).toString(), QStringLiteral("Status"));
+    NAVIGATION_COMPARE(descriptor.value(QStringLiteral("metadata")).toMap().value(QStringLiteral("domain")).toString(),
              QStringLiteral("navigation-test"));
 }
 
@@ -1360,12 +1409,35 @@ void NavigationStateTests::qml_context_bind_plan_reports_missing_required_object
     plan.viewModels.append(missingViewModel);
 
     const lvrs::QmlContextBindResult result = lvrs::applyQmlContextBindPlan(engine, plan);
-    QVERIFY(!result.ok);
-    QVERIFY(result.errorMessage().contains(QStringLiteral("missingContext")));
-    QVERIFY(result.errorMessage().contains(QStringLiteral("MissingVM")));
-    QVERIFY(result.contextNames.isEmpty());
-    QVERIFY(result.viewModelKeys.isEmpty());
+    CTEST_CHECK(!result.ok);
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("missingContext")));
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("MissingVM")));
+    CTEST_CHECK(result.contextNames.isEmpty());
+    CTEST_CHECK(result.viewModelKeys.isEmpty());
 }
 
-QTEST_MAIN(NavigationStateTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    NavigationStateTests tests;
+    runner.run("page_monitor_history_metrics", [&] { tests.page_monitor_history_metrics(); });
+    runner.run("page_monitor_signal_contract_and_normalization", [&] { tests.page_monitor_signal_contract_and_normalization(); });
+    runner.run("view_state_tracker_syncs_stack_and_status", [&] { tests.view_state_tracker_syncs_stack_and_status(); });
+    runner.run("view_state_tracker_disable_override_changes_active_target", [&] { tests.view_state_tracker_disable_override_changes_active_target(); });
+    runner.run("route_matcher_normalization_and_param_contract", [&] { tests.route_matcher_normalization_and_param_contract(); });
+    runner.run("viewmodels_registry_binding_ownership_and_write_permissions", [&] { tests.viewmodels_registry_binding_ownership_and_write_permissions(); });
+    runner.run("viewmodels_registry_rebinding_clears_stale_ownership", [&] { tests.viewmodels_registry_rebinding_clears_stale_ownership(); });
+    runner.run("viewmodels_registry_tracks_keys_and_ownership", [&] { tests.viewmodels_registry_tracks_keys_and_ownership(); });
+    runner.run("viewmodels_registry_signal_and_prune_contract", [&] { tests.viewmodels_registry_signal_and_prune_contract(); });
+    runner.run("viewmodel_base_and_registry_descriptors_track_cpp_state", [&] { tests.viewmodel_base_and_registry_descriptors_track_cpp_state(); });
+    runner.run("state_model_stores_state_and_registry_descriptors_track_values", [&] { tests.state_model_stores_state_and_registry_descriptors_track_values(); });
+    runner.run("cpp_model_sources_own_list_hierarchy_and_table_contracts", [&] { tests.cpp_model_sources_own_list_hierarchy_and_table_contracts(); });
+    runner.run("table_projection_matches_public_cell_queries", [&] { tests.table_projection_matches_public_cell_queries(); });
+    runner.run("table_viewport_projection_preserves_merged_anchors_and_bounds", [&] { tests.table_viewport_projection_preserves_merged_anchors_and_bounds(); });
+    runner.run("table_column_count_tracks_headers_structure_and_undo", [&] { tests.table_column_count_tracks_headers_structure_and_undo(); });
+    runner.run("qml_context_bind_plan_exposes_context_objects_and_viewmodels", [&] { tests.qml_context_bind_plan_exposes_context_objects_and_viewmodels(); });
+    runner.run("qml_context_bind_plan_reports_missing_required_objects", [&] { tests.qml_context_bind_plan_reports_missing_required_objects(); });
+    return runner.result();
+}
 #include "tst_navigation_state.moc"

@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QtPlugin>
 
@@ -10,9 +11,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class AppStateTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void defaults_and_progress_clamping();
     void route_tracking_updates_models();
     void snapshot_sync_bridges_backend_state();
@@ -24,22 +23,22 @@ void AppStateTests::defaults_and_progress_clamping()
 {
     AppState state;
 
-    QCOMPARE(state.currentRoute(), QStringLiteral("/overview"));
-    QCOMPARE(state.progressStart(), 0.0);
-    QCOMPARE(state.progressEnd(), 100.0);
-    QCOMPARE(state.progressCurrent(), 46.0);
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("/overview"));
+    CTEST_COMPARE(state.progressStart(), 0.0);
+    CTEST_COMPARE(state.progressEnd(), 100.0);
+    CTEST_COMPARE(state.progressCurrent(), 46.0);
 
     state.setProgressCurrent(140.0);
-    QCOMPARE(state.progressCurrent(), 100.0);
+    CTEST_COMPARE(state.progressCurrent(), 100.0);
 
     state.setProgressStart(40.0);
-    QCOMPARE(state.progressCurrent(), 100.0);
+    CTEST_COMPARE(state.progressCurrent(), 100.0);
 
     state.setProgressEnd(80.0);
-    QCOMPARE(state.progressCurrent(), 80.0);
+    CTEST_COMPARE(state.progressCurrent(), 80.0);
 
     state.nudgeProgress(-1000.0);
-    QCOMPARE(state.progressCurrent(), 40.0);
+    CTEST_COMPARE(state.progressCurrent(), 40.0);
 }
 
 void AppStateTests::route_tracking_updates_models()
@@ -47,24 +46,24 @@ void AppStateTests::route_tracking_updates_models()
     AppState state;
     state.bootstrap();
 
-    QVERIFY(!state.navItems().isEmpty());
-    QVERIFY(!state.scaffoldNavModel().isEmpty());
-    QVERIFY(!state.demoListItems().isEmpty());
+    CTEST_CHECK(!state.navItems().isEmpty());
+    CTEST_CHECK(!state.scaffoldNavModel().isEmpty());
+    CTEST_CHECK(!state.demoListItems().isEmpty());
 
     state.recordNavigation(QStringLiteral("/reports"));
-    QCOMPARE(state.currentRoute(), QStringLiteral("/reports"));
-    QCOMPARE(state.scaffoldNavIndex(), -1);
-    QCOMPARE(state.pageHistory().size(), 1);
-    QCOMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("/reports"));
+    CTEST_COMPARE(state.scaffoldNavIndex(), -1);
+    CTEST_COMPARE(state.pageHistory().size(), 1);
+    CTEST_COMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
 
     const QVariantList listItems = state.demoListItems();
-    QVERIFY(listItems.size() >= 2);
-    QCOMPARE(listItems.at(0).toMap().value(QStringLiteral("selected")).toBool(), false);
-    QCOMPARE(listItems.at(1).toMap().value(QStringLiteral("selected")).toBool(), true);
+    CTEST_CHECK(listItems.size() >= 2);
+    CTEST_COMPARE(listItems.at(0).toMap().value(QStringLiteral("selected")).toBool(), false);
+    CTEST_COMPARE(listItems.at(1).toMap().value(QStringLiteral("selected")).toBool(), true);
 
     state.recordNavigation(QStringLiteral("/reports"));
-    QCOMPARE(state.pageHistory().size(), 2);
-    QCOMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
+    CTEST_COMPARE(state.pageHistory().size(), 2);
+    CTEST_COMPARE(state.pageHistory().last(), QStringLiteral("/reports"));
 
     QString reportsBadge;
     const QVariantList navItems = state.navItems();
@@ -75,7 +74,7 @@ void AppStateTests::route_tracking_updates_models()
             break;
         }
     }
-    QCOMPARE(reportsBadge, QStringLiteral("2"));
+    CTEST_COMPARE(reportsBadge, QStringLiteral("2"));
 }
 
 void AppStateTests::snapshot_sync_bridges_backend_state()
@@ -87,14 +86,14 @@ void AppStateTests::snapshot_sync_bridges_backend_state()
         {QStringLiteral("uptimeMs"), 64000}
     };
     state.syncRuntimeSnapshot(runtime);
-    QCOMPARE(state.runtimeSnapshot(), runtime);
+    CTEST_COMPARE(state.runtimeSnapshot(), runtime);
 
     const QVariantMap viewState {
         {QStringLiteral("currentActiveView"), QStringLiteral("/runs")},
         {QStringLiteral("loadedViews"), QStringList {QStringLiteral("/overview"), QStringLiteral("/runs")}}
     };
     state.syncViewStateSnapshot(viewState);
-    QCOMPARE(state.viewStateSnapshot(), viewState);
+    CTEST_COMPARE(state.viewStateSnapshot(), viewState);
 
     state.syncPageHistory(QStringList {
         QStringLiteral("/overview"),
@@ -102,13 +101,13 @@ void AppStateTests::snapshot_sync_bridges_backend_state()
         QStringLiteral("/runs")
     });
 
-    QCOMPARE(state.currentRoute(), QStringLiteral("/runs"));
-    QCOMPARE(state.scaffoldNavIndex(), 1);
-    QCOMPARE(state.pageHistory().size(), 3);
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("/runs"));
+    CTEST_COMPARE(state.scaffoldNavIndex(), 1);
+    CTEST_COMPARE(state.pageHistory().size(), 3);
 
     const QVariantList scaffold = state.scaffoldNavModel();
-    QVERIFY(scaffold.size() >= 2);
-    QCOMPARE(scaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("2"));
+    CTEST_CHECK(scaffold.size() >= 2);
+    CTEST_COMPARE(scaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("2"));
 }
 
 void AppStateTests::resilient_normalization_and_index_clamping()
@@ -116,18 +115,18 @@ void AppStateTests::resilient_normalization_and_index_clamping()
     AppState state;
 
     state.recordNavigation(QStringLiteral(" reports?tab=summary "));
-    QCOMPARE(state.currentRoute(), QStringLiteral("/reports"));
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("/reports"));
 
     state.recordNavigation(QStringLiteral("https://example.com/runs/42?tab=logs#tail"));
-    QCOMPARE(state.currentRoute(), QStringLiteral("/runs/42"));
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("/runs/42"));
 
     state.setCurrentRoute(QStringLiteral("not-found: settings?x=1"));
-    QCOMPARE(state.currentRoute(), QStringLiteral("not-found: /settings"));
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("not-found: /settings"));
 
     state.setScaffoldNavIndex(99);
-    QCOMPARE(state.scaffoldNavIndex(), 3);
+    CTEST_COMPARE(state.scaffoldNavIndex(), 3);
     state.setScaffoldNavIndex(-9);
-    QCOMPARE(state.scaffoldNavIndex(), -1);
+    CTEST_COMPARE(state.scaffoldNavIndex(), -1);
 
     state.syncPageHistory(QStringList {
         QStringLiteral("/overview"),
@@ -135,8 +134,8 @@ void AppStateTests::resilient_normalization_and_index_clamping()
         QStringLiteral("/runs/9")
     });
     const QVariantList scaffold = state.scaffoldNavModel();
-    QVERIFY(scaffold.size() >= 2);
-    QCOMPARE(scaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("2"));
+    CTEST_CHECK(scaffold.size() >= 2);
+    CTEST_COMPARE(scaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("2"));
 }
 
 void AppStateTests::definitions_drive_route_matching()
@@ -155,19 +154,29 @@ void AppStateTests::definitions_drive_route_matching()
     });
 
     const QVariantList scaffoldModel = state.scaffoldNavModel();
-    QCOMPARE(scaffoldModel.size(), 2);
-    QCOMPARE(scaffoldModel.at(1).toMap().value(QStringLiteral("path")).toString(), QStringLiteral("/reports"));
+    CTEST_COMPARE(scaffoldModel.size(), 2);
+    CTEST_COMPARE(scaffoldModel.at(1).toMap().value(QStringLiteral("path")).toString(), QStringLiteral("/reports"));
 
     state.recordNavigation(QStringLiteral("/reports"));
-    QCOMPARE(state.scaffoldNavIndex(), 1);
+    CTEST_COMPARE(state.scaffoldNavIndex(), 1);
 
     state.recordNavigation(QStringLiteral("not-found: reports"));
-    QCOMPARE(state.currentRoute(), QStringLiteral("not-found: /reports"));
-    QCOMPARE(state.scaffoldNavIndex(), -1);
+    CTEST_COMPARE(state.currentRoute(), QStringLiteral("not-found: /reports"));
+    CTEST_COMPARE(state.scaffoldNavIndex(), -1);
 
     const QVariantList refreshedScaffold = state.scaffoldNavModel();
-    QCOMPARE(refreshedScaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("1"));
+    CTEST_COMPARE(refreshedScaffold.at(1).toMap().value(QStringLiteral("badge")).toString(), QStringLiteral("1"));
 }
 
-QTEST_MAIN(AppStateTests)
-#include "tst_app_state.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    AppStateTests tests;
+    runner.run("defaults_and_progress_clamping", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.defaults_and_progress_clamping(); });
+    runner.run("route_tracking_updates_models", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.route_tracking_updates_models(); });
+    runner.run("snapshot_sync_bridges_backend_state", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.snapshot_sync_bridges_backend_state(); });
+    runner.run("resilient_normalization_and_index_clamping", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.resilient_normalization_and_index_clamping(); });
+    runner.run("definitions_drive_route_matching", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.definitions_drive_route_matching(); });
+    return runner.result();
+}

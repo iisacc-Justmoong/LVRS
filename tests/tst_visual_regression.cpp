@@ -1,6 +1,11 @@
-#include <QtTest>
+#include "CTestSupport.h"
+#include "QtEventWait.h"
+#include <QGuiApplication>
+#include <QTemporaryDir>
+#include <QTimer>
 
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QImage>
 #include <QDebug>
@@ -156,22 +161,26 @@ Item {
 
     window.show();
     QCoreApplication::processEvents();
-    QTest::qWait(120);
+    QEventLoop stabilization;
+    QTimer::singleShot(120, &stabilization, &QEventLoop::quit);
+    stabilization.exec();
     QCoreApplication::processEvents();
 
     const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(targetSize);
     if (!grabResult)
         return QImage();
 
-    QSignalSpy readySpy(grabResult.data(), &QQuickItemGrabResult::ready);
-    if (!readySpy.isValid())
+    bool ready = false;
+    const auto readyConnection = QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready,
+                                                   &window, [&ready] { ready = true; });
+    if (!readyConnection)
         return QImage();
 
     QElapsedTimer waitTimer;
     waitTimer.start();
-    while (readySpy.count() < 1 && waitTimer.elapsed() < 5000)
+    while (!ready && waitTimer.elapsed() < 5000)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
-    if (readySpy.count() < 1)
+    if (!ready)
         return QImage();
 
     const QImage frame = grabResult->image();
@@ -182,9 +191,7 @@ Item {
 
 class VisualRegressionTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void comparison_detects_changes();
     void reference_scene_matches_golden();
 };
@@ -197,36 +204,38 @@ void VisualRegressionTests::comparison_detects_changes()
     for (int y = 16; y < 88; ++y)
         for (int x = 16; x < 136; ++x)
             changed.setPixelColor(x, y, QColor("#FF5A5F"));
-    QCOMPARE(mismatchRatio(reference, reference, 8), 0.0);
-    QVERIFY(mismatchRatio(changed, reference, 8) > 0.1);
+    CTEST_COMPARE(mismatchRatio(reference, reference, 8), 0.0);
+    CTEST_CHECK(mismatchRatio(changed, reference, 8) > 0.1);
     QImage shifted = changed.copy();
     for (int y = 16; y < 88; ++y) {
         shifted.setPixelColor(16, y, QColor("#111827"));
         shifted.setPixelColor(136, y, QColor("#FF5A5F"));
     }
-    QVERIFY(mismatchRatio(changed, shifted, 8) > 0.001);
+    CTEST_CHECK(mismatchRatio(changed, shifted, 8) > 0.001);
 }
 
 void VisualRegressionTests::reference_scene_matches_golden()
 {
     const QString sourceRoot = QStringLiteral(LVRS_TEST_SOURCE_DIR);
     const QString goldenPath = sourceRoot + QStringLiteral("/golden/visual_baseline_scene.png");
-    const QString diffPath = QDir::current().filePath(QStringLiteral("visual_baseline_scene.diff.png"));
+    QTemporaryDir workspace(sourceRoot + QStringLiteral("/../resources/ctest-visual-XXXXXX"));
+    CTEST_CHECK(workspace.isValid());
+    const QString diffPath = workspace.filePath(QStringLiteral("visual_baseline_scene.diff.png"));
 
     const QImage actual = renderReferenceScene();
-    QVERIFY2(!actual.isNull(), "Failed to render reference scene for visual regression.");
+    CTEST_CHECK_MESSAGE(!actual.isNull(), "Failed to render reference scene for visual regression.");
     const QString capturePath = qEnvironmentVariable("LVRS_VISUAL_CAPTURE_PATH");
-    if (!capturePath.isEmpty()) QVERIFY(actual.save(capturePath));
+    if (!capturePath.isEmpty()) CTEST_CHECK(actual.save(capturePath));
 
     if (qEnvironmentVariableIsSet("LVRS_UPDATE_GOLDEN")) {
         QDir().mkpath(QFileInfo(goldenPath).absolutePath());
-        QVERIFY2(actual.save(goldenPath), qPrintable(QStringLiteral("Failed to write golden image: %1").arg(goldenPath)));
+        CTEST_CHECK_MESSAGE(actual.save(goldenPath), qPrintable(QStringLiteral("Failed to write golden image: %1").arg(goldenPath)));
         QFile::remove(diffPath);
         return;
     }
 
     const QImage baseline = normalizeImage(QImage(goldenPath), actual.size());
-    QVERIFY2(!baseline.isNull(),
+    CTEST_CHECK_MESSAGE(!baseline.isNull(),
              qPrintable(QStringLiteral("Golden image is missing. Set LVRS_UPDATE_GOLDEN=1 and re-run. Path: %1").arg(goldenPath)));
 
     const int channelTolerance = envInt("LVRS_VISUAL_DIFF_CHANNEL_TOLERANCE", 8, 0, 64);
@@ -251,7 +260,8 @@ void VisualRegressionTests::reference_scene_matches_golden()
             }
         }
         QDir().mkpath(QFileInfo(diffPath).absolutePath());
-        diff.save(diffPath);
+        CTEST_CHECK(diff.save(diffPath));
+        workspace.setAutoRemove(false); // Preserve a failed comparison's evidence under resources/.
     } else {
         QFile::remove(diffPath);
     }
@@ -260,12 +270,19 @@ void VisualRegressionTests::reference_scene_matches_golden()
                       << "limit=" << ratioLimit
                       << "tolerance=" << channelTolerance;
 
-    QVERIFY2(ratio <= ratioLimit,
+    CTEST_CHECK_MESSAGE(ratio <= ratioLimit,
              qPrintable(QStringLiteral("Visual regression gate failed. ratio=%1 limit=%2 diff=%3")
                             .arg(ratio, 0, 'f', 6)
                             .arg(ratioLimit, 0, 'f', 6)
                             .arg(diffPath)));
 }
 
-QTEST_MAIN(VisualRegressionTests)
-#include "tst_visual_regression.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    VisualRegressionTests tests;
+    runner.run("comparison_detects_changes", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.comparison_detects_changes(); });
+    runner.run("reference_scene_matches_golden", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.reference_scene_matches_golden(); });
+    return runner.result();
+}

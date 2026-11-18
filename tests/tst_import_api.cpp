@@ -1,4 +1,10 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QElapsedTimer>
+#include <QEventLoop>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QTimer>
+#include <type_traits>
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -29,6 +35,80 @@
 #if defined(LVRS_USE_STATIC_QML_PLUGIN)
 Q_IMPORT_PLUGIN(LVRSPlugin)
 #endif
+
+class ImportSignalRecorder : public QObject
+{
+    Q_OBJECT
+public:
+    QList<QVariantList> events;
+public slots:
+    void recordVoid() { events.append(QVariantList{}); }
+    void recordActivation(const QVariant &item, int row, int depth) { events.append({item, row, depth}); }
+};
+
+namespace {
+template <typename Actual, typename Expected>
+bool importEqual(const Actual &actual, const Expected &expected)
+{
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+void processFor(int milliseconds)
+{
+    QEventLoop loop;
+    QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);
+    loop.exec();
+}
+bool waitForWindowExposed(QWindow *window) { return window && lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000); }
+bool waitForWindowActive(QWindow *window) { return window && lvrs_ctest::waitFor([&] { return window->isActive(); }, 5000); }
+Qt::MouseButtons pressedButtons = Qt::NoButton;
+void emitMouse(QWindow *window, QEvent::Type type, Qt::MouseButton button, Qt::KeyboardModifiers modifiers, const QPoint &point, int delay = -1)
+{
+    if (type == QEvent::MouseButtonPress) pressedButtons |= button;
+    if (type == QEvent::MouseButtonRelease) pressedButtons &= ~Qt::MouseButtons(button);
+    static ulong timestamp = 10000;
+    timestamp += delay < 0 ? 16 : qMax(1, delay);
+    const QPointF local(point), global(window->mapToGlobal(point));
+    QMouseEvent event(type, local, local, global, button, pressedButtons, modifiers);
+    event.setTimestamp(timestamp);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+void mousePress(QWindow *window, Qt::MouseButton button, Qt::KeyboardModifiers modifiers, const QPoint &point, int delay = -1)
+{ emitMouse(window, QEvent::MouseButtonPress, button, modifiers, point, delay); }
+void mouseRelease(QWindow *window, Qt::MouseButton button, Qt::KeyboardModifiers modifiers, const QPoint &point, int delay = -1)
+{ emitMouse(window, QEvent::MouseButtonRelease, button, modifiers, point, delay); }
+void mouseMove(QWindow *window, const QPoint &point, int delay = -1)
+{ emitMouse(window, QEvent::MouseMove, Qt::NoButton, Qt::NoModifier, point, delay); }
+void mouseClick(QWindow *window, Qt::MouseButton button, Qt::KeyboardModifiers modifiers, const QPoint &point, int delay = -1)
+{ mouseMove(window, point, delay); mousePress(window, button, modifiers, point, delay); mouseRelease(window, button, modifiers, point, delay); }
+void mouseDoubleClick(QWindow *window, Qt::MouseButton button, Qt::KeyboardModifiers modifiers, const QPoint &point, int delay = -1)
+{
+    mouseClick(window, button, modifiers, point, delay);
+    mousePress(window, button, modifiers, point, delay);
+    emitMouse(window, QEvent::MouseButtonDblClick, button, modifiers, point, delay);
+    mouseRelease(window, button, modifiers, point, delay);
+}
+void keyClick(QWindow *window, Qt::Key key, Qt::KeyboardModifiers modifiers = Qt::NoModifier, int delay = -1)
+{
+    Q_UNUSED(delay);
+    QString text;
+    if (key >= Qt::Key_A && key <= Qt::Key_Z)
+        text = QString(modifiers.testFlag(Qt::ShiftModifier) ? QChar(key) : QChar(key).toLower());
+    else if (key == Qt::Key_Space)
+        text = QStringLiteral(" ");
+    QKeyEvent press(QEvent::KeyPress, key, modifiers, text), release(QEvent::KeyRelease, key, modifiers, text);
+    QCoreApplication::sendEvent(window, &press);
+    QCoreApplication::sendEvent(window, &release);
+    QCoreApplication::processEvents();
+}
+}
+#define IMPORT_COMPARE(actual, expected) CTEST_CHECK(importEqual((actual), (expected)))
+#define IMPORT_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(importEqual((actual), (expected)))
+#define IMPORT_WAIT_MESSAGE(expression, message) CTEST_CHECK_MESSAGE(lvrs_ctest::waitFor([&] { return bool(expression); }, 5000), (message))
 
 namespace {
 constexpr int kFlickableDragAndOvershootBounds = 3;
@@ -71,20 +151,21 @@ QQuickItem *visualChildByObjectName(QQuickItem *root, const QString &objectName)
 
 bool waitForInputMaterials(const QList<QQuickItem *> &fields)
 {
-    QList<std::shared_ptr<QSignalSpy>> paints;
+    QList<std::shared_ptr<ImportSignalRecorder>> paints;
     for (auto *field : fields) {
         auto *canvas = visualChildByObjectName(field, QStringLiteral("inputFieldMaterial"));
         if (!canvas) return false;
-        auto spy = std::make_shared<QSignalSpy>(canvas, SIGNAL(painted()));
-        if (!spy->isValid() || !QMetaObject::invokeMethod(canvas, "requestPaint")) return false;
-        paints.append(std::move(spy));
+        auto recorder = std::make_shared<ImportSignalRecorder>();
+        const auto connection = QObject::connect(canvas, SIGNAL(painted()), recorder.get(), SLOT(recordVoid()));
+        if (!connection || !QMetaObject::invokeMethod(canvas, "requestPaint")) return false;
+        paints.append(std::move(recorder));
     }
     QElapsedTimer elapsed; elapsed.start();
     while (elapsed.elapsed() < 20000) {
         bool ready = true;
-        for (const auto &paint : paints) ready = ready && !paint->isEmpty();
+        for (const auto &paint : paints) ready = ready && !paint->events.isEmpty();
         if (ready) return true;
-        QTest::qWait(10);
+        processFor(10);
     }
     return false;
 }
@@ -398,11 +479,9 @@ private:
 };
 }
 
-class ImportApiTests : public QObject
+class ImportApiTests
 {
-    Q_OBJECT
-
-private slots:
+public:
     void embedded_qml_matches_source();
     void app_bootstrap_window_loads();
     void versionless_import_application_window_loads();
@@ -445,11 +524,9 @@ private slots:
     void hierarchy_item_structure_api_contract_loads();
     void hierarchy_item_ux_state_contract_loads();
     void button_padding_matches_figma_spec();
-    void button_family_components_contract_data();
-    void button_family_components_contract();
+    void button_family_components_contract(bool mobile);
     void button_default_tone_matches_figma_accent_loads();
-    void segmented_control_figma_contract_loads_data();
-    void segmented_control_figma_contract_loads();
+    void segmented_control_figma_contract_loads(bool mobile);
     void segmented_button_selected_color();
     void button_injected_methods_contract_loads();
     void stepper_figma_contract_loads();
@@ -468,11 +545,9 @@ private slots:
     void modal_content_action_contract_loads();
     void alert_figma_variant_contract_loads();
     void alert_content_arguments_contract_loads();
-    void alert_button_methods_are_invoked_data();
-    void alert_button_methods_are_invoked();
+    void alert_button_methods_are_invoked(int buttonCount, int buttonIndex, const QString &buttonName);
     void alert_action_button_padding_scopes_to_alert();
-    void alert_glass_overlay_and_input_contract_data();
-    void alert_glass_overlay_and_input_contract();
+    void alert_glass_overlay_and_input_contract(bool frameworkWindow, const QString &dataTag);
     void menu_item_key_and_chevron_contract_loads();
     void menu_item_icon_slot_switch_contract_loads();
     void context_menu_item_action_contract_loads();
@@ -520,18 +595,18 @@ void ImportApiTests::embedded_qml_matches_source()
         QFile embedded(QStringLiteral(":/qt/qml/LVRS/") + relativePath);
         if (!embedded.exists())
             embedded.setFileName(QStringLiteral(":/qt/qml/LVRS/") + QFileInfo(source.fileName()).fileName());
-        QVERIFY2(source.open(QIODevice::ReadOnly), qPrintable(source.fileName()));
-        QVERIFY2(embedded.open(QIODevice::ReadOnly), qPrintable(embedded.fileName()));
+        CTEST_CHECK_MESSAGE(source.open(QIODevice::ReadOnly), qPrintable(source.fileName()));
+        CTEST_CHECK_MESSAGE(embedded.open(QIODevice::ReadOnly), qPrintable(embedded.fileName()));
         const auto sourceHash = QCryptographicHash::hash(source.readAll(), QCryptographicHash::Sha256);
         const auto embeddedHash = QCryptographicHash::hash(embedded.readAll(), QCryptographicHash::Sha256);
-        QVERIFY2(embeddedHash == sourceHash,
+        CTEST_CHECK_MESSAGE(embeddedHash == sourceHash,
                  qPrintable(QStringLiteral("Loaded LVRS QML differs from current source: %1; "
                                            "source=%2 loaded=%3. Check the library loader path.")
                                 .arg(relativePath, QString::fromLatin1(sourceHash.toHex()),
                                      QString::fromLatin1(embeddedHash.toHex()))));
         ++checked;
     }
-    QVERIFY(checked > 0);
+    CTEST_CHECK(checked > 0);
     qInfo() << "Verified embedded QML against" << checked << "current source files";
 }
 
@@ -573,9 +648,9 @@ import LVRS as LV
                       QUrl());
 
     QScopedPointer<QObject> root(component.create());
-    QVERIFY2(root, "Expected AppBootstrapWindow to load");
-    QVERIFY2(!component.isError(), "Unexpected QML errors while creating AppBootstrapWindow");
-    QVERIFY(root->property("bootstrapContractReady").toBool());
+    CTEST_CHECK_MESSAGE(root, "Expected AppBootstrapWindow to load");
+    CTEST_CHECK_MESSAGE(!component.isError(), "Unexpected QML errors while creating AppBootstrapWindow");
+    CTEST_CHECK(root->property("bootstrapContractReady").toBool());
 }
 
 void ImportApiTests::versionless_import_application_window_loads()
@@ -708,21 +783,21 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("importReady").toBool());
-    QVERIFY(root->property("shellApiReady").toBool());
-    QVERIFY(root->property("adaptiveApiReady").toBool());
-    QVERIFY(root->property("qualityReady").toBool());
-    QVERIFY(root->property("backendOptimizationDefaultsReady").toBool());
-    QVERIFY(root->property("bootstrapContractReady").toBool());
-    QVERIFY(root->property("platformPolicyDefaultsReady").toBool());
-    QVERIFY(root->property("mobileSystemSafeAreaApiReady").toBool());
-    QVERIFY(root->property("deviceTierPolicyReady").toBool());
-    QVERIFY(root->property("chromeInteractionReady").toBool());
-    QVERIFY(root->property("safeAreaObserverReady").toBool());
-    QVERIFY(root->property("labelStyleApiReady").toBool());
-    QVERIFY(root->property("figmaTextDesignReady").toBool());
-    QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("importReady").toBool());
+    CTEST_CHECK(root->property("shellApiReady").toBool());
+    CTEST_CHECK(root->property("adaptiveApiReady").toBool());
+    CTEST_CHECK(root->property("qualityReady").toBool());
+    CTEST_CHECK(root->property("backendOptimizationDefaultsReady").toBool());
+    CTEST_CHECK(root->property("bootstrapContractReady").toBool());
+    CTEST_CHECK(root->property("platformPolicyDefaultsReady").toBool());
+    CTEST_CHECK(root->property("mobileSystemSafeAreaApiReady").toBool());
+    CTEST_CHECK(root->property("deviceTierPolicyReady").toBool());
+    CTEST_CHECK(root->property("chromeInteractionReady").toBool());
+    CTEST_CHECK(root->property("safeAreaObserverReady").toBool());
+    CTEST_CHECK(root->property("labelStyleApiReady").toBool());
+    CTEST_CHECK(root->property("figmaTextDesignReady").toBool());
+    IMPORT_COMPARE(root->property("subtitle").toString(), QStringLiteral("Merged"));
 }
 
 void ImportApiTests::application_window_mobile_coverage_visibility_contract_loads()
@@ -749,8 +824,8 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("coverageVisibilityReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("coverageVisibilityReady").toBool());
 }
 
 void ImportApiTests::versionless_import_window_loads()
@@ -792,11 +867,11 @@ LV.Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QCOMPARE(root->property("title").toString(), QStringLiteral("Settings"));
-    QVERIFY(root->property("solidChrome").toBool());
-    QVERIFY(root->property("windowApiReady").toBool());
-    QVERIFY(root->property("contentApiReady").toBool());
+    CTEST_CHECK(root);
+    IMPORT_COMPARE(root->property("title").toString(), QStringLiteral("Settings"));
+    CTEST_CHECK(root->property("solidChrome").toBool());
+    CTEST_CHECK(root->property("windowApiReady").toBool());
+    CTEST_CHECK(root->property("contentApiReady").toBool());
 }
 
 void ImportApiTests::window_custom_chrome_interaction_contract_loads()
@@ -859,49 +934,49 @@ LV.Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("chromeApiReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("chromeApiReady").toBool());
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
-    QTRY_VERIFY(window->isVisible());
+    CTEST_CHECK(window);
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     auto *interactionLayer = root->findChild<QQuickItem *>(QStringLiteral("windowChromeInteractionLayer"));
     auto *dragHandle = root->findChild<QQuickItem *>(QStringLiteral("windowDragHandle"));
     auto *leftResizeHandle = root->findChild<QQuickItem *>(QStringLiteral("windowResizeLeftHandle"));
     auto *topLeftResizeHandle = root->findChild<QQuickItem *>(QStringLiteral("windowResizeTopLeftHandle"));
-    QVERIFY(interactionLayer);
-    QVERIFY(dragHandle);
-    QVERIFY(leftResizeHandle);
-    QVERIFY(topLeftResizeHandle);
+    CTEST_CHECK(interactionLayer);
+    CTEST_CHECK(dragHandle);
+    CTEST_CHECK(leftResizeHandle);
+    CTEST_CHECK(topLeftResizeHandle);
 
-    QCOMPARE(interactionLayer->z(), 12000.0);
-    QCOMPARE(dragHandle->x(), 10.0);
-    QCOMPARE(dragHandle->y(), 4.0);
-    QCOMPARE(dragHandle->width(), 338.0);
-    QCOMPARE(dragHandle->height(), 32.0);
-    QCOMPARE(leftResizeHandle->width(), 7.0);
-    QCOMPARE(topLeftResizeHandle->width(), 15.0);
-    QCOMPARE(topLeftResizeHandle->height(), 15.0);
+    IMPORT_COMPARE(interactionLayer->z(), 12000.0);
+    IMPORT_COMPARE(dragHandle->x(), 10.0);
+    IMPORT_COMPARE(dragHandle->y(), 4.0);
+    IMPORT_COMPARE(dragHandle->width(), 338.0);
+    IMPORT_COMPARE(dragHandle->height(), 32.0);
+    IMPORT_COMPARE(leftResizeHandle->width(), 7.0);
+    IMPORT_COMPARE(topLeftResizeHandle->width(), 15.0);
+    IMPORT_COMPARE(topLeftResizeHandle->height(), 15.0);
 
 #ifdef Q_OS_WIN
     if (QGuiApplication::platformName() == QStringLiteral("windows"))
-        QSKIP("Native Windows move/resize enters an OS modal loop with synthetic input; the offscreen companion verifies these requests");
+        lvrs_ctest::skip("Native Windows move/resize enters an OS modal loop with synthetic input; the offscreen companion verifies these requests");
 #endif
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(125, 20));
-    QCOMPARE(root->property("moveAttemptCount").toInt(), 0);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(125, 20));
+    IMPORT_COMPARE(root->property("moveAttemptCount").toInt(), 0);
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(180, 20));
-    QTRY_COMPARE(root->property("moveAttemptCount").toInt(), 1);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(180, 20));
+    IMPORT_WAIT_COMPARE(root->property("moveAttemptCount").toInt(), 1);
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 120));
-    QTRY_COMPARE(root->property("resizeAttemptCount").toInt(), 1);
-    QCOMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge));
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 120));
+    IMPORT_WAIT_COMPARE(root->property("resizeAttemptCount").toInt(), 1);
+    IMPORT_COMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge));
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 2));
-    QTRY_COMPARE(root->property("resizeAttemptCount").toInt(), 2);
-    QCOMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge | Qt::TopEdge));
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(2, 2));
+    IMPORT_WAIT_COMPARE(root->property("resizeAttemptCount").toInt(), 2);
+    IMPORT_COMPARE(root->property("lastResizeEdges").toInt(), int(Qt::LeftEdge | Qt::TopEdge));
 }
 
 void ImportApiTests::window_safe_margin_scopes_to_layout_not_render_surface()
@@ -935,23 +1010,23 @@ LV.Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const qreal rootWidth = root->property("width").toReal();
     const qreal rootHeight = root->property("height").toReal();
     root->setProperty("visible", true);
-    QTRY_COMPARE(root->property("renderSurfaceBounds").toRectF(), QRectF(0.0, 0.0, rootWidth, rootHeight));
-    QTRY_COMPARE(root->property("layoutSafeAreaBounds").toRectF(), QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
+    IMPORT_WAIT_COMPARE(root->property("renderSurfaceBounds").toRectF(), QRectF(0.0, 0.0, rootWidth, rootHeight));
+    IMPORT_WAIT_COMPARE(root->property("layoutSafeAreaBounds").toRectF(), QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
     auto *layoutHost = root->findChild<QQuickItem *>(QStringLiteral("windowLayoutSafeAreaHost"));
-    QVERIFY(layoutHost);
-    QTRY_COMPARE(layoutHost->width(), rootWidth - 48.0);
-    QTRY_COMPARE(layoutHost->height(), rootHeight - 48.0);
+    CTEST_CHECK(layoutHost);
+    IMPORT_WAIT_COMPARE(layoutHost->width(), rootWidth - 48.0);
+    IMPORT_WAIT_COMPARE(layoutHost->height(), rootHeight - 48.0);
     const QPointF layoutOrigin = layoutHost->mapToScene(QPointF(0.0, 0.0));
-    QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
+    IMPORT_COMPARE(layoutOrigin, QPointF(24.0, 24.0));
     auto *contentProbe = root->findChild<QQuickItem *>(QStringLiteral("contentProbe"));
-    QVERIFY(contentProbe);
-    QTRY_COMPARE(contentProbe->width(), rootWidth);
-    QTRY_COMPARE(contentProbe->height(), rootHeight);
-    QCOMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
+    CTEST_CHECK(contentProbe);
+    IMPORT_WAIT_COMPARE(contentProbe->width(), rootWidth);
+    IMPORT_WAIT_COMPARE(contentProbe->height(), rootHeight);
+    IMPORT_COMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
 }
 
 void ImportApiTests::application_window_safe_margin_scopes_to_layout_not_render_surface()
@@ -986,25 +1061,25 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const qreal rootWidth = root->property("width").toReal();
     const qreal rootHeight = root->property("height").toReal();
     root->setProperty("visible", true);
     const QRectF renderSurfaceBounds = root->property("renderSurfaceBounds").toRectF();
     const QRectF layoutSafeAreaBounds = root->property("layoutSafeAreaBounds").toRectF();
-    QCOMPARE(renderSurfaceBounds, QRectF(0.0, 0.0, rootWidth, rootHeight));
-    QCOMPARE(layoutSafeAreaBounds, QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
+    IMPORT_COMPARE(renderSurfaceBounds, QRectF(0.0, 0.0, rootWidth, rootHeight));
+    IMPORT_COMPARE(layoutSafeAreaBounds, QRectF(24.0, 24.0, rootWidth - 48.0, rootHeight - 48.0));
     auto *layoutHost = root->findChild<QQuickItem *>(QStringLiteral("applicationWindowLayoutSafeAreaHost"));
-    QVERIFY(layoutHost);
+    CTEST_CHECK(layoutHost);
     const QPointF layoutOrigin = layoutHost->mapToScene(QPointF(0.0, 0.0));
-    QCOMPARE(layoutOrigin, QPointF(24.0, 24.0));
-    QCOMPARE(layoutHost->width(), rootWidth - 48.0);
-    QCOMPARE(layoutHost->height(), rootHeight - 48.0);
+    IMPORT_COMPARE(layoutOrigin, QPointF(24.0, 24.0));
+    IMPORT_COMPARE(layoutHost->width(), rootWidth - 48.0);
+    IMPORT_COMPARE(layoutHost->height(), rootHeight - 48.0);
     auto *contentProbe = root->findChild<QQuickItem *>(QStringLiteral("contentProbe"));
-    QVERIFY(contentProbe);
-    QTRY_COMPARE(contentProbe->width(), rootWidth);
-    QTRY_COMPARE(contentProbe->height(), rootHeight);
-    QCOMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
+    CTEST_CHECK(contentProbe);
+    IMPORT_WAIT_COMPARE(contentProbe->width(), rootWidth);
+    IMPORT_WAIT_COMPARE(contentProbe->height(), rootHeight);
+    IMPORT_COMPARE(contentProbe->mapToScene(QPointF(0.0, 0.0)), QPointF(0.0, 0.0));
 }
 
 void ImportApiTests::application_window_page_stack_state_loads()
@@ -1060,9 +1135,9 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("stackInitialReady").toBool());
-    QTRY_VERIFY(root->property("stackNavigationWorked").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("stackInitialReady").toBool());
+    CTEST_WAIT_DEFAULT(root->property("stackNavigationWorked").toBool());
 }
 
 void ImportApiTests::application_window_initial_properties_seed_page_stack()
@@ -1105,9 +1180,9 @@ LV.ApplicationWindow {
         {QStringLiteral("initialRoutePath"), QStringLiteral("/")}
     });
     QScopedPointer<QObject> root(created);
-    QVERIFY2(root, "Expected ApplicationWindow to load with initial properties");
-    QVERIFY2(!component.isError(), "Unexpected QML errors while creating ApplicationWindow with initial properties");
-    QTRY_VERIFY(root->property("stackReady").toBool());
+    CTEST_CHECK_MESSAGE(root, "Expected ApplicationWindow to load with initial properties");
+    CTEST_CHECK_MESSAGE(!component.isError(), "Unexpected QML errors while creating ApplicationWindow with initial properties");
+    CTEST_WAIT_DEFAULT(root->property("stackReady").toBool());
 }
 
 void ImportApiTests::appshell_compat_loads()
@@ -1131,10 +1206,10 @@ LV.AppShell {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QCOMPARE(root->property("title").toString(), QStringLiteral("Compat"));
-    QCOMPARE(root->property("subtitle").toString(), QStringLiteral("Wrapper"));
-    QVERIFY(root->property("navItems").isValid());
+    CTEST_CHECK(root);
+    IMPORT_COMPARE(root->property("title").toString(), QStringLiteral("Compat"));
+    IMPORT_COMPARE(root->property("subtitle").toString(), QStringLiteral("Wrapper"));
+    CTEST_CHECK(root->property("navItems").isValid());
 }
 
 void ImportApiTests::application_window_platform_adaptive_layout_loads()
@@ -1175,9 +1250,9 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> mobileRoot(createFromQml(mobileEngine, mobileQml));
-    QVERIFY(mobileRoot);
-    QTRY_VERIFY(mobileRoot->property("contract").toBool());
-    QCOMPARE(mobileRoot->property("navigationIconSize").toInt(), 18);
+    CTEST_CHECK(mobileRoot);
+    CTEST_WAIT_DEFAULT(mobileRoot->property("contract").toBool());
+    IMPORT_COMPARE(mobileRoot->property("navigationIconSize").toInt(), 18);
 
     QQmlEngine desktopEngine;
     desktopEngine.addImportPath(importBase);
@@ -1209,9 +1284,9 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> desktopRoot(createFromQml(desktopEngine, desktopQml));
-    QVERIFY(desktopRoot);
-    QTRY_VERIFY(desktopRoot->property("contract").toBool());
-    QCOMPARE(desktopRoot->property("navigationIconSize").toInt(), 18);
+    CTEST_CHECK(desktopRoot);
+    CTEST_WAIT_DEFAULT(desktopRoot->property("contract").toBool());
+    IMPORT_COMPARE(desktopRoot->property("navigationIconSize").toInt(), 18);
 }
 
 void ImportApiTests::icon_name_mapping_loads()
@@ -1283,15 +1358,15 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("themeAddsSvg").toBool());
-    QVERIFY(root->property("themeKeepsSvg").toBool());
-    QVERIFY(root->property("themeFlattensGroupedName").toBool());
-    QVERIFY(root->property("byNameOk").toBool());
-    QVERIFY(root->property("byExtOk").toBool());
-    QVERIFY(root->property("byGroupOk").toBool());
-    QVERIFY(root->property("byUrlOk").toBool());
-    QVERIFY(root->property("menuByNameOk").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("themeAddsSvg").toBool());
+    CTEST_CHECK(root->property("themeKeepsSvg").toBool());
+    CTEST_CHECK(root->property("themeFlattensGroupedName").toBool());
+    CTEST_CHECK(root->property("byNameOk").toBool());
+    CTEST_CHECK(root->property("byExtOk").toBool());
+    CTEST_CHECK(root->property("byGroupOk").toBool());
+    CTEST_CHECK(root->property("byUrlOk").toBool());
+    CTEST_CHECK(root->property("menuByNameOk").toBool());
 }
 
 void ImportApiTests::compact_icon_frame_contract_loads()
@@ -1389,11 +1464,11 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("compactIconContractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("compactIconContractReady").toBool(),
                  qPrintable(root->property("compactIconDiagnostics").toString()));
-    QVERIFY(root->setProperty("themeTarget", QStringLiteral("android")));
-    QTRY_VERIFY2(root->property("mobileCompactIconContractReady").toBool(),
+    CTEST_CHECK(root->setProperty("themeTarget", QStringLiteral("android")));
+    IMPORT_WAIT_MESSAGE(root->property("mobileCompactIconContractReady").toBool(),
                  qPrintable(root->property("compactIconDiagnostics").toString()));
 }
 
@@ -1454,8 +1529,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("treeApiReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("treeApiReady").toBool());
 }
 
 void ImportApiTests::hierarchy_string_array_model_loads()
@@ -1483,8 +1558,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("stringModelReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("stringModelReady").toBool());
 }
 
 void ImportApiTests::hierarchy_direct_model_contract_loads()
@@ -1597,8 +1672,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("directModelContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("directModelContractReady").toBool());
 
     nativeModel.appendRow(QStringLiteral("native-extra"),
                           QStringLiteral("Native Extra"),
@@ -1607,8 +1682,8 @@ Item {
                           0,
                           true,
                           false);
-    QTRY_COMPARE(root->property("nativeListItemCount").toInt(), 4);
-    QTRY_VERIFY(root->property("appendedNativeModelReady").toBool());
+    IMPORT_WAIT_COMPARE(root->property("nativeListItemCount").toInt(), 4);
+    CTEST_WAIT_DEFAULT(root->property("appendedNativeModelReady").toBool());
 }
 
 void ImportApiTests::hierarchy_direct_model_editing_contract_loads()
@@ -1754,23 +1829,23 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("itemsReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("itemsReady").toBool(),
                  qPrintable(root->property("readinessState").toString()));
 
     QVariant nativeMovePerformed;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "performNativeModelMove",
                                       Q_RETURN_ARG(QVariant, nativeMovePerformed)));
-    QVERIFY(nativeMovePerformed.toBool());
-    QTRY_VERIFY(root->property("nativeModelMovedReady").toBool());
+    CTEST_CHECK(nativeMovePerformed.toBool());
+    CTEST_WAIT_DEFAULT(root->property("nativeModelMovedReady").toBool());
 
     QVariant qmlMovePerformed;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "performQmlListModelMove",
                                       Q_RETURN_ARG(QVariant, qmlMovePerformed)));
-    QVERIFY(qmlMovePerformed.toBool());
-    QTRY_VERIFY(root->property("qmlModelMovedReady").toBool());
+    CTEST_CHECK(qmlMovePerformed.toBool());
+    CTEST_WAIT_DEFAULT(root->property("qmlModelMovedReady").toBool());
 }
 
 void ImportApiTests::hierarchy_nested_children_indent_contract_loads()
@@ -1857,8 +1932,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("nestedContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("nestedContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_expansion_uses_incremental_visibility_refresh()
@@ -2114,8 +2189,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("fastRefreshContractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("fastRefreshContractReady").toBool(),
                  qPrintable(root->property("readinessState").toString()));
 }
 
@@ -2314,14 +2389,14 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("dragItemReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("dragItemReady").toBool());
     QVariant dragPerformed;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "performEditableDrag",
                                       Q_RETURN_ARG(QVariant, dragPerformed)));
-    QVERIFY(dragPerformed.toBool());
-    QTRY_VERIFY(root->property("dragContractReady").toBool());
+    CTEST_CHECK(dragPerformed.toBool());
+    CTEST_WAIT_DEFAULT(root->property("dragContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_editable_drag_per_item_lock_contract_loads()
@@ -2423,13 +2498,13 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("itemsReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("itemsReady").toBool());
     QVariant dragLockContractReady;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "evaluateDragLockContract",
                                       Q_RETURN_ARG(QVariant, dragLockContractReady)));
-    QVERIFY(dragLockContractReady.toBool());
+    CTEST_CHECK(dragLockContractReady.toBool());
 }
 
 void ImportApiTests::hierarchy_mobile_drag_hold_contract_loads()
@@ -2519,13 +2594,13 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("mobileHoldContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("mobileHoldContractReady").toBool());
     QVariant dragPerformed;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "performProgrammaticDrag",
                                       Q_RETURN_ARG(QVariant, dragPerformed)));
-    QVERIFY(dragPerformed.toBool());
+    CTEST_CHECK(dragPerformed.toBool());
 }
 
 void ImportApiTests::hierarchy_mobile_activation_commits_on_release_contract_loads()
@@ -2596,42 +2671,42 @@ Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
-    QTRY_VERIFY(root->property("mobileReleaseActivationContractReady").toBool());
+    CTEST_WAIT_DEFAULT(window->isVisible());
+    CTEST_WAIT_DEFAULT(root->property("mobileReleaseActivationContractReady").toBool());
 
     auto *list = root->findChild<QObject *>(QStringLiteral("hierarchyList"));
-    QVERIFY(list);
+    CTEST_CHECK(list);
     QObject *rootItemObject = root->property("rootItemRef").value<QObject *>();
     QObject *branchItemObject = root->property("branchItemRef").value<QObject *>();
-    QVERIFY(rootItemObject);
-    QVERIFY(branchItemObject);
+    CTEST_CHECK(rootItemObject);
+    CTEST_CHECK(branchItemObject);
     auto *branchItem = qobject_cast<QQuickItem *>(branchItemObject);
-    QVERIFY(branchItem);
+    CTEST_CHECK(branchItem);
 
     const QPointF branchPoint = branchItem->mapToScene(QPointF(branchItem->width() * 0.5,
                                                                branchItem->height() * 0.5));
     const QPoint branchPointInt(qRound(branchPoint.x()), qRound(branchPoint.y()));
 
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
+    mousePress(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
     QCoreApplication::processEvents();
-    QTest::qWait(50);
+    processFor(50);
 
-    QCOMPARE(list->property("activeItem").value<QObject *>(), rootItemObject);
-    QCOMPARE(list->property("activeItemKey").toString(), QStringLiteral("root"));
-    QVERIFY(!branchItemObject->property("active").toBool());
+    IMPORT_COMPARE(list->property("activeItem").value<QObject *>(), rootItemObject);
+    IMPORT_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("root"));
+    CTEST_CHECK(!branchItemObject->property("active").toBool());
 
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
+    mouseRelease(window, Qt::LeftButton, Qt::NoModifier, branchPointInt, 10);
 
-    QTRY_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("branch"));
-    QTRY_VERIFY(list->property("activeItem").value<QObject *>() != nullptr);
+    IMPORT_WAIT_COMPARE(list->property("activeItemKey").toString(), QStringLiteral("branch"));
+    CTEST_WAIT_DEFAULT(list->property("activeItem").value<QObject *>() != nullptr);
     QObject *activeBranchObject = list->property("activeItem").value<QObject *>();
-    QCOMPARE(activeBranchObject->property("itemKey").toString(), QStringLiteral("branch"));
-    QTRY_VERIFY(activeBranchObject->property("active").toBool());
+    IMPORT_COMPARE(activeBranchObject->property("itemKey").toString(), QStringLiteral("branch"));
+    CTEST_WAIT_DEFAULT(activeBranchObject->property("active").toBool());
 }
 
 void ImportApiTests::hierarchy_mobile_reactivation_reemits_active_signal()
@@ -2693,38 +2768,40 @@ Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
-    QTRY_VERIFY(root->property("mobileRetapContractReady").toBool());
+    CTEST_WAIT_DEFAULT(window->isVisible());
+    CTEST_WAIT_DEFAULT(root->property("mobileRetapContractReady").toBool());
 
     auto *hierarchy = root->findChild<QObject *>(QStringLiteral("hierarchy"));
-    QVERIFY(hierarchy);
+    CTEST_CHECK(hierarchy);
     QObject *rootItemObject = root->property("rootItemRef").value<QObject *>();
-    QVERIFY(rootItemObject);
+    CTEST_CHECK(rootItemObject);
     auto *rootItem = qobject_cast<QQuickItem *>(rootItemObject);
-    QVERIFY(rootItem);
+    CTEST_CHECK(rootItem);
 
-    QSignalSpy activationSpy(hierarchy, SIGNAL(listItemActivated(QVariant,int,int)));
-    QVERIFY(activationSpy.isValid());
+    ImportSignalRecorder activationSpy;
+    const auto activationSpyConnection = QObject::connect(hierarchy, SIGNAL(listItemActivated(QVariant,int,int)), &activationSpy, SLOT(recordActivation(QVariant,int,int)));
+    CTEST_CHECK(activationSpyConnection);
+    CTEST_CHECK(bool(activationSpyConnection));
 
     const QPointF rootPoint = rootItem->mapToScene(QPointF(rootItem->width() * 0.5,
                                                            rootItem->height() * 0.5));
     const QPoint rootPointInt(qRound(rootPoint.x()), qRound(rootPoint.y()));
 
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
+    mousePress(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
     QCoreApplication::processEvents();
-    QTest::qWait(50);
-    QCOMPARE(activationSpy.count(), 0);
+    processFor(50);
+    IMPORT_COMPARE(activationSpy.events.size(), 0);
 
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
+    mouseRelease(window, Qt::LeftButton, Qt::NoModifier, rootPointInt, 10);
 
-    QTRY_COMPARE(activationSpy.count(), 1);
-    QCOMPARE(hierarchy->property("activeListItem").value<QObject *>(), rootItemObject);
-    QCOMPARE(hierarchy->property("activeListItemKey").toString(), QStringLiteral("root"));
+    IMPORT_WAIT_COMPARE(activationSpy.events.size(), 1);
+    IMPORT_COMPARE(hierarchy->property("activeListItem").value<QObject *>(), rootItemObject);
+    IMPORT_COMPARE(hierarchy->property("activeListItemKey").toString(), QStringLiteral("root"));
 }
 
 void ImportApiTests::hierarchy_mobile_scroll_physics_contract_loads()
@@ -2772,19 +2849,19 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     QObject *hierarchy = root->findChild<QObject *>(QStringLiteral("hierarchy"));
-    QVERIFY(hierarchy);
+    CTEST_CHECK(hierarchy);
     QObject *viewport = root->findChild<QObject *>(QStringLiteral("hierarchyListViewportFlickable"));
-    QVERIFY(viewport);
+    CTEST_CHECK(viewport);
 
-    QTRY_COMPARE(viewport->property("boundsBehavior").toInt(), kFlickableDragAndOvershootBounds);
-    QCOMPARE(viewport->property("boundsMovement").toInt(), kFlickableFollowBoundsBehavior);
-    QCOMPARE(viewport->property("boundsBehavior").toInt(), hierarchy->property("listBoundsBehavior").toInt());
-    QCOMPARE(viewport->property("boundsMovement").toInt(), hierarchy->property("listBoundsMovement").toInt());
-    QCOMPARE(viewport->property("flickDeceleration").toInt(), hierarchy->property("listFlickDeceleration").toInt());
-    QCOMPARE(viewport->property("maximumFlickVelocity").toInt(), hierarchy->property("listMaximumFlickVelocity").toInt());
+    IMPORT_WAIT_COMPARE(viewport->property("boundsBehavior").toInt(), kFlickableDragAndOvershootBounds);
+    IMPORT_COMPARE(viewport->property("boundsMovement").toInt(), kFlickableFollowBoundsBehavior);
+    IMPORT_COMPARE(viewport->property("boundsBehavior").toInt(), hierarchy->property("listBoundsBehavior").toInt());
+    IMPORT_COMPARE(viewport->property("boundsMovement").toInt(), hierarchy->property("listBoundsMovement").toInt());
+    IMPORT_COMPARE(viewport->property("flickDeceleration").toInt(), hierarchy->property("listFlickDeceleration").toInt());
+    IMPORT_COMPARE(viewport->property("maximumFlickVelocity").toInt(), hierarchy->property("listMaximumFlickVelocity").toInt());
 }
 
 void ImportApiTests::hierarchy_optional_footer_contract_loads()
@@ -2852,8 +2929,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("footerContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("footerContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_toolbar_empty_state_does_not_reschedule()
@@ -2865,15 +2942,17 @@ import QtQuick
 import LVRS as LV
 LV.HierarchyToolbar {}
 )"));
-    QVERIFY(toolbar);
-    QSignalSpy idChanges(toolbar.data(), SIGNAL(activeButtonIdChanged()));
-    QVERIFY(idChanges.isValid());
+    CTEST_CHECK(toolbar);
+    ImportSignalRecorder idChanges;
+    const auto idChangesConnection = QObject::connect(toolbar.data(), SIGNAL(activeButtonIdChanged()), &idChanges, SLOT(recordVoid()));
+    CTEST_CHECK(idChangesConnection);
+    CTEST_CHECK(bool(idChangesConnection));
     for (int i = 0; i < 8; ++i)
-        QVERIFY(QMetaObject::invokeMethod(toolbar.data(), "normalizeActiveButton"));
-    QCOMPARE(toolbar->property("activeButtonId").toInt(), -1);
-    QCOMPARE(idChanges.count(), 0);
-    QTest::qWait(30);
-    QVERIFY(!toolbar->property("_normalizeScheduled").toBool());
+        CTEST_CHECK(QMetaObject::invokeMethod(toolbar.data(), "normalizeActiveButton"));
+    IMPORT_COMPARE(toolbar->property("activeButtonId").toInt(), -1);
+    IMPORT_COMPARE(idChanges.events.size(), 0);
+    processFor(30);
+    CTEST_CHECK(!toolbar->property("_normalizeScheduled").toBool());
 }
 
 void ImportApiTests::hierarchy_toolbar_item_model_contract_loads()
@@ -2972,8 +3051,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("toolbarContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("toolbarContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_toolbar_figma_layout_contract_loads()
@@ -3080,8 +3159,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("layoutContractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("layoutContractReady").toBool(),
                  qPrintable(root->property("layoutDiagnostics").toString()));
 }
 
@@ -3176,23 +3255,23 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("contractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("contractReady").toBool(),
                  qPrintable(root->property("contractDiagnostics").toString()));
 
     auto *hierarchy = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaHierarchy")));
     auto *viewport = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("hierarchyListViewportFlickable")));
-    QVERIFY(hierarchy);
-    QVERIFY(viewport);
+    CTEST_CHECK(hierarchy);
+    CTEST_CHECK(viewport);
     const QPointF viewportPosition = viewport->mapToItem(hierarchy, QPointF(0.0, 0.0));
-    QVERIFY2(qAbs(viewportPosition.x()) <= 0.01, "Hierarchy list must align to the panel left edge.");
-    QVERIFY2(qAbs(viewportPosition.y() - 26.0) <= 0.01,
+    CTEST_CHECK_MESSAGE(qAbs(viewportPosition.x()) <= 0.01, "Hierarchy list must align to the panel left edge.");
+    CTEST_CHECK_MESSAGE(qAbs(viewportPosition.y() - 26.0) <= 0.01,
              "Hierarchy list must begin immediately below the 26px toolbar.");
-    QVERIFY2(qAbs(viewport->width() - 200.0) <= 0.01,
+    CTEST_CHECK_MESSAGE(qAbs(viewport->width() - 200.0) <= 0.01,
              "Hierarchy list viewport must preserve the 200px panel width.");
-    QVERIFY2(qAbs(viewport->property("contentHeight").toReal() - 320.0) <= 0.01,
+    CTEST_CHECK_MESSAGE(qAbs(viewport->property("contentHeight").toReal() - 320.0) <= 0.01,
              "Sixteen 20px rows must produce the 320px Figma list content height.");
 }
 
@@ -3264,8 +3343,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_row_click_only_activates_not_toggles()
@@ -3326,8 +3405,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("rowClickContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("rowClickContractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_chevron_requires_children_loads()
@@ -3383,8 +3462,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("chevronRuleReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("chevronRuleReady").toBool());
 }
 
 void ImportApiTests::hierarchy_item_chevron_direction_contract_loads()
@@ -3446,8 +3525,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("chevronDirectionReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("chevronDirectionReady").toBool());
 }
 
 void ImportApiTests::hierarchy_item_hover_and_active_state_visual_contract_loads()
@@ -3455,7 +3534,7 @@ void ImportApiTests::hierarchy_item_hover_and_active_state_visual_contract_loads
     const QString requestedPlatform = qEnvironmentVariable("QT_QPA_PLATFORM").trimmed();
     if (requestedPlatform.compare(QStringLiteral("offscreen"), Qt::CaseInsensitive) == 0
         || QGuiApplication::platformName().compare(QStringLiteral("offscreen"), Qt::CaseInsensitive) == 0) {
-        QSKIP("Hover pointer delivery is unavailable on offscreen platform plugin");
+        lvrs_ctest::skip("Hover pointer delivery is unavailable on offscreen platform plugin");
     }
 
     QQmlEngine engine;
@@ -3501,35 +3580,35 @@ Window {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     auto *list = root->findChild<QObject *>(QStringLiteral("hierarchyList"));
-    QVERIFY(list);
+    CTEST_CHECK(list);
     auto *itemAObject = root->findChild<QObject *>(QStringLiteral("itemA"));
     auto *itemBObject = root->findChild<QObject *>(QStringLiteral("itemB"));
-    QVERIFY(itemAObject);
-    QVERIFY(itemBObject);
+    CTEST_CHECK(itemAObject);
+    CTEST_CHECK(itemBObject);
     auto *itemA = qobject_cast<QQuickItem *>(itemAObject);
     auto *itemB = qobject_cast<QQuickItem *>(itemBObject);
-    QVERIFY(itemA);
-    QVERIFY(itemB);
+    CTEST_CHECK(itemA);
+    CTEST_CHECK(itemB);
 
-    QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemAObject);
-    QTRY_VERIFY(itemAObject->property("active").toBool());
-    QTRY_COMPARE(itemAObject->property("state").toString(), QStringLiteral("Active"));
-    QTRY_COMPARE(itemAObject->property("uxState").toInt(), itemAObject->property("uxStateActive").toInt());
-    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Idle"));
-    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateIdle").toInt());
-    QVERIFY(!itemBObject->property("isHoverState").toBool());
-    QVERIFY(!itemBObject->property("isActiveState").toBool());
+    CTEST_WAIT_DEFAULT(list->property("activeItem").value<QObject *>() == itemAObject);
+    CTEST_WAIT_DEFAULT(itemAObject->property("active").toBool());
+    IMPORT_WAIT_COMPARE(itemAObject->property("state").toString(), QStringLiteral("Active"));
+    IMPORT_WAIT_COMPARE(itemAObject->property("uxState").toInt(), itemAObject->property("uxStateActive").toInt());
+    IMPORT_WAIT_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Idle"));
+    IMPORT_WAIT_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateIdle").toInt());
+    CTEST_CHECK(!itemBObject->property("isHoverState").toBool());
+    CTEST_CHECK(!itemBObject->property("isActiveState").toBool());
 
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QTest::qWait(50);
+    CTEST_CHECK(waitForWindowExposed(window));
+    processFor(50);
 
     const QPointF hoverPoint = itemB->mapToScene(QPointF(itemB->width() * 0.5, itemB->height() * 0.5));
     const QPoint hoverPointInt(qRound(hoverPoint.x()), qRound(hoverPoint.y()));
@@ -3537,12 +3616,12 @@ Window {
     const auto previousCursor = QCursor::pos();
     const auto restoreCursor = qScopeGuard([previousCursor] { QCursor::setPos(previousCursor); });
     window->requestActivate();
-    QVERIFY(QTest::qWaitForWindowActive(window));
+    CTEST_CHECK(waitForWindowActive(window));
     QCursor::setPos(window->mapToGlobal(hoverPointInt));
 #endif
-    QTest::mouseMove(window, hoverPointInt, 10);
+    mouseMove(window, hoverPointInt, 10);
 
-    QTRY_VERIFY2(itemBObject->property("isHoverState").toBool(), qPrintable(
+    IMPORT_WAIT_MESSAGE(itemBObject->property("isHoverState").toBool(), qPrintable(
         QStringLiteral("hovered=%1 selected=%2 state=%3 active=%4 pressed=%5 bounds=%6,%7,%8,%9 pointer=%10,%11")
             .arg(itemBObject->property("hovered").toBool())
             .arg(itemBObject->property("resolvedSelected").toBool())
@@ -3551,30 +3630,30 @@ Window {
             .arg(itemBObject->property("down").toBool())
             .arg(itemB->x()).arg(itemB->y()).arg(itemB->width()).arg(itemB->height())
             .arg(hoverPointInt.x()).arg(hoverPointInt.y())));
-    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Hover"));
-    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateHover").toInt());
+    IMPORT_WAIT_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Hover"));
+    IMPORT_WAIT_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateHover").toInt());
 
     QObject *hoverBackground = itemBObject->property("background").value<QObject *>();
-    QVERIFY(hoverBackground);
+    CTEST_CHECK(hoverBackground);
     const auto interaction = itemBObject->property("interaction").value<QObject *>();
-    QVERIFY(interaction);
-    QTRY_COMPARE(interaction->property("hovered").toBool(), true);
+    CTEST_CHECK(interaction);
+    IMPORT_WAIT_COMPARE(interaction->property("hovered").toBool(), true);
     const QColor expectedHoverColor = itemBObject->property("backgroundColorHover").value<QColor>();
-    QTRY_COMPARE(hoverBackground->property("color").value<QColor>(), expectedHoverColor);
+    IMPORT_WAIT_COMPARE(hoverBackground->property("color").value<QColor>(), expectedHoverColor);
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, hoverPointInt, 10);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, hoverPointInt, 10);
 
-    QTRY_VERIFY(list->property("activeItem").value<QObject *>() == itemBObject);
-    QTRY_VERIFY(itemBObject->property("active").toBool());
-    QTRY_VERIFY(itemBObject->property("isActiveState").toBool());
-    QTRY_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Active"));
-    QTRY_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateActive").toInt());
-    QTRY_VERIFY(!itemAObject->property("isActiveState").toBool());
+    CTEST_WAIT_DEFAULT(list->property("activeItem").value<QObject *>() == itemBObject);
+    CTEST_WAIT_DEFAULT(itemBObject->property("active").toBool());
+    CTEST_WAIT_DEFAULT(itemBObject->property("isActiveState").toBool());
+    IMPORT_WAIT_COMPARE(itemBObject->property("state").toString(), QStringLiteral("Active"));
+    IMPORT_WAIT_COMPARE(itemBObject->property("uxState").toInt(), itemBObject->property("uxStateActive").toInt());
+    CTEST_WAIT_DEFAULT(!itemAObject->property("isActiveState").toBool());
 
     QObject *activeBackground = itemBObject->property("background").value<QObject *>();
-    QVERIFY(activeBackground);
+    CTEST_CHECK(activeBackground);
     const QColor expectedActiveColor = itemBObject->property("backgroundColor").value<QColor>();
-    QTRY_COMPARE(activeBackground->property("color").value<QColor>(), expectedActiveColor);
+    IMPORT_WAIT_COMPARE(activeBackground->property("color").value<QColor>(), expectedActiveColor);
 }
 
 void ImportApiTests::hierarchy_item_figma_defaults_contract_loads()
@@ -3629,8 +3708,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_item_layout_geometry_contract_loads()
@@ -3655,35 +3734,35 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *itemObject = root->findChild<QObject *>(QStringLiteral("item"));
-    QVERIFY(itemObject);
+    CTEST_CHECK(itemObject);
     auto *item = qobject_cast<QQuickItem *>(itemObject);
-    QVERIFY(item);
+    CTEST_CHECK(item);
 
     auto *iconObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemIcon"), Qt::FindChildrenRecursively);
     auto *labelObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemLabel"), Qt::FindChildrenRecursively);
     auto *chevronObject = itemObject->findChild<QObject *>(QStringLiteral("hierarchyItemChevron"), Qt::FindChildrenRecursively);
-    QVERIFY(iconObject);
-    QVERIFY(labelObject);
-    QVERIFY(chevronObject);
+    CTEST_CHECK(iconObject);
+    CTEST_CHECK(labelObject);
+    CTEST_CHECK(chevronObject);
     auto *iconItem = qobject_cast<QQuickItem *>(iconObject);
     auto *labelItem = qobject_cast<QQuickItem *>(labelObject);
     auto *chevronItem = qobject_cast<QQuickItem *>(chevronObject);
-    QVERIFY(iconItem);
-    QVERIFY(labelItem);
-    QVERIFY(chevronItem);
+    CTEST_CHECK(iconItem);
+    CTEST_CHECK(labelItem);
+    CTEST_CHECK(chevronItem);
 
     const QPointF iconPos = iconItem->mapToItem(item, QPointF(0, 0));
     const QPointF labelPos = labelItem->mapToItem(item, QPointF(0, 0));
     const QPointF chevronPos = chevronItem->mapToItem(item, QPointF(0, 0));
 
-    QVERIFY2(qAbs(iconPos.x() - 8.0) <= 0.5, "Icon x must match the 8px Figma inset.");
-    QVERIFY2(qAbs(labelPos.x() - 28.0) <= 0.5, "Label x must follow icon width + 2px gap.");
-    QVERIFY2(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
-    QVERIFY2(qAbs(labelItem->width() - 146.0) <= 0.5, "Label width must match the 18px icon and 16px chevron layout.");
-    QVERIFY2(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
+    CTEST_CHECK_MESSAGE(qAbs(iconPos.x() - 8.0) <= 0.5, "Icon x must match the 8px Figma inset.");
+    CTEST_CHECK_MESSAGE(qAbs(labelPos.x() - 28.0) <= 0.5, "Label x must follow icon width + 2px gap.");
+    CTEST_CHECK_MESSAGE(qAbs(chevronPos.x() - 176.0) <= 0.5, "Chevron x must match the trailing 8px inset.");
+    CTEST_CHECK_MESSAGE(qAbs(labelItem->width() - 146.0) <= 0.5, "Label width must match the 18px icon and 16px chevron layout.");
+    CTEST_CHECK_MESSAGE(qAbs(item->height() - 20.0) <= 0.5, "Row height must remain 20px.");
 }
 
 void ImportApiTests::hierarchy_item_count_view_contract_loads()
@@ -3747,17 +3826,17 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("countViewReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("countViewReady").toBool());
 
     auto *defaultItemObject = root->findChild<QObject *>(QStringLiteral("defaultCountItem"));
     auto *customItemObject = root->findChild<QObject *>(QStringLiteral("customCountItem"));
-    QVERIFY(defaultItemObject);
-    QVERIFY(customItemObject);
+    CTEST_CHECK(defaultItemObject);
+    CTEST_CHECK(customItemObject);
     auto *defaultItem = qobject_cast<QQuickItem *>(defaultItemObject);
     auto *customItem = qobject_cast<QQuickItem *>(customItemObject);
-    QVERIFY(defaultItem);
-    QVERIFY(customItem);
+    CTEST_CHECK(defaultItem);
+    CTEST_CHECK(customItem);
 
     auto *defaultCountLabelObject = defaultItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemCountLabel"),
                                                                             Qt::FindChildrenRecursively);
@@ -3769,35 +3848,35 @@ Item {
                                                                      Qt::FindChildrenRecursively);
     auto *customChevronObject = customItemObject->findChild<QObject *>(QStringLiteral("hierarchyItemChevron"),
                                                                        Qt::FindChildrenRecursively);
-    QVERIFY(defaultCountLabelObject);
-    QVERIFY(defaultChevronObject);
-    QVERIFY(customCountSlotObject);
-    QVERIFY(customCountObject);
-    QVERIFY(customChevronObject);
+    CTEST_CHECK(defaultCountLabelObject);
+    CTEST_CHECK(defaultChevronObject);
+    CTEST_CHECK(customCountSlotObject);
+    CTEST_CHECK(customCountObject);
+    CTEST_CHECK(customChevronObject);
 
     auto *defaultCountLabel = qobject_cast<QQuickItem *>(defaultCountLabelObject);
     auto *defaultChevron = qobject_cast<QQuickItem *>(defaultChevronObject);
     auto *customCountSlot = qobject_cast<QQuickItem *>(customCountSlotObject);
     auto *customCount = qobject_cast<QQuickItem *>(customCountObject);
     auto *customChevron = qobject_cast<QQuickItem *>(customChevronObject);
-    QVERIFY(defaultCountLabel);
-    QVERIFY(defaultChevron);
-    QVERIFY(customCountSlot);
-    QVERIFY(customCount);
-    QVERIFY(customChevron);
+    CTEST_CHECK(defaultCountLabel);
+    CTEST_CHECK(defaultChevron);
+    CTEST_CHECK(customCountSlot);
+    CTEST_CHECK(customCount);
+    CTEST_CHECK(customChevron);
 
-    QCOMPARE(defaultCountLabelObject->property("text").toString(), QStringLiteral("7"));
-    QCOMPARE(customCountObject->property("count").toInt(), 12);
+    IMPORT_COMPARE(defaultCountLabelObject->property("text").toString(), QStringLiteral("7"));
+    IMPORT_COMPARE(customCountObject->property("count").toInt(), 12);
 
     const QPointF defaultCountPos = defaultCountLabel->mapToItem(defaultItem, QPointF(0, 0));
     const QPointF defaultChevronPos = defaultChevron->mapToItem(defaultItem, QPointF(0, 0));
     const qreal defaultGap = defaultChevronPos.x() - (defaultCountPos.x() + defaultCountLabel->width());
-    QVERIFY2(qAbs(defaultGap - 8.0) <= 0.5, "Count label must sit 8px left of the chevron slot.");
+    CTEST_CHECK_MESSAGE(qAbs(defaultGap - 8.0) <= 0.5, "Count label must sit 8px left of the chevron slot.");
 
     const QPointF customCountPos = customCountSlot->mapToItem(customItem, QPointF(0, 0));
     const QPointF customChevronPos = customChevron->mapToItem(customItem, QPointF(0, 0));
     const qreal customGap = customChevronPos.x() - (customCountPos.x() + customCountSlot->width());
-    QVERIFY2(qAbs(customGap - 8.0) <= 0.5, "Custom count view must align 8px left of the chevron anchor.");
+    CTEST_CHECK_MESSAGE(qAbs(customGap - 8.0) <= 0.5, "Custom count view must align 8px left of the chevron anchor.");
 }
 
 void ImportApiTests::hierarchy_item_structure_api_contract_loads()
@@ -4026,8 +4105,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::hierarchy_item_ux_state_contract_loads()
@@ -4114,8 +4193,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::button_padding_matches_figma_spec()
@@ -4291,8 +4370,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("figmaPaddingReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("figmaPaddingReady").toBool(),
                  qPrintable(root->property("figmaPaddingDebug").toString()));
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
@@ -4300,7 +4379,7 @@ Item {
                       QSizeF(item->width(), item->height()));
     };
     const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -4321,11 +4400,11 @@ Item {
         root->findChild<QObject *>(QStringLiteral("figmaIconMenuButton")));
     auto *constrainedLabelMenuButton = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("constrainedLabelMenuButton")));
-    QVERIFY(labelButton);
-    QVERIFY(iconButton);
-    QVERIFY(labelMenuButton);
-    QVERIFY(iconMenuButton);
-    QVERIFY(constrainedLabelMenuButton);
+    CTEST_CHECK(labelButton);
+    CTEST_CHECK(iconButton);
+    CTEST_CHECK(labelMenuButton);
+    CTEST_CHECK(iconMenuButton);
+    CTEST_CHECK(constrainedLabelMenuButton);
 
     auto *labelText = qobject_cast<QQuickItem *>(
         labelButton->findChild<QObject *>(QStringLiteral("labelButton_label")));
@@ -4343,14 +4422,14 @@ Item {
         constrainedLabelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_label")));
     auto *constrainedIndicator = qobject_cast<QQuickItem *>(
         constrainedLabelMenuButton->findChild<QObject *>(QStringLiteral("labelMenuButton_indicator")));
-    QVERIFY(labelText);
-    QVERIFY(iconImage);
-    QVERIFY(labelMenuText);
-    QVERIFY(labelMenuIndicator);
-    QVERIFY(iconMenuImage);
-    QVERIFY(iconMenuIndicator);
-    QVERIFY(constrainedLabel);
-    QVERIFY(constrainedIndicator);
+    CTEST_CHECK(labelText);
+    CTEST_CHECK(iconImage);
+    CTEST_CHECK(labelMenuText);
+    CTEST_CHECK(labelMenuIndicator);
+    CTEST_CHECK(iconMenuImage);
+    CTEST_CHECK(iconMenuIndicator);
+    CTEST_CHECK(constrainedLabel);
+    CTEST_CHECK(constrainedIndicator);
 
     verifyBounds(boundsIn(labelText, labelButton), QRectF(8.0, 4.5, 40.0, 13.0));
     verifyBounds(boundsIn(iconImage, iconButton), QRectF(2.0, 2.0, 18.0, 18.0));
@@ -4365,28 +4444,20 @@ Item {
 
     const QFont labelFont = labelText->property("font").value<QFont>();
     const QFont labelMenuFont = labelMenuText->property("font").value<QFont>();
-    QCOMPARE(labelFont.pixelSize(), 13);
-    QCOMPARE(labelFont.weight(), QFont::Medium);
-    QCOMPARE(labelFont.styleName(), QStringLiteral("Medium"));
-    QCOMPARE(labelMenuFont.pixelSize(), 13);
-    QCOMPARE(labelMenuFont.weight(), QFont::Medium);
-    QCOMPARE(labelMenuFont.styleName(), QStringLiteral("Medium"));
-    QTRY_COMPARE(iconImage->property("status").toInt(), 1);
-    QTRY_COMPARE(labelMenuIndicator->property("status").toInt(), 1);
-    QTRY_COMPARE(iconMenuImage->property("status").toInt(), 1);
-    QTRY_COMPARE(iconMenuIndicator->property("status").toInt(), 1);
+    IMPORT_COMPARE(labelFont.pixelSize(), 13);
+    IMPORT_COMPARE(labelFont.weight(), QFont::Medium);
+    IMPORT_COMPARE(labelFont.styleName(), QStringLiteral("Medium"));
+    IMPORT_COMPARE(labelMenuFont.pixelSize(), 13);
+    IMPORT_COMPARE(labelMenuFont.weight(), QFont::Medium);
+    IMPORT_COMPARE(labelMenuFont.styleName(), QStringLiteral("Medium"));
+    IMPORT_WAIT_COMPARE(iconImage->property("status").toInt(), 1);
+    IMPORT_WAIT_COMPARE(labelMenuIndicator->property("status").toInt(), 1);
+    IMPORT_WAIT_COMPARE(iconMenuImage->property("status").toInt(), 1);
+    IMPORT_WAIT_COMPARE(iconMenuIndicator->property("status").toInt(), 1);
 }
 
-void ImportApiTests::button_family_components_contract_data()
+void ImportApiTests::button_family_components_contract(bool mobile)
 {
-    QTest::addColumn<bool>("mobile");
-    QTest::newRow("desktop") << false;
-    QTest::newRow("mobile") << true;
-}
-
-void ImportApiTests::button_family_components_contract()
-{
-    QFETCH(bool, mobile);
     QQmlEngine engine;
     engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
     engine.rootContext()->setContextProperty("testMobile", mobile);
@@ -4446,14 +4517,14 @@ Item {
 }
 )";
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     QQuickWindow window;
     window.resize(640, 400);
     auto *host = qobject_cast<QQuickItem *>(root.data());
-    QVERIFY(host);
+    CTEST_CHECK(host);
     host->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    CTEST_CHECK(waitForWindowExposed(&window));
     const int scale = 1;
     const QStringList families = {"pushLabel", "pushIcon", "dropdownLabel", "dropdownIcon"};
     int expectedCalls = 0;
@@ -4461,51 +4532,53 @@ Item {
         for (int kind = 0; kind < families.size(); ++kind) {
             const QString buttonName = families.at(kind) + QString::number(tone);
             auto *button = visualChildByObjectName(host, buttonName);
-            QVERIFY2(button, qPrintable(buttonName));
-            QTRY_COMPARE(button->height(), 22.0 * scale);
-            QCOMPARE(button->property("cornerRadius").toInt(), 8 * scale);
-            QCOMPARE(button->property("resolvedCornerRadius").toReal(), 8.0 * scale);
+            CTEST_CHECK_MESSAGE(button, qPrintable(buttonName));
+            IMPORT_WAIT_COMPARE(button->height(), 22.0 * scale);
+            IMPORT_COMPARE(button->property("cornerRadius").toInt(), 8 * scale);
+            IMPORT_COMPARE(button->property("resolvedCornerRadius").toReal(), 8.0 * scale);
             const QList<int> leftInsets = {8, 2, 8, 4};
             const QList<int> rightInsets = {8, 2, 2, 2};
-            QCOMPARE(button->property("leftPadding").toReal(), qreal(leftInsets.at(kind) * scale));
-            QCOMPARE(button->property("rightPadding").toReal(), qreal(rightInsets.at(kind) * scale));
+            IMPORT_COMPARE(button->property("leftPadding").toReal(), qreal(leftInsets.at(kind) * scale));
+            IMPORT_COMPARE(button->property("rightPadding").toReal(), qreal(rightInsets.at(kind) * scale));
             const qreal topInset = kind == 0 ? (22.0 * scale - 13) / 2 : 2.0 * scale;
-            QCOMPARE(button->property("topPadding").toReal(), topInset);
-            QCOMPARE(button->property("bottomPadding").toReal(), topInset);
+            IMPORT_COMPARE(button->property("topPadding").toReal(), topInset);
+            IMPORT_COMPARE(button->property("bottomPadding").toReal(), topInset);
             const qreal gap = kind == 0 ? 10 * scale : kind == 1 ? (tone == 0 ? 0 : 7 * scale)
                 : kind == 2 ? 0 : -2 * scale;
-            QCOMPARE(button->property("spacing").toReal(), gap);
+            IMPORT_COMPARE(button->property("spacing").toReal(), gap);
             const QList<qreal> widths = {40.0 + 16 * scale, 22.0 * scale,
                                          32.0 + 28 * scale, 40.0 * scale};
-            QCOMPARE(button->width(), widths.at(kind));
+            IMPORT_COMPARE(button->width(), widths.at(kind));
             if (kind >= 2) {
                 auto *indicator = button->findChild<QQuickItem *>(kind == 2
                     ? "labelMenuButton_indicator" : "iconMenuButton_indicator");
-                QVERIFY(indicator);
+                CTEST_CHECK(indicator);
                 const QPointF position = indicator->mapToItem(button, QPointF());
-                QCOMPARE(position.x(), kind == 2 ? 32.0 + 8 * scale : 20.0 * scale);
-                QCOMPARE(position.y(), 2.0 * scale);
-                QCOMPARE(indicator->width(), 18.0 * scale);
-                QTRY_COMPARE(indicator->property("status").toInt(), 1);
+                IMPORT_COMPARE(position.x(), kind == 2 ? 32.0 + 8 * scale : 20.0 * scale);
+                IMPORT_COMPARE(position.y(), 2.0 * scale);
+                IMPORT_COMPARE(indicator->width(), 18.0 * scale);
+                IMPORT_WAIT_COMPARE(indicator->property("status").toInt(), 1);
             }
-            QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier,
+            mouseClick(&window, Qt::LeftButton, Qt::NoModifier,
                              scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
             if (tone != 4)
                 ++expectedCalls;
-            QCOMPARE(root->property("methodCalls").toInt(), expectedCalls);
-            QCOMPARE(root->property("signalCalls").toInt(), expectedCalls);
+            IMPORT_COMPARE(root->property("methodCalls").toInt(), expectedCalls);
+            IMPORT_COMPARE(root->property("signalCalls").toInt(), expectedCalls);
         }
     }
     const QString captureDir = qEnvironmentVariable("LVRS_BUTTON_CAPTURE_DIR");
     if (!captureDir.isEmpty()) {
-        QVERIFY(QDir().mkpath(captureDir));
-        QSignalSpy frameSpy(&window, &QQuickWindow::frameSwapped);
+        CTEST_CHECK(QDir().mkpath(captureDir));
+        ImportSignalRecorder frameSpy;
+        const auto frameSpyConnection = QObject::connect(&window, &QQuickWindow::frameSwapped, &frameSpy, &ImportSignalRecorder::recordVoid);
+        CTEST_CHECK(frameSpyConnection);
         window.update();
-        QTRY_VERIFY_WITH_TIMEOUT(frameSpy.count() > 0, 5000);
+        CTEST_WAIT_VERIFY(frameSpy.events.size() > 0, 5000);
         const auto capture = host->grabToImage(QSize(1280, 800));
-        QVERIFY(capture);
-        QTRY_VERIFY(!capture->image().isNull());
-        QVERIFY(capture->image().save(captureDir + (mobile ? "/buttons-mobile.png" : "/buttons-desktop.png")));
+        CTEST_CHECK(capture);
+        CTEST_WAIT_DEFAULT(!capture->image().isNull());
+        CTEST_CHECK(capture->image().save(captureDir + (mobile ? "/buttons-mobile.png" : "/buttons-desktop.png")));
     }
 }
 
@@ -4539,20 +4612,12 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("defaultToneReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("defaultToneReady").toBool());
 }
 
-void ImportApiTests::segmented_control_figma_contract_loads_data()
+void ImportApiTests::segmented_control_figma_contract_loads(bool mobile)
 {
-    QTest::addColumn<bool>("mobile");
-    QTest::newRow("desktop") << false;
-    QTest::newRow("mobile") << true;
-}
-
-void ImportApiTests::segmented_control_figma_contract_loads()
-{
-    QFETCH(bool, mobile);
     QQmlEngine engine;
     const QString importBase = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/..");
     engine.addImportPath(importBase);
@@ -4561,7 +4626,7 @@ void ImportApiTests::segmented_control_figma_contract_loads()
     const auto verifyBounds = [](QQuickItem *item, QQuickItem *ancestor, const QRectF &expected) {
         const QRectF actual(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
                             QSizeF(item->width(), item->height()));
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -4680,18 +4745,18 @@ Item {
                                    .toUtf8();
 
         QScopedPointer<QObject> root(createFromQml(engine, qml));
-        QVERIFY(root);
-        QTRY_VERIFY2(root->property("contractReady").toBool(),
+        CTEST_CHECK(root);
+        IMPORT_WAIT_MESSAGE(root->property("contractReady").toBool(),
                      qPrintable(root->property("contractDebug").toString()));
 
         auto *labelSegment = qobject_cast<QQuickItem *>(
             root->findChild<QObject *>(QStringLiteral("figmaLabelSegment")));
         auto *iconSegment = qobject_cast<QQuickItem *>(
             root->findChild<QObject *>(QStringLiteral("figmaIconSegment")));
-        QVERIFY(labelSegment);
-        QVERIFY(iconSegment);
+        CTEST_CHECK(labelSegment);
+        CTEST_CHECK(iconSegment);
         auto *verticalSegment = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("verticalIconSegment")));
-        QVERIFY(verticalSegment);
+        CTEST_CHECK(verticalSegment);
         const int borderlessTone = root->property("borderlessTone").toInt();
 
         for (int index = 0; index < count; ++index) {
@@ -4699,19 +4764,19 @@ Item {
                 root->findChild<QObject *>(QStringLiteral("labelSegmentButton_%1").arg(index)));
             auto *iconButton = qobject_cast<QQuickItem *>(
                 root->findChild<QObject *>(QStringLiteral("iconSegmentButton_%1").arg(index)));
-            QVERIFY(labelButton);
-            QVERIFY(iconButton);
+            CTEST_CHECK(labelButton);
+            CTEST_CHECK(iconButton);
             auto *verticalButton = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("verticalSegmentButton_%1").arg(index)));
-            QVERIFY(verticalButton);
+            CTEST_CHECK(verticalButton);
             verifyBounds(verticalButton, verticalSegment, QRectF(4.0, 4.0 + (index * 24.0), 22.0, 22.0));
-            QCOMPARE(verticalButton->property("effectiveTone").toInt(), borderlessTone);
-            QCOMPARE(verticalButton->property("tone").toInt(), 0);
-            QCOMPARE(labelButton->property("effectiveTone").toInt(), borderlessTone);
-            QCOMPARE(iconButton->property("effectiveTone").toInt(), borderlessTone);
-            QCOMPARE(labelButton->property("tone").toInt(), 0);
-            QCOMPARE(iconButton->property("tone").toInt(), 0);
-            QCOMPARE(labelButton->property("resolvedCornerRadius").toReal(), 8.0);
-            QCOMPARE(iconButton->property("resolvedCornerRadius").toReal(), 8.0);
+            IMPORT_COMPARE(verticalButton->property("effectiveTone").toInt(), borderlessTone);
+            IMPORT_COMPARE(verticalButton->property("tone").toInt(), 0);
+            IMPORT_COMPARE(labelButton->property("effectiveTone").toInt(), borderlessTone);
+            IMPORT_COMPARE(iconButton->property("effectiveTone").toInt(), borderlessTone);
+            IMPORT_COMPARE(labelButton->property("tone").toInt(), 0);
+            IMPORT_COMPARE(iconButton->property("tone").toInt(), 0);
+            IMPORT_COMPARE(labelButton->property("resolvedCornerRadius").toReal(), 8.0);
+            IMPORT_COMPARE(iconButton->property("resolvedCornerRadius").toReal(), 8.0);
             verifyBounds(labelButton,
                          labelSegment,
                          QRectF(4.0 + (index * 58.0), 3.5, 56.0, 22.0));
@@ -4721,36 +4786,38 @@ Item {
         }
 
         // Reorient an existing control and verify both geometry and child order.
-        QVERIFY(iconSegment->setProperty("orientation", int(Qt::Vertical)));
-        QTRY_COMPARE(iconSegment->width(), 30.0);
-        QTRY_COMPARE(iconSegment->height(), double(expectedIconWidth));
+        CTEST_CHECK(iconSegment->setProperty("orientation", int(Qt::Vertical)));
+        IMPORT_WAIT_COMPARE(iconSegment->width(), 30.0);
+        IMPORT_WAIT_COMPARE(iconSegment->height(), double(expectedIconWidth));
         for (int index = 0; index < count; ++index) {
             auto *button = qobject_cast<QQuickItem *>(root->findChild<QObject *>(QStringLiteral("iconSegmentButton_%1").arg(index)));
             verifyBounds(button, iconSegment, QRectF(4.0, 4.0 + index * 24.0, 22.0, 22.0));
         }
-        QVERIFY(iconSegment->setProperty("orientation", int(Qt::Horizontal)));
-        QTRY_COMPARE(iconSegment->width(), double(expectedIconWidth));
-        QTRY_COMPARE(iconSegment->height(), 30.0);
+        CTEST_CHECK(iconSegment->setProperty("orientation", int(Qt::Horizontal)));
+        IMPORT_WAIT_COMPARE(iconSegment->width(), double(expectedIconWidth));
+        IMPORT_WAIT_COMPARE(iconSegment->height(), 30.0);
 
         const QString captureDir = qEnvironmentVariable("LVRS_SEGMENT_CAPTURE_DIR");
         if (!captureDir.isEmpty()) {
-            QVERIFY(QDir().mkpath(captureDir));
+            CTEST_CHECK(QDir().mkpath(captureDir));
             QQuickWindow window;
             window.resize(460, 120);
             auto *host = qobject_cast<QQuickItem *>(root.data());
-            QVERIFY(host);
+            CTEST_CHECK(host);
             host->setParentItem(window.contentItem());
             window.show();
-            QVERIFY(QTest::qWaitForWindowExposed(&window));
-            QSignalSpy frameSpy(&window, &QQuickWindow::frameSwapped);
+            CTEST_CHECK(waitForWindowExposed(&window));
+            ImportSignalRecorder frameSpy;
+        const auto frameSpyConnection = QObject::connect(&window, &QQuickWindow::frameSwapped, &frameSpy, &ImportSignalRecorder::recordVoid);
+        CTEST_CHECK(frameSpyConnection);
             window.update();
-            QTRY_VERIFY_WITH_TIMEOUT(frameSpy.count() > 0, 5000);
+            CTEST_WAIT_VERIFY(frameSpy.events.size() > 0, 5000);
             const auto capture = host->grabToImage(QSize(920, 240));
-            QVERIFY(capture);
-            QTRY_VERIFY(!capture->image().isNull());
+            CTEST_CHECK(capture);
+            CTEST_WAIT_DEFAULT(!capture->image().isNull());
             const QString fileName = QStringLiteral("/segments-%1-%2.png")
                 .arg(mobile ? "mobile" : "desktop").arg(count);
-            QVERIFY(capture->image().save(captureDir + fileName));
+            CTEST_CHECK(capture->image().save(captureDir + fileName));
             host->setParentItem(nullptr);
         }
     }
@@ -4777,37 +4844,37 @@ Item {
     Component.onCompleted: LV.Theme.primaryColor = "#ef5123"
 }
 )"));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *button = root->findChild<QObject *>(QStringLiteral("segmentButton"));
     auto *group = root->findChild<QObject *>(QStringLiteral("segmentGroup"));
-    QVERIFY(button && group);
-    QTRY_COMPARE(button->property("effectiveTone").toInt(), 2); // Borderless presentation
-    QCOMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
-    QVERIFY(QMetaObject::invokeMethod(button, "click"));
-    QTRY_VERIFY(button->property("checked").toBool());
-    QCOMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
+    CTEST_CHECK(button && group);
+    IMPORT_WAIT_COMPARE(button->property("effectiveTone").toInt(), 2); // Borderless presentation
+    IMPORT_COMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
+    CTEST_CHECK(QMetaObject::invokeMethod(button, "click"));
+    CTEST_WAIT_DEFAULT(button->property("checked").toBool());
+    IMPORT_COMPARE(button->property("tone").toInt(), root->property("originalTone").toInt());
     auto *background=button->property("background").value<QObject *>();
-    QVERIFY(background);
-    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    CTEST_CHECK(background);
+    IMPORT_WAIT_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
     const auto oldColor=root->property("expectedSelected").value<QColor>();
     // The selected fill follows the app accent, including subsequent changes.
     auto *theme=engine.singletonInstance<QObject *>("LVRS", "Theme");
-    QVERIFY(theme); QVERIFY(theme->setProperty("primaryColor", QColor("#31bb75")));
-    QTRY_VERIFY(root->property("expectedSelected").value<QColor>()!=oldColor);
-    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
-    QVERIFY(group->setProperty("forceBorderlessTone",false));
-    QTRY_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
-    QCOMPARE(button->property("tone").toInt(),root->property("originalTone").toInt());
-    QTRY_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
-    QVERIFY(QMetaObject::invokeMethod(button, "click"));
-    QTRY_VERIFY(!button->property("checked").toBool());
-    QVERIFY(group->setProperty("forceBorderlessTone",true));
-    QTRY_COMPARE(button->property("effectiveTone").toInt(),2);
+    CTEST_CHECK(theme); CTEST_CHECK(theme->setProperty("primaryColor", QColor("#31bb75")));
+    CTEST_WAIT_DEFAULT(root->property("expectedSelected").value<QColor>()!=oldColor);
+    IMPORT_WAIT_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    CTEST_CHECK(group->setProperty("forceBorderlessTone",false));
+    IMPORT_WAIT_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
+    IMPORT_COMPARE(button->property("tone").toInt(),root->property("originalTone").toInt());
+    IMPORT_WAIT_COMPARE(background->property("color").value<QColor>(),root->property("expectedSelected").value<QColor>());
+    CTEST_CHECK(QMetaObject::invokeMethod(button, "click"));
+    CTEST_WAIT_DEFAULT(!button->property("checked").toBool());
+    CTEST_CHECK(group->setProperty("forceBorderlessTone",true));
+    IMPORT_WAIT_COMPARE(button->property("effectiveTone").toInt(),2);
     auto *buttonItem=qobject_cast<QQuickItem *>(button);
     auto *rootItem=qobject_cast<QQuickItem *>(root.data());
-    QVERIFY(buttonItem && rootItem);
+    CTEST_CHECK(buttonItem && rootItem);
     buttonItem->setParentItem(rootItem);
-    QTRY_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
+    IMPORT_WAIT_COMPARE(button->property("effectiveTone").toInt(),root->property("originalTone").toInt());
 }
 
 void ImportApiTests::button_injected_methods_contract_loads()
@@ -5001,8 +5068,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("injectedMethodsReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("injectedMethodsReady").toBool(),
                  qPrintable(root->property("methodLog").toString()));
 }
 
@@ -5105,9 +5172,9 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const QString stepperDebug = root->property("stepperDebug").toString();
-    QVERIFY2(root->property("stepperContractReady").toBool(), qPrintable(stepperDebug));
+    CTEST_CHECK_MESSAGE(root->property("stepperContractReady").toBool(), qPrintable(stepperDebug));
 
     const auto verifyRenderedVariant = [&root](const QString &controlName,
                                                 qreal expectedRotation) {
@@ -5116,18 +5183,18 @@ Item {
                                                          Qt::FindChildrenRecursively);
         QObject *icon = root->findChild<QObject *>(controlName + QStringLiteral("_iconSnapshot"),
                                                    Qt::FindChildrenRecursively);
-        QVERIFY(control);
-        QVERIFY(background);
-        QVERIFY(icon);
-        QCOMPARE(background->property("color"), control->property("renderedBackgroundColor"));
-        QVERIFY(qAbs(background->property("radius").toReal() - control->property("cornerRadius").toReal()) < 0.01);
-        QCOMPARE(icon->property("source"), control->property("renderedIconSource"));
-        QCOMPARE(icon->property("status").toInt(), 1);
-        QVERIFY(qAbs(icon->property("x").toReal() - control->property("iconBounds").toRectF().x()) < 0.01);
-        QVERIFY(qAbs(icon->property("y").toReal() - control->property("iconBounds").toRectF().y()) < 0.01);
-        QVERIFY(qAbs(icon->property("width").toReal() - control->property("iconWidth").toReal()) < 0.01);
-        QVERIFY(qAbs(icon->property("height").toReal() - control->property("iconHeight").toReal()) < 0.01);
-        QVERIFY(qAbs(icon->property("rotation").toReal() - expectedRotation) < 0.01);
+        CTEST_CHECK(control);
+        CTEST_CHECK(background);
+        CTEST_CHECK(icon);
+        IMPORT_COMPARE(background->property("color"), control->property("renderedBackgroundColor"));
+        CTEST_CHECK(qAbs(background->property("radius").toReal() - control->property("cornerRadius").toReal()) < 0.01);
+        IMPORT_COMPARE(icon->property("source"), control->property("renderedIconSource"));
+        IMPORT_COMPARE(icon->property("status").toInt(), 1);
+        CTEST_CHECK(qAbs(icon->property("x").toReal() - control->property("iconBounds").toRectF().x()) < 0.01);
+        CTEST_CHECK(qAbs(icon->property("y").toReal() - control->property("iconBounds").toRectF().y()) < 0.01);
+        CTEST_CHECK(qAbs(icon->property("width").toReal() - control->property("iconWidth").toReal()) < 0.01);
+        CTEST_CHECK(qAbs(icon->property("height").toReal() - control->property("iconHeight").toReal()) < 0.01);
+        CTEST_CHECK(qAbs(icon->property("rotation").toReal() - expectedRotation) < 0.01);
     };
 
     verifyRenderedVariant(QStringLiteral("primaryUpDown"), 0.0);
@@ -5199,8 +5266,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("comboBoxContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("comboBoxContractReady").toBool());
 }
 
 void ImportApiTests::input_field_figma_contract_loads()
@@ -5436,7 +5503,7 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *rootItem = qobject_cast<QQuickItem *>(root.data());
     auto *roundedItem = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaInputRounded")));
@@ -5446,80 +5513,80 @@ Item {
         root->findChild<QObject *>(QStringLiteral("figmaInputInline")));
     auto *searchItem = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaInputSearch")));
-    QVERIFY(rootItem);
-    QVERIFY(roundedItem);
-    QVERIFY(cylinderItem);
-    QVERIFY(inlineItem);
-    QVERIFY(searchItem);
+    CTEST_CHECK(rootItem);
+    CTEST_CHECK(roundedItem);
+    CTEST_CHECK(cylinderItem);
+    CTEST_CHECK(inlineItem);
+    CTEST_CHECK(searchItem);
     for (int index = 0; index < 18; ++index) {
         auto *combination = visualChildByObjectName(rootItem, QStringLiteral("inputCombination%1").arg(index));
-        QVERIFY(combination);
-        QTRY_VERIFY2(combination->property("comboReady").toBool(), qPrintable(combination->objectName()));
+        CTEST_CHECK(combination);
+        IMPORT_WAIT_MESSAGE(combination->property("comboReady").toBool(), qPrintable(combination->objectName()));
     }
 
     const auto verifyClearPadding = [](QQuickItem *field) {
         auto *clear = field->findChild<QQuickItem *>(field->objectName() + "_clearButton");
-        QVERIFY(clear);
-        QTRY_VERIFY(field->property("showClearButton").toBool());
-        QTRY_VERIFY(qAbs(field->width() - clear->mapToItem(field, QPointF()).x()
+        CTEST_CHECK(clear);
+        CTEST_WAIT_DEFAULT(field->property("showClearButton").toBool());
+        CTEST_WAIT_DEFAULT(qAbs(field->width() - clear->mapToItem(field, QPointF()).x()
                          - clear->width() - 8.0) < 0.01);
-        QTRY_COMPARE(clear->mapToItem(field, QPointF()).y() + clear->height() / 2,
+        IMPORT_WAIT_COMPARE(clear->mapToItem(field, QPointF()).y() + clear->height() / 2,
                      field->height() / 2);
         auto *input = field->property("inputItem").value<QQuickItem *>();
-        QVERIFY(input);
-        QTRY_VERIFY(qAbs(clear->mapToItem(field, QPointF()).x() - input->x()
+        CTEST_CHECK(input);
+        CTEST_WAIT_DEFAULT(qAbs(clear->mapToItem(field, QPointF()).x() - input->x()
                          - input->width() - field->property("sideSpacing").toReal()) < 0.01);
     };
     const QList<QQuickItem *> fields = {roundedItem, cylinderItem, inlineItem, searchItem};
     for (const QString &target : {QStringLiteral("macos"), QStringLiteral("ios"), QStringLiteral("android"),
                                   QStringLiteral("macos")}) {
-        QVERIFY(root->setProperty("themeTarget", target));
-        QTRY_VERIFY2(root->property("figmaInputFieldReady").toBool(),
+        CTEST_CHECK(root->setProperty("themeTarget", target));
+        IMPORT_WAIT_MESSAGE(root->property("figmaInputFieldReady").toBool(),
                      qPrintable(root->property("figmaInputFieldDiagnostics").toString()));
         for (QQuickItem *field : fields) {
             auto *input = field->property("inputItem").value<QQuickItem *>();
-            QVERIFY(input);
-            QCOMPARE(field->height(), 22.0);
-            QCOMPARE(input->y(), 4.5);
-            QCOMPARE(input->height(), 13.0);
+            CTEST_CHECK(input);
+            IMPORT_COMPARE(field->height(), 22.0);
+            IMPORT_COMPARE(input->y(), 4.5);
+            IMPORT_COMPARE(input->height(), 13.0);
             const QString originalText = field->property("text").toString();
-            QVERIFY(field->setProperty("text", QStringLiteral("Filled value")));
+            CTEST_CHECK(field->setProperty("text", QStringLiteral("Filled value")));
             verifyClearPadding(field);
-            QVERIFY(field->setProperty("text", originalText));
+            CTEST_CHECK(field->setProperty("text", originalText));
         }
         auto *searchIcon = searchItem->findChild<QQuickItem *>(QStringLiteral("figmaInputSearch_searchIconImage"));
-        QVERIFY(searchIcon);
-        QCOMPARE(searchIcon->mapToItem(searchItem, QPointF()).y(), 5.0);
-        QCOMPARE(searchIcon->height(), 12.0);
+        CTEST_CHECK(searchIcon);
+        IMPORT_COMPARE(searchIcon->mapToItem(searchItem, QPointF()).y(), 5.0);
+        IMPORT_COMPARE(searchIcon->height(), 12.0);
     }
     auto *passwordItem = root->findChild<QObject *>(QStringLiteral("figmaPasswordField"));
-    QVERIFY(passwordItem);
+    CTEST_CHECK(passwordItem);
     const int passwordEchoMode = passwordItem->property("echoMode").toInt();
-    QVERIFY(passwordItem->setProperty("mode", passwordItem->property("searchMode")));
-    QTRY_VERIFY(passwordItem->property("searchIconVisible").toBool());
-    QVERIFY(passwordItem->property("echoMode").toInt() != passwordEchoMode);
-    QVERIFY(passwordItem->setProperty("mode", passwordItem->property("passwordMode")));
-    QTRY_VERIFY(!passwordItem->property("searchIconVisible").toBool());
-    QCOMPARE(passwordItem->property("echoMode").toInt(), passwordEchoMode);
+    CTEST_CHECK(passwordItem->setProperty("mode", passwordItem->property("searchMode")));
+    CTEST_WAIT_DEFAULT(passwordItem->property("searchIconVisible").toBool());
+    CTEST_CHECK(passwordItem->property("echoMode").toInt() != passwordEchoMode);
+    CTEST_CHECK(passwordItem->setProperty("mode", passwordItem->property("passwordMode")));
+    CTEST_WAIT_DEFAULT(!passwordItem->property("searchIconVisible").toBool());
+    IMPORT_COMPARE(passwordItem->property("echoMode").toInt(), passwordEchoMode);
 
     // Fractional padding follows an explicit minimum height without clipping the line box.
-    QVERIFY(roundedItem->setProperty("fieldMinHeight", 30));
-    QTRY_COMPARE(roundedItem->height(), 30.0);
-    QCOMPARE(roundedItem->property("insetVertical").toReal(), 8.5);
-    QCOMPARE(roundedItem->property("inputItem").value<QQuickItem *>()->y(), 8.5);
-    QVERIFY(roundedItem->setProperty("fieldMinHeight", 22));
-    QTRY_COMPARE(roundedItem->height(), 22.0);
+    CTEST_CHECK(roundedItem->setProperty("fieldMinHeight", 30));
+    IMPORT_WAIT_COMPARE(roundedItem->height(), 30.0);
+    IMPORT_COMPARE(roundedItem->property("insetVertical").toReal(), 8.5);
+    IMPORT_COMPARE(roundedItem->property("inputItem").value<QQuickItem *>()->y(), 8.5);
+    CTEST_CHECK(roundedItem->setProperty("fieldMinHeight", 22));
+    IMPORT_WAIT_COMPARE(roundedItem->height(), 22.0);
 
     searchItem->setWidth(333);
-    QVERIFY(searchItem->setProperty("insetHorizontal", 19));
+    CTEST_CHECK(searchItem->setProperty("insetHorizontal", 19));
     verifyClearPadding(searchItem);
-    QVERIFY(searchItem->setProperty("text", QString()));
-    QVERIFY(!searchItem->property("showClearButton").toBool());
-    QTRY_COMPARE(searchItem->property("rightInset").toInt(), 19);
-    QVERIFY(searchItem->setProperty("text", QStringLiteral("abc")));
+    CTEST_CHECK(searchItem->setProperty("text", QString()));
+    CTEST_CHECK(!searchItem->property("showClearButton").toBool());
+    IMPORT_WAIT_COMPARE(searchItem->property("rightInset").toInt(), 19);
+    CTEST_CHECK(searchItem->setProperty("text", QStringLiteral("abc")));
     verifyClearPadding(searchItem);
     searchItem->setWidth(206);
-    QVERIFY(searchItem->setProperty("insetHorizontal", 7));
+    CTEST_CHECK(searchItem->setProperty("insetHorizontal", 7));
 
     roundedItem->setVisible(true);
     cylinderItem->setVisible(true);
@@ -5535,17 +5602,17 @@ Item {
     rootItem->setVisible(true);
     captureWindow.show();
     QCoreApplication::processEvents();
-    QVERIFY2(waitForInputMaterials({roundedItem, cylinderItem, inlineItem, searchItem}),
+    CTEST_CHECK_MESSAGE(waitForInputMaterials({roundedItem, cylinderItem, inlineItem, searchItem}),
              "Input field material painting did not complete");
 
-    QTest::qWait(120);
+    processFor(120);
     const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(698, 84));
-    QVERIFY(grabResult);
-    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    CTEST_CHECK(grabResult);
+    CTEST_WAIT_VERIFY(!grabResult->image().isNull(), 5000);
     const QImage captured = grabResult->image().convertToFormat(QImage::Format_RGBA8888);
     const qreal captureScale = static_cast<qreal>(captured.width()) / 698.0;
-    QVERIFY(captureScale >= 1.0);
-    QCOMPARE(captured.height(), qRound(84.0 * captureScale));
+    CTEST_CHECK(captureScale >= 1.0);
+    IMPORT_COMPARE(captured.height(), qRound(84.0 * captureScale));
 
     const auto logicalPixel = [&captured, captureScale](int x, int y) {
         return captured.pixelColor(qRound(x * captureScale), qRound(y * captureScale));
@@ -5556,13 +5623,13 @@ Item {
     const QColor cylinderFill = logicalPixel(396, 29);
     const QColor inlineFill = logicalPixel(622, 29);
     qInfo() << "TextField material alpha:" << roundedFill.alphaF() << inlineFill.alphaF();
-    QVERIFY(roundedFill.alphaF() > 0.63 && roundedFill.alphaF() < 0.70);
-    QVERIFY(qAbs(roundedFill.alpha() - cylinderFill.alpha()) <= 2);
-    QVERIFY(inlineFill.alphaF() > 0.15 && inlineFill.alphaF() < 0.22);
-    QVERIFY(logicalPixel(225, 29).alpha() > 0);
-    QCOMPARE(logicalPixel(226, 29).alpha(), 0);
-    QCOMPARE(logicalPixel(20, 20).alpha(), 0);
-    QCOMPARE(logicalPixel(246, 20).alpha(), 0);
+    CTEST_CHECK(roundedFill.alphaF() > 0.63 && roundedFill.alphaF() < 0.70);
+    CTEST_CHECK(qAbs(roundedFill.alpha() - cylinderFill.alpha()) <= 2);
+    CTEST_CHECK(inlineFill.alphaF() > 0.15 && inlineFill.alphaF() < 0.22);
+    CTEST_CHECK(logicalPixel(225, 29).alpha() > 0);
+    IMPORT_COMPARE(logicalPixel(226, 29).alpha(), 0);
+    IMPORT_COMPARE(logicalPixel(20, 20).alpha(), 0);
+    IMPORT_COMPARE(logicalPixel(246, 20).alpha(), 0);
 
     int searchGlyphPixels = 0;
     for (int y = 50; y < 62; ++y) {
@@ -5571,7 +5638,7 @@ Item {
                 ++searchGlyphPixels;
         }
     }
-    QVERIFY(searchGlyphPixels > 8);
+    CTEST_CHECK(searchGlyphPixels > 8);
 
     int clearGlyphPixels = 0;
     for (int y = 50; y < 62; ++y) {
@@ -5580,19 +5647,19 @@ Item {
                 ++clearGlyphPixels;
         }
     }
-    QVERIFY(clearGlyphPixels > 16);
+    CTEST_CHECK(clearGlyphPixels > 16);
 
     const QString capturePath = qEnvironmentVariable("LVRS_INPUT_FIELD_CAPTURE_PATH");
     if (!capturePath.isEmpty())
-        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+        CTEST_CHECK_MESSAGE(captured.save(capturePath), qPrintable(capturePath));
 
     auto *clear = searchItem->findChild<QQuickItem *>(QStringLiteral("figmaInputSearch_clearButton"));
-    QVERIFY(clear);
-    QTest::mouseClick(&captureWindow, Qt::LeftButton, Qt::NoModifier,
+    CTEST_CHECK(clear);
+    mouseClick(&captureWindow, Qt::LeftButton, Qt::NoModifier,
                      scenePoint(clear, QPointF(clear->width() / 2, clear->height() / 2)));
-    QTRY_COMPARE(searchItem->property("text").toString(), QString());
-    QVERIFY(!searchItem->property("showClearButton").toBool());
-    QTRY_VERIFY(searchItem->property("focused").toBool());
+    IMPORT_WAIT_COMPARE(searchItem->property("text").toString(), QString());
+    CTEST_CHECK(!searchItem->property("showClearButton").toBool());
+    CTEST_WAIT_DEFAULT(searchItem->property("focused").toBool());
 }
 
 void ImportApiTests::input_field_material_rendering_contract()
@@ -5658,26 +5725,26 @@ Controls.ApplicationWindow {
 }
 )";
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     QList<QQuickItem *> fields;
     for (int i = 0; i < 18; ++i) {
         auto *field = visualChildByObjectName(window->contentItem(),
                                              QStringLiteral("materialField%1").arg(i));
-        QVERIFY(field);
+        CTEST_CHECK(field);
         fields.append(field);
         auto *materialCanvas = visualChildByObjectName(field, QStringLiteral("inputFieldMaterial"));
-        QVERIFY(materialCanvas);
+        CTEST_CHECK(materialCanvas);
         const auto strategyIndex = materialCanvas->metaObject()->indexOfEnumerator("RenderStrategy");
-        QVERIFY(strategyIndex >= 0);
+        CTEST_CHECK(strategyIndex >= 0);
         const auto strategy = materialCanvas->metaObject()->enumerator(strategyIndex);
-        QCOMPARE(materialCanvas->property("renderStrategy").toInt(), strategy.keyToValue("Threaded"));
-        QCOMPARE(field->size(), QSizeF(206, 22));
+        IMPORT_COMPARE(materialCanvas->property("renderStrategy").toInt(), strategy.keyToValue("Threaded"));
+        IMPORT_COMPARE(field->size(), QSizeF(206, 22));
         auto *input = field->property("inputItem").value<QQuickItem *>();
-        QVERIFY(input);
-        QCOMPARE(input->y(), 4.5);
-        QCOMPARE(input->height(), 13.0);
+        CTEST_CHECK(input);
+        IMPORT_COMPARE(input->y(), 4.5);
+        IMPORT_COMPARE(input->height(), 13.0);
         QQuickItem *placeholder = nullptr;
         for (auto *candidate : field->findChildren<QQuickItem *>()) {
             if (candidate->property("text").toString() == field->property("placeholderText").toString()) {
@@ -5685,17 +5752,17 @@ Controls.ApplicationWindow {
                 break;
             }
         }
-        QVERIFY(placeholder);
-        QCOMPARE(placeholder->y(), input->y());
-        QCOMPARE(placeholder->height(), input->height());
-        QCOMPARE(placeholder->property("color").value<QColor>().rgba(),
+        CTEST_CHECK(placeholder);
+        IMPORT_COMPARE(placeholder->y(), input->y());
+        IMPORT_COMPARE(placeholder->height(), input->height());
+        IMPORT_COMPARE(placeholder->property("color").value<QColor>().rgba(),
                  root->property(i % 6 == 1 ? "expectedDisabledPlaceholderColor" : "expectedPlaceholderColor").value<QColor>().rgba());
-        QCOMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
-        QTRY_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
+        IMPORT_COMPARE(placeholder->property("visible").toBool(), i % 6 < 2);
+        IMPORT_WAIT_COMPARE(field->property("glassActive").toBool(), i % 6 != 1);
     }
-    QVERIFY2(waitForInputMaterials(fields), "Input field material painting did not complete");
+    CTEST_CHECK_MESSAGE(waitForInputMaterials(fields), "Input field material painting did not complete");
     const auto grab = [window]() -> QImage {
-        QTest::qWait(120);
+        processFor(120);
         const auto result = window->contentItem()->grabToImage(window->size());
         if (!result)
             return {};
@@ -5706,7 +5773,7 @@ Controls.ApplicationWindow {
         return result->image().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
     };
     const QImage material = grab();
-    QVERIFY(!material.isNull());
+    CTEST_CHECK(!material.isNull());
     const auto depth = [](const QImage &image, QQuickItem *field) {
         const QPoint p = scenePoint(field, QPointF(150, 0));
         return qGray(image.pixel(p + QPoint(0, qRound(field->height()) - 1)))
@@ -5714,28 +5781,28 @@ Controls.ApplicationWindow {
     };
     for (int column = 0; column < 3; ++column) {
         QQuickItem *field = fields[column * 6];
-        QVERIFY2(depth(material, field) > (column == 2 ? 1 : 7),
+        CTEST_CHECK_MESSAGE(depth(material, field) > (column == 2 ? 1 : 7),
                  "The lower inner reflection must be brighter than the recessed top.");
-        QVERIFY(depth(material, field) > depth(material, fields[column * 6 + 1]));
+        CTEST_CHECK(depth(material, field) > depth(material, fields[column * 6 + 1]));
         const QPoint p = scenePoint(field, QPointF(150, 0));
-        QVERIFY2(qGray(material.pixel(p + QPoint(0, qRound(field->height()) - 1)))
+        CTEST_CHECK_MESSAGE(qGray(material.pixel(p + QPoint(0, qRound(field->height()) - 1)))
                      > qGray(material.pixel(p + QPoint(0, qRound(field->height() / 2)))) + (column == 2 ? 2 : 10),
                  "The material must include the lower rim, including when supersampled.");
-        QCOMPARE(material.pixelColor(p + QPoint(0, -1)), QColor("#1f1f1f"));
-        QCOMPARE(material.pixelColor(p + QPoint(0, qRound(field->height()))), QColor("#1f1f1f"));
+        IMPORT_COMPARE(material.pixelColor(p + QPoint(0, -1)), QColor("#1f1f1f"));
+        IMPORT_COMPARE(material.pixelColor(p + QPoint(0, qRound(field->height()))), QColor("#1f1f1f"));
     }
 
-    QVERIFY(root->setProperty("detailedBackdrop", true));
+    CTEST_CHECK(root->setProperty("detailedBackdrop", true));
     const QImage frosted = grab();
     for (QQuickItem *field : fields)
-        QVERIFY(field->setProperty("glassEnabled", false));
+        CTEST_CHECK(field->setProperty("glassEnabled", false));
     const QImage unblurred = grab();
     const QString captureDir = qEnvironmentVariable("LVRS_INPUT_MATERIAL_CAPTURE_DIR");
     if (!captureDir.isEmpty()) {
-        QVERIFY(QDir().mkpath(captureDir));
-        QVERIFY(material.save(captureDir + "/textfield-material.png"));
-        QVERIFY(frosted.save(captureDir + "/textfield-frosted.png"));
-        QVERIFY(unblurred.save(captureDir + "/textfield-without-blur.png"));
+        CTEST_CHECK(QDir().mkpath(captureDir));
+        CTEST_CHECK(material.save(captureDir + "/textfield-material.png"));
+        CTEST_CHECK(frosted.save(captureDir + "/textfield-frosted.png"));
+        CTEST_CHECK(unblurred.save(captureDir + "/textfield-without-blur.png"));
     }
     const auto variation = [](const QImage &image, QQuickItem *field) {
         const QPoint p = scenePoint(field, QPointF(95, 6));
@@ -5751,69 +5818,69 @@ Controls.ApplicationWindow {
         auto *field = fields[column * 6];
         const double sharpDetail = variation(unblurred, field);
         const double frostedDetail = variation(frosted, field);
-        QVERIFY2(sharpDetail > 1000, "The fixture must show fine detail through the material.");
+        CTEST_CHECK_MESSAGE(sharpDetail > 1000, "The fixture must show fine detail through the material.");
         qInfo() << "TextField style" << column << "backdrop detail:"
                 << frostedDetail << "unblurred:" << sharpDetail;
         if (software)
-            QCOMPARE(frostedDetail, sharpDetail);
+            IMPORT_COMPARE(frostedDetail, sharpDetail);
         else
             // MultiEffect mixes blur levels (including some source detail at 6/8px).
             // Require a substantial reduction without changing the Figma blur radii.
-            QVERIFY2(frostedDetail < sharpDetail * 0.60, "The actual backdrop must be blurred.");
-        QCOMPARE(variation(frosted, fields[column * 6 + 1]),
+            CTEST_CHECK_MESSAGE(frostedDetail < sharpDetail * 0.60, "The actual backdrop must be blurred.");
+        IMPORT_COMPARE(variation(frosted, fields[column * 6 + 1]),
                  variation(unblurred, fields[column * 6 + 1]));
     }
     for (QQuickItem *field : fields)
-        QVERIFY(field->setProperty("glassEnabled", true));
+        CTEST_CHECK(field->setProperty("glassEnabled", true));
 
     auto *field = fields.first();
     auto *capture = visualChildByObjectName(field, QStringLiteral("inputFieldGlassCapture"));
-    QVERIFY(capture);
-    QVERIFY(!capture->property("recursive").toBool());
-    QVERIFY(!capture->property("hideSource").toBool());
+    CTEST_CHECK(capture);
+    CTEST_CHECK(!capture->property("recursive").toBool());
+    CTEST_CHECK(!capture->property("hideSource").toBool());
     const QRectF beforeMove = capture->property("sourceRect").toRectF();
-    QVERIFY(root->setProperty("contentOffset", 11));
-    QTRY_COMPARE(capture->property("sourceRect").toRectF().x(), beforeMove.x() + 11);
-    QCOMPARE(capture->property("sourceRect").toRectF().size(), beforeMove.size());
-    QVERIFY(root->setProperty("contentOffset", 0));
+    CTEST_CHECK(root->setProperty("contentOffset", 11));
+    IMPORT_WAIT_COMPARE(capture->property("sourceRect").toRectF().x(), beforeMove.x() + 11);
+    IMPORT_COMPARE(capture->property("sourceRect").toRectF().size(), beforeMove.size());
+    CTEST_CHECK(root->setProperty("contentOffset", 0));
 
     // A live sibling source updates, while capturing the field or an ancestor is rejected.
-    QVERIFY(root->setProperty("stripeColor", QColor("#e74a62")));
+    CTEST_CHECK(root->setProperty("stripeColor", QColor("#e74a62")));
     const QImage changedBackdrop = grab();
     if (!software)
-        QVERIFY(changedBackdrop.pixelColor(170, 33) != frosted.pixelColor(170, 33));
+        CTEST_CHECK(changedBackdrop.pixelColor(170, 33) != frosted.pixelColor(170, 33));
     for (QQuickItem *unsafeSource : {window->contentItem(), field,
                                     field->property("inputItem").value<QQuickItem *>()}) {
-        QVERIFY(field->setProperty("backdropSource", QVariant::fromValue(unsafeSource)));
-        QTRY_VERIFY(!field->property("glassActive").toBool());
-        QVERIFY(!capture->property("sourceItem").value<QQuickItem *>());
+        CTEST_CHECK(field->setProperty("backdropSource", QVariant::fromValue(unsafeSource)));
+        CTEST_WAIT_DEFAULT(!field->property("glassActive").toBool());
+        CTEST_CHECK(!capture->property("sourceItem").value<QQuickItem *>());
     }
     auto *backdrop = root->findChild<QQuickItem *>("materialBackdrop");
-    QVERIFY(backdrop);
-    QVERIFY(field->setProperty("backdropSource", QVariant::fromValue(backdrop)));
-    QTRY_VERIFY(field->property("glassActive").toBool());
+    CTEST_CHECK(backdrop);
+    CTEST_CHECK(field->setProperty("backdropSource", QVariant::fromValue(backdrop)));
+    CTEST_WAIT_DEFAULT(field->property("glassActive").toBool());
     field->setVisible(false);
-    QVERIFY(!capture->property("live").toBool());
+    CTEST_CHECK(!capture->property("live").toBool());
     field->setVisible(true);
-    QTRY_VERIFY(capture->property("live").toBool());
+    CTEST_WAIT_DEFAULT(capture->property("live").toBool());
 
     // Repainting the material must preserve the public tint override and native input.
-    QVERIFY(root->setProperty("detailedBackdrop", false));
-    QVERIFY(field->setProperty("backgroundColor", QColor("#994433")));
+    CTEST_CHECK(root->setProperty("detailedBackdrop", false));
+    CTEST_CHECK(field->setProperty("backgroundColor", QColor("#994433")));
     const QImage customTint = grab();
-    QVERIFY(customTint.pixelColor(170, 33).red() > 130);
+    CTEST_CHECK(customTint.pixelColor(170, 33).red() > 130);
     auto *searchField = fields[5];
     auto *clear = visualChildByObjectName(searchField, QStringLiteral("materialField5_clearButton"));
-    QVERIFY(clear);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+    CTEST_CHECK(clear);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier,
                      scenePoint(clear, QPointF(clear->width() / 2, clear->height() / 2)));
-    QTRY_COMPARE(searchField->property("text").toString(), QString());
-    QTRY_VERIFY(searchField->property("focused").toBool());
+    IMPORT_WAIT_COMPARE(searchField->property("text").toString(), QString());
+    CTEST_WAIT_DEFAULT(searchField->property("focused").toBool());
     for (const Qt::Key key : {Qt::Key_T, Qt::Key_Y, Qt::Key_P, Qt::Key_E, Qt::Key_D})
-        QTest::keyClick(window, key);
-    QTRY_COMPARE(searchField->property("text").toString(), QStringLiteral("typed"));
-    QVERIFY(QMetaObject::invokeMethod(searchField, "selectAll"));
-    QCOMPARE(searchField->property("selectedText").toString(), QStringLiteral("typed"));
+        keyClick(window, key);
+    IMPORT_WAIT_COMPARE(searchField->property("text").toString(), QStringLiteral("typed"));
+    CTEST_CHECK(QMetaObject::invokeMethod(searchField, "selectAll"));
+    IMPORT_COMPARE(searchField->property("selectedText").toString(), QStringLiteral("typed"));
 }
 
 void ImportApiTests::progress_bar_range_contract_loads()
@@ -5924,8 +5991,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("progressBarRangeReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("progressBarRangeReady").toBool());
 }
 
 void ImportApiTests::control_icons_use_supersampled_raster_contract()
@@ -5966,7 +6033,7 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     const auto assertSnapshotImage = [&](const QString &controlObjectName,
                                          const QString &objectName,
@@ -5975,8 +6042,8 @@ Item {
                                          const char *heightPropertyName) {
         QObject *controlObject = root->findChild<QObject *>(controlObjectName, Qt::FindChildrenRecursively);
         QObject *imageObject = root->findChild<QObject *>(objectName, Qt::FindChildrenRecursively);
-        QVERIFY2(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
-        QVERIFY2(imageObject, qPrintable(QStringLiteral("Expected image object %1").arg(objectName)));
+        CTEST_CHECK_MESSAGE(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
+        CTEST_CHECK_MESSAGE(imageObject, qPrintable(QStringLiteral("Expected image object %1").arg(objectName)));
 
         const QSize sourceSize = imageObject->property("sourceSize").toSize();
         const QUrl source = imageObject->property("source").toUrl();
@@ -5984,9 +6051,9 @@ Item {
         const qreal expectedWidth = controlObject->property(widthPropertyName).toReal();
         const qreal expectedHeight = controlObject->property(heightPropertyName).toReal();
 
-        QCOMPARE(source, expectedSource);
-        QCOMPARE(sourceSize.width(), qRound(expectedWidth));
-        QCOMPARE(sourceSize.height(), qRound(expectedHeight));
+        IMPORT_COMPARE(source, expectedSource);
+        IMPORT_COMPARE(sourceSize.width(), qRound(expectedWidth));
+        IMPORT_COMPARE(sourceSize.height(), qRound(expectedHeight));
     };
 
     const auto assertSupersampledCanvas = [&](const QString &controlObjectName,
@@ -5994,22 +6061,22 @@ Item {
                                               const char *scalePropertyName) {
         QObject *controlObject = root->findChild<QObject *>(controlObjectName, Qt::FindChildrenRecursively);
         QObject *canvasObject = root->findChild<QObject *>(objectName, Qt::FindChildrenRecursively);
-        QVERIFY2(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
-        QVERIFY2(canvasObject, qPrintable(QStringLiteral("Expected canvas object %1").arg(objectName)));
+        CTEST_CHECK_MESSAGE(controlObject, qPrintable(QStringLiteral("Expected control object %1").arg(controlObjectName)));
+        CTEST_CHECK_MESSAGE(canvasObject, qPrintable(QStringLiteral("Expected canvas object %1").arg(objectName)));
 
         const QSize canvasSize = canvasObject->property("canvasSize").toSize();
         const qreal logicalWidth = canvasObject->property("width").toReal();
         const qreal logicalHeight = canvasObject->property("height").toReal();
         const qreal rasterScale = controlObject->property(scalePropertyName).toReal();
 
-        QVERIFY2(logicalWidth > 0.0, qPrintable(QStringLiteral("%1 width must be positive").arg(objectName)));
-        QVERIFY2(logicalHeight > 0.0, qPrintable(QStringLiteral("%1 height must be positive").arg(objectName)));
-        QVERIFY2(canvasSize.width() > qRound(logicalWidth),
+        CTEST_CHECK_MESSAGE(logicalWidth > 0.0, qPrintable(QStringLiteral("%1 width must be positive").arg(objectName)));
+        CTEST_CHECK_MESSAGE(logicalHeight > 0.0, qPrintable(QStringLiteral("%1 height must be positive").arg(objectName)));
+        CTEST_CHECK_MESSAGE(canvasSize.width() > qRound(logicalWidth),
                  qPrintable(QStringLiteral("%1 canvas width should exceed logical width").arg(objectName)));
-        QVERIFY2(canvasSize.height() > qRound(logicalHeight),
+        CTEST_CHECK_MESSAGE(canvasSize.height() > qRound(logicalHeight),
                  qPrintable(QStringLiteral("%1 canvas height should exceed logical height").arg(objectName)));
-        QCOMPARE(canvasSize.width(), qCeil(logicalWidth * rasterScale));
-        QCOMPARE(canvasSize.height(), qCeil(logicalHeight * rasterScale));
+        IMPORT_COMPARE(canvasSize.width(), qCeil(logicalWidth * rasterScale));
+        IMPORT_COMPARE(canvasSize.height(), qCeil(logicalHeight * rasterScale));
     };
 
     assertSnapshotImage(QStringLiteral("stepper"),
@@ -6057,8 +6124,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("iosNativeTextReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("iosNativeTextReady").toBool());
 }
 
 void ImportApiTests::input_field_native_event_input_contract_loads()
@@ -6098,56 +6165,56 @@ LV.ApplicationWindow {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     window->show();
-    QTRY_VERIFY(window->isVisible());
+    CTEST_WAIT_DEFAULT(window->isVisible());
 
     QObject *field = root->findChild<QObject *>(QStringLiteral("inputField"));
-    QVERIFY(field);
+    CTEST_CHECK(field);
     auto *inputItem = root->findChild<QQuickItem *>(QStringLiteral("nativeInput"));
-    QVERIFY(inputItem);
+    CTEST_CHECK(inputItem);
 
     const QPoint wordPoint = scenePoint(inputItem, QPointF(28.0, inputItem->height() * 0.5));
     const QPoint dragStart = scenePoint(inputItem, QPointF(8.0, inputItem->height() * 0.5));
     const QPoint dragEnd = scenePoint(inputItem, QPointF(132.0, inputItem->height() * 0.5));
 
-    QVERIFY(!mouseAreaContainsScenePoint(root.data(), wordPoint));
+    CTEST_CHECK(!mouseAreaContainsScenePoint(root.data(), wordPoint));
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(inputItem->property("activeFocus").toBool());
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    CTEST_WAIT_DEFAULT(inputItem->property("activeFocus").toBool());
 
     inputItem->setProperty("cursorPosition", 0);
-    QTest::keyClick(window, Qt::Key_Z, Qt::NoModifier, 10);
-    QTRY_VERIFY(field->property("text").toString().startsWith(QStringLiteral("z")));
+    keyClick(window, Qt::Key_Z, Qt::NoModifier, 10);
+    CTEST_WAIT_DEFAULT(field->property("text").toString().startsWith(QStringLiteral("z")));
 
     QInputMethodEvent preeditEvent(QStringLiteral("preedit"), {});
     QCoreApplication::sendEvent(inputItem, &preeditEvent);
-    QTRY_COMPARE(inputItem->property("preeditText").toString(), QStringLiteral("preedit"));
+    IMPORT_WAIT_COMPARE(inputItem->property("preeditText").toString(), QStringLiteral("preedit"));
 
     QInputMethodEvent commitEvent;
     commitEvent.setCommitString(QStringLiteral("한"));
     QCoreApplication::sendEvent(inputItem, &commitEvent);
-    QTRY_VERIFY(field->property("text").toString().contains(QStringLiteral("한")));
+    CTEST_WAIT_DEFAULT(field->property("text").toString().contains(QStringLiteral("한")));
 
     inputItem->setProperty("text", QStringLiteral("alpha beta gamma"));
     inputItem->setProperty("cursorPosition", 0);
-    QVERIFY(QMetaObject::invokeMethod(field, "deselect"));
-    QTest::mouseDClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(inputItem->property("selectedText").toString().contains(QStringLiteral("alpha")));
+    CTEST_CHECK(QMetaObject::invokeMethod(field, "deselect"));
+    mouseDoubleClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    CTEST_WAIT_DEFAULT(inputItem->property("selectedText").toString().contains(QStringLiteral("alpha")));
     const QString doubleClickSelection = inputItem->property("selectedText").toString();
-    QVERIFY(!doubleClickSelection.isEmpty());
+    CTEST_CHECK(!doubleClickSelection.isEmpty());
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
-    QTRY_VERIFY(inputItem->property("selectedText").toString() != doubleClickSelection);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, wordPoint, 10);
+    CTEST_WAIT_DEFAULT(inputItem->property("selectedText").toString() != doubleClickSelection);
 
-    QVERIFY(QMetaObject::invokeMethod(field, "deselect"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, dragStart, 10);
-    QTest::mouseMove(window, dragEnd, 10);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, dragEnd, 10);
-    QTRY_VERIFY(inputItem->property("selectedText").toString().size() > 0);
+    CTEST_CHECK(QMetaObject::invokeMethod(field, "deselect"));
+    mousePress(window, Qt::LeftButton, Qt::NoModifier, dragStart, 10);
+    mouseMove(window, dragEnd, 10);
+    mouseRelease(window, Qt::LeftButton, Qt::NoModifier, dragEnd, 10);
+    CTEST_WAIT_DEFAULT(inputItem->property("selectedText").toString().size() > 0);
 }
 
 void ImportApiTests::input_field_search_icon_mobile_scaling_contract_loads()
@@ -6191,8 +6258,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("mobileSearchContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("mobileSearchContractReady").toBool());
 }
 
 void ImportApiTests::toggle_switch_figma_contract_loads()
@@ -6332,39 +6399,39 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("figmaToggleContractReady").toBool());
 
     QVariant stateAliasRoundTrip;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "verifyStateAliasRoundTrip",
                                       Q_RETURN_ARG(QVariant, stateAliasRoundTrip)));
-    QVERIFY(stateAliasRoundTrip.toBool());
+    CTEST_CHECK(stateAliasRoundTrip.toBool());
 
     QObject *desktopShadow = root->findChild<QObject *>(QStringLiteral("onSwitch_trackShadowEffect"),
                                                          Qt::FindChildrenRecursively);
-    QVERIFY(desktopShadow);
-    QVERIFY(desktopShadow->property("shadowEnabled").toBool());
-    QCOMPARE(desktopShadow->property("blurMax").toInt(), 4);
-    QCOMPARE(desktopShadow->property("shadowBlur").toReal(), 1.0);
-    QCOMPARE(desktopShadow->property("shadowHorizontalOffset").toReal(), 0.0);
-    QCOMPARE(desktopShadow->property("shadowVerticalOffset").toReal(), 4.0);
-    QCOMPARE(desktopShadow->property("shadowColor").value<QColor>(), QColor(QStringLiteral("#40000000")));
+    CTEST_CHECK(desktopShadow);
+    CTEST_CHECK(desktopShadow->property("shadowEnabled").toBool());
+    IMPORT_COMPARE(desktopShadow->property("blurMax").toInt(), 4);
+    IMPORT_COMPARE(desktopShadow->property("shadowBlur").toReal(), 1.0);
+    IMPORT_COMPARE(desktopShadow->property("shadowHorizontalOffset").toReal(), 0.0);
+    IMPORT_COMPARE(desktopShadow->property("shadowVerticalOffset").toReal(), 4.0);
+    IMPORT_COMPARE(desktopShadow->property("shadowColor").value<QColor>(), QColor(QStringLiteral("#40000000")));
 
     root->setProperty("themeTarget", QStringLiteral("ios"));
-    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+    CTEST_WAIT_DEFAULT(root->property("figmaToggleContractReady").toBool());
 
     QObject *mobileShadow = root->findChild<QObject *>(QStringLiteral("onSwitch_trackShadowEffect"),
                                                         Qt::FindChildrenRecursively);
-    QVERIFY(mobileShadow);
-    QCOMPARE(mobileShadow->property("blurMax").toInt(), 4);
-    QCOMPARE(mobileShadow->property("shadowVerticalOffset").toReal(), 4.0);
+    CTEST_CHECK(mobileShadow);
+    IMPORT_COMPARE(mobileShadow->property("blurMax").toInt(), 4);
+    IMPORT_COMPARE(mobileShadow->property("shadowVerticalOffset").toReal(), 4.0);
 
     root->setProperty("themeTarget", QStringLiteral("macos"));
-    QTRY_VERIFY(root->property("figmaToggleContractReady").toBool());
+    CTEST_WAIT_DEFAULT(root->property("figmaToggleContractReady").toBool());
 
     auto *rootItem = qobject_cast<QQuickItem *>(root.data());
-    QVERIFY(rootItem);
+    CTEST_CHECK(rootItem);
     QQuickWindow captureWindow;
     captureWindow.setColor(Qt::transparent);
     captureWindow.resize(152, 62);
@@ -6375,16 +6442,16 @@ Item {
     rootItem->setVisible(true);
     captureWindow.show();
     QCoreApplication::processEvents();
-    QTest::qWait(120);
+    processFor(120);
     QCoreApplication::processEvents();
 
     const QSharedPointer<QQuickItemGrabResult> grabResult = rootItem->grabToImage(QSize(152, 62));
-    QVERIFY(grabResult);
-    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    CTEST_CHECK(grabResult);
+    CTEST_WAIT_VERIFY(!grabResult->image().isNull(), 5000);
     const QImage captured = grabResult->image().convertToFormat(QImage::Format_RGBA8888);
     const qreal captureScale = static_cast<qreal>(captured.width()) / 152.0;
-    QVERIFY(captureScale >= 1.0);
-    QCOMPARE(captured.height(), qRound(62.0 * captureScale));
+    CTEST_CHECK(captureScale >= 1.0);
+    IMPORT_COMPARE(captured.height(), qRound(62.0 * captureScale));
 
     const auto logicalPixel = [&captured, captureScale](int x, int y) {
         return captured.pixelColor(qRound(x * captureScale), qRound(y * captureScale));
@@ -6392,7 +6459,7 @@ Item {
 
     const QString capturePath = qEnvironmentVariable("LVRS_TOGGLE_CAPTURE_PATH");
     if (!capturePath.isEmpty())
-        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+        CTEST_CHECK_MESSAGE(captured.save(capturePath), qPrintable(capturePath));
 
     const auto opaqueRgbMatches = [](const QColor &actual, const QColor &expected) {
         return qAbs(actual.red() - expected.red()) <= 2
@@ -6402,21 +6469,21 @@ Item {
     };
     const QColor capturedOnTrack = logicalPixel(28, 33);
     const QColor capturedOffTrack = logicalPixel(124, 33);
-    QVERIFY2(opaqueRgbMatches(capturedOnTrack, AccentFixture::color("accentBlue")),
+    CTEST_CHECK_MESSAGE(opaqueRgbMatches(capturedOnTrack, AccentFixture::color("accentBlue")),
              qPrintable(capturedOnTrack.name(QColor::HexArgb)));
-    QVERIFY2(opaqueRgbMatches(capturedOffTrack, QColor(QStringLiteral("#313233"))),
+    CTEST_CHECK_MESSAGE(opaqueRgbMatches(capturedOffTrack, QColor(QStringLiteral("#313233"))),
              qPrintable(capturedOffTrack.name(QColor::HexArgb)));
     const QColor capturedOnKnob = logicalPixel(47, 33);
     const QColor capturedOffKnob = logicalPixel(105, 33);
-    QVERIFY2(capturedOnKnob.lightness() > 220,
+    CTEST_CHECK_MESSAGE(capturedOnKnob.lightness() > 220,
              qPrintable(capturedOnKnob.name(QColor::HexArgb)));
-    QVERIFY2(capturedOffKnob.lightness() > 200,
+    CTEST_CHECK_MESSAGE(capturedOffKnob.lightness() > 200,
              qPrintable(capturedOffKnob.name(QColor::HexArgb)));
     int shadowOverflowAlpha = 0;
     for (int logicalY = 45; logicalY <= 52; ++logicalY)
         shadowOverflowAlpha = qMax(shadowOverflowAlpha, logicalPixel(39, logicalY).alpha());
     if (QGuiApplication::platformName() != QStringLiteral("offscreen"))
-        QVERIFY(shadowOverflowAlpha > 0);
+        CTEST_CHECK(shadowOverflowAlpha > 0);
 
 }
 
@@ -6566,8 +6633,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("figmaCheckBoxReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("figmaCheckBoxReady").toBool(),
                  qPrintable(root->property("figmaCheckBoxDiagnostics").toString()));
 
     auto *checkedEnabled = qobject_cast<QQuickItem *>(
@@ -6578,17 +6645,17 @@ Item {
         checkedEnabled, QStringLiteral("checkedEnabled_label"));
     auto *checkedAsset = visualChildByObjectName(
         checkedEnabled, QStringLiteral("checkedEnabled_checkedAsset"));
-    QVERIFY(checkedEnabled);
-    QVERIFY(indicator);
-    QVERIFY(label);
-    QVERIFY(checkedAsset);
+    CTEST_CHECK(checkedEnabled);
+    CTEST_CHECK(indicator);
+    CTEST_CHECK(label);
+    CTEST_CHECK(checkedAsset);
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
         return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
                       QSizeF(item->width(), item->height()));
     };
     const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -6602,8 +6669,8 @@ Item {
     verifyBounds(boundsIn(indicator, checkedEnabled), QRectF(0.5, 0.5, 17.0, 17.0));
     verifyBounds(boundsIn(label, checkedEnabled), QRectF(23.5, 2.5, 33.0, 13.0));
     verifyBounds(boundsIn(checkedAsset, checkedEnabled), QRectF(0.5, 0.5, 17.0, 17.0));
-    QTRY_COMPARE(checkedAsset->property("status").toInt(), 1);
-    QVERIFY(checkedAsset->property("source").toUrl().toString().endsWith(
+    IMPORT_WAIT_COMPARE(checkedAsset->property("status").toInt(), 1);
+    CTEST_CHECK(checkedAsset->property("source").toUrl().toString().endsWith(
         QStringLiteral("checkboxCheckedEnabled.svg")));
 }
 
@@ -6766,16 +6833,16 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("figmaRadioReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("figmaRadioReady").toBool(),
                  qPrintable(root->property("figmaRadioDiagnostics").toString()));
 
     auto *onEnabled = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("onEnabled")));
     auto *labeled = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("labeled")));
-    QVERIFY(onEnabled);
-    QVERIFY(labeled);
+    CTEST_CHECK(onEnabled);
+    CTEST_CHECK(labeled);
 
     auto *indicator = visualChildByObjectName(
         onEnabled, QStringLiteral("onEnabled_indicator"));
@@ -6783,16 +6850,16 @@ Item {
         onEnabled, QStringLiteral("onEnabled_dot"));
     auto *label = visualChildByObjectName(
         labeled, QStringLiteral("labeled_label"));
-    QVERIFY(indicator);
-    QVERIFY(dot);
-    QVERIFY(label);
+    CTEST_CHECK(indicator);
+    CTEST_CHECK(dot);
+    CTEST_CHECK(label);
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
         return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
                       QSizeF(item->width(), item->height()));
     };
     const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -6848,8 +6915,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::modal_content_action_contract_loads()
@@ -6915,8 +6982,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("contractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("contractReady").toBool());
 }
 
 void ImportApiTests::alert_figma_variant_contract_loads()
@@ -6980,17 +7047,17 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     auto *host = qobject_cast<QQuickItem *>(root.data());
-    QVERIFY(host);
+    CTEST_CHECK(host);
     host->setParentItem(window.contentItem());
     window.show();
 
     QObject *twoActionAlert = root->findChild<QObject *>(QStringLiteral("twoActionAlert"));
     QObject *threeActionAlert = root->findChild<QObject *>(QStringLiteral("threeActionAlert"));
-    QVERIFY(twoActionAlert);
-    QVERIFY(threeActionAlert);
+    CTEST_CHECK(twoActionAlert);
+    CTEST_CHECK(threeActionAlert);
 
     auto findItem = [](QObject *alert, const QString &objectName) -> QQuickItem * {
         return qobject_cast<QQuickItem *>(
@@ -7017,25 +7084,25 @@ Item {
     QQuickItem *threeSecondary = findItem(threeActionAlert, QStringLiteral("alertSecondaryVertical"));
     QQuickItem *threeTertiary = findItem(threeActionAlert, QStringLiteral("alertTertiaryVertical"));
 
-    QVERIFY(twoCard);
-    QVERIFY(threeCard);
-    QVERIFY(twoContent);
-    QVERIFY(threeContent);
-    QVERIFY(twoIcon);
-    QVERIFY(threeIcon);
-    QVERIFY(twoTitle);
-    QVERIFY(threeTitle);
-    QVERIFY(twoMessage);
-    QVERIFY(threeMessage);
-    QVERIFY(twoHorizontalActions);
-    QVERIFY(twoVerticalActions);
-    QVERIFY(threeHorizontalActions);
-    QVERIFY(threeVerticalActions);
-    QVERIFY(twoPrimary);
-    QVERIFY(twoSecondary);
-    QVERIFY(threePrimary);
-    QVERIFY(threeSecondary);
-    QVERIFY(threeTertiary);
+    CTEST_CHECK(twoCard);
+    CTEST_CHECK(threeCard);
+    CTEST_CHECK(twoContent);
+    CTEST_CHECK(threeContent);
+    CTEST_CHECK(twoIcon);
+    CTEST_CHECK(threeIcon);
+    CTEST_CHECK(twoTitle);
+    CTEST_CHECK(threeTitle);
+    CTEST_CHECK(twoMessage);
+    CTEST_CHECK(threeMessage);
+    CTEST_CHECK(twoHorizontalActions);
+    CTEST_CHECK(twoVerticalActions);
+    CTEST_CHECK(threeHorizontalActions);
+    CTEST_CHECK(threeVerticalActions);
+    CTEST_CHECK(twoPrimary);
+    CTEST_CHECK(twoSecondary);
+    CTEST_CHECK(threePrimary);
+    CTEST_CHECK(threeSecondary);
+    CTEST_CHECK(threeTertiary);
 
     const qreal expectedWidth = root->property("expectedWidth").toReal();
     const qreal expectedIconSize = root->property("expectedIconSize").toReal();
@@ -7049,119 +7116,119 @@ Item {
     const QColor expectedTextColor = root->property("expectedTextColor").value<QColor>();
 
     for (QQuickItem *card : {twoCard, threeCard}) {
-        QVERIFY(qAbs(card->width() - expectedWidth) < 0.01);
-        QVERIFY(qAbs(card->property("radius").toReal()
+        CTEST_CHECK(qAbs(card->width() - expectedWidth) < 0.01);
+        CTEST_CHECK(qAbs(card->property("radius").toReal()
                      - root->property("expectedCardRadius").toReal()) < 0.01);
-        QCOMPARE(card->property("color").value<QColor>(), expectedCardColor);
-        QVERIFY(card->property("clip").toBool());
+        IMPORT_COMPARE(card->property("color").value<QColor>(), expectedCardColor);
+        CTEST_CHECK(card->property("clip").toBool());
     }
 
     for (QQuickItem *content : {twoContent, threeContent}) {
-        QVERIFY(qAbs(content->property("topPadding").toReal() - expectedTopPadding) < 0.01);
-        QVERIFY(qAbs(content->property("spacing").toReal() - expectedSectionSpacing) < 0.01);
+        CTEST_CHECK(qAbs(content->property("topPadding").toReal() - expectedTopPadding) < 0.01);
+        CTEST_CHECK(qAbs(content->property("spacing").toReal() - expectedSectionSpacing) < 0.01);
     }
 
     for (QQuickItem *icon : {twoIcon, threeIcon}) {
         const qreal size = icon == twoIcon ? expectedIconSize : 56;
-        QVERIFY(qAbs(icon->width() - size) < 0.01);
-        QVERIFY(qAbs(icon->height() - size) < 0.01);
-        QVERIFY(icon->property("source").toUrl().toString().endsWith(icon == twoIcon
+        CTEST_CHECK(qAbs(icon->width() - size) < 0.01);
+        CTEST_CHECK(qAbs(icon->height() - size) < 0.01);
+        CTEST_CHECK(icon->property("source").toUrl().toString().endsWith(icon == twoIcon
             ? QStringLiteral("/resources/images/alert-adjustments.svg")
             : QStringLiteral("/resources/images/alert-file-text.svg")));
-        QTRY_COMPARE(icon->property("status").toInt(), 1);
+        IMPORT_WAIT_COMPARE(icon->property("status").toInt(), 1);
     }
 
     for (QQuickItem *label : {twoTitle, threeTitle}) {
-        QCOMPARE(label->property("color").value<QColor>(),
+        IMPORT_COMPARE(label->property("color").value<QColor>(),
                  root->property("expectedTitleColor").value<QColor>());
-        QCOMPARE(label->property("stylePixelSize").toInt(), 26);
-        QCOMPARE(label->property("font").value<QFont>().pixelSize(), 26);
-        QCOMPARE(label->property("lineHeight").toReal(), qreal(26));
+        IMPORT_COMPARE(label->property("stylePixelSize").toInt(), 26);
+        IMPORT_COMPARE(label->property("font").value<QFont>().pixelSize(), 26);
+        IMPORT_COMPARE(label->property("lineHeight").toReal(), qreal(26));
     }
     for (QQuickItem *label : {twoMessage, threeMessage}) {
-        QCOMPARE(label->property("color").value<QColor>(), expectedTextColor);
-        QCOMPARE(label->property("stylePixelSize").toInt(), 13);
-        QCOMPARE(label->property("font").value<QFont>().pixelSize(), 13);
-        QCOMPARE(label->property("lineHeight").toReal(), qreal(13));
+        IMPORT_COMPARE(label->property("color").value<QColor>(), expectedTextColor);
+        IMPORT_COMPARE(label->property("stylePixelSize").toInt(), 13);
+        IMPORT_COMPARE(label->property("font").value<QFont>().pixelSize(), 13);
+        IMPORT_COMPARE(label->property("lineHeight").toReal(), qreal(13));
     }
 
-    QVERIFY(twoHorizontalActions->isVisible());
-    QVERIFY(!twoVerticalActions->isVisible());
-    QVERIFY(!threeHorizontalActions->isVisible());
-    QVERIFY(threeVerticalActions->isVisible());
-    QVERIFY(qAbs(twoHorizontalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
-    QCOMPARE(threeVerticalActions->property("spacing").toReal(), qreal(12));
-    QVERIFY(twoSecondary->x() < twoPrimary->x());
-    QVERIFY(qAbs(twoHorizontalActions->x() - expectedSidePadding) < 0.01);
-    QVERIFY(qAbs(threeVerticalActions->x() - expectedSidePadding) < 0.01);
+    CTEST_CHECK(twoHorizontalActions->isVisible());
+    CTEST_CHECK(!twoVerticalActions->isVisible());
+    CTEST_CHECK(!threeHorizontalActions->isVisible());
+    CTEST_CHECK(threeVerticalActions->isVisible());
+    CTEST_CHECK(qAbs(twoHorizontalActions->property("spacing").toReal() - expectedActionSpacing) < 0.01);
+    IMPORT_COMPARE(threeVerticalActions->property("spacing").toReal(), qreal(12));
+    CTEST_CHECK(twoSecondary->x() < twoPrimary->x());
+    CTEST_CHECK(qAbs(twoHorizontalActions->x() - expectedSidePadding) < 0.01);
+    CTEST_CHECK(qAbs(threeVerticalActions->x() - expectedSidePadding) < 0.01);
 
     const qreal expectedHorizontalButtonWidth = (expectedWidth - (expectedSidePadding * 2)
                                                  - expectedActionSpacing) / 2;
     for (QQuickItem *button : {twoPrimary, twoSecondary}) {
-        QVERIFY(qAbs(button->width() - expectedHorizontalButtonWidth) < 0.01);
-        QVERIFY(qAbs(button->height() - expectedButtonHeight) < 0.01);
-        QCOMPARE(button->property("cornerRadius").toReal(), qreal(16));
-        QVERIFY(qAbs(button->property("verticalPadding").toReal()
+        CTEST_CHECK(qAbs(button->width() - expectedHorizontalButtonWidth) < 0.01);
+        CTEST_CHECK(qAbs(button->height() - expectedButtonHeight) < 0.01);
+        IMPORT_COMPARE(button->property("cornerRadius").toReal(), qreal(16));
+        CTEST_CHECK(qAbs(button->property("verticalPadding").toReal()
                      - expectedButtonVerticalPadding) < 0.01);
     }
 
     const qreal expectedVerticalButtonWidth = expectedWidth - (expectedSidePadding * 2);
     for (QQuickItem *button : {threePrimary, threeSecondary, threeTertiary}) {
-        QVERIFY(qAbs(button->width() - expectedVerticalButtonWidth) < 0.01);
+        CTEST_CHECK(qAbs(button->width() - expectedVerticalButtonWidth) < 0.01);
         const qreal expectedHeight = button == threeTertiary ? 44 : expectedButtonHeight;
-        QVERIFY(qAbs(button->height() - expectedHeight) < 0.01);
-        QCOMPARE(button->property("cornerRadius").toReal(), qreal(16));
-        QVERIFY(qAbs(button->property("verticalPadding").toReal()
+        CTEST_CHECK(qAbs(button->height() - expectedHeight) < 0.01);
+        IMPORT_COMPARE(button->property("cornerRadius").toReal(), qreal(16));
+        CTEST_CHECK(qAbs(button->property("verticalPadding").toReal()
                      - expectedButtonVerticalPadding) < 0.01);
     }
 
     // Figma 658:225 uses auto-height text with 26px Title / 13px Body lines.
     // The old cached 34px/56px text bounds must not become minimum heights.
-    QTRY_COMPARE(twoContent->height(), qreal(262));
-    QTRY_COMPARE(threeContent->height(), qreal(262));
-    QTRY_COMPARE(twoTitle->parentItem()->height(), qreal(26));
-    QTRY_COMPARE(twoMessage->parentItem()->height(), qreal(26));
-    QTRY_COMPARE(twoCard->height(), qreal(379));
-    QTRY_COMPARE(threeCard->height(), qreal(479));
-    QCOMPARE(threeSecondary->property("textColor").value<QColor>(), AccentFixture::color("accentRed"));
-    QCOMPARE(twoSecondary->property("textColor").value<QColor>(), QColor("#f4f5f7"));
-    QCOMPARE(threeTertiary->property("backgroundColor").value<QColor>(), QColor(Qt::transparent));
+    IMPORT_WAIT_COMPARE(twoContent->height(), qreal(262));
+    IMPORT_WAIT_COMPARE(threeContent->height(), qreal(262));
+    IMPORT_WAIT_COMPARE(twoTitle->parentItem()->height(), qreal(26));
+    IMPORT_WAIT_COMPARE(twoMessage->parentItem()->height(), qreal(26));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(379));
+    IMPORT_WAIT_COMPARE(threeCard->height(), qreal(479));
+    IMPORT_COMPARE(threeSecondary->property("textColor").value<QColor>(), AccentFixture::color("accentRed"));
+    IMPORT_COMPARE(twoSecondary->property("textColor").value<QColor>(), QColor("#f4f5f7"));
+    IMPORT_COMPARE(threeTertiary->property("backgroundColor").value<QColor>(), QColor(Qt::transparent));
 
     // Narrow hosts must remain contained even below the preferred minimum.
-    QVERIFY(root->setProperty("width", 448));
-    QTRY_COMPARE(twoCard->width(), qreal(400));
-    QVERIFY(root->setProperty("width", 240));
-    QTRY_VERIFY(twoCard->width() <= 192);
-    QVERIFY(root->setProperty("width", 960));
-    QTRY_COMPARE(twoCard->width(), qreal(500));
+    CTEST_CHECK(root->setProperty("width", 448));
+    IMPORT_WAIT_COMPARE(twoCard->width(), qreal(400));
+    CTEST_CHECK(root->setProperty("width", 240));
+    CTEST_WAIT_DEFAULT(twoCard->width() <= 192);
+    CTEST_CHECK(root->setProperty("width", 960));
+    IMPORT_WAIT_COMPARE(twoCard->width(), qreal(500));
 
     // Hidden icons release their frame and the adjacent gap; copy may grow.
-    QVERIFY(twoActionAlert->setProperty("showIcon", false));
-    QTRY_COMPARE(twoCard->height(), qreal(265));
-    QVERIFY(twoActionAlert->setProperty("showIcon", true));
-    QTRY_COMPARE(twoCard->height(), qreal(379));
-    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("First line\nSecond line\nThird line")));
-    QTRY_COMPARE(twoCard->height(), qreal(431));
+    CTEST_CHECK(twoActionAlert->setProperty("showIcon", false));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(265));
+    CTEST_CHECK(twoActionAlert->setProperty("showIcon", true));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(379));
+    CTEST_CHECK(twoActionAlert->setProperty("title", QStringLiteral("First line\nSecond line\nThird line")));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(431));
 
     // Changing copy must release both obsolete line height and empty-section gaps.
-    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
-    QVERIFY(twoActionAlert->setProperty("message", QStringLiteral("Ready to apply.")));
-    QTRY_COMPARE(twoCard->height(), qreal(366));
-    QVERIFY(twoActionAlert->setProperty("message", QString()));
-    QTRY_COMPARE(twoCard->height(), qreal(339));
-    QVERIFY(twoActionAlert->setProperty("title", QString()));
-    QTRY_COMPARE(twoCard->height(), qreal(285));
-    QVERIFY(twoActionAlert->setProperty("message", QStringLiteral("First line\nSecond line")));
-    QTRY_COMPARE(twoCard->height(), qreal(339));
-    QVERIFY(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
-    QTRY_COMPARE(twoCard->height(), qreal(379));
+    CTEST_CHECK(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
+    CTEST_CHECK(twoActionAlert->setProperty("message", QStringLiteral("Ready to apply.")));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(366));
+    CTEST_CHECK(twoActionAlert->setProperty("message", QString()));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(339));
+    CTEST_CHECK(twoActionAlert->setProperty("title", QString()));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(285));
+    CTEST_CHECK(twoActionAlert->setProperty("message", QStringLiteral("First line\nSecond line")));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(339));
+    CTEST_CHECK(twoActionAlert->setProperty("title", QStringLiteral("Apply changes?")));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(379));
 
     // Wrapping remains responsive, and restoring the host releases extra lines.
-    QVERIFY(root->setProperty("width", 240));
-    QTRY_VERIFY(twoTitle->property("lineCount").toInt() > 1);
-    QTRY_VERIFY(twoCard->height() > 379);
-    QVERIFY(root->setProperty("width", 960));
-    QTRY_COMPARE(twoCard->height(), qreal(379));
+    CTEST_CHECK(root->setProperty("width", 240));
+    CTEST_WAIT_DEFAULT(twoTitle->property("lineCount").toInt() > 1);
+    CTEST_WAIT_DEFAULT(twoCard->height() > 379);
+    CTEST_CHECK(root->setProperty("width", 960));
+    IMPORT_WAIT_COMPARE(twoCard->height(), qreal(379));
 }
 
 void ImportApiTests::alert_content_arguments_contract_loads()
@@ -7187,17 +7254,17 @@ LV.Alert {
 }
 )";
     QScopedPointer<QObject> alert(createFromQml(engine, qml));
-    QVERIFY(alert);
+    CTEST_CHECK(alert);
     auto *image = alert->findChild<QQuickItem *>("alertAppIcon");
     auto *title = alert->findChild<QQuickItem *>("alertTitle");
     auto *description = alert->findChild<QQuickItem *>("alertMessage");
-    QVERIFY(image && title && description);
-    QCOMPARE(image->property("source").toUrl(), alert->property("imageSource").toUrl());
-    QTRY_COMPARE(image->property("status").toInt(), 1); // Image.Ready
-    QCOMPARE(title->property("text").toString(), QStringLiteral("Save this document?"));
-    QCOMPARE(description->property("text").toString(),
+    CTEST_CHECK(image && title && description);
+    IMPORT_COMPARE(image->property("source").toUrl(), alert->property("imageSource").toUrl());
+    IMPORT_WAIT_COMPARE(image->property("status").toInt(), 1); // Image.Ready
+    IMPORT_COMPARE(title->property("text").toString(), QStringLiteral("Save this document?"));
+    IMPORT_COMPARE(description->property("text").toString(),
              QStringLiteral("The document contains unsaved changes."));
-    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 3);
+    IMPORT_COMPARE(alert->property("resolvedButtonCount").toInt(), 3);
 
     const QList<QByteArray> legacyTexts = {"primaryText", "secondaryText", "tertiaryText"};
     const QStringList buttonNames = {"alertPrimaryVertical", "alertSecondaryVertical",
@@ -7205,52 +7272,36 @@ LV.Alert {
     for (int index = 0; index < 3; ++index) {
         const QByteArray textProperty = "button" + QByteArray::number(index + 1) + "Text";
         auto *button = alert->findChild<QQuickItem *>(buttonNames.at(index));
-        QVERIFY(button);
-        QCOMPARE(button->property("text"), alert->property(textProperty.constData()));
-        QCOMPARE(alert->property(legacyTexts.at(index).constData()),
+        CTEST_CHECK(button);
+        IMPORT_COMPARE(button->property("text"), alert->property(textProperty.constData()));
+        IMPORT_COMPARE(alert->property(legacyTexts.at(index).constData()),
                  alert->property(textProperty.constData()));
         const QString updatedText = QStringLiteral("Updated action %1").arg(index + 1);
-        QVERIFY(alert->setProperty(textProperty.constData(), updatedText));
-        QCOMPARE(button->property("text").toString(), updatedText);
+        CTEST_CHECK(alert->setProperty(textProperty.constData(), updatedText));
+        IMPORT_COMPARE(button->property("text").toString(), updatedText);
     }
 
     const QUrl replacementIcon("qrc:/qt/qml/LVRS/resources/images/alert-file-text.svg");
-    QVERIFY(alert->setProperty("appIconSource", replacementIcon));
-    QCOMPARE(alert->property("imageSource").toUrl(), replacementIcon);
-    QCOMPARE(image->property("source").toUrl(), replacementIcon);
-    QTRY_COMPARE(image->property("status").toInt(), 1);
-    QVERIFY(alert->setProperty("message", QStringLiteral("Updated through the legacy API.")));
-    QCOMPARE(alert->property("description").toString(),
+    CTEST_CHECK(alert->setProperty("appIconSource", replacementIcon));
+    IMPORT_COMPARE(alert->property("imageSource").toUrl(), replacementIcon);
+    IMPORT_COMPARE(image->property("source").toUrl(), replacementIcon);
+    IMPORT_WAIT_COMPARE(image->property("status").toInt(), 1);
+    CTEST_CHECK(alert->setProperty("message", QStringLiteral("Updated through the legacy API.")));
+    IMPORT_COMPARE(alert->property("description").toString(),
              QStringLiteral("Updated through the legacy API."));
-    QCOMPARE(description->property("text"), alert->property("description"));
-    QVERIFY(alert->setProperty("description", QStringLiteral("Updated description.")));
-    QCOMPARE(alert->property("message"), alert->property("description"));
-    QCOMPARE(description->property("text"), alert->property("description"));
-    QVERIFY(alert->setProperty("button3Text", QString()));
-    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 2);
-    QVERIFY(alert->setProperty("secondaryText", QString()));
-    QCOMPARE(alert->property("button2Text").toString(), QString());
-    QCOMPARE(alert->property("resolvedButtonCount").toInt(), 1);
+    IMPORT_COMPARE(description->property("text"), alert->property("description"));
+    CTEST_CHECK(alert->setProperty("description", QStringLiteral("Updated description.")));
+    IMPORT_COMPARE(alert->property("message"), alert->property("description"));
+    IMPORT_COMPARE(description->property("text"), alert->property("description"));
+    CTEST_CHECK(alert->setProperty("button3Text", QString()));
+    IMPORT_COMPARE(alert->property("resolvedButtonCount").toInt(), 2);
+    CTEST_CHECK(alert->setProperty("secondaryText", QString()));
+    IMPORT_COMPARE(alert->property("button2Text").toString(), QString());
+    IMPORT_COMPARE(alert->property("resolvedButtonCount").toInt(), 1);
 }
 
-void ImportApiTests::alert_button_methods_are_invoked_data()
+void ImportApiTests::alert_button_methods_are_invoked(int buttonCount, int buttonIndex, const QString &buttonName)
 {
-    QTest::addColumn<int>("buttonCount");
-    QTest::addColumn<int>("buttonIndex");
-    QTest::addColumn<QString>("buttonName");
-    QTest::newRow("single-primary") << 1 << 1 << QStringLiteral("alertPrimarySingle");
-    QTest::newRow("horizontal-primary") << 2 << 1 << QStringLiteral("alertPrimaryHorizontal");
-    QTest::newRow("horizontal-secondary") << 2 << 2 << QStringLiteral("alertSecondaryHorizontal");
-    QTest::newRow("vertical-primary") << 3 << 1 << QStringLiteral("alertPrimaryVertical");
-    QTest::newRow("vertical-secondary") << 3 << 2 << QStringLiteral("alertSecondaryVertical");
-    QTest::newRow("vertical-tertiary") << 3 << 3 << QStringLiteral("alertTertiaryVertical");
-}
-
-void ImportApiTests::alert_button_methods_are_invoked()
-{
-    QFETCH(int, buttonCount);
-    QFETCH(int, buttonIndex);
-    QFETCH(QString, buttonName);
     QQmlEngine engine;
     engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
     engine.rootContext()->setContextProperty("testButtonCount", buttonCount);
@@ -7306,42 +7357,42 @@ Controls.ApplicationWindow {
 }
 )";
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *alert = root->findChild<QQuickItem *>("argumentAlert");
-    QVERIFY(window && alert);
+    CTEST_CHECK(window && alert);
     auto *button = alert->findChild<QQuickItem *>(buttonName);
-    QVERIFY(button);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QTRY_VERIFY(button->isVisible());
-    QCOMPARE(alert->property("resolvedButtonCount").toInt(), buttonCount);
+    CTEST_CHECK(button);
+    CTEST_CHECK(waitForWindowExposed(window));
+    CTEST_WAIT_DEFAULT(button->isVisible());
+    IMPORT_COMPARE(alert->property("resolvedButtonCount").toInt(), buttonCount);
     auto clickButton = [&]() {
-        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+        mouseClick(window, Qt::LeftButton, Qt::NoModifier,
                          scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
     };
     clickButton();
-    QCOMPARE(root->property("methodCalls").toInt(), 1);
-    QCOMPARE(root->property("signalCalls").toInt(), 1);
-    QCOMPARE(root->property("lastIndex").toInt(), buttonIndex);
-    QCOMPARE(root->property("lastSource").value<QObject *>(), button);
-    QCOMPARE(root->property("lastTrigger").toString(), QStringLiteral("clicked"));
-    QVERIFY(root->property("lastEnabled").toBool());
-    QVERIFY(alert->property("open").toBool());
+    IMPORT_COMPARE(root->property("methodCalls").toInt(), 1);
+    IMPORT_COMPARE(root->property("signalCalls").toInt(), 1);
+    IMPORT_COMPARE(root->property("lastIndex").toInt(), buttonIndex);
+    IMPORT_COMPARE(root->property("lastSource").value<QObject *>(), button);
+    IMPORT_COMPARE(root->property("lastTrigger").toString(), QStringLiteral("clicked"));
+    CTEST_CHECK(root->property("lastEnabled").toBool());
+    CTEST_CHECK(alert->property("open").toBool());
 
     const QList<QByteArray> enabledProperties = {"primaryEnabled", "secondaryEnabled", "tertiaryEnabled"};
     const QByteArray enabledProperty = enabledProperties.at(buttonIndex - 1);
-    QVERIFY(alert->setProperty(enabledProperty.constData(), false));
+    CTEST_CHECK(alert->setProperty(enabledProperty.constData(), false));
     clickButton();
-    QCOMPARE(root->property("methodCalls").toInt(), 1);
-    QCOMPARE(root->property("signalCalls").toInt(), 1);
+    IMPORT_COMPARE(root->property("methodCalls").toInt(), 1);
+    IMPORT_COMPARE(root->property("signalCalls").toInt(), 1);
 
-    QVERIFY(alert->setProperty(enabledProperty.constData(), true));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "replaceMethod", Q_ARG(QVariant, buttonIndex)));
+    CTEST_CHECK(alert->setProperty(enabledProperty.constData(), true));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "replaceMethod", Q_ARG(QVariant, buttonIndex)));
     clickButton();
-    QCOMPARE(root->property("methodCalls").toInt(), 2);
-    QCOMPARE(root->property("replacementCalls").toInt(), 1);
-    QCOMPARE(root->property("signalCalls").toInt(), 2);
-    QCOMPARE(root->property("lastIndex").toInt(), buttonIndex);
+    IMPORT_COMPARE(root->property("methodCalls").toInt(), 2);
+    IMPORT_COMPARE(root->property("replacementCalls").toInt(), 1);
+    IMPORT_COMPARE(root->property("signalCalls").toInt(), 2);
+    IMPORT_COMPARE(root->property("lastIndex").toInt(), buttonIndex);
 }
 
 void ImportApiTests::alert_action_button_padding_scopes_to_alert()
@@ -7398,7 +7449,7 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
     const auto findButtonByText = [&](const QString &text) -> QObject * {
         const auto candidates = root->findChildren<QObject *>();
@@ -7421,47 +7472,39 @@ Item {
     QObject *modalTertiary = findButtonByText("ModalTertiary");
     QObject *standaloneAlertButton = findButtonByText("StandaloneAlertButton");
 
-    QVERIFY(alertPrimary);
-    QVERIFY(alertSecondary);
-    QVERIFY(alertTertiary);
-    QVERIFY(modalPrimary);
-    QVERIFY(modalSecondary);
-    QVERIFY(modalTertiary);
-    QVERIFY(standaloneAlertButton);
+    CTEST_CHECK(alertPrimary);
+    CTEST_CHECK(alertSecondary);
+    CTEST_CHECK(alertTertiary);
+    CTEST_CHECK(modalPrimary);
+    CTEST_CHECK(modalSecondary);
+    CTEST_CHECK(modalTertiary);
+    CTEST_CHECK(standaloneAlertButton);
 
     const double expectedAlertVerticalPadding = root->property("expectedAlertVerticalPadding").toDouble();
     const int expectedDefaultVerticalPadding = root->property("expectedDefaultVerticalPadding").toInt();
     const double expectedAlertButtonHeight = root->property("expectedAlertButtonHeight").toDouble();
     const double expectedDefaultButtonHeight = root->property("expectedDefaultButtonHeight").toDouble();
 
-    QVERIFY(qAbs(alertPrimary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
-    QVERIFY(qAbs(alertSecondary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
-    QVERIFY(qAbs(alertTertiary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
-    QVERIFY(qAbs(alertPrimary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
-    QVERIFY(qAbs(alertSecondary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
-    QCOMPARE(alertTertiary->property("height").toDouble(), 44.0);
+    CTEST_CHECK(qAbs(alertPrimary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
+    CTEST_CHECK(qAbs(alertSecondary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
+    CTEST_CHECK(qAbs(alertTertiary->property("verticalPadding").toDouble() - expectedAlertVerticalPadding) < 0.01);
+    CTEST_CHECK(qAbs(alertPrimary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+    CTEST_CHECK(qAbs(alertSecondary->property("height").toDouble() - expectedAlertButtonHeight) < 0.01);
+    IMPORT_COMPARE(alertTertiary->property("height").toDouble(), 44.0);
 
-    QCOMPARE(modalPrimary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
-    QCOMPARE(modalSecondary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
-    QCOMPARE(modalTertiary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
-    QVERIFY(qAbs(modalPrimary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
-    QVERIFY(qAbs(modalSecondary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
-    QVERIFY(qAbs(modalTertiary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    IMPORT_COMPARE(modalPrimary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    IMPORT_COMPARE(modalSecondary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    IMPORT_COMPARE(modalTertiary->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    CTEST_CHECK(qAbs(modalPrimary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    CTEST_CHECK(qAbs(modalSecondary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    CTEST_CHECK(qAbs(modalTertiary->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
 
-    QCOMPARE(standaloneAlertButton->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
-    QVERIFY(qAbs(standaloneAlertButton->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
+    IMPORT_COMPARE(standaloneAlertButton->property("verticalPadding").toInt(), expectedDefaultVerticalPadding);
+    CTEST_CHECK(qAbs(standaloneAlertButton->property("height").toDouble() - expectedDefaultButtonHeight) < 0.01);
 }
 
-void ImportApiTests::alert_glass_overlay_and_input_contract_data()
+void ImportApiTests::alert_glass_overlay_and_input_contract(bool frameworkWindow, const QString &dataTag)
 {
-    QTest::addColumn<bool>("frameworkWindow");
-    QTest::newRow("qt-window") << false;
-    QTest::newRow("lvrs-window") << true;
-}
-
-void ImportApiTests::alert_glass_overlay_and_input_contract()
-{
-    QFETCH(bool, frameworkWindow);
     QQmlEngine engine;
     engine.addImportPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/.."));
     QByteArray qml = R"(
@@ -7513,27 +7556,27 @@ Controls.ApplicationWindow {
 )");
     }
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
     auto *alert = root->findChild<QQuickItem *>("glassAlert");
-    QVERIFY(alert);
+    CTEST_CHECK(alert);
     auto *card = alert->findChild<QQuickItem *>("alertCard");
     auto *capture = alert->findChild<QQuickItem *>("alertGlassCapture");
     auto *secondary = alert->findChild<QQuickItem *>("alertSecondaryVertical");
     auto *primary = alert->findChild<QQuickItem *>("alertPrimaryVertical");
     auto *tertiary = alert->findChild<QQuickItem *>("alertTertiaryVertical");
-    QVERIFY(card && capture && secondary && primary && tertiary);
-    QTRY_VERIFY(alert->property("glassActive").toBool());
-    QVERIFY(!capture->property("recursive").toBool());
-    QVERIFY(capture->property("live").toBool());
-    QTRY_COMPARE(card->width(), 500.0);
-    QTRY_COMPARE(primary->height(), 56.0);
-    QCOMPARE(capture->property("sourceRect").toRectF().size(), card->size());
-    QCOMPARE(card->opacity(), 1.0);
+    CTEST_CHECK(card && capture && secondary && primary && tertiary);
+    CTEST_WAIT_DEFAULT(alert->property("glassActive").toBool());
+    CTEST_CHECK(!capture->property("recursive").toBool());
+    CTEST_CHECK(capture->property("live").toBool());
+    IMPORT_WAIT_COMPARE(card->width(), 500.0);
+    IMPORT_WAIT_COMPARE(primary->height(), 56.0);
+    IMPORT_COMPARE(capture->property("sourceRect").toRectF().size(), card->size());
+    IMPORT_COMPARE(card->opacity(), 1.0);
 
     auto grab = [window]() -> QImage {
-        QTest::qWait(120);
+        processFor(120);
         if (window->rendererInterface()->graphicsApi() != QSGRendererInterface::Software)
             return window->grabWindow().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
         const auto result = window->contentItem()->grabToImage(window->size());
@@ -7546,16 +7589,16 @@ Controls.ApplicationWindow {
         return result->image().scaled(window->size()).convertToFormat(QImage::Format_RGB32);
     };
     const QImage frosted = grab();
-    QVERIFY(!frosted.isNull());
-    QVERIFY(alert->setProperty("glassEnabled", false));
+    CTEST_CHECK(!frosted.isNull());
+    CTEST_CHECK(alert->setProperty("glassEnabled", false));
     const QImage unblurred = grab();
-    QVERIFY(!unblurred.isNull());
+    CTEST_CHECK(!unblurred.isNull());
     const QString outputDir = qEnvironmentVariable("LVRS_ALERT_CAPTURE_DIR");
     if (!outputDir.isEmpty()) {
-        QVERIFY(QDir().mkpath(outputDir));
-        const auto prefix = outputDir + '/' + QString::fromLatin1(QTest::currentDataTag());
-        QVERIFY(frosted.save(prefix + "-alert-three-actions.png"));
-        QVERIFY(unblurred.save(prefix + "-alert-without-blur.png"));
+        CTEST_CHECK(QDir().mkpath(outputDir));
+        const auto prefix = outputDir + '/' + dataTag;
+        CTEST_CHECK(frosted.save(prefix + "-alert-three-actions.png"));
+        CTEST_CHECK(unblurred.save(prefix + "-alert-without-blur.png"));
     }
     const QPoint cardTopLeft = scenePoint(card, QPointF(0, 0));
     const QRect probe(cardTopLeft + QPoint(45, 25), QSize(65, 30));
@@ -7568,18 +7611,18 @@ Controls.ApplicationWindow {
         }
         return sum;
     };
-    QVERIFY2(variation(unblurred) > 1000, "The backdrop fixture must contain visible fine detail.");
+    CTEST_CHECK_MESSAGE(variation(unblurred) > 1000, "The backdrop fixture must contain visible fine detail.");
     qInfo() << "Backdrop detail: glass" << variation(frosted)
             << "unblurred" << variation(unblurred);
     if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
-        QCOMPARE(variation(frosted), variation(unblurred));
+        IMPORT_COMPARE(variation(frosted), variation(unblurred));
         qInfo() << "Software renderer: tint fallback verified; native RHI is required for frost.";
     } else {
-        QVERIFY2(variation(frosted) < variation(unblurred) * 0.35,
+        CTEST_CHECK_MESSAGE(variation(frosted) < variation(unblurred) * 0.35,
                  "Glass must blur the actual window content, not merely add a translucent tint.");
     }
     if (frameworkWindow)
-        QCOMPARE(alert->property("resolvedBackdropSource").value<QQuickItem *>(),
+        IMPORT_COMPARE(alert->property("resolvedBackdropSource").value<QQuickItem *>(),
                  window->property("materialBackdropSource").value<QQuickItem *>());
     int redTextPixels = 0;
     const QPoint buttonOrigin = scenePoint(secondary, QPointF(0, 0));
@@ -7590,40 +7633,48 @@ Controls.ApplicationWindow {
                 ++redTextPixels;
         }
     }
-    QVERIFY2(redTextPixels > 20, "Discard text must remain sharp and red over the glass.");
-    QVERIFY(alert->setProperty("glassEnabled", true));
+    CTEST_CHECK_MESSAGE(redTextPixels > 20, "Discard text must remain sharp and red over the glass.");
+    CTEST_CHECK(alert->setProperty("glassEnabled", true));
 
-    QSignalSpy primarySpy(alert, SIGNAL(primaryClicked()));
-    QSignalSpy secondarySpy(alert, SIGNAL(secondaryClicked()));
-    QSignalSpy tertiarySpy(alert, SIGNAL(tertiaryClicked()));
-    QSignalSpy dismissSpy(alert, SIGNAL(dismissed()));
+    ImportSignalRecorder primarySpy;
+    const auto primarySpyConnection = QObject::connect(alert, SIGNAL(primaryClicked()), &primarySpy, SLOT(recordVoid()));
+    CTEST_CHECK(primarySpyConnection);
+    ImportSignalRecorder secondarySpy;
+    const auto secondarySpyConnection = QObject::connect(alert, SIGNAL(secondaryClicked()), &secondarySpy, SLOT(recordVoid()));
+    CTEST_CHECK(secondarySpyConnection);
+    ImportSignalRecorder tertiarySpy;
+    const auto tertiarySpyConnection = QObject::connect(alert, SIGNAL(tertiaryClicked()), &tertiarySpy, SLOT(recordVoid()));
+    CTEST_CHECK(tertiarySpyConnection);
+    ImportSignalRecorder dismissSpy;
+    const auto dismissSpyConnection = QObject::connect(alert, SIGNAL(dismissed()), &dismissSpy, SLOT(recordVoid()));
+    CTEST_CHECK(dismissSpyConnection);
     for (QQuickItem *button : {primary, secondary, tertiary})
-        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+        mouseClick(window, Qt::LeftButton, Qt::NoModifier,
                          scenePoint(button, QPointF(button->width() / 2, button->height() / 2)));
-    QCOMPARE(primarySpy.count(), 1);
-    QCOMPARE(secondarySpy.count(), 1);
-    QCOMPARE(tertiarySpy.count(), 1);
-    QVERIFY(alert->property("open").toBool());
-    QVERIFY(alert->setProperty("secondaryEnabled", false));
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier,
+    IMPORT_COMPARE(primarySpy.events.size(), 1);
+    IMPORT_COMPARE(secondarySpy.events.size(), 1);
+    IMPORT_COMPARE(tertiarySpy.events.size(), 1);
+    CTEST_CHECK(alert->property("open").toBool());
+    CTEST_CHECK(alert->setProperty("secondaryEnabled", false));
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier,
                      scenePoint(secondary, QPointF(50, 20)));
-    QCOMPARE(secondarySpy.count(), 1);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
-    QCOMPARE(root->property("backgroundClicks").toInt(), 0);
-    QCOMPARE(dismissSpy.count(), 0);
-    QVERIFY(alert->setProperty("dismissOnBackground", true));
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
-    QCOMPARE(dismissSpy.count(), 1);
-    QVERIFY(!alert->property("open").toBool());
-    QVERIFY(!capture->property("live").toBool());
-    QVERIFY(!capture->property("sourceItem").value<QQuickItem *>());
+    IMPORT_COMPARE(secondarySpy.events.size(), 1);
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
+    IMPORT_COMPARE(root->property("backgroundClicks").toInt(), 0);
+    IMPORT_COMPARE(dismissSpy.events.size(), 0);
+    CTEST_CHECK(alert->setProperty("dismissOnBackground", true));
+    mouseClick(window, Qt::LeftButton, Qt::NoModifier, QPoint(10, 10));
+    IMPORT_COMPARE(dismissSpy.events.size(), 1);
+    CTEST_CHECK(!alert->property("open").toBool());
+    CTEST_CHECK(!capture->property("live").toBool());
+    CTEST_CHECK(!capture->property("sourceItem").value<QQuickItem *>());
 
-    QVERIFY(alert->setProperty("open", true));
-    QTRY_VERIFY(alert->property("glassActive").toBool());
-    QVERIFY(alert->setProperty("useOverlayLayer", false));
-    QTRY_VERIFY(!alert->property("glassActive").toBool());
-    QVERIFY(alert->setProperty("useOverlayLayer", true));
-    QTRY_VERIFY(alert->property("glassActive").toBool());
+    CTEST_CHECK(alert->setProperty("open", true));
+    CTEST_WAIT_DEFAULT(alert->property("glassActive").toBool());
+    CTEST_CHECK(alert->setProperty("useOverlayLayer", false));
+    CTEST_WAIT_DEFAULT(!alert->property("glassActive").toBool());
+    CTEST_CHECK(alert->setProperty("useOverlayLayer", true));
+    CTEST_WAIT_DEFAULT(alert->property("glassActive").toBool());
 }
 
 void ImportApiTests::menu_item_key_and_chevron_contract_loads()
@@ -7800,11 +7851,11 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("menuItemContract").toBool(), qPrintable(root->property("menuItemDiagnostics").toString()));
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("menuItemContract").toBool(), qPrintable(root->property("menuItemDiagnostics").toString()));
 
     QObject *figmaItem = root->findChild<QObject *>(QStringLiteral("figmaItem"));
-    QVERIFY(figmaItem);
+    CTEST_CHECK(figmaItem);
 
     auto *figmaContentRow =
         qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
@@ -7821,72 +7872,72 @@ Item {
     auto *figmaChevronIcon =
         qobject_cast<QQuickItem *>(figmaItem->findChild<QObject *>(QStringLiteral("menuItem_chevronIcon")));
 
-    QVERIFY(figmaContentRow);
-    QVERIFY(figmaIconSlot);
-    QVERIFY(figmaIconImage);
-    QVERIFY(figmaLabelNode);
-    QVERIFY(figmaTrailingGroup);
-    QVERIFY(figmaShortcutLabel);
-    QVERIFY(figmaChevronIcon);
+    CTEST_CHECK(figmaContentRow);
+    CTEST_CHECK(figmaIconSlot);
+    CTEST_CHECK(figmaIconImage);
+    CTEST_CHECK(figmaLabelNode);
+    CTEST_CHECK(figmaTrailingGroup);
+    CTEST_CHECK(figmaShortcutLabel);
+    CTEST_CHECK(figmaChevronIcon);
 
-    QVERIFY(qAbs(figmaContentRow->width() - 153.0) < 0.01);
-    QVERIFY(qAbs(figmaContentRow->height() - 18.0) < 0.01);
-    QVERIFY(qAbs(figmaIconSlot->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(figmaIconSlot->y() - 0.0) < 0.01);
-    QVERIFY(qAbs(figmaIconSlot->width() - 18.0) < 0.01);
-    QVERIFY(qAbs(figmaIconSlot->height() - 18.0) < 0.01);
-    QCOMPARE(figmaIconImage->property("status").toInt(), 1);
-    QVERIFY(qAbs(figmaLabelNode->x() - 26.0) < 0.01);
-    QVERIFY2(qAbs(figmaLabelNode->y() - 2.5) < 0.01,
+    CTEST_CHECK(qAbs(figmaContentRow->width() - 153.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaContentRow->height() - 18.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaIconSlot->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaIconSlot->y() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaIconSlot->width() - 18.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaIconSlot->height() - 18.0) < 0.01);
+    IMPORT_COMPARE(figmaIconImage->property("status").toInt(), 1);
+    CTEST_CHECK(qAbs(figmaLabelNode->x() - 26.0) < 0.01);
+    CTEST_CHECK_MESSAGE(qAbs(figmaLabelNode->y() - 2.5) < 0.01,
              qPrintable(QStringLiteral("Figma label y/height: %1/%2")
                             .arg(figmaLabelNode->y())
                             .arg(figmaLabelNode->height())));
-    QVERIFY2(qAbs(figmaLabelNode->width() - 33.0) < 0.01,
+    CTEST_CHECK_MESSAGE(qAbs(figmaLabelNode->width() - 33.0) < 0.01,
              qPrintable(QStringLiteral("Figma label bounds: x=%1 y=%2 width=%3 height=%4")
                             .arg(figmaLabelNode->x())
                             .arg(figmaLabelNode->y())
                             .arg(figmaLabelNode->width())
                             .arg(figmaLabelNode->height())));
-    QVERIFY(qAbs(figmaLabelNode->height() - 13.0) < 0.01);
-    QCOMPARE(figmaLabelNode->property("style").toInt(), figmaLabelNode->property("body").toInt());
+    CTEST_CHECK(qAbs(figmaLabelNode->height() - 13.0) < 0.01);
+    IMPORT_COMPARE(figmaLabelNode->property("style").toInt(), figmaLabelNode->property("body").toInt());
     const QFont figmaLabelFont = figmaLabelNode->property("font").value<QFont>();
-    QCOMPARE(figmaLabelFont.pixelSize(), 13);
-    QCOMPARE(figmaLabelFont.weight(), QFont::Medium);
-    QCOMPARE(figmaLabelFont.styleName(), QStringLiteral("Medium"));
-    QVERIFY2(qAbs(figmaTrailingGroup->x() - 108.0) < 0.01,
+    IMPORT_COMPARE(figmaLabelFont.pixelSize(), 13);
+    IMPORT_COMPARE(figmaLabelFont.weight(), QFont::Medium);
+    IMPORT_COMPARE(figmaLabelFont.styleName(), QStringLiteral("Medium"));
+    CTEST_CHECK_MESSAGE(qAbs(figmaTrailingGroup->x() - 108.0) < 0.01,
              qPrintable(QStringLiteral("Figma trailing bounds: x=%1 width=%2 shortcut=%3 natural=%4 content=%5")
                             .arg(figmaTrailingGroup->x())
                             .arg(figmaTrailingGroup->width())
                             .arg(figmaShortcutLabel->width())
                             .arg(figmaItem->property("shortcutNaturalWidth").toDouble())
                             .arg(figmaContentRow->width())));
-    QVERIFY(qAbs(figmaTrailingGroup->y() - 1.0) < 0.01);
-    QVERIFY(qAbs(figmaTrailingGroup->width() - 45.0) < 0.01);
-    QVERIFY(qAbs(figmaTrailingGroup->height() - 16.0) < 0.01);
-    QVERIFY(qAbs(figmaShortcutLabel->x() - 0.0) < 0.01);
-    QVERIFY2(qAbs(figmaShortcutLabel->y() - 1.5) < 0.01,
+    CTEST_CHECK(qAbs(figmaTrailingGroup->y() - 1.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaTrailingGroup->width() - 45.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaTrailingGroup->height() - 16.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaShortcutLabel->x() - 0.0) < 0.01);
+    CTEST_CHECK_MESSAGE(qAbs(figmaShortcutLabel->y() - 1.5) < 0.01,
              qPrintable(QStringLiteral("Figma shortcut bounds: x=%1 y=%2 width=%3 height=%4")
                             .arg(figmaShortcutLabel->x())
                             .arg(figmaShortcutLabel->y())
                             .arg(figmaShortcutLabel->width())
                             .arg(figmaShortcutLabel->height())));
-    QVERIFY(qAbs(figmaShortcutLabel->width() - 21.0) < 0.01);
-    QVERIFY(qAbs(figmaShortcutLabel->height() - 13.0) < 0.01);
-    QCOMPARE(figmaShortcutLabel->property("style").toInt(), figmaShortcutLabel->property("body").toInt());
+    CTEST_CHECK(qAbs(figmaShortcutLabel->width() - 21.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaShortcutLabel->height() - 13.0) < 0.01);
+    IMPORT_COMPARE(figmaShortcutLabel->property("style").toInt(), figmaShortcutLabel->property("body").toInt());
     const QFont figmaShortcutFont = figmaShortcutLabel->property("font").value<QFont>();
-    QCOMPARE(figmaShortcutFont.pixelSize(), 13);
-    QCOMPARE(figmaShortcutFont.weight(), QFont::Medium);
-    QCOMPARE(figmaShortcutFont.styleName(), QStringLiteral("Medium"));
-    QCOMPARE(figmaChevronIcon->property("status").toInt(), 1);
-    QVERIFY(figmaChevronIcon->property("source").toUrl().toString().contains(
+    IMPORT_COMPARE(figmaShortcutFont.pixelSize(), 13);
+    IMPORT_COMPARE(figmaShortcutFont.weight(), QFont::Medium);
+    IMPORT_COMPARE(figmaShortcutFont.styleName(), QStringLiteral("Medium"));
+    IMPORT_COMPARE(figmaChevronIcon->property("status").toInt(), 1);
+    CTEST_CHECK(figmaChevronIcon->property("source").toUrl().toString().contains(
         QStringLiteral("generalchevronRight")));
-    QVERIFY(qAbs(figmaChevronIcon->x() - 29.0) < 0.01);
-    QVERIFY(qAbs(figmaChevronIcon->y() - 0.0) < 0.01);
-    QVERIFY(qAbs(figmaChevronIcon->width() - 16.0) < 0.01);
-    QVERIFY(qAbs(figmaChevronIcon->height() - 16.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaChevronIcon->x() - 29.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaChevronIcon->y() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaChevronIcon->width() - 16.0) < 0.01);
+    CTEST_CHECK(qAbs(figmaChevronIcon->height() - 16.0) < 0.01);
 
     QObject *constrainedItem = root->findChild<QObject *>(QStringLiteral("constrainedItem"));
-    QVERIFY(constrainedItem);
+    CTEST_CHECK(constrainedItem);
 
     auto *contentRow = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
     auto *labelNode = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
@@ -7895,13 +7946,13 @@ Item {
     auto *shortcutLabel = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_shortcutLabel")));
     auto *chevronIcon = qobject_cast<QQuickItem *>(constrainedItem->findChild<QObject *>(QStringLiteral("menuItem_chevronIcon")));
 
-    QVERIFY(contentRow);
-    QVERIFY(labelNode);
-    QVERIFY(spacer);
-    QVERIFY(trailingGroup);
-    QVERIFY(shortcutLabel);
-    QVERIFY(chevronIcon);
-    QCOMPARE(shortcutLabel->property("style").toInt(), shortcutLabel->property("body").toInt());
+    CTEST_CHECK(contentRow);
+    CTEST_CHECK(labelNode);
+    CTEST_CHECK(spacer);
+    CTEST_CHECK(trailingGroup);
+    CTEST_CHECK(shortcutLabel);
+    CTEST_CHECK(chevronIcon);
+    IMPORT_COMPARE(shortcutLabel->property("style").toInt(), shortcutLabel->property("body").toInt());
 
     const qreal contentWidth = contentRow->width();
     const qreal labelRight = labelNode->x() + labelNode->width();
@@ -7909,21 +7960,21 @@ Item {
     const qreal shortcutRight = shortcutLabel->x() + shortcutLabel->width();
     const qreal chevronRight = chevronIcon->x() + chevronIcon->width();
 
-    QVERIFY2(labelRight <= contentWidth + 0.01, "Menu label must stay within the content row.");
-    QVERIFY2(trailingGroup->x() >= labelRight - 0.01, "Trailing group must not overlap the label block.");
-    QVERIFY2(spacer->width() >= -0.01, "Responsive spacer must not resolve to a negative width.");
-    QVERIFY2(trailingRight <= contentWidth + 0.01, "Trailing group must stay within the content row.");
-    QVERIFY2(shortcutRight <= trailingGroup->width() + 0.01,
+    CTEST_CHECK_MESSAGE(labelRight <= contentWidth + 0.01, "Menu label must stay within the content row.");
+    CTEST_CHECK_MESSAGE(trailingGroup->x() >= labelRight - 0.01, "Trailing group must not overlap the label block.");
+    CTEST_CHECK_MESSAGE(spacer->width() >= -0.01, "Responsive spacer must not resolve to a negative width.");
+    CTEST_CHECK_MESSAGE(trailingRight <= contentWidth + 0.01, "Trailing group must stay within the content row.");
+    CTEST_CHECK_MESSAGE(shortcutRight <= trailingGroup->width() + 0.01,
              qPrintable(QStringLiteral("Shortcut label must stay within the trailing group (%1 <= %2).")
                             .arg(shortcutRight)
                             .arg(trailingGroup->width())));
-    QVERIFY2(chevronRight <= trailingGroup->width() + 0.01,
+    CTEST_CHECK_MESSAGE(chevronRight <= trailingGroup->width() + 0.01,
              qPrintable(QStringLiteral("Chevron must stay within the trailing group (%1 <= %2).")
                             .arg(chevronRight)
                             .arg(trailingGroup->width())));
 
     QObject *noTrailingConstrainedItem = root->findChild<QObject *>(QStringLiteral("noTrailingConstrainedItem"));
-    QVERIFY(noTrailingConstrainedItem);
+    CTEST_CHECK(noTrailingConstrainedItem);
 
     auto *noTrailingContentRow =
         qobject_cast<QQuickItem *>(noTrailingConstrainedItem->findChild<QObject *>(QStringLiteral("menuItem_contentRow")));
@@ -7932,16 +7983,16 @@ Item {
     QObject *noTrailingGroup =
         noTrailingConstrainedItem->findChild<QObject *>(QStringLiteral("menuItem_trailingGroup"));
 
-    QVERIFY(noTrailingContentRow);
-    QVERIFY(noTrailingLabelNode);
-    QVERIFY(noTrailingGroup);
+    CTEST_CHECK(noTrailingContentRow);
+    CTEST_CHECK(noTrailingLabelNode);
+    CTEST_CHECK(noTrailingGroup);
 
     const qreal noTrailingAvailableLabelWidth = noTrailingContentRow->width() - noTrailingLabelNode->x();
-    QVERIFY2(qAbs(noTrailingLabelNode->width() - noTrailingAvailableLabelWidth) < 0.01,
+    CTEST_CHECK_MESSAGE(qAbs(noTrailingLabelNode->width() - noTrailingAvailableLabelWidth) < 0.01,
              qPrintable(QStringLiteral("Label should consume the full available width when trailing content is absent (%1 vs %2).")
                             .arg(noTrailingLabelNode->width())
                             .arg(noTrailingAvailableLabelWidth)));
-    QVERIFY(!noTrailingGroup->property("visible").toBool());
+    CTEST_CHECK(!noTrailingGroup->property("visible").toBool());
 }
 
 void ImportApiTests::menu_item_icon_slot_switch_contract_loads()
@@ -7980,13 +8031,13 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("iconSlotSwitchContract").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("iconSlotSwitchContract").toBool());
 
     QObject *defaultSlotItem = root->findChild<QObject *>(QStringLiteral("defaultSlotItem"));
     QObject *hiddenSlotItem = root->findChild<QObject *>(QStringLiteral("hiddenSlotItem"));
-    QVERIFY(defaultSlotItem);
-    QVERIFY(hiddenSlotItem);
+    CTEST_CHECK(defaultSlotItem);
+    CTEST_CHECK(hiddenSlotItem);
 
     auto *defaultIconSlot =
         qobject_cast<QQuickItem *>(defaultSlotItem->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
@@ -7997,17 +8048,17 @@ Item {
     auto *hiddenLabel =
         qobject_cast<QQuickItem *>(hiddenSlotItem->findChild<QObject *>(QStringLiteral("menuItem_labelNode")));
 
-    QVERIFY(defaultIconSlot);
-    QVERIFY(hiddenIconSlot);
-    QVERIFY(defaultLabel);
-    QVERIFY(hiddenLabel);
+    CTEST_CHECK(defaultIconSlot);
+    CTEST_CHECK(hiddenIconSlot);
+    CTEST_CHECK(defaultLabel);
+    CTEST_CHECK(hiddenLabel);
 
-    QVERIFY(defaultIconSlot->property("visible").toBool());
-    QVERIFY(!hiddenIconSlot->property("visible").toBool());
-    QCOMPARE(defaultIconSlot->width(), defaultSlotItem->property("iconSize").toDouble());
-    QCOMPARE(hiddenIconSlot->width(), 0.0);
-    QVERIFY(defaultLabel->x() > hiddenLabel->x());
-    QCOMPARE(hiddenLabel->x(), 0.0);
+    CTEST_CHECK(defaultIconSlot->property("visible").toBool());
+    CTEST_CHECK(!hiddenIconSlot->property("visible").toBool());
+    IMPORT_COMPARE(defaultIconSlot->width(), defaultSlotItem->property("iconSize").toDouble());
+    IMPORT_COMPARE(hiddenIconSlot->width(), 0.0);
+    CTEST_CHECK(defaultLabel->x() > hiddenLabel->x());
+    IMPORT_COMPARE(hiddenLabel->x(), 0.0);
 }
 
 void ImportApiTests::context_menu_item_action_contract_loads()
@@ -8102,8 +8153,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("actionContract").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("actionContract").toBool());
 }
 
 void ImportApiTests::context_menu_visual_contract_loads()
@@ -8190,28 +8241,28 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("visualContract").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("visualContract").toBool());
 
     QObject *standaloneDivider = root->findChild<QObject *>(QStringLiteral("standaloneDivider"));
     QObject *composedDivider = root->findChild<QObject *>(QStringLiteral("composedDivider"));
-    QVERIFY(standaloneDivider);
-    QVERIFY(composedDivider);
+    CTEST_CHECK(standaloneDivider);
+    CTEST_CHECK(composedDivider);
 
     auto *standaloneLine = qobject_cast<QQuickItem *>(
         standaloneDivider->findChild<QObject *>(QStringLiteral("menuDivider_line")));
     auto *composedLine = qobject_cast<QQuickItem *>(
         composedDivider->findChild<QObject *>(QStringLiteral("menuDivider_line")));
-    QVERIFY(standaloneLine);
-    QVERIFY(composedLine);
-    QVERIFY(qAbs(standaloneLine->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(standaloneLine->y() - 1.0) < 0.01);
-    QVERIFY(qAbs(standaloneLine->width() - 220.0) < 0.01);
-    QVERIFY(qAbs(standaloneLine->height() - 1.0) < 0.01);
-    QVERIFY(qAbs(composedLine->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(composedLine->y() - 1.0) < 0.01);
-    QVERIFY(qAbs(composedLine->width() - 145.0) < 0.01);
-    QVERIFY(qAbs(composedLine->height() - 1.0) < 0.01);
+    CTEST_CHECK(standaloneLine);
+    CTEST_CHECK(composedLine);
+    CTEST_CHECK(qAbs(standaloneLine->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(standaloneLine->y() - 1.0) < 0.01);
+    CTEST_CHECK(qAbs(standaloneLine->width() - 220.0) < 0.01);
+    CTEST_CHECK(qAbs(standaloneLine->height() - 1.0) < 0.01);
+    CTEST_CHECK(qAbs(composedLine->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(composedLine->y() - 1.0) < 0.01);
+    CTEST_CHECK(qAbs(composedLine->width() - 145.0) < 0.01);
+    CTEST_CHECK(qAbs(composedLine->height() - 1.0) < 0.01);
 }
 
 void ImportApiTests::context_menu_icon_slot_switch_contract_loads()
@@ -8271,22 +8322,22 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("iconSlotSwitchContract").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("iconSlotSwitchContract").toBool());
 
     QObject *noSlotDelegate = root->findChild<QObject *>(QStringLiteral("contextMenuNoSlotDelegate"));
     QObject *overrideSlotDelegate = root->findChild<QObject *>(QStringLiteral("contextMenuOverrideSlotDelegate"));
-    QVERIFY(noSlotDelegate);
-    QVERIFY(overrideSlotDelegate);
+    CTEST_CHECK(noSlotDelegate);
+    CTEST_CHECK(overrideSlotDelegate);
 
     auto *noSlotIcon =
         qobject_cast<QQuickItem *>(noSlotDelegate->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
     auto *overrideSlotIcon =
         qobject_cast<QQuickItem *>(overrideSlotDelegate->findChild<QObject *>(QStringLiteral("menuItem_iconSlot")));
-    QVERIFY(noSlotIcon);
-    QVERIFY(overrideSlotIcon);
-    QVERIFY(!noSlotIcon->isVisible());
-    QVERIFY(overrideSlotIcon->isVisible());
+    CTEST_CHECK(noSlotIcon);
+    CTEST_CHECK(overrideSlotIcon);
+    CTEST_CHECK(!noSlotIcon->isVisible());
+    CTEST_CHECK(overrideSlotIcon->isVisible());
 }
 
 void ImportApiTests::context_menu_width_expansion_contract_loads()
@@ -8400,9 +8451,9 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const QString widthDebug = root->property("widthDebug").toString();
-    QTRY_VERIFY2(root->property("widthExpansionContract").toBool(), qPrintable(widthDebug));
+    IMPORT_WAIT_MESSAGE(root->property("widthExpansionContract").toBool(), qPrintable(widthDebug));
 }
 
 void ImportApiTests::context_menu_auto_placement_contract_loads()
@@ -8455,8 +8506,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("placementContract").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("placementContract").toBool());
 }
 
 void ImportApiTests::model_component_delegate_contract_loads()
@@ -8631,8 +8682,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("delegateContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("delegateContractReady").toBool());
 }
 
 void ImportApiTests::table_figma_geometry_contract_loads()
@@ -8757,8 +8808,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("figmaTableReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("figmaTableReady").toBool(),
                  qPrintable(root->property("figmaTableDiagnostics").toString()));
 
     auto *header = qobject_cast<QQuickItem *>(
@@ -8767,9 +8818,9 @@ Item {
         root->findChild<QObject *>(QStringLiteral("figmaCell")));
     auto *table = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaTable")));
-    QVERIFY(header);
-    QVERIFY(cell);
-    QVERIFY(table);
+    CTEST_CHECK(header);
+    CTEST_CHECK(cell);
+    CTEST_CHECK(table);
 
     auto *headerLabel = visualChildByObjectName(
         header, QStringLiteral("figmaHeader_cell_0_label"));
@@ -8783,19 +8834,19 @@ Item {
         cell, QStringLiteral("figmaCell_label"));
     auto *tableFrame = visualChildByObjectName(
         table, QStringLiteral("figmaTable_frame"));
-    QVERIFY(headerLabel);
-    QVERIFY(headerSeparator);
-    QVERIFY(cellDivider);
-    QVERIFY(cellContent);
-    QVERIFY(cellLabel);
-    QVERIFY(tableFrame);
+    CTEST_CHECK(headerLabel);
+    CTEST_CHECK(headerSeparator);
+    CTEST_CHECK(cellDivider);
+    CTEST_CHECK(cellContent);
+    CTEST_CHECK(cellLabel);
+    CTEST_CHECK(tableFrame);
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
         return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
                       QSizeF(item->width(), item->height()));
     };
     const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -8810,32 +8861,32 @@ Item {
         header, QStringLiteral("figmaHeader_cell_0_leadingIcon"));
     auto *headerTrailing = visualChildByObjectName(
         header, QStringLiteral("figmaHeader_cell_0_trailingIcon"));
-    QVERIFY(headerLeading);
-    QVERIFY(headerTrailing);
+    CTEST_CHECK(headerLeading);
+    CTEST_CHECK(headerTrailing);
     verifyBounds(boundsIn(headerLeading, header), QRectF(8.0, 3.0, 18.0, 18.0));
-    QCOMPARE(headerLeading->property("source").toUrl().fileName(), QStringLiteral("generalchevronDown.svg"));
-    QVERIFY(!headerTrailing->isVisible());
-    QCOMPARE(boundsIn(headerLabel, header).x(), 33.0);
-    QCOMPARE(boundsIn(headerLabel, header).y(), 6.0);
+    IMPORT_COMPARE(headerLeading->property("source").toUrl().fileName(), QStringLiteral("generalchevronDown.svg"));
+    CTEST_CHECK(!headerTrailing->isVisible());
+    IMPORT_COMPARE(boundsIn(headerLabel, header).x(), 33.0);
+    IMPORT_COMPARE(boundsIn(headerLabel, header).y(), 6.0);
     auto *secondLeading = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_leadingIcon"));
     auto *secondTrailing = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_trailingIcon"));
     auto *secondLabel = visualChildByObjectName(header, QStringLiteral("figmaHeader_cell_1_label"));
-    QVERIFY(secondLeading);
-    QVERIFY(secondTrailing);
-    QVERIFY(secondLabel);
-    QVERIFY(!secondLeading->isVisible());
-    QVERIFY(secondTrailing->isVisible());
-    QCOMPARE(boundsIn(secondLabel, header).x(), 247.0);
-    QCOMPARE(boundsIn(secondTrailing, header).x(), boundsIn(secondLabel, header).right() + 7.0);
+    CTEST_CHECK(secondLeading);
+    CTEST_CHECK(secondTrailing);
+    CTEST_CHECK(secondLabel);
+    CTEST_CHECK(!secondLeading->isVisible());
+    CTEST_CHECK(secondTrailing->isVisible());
+    IMPORT_COMPARE(boundsIn(secondLabel, header).x(), 247.0);
+    IMPORT_COMPARE(boundsIn(secondTrailing, header).x(), boundsIn(secondLabel, header).right() + 7.0);
     verifyBounds(boundsIn(headerSeparator, header), QRectF(0.0, 24.0, 717.0, 1.0));
     verifyBounds(boundsIn(cellDivider, cell), QRectF(0.0, 0.0, 1.0, 24.0));
     verifyBounds(boundsIn(cellContent, cell), QRectF(9.0, 5.5, 225.0, 13.0));
     verifyBounds(boundsIn(cellLabel, cell), QRectF(9.0, 5.5, 225.0, 13.0));
     verifyBounds(boundsIn(tableFrame, table), QRectF(0.0, 0.0, 528.0, 121.0));
-    QCOMPARE(headerLabel->property("stylePixelSize").toInt(), 12);
-    QCOMPARE(headerLabel->property("styleLineHeight").toInt(), 12);
-    QCOMPARE(cellLabel->property("stylePixelSize").toInt(), 13);
-    QCOMPARE(cellLabel->property("styleLineHeight").toInt(), 13);
+    IMPORT_COMPARE(headerLabel->property("stylePixelSize").toInt(), 12);
+    IMPORT_COMPARE(headerLabel->property("styleLineHeight").toInt(), 12);
+    IMPORT_COMPARE(cellLabel->property("stylePixelSize").toInt(), 13);
+    IMPORT_COMPARE(cellLabel->property("styleLineHeight").toInt(), 13);
 
     QQuickWindow captureWindow;
     captureWindow.setColor(Qt::transparent);
@@ -8848,11 +8899,11 @@ Item {
     QCoreApplication::processEvents();
 
     const QSharedPointer<QQuickItemGrabResult> grabResult = table->grabToImage(QSize(528, 121));
-    QVERIFY(grabResult);
-    QTRY_VERIFY_WITH_TIMEOUT(!grabResult->image().isNull(), 5000);
+    CTEST_CHECK(grabResult);
+    CTEST_WAIT_VERIFY(!grabResult->image().isNull(), 5000);
     const QImage captured = grabResult->image().scaled(QSize(528, 121), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
         .convertToFormat(QImage::Format_RGBA8888);
-    QCOMPARE(captured.size(), QSize(528, 121));
+    IMPORT_COMPARE(captured.size(), QSize(528, 121));
 
     const auto colorMatches = [](const QColor &actual, const QColor &expected) {
         return qAbs(actual.red() - expected.red()) <= 1
@@ -8862,16 +8913,16 @@ Item {
     };
     const QColor panel10(QStringLiteral("#282828"));
     const QColor tableBackground(QStringLiteral("#1e1e1e"));
-    QVERIFY(colorMatches(captured.pixelColor(0, 0), panel10));
-    QVERIFY(colorMatches(captured.pixelColor(527, 120), panel10));
-    QVERIFY(colorMatches(captured.pixelColor(100, 24), panel10));
-    QVERIFY(colorMatches(captured.pixelColor(176, 30), panel10));
-    QVERIFY(colorMatches(captured.pixelColor(352, 30), panel10));
-    QVERIFY(colorMatches(captured.pixelColor(100, 30), tableBackground));
+    CTEST_CHECK(colorMatches(captured.pixelColor(0, 0), panel10));
+    CTEST_CHECK(colorMatches(captured.pixelColor(527, 120), panel10));
+    CTEST_CHECK(colorMatches(captured.pixelColor(100, 24), panel10));
+    CTEST_CHECK(colorMatches(captured.pixelColor(176, 30), panel10));
+    CTEST_CHECK(colorMatches(captured.pixelColor(352, 30), panel10));
+    CTEST_CHECK(colorMatches(captured.pixelColor(100, 30), tableBackground));
 
     const QString capturePath = qEnvironmentVariable("LVRS_TABLE_CAPTURE_PATH");
     if (!capturePath.isEmpty())
-        QVERIFY2(captured.save(capturePath), qPrintable(capturePath));
+        CTEST_CHECK_MESSAGE(captured.save(capturePath), qPrintable(capturePath));
 }
 
 void ImportApiTests::table_spreadsheet_api_contract_loads()
@@ -9120,8 +9171,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("spreadsheetContractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("spreadsheetContractReady").toBool(),
                  qPrintable(root->property("spreadsheetDiagnostics").toString()));
 }
 
@@ -9154,27 +9205,27 @@ LV.Table {
         rows = values
     }
 })"));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     const auto count = [&] { return engine.newQObject(root.data()).property("visibleCellItems").property("length").toInt(); };
-    QTRY_VERIFY(count() > 0);
-    auto *table = qobject_cast<QQuickItem *>(root.data()); QVERIFY(table);
-    QTRY_VERIFY(visualChildByObjectName(table, "reusableCell"));
-    QVERIFY(engine.newQObject(root.data()).property("_cellContextMenu").isNull());
-    QPointer<QObject> first = visualChildByObjectName(table, "reusableCell"); QVERIFY(first);
+    CTEST_WAIT_DEFAULT(count() > 0);
+    auto *table = qobject_cast<QQuickItem *>(root.data()); CTEST_CHECK(table);
+    CTEST_WAIT_DEFAULT(visualChildByObjectName(table, "reusableCell"));
+    CTEST_CHECK(engine.newQObject(root.data()).property("_cellContextMenu").isNull());
+    QPointer<QObject> first = visualChildByObjectName(table, "reusableCell"); CTEST_CHECK(first);
     const auto initial = count();
     const auto created = root->property("created").toInt();
     root->setProperty("viewportY", 2400);
-    QTRY_VERIFY(engine.newQObject(first).property("modelData").property("rowIndex").toInt() > 80);
-    QCOMPARE(root->property("created").toInt(), created + qMax(0, count() - initial));
-    QVERIFY(first);
+    CTEST_WAIT_DEFAULT(engine.newQObject(first).property("modelData").property("rowIndex").toInt() > 80);
+    IMPORT_COMPARE(root->property("created").toInt(), created + qMax(0, count() - initial));
+    CTEST_CHECK(first);
     root->setProperty("deleteContextMenuEnabled", true);
     QVariant one, two;
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, one)));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, two)));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, one)));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "cellContextMenu", Q_RETURN_ARG(QVariant, two)));
     const auto menu = engine.newQObject(root.data()).property("_cellContextMenu").toQObject();
-    QVERIFY(menu);
-    QCOMPARE(one.value<QObject *>(), menu);
-    QCOMPARE(two.value<QObject *>(), menu);
+    CTEST_CHECK(menu);
+    IMPORT_COMPARE(one.value<QObject *>(), menu);
+    IMPORT_COMPARE(two.value<QObject *>(), menu);
 }
 
 void ImportApiTests::table_cell_item_contract_loads()
@@ -9341,19 +9392,19 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QVERIFY(root->property("tableCellContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(root->property("tableCellContractReady").toBool());
 
-    QTRY_VERIFY(root->findChild<QObject *>(QStringLiteral("singleCell_inputField"),
+    CTEST_WAIT_DEFAULT(root->findChild<QObject *>(QStringLiteral("singleCell_inputField"),
                                           Qt::FindChildrenRecursively));
     QObject *cellInput = root->findChild<QObject *>(QStringLiteral("singleCell_inputField"),
                                                     Qt::FindChildrenRecursively);
-    QCOMPARE(cellInput->property("fieldMinHeight").toInt(), 13);
-    QCOMPARE(cellInput->property("centeredTextHeight").toInt(), 13);
+    IMPORT_COMPARE(cellInput->property("fieldMinHeight").toInt(), 13);
+    IMPORT_COMPARE(cellInput->property("centeredTextHeight").toInt(), 13);
     QObject *cellNativeInput = cellInput->property("inputItem").value<QObject *>();
-    QVERIFY(cellNativeInput);
-    QCOMPARE(cellNativeInput->property("height").toReal(), 13.0);
-    QCOMPARE(cellNativeInput->property("font").value<QFont>().pixelSize(), 13);
+    CTEST_CHECK(cellNativeInput);
+    IMPORT_COMPARE(cellNativeInput->property("height").toReal(), 13.0);
+    IMPORT_COMPARE(cellNativeInput->property("font").value<QFont>().pixelSize(), 13);
 }
 
 void ImportApiTests::table_cell_merge_split_contract_loads()
@@ -9480,8 +9531,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("mergeSplitReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("mergeSplitReady").toBool());
 }
 
 void ImportApiTests::table_structure_editing_contract_loads()
@@ -9652,8 +9703,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("structureEditingReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("structureEditingReady").toBool());
 }
 
 void ImportApiTests::table_resize_contract_loads()
@@ -9793,8 +9844,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("resizeContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("resizeContractReady").toBool());
 }
 
 void ImportApiTests::table_typed_header_contract_loads()
@@ -9954,8 +10005,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("typedHeaderContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("typedHeaderContractReady").toBool());
 }
 
 void ImportApiTests::table_cpp_model_contract_loads()
@@ -10034,8 +10085,8 @@ Item {
         for (const auto &err : errors)
             qWarning() << err;
     }
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("cppModelContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("cppModelContractReady").toBool());
 }
 
 void ImportApiTests::table_undo_redo_contract_loads()
@@ -10138,8 +10189,8 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("undoRedoContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("undoRedoContractReady").toBool());
 }
 
 void ImportApiTests::list_model_contract_loads()
@@ -10246,11 +10297,11 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY(root->property("listModelContractReady").toBool());
+    CTEST_CHECK(root);
+    CTEST_WAIT_DEFAULT(root->property("listModelContractReady").toBool());
 
     nativeModel.appendRow(QStringLiteral("Native D"), true, false);
-    QTRY_COMPARE(root->property("nativeModelEntryCount").toInt(), 4);
+    IMPORT_WAIT_COMPARE(root->property("nativeModelEntryCount").toInt(), 4);
 }
 
 void ImportApiTests::list_figma_contract_loads()
@@ -10411,24 +10462,24 @@ Item {
 )";
 
     QScopedPointer<QObject> root(createFromQml(engine, qml));
-    QVERIFY(root);
-    QTRY_VERIFY2(root->property("contractReady").toBool(),
+    CTEST_CHECK(root);
+    IMPORT_WAIT_MESSAGE(root->property("contractReady").toBool(),
                  qPrintable(root->property("contractDebug").toString()));
 
-    QTRY_VERIFY(root->findChild<QObject *>(QStringLiteral("editableItem_inputField"),
+    CTEST_WAIT_DEFAULT(root->findChild<QObject *>(QStringLiteral("editableItem_inputField"),
                                           Qt::FindChildrenRecursively));
     QObject *listInput = root->findChild<QObject *>(QStringLiteral("editableItem_inputField"),
                                                     Qt::FindChildrenRecursively);
-    QCOMPARE(listInput->property("fieldMinHeight").toInt(), 13);
-    QCOMPARE(listInput->property("centeredTextHeight").toInt(), 13);
+    IMPORT_COMPARE(listInput->property("fieldMinHeight").toInt(), 13);
+    IMPORT_COMPARE(listInput->property("centeredTextHeight").toInt(), 13);
     QObject *listNativeInput = listInput->property("inputItem").value<QObject *>();
-    QVERIFY(listNativeInput);
-    QCOMPARE(listNativeInput->property("height").toReal(), 13.0);
-    QCOMPARE(listNativeInput->property("font").value<QFont>().pixelSize(), 13);
+    CTEST_CHECK(listNativeInput);
+    IMPORT_COMPARE(listNativeInput->property("height").toReal(), 13.0);
+    IMPORT_COMPARE(listNativeInput->property("font").value<QFont>().pixelSize(), 13);
 
     auto *smallList = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaSmallList")));
-    QVERIFY(smallList);
+    CTEST_CHECK(smallList);
     auto *listViewport = qobject_cast<QQuickItem *>(
         smallList->findChild<QObject *>(QStringLiteral("list_itemsViewport")));
     auto *listColumn = qobject_cast<QQuickItem *>(
@@ -10441,35 +10492,35 @@ Item {
     auto *sixthDelegate = visualChildByObjectName(
         listColumn,
         QStringLiteral("list_delegateRoot_5"));
-    QVERIFY(listViewport);
-    QVERIFY(listColumn);
-    QVERIFY(embeddedFooter);
-    QVERIFY(firstDelegate);
-    QVERIFY(sixthDelegate);
-    QVERIFY(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniIcon")));
-    QVERIFY(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniLabel")));
-    QVERIFY(qAbs(listViewport->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(listViewport->y() - 0.0) < 0.01);
-    QVERIFY(qAbs(listViewport->width() - 170.0) < 0.01);
-    QVERIFY(qAbs(listViewport->height() - 114.0) < 0.01);
-    QVERIFY(qAbs(listColumn->height() - 132.0) < 0.01);
-    QVERIFY(listViewport->clip());
-    QVERIFY(qAbs(firstDelegate->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(firstDelegate->y() - 0.0) < 0.01);
-    QVERIFY(qAbs(firstDelegate->width() - 170.0) < 0.01);
-    QVERIFY(qAbs(firstDelegate->height() - 22.0) < 0.01);
-    QVERIFY(qAbs(sixthDelegate->y() - 110.0) < 0.01);
-    QVERIFY(qAbs(embeddedFooter->x() - 0.0) < 0.01);
-    QVERIFY(qAbs(embeddedFooter->y() - 114.0) < 0.01);
-    QVERIFY(qAbs(embeddedFooter->width() - 88.0) < 0.01);
-    QVERIFY(qAbs(embeddedFooter->height() - 26.0) < 0.01);
+    CTEST_CHECK(listViewport);
+    CTEST_CHECK(listColumn);
+    CTEST_CHECK(embeddedFooter);
+    CTEST_CHECK(firstDelegate);
+    CTEST_CHECK(sixthDelegate);
+    CTEST_CHECK(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniIcon")));
+    CTEST_CHECK(visualChildByObjectName(firstDelegate, QStringLiteral("listItem_miniLabel")));
+    CTEST_CHECK(qAbs(listViewport->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(listViewport->y() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(listViewport->width() - 170.0) < 0.01);
+    CTEST_CHECK(qAbs(listViewport->height() - 114.0) < 0.01);
+    CTEST_CHECK(qAbs(listColumn->height() - 132.0) < 0.01);
+    CTEST_CHECK(listViewport->clip());
+    CTEST_CHECK(qAbs(firstDelegate->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(firstDelegate->y() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(firstDelegate->width() - 170.0) < 0.01);
+    CTEST_CHECK(qAbs(firstDelegate->height() - 22.0) < 0.01);
+    CTEST_CHECK(qAbs(sixthDelegate->y() - 110.0) < 0.01);
+    CTEST_CHECK(qAbs(embeddedFooter->x() - 0.0) < 0.01);
+    CTEST_CHECK(qAbs(embeddedFooter->y() - 114.0) < 0.01);
+    CTEST_CHECK(qAbs(embeddedFooter->width() - 88.0) < 0.01);
+    CTEST_CHECK(qAbs(embeddedFooter->height() - 26.0) < 0.01);
 
     const auto boundsIn = [](QQuickItem *item, QQuickItem *ancestor) {
         return QRectF(item->mapToItem(ancestor, QPointF(0.0, 0.0)),
                       QSizeF(item->width(), item->height()));
     };
     const auto verifyBounds = [](const QRectF &actual, const QRectF &expected) {
-        QVERIFY2(qAbs(actual.x() - expected.x()) < 0.01
+        CTEST_CHECK_MESSAGE(qAbs(actual.x() - expected.x()) < 0.01
                      && qAbs(actual.y() - expected.y()) < 0.01
                      && qAbs(actual.width() - expected.width()) < 0.01
                      && qAbs(actual.height() - expected.height()) < 0.01,
@@ -10482,24 +10533,24 @@ Item {
 
     auto *miniItem = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaMiniItem")));
-    QVERIFY(miniItem);
+    CTEST_CHECK(miniItem);
     auto *miniIcon = qobject_cast<QQuickItem *>(
         miniItem->findChild<QObject *>(QStringLiteral("listItem_miniIcon")));
     auto *miniLabel = qobject_cast<QQuickItem *>(
         miniItem->findChild<QObject *>(QStringLiteral("listItem_miniLabel")));
-    QVERIFY(miniIcon);
-    QVERIFY(miniLabel);
-    QCOMPARE(miniIcon->property("status").toInt(), 1);
+    CTEST_CHECK(miniIcon);
+    CTEST_CHECK(miniLabel);
+    IMPORT_COMPARE(miniIcon->property("status").toInt(), 1);
     verifyBounds(boundsIn(miniIcon, miniItem), QRectF(4.0, 2.0, 18.0, 18.0));
     verifyBounds(boundsIn(miniLabel, miniItem), QRectF(23.0, 4.5, 33.0, 13.0));
     const QFont miniFont = miniLabel->property("font").value<QFont>();
-    QCOMPARE(miniFont.pixelSize(), 13);
-    QCOMPARE(miniFont.weight(), QFont::Medium);
-    QCOMPARE(miniFont.styleName(), QStringLiteral("Medium"));
+    IMPORT_COMPARE(miniFont.pixelSize(), 13);
+    IMPORT_COMPARE(miniFont.weight(), QFont::Medium);
+    IMPORT_COMPARE(miniFont.styleName(), QStringLiteral("Medium"));
 
     auto *detailItem = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaDetailItem")));
-    QVERIFY(detailItem);
+    CTEST_CHECK(detailItem);
     const struct {
         const char *name;
         QRectF bounds;
@@ -10517,7 +10568,7 @@ Item {
     for (const auto &entry : detailBounds) {
         auto *item = qobject_cast<QQuickItem *>(
             detailItem->findChild<QObject *>(QString::fromLatin1(entry.name)));
-        QVERIFY2(item, entry.name);
+        CTEST_CHECK_MESSAGE(item, entry.name);
         verifyBounds(boundsIn(item, detailItem), entry.bounds);
     }
 
@@ -10526,11 +10577,11 @@ Item {
     auto *caption = qobject_cast<QQuickItem *>(
         detailItem->findChild<QObject *>(QStringLiteral("listItem_folderLabel1")));
     auto *detailBookmark = detailItem->findChild<QObject *>(QStringLiteral("listItem_detailBookmark"));
-    QVERIFY(detailTitle);
-    QVERIFY(detailDate);
-    QVERIFY(caption);
-    QVERIFY(detailBookmark);
-    QCOMPARE(detailBookmark->property("status").toInt(), 1);
+    CTEST_CHECK(detailTitle);
+    CTEST_CHECK(detailDate);
+    CTEST_CHECK(caption);
+    CTEST_CHECK(detailBookmark);
+    IMPORT_COMPARE(detailBookmark->property("status").toInt(), 1);
     const struct {
         const char *name;
         const char *assetName;
@@ -10542,9 +10593,9 @@ Item {
     };
     for (const auto &entry : metadataIcons) {
         auto *icon = detailItem->findChild<QObject *>(QString::fromLatin1(entry.name));
-        QVERIFY2(icon, entry.name);
-        QCOMPARE(icon->property("status").toInt(), 1);
-        QVERIFY2(icon->property("source").toUrl().toString().contains(
+        CTEST_CHECK_MESSAGE(icon, entry.name);
+        IMPORT_COMPARE(icon->property("status").toInt(), 1);
+        CTEST_CHECK_MESSAGE(icon->property("source").toUrl().toString().contains(
                      QString::fromLatin1(entry.assetName)),
                  qPrintable(icon->property("source").toUrl().toString()));
     }
@@ -10552,18 +10603,18 @@ Item {
     const QFont detailTitleFont = detailTitle->property("font").value<QFont>();
     const QFont detailDateFont = detailDate->property("font").value<QFont>();
     const QFont captionFont = caption->property("font").value<QFont>();
-    QCOMPARE(detailTitleFont.pixelSize(), 12);
-    QCOMPARE(detailTitleFont.weight(), QFont::DemiBold);
-    QCOMPARE(detailTitleFont.styleName(), QStringLiteral("SemiBold"));
-    QCOMPARE(detailDateFont.pixelSize(), 12);
-    QCOMPARE(detailDateFont.weight(), QFont::DemiBold);
-    QCOMPARE(captionFont.pixelSize(), 11);
-    QCOMPARE(captionFont.weight(), QFont::Normal);
-    QCOMPARE(captionFont.styleName(), QStringLiteral("Regular"));
+    IMPORT_COMPARE(detailTitleFont.pixelSize(), 12);
+    IMPORT_COMPARE(detailTitleFont.weight(), QFont::DemiBold);
+    IMPORT_COMPARE(detailTitleFont.styleName(), QStringLiteral("SemiBold"));
+    IMPORT_COMPARE(detailDateFont.pixelSize(), 12);
+    IMPORT_COMPARE(detailDateFont.weight(), QFont::DemiBold);
+    IMPORT_COMPARE(captionFont.pixelSize(), 11);
+    IMPORT_COMPARE(captionFont.weight(), QFont::Normal);
+    IMPORT_COMPARE(captionFont.styleName(), QStringLiteral("Regular"));
 
     auto *footer = qobject_cast<QQuickItem *>(
         root->findChild<QObject *>(QStringLiteral("figmaListFooter")));
-    QVERIFY(footer);
+    CTEST_CHECK(footer);
     const QRectF slotBounds[] = {
         QRectF(2.0, 2.0, 22.0, 22.0),
         QRectF(24.0, 2.0, 22.0, 22.0),
@@ -10579,40 +10630,123 @@ Item {
         auto *slotMenuButton = visualChildByObjectName(
             slot,
             QStringLiteral("listFooter_menuButton_%1").arg(index));
-        QVERIFY(slot);
-        QVERIFY(iconButton);
-        QVERIFY(slotMenuButton);
+        CTEST_CHECK(slot);
+        CTEST_CHECK(iconButton);
+        CTEST_CHECK(slotMenuButton);
         verifyBounds(boundsIn(slot, footer), slotBounds[index]);
-        QCOMPARE(iconButton->isVisible(), index < 2);
-        QCOMPARE(slotMenuButton->isVisible(), index == 2);
+        IMPORT_COMPARE(iconButton->isVisible(), index < 2);
+        IMPORT_COMPARE(slotMenuButton->isVisible(), index == 2);
     }
     QObject *menuButton = visualChildByObjectName(
         footer,
         QStringLiteral("listFooter_menuButton_2"));
-    QVERIFY(menuButton);
-    QCOMPARE(menuButton->property("spacing").toInt(), -2);
-    QCOMPARE(menuButton->property("resolvedIconName").toString(), QStringLiteral("settings"));
-    QCOMPARE(menuButton->property("resolvedIndicatorName").toString(),
+    CTEST_CHECK(menuButton);
+    IMPORT_COMPARE(menuButton->property("spacing").toInt(), -2);
+    IMPORT_COMPARE(menuButton->property("resolvedIconName").toString(), QStringLiteral("settings"));
+    IMPORT_COMPARE(menuButton->property("resolvedIndicatorName").toString(),
              QStringLiteral("generalchevronDownBorderless"));
 }
 
 int main(int argc, char **argv)
 {
     QGuiApplication application(argc, argv);
+    const bool nativeSet = qEnvironmentVariable("LVRS_IMPORT_CONTRACT_SET") == "native" && argc == 1;
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
     ImportApiTests tests;
-    if (qEnvironmentVariable("LVRS_IMPORT_CONTRACT_SET") == "native" && argc == 1) {
-        QStringList arguments{QString::fromLocal8Bit(argv[0])};
-        const auto *meta = tests.metaObject();
-        for (int index = meta->methodOffset(); index < meta->methodCount(); ++index) {
-            const auto method = meta->method(index);
-            const auto name = QString::fromLatin1(method.name());
-            if (method.methodType() == QMetaMethod::Slot && method.parameterCount() == 0
-                && name != "initTestCase" && name != "cleanupTestCase" && name != "init" && name != "cleanup"
-                && name != "toggle_switch_figma_contract_loads" && !name.endsWith("_data"))
-                arguments.append(name);
-        }
-        return QTest::qExec(&tests, arguments);
-    }
-    return QTest::qExec(&tests, argc, argv);
+    runner.run("embedded_qml_matches_source", [&] { pressedButtons = Qt::NoButton; tests.embedded_qml_matches_source(); });
+    runner.run("app_bootstrap_window_loads", [&] { pressedButtons = Qt::NoButton; tests.app_bootstrap_window_loads(); });
+    runner.run("versionless_import_application_window_loads", [&] { pressedButtons = Qt::NoButton; tests.versionless_import_application_window_loads(); });
+    runner.run("application_window_mobile_coverage_visibility_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.application_window_mobile_coverage_visibility_contract_loads(); });
+    runner.run("application_window_page_stack_state_loads", [&] { pressedButtons = Qt::NoButton; tests.application_window_page_stack_state_loads(); });
+    runner.run("application_window_initial_properties_seed_page_stack", [&] { pressedButtons = Qt::NoButton; tests.application_window_initial_properties_seed_page_stack(); });
+    runner.run("application_window_safe_margin_scopes_to_layout_not_render_surface", [&] { pressedButtons = Qt::NoButton; tests.application_window_safe_margin_scopes_to_layout_not_render_surface(); });
+    runner.run("versionless_import_window_loads", [&] { pressedButtons = Qt::NoButton; tests.versionless_import_window_loads(); });
+    runner.run("window_custom_chrome_interaction_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.window_custom_chrome_interaction_contract_loads(); });
+    runner.run("window_safe_margin_scopes_to_layout_not_render_surface", [&] { pressedButtons = Qt::NoButton; tests.window_safe_margin_scopes_to_layout_not_render_surface(); });
+    runner.run("appshell_compat_loads", [&] { pressedButtons = Qt::NoButton; tests.appshell_compat_loads(); });
+    runner.run("application_window_platform_adaptive_layout_loads", [&] { pressedButtons = Qt::NoButton; tests.application_window_platform_adaptive_layout_loads(); });
+    runner.run("icon_name_mapping_loads", [&] { pressedButtons = Qt::NoButton; tests.icon_name_mapping_loads(); });
+    runner.run("compact_icon_frame_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.compact_icon_frame_contract_loads(); });
+    runner.run("hierarchy_tree_model_api_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_tree_model_api_loads(); });
+    runner.run("hierarchy_string_array_model_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_string_array_model_loads(); });
+    runner.run("hierarchy_direct_model_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_direct_model_contract_loads(); });
+    runner.run("hierarchy_direct_model_editing_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_direct_model_editing_contract_loads(); });
+    runner.run("hierarchy_nested_children_indent_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_nested_children_indent_contract_loads(); });
+    runner.run("hierarchy_expansion_uses_incremental_visibility_refresh", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_expansion_uses_incremental_visibility_refresh(); });
+    runner.run("hierarchy_editable_drag_depth_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_editable_drag_depth_contract_loads(); });
+    runner.run("hierarchy_editable_drag_per_item_lock_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_editable_drag_per_item_lock_contract_loads(); });
+    runner.run("hierarchy_mobile_drag_hold_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_mobile_drag_hold_contract_loads(); });
+    runner.run("hierarchy_mobile_activation_commits_on_release_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_mobile_activation_commits_on_release_contract_loads(); });
+    runner.run("hierarchy_mobile_reactivation_reemits_active_signal", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_mobile_reactivation_reemits_active_signal(); });
+    runner.run("hierarchy_mobile_scroll_physics_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_mobile_scroll_physics_contract_loads(); });
+    runner.run("hierarchy_optional_footer_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_optional_footer_contract_loads(); });
+    runner.run("hierarchy_toolbar_empty_state_does_not_reschedule", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_toolbar_empty_state_does_not_reschedule(); });
+    runner.run("hierarchy_toolbar_item_model_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_toolbar_item_model_contract_loads(); });
+    runner.run("hierarchy_toolbar_figma_layout_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_toolbar_figma_layout_contract_loads(); });
+    runner.run("hierarchy_figma_composition_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_figma_composition_contract_loads(); });
+    runner.run("hierarchy_toolbar_manual_icon_button_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_toolbar_manual_icon_button_contract_loads(); });
+    runner.run("hierarchy_row_click_only_activates_not_toggles", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_row_click_only_activates_not_toggles(); });
+    runner.run("hierarchy_chevron_requires_children_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_chevron_requires_children_loads(); });
+    runner.run("hierarchy_item_chevron_direction_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_chevron_direction_contract_loads(); });
+    runner.run("hierarchy_item_hover_and_active_state_visual_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_hover_and_active_state_visual_contract_loads(); });
+    runner.run("hierarchy_item_figma_defaults_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_figma_defaults_contract_loads(); });
+    runner.run("hierarchy_item_layout_geometry_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_layout_geometry_contract_loads(); });
+    runner.run("hierarchy_item_count_view_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_count_view_contract_loads(); });
+    runner.run("hierarchy_item_structure_api_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_structure_api_contract_loads(); });
+    runner.run("hierarchy_item_ux_state_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_item_ux_state_contract_loads(); });
+    runner.run("button_padding_matches_figma_spec", [&] { pressedButtons = Qt::NoButton; tests.button_padding_matches_figma_spec(); });
+    runner.run("button_default_tone_matches_figma_accent_loads", [&] { pressedButtons = Qt::NoButton; tests.button_default_tone_matches_figma_accent_loads(); });
+    runner.run("segmented_button_selected_color", [&] { pressedButtons = Qt::NoButton; tests.segmented_button_selected_color(); });
+    runner.run("button_injected_methods_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.button_injected_methods_contract_loads(); });
+    runner.run("stepper_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.stepper_figma_contract_loads(); });
+    runner.run("combo_box_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.combo_box_figma_contract_loads(); });
+    runner.run("input_field_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.input_field_figma_contract_loads(); });
+    runner.run("input_field_material_rendering_contract", [&] { pressedButtons = Qt::NoButton; tests.input_field_material_rendering_contract(); });
+    runner.run("progress_bar_range_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.progress_bar_range_contract_loads(); });
+    runner.run("control_icons_use_supersampled_raster_contract", [&] { pressedButtons = Qt::NoButton; tests.control_icons_use_supersampled_raster_contract(); });
+    runner.run("input_field_ios_native_text_interaction_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.input_field_ios_native_text_interaction_contract_loads(); });
+    runner.run("input_field_native_event_input_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.input_field_native_event_input_contract_loads(); });
+    runner.run("input_field_search_icon_mobile_scaling_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.input_field_search_icon_mobile_scaling_contract_loads(); });
+    if (!nativeSet) runner.run("toggle_switch_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.toggle_switch_figma_contract_loads(); });
+    runner.run("checkbox_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.checkbox_figma_contract_loads(); });
+    runner.run("radio_button_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.radio_button_figma_contract_loads(); });
+    runner.run("modal_empty_frame_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.modal_empty_frame_contract_loads(); });
+    runner.run("modal_content_action_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.modal_content_action_contract_loads(); });
+    runner.run("alert_figma_variant_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.alert_figma_variant_contract_loads(); });
+    runner.run("alert_content_arguments_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.alert_content_arguments_contract_loads(); });
+    runner.run("alert_action_button_padding_scopes_to_alert", [&] { pressedButtons = Qt::NoButton; tests.alert_action_button_padding_scopes_to_alert(); });
+    runner.run("menu_item_key_and_chevron_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.menu_item_key_and_chevron_contract_loads(); });
+    runner.run("menu_item_icon_slot_switch_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.menu_item_icon_slot_switch_contract_loads(); });
+    runner.run("context_menu_item_action_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.context_menu_item_action_contract_loads(); });
+    runner.run("context_menu_visual_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.context_menu_visual_contract_loads(); });
+    runner.run("context_menu_icon_slot_switch_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.context_menu_icon_slot_switch_contract_loads(); });
+    runner.run("context_menu_width_expansion_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.context_menu_width_expansion_contract_loads(); });
+    runner.run("context_menu_auto_placement_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.context_menu_auto_placement_contract_loads(); });
+    runner.run("model_component_delegate_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.model_component_delegate_contract_loads(); });
+    runner.run("table_figma_geometry_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_figma_geometry_contract_loads(); });
+    runner.run("table_spreadsheet_api_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_spreadsheet_api_contract_loads(); });
+    runner.run("table_viewport_reuses_delegates_and_creates_one_menu_on_demand", [&] { pressedButtons = Qt::NoButton; tests.table_viewport_reuses_delegates_and_creates_one_menu_on_demand(); });
+    runner.run("table_cell_item_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_cell_item_contract_loads(); });
+    runner.run("table_cell_merge_split_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_cell_merge_split_contract_loads(); });
+    runner.run("table_structure_editing_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_structure_editing_contract_loads(); });
+    runner.run("table_resize_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_resize_contract_loads(); });
+    runner.run("table_typed_header_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_typed_header_contract_loads(); });
+    runner.run("table_cpp_model_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_cpp_model_contract_loads(); });
+    runner.run("table_undo_redo_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.table_undo_redo_contract_loads(); });
+    runner.run("list_model_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.list_model_contract_loads(); });
+    runner.run("list_figma_contract_loads", [&] { pressedButtons = Qt::NoButton; tests.list_figma_contract_loads(); });
+    runner.run("button_family_components_contract:desktop", [&] { pressedButtons = Qt::NoButton; tests.button_family_components_contract(false); });
+    runner.run("button_family_components_contract:mobile", [&] { pressedButtons = Qt::NoButton; tests.button_family_components_contract(true); });
+    runner.run("segmented_control_figma_contract_loads:desktop", [&] { pressedButtons = Qt::NoButton; tests.segmented_control_figma_contract_loads(false); });
+    runner.run("segmented_control_figma_contract_loads:mobile", [&] { pressedButtons = Qt::NoButton; tests.segmented_control_figma_contract_loads(true); });
+    runner.run("alert_button_methods_are_invoked:single-primary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(1, 1, QStringLiteral("alertPrimarySingle")); });
+    runner.run("alert_button_methods_are_invoked:horizontal-primary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(2, 1, QStringLiteral("alertPrimaryHorizontal")); });
+    runner.run("alert_button_methods_are_invoked:horizontal-secondary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(2, 2, QStringLiteral("alertSecondaryHorizontal")); });
+    runner.run("alert_button_methods_are_invoked:vertical-primary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(3, 1, QStringLiteral("alertPrimaryVertical")); });
+    runner.run("alert_button_methods_are_invoked:vertical-secondary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(3, 2, QStringLiteral("alertSecondaryVertical")); });
+    runner.run("alert_button_methods_are_invoked:vertical-tertiary", [&] { pressedButtons = Qt::NoButton; tests.alert_button_methods_are_invoked(3, 3, QStringLiteral("alertTertiaryVertical")); });
+    runner.run("alert_glass_overlay_and_input_contract:qt-window", [&] { pressedButtons = Qt::NoButton; tests.alert_glass_overlay_and_input_contract(false, QStringLiteral("qt-window")); });
+    runner.run("alert_glass_overlay_and_input_contract:lvrs-window", [&] { pressedButtons = Qt::NoButton; tests.alert_glass_overlay_and_input_contract(true, QStringLiteral("lvrs-window")); });
+    return runner.result();
 }
 #include "tst_import_api.moc"

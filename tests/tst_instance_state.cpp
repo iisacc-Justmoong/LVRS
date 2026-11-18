@@ -1,4 +1,9 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QCoreApplication>
+#include <QGuiApplication>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <type_traits>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -6,19 +11,76 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QSignalSpy>
 #include "test_utils.h"
 
-class InstanceStateTests : public QObject
+class InstanceStateSignalRecorder : public QObject
 {
     Q_OBJECT
-private slots:
-    void owned_input_lifecycle_data();
-    void owned_input_lifecycle();
+public:
+    int count = 0;
+public slots:
+    void recordClicked() { ++count; }
+};
+
+namespace {
+struct LifecycleVariant { QString tag; QString type; QString configuration; };
+QList<LifecycleVariant> lifecycleVariants()
+{
+    QList<LifecycleVariant> result;
+    for (const char *type : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton",
+                             "MenuItem", "ContextMenuItem", "HierarchyItem"})
+        result.append({QString::fromLatin1(type), QString::fromLatin1(type), {}});
+    for (int type = 0; type < 17; ++type)
+        result.append({QStringLiteral("ListItem-") + QString::number(type),
+                       QStringLiteral("ListItem"), QStringLiteral("type: %1").arg(type)});
+    return result;
+}
+
+template <typename Actual, typename Expected>
+bool stateEqual(const Actual &actual, const Expected &expected)
+{
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+
+Qt::MouseButtons pressedButtons = Qt::NoButton;
+void sendMouse(QQuickWindow *window, QEvent::Type type, const QPoint &point, Qt::MouseButton button)
+{
+    if (type == QEvent::MouseButtonPress) pressedButtons |= button;
+    if (type == QEvent::MouseButtonRelease) pressedButtons &= ~Qt::MouseButtons(button);
+    const QPointF local(point), global(window->mapToGlobal(point));
+    static ulong timestamp = 10000;
+    QMouseEvent event(type, local, local, global, button, pressedButtons, Qt::NoModifier);
+    event.setTimestamp(timestamp += 16);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+void mouseMove(QQuickWindow *window, const QPoint &point) { sendMouse(window, QEvent::MouseMove, point, Qt::NoButton); }
+void mousePress(QQuickWindow *window, const QPoint &point) { sendMouse(window, QEvent::MouseButtonPress, point, Qt::LeftButton); }
+void mouseRelease(QQuickWindow *window, const QPoint &point) { sendMouse(window, QEvent::MouseButtonRelease, point, Qt::LeftButton); }
+void mouseClick(QQuickWindow *window, const QPoint &point) { mousePress(window, point); mouseRelease(window, point); }
+void sendKey(QQuickWindow *window, QEvent::Type type, Qt::Key key)
+{
+    const QString text = key == Qt::Key_Space ? QStringLiteral(" ") : QString();
+    QKeyEvent event(type, key, Qt::NoModifier, text);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+void keyClick(QQuickWindow *window, Qt::Key key) { sendKey(window, QEvent::KeyPress, key); sendKey(window, QEvent::KeyRelease, key); }
+}
+#define STATE_COMPARE(actual, expected) CTEST_CHECK(stateEqual((actual), (expected)))
+#define STATE_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(stateEqual((actual), (expected)))
+
+class InstanceStateTests
+{
+public:
+    void owned_input_lifecycle(const QString &type, const QString &configuration);
     void cancellation_and_motion_preferences();
     void model_states_remain_independent();
-    void menu_selected_uses_press_fill_data();
-    void menu_selected_uses_press_fill();
+    void menu_selected_uses_press_fill(bool expanded, const QString &primary);
     void mobile_hierarchy_input();
     void native_focus_capture();
     void recorded_figma_contract();
@@ -48,134 +110,124 @@ static QString phase(QObject *control)
     return control->property("interactionPhase").toString();
 }
 
-void InstanceStateTests::owned_input_lifecycle_data()
+void InstanceStateTests::owned_input_lifecycle(const QString &type, const QString &configuration)
 {
-    QTest::addColumn<QString>("type");
-    QTest::addColumn<QString>("configuration");
-    for (const char *type : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton",
-                            "MenuItem", "ContextMenuItem", "HierarchyItem"})
-        QTest::newRow(type) << QString::fromLatin1(type) << QString();
-    for (int type = 0; type < 17; ++type) {
-        const QByteArray row = "ListItem-" + QByteArray::number(type);
-        QTest::newRow(row.constData()) << QStringLiteral("ListItem")
-            << QStringLiteral("type: %1").arg(type);
-    }
-}
-
-void InstanceStateTests::owned_input_lifecycle()
-{
-    QFETCH(QString, type);
-    QFETCH(QString, configuration);
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine, type, configuration));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *control = root->findChild<QQuickItem *>("control");
     auto *other = root->findChild<QQuickItem *>("other");
     auto *next = root->findChild<QQuickItem *>("next");
-    QVERIFY(control && other && next);
+    CTEST_CHECK(control && other && next);
     auto *state = control->property("interaction").value<QObject *>();
     auto *otherState = other->property("interaction").value<QObject *>();
-    QVERIFY2(state && otherState, "Each component must own its interaction state object");
-    QVERIFY(state != otherState);
-    QCOMPARE(state, control->findChild<QObject *>("controlInstanceState"));
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK_MESSAGE(state && otherState, "Each component must own its interaction state object");
+    CTEST_CHECK(state != otherState);
+    STATE_COMPARE(state, control->findChild<QObject *>("controlInstanceState"));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     next->forceActiveFocus(Qt::MouseFocusReason);
-    QTest::mouseMove(window, QPoint(650, 350));
-    QTRY_COMPARE(phase(control), QStringLiteral("default"));
-    QCOMPARE(control->property("interactionInput").toString(), QStringLiteral("pointer"));
+    mouseMove(window, QPoint(650, 350));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("default"));
+    STATE_COMPARE(control->property("interactionInput").toString(), QStringLiteral("pointer"));
     const QRectF geometry = control->mapRectToScene(control->boundingRect());
     // The leading edge activates the row without stealing embedded accessory input.
     const QPoint point = control->mapToScene(QPointF(2, control->height() / 2)).toPoint();
-    QSignalSpy clicks(control, SIGNAL(clicked()));
-    QTest::mouseMove(window, point);
-    QTRY_COMPARE(phase(control), QStringLiteral("hover"));
-    QCOMPARE(phase(other), QStringLiteral("default"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("press"));
-    QCOMPARE(clicks.count(), 0);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("release"));
-    QCOMPARE(clicks.count(), 1);
-    QTRY_COMPARE(phase(control), QStringLiteral("hover"));
-    QTest::mouseMove(window, QPoint(650, 350));
+    InstanceStateSignalRecorder clicks;
+    const auto clickedConnection = QObject::connect(control, SIGNAL(clicked()), &clicks, SLOT(recordClicked()));
+    CTEST_CHECK(clickedConnection);
+    mouseMove(window, point);
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("hover"));
+    STATE_COMPARE(phase(other), QStringLiteral("default"));
+    mousePress(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
+    STATE_COMPARE(clicks.count, 0);
+    mouseRelease(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
+    STATE_COMPARE(clicks.count, 1);
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("hover"));
+    mouseMove(window, QPoint(650, 350));
     next->forceActiveFocus(Qt::TabFocusReason);
     control->forceActiveFocus(Qt::TabFocusReason);
-    QTRY_COMPARE(phase(control), QStringLiteral("focus"));
-    QCOMPARE(control->property("interactionInput").toString(), QStringLiteral("keyboard"));
-    QVERIFY(state->property("focusVisible").toBool());
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
+    STATE_COMPARE(control->property("interactionInput").toString(), QStringLiteral("keyboard"));
+    CTEST_CHECK(state->property("focusVisible").toBool());
     auto *ring = control->findChild<QQuickItem *>("buttonFocusRing");
-    QVERIFY(ring && ring->property("active").toBool());
+    CTEST_CHECK(ring && ring->property("active").toBool());
     // The row must not clip its own 3px external focus outline.
-    QVERIFY(!control->clip());
+    CTEST_CHECK(!control->clip());
     for (Qt::Key key : {Qt::Key_Space, Qt::Key_Return, Qt::Key_Enter}) {
-        const int before = clicks.count();
-        QTest::keyPress(window, key);
-        QCOMPARE(phase(control), QStringLiteral("press"));
-        QVERIFY(state->property("focusVisible").toBool());
-        QCOMPARE(clicks.count(), before);
-        QTest::keyRelease(window, key);
-        QCOMPARE(phase(control), QStringLiteral("release"));
-        QCOMPARE(clicks.count(), before + 1);
-        QVERIFY(ring->property("active").toBool());
-        QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+        const int before = clicks.count;
+        sendKey(window, QEvent::KeyPress, key);
+        STATE_COMPARE(phase(control), QStringLiteral("press"));
+        CTEST_CHECK(state->property("focusVisible").toBool());
+        STATE_COMPARE(clicks.count, before);
+        sendKey(window, QEvent::KeyRelease, key);
+        STATE_COMPARE(phase(control), QStringLiteral("release"));
+        STATE_COMPARE(clicks.count, before + 1);
+        CTEST_CHECK(ring->property("active").toBool());
+        STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
     }
-    QCOMPARE(control->mapRectToScene(control->boundingRect()), geometry);
-    QCOMPARE(phase(other), QStringLiteral("default"));
+    STATE_COMPARE(control->mapRectToScene(control->boundingRect()), geometry);
+    STATE_COMPARE(phase(other), QStringLiteral("default"));
     // Enter completion must restore native pointer tracking on this instance.
-    QTest::mouseMove(window, point);
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("press"));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("release"));
+    mouseMove(window, point);
+    mousePress(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
+    mouseRelease(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
     control->setEnabled(false);
-    QCOMPARE(phase(control), QStringLiteral("disabled"));
-    QVERIFY(!state->property("focusVisible").toBool());
-    const int before = clicks.count();
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(clicks.count(), before);
+    STATE_COMPARE(phase(control), QStringLiteral("disabled"));
+    CTEST_CHECK(!state->property("focusVisible").toBool());
+    const int before = clicks.count;
+    mouseClick(window, point);
+    STATE_COMPARE(clicks.count, before);
 }
 
 void InstanceStateTests::cancellation_and_motion_preferences()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine, QStringLiteral("PushButton")));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *control = root->findChild<QQuickItem *>("control");
     auto *next = root->findChild<QQuickItem *>("next");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QVERIFY(control->property("interaction").value<QObject *>());
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
+    CTEST_CHECK(control->property("interaction").value<QObject *>());
     const QPoint center = control->mapToScene(control->boundingRect().center()).toPoint();
-    QSignalSpy clicks(control, SIGNAL(clicked()));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTest::mouseMove(window, QPoint(650, 350));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, QPoint(650, 350));
-    QCOMPARE(clicks.count(), 0);
-    QVERIFY(phase(control) != QStringLiteral("release"));
+    InstanceStateSignalRecorder clicks;
+    const auto clickedConnection = QObject::connect(control, SIGNAL(clicked()), &clicks, SLOT(recordClicked()));
+    CTEST_CHECK(clickedConnection);
+    mousePress(window, center);
+    mouseMove(window, QPoint(650, 350));
+    mouseRelease(window, QPoint(650, 350));
+    STATE_COMPARE(clicks.count, 0);
+    CTEST_CHECK(phase(control) != QStringLiteral("release"));
     control->forceActiveFocus(Qt::TabFocusReason);
-    QTest::keyPress(window, Qt::Key_Return);
+    sendKey(window, QEvent::KeyPress, Qt::Key_Return);
     next->forceActiveFocus(Qt::TabFocusReason);
-    QTest::keyRelease(window, Qt::Key_Return);
-    QCOMPARE(clicks.count(), 0);
-    QTRY_COMPARE(phase(control), QStringLiteral("default"));
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("release"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("press"));
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Return);
+    STATE_COMPARE(clicks.count, 0);
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("default"));
+    // Re-enter the control before clicking so the native hover state follows the pointer.
+    mouseMove(window, center);
+    mouseClick(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
+    mousePress(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
     auto *motion = control->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion && !motion->property("releasing").toBool());
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
-    QTRY_COMPARE(phase(control), QStringLiteral("hover"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("press"));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("hover"));
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
+    CTEST_CHECK(motion && !motion->property("releasing").toBool());
+    mouseRelease(window, center);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("hover"));
+    mousePress(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
+    mouseRelease(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("hover"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
     control->setProperty("motionEnabled", false);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("hover"));
+    mouseClick(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("hover"));
 }
 
 void InstanceStateTests::model_states_remain_independent()
@@ -185,144 +237,130 @@ void InstanceStateTests::model_states_remain_independent()
         const bool menu = type.contains(QStringLiteral("MenuItem"));
         QQmlEngine engine;
         QScopedPointer<QObject> root(fixture(engine, type, menu ? "state: selectedState" : "selected: true"));
-        QVERIFY(root);
+        CTEST_CHECK(root);
         auto *window = qobject_cast<QQuickWindow *>(root.data());
         auto *control = root->findChild<QQuickItem *>("control");
-        QVERIFY(QTest::qWaitForWindowExposed(window));
-        QVERIFY(control->property("interaction").value<QObject *>());
+        CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
+        CTEST_CHECK(control->property("interaction").value<QObject *>());
         root->findChild<QQuickItem *>("next")->forceActiveFocus(Qt::TabFocusReason);
         control->forceActiveFocus(Qt::TabFocusReason);
-        QTRY_COMPARE(phase(control), QStringLiteral("focus"));
-        QTest::keyClick(window, Qt::Key_Return);
-        QCOMPARE(phase(control), QStringLiteral("release"));
+        STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
+        keyClick(window, Qt::Key_Return);
+        STATE_COMPARE(phase(control), QStringLiteral("release"));
         if (menu) {
-            QCOMPARE(control->property("state").toInt(), control->property("selectedState").toInt());
+            STATE_COMPARE(control->property("state").toInt(), control->property("selectedState").toInt());
             control->setProperty("state", control->property("inactiveState"));
         } else if (type == "HierarchyItem") {
-            QVERIFY(control->property("selected").toBool());
+            CTEST_CHECK(control->property("selected").toBool());
             control->setProperty("dragPreviewActive", true);
-            QCOMPARE(phase(control), QStringLiteral("disabled"));
-            QCOMPARE(control->property("uxStateName").toString(), QStringLiteral("Drag"));
+            STATE_COMPARE(phase(control), QStringLiteral("disabled"));
+            STATE_COMPARE(control->property("uxStateName").toString(), QStringLiteral("Drag"));
             control->setProperty("dragPreviewActive", false);
             control->setProperty("activatable", false);
         } else {
-            QVERIFY(control->property("selected").toBool());
+            CTEST_CHECK(control->property("selected").toBool());
             control->setEnabled(false);
         }
-        QCOMPARE(phase(control), QStringLiteral("disabled"));
-        QVERIFY(!control->property("interaction").value<QObject *>()->property("focusVisible").toBool());
+        STATE_COMPARE(phase(control), QStringLiteral("disabled"));
+        CTEST_CHECK(!control->property("interaction").value<QObject *>()->property("focusVisible").toBool());
     }
 }
 
-void InstanceStateTests::menu_selected_uses_press_fill_data()
+void InstanceStateTests::menu_selected_uses_press_fill(bool expanded, const QString &primary)
 {
-    QTest::addColumn<bool>("expanded");
-    QTest::addColumn<QString>("primary");
-    for (bool expanded : {false, true}) {
-        for (const QString &primary : {QStringLiteral("#0A84FF"), QStringLiteral("#A571E6")}) {
-            const QByteArray name = (expanded ? "expanded-" : "collapsed-") + primary.toUtf8();
-            QTest::newRow(name.constData()) << expanded << primary;
-        }
-    }
-}
-
-void InstanceStateTests::menu_selected_uses_press_fill()
-{
-    QFETCH(bool, expanded);
-    QFETCH(QString, primary);
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine, "MenuItem",
         QStringLiteral("expanded: %1; motionEnabled: false").arg(expanded ? "true" : "false")));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *control = root->findChild<QQuickItem *>("control");
     auto *other = root->findChild<QQuickItem *>("other");
     auto *next = root->findChild<QQuickItem *>("next");
-    QVERIFY(control && other && next);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(control && other && next);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     QScopedPointer<QObject> tokens(TestUtils::createFromQml(engine,
         "import QtQuick; import LVRS as LV; QtObject { property var theme: LV.Theme }"));
-    QVERIFY(tokens);
+    CTEST_CHECK(tokens);
     auto *theme = tokens->property("theme").value<QObject *>();
-    QVERIFY(theme);
-    QVERIFY(theme->setProperty("primaryColor", QColor(primary)));
+    CTEST_CHECK(theme);
+    CTEST_CHECK(theme->setProperty("primaryColor", QColor(primary)));
     const QColor expected = other->property("backgroundColorPressed").value<QColor>();
-    QCOMPARE(expected, theme->property("accentMuted").value<QColor>());
+    STATE_COMPARE(expected, theme->property("accentMuted").value<QColor>());
     auto *background = control->property("background").value<QQuickItem *>();
-    QVERIFY(background);
-    QVERIFY(control->setProperty("state", control->property("selectedState")));
+    CTEST_CHECK(background);
+    CTEST_CHECK(control->setProperty("state", control->property("selectedState")));
     const auto verifyFill = [&] {
-        QCOMPARE(background->property("color").value<QColor>(), expected);
+        STATE_COMPARE(background->property("color").value<QColor>(), expected);
         const QImage frame = window->grabWindow();
-        QVERIFY(!frame.isNull());
+        CTEST_CHECK(!frame.isNull());
         const QPointF center = control->mapToScene(control->boundingRect().center()) * (qreal(frame.width()) / window->width());
         const QColor pixel = frame.pixelColor(qRound(center.x()), qRound(center.y()));
-        QVERIFY2(qAbs(pixel.red() - expected.red()) <= 2
+        CTEST_CHECK_MESSAGE(qAbs(pixel.red() - expected.red()) <= 2
                  && qAbs(pixel.green() - expected.green()) <= 2
                  && qAbs(pixel.blue() - expected.blue()) <= 2,
                  qPrintable(QString("Selected rendered %1; press uses %2").arg(pixel.name(), expected.name())));
     };
     next->forceActiveFocus(Qt::MouseFocusReason);
-    QTest::mouseMove(window, QPoint(650, 350));
-    QTRY_COMPARE(phase(control), QStringLiteral("default"));
+    mouseMove(window, QPoint(650, 350));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("default"));
     verifyFill();
     const QPoint point = control->mapToScene(QPointF(2, control->height() / 2)).toPoint();
-    QTest::mouseMove(window, point);
-    QTRY_COMPARE(phase(control), QStringLiteral("hover"));
+    mouseMove(window, point);
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("hover"));
     verifyFill();
     control->setProperty("motionEnabled", true);
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("press"));
+    mousePress(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
     verifyFill();
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(phase(control), QStringLiteral("release"));
+    mouseRelease(window, point);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
     verifyFill();
-    QTest::mouseMove(window, QPoint(650, 350));
+    mouseMove(window, QPoint(650, 350));
     next->forceActiveFocus(Qt::TabFocusReason);
     control->forceActiveFocus(Qt::TabFocusReason);
-    QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
     verifyFill();
-    QTest::keyPress(window, Qt::Key_Return);
-    QCOMPARE(phase(control), QStringLiteral("press"));
+    sendKey(window, QEvent::KeyPress, Qt::Key_Return);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
     verifyFill();
-    QTest::keyRelease(window, Qt::Key_Return);
-    QCOMPARE(phase(control), QStringLiteral("release"));
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Return);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
     verifyFill();
-    QCOMPARE(control->property("state").toInt(), control->property("selectedState").toInt());
+    STATE_COMPARE(control->property("state").toInt(), control->property("selectedState").toInt());
     QScopedPointer<QObject> compact(TestUtils::createFromQml(engine,
         "import LVRS as LV; LV.ContextMenuItem { state: selectedState }"));
-    QVERIFY(compact);
-    QCOMPARE(compact->property("resolvedBackgroundColor").value<QColor>(), QColor(primary));
+    CTEST_CHECK(compact);
+    STATE_COMPARE(compact->property("resolvedBackgroundColor").value<QColor>(), QColor(primary));
 }
 
 void InstanceStateTests::recorded_figma_contract()
 {
     QFile file(QStringLiteral(LVRS_TEST_SOURCE_DIR "/fixtures/figma-instance-state.json"));
-    QVERIFY(file.open(QIODevice::ReadOnly));
+    CTEST_CHECK(file.open(QIODevice::ReadOnly));
     QJsonParseError error;
     const QJsonObject contract = QJsonDocument::fromJson(file.readAll(), &error).object();
-    QCOMPARE(error.error, QJsonParseError::NoError);
-    QCOMPARE(contract.value("fileKey").toString(), QStringLiteral("0GkItQYSNIR0lZ3iJhfJzc"));
-    QCOMPARE(contract.value("phases").toArray(), QJsonArray({"default", "hover", "press", "release", "focus"}));
+    STATE_COMPARE(error.error, QJsonParseError::NoError);
+    STATE_COMPARE(contract.value("fileKey").toString(), QStringLiteral("0GkItQYSNIR0lZ3iJhfJzc"));
+    STATE_COMPARE(contract.value("phases").toArray(), QJsonArray({"default", "hover", "press", "release", "focus"}));
     const QJsonArray sets = contract.value("sets").toArray();
-    QCOMPARE(sets.size(), 25);
+    STATE_COMPARE(sets.size(), 25);
     int variants = 0;
     QSet<QString> ids;
     for (const QJsonValue &value : sets) {
         const QJsonObject set = value.toObject();
         const int count = set.value("count").toInt();
-        QVERIFY(count > 0 && count <= 30);
-        QCOMPARE(set.value("boundVariantCount").toInt(), count);
-        QCOMPARE(set.value("verifiedInstanceOverrides").toInt(), count);
-        QVERIFY(!ids.contains(set.value("id").toString()));
+        CTEST_CHECK(count > 0 && count <= 30);
+        STATE_COMPARE(set.value("boundVariantCount").toInt(), count);
+        STATE_COMPARE(set.value("verifiedInstanceOverrides").toInt(), count);
+        CTEST_CHECK(!ids.contains(set.value("id").toString()));
         ids.insert(set.value("id").toString());
         variants += count;
     }
-    QCOMPARE(variants, 740);
-    QCOMPARE(contract.value("remainingOverlayInstances").toInt(-1), 0);
-    QCOMPARE(contract.value("removedOverlaySets").toArray().size(), 5);
-    QCOMPARE(contract.value("auditedPages").toInt(), 23);
-    QCOMPARE(contract.value("migratedInstances").toInt(), 539);
+    STATE_COMPARE(variants, 740);
+    STATE_COMPARE(contract.value("remainingOverlayInstances").toInt(-1), 0);
+    STATE_COMPARE(contract.value("removedOverlaySets").toArray().size(), 5);
+    STATE_COMPARE(contract.value("auditedPages").toInt(), 23);
+    STATE_COMPARE(contract.value("migratedInstances").toInt(), 539);
 }
 
 void InstanceStateTests::mobile_hierarchy_input()
@@ -349,53 +387,53 @@ Controls.ApplicationWindow {
     }
     LV.PushButton { objectName: "next"; x: 350; y: 200 }
 })"));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *control = root->findChild<QQuickItem *>("control");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QVERIFY(control->property("pointerDragRequiresLongPress").toBool());
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
+    CTEST_CHECK(control->property("pointerDragRequiresLongPress").toBool());
     const QPoint center = control->mapToScene(control->boundingRect().center()).toPoint();
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("press"));
-    QVERIFY(!control->property("down").toBool());
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(phase(control), QStringLiteral("release"));
-    QTRY_COMPARE(phase(control), QStringLiteral("default"));
+    mousePress(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("press"));
+    CTEST_CHECK(!control->property("down").toBool());
+    mouseRelease(window, center);
+    STATE_COMPARE(phase(control), QStringLiteral("release"));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("default"));
     root->findChild<QQuickItem *>("next")->forceActiveFocus(Qt::TabFocusReason);
     control->forceActiveFocus(Qt::TabFocusReason);
-    QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+    STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
     for (Qt::Key key : {Qt::Key_Space, Qt::Key_Return}) {
-        QTest::keyPress(window, key);
-        QCOMPARE(phase(control), QStringLiteral("press"));
-        QTest::keyRelease(window, key);
-        QCOMPARE(phase(control), QStringLiteral("release"));
-        QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+        sendKey(window, QEvent::KeyPress, key);
+        STATE_COMPARE(phase(control), QStringLiteral("press"));
+        sendKey(window, QEvent::KeyRelease, key);
+        STATE_COMPARE(phase(control), QStringLiteral("release"));
+        STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
     }
     control->setProperty("dragPreviewActive", true);
-    QCOMPARE(phase(control), QStringLiteral("disabled"));
+    STATE_COMPARE(phase(control), QStringLiteral("disabled"));
 }
 
 void InstanceStateTests::native_focus_capture()
 {
     const QString directory = qEnvironmentVariable("LVRS_STATE_CAPTURE_DIR");
     if (directory.isEmpty())
-        QSKIP("Set LVRS_STATE_CAPTURE_DIR for rendered state captures.");
-    QVERIFY(QDir().mkpath(directory));
+        lvrs_ctest::skip("Set LVRS_STATE_CAPTURE_DIR for rendered state captures.");
+    CTEST_CHECK(QDir().mkpath(directory));
     for (const QString &type : {QStringLiteral("PushButton"), QStringLiteral("DropdownButton"),
                                 QStringLiteral("ListItem"), QStringLiteral("MenuItem"),
                                 QStringLiteral("ContextMenuItem"), QStringLiteral("HierarchyItem")}) {
         QQmlEngine engine;
         QScopedPointer<QObject> root(fixture(engine, type, type == "ListItem" ? "type: LV.ListItem.Navigation" : ""));
-        QVERIFY(root);
+        CTEST_CHECK(root);
         auto *window = qobject_cast<QQuickWindow *>(root.data());
         auto *control = root->findChild<QQuickItem *>("control");
-        QVERIFY(QTest::qWaitForWindowExposed(window));
+        CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
         window->requestActivate();
-        QVERIFY(QTest::qWaitForWindowActive(window));
+        CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isActive(); }, 5000));
         control->setProperty("motionEnabled", false);
         root->findChild<QQuickItem *>("next")->forceActiveFocus(Qt::TabFocusReason);
         control->forceActiveFocus(Qt::TabFocusReason);
-        QTRY_COMPARE(phase(control), QStringLiteral("focus"));
+        STATE_WAIT_COMPARE(phase(control), QStringLiteral("focus"));
         QImage frame;
         const auto hasFocusOutline = [&] {
             frame = window->grabWindow();
@@ -412,15 +450,37 @@ void InstanceStateTests::native_focus_capture()
             }
             return bluePixels > 5;
         };
-        QTRY_VERIFY2(hasFocusOutline(), qPrintable(type + " external focus outline was clipped"));
-        QVERIFY(frame.save(directory + '/' + type + "-window.png"));
+        CTEST_CHECK_MESSAGE(lvrs_ctest::waitFor([&] { return hasFocusOutline(); }, 5000), qPrintable(type + " external focus outline was clipped"));
+        CTEST_CHECK(frame.save(directory + '/' + type + "-window.png"));
         const qreal scale = qreal(frame.width()) / window->width();
         const QRectF bounds = control->mapRectToScene(control->boundingRect()).adjusted(-8, -8, 8, 8);
         const QRect crop(qRound(bounds.x() * scale), qRound(bounds.y() * scale),
                          qRound(bounds.width() * scale), qRound(bounds.height() * scale));
-        QVERIFY(frame.copy(crop).save(directory + '/' + type + "-focus.png"));
+        CTEST_CHECK(frame.copy(crop).save(directory + '/' + type + "-focus.png"));
     }
 }
 
-QTEST_MAIN(InstanceStateTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    InstanceStateTests tests;
+    for (const LifecycleVariant &variant : lifecycleVariants()) {
+        const auto name = QStringLiteral("owned_input_lifecycle:") + variant.tag;
+        runner.run(name.toStdString(), [&] { pressedButtons = Qt::NoButton; tests.owned_input_lifecycle(variant.type, variant.configuration); });
+    }
+    for (bool expanded : {false, true}) {
+        for (const QString &primary : {QStringLiteral("#0A84FF"), QStringLiteral("#A571E6")}) {
+            const auto name = QStringLiteral("menu_selected_uses_press_fill:")
+                + (expanded ? QStringLiteral("expanded-") : QStringLiteral("collapsed-")) + primary;
+            runner.run(name.toStdString(), [&] { pressedButtons = Qt::NoButton; tests.menu_selected_uses_press_fill(expanded, primary); });
+        }
+    }
+    runner.run("cancellation_and_motion_preferences", [&] { pressedButtons = Qt::NoButton; tests.cancellation_and_motion_preferences(); });
+    runner.run("model_states_remain_independent", [&] { pressedButtons = Qt::NoButton; tests.model_states_remain_independent(); });
+    runner.run("mobile_hierarchy_input", [&] { pressedButtons = Qt::NoButton; tests.mobile_hierarchy_input(); });
+    runner.run("native_focus_capture", [&] { pressedButtons = Qt::NoButton; tests.native_focus_capture(); });
+    runner.run("recorded_figma_contract", [&] { pressedButtons = Qt::NoButton; tests.recorded_figma_contract(); });
+    return runner.result();
+}
 #include "tst_instance_state.moc"

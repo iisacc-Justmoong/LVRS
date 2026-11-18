@@ -1,13 +1,58 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QCoreApplication>
+#include <QDir>
+#include <QEventLoop>
+#include <QFileInfo>
+#include <QGuiApplication>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QScopeGuard>
+#include <QTimer>
+#include <type_traits>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QQmlEngine>
-#include <QSignalSpy>
 #include <QQuickItemGrabResult>
 
 #include "test_utils.h"
 
+class ListCompositeSignalRecorder : public QObject
+{
+    Q_OBJECT
+public:
+    QList<QPair<QString, QVariant>> actionEvents;
+    QList<QPair<QString, QVariant>> editEvents;
+public slots:
+    void recordAction(const QString &name, const QVariant &value) { actionEvents.append({name, value}); }
+    void recordEdit(const QString &name, const QVariant &value) { editEvents.append({name, value}); }
+};
+
 namespace {
+struct ListVariant {
+    const char *name;
+    int type;
+    int width;
+    int height;
+    bool mobile;
+};
+
+QList<ListVariant> listVariants()
+{
+    const char *names[] = {"Mini", "Detail", "Navigation", "Toggle", "Checkable",
+                           "Action", "ActionGroup", "Stepper", "Select", "InlineEdit",
+                           "DetailActions", "DetailQuantity", "DetailSettings", "Resource",
+                           "Media", "Task", "Form"};
+    const int widths[] = {170, 194, 280, 280, 280, 400, 400, 400, 400, 400,
+                          400, 400, 400, 400, 400, 400, 400};
+    const int heights[] = {22, 106, 44, 44, 44, 44, 44, 44, 44, 44,
+                           120, 118, 159, 129, 113, 135, 154};
+    QList<ListVariant> result;
+    for (int type = 0; type < 17; ++type)
+        for (bool mobile : {false, true})
+            result.append({names[type], type, widths[type], heights[type], mobile});
+    return result;
+}
+
 QQuickItem *visibleItem(QObject *root, const QString &name)
 {
     auto *item = qobject_cast<QQuickItem *>(root);
@@ -22,25 +67,57 @@ QQuickItem *visibleItem(QObject *root, const QString &name)
     return nullptr;
 }
 
+template <typename Actual, typename Expected>
+bool listEqual(const Actual &actual, const Expected &expected)
+{
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+
 void click(QQuickWindow &window, QQuickItem *item, QPointF local = QPointF(-1, -1))
 {
-    if (!item) {
-        QTest::qFail("Expected a visible interactive control", __FILE__, __LINE__);
-        return;
-    }
+    CTEST_CHECK_MESSAGE(item, "Expected a visible interactive control");
     if (local.x() < 0)
         local = QPointF(item->width() / 2, item->height() / 2);
-    QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier, item->mapToScene(local).toPoint());
-}
+    const QPointF point(item->mapToScene(local));
+    const QPointF global(window.mapToGlobal(point.toPoint()));
+    static ulong timestamp = 10000;
+    QMouseEvent press(QEvent::MouseButtonPress, point, point, global, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+    press.setTimestamp(timestamp += 16);
+    QCoreApplication::sendEvent(&window, &press);
+    QMouseEvent release(QEvent::MouseButtonRelease, point, point, global, Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+    release.setTimestamp(timestamp += 16);
+    QCoreApplication::sendEvent(&window, &release);
+    QCoreApplication::processEvents();
 }
 
-class ListCompositeTests : public QObject
+void keyClick(QQuickWindow *window, Qt::Key key)
 {
-    Q_OBJECT
+    const QString text = key >= Qt::Key_A && key <= Qt::Key_Z ? QString(QChar(key).toLower()) : QString();
+    QKeyEvent press(QEvent::KeyPress, key, Qt::NoModifier, text);
+    QKeyEvent release(QEvent::KeyRelease, key, Qt::NoModifier, text);
+    QCoreApplication::sendEvent(window, &press);
+    QCoreApplication::sendEvent(window, &release);
+    QCoreApplication::processEvents();
+}
 
-private slots:
-    void figma_variants_data();
-    void figma_variants();
+void processFor(int milliseconds)
+{
+    QEventLoop loop;
+    QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);
+    loop.exec();
+}
+}
+#define LIST_COMPARE(actual, expected) CTEST_CHECK(listEqual((actual), (expected)))
+#define LIST_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(listEqual((actual), (expected)))
+
+class ListCompositeTests
+{
+public:
+    void figma_variants(int type, int width, int height, bool mobile);
     void mixed_list_uses_each_rows_height();
     void controls_deliver_real_edits_and_actions();
     void model_edits_keep_the_live_delegate();
@@ -49,27 +126,6 @@ private slots:
     void render_catalog_has_all_seventeen_rows();
     void visual_catalog_list_preview_loads();
 };
-
-void ListCompositeTests::figma_variants_data()
-{
-    QTest::addColumn<int>("type");
-    QTest::addColumn<int>("width");
-    QTest::addColumn<int>("height");
-    QTest::addColumn<bool>("mobile");
-    const char *names[] = {"Mini", "Detail", "Navigation", "Toggle", "Checkable",
-                          "Action", "ActionGroup", "Stepper", "Select", "InlineEdit",
-                          "DetailActions", "DetailQuantity", "DetailSettings", "Resource",
-                          "Media", "Task", "Form"};
-    const int widths[] = {170, 194, 280, 280, 280, 400, 400, 400, 400, 400,
-                          400, 400, 400, 400, 400, 400, 400};
-    const int heights[] = {22, 106, 44, 44, 44, 44, 44, 44, 44, 44,
-                           120, 118, 159, 129, 113, 135, 154};
-    for (int index = 0; index < 17; ++index) {
-        QTest::newRow(names[index]) << index << widths[index] << heights[index] << false;
-        QTest::newRow((QByteArray(names[index]) + "-mobile").constData())
-            << index << widths[index] << heights[index] << true;
-    }
-}
 
 void ListCompositeTests::controls_deliver_real_edits_and_actions()
 {
@@ -122,109 +178,110 @@ Item {
     LV.ListItem { objectName: "settings"; y: 530; type: LV.ListItem.DetailSettings }
 }
 )"));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *root = qobject_cast<QQuickItem *>(object.data());
-    QVERIFY(root);
+    CTEST_CHECK(root);
     root->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window.isExposed(); }, 5000));
     auto *actions = object->findChild<QQuickItem *>("actions");
     auto *quantity = object->findChild<QQuickItem *>("quantity");
     auto *form = object->findChild<QQuickItem *>("form");
     auto *task = object->findChild<QQuickItem *>("task");
     auto *settings = object->findChild<QQuickItem *>("settings");
-    QVERIFY(actions && quantity && form && task && settings);
-    QSignalSpy actionsSpy(actions, SIGNAL(actionTriggered(QString,QVariant)));
-    QSignalSpy editsSpy(quantity, SIGNAL(edited(QString,QVariant)));
-    QVERIFY(actionsSpy.isValid() && editsSpy.isValid());
+    CTEST_CHECK(actions && quantity && form && task && settings);
+    ListCompositeSignalRecorder observations;
+    const auto actionsConnection = QObject::connect(actions, SIGNAL(actionTriggered(QString,QVariant)), &observations, SLOT(recordAction(QString,QVariant)));
+    const auto editsConnection = QObject::connect(quantity, SIGNAL(edited(QString,QVariant)), &observations, SLOT(recordEdit(QString,QVariant)));
+    CTEST_CHECK(actionsConnection && editsConnection);
 
-    QTRY_VERIFY(visibleItem(actions, "listItem_primaryAction"));
+    CTEST_WAIT_DEFAULT(visibleItem(actions, "listItem_primaryAction"));
     click(window, visibleItem(actions, "listItem_primaryAction"));
-    QTRY_COMPARE(object->property("methodCalls").toInt(), 1);
-    QCOMPARE(object->property("rowClicks").toInt(), 0);
-    QCOMPARE(actionsSpy.count(), 1);
-    QCOMPARE(actionsSpy.at(0).at(0).toString(), QString("primary"));
+    LIST_WAIT_COMPARE(object->property("methodCalls").toInt(), 1);
+    LIST_COMPARE(object->property("rowClicks").toInt(), 0);
+    LIST_COMPARE(observations.actionEvents.size(), 1);
+    LIST_COMPARE(observations.actionEvents.at(0).first, QString("primary"));
     click(window, visibleItem(actions, "listItem_secondaryAction"));
-    QTRY_COMPARE(actionsSpy.count(), 2);
-    QCOMPARE(actionsSpy.at(1).at(0).toString(), QString("secondary"));
+    LIST_WAIT_COMPARE(observations.actionEvents.size(), 2);
+    LIST_COMPARE(observations.actionEvents.at(1).first, QString("secondary"));
 
     click(window, visibleItem(actions, "listItem_moreMenu"));
     auto *actionMenu = actions->findChild<QObject *>("listItem_actionMenu");
-    QVERIFY(actionMenu);
-    QTRY_VERIFY(actionMenu->property("opened").toBool());
-    QVERIFY(QMetaObject::invokeMethod(actionMenu, "triggerEntry", Q_ARG(QVariant, 0)));
-    QTRY_COMPARE(object->property("menuCalls").toInt(), 1);
-    QTRY_VERIFY(!actionMenu->property("visible").toBool());
+    CTEST_CHECK(actionMenu);
+    CTEST_WAIT_DEFAULT(actionMenu->property("opened").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(actionMenu, "triggerEntry", Q_ARG(QVariant, 0)));
+    LIST_WAIT_COMPARE(object->property("menuCalls").toInt(), 1);
+    CTEST_WAIT_DEFAULT(!actionMenu->property("visible").toBool());
 
     auto *stepper = visibleItem(quantity, "listItem_stepper");
-    QVERIFY(stepper);
+    CTEST_CHECK(stepper);
     click(window, stepper, QPointF(9, 3));
-    QTRY_COMPARE(quantity->property("quantity").toDouble(), 3.0);
+    LIST_WAIT_COMPARE(quantity->property("quantity").toDouble(), 3.0);
     click(window, stepper, QPointF(9, 3));
-    QCOMPARE(quantity->property("quantity").toDouble(), 3.0);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 3.0);
     click(window, stepper, QPointF(9, 15));
-    QTRY_COMPARE(quantity->property("quantity").toDouble(), 2.0);
-    QTest::keyClick(&window, Qt::Key_Down);
-    QTRY_COMPARE(quantity->property("quantity").toDouble(), 1.0);
-    QTest::keyClick(&window, Qt::Key_Down);
-    QCOMPARE(quantity->property("quantity").toDouble(), 1.0);
-    QVERIFY(editsSpy.count() >= 3);
+    LIST_WAIT_COMPARE(quantity->property("quantity").toDouble(), 2.0);
+    keyClick(&window, Qt::Key_Down);
+    LIST_WAIT_COMPARE(quantity->property("quantity").toDouble(), 1.0);
+    keyClick(&window, Qt::Key_Down);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 1.0);
+    CTEST_CHECK(observations.editEvents.size() >= 3);
 
     click(window, visibleItem(quantity, "listItem_toggle"));
-    QTRY_VERIFY(!quantity->property("checked").toBool());
+    CTEST_WAIT_DEFAULT(!quantity->property("checked").toBool());
     click(window, visibleItem(task, "listItem_selection"));
-    QTRY_VERIFY(task->property("checked").toBool());
+    CTEST_WAIT_DEFAULT(task->property("checked").toBool());
     auto *firstSegment = visibleItem(settings, "listItem_segment_0");
     auto *secondSegment = visibleItem(settings, "listItem_segment_1");
-    QVERIFY(firstSegment && secondSegment);
-    QVERIFY(firstSegment->property("checked").toBool());
+    CTEST_CHECK(firstSegment && secondSegment);
+    CTEST_CHECK(firstSegment->property("checked").toBool());
     const auto originalTone = secondSegment->property("tone").toInt();
     click(window, secondSegment);
-    QTRY_COMPARE(settings->property("segmentIndex").toInt(), 1);
-    QTRY_VERIFY(secondSegment->property("checked").toBool());
-    QTRY_VERIFY(!firstSegment->property("checked").toBool());
-    QCOMPARE(secondSegment->property("tone").toInt(), originalTone);
-    QCOMPARE(firstSegment->property("tone").toInt(), originalTone);
+    LIST_WAIT_COMPARE(settings->property("segmentIndex").toInt(), 1);
+    CTEST_WAIT_DEFAULT(secondSegment->property("checked").toBool());
+    CTEST_WAIT_DEFAULT(!firstSegment->property("checked").toBool());
+    LIST_COMPARE(secondSegment->property("tone").toInt(), originalTone);
+    LIST_COMPARE(firstSegment->property("tone").toInt(), originalTone);
     const auto surface = secondSegment->property("background").value<QObject *>();
-    QVERIFY(surface);
-    QTRY_COMPARE(surface->property("color").value<QColor>(), secondSegment->property("selectedBackgroundColor").value<QColor>());
+    CTEST_CHECK(surface);
+    LIST_WAIT_COMPARE(surface->property("color").value<QColor>(), secondSegment->property("selectedBackgroundColor").value<QColor>());
 
     click(window, visibleItem(quantity, "listItem_selector"));
     auto *selectorMenu = quantity->findChild<QObject *>("listItem_selectorMenu");
-    QVERIFY(selectorMenu);
-    QTRY_VERIFY(selectorMenu->property("opened").toBool());
-    QVERIFY(QMetaObject::invokeMethod(selectorMenu, "triggerEntry", Q_ARG(QVariant, 1)));
-    QTRY_COMPARE(quantity->property("selectorIndex").toInt(), 1);
-    QTRY_VERIFY(!selectorMenu->property("visible").toBool());
-    QCOMPARE(visibleItem(quantity, "listItem_selector")->property("text").toString(), QString("JPEG"));
+    CTEST_CHECK(selectorMenu);
+    CTEST_WAIT_DEFAULT(selectorMenu->property("opened").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(selectorMenu, "triggerEntry", Q_ARG(QVariant, 1)));
+    LIST_WAIT_COMPARE(quantity->property("selectorIndex").toInt(), 1);
+    CTEST_WAIT_DEFAULT(!selectorMenu->property("visible").toBool());
+    LIST_COMPARE(visibleItem(quantity, "listItem_selector")->property("text").toString(), QString("JPEG"));
 
     auto *input = visibleItem(form, "listItem_input1");
-    QVERIFY(input);
-    QVERIFY(QMetaObject::invokeMethod(input, "forceInputFocus"));
-    QVERIFY(QMetaObject::invokeMethod(input, "selectAll"));
-    QTest::keyClick(&window, Qt::Key_Z);
-    QTRY_COMPARE(form->property("inputText1").toString(), QString("z"));
-    QCOMPARE(form->property("inputText2").toString(), QString("Beta"));
+    CTEST_CHECK(input);
+    CTEST_CHECK(QMetaObject::invokeMethod(input, "forceInputFocus"));
+    CTEST_CHECK(QMetaObject::invokeMethod(input, "selectAll"));
+    keyClick(&window, Qt::Key_Z);
+    LIST_WAIT_COMPARE(form->property("inputText1").toString(), QString("z"));
+    LIST_COMPARE(form->property("inputText2").toString(), QString("Beta"));
     click(window, visibleItem(form, "listItem_primaryAction"));
-    QTRY_COMPARE(object->property("savedText").toString(), QString("z"));
+    LIST_WAIT_COMPARE(object->property("savedText").toString(), QString("z"));
 
-    QVERIFY(QMetaObject::invokeMethod(object.data(), "setStepperMode", Q_ARG(QVariant, "up")));
+    CTEST_CHECK(QMetaObject::invokeMethod(object.data(), "setStepperMode", Q_ARG(QVariant, "up")));
     click(window, stepper, QPointF(9, 15));
-    QTRY_COMPARE(quantity->property("quantity").toDouble(), 2.0);
-    QTest::keyClick(&window, Qt::Key_Down);
-    QCOMPARE(quantity->property("quantity").toDouble(), 2.0);
-    QVERIFY(QMetaObject::invokeMethod(object.data(), "setStepperMode", Q_ARG(QVariant, "disabled")));
-    QTest::keyClick(&window, Qt::Key_Up);
-    QCOMPARE(quantity->property("quantity").toDouble(), 2.0);
+    LIST_WAIT_COMPARE(quantity->property("quantity").toDouble(), 2.0);
+    keyClick(&window, Qt::Key_Down);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 2.0);
+    CTEST_CHECK(QMetaObject::invokeMethod(object.data(), "setStepperMode", Q_ARG(QVariant, "disabled")));
+    keyClick(&window, Qt::Key_Up);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 2.0);
     click(window, stepper, QPointF(9, 3));
-    QCOMPARE(quantity->property("quantity").toDouble(), 2.0);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 2.0);
 
     actions->setEnabled(false);
     click(window, visibleItem(actions, "listItem_primaryAction"));
-    QCOMPARE(object->property("methodCalls").toInt(), 1);
+    LIST_COMPARE(object->property("methodCalls").toInt(), 1);
     quantity->setEnabled(false);
     click(window, stepper, QPointF(9, 3));
-    QCOMPARE(quantity->property("quantity").toDouble(), 2.0);
+    LIST_COMPARE(quantity->property("quantity").toDouble(), 2.0);
 }
 
 void ListCompositeTests::model_edits_keep_the_live_delegate()
@@ -255,25 +312,25 @@ LV.List {
     }
 }
 )"));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *root = qobject_cast<QQuickItem *>(object.data());
     root->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window.isExposed(); }, 5000));
     auto *delegateRoot = visibleItem(root, "list_delegateRoot_0");
-    QVERIFY(delegateRoot);
+    CTEST_CHECK(delegateRoot);
     QPointer<QQuickItem> delegateItem = visibleItem(delegateRoot, "list_defaultDelegate_0");
-    QVERIFY(delegateItem);
+    CTEST_CHECK(delegateItem);
     auto *input = visibleItem(delegateItem, "listItem_input1");
-    QVERIFY(input);
-    QVERIFY(QMetaObject::invokeMethod(input, "forceInputFocus"));
-    QVERIFY(QMetaObject::invokeMethod(input, "selectAll"));
-    QTest::keyClick(&window, Qt::Key_X);
-    QTRY_COMPARE(delegateItem->property("inputText1").toString(), QString("x"));
-    QCOMPARE(visibleItem(delegateRoot, "list_defaultDelegate_0"), delegateItem.data());
-    QVERIFY(input->property("focused").toBool());
+    CTEST_CHECK(input);
+    CTEST_CHECK(QMetaObject::invokeMethod(input, "forceInputFocus"));
+    CTEST_CHECK(QMetaObject::invokeMethod(input, "selectAll"));
+    keyClick(&window, Qt::Key_X);
+    LIST_WAIT_COMPARE(delegateItem->property("inputText1").toString(), QString("x"));
+    LIST_COMPARE(visibleItem(delegateRoot, "list_defaultDelegate_0"), delegateItem.data());
+    CTEST_CHECK(input->property("focused").toBool());
     click(window, visibleItem(delegateItem, "listItem_primaryAction"));
-    QTRY_COMPARE(object->property("savedEvents").toInt(), 1);
+    LIST_WAIT_COMPARE(object->property("savedEvents").toInt(), 1);
 }
 
 void ListCompositeTests::long_content_and_custom_composition_fit()
@@ -309,34 +366,30 @@ Item {
     }
 }
 )"));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *custom = object->findChild<QQuickItem *>("custom");
-    QTRY_VERIFY(visibleItem(custom, "customAccessories"));
+    CTEST_WAIT_DEFAULT(visibleItem(custom, "customAccessories"));
     auto *accessories = visibleItem(custom, "customAccessories");
-    QCOMPARE(accessories->property("listItem").value<QObject *>(), custom);
-    QCOMPARE(qRound(accessories->width()), 120);
-    QVERIFY(!visibleItem(custom, "listItem_primaryAction"));
+    LIST_COMPARE(accessories->property("listItem").value<QObject *>(), custom);
+    LIST_COMPARE(qRound(accessories->width()), 120);
+    CTEST_CHECK(!visibleItem(custom, "listItem_primaryAction"));
     auto *longRow = object->findChild<QQuickItem *>("long");
-    QTRY_COMPARE(qRound(longRow->implicitWidth()), 400);
-    QTRY_COMPARE(qRound(longRow->implicitHeight()), 44);
+    LIST_WAIT_COMPARE(qRound(longRow->implicitWidth()), 400);
+    LIST_WAIT_COMPARE(qRound(longRow->implicitHeight()), 44);
     for (const QString &name : {QString("listItem_primaryAction"), QString("listItem_secondaryAction"), QString("listItem_moreMenu")}) {
         auto *button = visibleItem(longRow, name);
-        QVERIFY(button);
-        QCOMPARE(qRound(button->width()), 72);
+        CTEST_CHECK(button);
+        LIST_COMPARE(qRound(button->width()), 72);
         const QPointF corner = button->mapToItem(longRow, QPointF(button->width(), button->height()));
-        QVERIFY(corner.x() <= longRow->width() && corner.y() <= longRow->height());
+        CTEST_CHECK(corner.x() <= longRow->width() && corner.y() <= longRow->height());
     }
     longRow->setProperty("showPrimaryAction", false);
-    QTRY_VERIFY(!visibleItem(longRow, "listItem_primaryAction"));
-    QTRY_COMPARE(qRound(longRow->implicitHeight()), 44);
+    CTEST_WAIT_DEFAULT(!visibleItem(longRow, "listItem_primaryAction"));
+    LIST_WAIT_COMPARE(qRound(longRow->implicitHeight()), 44);
 }
 
-void ListCompositeTests::figma_variants()
+void ListCompositeTests::figma_variants(int type, int width, int height, bool mobile)
 {
-    QFETCH(int, type);
-    QFETCH(int, width);
-    QFETCH(int, height);
-    QFETCH(bool, mobile);
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
     QQuickWindow window;
@@ -345,31 +398,31 @@ void ListCompositeTests::figma_variants()
         + QByteArray::number(type) + "; Component.onCompleted: LV.Theme.targetOverride = \""
         + (mobile ? "ios" : "macos") + "\" }";
     QScopedPointer<QObject> object(TestUtils::createFromQml(engine, qml));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *root = qobject_cast<QQuickItem *>(object.data());
-    QVERIFY(root);
+    CTEST_CHECK(root);
     root->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
-    QTRY_COMPARE(object->property("implicitWidth").toInt(), width);
-    QTRY_COMPARE(object->property("implicitHeight").toInt(), height);
-    QCOMPARE(object->property("size").toInt(), type);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window.isExposed(); }, 5000));
+    LIST_WAIT_COMPARE(object->property("implicitWidth").toInt(), width);
+    LIST_WAIT_COMPARE(object->property("implicitHeight").toInt(), height);
+    LIST_COMPARE(object->property("size").toInt(), type);
     if (type >= 2) {
         auto *label = visibleItem(object.data(), type == 15 ? "listItem_taskLabel" : "listItem_label");
-        QVERIFY(label);
-        QCOMPARE(label->property("font").value<QFont>().pixelSize(), 13);
+        CTEST_CHECK(label);
+        LIST_COMPARE(label->property("font").value<QFont>().pixelSize(), 13);
     }
     if (type == 9 || type == 16) {
         const int inputCount = type == 16 ? 2 : 1;
         for (int index = 1; index <= inputCount; ++index) {
             auto *input = visibleItem(root, QStringLiteral("listItem_input%1").arg(index));
-            QVERIFY(input);
-            QCOMPARE(input->height(), 22.0);
+            CTEST_CHECK(input);
+            LIST_COMPARE(input->height(), 22.0);
             auto *nativeInput = input->property("inputItem").value<QQuickItem *>();
-            QVERIFY(nativeInput);
-            QCOMPARE(nativeInput->y(), 4.5);
+            CTEST_CHECK(nativeInput);
+            LIST_COMPARE(nativeInput->y(), 4.5);
             const QPointF bottom = input->mapToItem(root, QPointF(input->width(), input->height()));
-            QVERIFY(bottom.x() <= root->width() && bottom.y() <= root->height());
+            CTEST_CHECK(bottom.x() <= root->width() && bottom.y() <= root->height());
         }
     }
 }
@@ -395,16 +448,16 @@ LV.List {
     ]
 }
 )"));
-    QVERIFY(object);
-    QTRY_COMPARE(object->property("contentHeight").toInt(), 333);
-    QTRY_COMPARE(object->property("implicitHeight").toInt(), 333);
+    CTEST_CHECK(object);
+    LIST_WAIT_COMPARE(object->property("contentHeight").toInt(), 333);
+    LIST_WAIT_COMPARE(object->property("implicitHeight").toInt(), 333);
     const int heights[] = {22, 154, 44, 113};
     int top = 0;
     for (int i = 0; i < 4; ++i) {
         auto *row = visibleItem(object.data(), QStringLiteral("list_delegateRoot_%1").arg(i));
-        QVERIFY(row);
-        QTRY_COMPARE(qRound(row->y()), top);
-        QTRY_COMPARE(qRound(row->height()), heights[i]);
+        CTEST_CHECK(row);
+        LIST_WAIT_COMPARE(qRound(row->y()), top);
+        LIST_WAIT_COMPARE(qRound(row->height()), heights[i]);
         top += heights[i];
     }
 }
@@ -450,29 +503,33 @@ Rectangle {
     }
 }
 )"));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *root = qobject_cast<QQuickItem *>(object.data());
-    QVERIFY(root);
+    CTEST_CHECK(root);
     root->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
-    QTest::qWait(100);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window.isExposed(); }, 5000));
+    processFor(100);
     // Windows may clamp a top-level window to the available monitor height.
     // Capture in the root item's coordinates, which the row bounds also use.
     const QSize captureSize(qRound(root->width()), qRound(root->height()));
     const auto result = root->grabToImage(captureSize);
-    QVERIFY(result);
-    QSignalSpy ready(result.data(), &QQuickItemGrabResult::ready);
-    QTRY_VERIFY_WITH_TIMEOUT(!ready.isEmpty(), 5000);
+    CTEST_CHECK(result);
+    int readyCount = 0;
+    const auto captureConnection = QObject::connect(result.data(), &QQuickItemGrabResult::ready,
+                                                     [&] { ++readyCount; });
+    CTEST_CHECK(captureConnection);
+    const auto disconnectCapture = qScopeGuard([&] { QObject::disconnect(captureConnection); });
+    CTEST_WAIT_VERIFY(readyCount > 0, 5000);
     const QImage rendered = result->image().scaled(captureSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QCOMPARE(rendered.size(), captureSize);
+    LIST_COMPARE(rendered.size(), captureSize);
     const QString diagnosticCapture = qEnvironmentVariable("LVRS_LIST_DIAGNOSTIC_CAPTURE");
-    if (!diagnosticCapture.isEmpty()) QVERIFY(rendered.save(diagnosticCapture));
+    if (!diagnosticCapture.isEmpty()) CTEST_CHECK(rendered.save(diagnosticCapture));
     for (int index = 0; index < 17; ++index) {
         auto *row = visibleItem(root, QStringLiteral("capture_row_%1").arg(index));
-        QVERIFY(row);
+        CTEST_CHECK(row);
         const QRect bounds(row->mapToItem(root, QPointF()).toPoint(), QSize(qRound(row->width()), qRound(row->height())));
-        QVERIFY(QRect(QPoint(), rendered.size()).contains(bounds));
+        CTEST_CHECK(QRect(QPoint(), rendered.size()).contains(bounds));
         const QImage pixels = rendered.copy(bounds);
         const QColor background = pixels.pixelColor(0, 0);
         int painted = 0;
@@ -482,12 +539,12 @@ Rectangle {
                     ++painted;
             }
         }
-        QVERIFY2(painted > 100, qPrintable(QStringLiteral("Variant %1 must render visible content at %2,%3 (%4x%5), painted %6").arg(index).arg(bounds.x()).arg(bounds.y()).arg(bounds.width()).arg(bounds.height()).arg(painted)));
+        CTEST_CHECK_MESSAGE(painted > 100, qPrintable(QStringLiteral("Variant %1 must render visible content at %2,%3 (%4x%5), painted %6").arg(index).arg(bounds.x()).arg(bounds.y()).arg(bounds.width()).arg(bounds.height()).arg(painted)));
     }
     const QString captureDir = qEnvironmentVariable("LVRS_LIST_CAPTURE_DIR");
     if (!captureDir.isEmpty()) {
-        QVERIFY(QDir().mkpath(captureDir));
-        QVERIFY(rendered.save(QDir(captureDir).filePath("listitem-presets.png")));
+        CTEST_CHECK(QDir().mkpath(captureDir));
+        CTEST_CHECK(rendered.save(QDir(captureDir).filePath("listitem-presets.png")));
     }
 }
 
@@ -507,56 +564,75 @@ LV.List {
     function expandFirst() { items = [{ type: "Resource", label: "First" }, items[1]] }
 }
 )"));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *root = qobject_cast<QQuickItem *>(object.data());
     root->setParentItem(window.contentItem());
     window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
-    QTRY_COMPARE(qRound(root->width()), 170);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window.isExposed(); }, 5000));
+    LIST_WAIT_COMPARE(qRound(root->width()), 170);
     auto *first = visibleItem(root, "list_delegateRoot_0");
     auto *second = visibleItem(root, "list_delegateRoot_1");
     auto *footer = visibleItem(root, "list_footer");
     auto *viewport = visibleItem(root, "list_itemsViewport");
-    QVERIFY(first && second && footer && viewport);
+    CTEST_CHECK(first && second && footer && viewport);
     const QPointF footerPosition = footer->mapToItem(root, QPointF());
     QPointer<QQuickItem> original = visibleItem(first, "list_defaultDelegate_0");
-    QVERIFY(QMetaObject::invokeMethod(root, "expandFirst"));
-    QTRY_COMPARE(qRound(root->width()), 400);
-    QTRY_COMPARE(qRound(first->height()), 129);
-    QTRY_COMPARE(qRound(second->y()), 137);
-    QTRY_COMPARE(viewport->property("contentHeight").toInt(), 159);
-    QCOMPARE(visibleItem(first, "list_defaultDelegate_0"), original.data());
-    QVERIFY(viewport->property("interactive").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root, "expandFirst"));
+    LIST_WAIT_COMPARE(qRound(root->width()), 400);
+    LIST_WAIT_COMPARE(qRound(first->height()), 129);
+    LIST_WAIT_COMPARE(qRound(second->y()), 137);
+    LIST_WAIT_COMPARE(viewport->property("contentHeight").toInt(), 159);
+    LIST_COMPARE(visibleItem(first, "list_defaultDelegate_0"), original.data());
+    CTEST_CHECK(viewport->property("interactive").toBool());
     const double offset = viewport->property("contentHeight").toDouble() - viewport->height();
-    QVERIFY(offset > 0);
-    QVERIFY(viewport->setProperty("contentY", offset));
-    QTRY_COMPARE(viewport->property("contentY").toDouble(), offset);
-    QCOMPARE(footer->mapToItem(root, QPointF()), footerPosition);
-    QVERIFY(viewport->clip());
-    QVERIFY(root->setProperty("scrollable", false));
-    QTRY_VERIFY(!viewport->property("interactive").toBool());
+    CTEST_CHECK(offset > 0);
+    CTEST_CHECK(viewport->setProperty("contentY", offset));
+    LIST_WAIT_COMPARE(viewport->property("contentY").toDouble(), offset);
+    LIST_COMPARE(footer->mapToItem(root, QPointF()), footerPosition);
+    CTEST_CHECK(viewport->clip());
+    CTEST_CHECK(root->setProperty("scrollable", false));
+    CTEST_WAIT_DEFAULT(!viewport->property("interactive").toBool());
 }
 
 void ListCompositeTests::visual_catalog_list_preview_loads()
 {
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
-    const QString path = QFINDTESTDATA("../example/VisualCatalog/qml/Main.qml");
-    QVERIFY(!path.isEmpty());
+    const QString candidate = QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../example/VisualCatalog/qml/Main.qml");
+    const QString path = QFileInfo::exists(candidate) ? candidate : QString();
+    CTEST_CHECK(!path.isEmpty());
     QScopedPointer<QObject> object(TestUtils::loadQmlFile(engine, path));
-    QVERIFY(object);
+    CTEST_CHECK(object);
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QVERIFY(object->setProperty("activeEntryKey", "list"));
-    QTRY_VERIFY(visibleItem(window->contentItem(), "list_defaultDelegate_16"));
+    CTEST_CHECK(window);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
+    CTEST_CHECK(object->setProperty("activeEntryKey", "list"));
+    CTEST_WAIT_DEFAULT(visibleItem(window->contentItem(), "list_defaultDelegate_16"));
     for (int index = 0; index < 17; ++index) {
         auto *row = visibleItem(window->contentItem(), QStringLiteral("list_defaultDelegate_%1").arg(index));
-        QVERIFY(row);
-        QCOMPARE(row->property("type").toInt(), index);
-        QVERIFY(row->width() >= 400);
+        CTEST_CHECK(row);
+        LIST_COMPARE(row->property("type").toInt(), index);
+        CTEST_CHECK(row->width() >= 400);
     }
 }
 
-QTEST_MAIN(ListCompositeTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    ListCompositeTests tests;
+    for (const ListVariant &variant : listVariants()) {
+        const auto name = QStringLiteral("figma_variants:") + QString::fromLatin1(variant.name)
+            + (variant.mobile ? QStringLiteral("-mobile") : QString());
+        runner.run(name.toStdString(), [&] { tests.figma_variants(variant.type, variant.width, variant.height, variant.mobile); });
+    }
+    runner.run("mixed_list_uses_each_rows_height", [&] { tests.mixed_list_uses_each_rows_height(); });
+    runner.run("controls_deliver_real_edits_and_actions", [&] { tests.controls_deliver_real_edits_and_actions(); });
+    runner.run("model_edits_keep_the_live_delegate", [&] { tests.model_edits_keep_the_live_delegate(); });
+    runner.run("long_content_and_custom_composition_fit", [&] { tests.long_content_and_custom_composition_fit(); });
+    runner.run("variant_changes_reflow_and_keep_footer_fixed", [&] { tests.variant_changes_reflow_and_keep_footer_fixed(); });
+    runner.run("render_catalog_has_all_seventeen_rows", [&] { tests.render_catalog_has_all_seventeen_rows(); });
+    runner.run("visual_catalog_list_preview_loads", [&] { tests.visual_catalog_list_preview_loads(); });
+    return runner.result();
+}
 #include "tst_list_composites.moc"

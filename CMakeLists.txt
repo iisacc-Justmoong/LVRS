@@ -114,9 +114,6 @@ set(LVRS_BOOTSTRAP_INSTALL_ROOT
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/LVRSHelpers.cmake)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2 Qml Svg Network)
-if(LVRS_BUILD_TESTS)
-    find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
-endif()
 find_package(Vulkan QUIET)
 
 if(APPLE)

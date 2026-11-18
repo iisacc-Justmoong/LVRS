@@ -1,13 +1,12 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include "backend/hierarchy/hierarchycommandstack.h"
 #include "backend/hierarchy/hierarchyvisibility.h"
 
 class HierarchyInteractionTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void move_intent_before_after_child_root();
     void visibility_projection_respects_expanded_state();
     void visibility_projection_matches_reference();
@@ -24,17 +23,17 @@ void HierarchyInteractionTests::move_intent_before_after_child_root()
     };
 
     QString error;
-    QVERIFY(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("a"), HierarchyDropMode::Before}, &error));
-    QCOMPARE(nodes.at(0).id, QStringLiteral("c"));
+    CTEST_CHECK(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("a"), HierarchyDropMode::Before}, &error));
+    CTEST_COMPARE(nodes.at(0).id, QStringLiteral("c"));
 
-    QVERIFY(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("b"), HierarchyDropMode::After}, &error));
-    QCOMPARE(nodes.at(2).id, QStringLiteral("c"));
+    CTEST_CHECK(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("b"), HierarchyDropMode::After}, &error));
+    CTEST_COMPARE(nodes.at(2).id, QStringLiteral("c"));
 
-    QVERIFY(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("a"), HierarchyDropMode::Child}, &error));
-    QCOMPARE(nodes.at(1).parentId, QStringLiteral("a"));
+    CTEST_CHECK(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QStringLiteral("a"), HierarchyDropMode::Child}, &error));
+    CTEST_COMPARE(nodes.at(1).parentId, QStringLiteral("a"));
 
-    QVERIFY(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QString(), HierarchyDropMode::Root}, &error));
-    QVERIFY(nodes.at(2).parentId.isEmpty());
+    CTEST_CHECK(HierarchyController::applyMove(&nodes, {QStringLiteral("c"), QString(), HierarchyDropMode::Root}, &error));
+    CTEST_CHECK(nodes.at(2).parentId.isEmpty());
 }
 
 void HierarchyInteractionTests::visibility_projection_respects_expanded_state()
@@ -47,14 +46,14 @@ void HierarchyInteractionTests::visibility_projection_respects_expanded_state()
 
     {
         const QVector<HierarchyVisibleRow> rows = HierarchyVisibility::project(nodes, {});
-        QCOMPARE(rows.size(), 1);
-        QCOMPARE(rows.at(0).node.id, QStringLiteral("root"));
+        CTEST_COMPARE(rows.size(), 1);
+        CTEST_COMPARE(rows.at(0).node.id, QStringLiteral("root"));
     }
 
     {
         const QVector<HierarchyVisibleRow> rows = HierarchyVisibility::project(nodes, {QStringLiteral("root")});
-        QCOMPARE(rows.size(), 2);
-        QCOMPARE(rows.at(1).node.id, QStringLiteral("child"));
+        CTEST_COMPARE(rows.size(), 2);
+        CTEST_COMPARE(rows.at(1).node.id, QStringLiteral("child"));
     }
 }
 
@@ -89,12 +88,12 @@ void HierarchyInteractionTests::visibility_projection_matches_reference()
             if (visible) expected.push_back({n,depths.value(n.id),hasChildren.contains(n.id)});
         }
         const auto actual=HierarchyVisibility::project(nodes,expanded);
-        QCOMPARE(actual.size(),expected.size());
+        CTEST_COMPARE(actual.size(),expected.size());
         for (qsizetype i=0;i<actual.size();++i) {
-            QCOMPARE(actual[i].node.id,expected[i].node.id);
-            QCOMPARE(actual[i].node.parentId,expected[i].node.parentId);
-            QCOMPARE(actual[i].depth,expected[i].depth);
-            QCOMPARE(actual[i].hasChildren,expected[i].hasChildren);
+            CTEST_COMPARE(actual[i].node.id,expected[i].node.id);
+            CTEST_COMPARE(actual[i].node.parentId,expected[i].node.parentId);
+            CTEST_COMPARE(actual[i].depth,expected[i].depth);
+            CTEST_COMPARE(actual[i].hasChildren,expected[i].hasChildren);
         }
     }
 }
@@ -110,13 +109,13 @@ void HierarchyInteractionTests::visibility_projection_handles_deep_and_cyclic_br
     }
     std::reverse(nodes.begin(),nodes.end());
     const auto rows=HierarchyVisibility::project(nodes,expanded);
-    QCOMPARE(rows.size(),nodes.size());
-    QCOMPARE(rows.first().depth,9999);
-    QCOMPARE(rows.last().depth,0);
+    CTEST_COMPARE(rows.size(),nodes.size());
+    CTEST_COMPARE(rows.first().depth,9999);
+    CTEST_COMPARE(rows.last().depth,0);
     nodes={{"a",{},"b",{}},{"b",{},"a",{}},{"root",{},{},{}}};
     const auto safe=HierarchyVisibility::project(nodes,{"a","b"});
-    QCOMPARE(safe.size(),1);
-    QCOMPARE(safe.first().node.id,QStringLiteral("root"));
+    CTEST_COMPARE(safe.size(),1);
+    CTEST_COMPARE(safe.first().node.id,QStringLiteral("root"));
 }
 
 void HierarchyInteractionTests::undo_redo_roundtrip()
@@ -128,15 +127,25 @@ void HierarchyInteractionTests::undo_redo_roundtrip()
 
     HierarchyCommandStack stack;
     QString error;
-    QVERIFY(stack.applyMove(&nodes, {QStringLiteral("b"), QStringLiteral("a"), HierarchyDropMode::Before}, &error));
-    QCOMPARE(nodes.at(0).id, QStringLiteral("b"));
+    CTEST_CHECK(stack.applyMove(&nodes, {QStringLiteral("b"), QStringLiteral("a"), HierarchyDropMode::Before}, &error));
+    CTEST_COMPARE(nodes.at(0).id, QStringLiteral("b"));
 
-    QVERIFY(stack.undo(&nodes, &error));
-    QCOMPARE(nodes.at(0).id, QStringLiteral("a"));
+    CTEST_CHECK(stack.undo(&nodes, &error));
+    CTEST_COMPARE(nodes.at(0).id, QStringLiteral("a"));
 
-    QVERIFY(stack.redo(&nodes, &error));
-    QCOMPARE(nodes.at(0).id, QStringLiteral("b"));
+    CTEST_CHECK(stack.redo(&nodes, &error));
+    CTEST_COMPARE(nodes.at(0).id, QStringLiteral("b"));
 }
 
-QTEST_MAIN(HierarchyInteractionTests)
-#include "tst_hierarchy_interaction.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    HierarchyInteractionTests tests;
+    runner.run("move_intent_before_after_child_root", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.move_intent_before_after_child_root(); });
+    runner.run("visibility_projection_respects_expanded_state", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.visibility_projection_respects_expanded_state(); });
+    runner.run("visibility_projection_matches_reference", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.visibility_projection_matches_reference(); });
+    runner.run("visibility_projection_handles_deep_and_cyclic_branches", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.visibility_projection_handles_deep_and_cyclic_branches(); });
+    runner.run("undo_redo_roundtrip", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.undo_redo_roundtrip(); });
+    return runner.result();
+}

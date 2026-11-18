@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QFont>
 #include <QFontDatabase>
@@ -13,9 +14,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class FontPolicyTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void font_policy_token_mapping_is_strict();
     void font_policy_family_resolution_and_compliance_edges();
 };
@@ -23,11 +22,11 @@ private slots:
 void FontPolicyTests::font_policy_token_mapping_is_strict()
 {
     FontPolicy policy;
-    QVERIFY(!policy.preferredFamily().isEmpty());
-    QCOMPARE(policy.systemFamily(), QFontInfo(QFontDatabase::systemFont(QFontDatabase::GeneralFont)).family());
-    QVERIFY(!policy.systemFamily().isEmpty());
-    QVERIFY(!policy.effectiveFamily().isEmpty());
-    QCOMPARE(policy.resolveFamily(QString()), policy.effectiveFamily());
+    CTEST_CHECK(!policy.preferredFamily().isEmpty());
+    CTEST_COMPARE(policy.systemFamily(), QFontInfo(QFontDatabase::systemFont(QFontDatabase::GeneralFont)).family());
+    CTEST_CHECK(!policy.systemFamily().isEmpty());
+    CTEST_CHECK(!policy.effectiveFamily().isEmpty());
+    CTEST_COMPARE(policy.resolveFamily(QString()), policy.effectiveFamily());
 
     struct Token {
         int pixelSize;
@@ -47,10 +46,10 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
     };
 
     for (const Token &token : expected) {
-        QCOMPARE(policy.weightForTextSize(token.pixelSize, token.fallbackWeight), token.weight);
-        QCOMPARE(policy.styleNameForTextSize(token.pixelSize, QString::fromLatin1(token.fallbackStyle)),
+        CTEST_COMPARE(policy.weightForTextSize(token.pixelSize, token.fallbackWeight), token.weight);
+        CTEST_COMPARE(policy.styleNameForTextSize(token.pixelSize, QString::fromLatin1(token.fallbackStyle)),
                  QString::fromLatin1(token.style));
-        QVERIFY2(policy.isThemeTextStyleCompliant(
+        CTEST_CHECK_MESSAGE(policy.isThemeTextStyleCompliant(
                      token.pixelSize,
                      token.weight,
                      QString::fromLatin1(token.style)),
@@ -76,47 +75,54 @@ void FontPolicyTests::font_policy_token_mapping_is_strict()
         {14, QFont::Normal, "Regular"}
     };
     for (const auto &token : legacyScaleTokens) {
-        QCOMPARE(policy.weightForTextSize(token.legacyPixelSize, QFont::Light), QFont::Light);
-        QCOMPARE(policy.styleNameForTextSize(token.legacyPixelSize, QStringLiteral("Fallback")),
+        CTEST_COMPARE(policy.weightForTextSize(token.legacyPixelSize, QFont::Light), QFont::Light);
+        CTEST_COMPARE(policy.styleNameForTextSize(token.legacyPixelSize, QStringLiteral("Fallback")),
                  QStringLiteral("Fallback"));
-        QVERIFY(!policy.isThemeTextStyleCompliant(
+        CTEST_CHECK(!policy.isThemeTextStyleCompliant(
             token.legacyPixelSize,
             token.weight,
             QString::fromLatin1(token.style)));
     }
 
     // 22px is Title2, not a doubled Caption alias.
-    QVERIFY(!policy.isThemeTextStyleCompliant(22, QFont::Normal, QStringLiteral("Regular")));
-    QCOMPARE(policy.weightForTextSize(22, QFont::Normal), QFont::Bold);
-    QCOMPARE(policy.styleNameForTextSize(22, QStringLiteral("Regular")), QStringLiteral("Bold"));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(22, QFont::Normal, QStringLiteral("Regular")));
+    CTEST_COMPARE(policy.weightForTextSize(22, QFont::Normal), QFont::Bold);
+    CTEST_COMPARE(policy.styleNameForTextSize(22, QStringLiteral("Regular")), QStringLiteral("Bold"));
 
-    QVERIFY(!policy.isThemeTextStyleCompliant(16, QFont::Medium, QStringLiteral("Medium")));
-    QCOMPARE(policy.weightForTextSize(16, QFont::Light), QFont::Light);
-    QCOMPARE(policy.styleNameForTextSize(16, QStringLiteral("Fallback")), QStringLiteral("Fallback"));
-    QVERIFY(!policy.isThemeTextStyleCompliant(26, QFont::Medium, QStringLiteral("Medium")));
-    QCOMPARE(policy.weightForTextSize(26, QFont::Medium), QFont::Bold);
-    QCOMPARE(policy.styleNameForTextSize(26, QStringLiteral("Medium")), QStringLiteral("Bold"));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(16, QFont::Medium, QStringLiteral("Medium")));
+    CTEST_COMPARE(policy.weightForTextSize(16, QFont::Light), QFont::Light);
+    CTEST_COMPARE(policy.styleNameForTextSize(16, QStringLiteral("Fallback")), QStringLiteral("Fallback"));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(26, QFont::Medium, QStringLiteral("Medium")));
+    CTEST_COMPARE(policy.weightForTextSize(26, QFont::Medium), QFont::Bold);
+    CTEST_COMPARE(policy.styleNameForTextSize(26, QStringLiteral("Medium")), QStringLiteral("Bold"));
 
-    QCOMPARE(policy.weightForTextSize(99, QFont::Light), QFont::Light);
-    QCOMPARE(policy.styleNameForTextSize(99, QStringLiteral("Fallback")), QStringLiteral("Fallback"));
-    QVERIFY(!policy.isThemeTextStyleCompliant(99, QFont::Bold, QStringLiteral("Bold")));
-    QVERIFY(!policy.isThemeTextStyleCompliant(13, QFont::Bold, QStringLiteral("Bold")));
+    CTEST_COMPARE(policy.weightForTextSize(99, QFont::Light), QFont::Light);
+    CTEST_COMPARE(policy.styleNameForTextSize(99, QStringLiteral("Fallback")), QStringLiteral("Fallback"));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(99, QFont::Bold, QStringLiteral("Bold")));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(13, QFont::Bold, QStringLiteral("Bold")));
 }
 
 void FontPolicyTests::font_policy_family_resolution_and_compliance_edges()
 {
     FontPolicy policy;
-    QVERIFY(!policy.resolveFamily(QStringLiteral("__unlikely_missing_family__")).isEmpty());
-    QCOMPARE(policy.resolveFamily(QStringLiteral("__unlikely_missing_family__")), policy.effectiveFamily());
-    QVERIFY(policy.isThemeTextStyleCompliant(26, QFont::Bold, QStringLiteral("bold")));
-    QVERIFY(!policy.isThemeTextStyleCompliant(26, QFont::Bold, QStringLiteral("SemiBold")));
-    QCOMPARE(policy.weightForTextSize(10, QFont::Thin), QFont::Thin);
-    QCOMPARE(policy.styleNameForTextSize(10, QStringLiteral("Thin")), QStringLiteral("Thin"));
+    CTEST_CHECK(!policy.resolveFamily(QStringLiteral("__unlikely_missing_family__")).isEmpty());
+    CTEST_COMPARE(policy.resolveFamily(QStringLiteral("__unlikely_missing_family__")), policy.effectiveFamily());
+    CTEST_CHECK(policy.isThemeTextStyleCompliant(26, QFont::Bold, QStringLiteral("bold")));
+    CTEST_CHECK(!policy.isThemeTextStyleCompliant(26, QFont::Bold, QStringLiteral("SemiBold")));
+    CTEST_COMPARE(policy.weightForTextSize(10, QFont::Thin), QFont::Thin);
+    CTEST_COMPARE(policy.styleNameForTextSize(10, QStringLiteral("Thin")), QStringLiteral("Thin"));
 
     const bool applied = policy.enforceApplicationFallback();
     if (!applied && !policy.pretendardAvailable())
-        QVERIFY(!policy.lastWarning().isEmpty());
+        CTEST_CHECK(!policy.lastWarning().isEmpty());
 }
 
-QTEST_MAIN(FontPolicyTests)
-#include "tst_font_policy.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    FontPolicyTests tests;
+    runner.run("font_policy_token_mapping_is_strict", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.font_policy_token_mapping_is_strict(); });
+    runner.run("font_policy_family_resolution_and_compliance_edges", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.font_policy_family_resolution_and_compliance_edges(); });
+    return runner.result();
+}

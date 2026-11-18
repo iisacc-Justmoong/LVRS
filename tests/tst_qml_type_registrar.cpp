@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QPointer>
 #include <QQmlComponent>
@@ -55,9 +56,7 @@ public:
 
 class QmlTypeRegistrarTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void manifest_registers_types_and_qml_can_create_manifest_type();
     void manifest_reports_required_failures_optional_skips_and_duplicates();
 };
@@ -80,14 +79,14 @@ void QmlTypeRegistrarTests::manifest_registers_types_and_qml_can_create_manifest
                                                              QStringLiteral("RegistrarUncreatableObject"))
     });
 
-    QVERIFY2(report.ok, qPrintable(report.errorMessage()));
-    QCOMPARE(report.results.size(), 2);
-    QVERIFY(report.results.at(0).typeId >= 0);
-    QVERIFY(report.results.at(1).typeId >= 0);
-    QCOMPARE(report.results.at(0).kind, lvrs::QmlTypeRegistrationKind::Creatable);
-    QCOMPARE(report.results.at(1).kind, lvrs::QmlTypeRegistrationKind::Uncreatable);
-    QCOMPARE(report.diagnostics().size(), 2);
-    QCOMPARE(report.results.at(0).toVariantMap().value(QStringLiteral("kind")).toString(),
+    CTEST_CHECK_MESSAGE(report.ok, qPrintable(report.errorMessage()));
+    CTEST_COMPARE(report.results.size(), 2);
+    CTEST_CHECK(report.results.at(0).typeId >= 0);
+    CTEST_CHECK(report.results.at(1).typeId >= 0);
+    CTEST_COMPARE(report.results.at(0).kind, lvrs::QmlTypeRegistrationKind::Creatable);
+    CTEST_COMPARE(report.results.at(1).kind, lvrs::QmlTypeRegistrationKind::Uncreatable);
+    CTEST_COMPARE(report.diagnostics().size(), 2);
+    CTEST_COMPARE(report.results.at(0).toVariantMap().value(QStringLiteral("kind")).toString(),
              QStringLiteral("creatable"));
 
     QQmlEngine engine;
@@ -107,11 +106,11 @@ RegistrarCreatable {
             messages.append(error.toString());
         return messages;
     }();
-    QVERIFY2(!component.isError(), qPrintable(errors.join(QStringLiteral("\n"))));
+    CTEST_CHECK_MESSAGE(!component.isError(), qPrintable(errors.join(QStringLiteral("\n"))));
 
     QPointer<QObject> object = component.create();
-    QVERIFY(!object.isNull());
-    QCOMPARE(object->property("value").toInt(), 42);
+    CTEST_CHECK(!object.isNull());
+    CTEST_COMPARE(object->property("value").toInt(), 42);
     delete object;
 }
 
@@ -151,21 +150,29 @@ void QmlTypeRegistrarTests::manifest_reports_required_failures_optional_skips_an
                                         false)
     });
 
-    QVERIFY(!report.ok);
-    QCOMPARE(report.results.size(), 4);
-    QVERIFY(report.results.at(0).ok);
-    QCOMPARE(report.results.at(0).typeId, 9001);
-    QVERIFY(!report.results.at(1).ok);
-    QVERIFY(report.results.at(1).error.contains(QStringLiteral("declared more than once")));
-    QVERIFY(!report.results.at(2).ok);
-    QVERIFY(report.results.at(2).error.contains(QStringLiteral("registration failed")));
-    QVERIFY(report.results.at(3).ok);
-    QVERIFY(report.results.at(3).skipped);
-    QVERIFY(report.results.at(3).error.contains(QStringLiteral("empty URI")));
-    QCOMPARE(report.errors.size(), 2);
-    QVERIFY(report.errorMessage().contains(QStringLiteral("SecondDuplicateThing")));
-    QCOMPARE(report.diagnostics().size(), 4);
+    CTEST_CHECK(!report.ok);
+    CTEST_COMPARE(report.results.size(), 4);
+    CTEST_CHECK(report.results.at(0).ok);
+    CTEST_COMPARE(report.results.at(0).typeId, 9001);
+    CTEST_CHECK(!report.results.at(1).ok);
+    CTEST_CHECK(report.results.at(1).error.contains(QStringLiteral("declared more than once")));
+    CTEST_CHECK(!report.results.at(2).ok);
+    CTEST_CHECK(report.results.at(2).error.contains(QStringLiteral("registration failed")));
+    CTEST_CHECK(report.results.at(3).ok);
+    CTEST_CHECK(report.results.at(3).skipped);
+    CTEST_CHECK(report.results.at(3).error.contains(QStringLiteral("empty URI")));
+    CTEST_COMPARE(report.errors.size(), 2);
+    CTEST_CHECK(report.errorMessage().contains(QStringLiteral("SecondDuplicateThing")));
+    CTEST_COMPARE(report.diagnostics().size(), 4);
 }
 
-QTEST_MAIN(QmlTypeRegistrarTests)
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    QmlTypeRegistrarTests tests;
+    runner.run("manifest_registers_types_and_qml_can_create_manifest_type", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.manifest_registers_types_and_qml_can_create_manifest_type(); });
+    runner.run("manifest_reports_required_failures_optional_skips_and_duplicates", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.manifest_reports_required_failures_optional_skips_and_duplicates(); });
+    return runner.result();
+}
 #include "tst_qml_type_registrar.moc"

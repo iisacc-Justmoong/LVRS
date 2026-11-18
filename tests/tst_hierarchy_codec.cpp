@@ -1,13 +1,12 @@
-#include <QtTest>
+#include "CTestSupport.h"
+#include <QGuiApplication>
 
 #include "backend/hierarchy/hierarchycodec.h"
 #include "backend/hierarchy/hierarchyops.h"
 
-class HierarchyCodecTests : public QObject
+class HierarchyCodecTests
 {
-    Q_OBJECT
-
-private slots:
+public:
     void parse_nodes_schema_succeeds();
     void reparent_prevents_cycle();
 };
@@ -26,9 +25,9 @@ void HierarchyCodecTests::parse_nodes_schema_succeeds()
         ]
     })JSON");
 
-    QVERIFY2(codec.parse(input, &nodes, &error), qPrintable(error));
-    QCOMPARE(nodes.size(), 2);
-    QCOMPARE(nodes.at(1).parentId, QStringLiteral("root"));
+    CTEST_CHECK_MESSAGE(codec.parse(input, &nodes, &error), qPrintable(error));
+    CTEST_COMPARE(nodes.size(), 2);
+    CTEST_COMPARE(nodes.at(1).parentId, QStringLiteral("root"));
 }
 
 void HierarchyCodecTests::reparent_prevents_cycle()
@@ -40,9 +39,16 @@ void HierarchyCodecTests::reparent_prevents_cycle()
     };
 
     QString error;
-    QVERIFY(!HierarchyOps::reparent(&nodes, QStringLiteral("a"), QStringLiteral("c"), &error));
-    QVERIFY(error.contains(QStringLiteral("cycle")));
+    CTEST_CHECK(!HierarchyOps::reparent(&nodes, QStringLiteral("a"), QStringLiteral("c"), &error));
+    CTEST_CHECK(error.contains(QStringLiteral("cycle")));
 }
 
-QTEST_MAIN(HierarchyCodecTests)
-#include "tst_hierarchy_codec.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner;
+    HierarchyCodecTests tests;
+    runner.run("parse_nodes_schema_succeeds", [&] { tests.parse_nodes_schema_succeeds(); });
+    runner.run("reparent_prevents_cycle", [&] { tests.reparent_prevents_cycle(); });
+    return runner.result();
+}

@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QCoreApplication>
 #include <QGuiApplication>
@@ -9,9 +10,7 @@
 
 class ForegroundServicesTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void gate_requires_visible_workspace_and_starts_services_once();
     void gate_reports_failures_and_can_be_reset();
 };
@@ -32,16 +31,16 @@ void ForegroundServicesTests::gate_requires_visible_workspace_and_starts_service
 
     const lvrs::ForegroundServiceStartResult notReady =
         gate.startOnceWhenWorkspaceVisible(context, {}, options);
-    QVERIFY(!notReady.ok);
-    QVERIFY(!notReady.started);
-    QVERIFY(!notReady.alreadyStarted);
-    QVERIFY(!notReady.visibleWorkspace);
-    QCOMPARE(gate.started(), false);
-    QCOMPARE(gate.startAttemptCount(), 0);
-    QVERIFY(notReady.errorMessage().contains(QStringLiteral("visible workspace")));
+    CTEST_CHECK(!notReady.ok);
+    CTEST_CHECK(!notReady.started);
+    CTEST_CHECK(!notReady.alreadyStarted);
+    CTEST_CHECK(!notReady.visibleWorkspace);
+    CTEST_COMPARE(gate.started(), false);
+    CTEST_COMPARE(gate.startAttemptCount(), 0);
+    CTEST_CHECK(notReady.errorMessage().contains(QStringLiteral("visible workspace")));
 
     window.show();
-    QTRY_VERIFY(window.isVisible());
+    CTEST_WAIT_DEFAULT(window.isVisible());
 
     QStringList calls;
     auto makeTask = [&](const QString &name, int priority) {
@@ -74,31 +73,31 @@ void ForegroundServicesTests::gate_requires_visible_workspace_and_starts_service
                                            },
                                            options);
 
-    QVERIFY2(started.ok, qPrintable(started.errorMessage()));
-    QVERIFY(started.started);
-    QVERIFY(!started.alreadyStarted);
-    QVERIFY(started.visibleWorkspace);
-    QCOMPARE(started.visibleWindowCount, 1);
-    QCOMPARE(started.taskResults.size(), 2);
-    QCOMPARE(calls,
+    CTEST_CHECK_MESSAGE(started.ok, qPrintable(started.errorMessage()));
+    CTEST_CHECK(started.started);
+    CTEST_CHECK(!started.alreadyStarted);
+    CTEST_CHECK(started.visibleWorkspace);
+    CTEST_COMPARE(started.visibleWindowCount, 1);
+    CTEST_COMPARE(started.taskResults.size(), 2);
+    CTEST_COMPARE(calls,
              (QStringList {
                  QStringLiteral("permission-bootstrap"),
                  QStringLiteral("scheduler")
              }));
-    QVERIFY(gate.started());
-    QCOMPARE(gate.startAttemptCount(), 1);
-    QCOMPARE(started.taskResults.at(0).metadata.value(QStringLiteral("service")).toString(),
+    CTEST_CHECK(gate.started());
+    CTEST_COMPARE(gate.startAttemptCount(), 1);
+    CTEST_COMPARE(started.taskResults.at(0).metadata.value(QStringLiteral("service")).toString(),
              QStringLiteral("permission-bootstrap"));
-    QCOMPARE(started.diagnostics().size(), 2);
+    CTEST_COMPARE(started.diagnostics().size(), 2);
 
     const lvrs::ForegroundServiceStartResult duplicate =
         gate.startOnceWhenWorkspaceVisible(context, {makeTask(QStringLiteral("duplicate"), 0)}, options);
-    QVERIFY(duplicate.ok);
-    QVERIFY(!duplicate.started);
-    QVERIFY(duplicate.alreadyStarted);
-    QCOMPARE(duplicate.taskResults.size(), 0);
-    QCOMPARE(gate.startAttemptCount(), 1);
-    QCOMPARE(calls.size(), 2);
+    CTEST_CHECK(duplicate.ok);
+    CTEST_CHECK(!duplicate.started);
+    CTEST_CHECK(duplicate.alreadyStarted);
+    CTEST_COMPARE(duplicate.taskResults.size(), 0);
+    CTEST_COMPARE(gate.startAttemptCount(), 1);
+    CTEST_COMPARE(calls.size(), 2);
 
     window.close();
 }
@@ -107,7 +106,7 @@ void ForegroundServicesTests::gate_reports_failures_and_can_be_reset()
 {
     QWindow window;
     window.show();
-    QTRY_VERIFY(window.isVisible());
+    CTEST_WAIT_DEFAULT(window.isVisible());
 
     lvrs::QmlAppLifecycleContext context;
     context.application = qGuiApp;
@@ -140,27 +139,27 @@ void ForegroundServicesTests::gate_reports_failures_and_can_be_reset()
     const lvrs::ForegroundServiceStartResult failed =
         gate.startOnceWhenWorkspaceVisible(context, {fatal, recoverable}, options);
 
-    QVERIFY(!failed.ok);
-    QVERIFY(failed.started);
-    QVERIFY(failed.fatalFailure());
-    QCOMPARE(failed.taskResults.size(), 2);
-    QCOMPARE(failed.taskResults.at(0).name, QStringLiteral("recoverable-service"));
-    QVERIFY(!failed.taskResults.at(0).fatal);
-    QCOMPARE(failed.taskResults.at(1).name, QStringLiteral("fatal-service"));
-    QVERIFY(failed.taskResults.at(1).fatal);
-    QVERIFY(failed.errorMessage().contains(QStringLiteral("recoverable startup failed")));
-    QVERIFY(failed.errorMessage().contains(QStringLiteral("fatal startup failed")));
-    QVERIFY(gate.started());
-    QCOMPARE(gate.startAttemptCount(), 1);
+    CTEST_CHECK(!failed.ok);
+    CTEST_CHECK(failed.started);
+    CTEST_CHECK(failed.fatalFailure());
+    CTEST_COMPARE(failed.taskResults.size(), 2);
+    CTEST_COMPARE(failed.taskResults.at(0).name, QStringLiteral("recoverable-service"));
+    CTEST_CHECK(!failed.taskResults.at(0).fatal);
+    CTEST_COMPARE(failed.taskResults.at(1).name, QStringLiteral("fatal-service"));
+    CTEST_CHECK(failed.taskResults.at(1).fatal);
+    CTEST_CHECK(failed.errorMessage().contains(QStringLiteral("recoverable startup failed")));
+    CTEST_CHECK(failed.errorMessage().contains(QStringLiteral("fatal startup failed")));
+    CTEST_CHECK(gate.started());
+    CTEST_COMPARE(gate.startAttemptCount(), 1);
 
     const lvrs::ForegroundServiceStartResult duplicate =
         gate.startOnceWhenWorkspaceVisible(context, {recoverable}, options);
-    QVERIFY(duplicate.ok);
-    QVERIFY(duplicate.alreadyStarted);
+    CTEST_CHECK(duplicate.ok);
+    CTEST_CHECK(duplicate.alreadyStarted);
 
     gate.reset();
-    QVERIFY(!gate.started());
-    QCOMPARE(gate.startAttemptCount(), 0);
+    CTEST_CHECK(!gate.started());
+    CTEST_COMPARE(gate.startAttemptCount(), 0);
 
     bool restarted = false;
     lvrs::ForegroundServiceTask success;
@@ -172,13 +171,20 @@ void ForegroundServicesTests::gate_reports_failures_and_can_be_reset()
 
     const lvrs::ForegroundServiceStartResult afterReset =
         gate.startOnceWhenWorkspaceVisible(context, {success}, options);
-    QVERIFY(afterReset.ok);
-    QVERIFY(afterReset.started);
-    QVERIFY(restarted);
-    QCOMPARE(gate.startAttemptCount(), 1);
+    CTEST_CHECK(afterReset.ok);
+    CTEST_CHECK(afterReset.started);
+    CTEST_CHECK(restarted);
+    CTEST_COMPARE(gate.startAttemptCount(), 1);
 
     window.close();
 }
 
-QTEST_MAIN(ForegroundServicesTests)
-#include "tst_foreground_services.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    ForegroundServicesTests tests;
+    runner.run("gate_requires_visible_workspace_and_starts_services_once", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.gate_requires_visible_workspace_and_starts_services_once(); });
+    runner.run("gate_reports_failures_and_can_be_reset", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.gate_reports_failures_and_can_be_reset(); });
+    return runner.result();
+}

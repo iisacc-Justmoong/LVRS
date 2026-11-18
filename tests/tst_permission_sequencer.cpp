@@ -1,14 +1,11 @@
-#include <QtTest>
-
-#include <QSignalSpy>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include "backend/runtime/permissionsequencer.h"
 
 class PermissionSequencerTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void sequencer_runs_steps_in_priority_order_and_records_history();
     void sequencer_stops_on_required_failure_and_can_continue_when_configured();
 };
@@ -16,8 +13,11 @@ private slots:
 void PermissionSequencerTests::sequencer_runs_steps_in_priority_order_and_records_history()
 {
     lvrs::PermissionRequestSequencer sequencer;
-    QSignalSpy historySpy(&sequencer, &lvrs::PermissionRequestSequencer::historyChanged);
-    QVERIFY(historySpy.isValid());
+    int historyCount = 0;
+    QObject observer;
+    const auto historyConnection = QObject::connect(&sequencer,
+        &lvrs::PermissionRequestSequencer::historyChanged, &observer, [&] { ++historyCount; });
+    CTEST_CHECK(historyConnection);
 
     QStringList calls;
     QList<int> previousResultCounts;
@@ -56,33 +56,33 @@ void PermissionSequencerTests::sequencer_runs_steps_in_priority_order_and_record
         makeStep(QStringLiteral("hub-folder"), 30, false, lvrs::PermissionRequestStatus::Skipped)
     }, options);
 
-    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
-    QVERIFY(!result.requiredFailure());
-    QVERIFY(!result.stoppedEarly);
-    QCOMPARE(result.runId, 1);
-    QCOMPARE(result.completedCount, 3);
-    QCOMPARE(result.grantedCount, 2);
-    QCOMPARE(result.skippedCount, 1);
-    QCOMPARE(calls,
+    CTEST_CHECK_MESSAGE(result.ok, qPrintable(result.errorMessage()));
+    CTEST_CHECK(!result.requiredFailure());
+    CTEST_CHECK(!result.stoppedEarly);
+    CTEST_COMPARE(result.runId, 1);
+    CTEST_COMPARE(result.completedCount, 3);
+    CTEST_COMPARE(result.grantedCount, 2);
+    CTEST_COMPARE(result.skippedCount, 1);
+    CTEST_COMPARE(calls,
              (QStringList {
                  QStringLiteral("full-disk-access"),
                  QStringLiteral("photo-library"),
                  QStringLiteral("hub-folder")
              }));
-    QCOMPARE(previousResultCounts, (QList<int> {0, 1, 2}));
-    QCOMPARE(result.stepResults.at(0).metadata.value(QStringLiteral("permission")).toString(),
+    CTEST_COMPARE(previousResultCounts, (QList<int> {0, 1, 2}));
+    CTEST_COMPARE(result.stepResults.at(0).metadata.value(QStringLiteral("permission")).toString(),
              QStringLiteral("full-disk-access"));
-    QCOMPARE(result.stepResults.at(0).details.value(QStringLiteral("runPhase")).toString(),
+    CTEST_COMPARE(result.stepResults.at(0).details.value(QStringLiteral("runPhase")).toString(),
              QStringLiteral("startup"));
-    QCOMPARE(result.diagnostics().size(), 3);
-    QCOMPARE(sequencer.history().size(), 3);
-    QCOMPARE(sequencer.runCount(), 1);
-    QCOMPARE(historySpy.count(), 1);
+    CTEST_COMPARE(result.diagnostics().size(), 3);
+    CTEST_COMPARE(sequencer.history().size(), 3);
+    CTEST_COMPARE(sequencer.runCount(), 1);
+    CTEST_COMPARE(historyCount, 1);
 
     sequencer.clearHistory();
-    QCOMPARE(sequencer.history().size(), 0);
-    QCOMPARE(sequencer.runCount(), 0);
-    QCOMPARE(historySpy.count(), 2);
+    CTEST_COMPARE(sequencer.history().size(), 0);
+    CTEST_COMPARE(sequencer.runCount(), 0);
+    CTEST_COMPARE(historyCount, 2);
 }
 
 void PermissionSequencerTests::sequencer_stops_on_required_failure_and_can_continue_when_configured()
@@ -128,14 +128,14 @@ void PermissionSequencerTests::sequencer_stops_on_required_failure_and_can_conti
     const lvrs::PermissionRequestRunResult stopped =
         sequencer.run({finalGranted, optionalUnavailable, requiredDenied}, stopOptions);
 
-    QVERIFY(!stopped.ok);
-    QVERIFY(stopped.requiredFailure());
-    QVERIFY(stopped.stoppedEarly);
-    QCOMPARE(stopped.completedCount, 1);
-    QCOMPARE(stopped.deniedCount, 1);
-    QCOMPARE(calls, (QStringList {QStringLiteral("required-denied")}));
-    QVERIFY(stopped.errorMessage().contains(QStringLiteral("user denied full disk access")));
-    QCOMPARE(sequencer.history().size(), 1);
+    CTEST_CHECK(!stopped.ok);
+    CTEST_CHECK(stopped.requiredFailure());
+    CTEST_CHECK(stopped.stoppedEarly);
+    CTEST_COMPARE(stopped.completedCount, 1);
+    CTEST_COMPARE(stopped.deniedCount, 1);
+    CTEST_COMPARE(calls, (QStringList {QStringLiteral("required-denied")}));
+    CTEST_CHECK(stopped.errorMessage().contains(QStringLiteral("user denied full disk access")));
+    CTEST_COMPARE(sequencer.history().size(), 1);
 
     calls.clear();
 
@@ -146,24 +146,31 @@ void PermissionSequencerTests::sequencer_stops_on_required_failure_and_can_conti
     const lvrs::PermissionRequestRunResult continued =
         sequencer.run({finalGranted, optionalUnavailable, requiredDenied}, continueOptions);
 
-    QVERIFY(!continued.ok);
-    QVERIFY(continued.requiredFailure());
-    QVERIFY(!continued.stoppedEarly);
-    QCOMPARE(continued.completedCount, 3);
-    QCOMPARE(continued.grantedCount, 1);
-    QCOMPARE(continued.deniedCount, 1);
-    QCOMPARE(continued.unavailableCount, 1);
-    QCOMPARE(calls,
+    CTEST_CHECK(!continued.ok);
+    CTEST_CHECK(continued.requiredFailure());
+    CTEST_CHECK(!continued.stoppedEarly);
+    CTEST_COMPARE(continued.completedCount, 3);
+    CTEST_COMPARE(continued.grantedCount, 1);
+    CTEST_COMPARE(continued.deniedCount, 1);
+    CTEST_COMPARE(continued.unavailableCount, 1);
+    CTEST_COMPARE(calls,
              (QStringList {
                  QStringLiteral("required-denied"),
                  QStringLiteral("optional-unavailable"),
                  QStringLiteral("final-granted")
              }));
-    QVERIFY(continued.stepResults.at(1).ok);
-    QCOMPARE(continued.stepResults.at(1).status, lvrs::PermissionRequestStatus::Unavailable);
-    QCOMPARE(sequencer.history().size(), 4);
-    QCOMPARE(sequencer.runCount(), 2);
+    CTEST_CHECK(continued.stepResults.at(1).ok);
+    CTEST_COMPARE(continued.stepResults.at(1).status, lvrs::PermissionRequestStatus::Unavailable);
+    CTEST_COMPARE(sequencer.history().size(), 4);
+    CTEST_COMPARE(sequencer.runCount(), 2);
 }
 
-QTEST_MAIN(PermissionSequencerTests)
-#include "tst_permission_sequencer.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    PermissionSequencerTests tests;
+    runner.run("sequencer_runs_steps_in_priority_order_and_records_history", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.sequencer_runs_steps_in_priority_order_and_records_history(); });
+    runner.run("sequencer_stops_on_required_failure_and_can_continue_when_configured", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.sequencer_stops_on_required_failure_and_can_continue_when_configured(); });
+    return runner.result();
+}

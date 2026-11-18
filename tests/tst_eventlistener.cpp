@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QCoreApplication>
@@ -17,9 +18,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class EventListenerTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void click_trigger();
     void global_context_requested_trigger();
     void application_window_global_context_signal();
@@ -76,13 +75,13 @@ Item {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
     QObject *listener = object->findChild<QObject *>("listener");
-    QVERIFY(listener);
+    CTEST_CHECK(listener);
     QVariant payload;
-    QVERIFY(QMetaObject::invokeMethod(listener, "fire", Q_ARG(QVariant, payload)));
-    QCOMPARE(object->property("count").toInt(), 1);
+    CTEST_CHECK(QMetaObject::invokeMethod(listener, "fire", Q_ARG(QVariant, payload)));
+    CTEST_COMPARE(object->property("count").toInt(), 1);
 }
 
 void EventListenerTests::global_context_requested_trigger()
@@ -137,13 +136,13 @@ LV.ApplicationWindow {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
-    QTRY_VERIFY(object->property("runtimeRunning").toBool());
-    QVERIFY(QMetaObject::invokeMethod(object.data(), "resetMonitor"));
+    CTEST_WAIT_DEFAULT(object->property("runtimeRunning").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(object.data(), "resetMonitor"));
 
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
 
     const QPointF p(24.0, 18.0);
     QMouseEvent mousePress(QEvent::MouseButtonPress,
@@ -154,18 +153,18 @@ LV.ApplicationWindow {
                            Qt::RightButton,
                            Qt::NoModifier);
     QCoreApplication::sendEvent(window, &mousePress);
-    QTRY_VERIFY(object->property("contextCount").toInt() >= 1);
-    QCOMPARE(object->property("lastSource").toString(), QStringLiteral("mouse"));
-    QVERIFY(object->property("hasInputState").toBool());
-    QVERIFY(object->property("hasPointerState").toBool());
+    CTEST_WAIT_DEFAULT(object->property("contextCount").toInt() >= 1);
+    CTEST_COMPARE(object->property("lastSource").toString(), QStringLiteral("mouse"));
+    CTEST_CHECK(object->property("hasInputState").toBool());
+    CTEST_CHECK(object->property("hasPointerState").toBool());
 
     const QPoint local(34, 22);
     const QPoint global(460, 360);
     QContextMenuEvent contextEvent(QContextMenuEvent::Keyboard, local, global, Qt::NoModifier);
     QCoreApplication::sendEvent(window, &contextEvent);
-    QTRY_VERIFY(object->property("contextCount").toInt() >= 2);
-    QCOMPARE(object->property("lastSource").toString(), QStringLiteral("context"));
-    QCOMPARE(object->property("lastReason").toInt(), static_cast<int>(QContextMenuEvent::Keyboard));
+    CTEST_WAIT_DEFAULT(object->property("contextCount").toInt() >= 2);
+    CTEST_COMPARE(object->property("lastSource").toString(), QStringLiteral("context"));
+    CTEST_COMPARE(object->property("lastReason").toInt(), static_cast<int>(QContextMenuEvent::Keyboard));
 }
 
 void EventListenerTests::application_window_global_context_signal()
@@ -203,10 +202,10 @@ LV.ApplicationWindow {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
 
     const QPointF p(26.0, 19.0);
     QMouseEvent mousePress(QEvent::MouseButtonPress,
@@ -218,10 +217,10 @@ LV.ApplicationWindow {
                            Qt::NoModifier);
     QCoreApplication::sendEvent(window, &mousePress);
 
-    QTRY_VERIFY(object->property("contextCount").toInt() >= 1);
-    QVERIFY(object->property("hasUiPayload").toBool());
-    QVERIFY(object->property("lastGlobalX").toReal() >= 0.0);
-    QVERIFY(object->property("lastGlobalY").toReal() >= 0.0);
+    CTEST_WAIT_DEFAULT(object->property("contextCount").toInt() >= 1);
+    CTEST_CHECK(object->property("hasUiPayload").toBool());
+    CTEST_CHECK(object->property("lastGlobalX").toReal() >= 0.0);
+    CTEST_CHECK(object->property("lastGlobalY").toReal() >= 0.0);
 }
 
 void EventListenerTests::context_menu_dismisses_on_global_press_outside()
@@ -260,11 +259,11 @@ LV.ApplicationWindow {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
-    QTRY_VERIFY(object->property("menuOpened").toBool());
+    CTEST_CHECK(window);
+    CTEST_WAIT_DEFAULT(object->property("menuOpened").toBool());
 
     const QPointF outsidePoint(230.0, 150.0);
     QMouseEvent outsidePress(QEvent::MouseButtonPress,
@@ -276,8 +275,8 @@ LV.ApplicationWindow {
                              Qt::NoModifier);
     QCoreApplication::sendEvent(window, &outsidePress);
 
-    QTRY_VERIFY(!object->property("menuOpened").toBool());
-    QTRY_VERIFY(object->property("closeCount").toInt() >= 1);
+    CTEST_WAIT_DEFAULT(!object->property("menuOpened").toBool());
+    CTEST_WAIT_DEFAULT(object->property("closeCount").toInt() >= 1);
 }
 
 void EventListenerTests::gesture_triggers_receive_touch_and_swipe()
@@ -348,10 +347,10 @@ LV.ApplicationWindow {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
 
     const QPointF beginPoint(42.0, 30.0);
     const QPointF updatePoint(88.0, 34.0);
@@ -363,15 +362,15 @@ LV.ApplicationWindow {
                            {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
     QCoreApplication::sendEvent(window, &touchBegin);
 
-    QTRY_COMPARE(object->property("touchStartCount").toInt(), 1);
-    QCOMPARE(object->property("lastStartX").toReal(), beginPoint.x());
-    QCOMPARE(object->property("lastStartY").toReal(), beginPoint.y());
-    QVERIFY(!object->property("lastUiObjectName").toString().isEmpty());
-    QVERIFY(object->property("lastUiObjectName").toString() != QStringLiteral("unknown"));
-    QCOMPARE(object->property("lastUiLayerKind").toString(), QStringLiteral("content"));
-    QVERIFY(!object->property("lastUiComponentName").toString().isEmpty());
-    QVERIFY(object->property("lastUiHierarchyDepth").toInt() >= 1);
-    QVERIFY(!object->property("lastUiHitPath").toString().isEmpty());
+    CTEST_WAIT_COMPARE(object->property("touchStartCount").toInt(), 1);
+    CTEST_COMPARE(object->property("lastStartX").toReal(), beginPoint.x());
+    CTEST_COMPARE(object->property("lastStartY").toReal(), beginPoint.y());
+    CTEST_CHECK(!object->property("lastUiObjectName").toString().isEmpty());
+    CTEST_CHECK(object->property("lastUiObjectName").toString() != QStringLiteral("unknown"));
+    CTEST_COMPARE(object->property("lastUiLayerKind").toString(), QStringLiteral("content"));
+    CTEST_CHECK(!object->property("lastUiComponentName").toString().isEmpty());
+    CTEST_CHECK(object->property("lastUiHierarchyDepth").toInt() >= 1);
+    CTEST_CHECK(!object->property("lastUiHitPath").toString().isEmpty());
 
     QTouchEvent touchUpdate(QEvent::TouchUpdate,
                             eventListenerTouchDevice(),
@@ -385,10 +384,10 @@ LV.ApplicationWindow {
                          {QEventPoint(0, QEventPoint::State::Released, endPoint, endPoint)});
     QCoreApplication::sendEvent(window, &touchEnd);
 
-    QTRY_COMPARE(object->property("swipeCount").toInt(), 1);
-    QCOMPARE(object->property("lastSwipeDirection").toString(), QStringLiteral("leftToRight"));
-    QVERIFY(object->property("lastSwipeDx").toReal() > 0.0);
-    QVERIFY(qAbs(object->property("lastSwipeDy").toReal()) < 12.0);
+    CTEST_WAIT_COMPARE(object->property("swipeCount").toInt(), 1);
+    CTEST_COMPARE(object->property("lastSwipeDirection").toString(), QStringLiteral("leftToRight"));
+    CTEST_CHECK(object->property("lastSwipeDx").toReal() > 0.0);
+    CTEST_CHECK(qAbs(object->property("lastSwipeDy").toReal()) < 12.0);
 }
 
 void EventListenerTests::mobile_press_and_scroll_triggers_are_distinct()
@@ -472,10 +471,10 @@ LV.ApplicationWindow {
     QQmlComponent component(&engine);
     component.setData(qml, QUrl());
     QScopedPointer<QObject> object(component.create());
-    QVERIFY(object);
+    CTEST_CHECK(object);
 
     auto *window = qobject_cast<QQuickWindow *>(object.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
 
     const QPointF beginPoint(52.0, 34.0);
     const QPointF updatePoint(55.0, 84.0);
@@ -486,29 +485,40 @@ LV.ApplicationWindow {
                            Qt::NoModifier,
                            {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
     QCoreApplication::sendEvent(window, &touchBegin);
-    QTRY_COMPARE(object->property("pressStartCount").toInt(), 1);
-    QCOMPARE(object->property("lastFingerCount").toInt(), 1);
-    QCOMPARE(object->property("lastMaximumFingerCount").toInt(), 1);
+    CTEST_WAIT_COMPARE(object->property("pressStartCount").toInt(), 1);
+    CTEST_COMPARE(object->property("lastFingerCount").toInt(), 1);
+    CTEST_COMPARE(object->property("lastMaximumFingerCount").toInt(), 1);
 
     QTouchEvent touchUpdate(QEvent::TouchUpdate,
                             eventListenerTouchDevice(),
                             Qt::NoModifier,
                             {QEventPoint(0, QEventPoint::State::Updated, updatePoint, updatePoint)});
     QCoreApplication::sendEvent(window, &touchUpdate);
-    QTRY_COMPARE(object->property("scrollStartCount").toInt(), 1);
-    QCOMPARE(object->property("lastScrollAxis").toString(), QStringLiteral("y"));
-    QCOMPARE(object->property("lastScrollDirection").toString(), QStringLiteral("topToBottom"));
+    CTEST_WAIT_COMPARE(object->property("scrollStartCount").toInt(), 1);
+    CTEST_COMPARE(object->property("lastScrollAxis").toString(), QStringLiteral("y"));
+    CTEST_COMPARE(object->property("lastScrollDirection").toString(), QStringLiteral("topToBottom"));
 
     QTouchEvent touchEnd(QEvent::TouchEnd,
                          eventListenerTouchDevice(),
                          Qt::NoModifier,
                          {QEventPoint(0, QEventPoint::State::Released, endPoint, endPoint)});
     QCoreApplication::sendEvent(window, &touchEnd);
-    QTRY_COMPARE(object->property("scrollEndCount").toInt(), 1);
-    QTRY_COMPARE(object->property("pressEndCount").toInt(), 1);
-    QVERIFY(object->property("lastReleased").toBool());
-    QVERIFY(object->property("lastPressDurationMs").toReal() >= 0.0);
+    CTEST_WAIT_COMPARE(object->property("scrollEndCount").toInt(), 1);
+    CTEST_WAIT_COMPARE(object->property("pressEndCount").toInt(), 1);
+    CTEST_CHECK(object->property("lastReleased").toBool());
+    CTEST_CHECK(object->property("lastPressDurationMs").toReal() >= 0.0);
 }
 
-QTEST_MAIN(EventListenerTests)
-#include "tst_eventlistener.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    EventListenerTests tests;
+    runner.run("click_trigger", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.click_trigger(); });
+    runner.run("global_context_requested_trigger", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.global_context_requested_trigger(); });
+    runner.run("application_window_global_context_signal", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.application_window_global_context_signal(); });
+    runner.run("context_menu_dismisses_on_global_press_outside", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.context_menu_dismisses_on_global_press_outside(); });
+    runner.run("gesture_triggers_receive_touch_and_swipe", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.gesture_triggers_receive_touch_and_swipe(); });
+    runner.run("mobile_press_and_scroll_triggers_are_distinct", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.mobile_press_and_scroll_triggers_are_distinct(); });
+    return runner.result();
+}

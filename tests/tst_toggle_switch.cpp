@@ -1,22 +1,88 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include "QtGuiTouch.h"
+#include <QCoreApplication>
+#include <QEventLoop>
+#include <QGuiApplication>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QScopeGuard>
+#include <QTimer>
+#include <type_traits>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QQmlEngine>
 #include <QQmlExpression>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QSignalSpy>
 #include "test_utils.h"
 
-class ToggleSwitchTests : public QObject
+class ToggleSignalRecorder : public QObject
 {
     Q_OBJECT
+public:
+    int count = 0;
+public slots:
+    void recordToggled() { ++count; }
+};
 
-private slots:
+namespace {
+template <typename Actual, typename Expected>
+bool toggleEqual(const Actual &actual, const Expected &expected)
+{
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual), qreal(expected));
+    else
+        return actual == expected;
+}
+
+void processFor(int milliseconds)
+{
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setTimerType(Qt::PreciseTimer);
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(milliseconds);
+    loop.exec();
+}
+
+void sendMouse(QQuickWindow *window, QEvent::Type type, const QPoint &point,
+               Qt::MouseButton button, Qt::MouseButtons buttons, ulong delay = 16)
+{
+    static ulong timestamp = 10000;
+    timestamp += delay;
+    const QPointF local(point);
+    QMouseEvent event(type, local, local, QPointF(window->mapToGlobal(point)),
+                      button, buttons, Qt::NoModifier);
+    event.setTimestamp(timestamp);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+
+void mouseClick(QQuickWindow *window, const QPoint &point)
+{
+    sendMouse(window, QEvent::MouseButtonPress, point, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseButtonRelease, point, Qt::LeftButton, Qt::NoButton);
+}
+
+void sendKey(QQuickWindow *window, QEvent::Type type, Qt::Key key)
+{
+    QKeyEvent event(type, key, Qt::NoModifier);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+}
+
+#define TOGGLE_COMPARE(actual, expected) CTEST_CHECK(toggleEqual((actual), (expected)))
+#define TOGGLE_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(toggleEqual((actual), (expected)))
+
+class ToggleSwitchTests
+{
+public:
     void init();
     void cleanup();
-    void press_and_rebound_data();
-    void press_and_rebound();
+    void press_and_rebound(bool initiallyChecked, const QString &dataTag);
     void quick_click_and_retarget();
     void keyboard_and_cancelled_press();
     void touch_press_and_rebound();
@@ -57,17 +123,17 @@ Controls.ApplicationWindow {
         checked: true
     }
 })"));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     window = qobject_cast<QQuickWindow *>(root.data());
     control = root->findChild<QQuickItem *>("toggle");
     knob = root->findChild<QQuickItem *>("toggle_knob");
     indicator = root->findChild<QQuickItem *>("toggle_indicator");
-    QVERIFY(window && control && knob && indicator);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QCOMPARE(knob->x(), 2.0);
+    CTEST_CHECK(window && control && knob && indicator);
+    CTEST_WAIT_DEFAULT(window->isExposed());
+    TOGGLE_COMPARE(knob->x(), 2.0);
     auto *initialOnKnob = root->findChild<QQuickItem *>("initialOn_knob");
-    QVERIFY(initialOnKnob);
-    QCOMPARE(initialOnKnob->x(), 18.0);
+    CTEST_CHECK(initialOnKnob);
+    TOGGLE_COMPARE(initialOnKnob->x(), 18.0);
 }
 
 void ToggleSwitchTests::cleanup()
@@ -91,70 +157,65 @@ void ToggleSwitchTests::setInitialState(bool checked)
     const int duration = control->property("transitionDuration").toInt();
     control->setProperty("transitionDuration", 0);
     control->setProperty("checked", checked);
-    QCOMPARE(knob->x(), checked ? 18.0 : 2.0);
+    TOGGLE_COMPARE(knob->x(), checked ? 18.0 : 2.0);
     control->setProperty("transitionDuration", duration);
 }
 
-void ToggleSwitchTests::press_and_rebound_data()
+void ToggleSwitchTests::press_and_rebound(bool initiallyChecked, const QString &dataTag)
 {
-    QTest::addColumn<bool>("initiallyChecked");
-    QTest::newRow("off-to-on") << false;
-    QTest::newRow("on-to-off") << true;
-}
-
-void ToggleSwitchTests::press_and_rebound()
-{
-    QFETCH(bool, initiallyChecked);
     setInitialState(initiallyChecked);
     const QString captureDirectory = qEnvironmentVariable("LVRS_TOGGLE_CAPTURE_DIR");
     QFile captureTimeline;
     QElapsedTimer captureTimer;
     int frameIndex = 0;
     if (!captureDirectory.isEmpty()) {
-        QVERIFY(QDir().mkpath(captureDirectory));
+        CTEST_CHECK(QDir().mkpath(captureDirectory));
         window->resize(360, 200);
         control->setTransformOrigin(QQuickItem::TopLeft);
         control->setScale(4);
         control->setPosition(QPointF(104, 56));
         root->findChild<QQuickItem *>("initialOn")->setVisible(false);
-        QTest::qWait(60);
-        captureTimeline.setFileName(captureDirectory + "/" + QTest::currentDataTag() + ".csv");
-        QVERIFY(captureTimeline.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        processFor(60);
+        captureTimeline.setFileName(captureDirectory + "/" + dataTag + ".csv");
+        CTEST_CHECK(captureTimeline.open(QIODevice::WriteOnly | QIODevice::Truncate));
         captureTimeline.write("frame,time_ms,x,width,height\n");
         captureTimer.start();
     }
     const auto captureFrame = [&] {
         if (captureDirectory.isEmpty())
             return;
-        const QString name = QString("%1-%2.png").arg(QTest::currentDataTag())
+        const QString name = QString("%1-%2.png").arg(dataTag)
             .arg(frameIndex++, 3, 10, QLatin1Char('0'));
         const QImage frame = window->grabWindow();
-        QVERIFY(!frame.isNull());
-        QVERIFY(frame.save(captureDirectory + "/" + name));
+        CTEST_CHECK(!frame.isNull());
+        CTEST_CHECK(frame.save(captureDirectory + "/" + name));
         captureTimeline.write(QString("%1,%2,%3,%4,%5\n").arg(name)
             .arg(captureTimer.elapsed()).arg(knob->x())
             .arg(knobBounds().width()).arg(knobBounds().height()).toUtf8());
     };
     captureFrame();
-    QSignalSpy toggled(control, SIGNAL(toggled()));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
+    ToggleSignalRecorder toggled;
+    const auto toggledConnection = QObject::connect(control, SIGNAL(toggled()),
+                                                      &toggled, SLOT(recordToggled()));
+    CTEST_CHECK(toggledConnection);
+    sendMouse(window, QEvent::MouseButtonPress, clickPoint(), Qt::LeftButton, Qt::LeftButton);
     if (!captureDirectory.isEmpty()) {
         for (int i = 0; i < 6; ++i) {
-            QTest::qWait(16);
+            processFor(16);
             captureFrame();
         }
     }
-    QTRY_VERIFY(control->property("down").toBool());
-    QTRY_VERIFY_WITH_TIMEOUT(knobBounds().width() > 19.0, 300);
-    QVERIFY(knobBounds().height() < 17.0);
-    QCOMPARE(control->property("checked").toBool(), initiallyChecked);
-    QCOMPARE(control->implicitWidth(), 38.0);
-    QCOMPARE(control->implicitHeight(), 22.0);
-    QCOMPARE(knob->size(), QSizeF(18, 18));
+    CTEST_WAIT_DEFAULT(control->property("down").toBool());
+    CTEST_WAIT_VERIFY(knobBounds().width() > 19.0, 300);
+    CTEST_CHECK(knobBounds().height() < 17.0);
+    TOGGLE_COMPARE(control->property("checked").toBool(), initiallyChecked);
+    TOGGLE_COMPARE(control->implicitWidth(), 38.0);
+    TOGGLE_COMPARE(control->implicitHeight(), 22.0);
+    TOGGLE_COMPARE(knob->size(), QSizeF(18, 18));
 
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QCOMPARE(control->property("checked").toBool(), !initiallyChecked);
-    QCOMPARE(toggled.count(), 1);
+    sendMouse(window, QEvent::MouseButtonRelease, clickPoint(), Qt::LeftButton, Qt::NoButton);
+    TOGGLE_COMPARE(control->property("checked").toBool(), !initiallyChecked);
+    TOGGLE_COMPARE(toggled.count, 1);
 
     const qreal destination = initiallyChecked ? 2.0 : 18.0;
     qreal furthestPosition = knob->x();
@@ -162,143 +223,177 @@ void ToggleSwitchTests::press_and_rebound()
     QElapsedTimer timer;
     timer.start();
     while (timer.elapsed() < control->property("transitionDuration").toInt() + 120) {
-        QTest::qWait(8);
+        processFor(8);
         furthestPosition = initiallyChecked ? qMin(furthestPosition, knob->x())
                                            : qMax(furthestPosition, knob->x());
         widestKnob = qMax(widestKnob, knobBounds().width());
         captureFrame();
         // The rebound remains inside the authored 38 x 22 track.
-        QVERIFY(knobBounds().left() >= -0.1);
-        QVERIFY(knobBounds().right() <= 38.1);
-        QVERIFY(knobBounds().top() >= -0.1);
-        QVERIFY(knobBounds().bottom() <= 22.1);
+        CTEST_CHECK(knobBounds().left() >= -0.1);
+        CTEST_CHECK(knobBounds().right() <= 38.1);
+        CTEST_CHECK(knobBounds().top() >= -0.1);
+        CTEST_CHECK(knobBounds().bottom() <= 22.1);
     }
-    QVERIFY(initiallyChecked ? furthestPosition < destination - 0.3
+    CTEST_CHECK(initiallyChecked ? furthestPosition < destination - 0.3
                              : furthestPosition > destination + 0.3);
-    QVERIFY(widestKnob > 19.0);
-    QTRY_COMPARE(knob->x(), destination);
-    QTRY_VERIFY(qAbs(knobBounds().width() - 18.0) < 0.01);
-    QTRY_VERIFY(qAbs(knobBounds().height() - 18.0) < 0.01);
-    QCOMPARE(toggled.count(), 1);
+    CTEST_CHECK(widestKnob > 19.0);
+    TOGGLE_WAIT_COMPARE(knob->x(), destination);
+    CTEST_WAIT_DEFAULT(qAbs(knobBounds().width() - 18.0) < 0.01);
+    CTEST_WAIT_DEFAULT(qAbs(knobBounds().height() - 18.0) < 0.01);
+    TOGGLE_COMPARE(toggled.count, 1);
 }
 
 void ToggleSwitchTests::quick_click_and_retarget()
 {
-    QSignalSpy toggled(control, SIGNAL(toggled()));
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QTRY_VERIFY_WITH_TIMEOUT(knobBounds().width() > 19.0, 200);
+    ToggleSignalRecorder toggled;
+    const auto toggledConnection = QObject::connect(control, SIGNAL(toggled()),
+                                                      &toggled, SLOT(recordToggled()));
+    CTEST_CHECK(toggledConnection);
+    mouseClick(window, clickPoint());
+    CTEST_WAIT_VERIFY(knobBounds().width() > 19.0, 200);
     QList<qreal> retargetPositions;
-    const auto connection = connect(knob, &QQuickItem::xChanged, this, [&] {
+    const auto connection = QObject::connect(knob, &QQuickItem::xChanged, knob, [&] {
         retargetPositions.append(knob->x());
     });
+    CTEST_CHECK(connection);
+    const auto disconnectPosition = qScopeGuard([&] { QObject::disconnect(connection); });
     for (int i = 0; i < 4; ++i) {
-        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-        QTest::qWait(35);
+        mouseClick(window, clickPoint());
+        processFor(35);
     }
-    disconnect(connection);
-    QVERIFY(!retargetPositions.isEmpty());
+    QObject::disconnect(connection);
+    CTEST_CHECK(!retargetPositions.isEmpty());
     // These reversals happen during travel: even an intermediate frame must
     // not snap to an endpoint before starting the next animation.
     for (qreal position : retargetPositions)
-        QVERIFY(position > 2.0 && position < 18.0);
-    QCOMPARE(toggled.count(), 5);
-    QVERIFY(control->property("checked").toBool());
-    QTRY_COMPARE(knob->x(), 18.0);
-    QTRY_VERIFY(qAbs(knobBounds().width() - 18.0) < 0.01);
+        CTEST_CHECK(position > 2.0 && position < 18.0);
+    TOGGLE_COMPARE(toggled.count, 5);
+    CTEST_CHECK(control->property("checked").toBool());
+    TOGGLE_WAIT_COMPARE(knob->x(), 18.0);
+    CTEST_WAIT_DEFAULT(qAbs(knobBounds().width() - 18.0) < 0.01);
 
     // Application-driven changes animate without emitting an input signal.
     control->setProperty("checked", false);
-    QTRY_VERIFY(knob->x() < 1.7);
-    QTRY_COMPARE(knob->x(), 2.0);
-    QCOMPARE(toggled.count(), 5);
-    QCOMPARE(control->property("state").toBool(), false);
+    CTEST_WAIT_DEFAULT(knob->x() < 1.7);
+    TOGGLE_WAIT_COMPARE(knob->x(), 2.0);
+    TOGGLE_COMPARE(toggled.count, 5);
+    TOGGLE_COMPARE(control->property("state").toBool(), false);
 }
 
 void ToggleSwitchTests::keyboard_and_cancelled_press()
 {
     control->forceActiveFocus();
-    QTRY_VERIFY(control->hasActiveFocus());
-    QSignalSpy toggled(control, SIGNAL(toggled()));
-    QTest::keyPress(window, Qt::Key_Space);
-    QTRY_VERIFY(knobBounds().width() > 19.0);
-    QTest::keyRelease(window, Qt::Key_Space);
-    QCOMPARE(toggled.count(), 1);
-    QTRY_VERIFY(knob->x() > 18.3);
-    QTRY_COMPARE(knob->x(), 18.0);
+    CTEST_WAIT_DEFAULT(control->hasActiveFocus());
+    ToggleSignalRecorder toggled;
+    const auto toggledConnection = QObject::connect(control, SIGNAL(toggled()),
+                                                      &toggled, SLOT(recordToggled()));
+    CTEST_CHECK(toggledConnection);
+    sendKey(window, QEvent::KeyPress, Qt::Key_Space);
+    CTEST_WAIT_DEFAULT(knobBounds().width() > 19.0);
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
+    TOGGLE_COMPARE(toggled.count, 1);
+    CTEST_WAIT_DEFAULT(knob->x() > 18.3);
+    TOGGLE_WAIT_COMPARE(knob->x(), 18.0);
 
     // Losing the mouse grab cancels input, as when a parent steals a gesture.
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QTRY_VERIFY(knobBounds().width() > 19.0);
+    sendMouse(window, QEvent::MouseButtonPress, clickPoint(), Qt::LeftButton, Qt::LeftButton);
+    CTEST_WAIT_DEFAULT(knobBounds().width() > 19.0);
     control->ungrabMouse();
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QTRY_VERIFY(!control->property("down").toBool());
-    QTRY_VERIFY(qAbs(knobBounds().width() - 18.0) < 0.01);
-    QCOMPARE(toggled.count(), 1);
-    QVERIFY(control->property("checked").toBool());
+    sendMouse(window, QEvent::MouseButtonRelease, clickPoint(), Qt::LeftButton, Qt::NoButton);
+    CTEST_WAIT_DEFAULT(!control->property("down").toBool());
+    CTEST_WAIT_DEFAULT(qAbs(knobBounds().width() - 18.0) < 0.01);
+    TOGGLE_COMPARE(toggled.count, 1);
+    CTEST_CHECK(control->property("checked").toBool());
 }
 
 void ToggleSwitchTests::touch_press_and_rebound()
 {
-    auto *device = QTest::createTouchDevice();
-    QSignalSpy toggled(control, SIGNAL(toggled()));
-    QTest::touchEvent(window, device).press(0, clickPoint(), window);
-    QTRY_VERIFY(control->property("down").toBool());
-    QTRY_VERIFY(knobBounds().width() > 19.0);
-    QTest::touchEvent(window, device).release(0, clickPoint(), window);
-    QTRY_COMPARE(toggled.count(), 1);
-    QTRY_VERIFY(knob->x() > 18.3);
-    QTRY_COMPARE(knob->x(), 18.0);
-    QTRY_VERIFY(qAbs(knobBounds().size().width() - 18.0) < 0.01);
+    auto *device = lvrs_ctest::createTouchDevice();
+    ToggleSignalRecorder toggled;
+    const auto toggledConnection = QObject::connect(control, SIGNAL(toggled()),
+                                                      &toggled, SLOT(recordToggled()));
+    CTEST_CHECK(toggledConnection);
+    lvrs_ctest::TouchSequence(window, device).press(0, clickPoint(), window);
+    CTEST_WAIT_DEFAULT(control->property("down").toBool());
+    CTEST_WAIT_DEFAULT(knobBounds().width() > 19.0);
+    lvrs_ctest::TouchSequence(window, device).release(0, clickPoint(), window);
+    TOGGLE_WAIT_COMPARE(toggled.count, 1);
+    CTEST_WAIT_DEFAULT(knob->x() > 18.3);
+    TOGGLE_WAIT_COMPARE(knob->x(), 18.0);
+    CTEST_WAIT_DEFAULT(qAbs(knobBounds().size().width() - 18.0) < 0.01);
 }
 
 void ToggleSwitchTests::drag_and_mirroring()
 {
     // Native Switch drag and RTL position must not fight the visual animation.
     const QPoint start = indicator->mapToScene(QPointF(4, 11)).toPoint();
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, start);
-    QTest::mouseMove(window, start + QPoint(23, 0), 30);
-    QTRY_VERIFY(control->property("position").toReal() > 0.5);
+    sendMouse(window, QEvent::MouseButtonPress, start, Qt::LeftButton, Qt::LeftButton);
+    sendMouse(window, QEvent::MouseMove, start + QPoint(23, 0), Qt::NoButton, Qt::LeftButton, 30);
+    CTEST_WAIT_DEFAULT(control->property("position").toReal() > 0.5);
     const qreal visualPosition = control->property("visualPosition").toReal();
-    QVERIFY(qAbs(knob->x() - (2.0 + visualPosition * 16.0)) < 0.1);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, start + QPoint(23, 0));
-    QTRY_VERIFY(control->property("checked").toBool());
-    QTRY_COMPARE(knob->x(), 18.0);
+    CTEST_CHECK(qAbs(knob->x() - (2.0 + visualPosition * 16.0)) < 0.1);
+    sendMouse(window, QEvent::MouseButtonRelease, start + QPoint(23, 0), Qt::LeftButton, Qt::NoButton);
+    CTEST_WAIT_DEFAULT(control->property("checked").toBool());
+    TOGGLE_WAIT_COMPARE(knob->x(), 18.0);
 
     control->setProperty("transitionDuration", 0);
     // Set the QML attached property through a binding evaluated in its context.
     QQmlExpression mirror(qmlContext(control), control,
                           "LayoutMirroring.enabled = true");
     mirror.evaluate();
-    QVERIFY2(!mirror.hasError(), qPrintable(mirror.error().toString()));
-    QTRY_VERIFY(control->property("mirrored").toBool());
-    QCOMPARE(knob->x(), 2.0);
+    CTEST_CHECK_MESSAGE(!mirror.hasError(), qPrintable(mirror.error().toString()));
+    CTEST_WAIT_DEFAULT(control->property("mirrored").toBool());
+    TOGGLE_COMPARE(knob->x(), 2.0);
     control->setProperty("checked", false);
-    QCOMPARE(knob->x(), 18.0);
+    TOGGLE_COMPARE(knob->x(), 18.0);
 }
 
 void ToggleSwitchTests::immediate_and_disabled_states()
 {
     control->setProperty("transitionDuration", 0);
-    QSignalSpy toggled(control, SIGNAL(toggled()));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QTest::qWait(100);
-    QCOMPARE(knobBounds().size(), QSizeF(18, 18));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QCOMPARE(knob->x(), 18.0);
-    QCOMPARE(toggled.count(), 1);
+    ToggleSignalRecorder toggled;
+    const auto toggledConnection = QObject::connect(control, SIGNAL(toggled()),
+                                                      &toggled, SLOT(recordToggled()));
+    CTEST_CHECK(toggledConnection);
+    sendMouse(window, QEvent::MouseButtonPress, clickPoint(), Qt::LeftButton, Qt::LeftButton);
+    processFor(100);
+    TOGGLE_COMPARE(knobBounds().size(), QSizeF(18, 18));
+    sendMouse(window, QEvent::MouseButtonRelease, clickPoint(), Qt::LeftButton, Qt::NoButton);
+    TOGGLE_COMPARE(knob->x(), 18.0);
+    TOGGLE_COMPARE(toggled.count, 1);
     control->setProperty("state", false);
-    QCOMPARE(knob->x(), 2.0);
+    TOGGLE_COMPARE(knob->x(), 2.0);
 
     control->setProperty("transitionDuration", 320);
     control->setEnabled(false);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, clickPoint());
-    QTest::keyClick(window, Qt::Key_Space);
-    QCOMPARE(toggled.count(), 1);
-    QVERIFY(!control->property("checked").toBool());
-    QCOMPARE(knobBounds().size(), QSizeF(18, 18));
+    mouseClick(window, clickPoint());
+    sendKey(window, QEvent::KeyPress, Qt::Key_Space); sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
+    TOGGLE_COMPARE(toggled.count, 1);
+    CTEST_CHECK(!control->property("checked").toBool());
+    TOGGLE_COMPARE(knobBounds().size(), QSizeF(18, 18));
     control->setProperty("checked", true);
-    QCOMPARE(knob->x(), 18.0);
+    TOGGLE_COMPARE(knob->x(), 18.0);
 }
 
-QTEST_MAIN(ToggleSwitchTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    auto runCase = [&](const char *name, auto function) {
+        runner.run(name, [&] {
+            ToggleSwitchTests tests;
+            tests.init();
+            const auto cleanup = qScopeGuard([&] { tests.cleanup(); });
+            function(tests);
+        });
+    };
+    runCase("press_and_rebound:off-to-on", [](auto &tests) { tests.press_and_rebound(false, QStringLiteral("off-to-on")); });
+    runCase("press_and_rebound:on-to-off", [](auto &tests) { tests.press_and_rebound(true, QStringLiteral("on-to-off")); });
+    runCase("quick_click_and_retarget", [](auto &tests) { tests.quick_click_and_retarget(); });
+    runCase("keyboard_and_cancelled_press", [](auto &tests) { tests.keyboard_and_cancelled_press(); });
+    runCase("touch_press_and_rebound", [](auto &tests) { tests.touch_press_and_rebound(); });
+    runCase("drag_and_mirroring", [](auto &tests) { tests.drag_and_mirroring(); });
+    runCase("immediate_and_disabled_states", [](auto &tests) { tests.immediate_and_disabled_states(); });
+    return runner.result();
+}
 #include "tst_toggle_switch.moc"

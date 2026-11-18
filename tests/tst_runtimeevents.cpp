@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -17,9 +18,7 @@ Q_IMPORT_PLUGIN(LVRSPlugin)
 
 class RuntimeEventsTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void runtime_events_are_exposed_and_idle_transitions();
     void keyboard_and_mouse_events_are_captured();
     void daemon_contract_is_exposed_to_qml();
@@ -106,27 +105,27 @@ void RuntimeEventsTests::runtime_events_are_exposed_and_idle_transitions()
     engine.addImportPath(importBase);
 
     QScopedPointer<QObject> root = createRuntimeWindow(engine);
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
-    QTRY_VERIFY(root->property("running").toBool());
-    QVERIFY(root->property("pid").toInt() > 0);
-    QVERIFY(!root->property("osLabel").toString().isEmpty());
-    QCOMPARE(root->property("captureProfile").toInt(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
-    QVERIFY(!root->property("uiTrackingEnabled").toBool());
-    QCOMPARE(root->property("uiCreatedCount").toInt(), 0);
-    QVERIFY(root->property("daemonBootEpochMs").toDouble() > 0.0);
+    CTEST_WAIT_DEFAULT(root->property("running").toBool());
+    CTEST_CHECK(root->property("pid").toInt() > 0);
+    CTEST_CHECK(!root->property("osLabel").toString().isEmpty());
+    CTEST_COMPARE(root->property("captureProfile").toInt(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    CTEST_CHECK(!root->property("uiTrackingEnabled").toBool());
+    CTEST_COMPARE(root->property("uiCreatedCount").toInt(), 0);
+    CTEST_CHECK(root->property("daemonBootEpochMs").toDouble() > 0.0);
     QVariant runningFromHealth;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "daemonHealthRunning",
                                       Q_RETURN_ARG(QVariant, runningFromHealth)));
-    QVERIFY(runningFromHealth.toBool());
+    CTEST_CHECK(runningFromHealth.toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "resetMonitor"));
-    QTRY_VERIFY(root->property("uptimeMs").toDouble() >= 0.0);
-    QTRY_VERIFY(root->property("idleState").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "resetMonitor"));
+    CTEST_WAIT_DEFAULT(root->property("uptimeMs").toDouble() >= 0.0);
+    CTEST_WAIT_DEFAULT(root->property("idleState").toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "pokeActivity"));
-    QTRY_VERIFY(!root->property("idleState").toBool());
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "pokeActivity"));
+    CTEST_WAIT_DEFAULT(!root->property("idleState").toBool());
 }
 
 void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
@@ -136,12 +135,12 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
     engine.addImportPath(importBase);
 
     QScopedPointer<QObject> root = createRuntimeWindow(engine);
-    QVERIFY(root);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "resetMonitor"));
-    QTRY_VERIFY(root->property("running").toBool());
+    CTEST_CHECK(root);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "resetMonitor"));
+    CTEST_WAIT_DEFAULT(root->property("running").toBool());
 
     auto *window = qobject_cast<QQuickWindow *>(root.data());
-    QVERIFY(window);
+    CTEST_CHECK(window);
 
     const int keyPressBefore = root->property("keyPressCount").toInt();
     const int keyReleaseBefore = root->property("keyReleaseCount").toInt();
@@ -182,30 +181,30 @@ void RuntimeEventsTests::keyboard_and_mouse_events_are_captured()
     QCoreApplication::sendEvent(window, &mousePress);
 
     QVariant inputStateValue;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "inputStateSnapshot",
                                       Q_RETURN_ARG(QVariant, inputStateValue)));
     const QVariantMap inputState = inputStateValue.toMap();
-    QVERIFY(!inputState.isEmpty());
-    QVERIFY(inputState.value(QStringLiteral("anyKeyPressed")).toBool());
-    QVERIFY(inputState.value(QStringLiteral("mouseButtonPressed")).toBool());
-    QVERIFY(inputState.value(QStringLiteral("activePressDurationMs")).toLongLong() >= 0);
+    CTEST_CHECK(!inputState.isEmpty());
+    CTEST_CHECK(inputState.value(QStringLiteral("anyKeyPressed")).toBool());
+    CTEST_CHECK(inputState.value(QStringLiteral("mouseButtonPressed")).toBool());
+    CTEST_CHECK(inputState.value(QStringLiteral("activePressDurationMs")).toLongLong() >= 0);
     const QVariantMap pointerUi = inputState.value(QStringLiteral("pointerUi")).toMap();
-    QVERIFY(pointerUi.contains(QStringLiteral("objectName")));
+    CTEST_CHECK(pointerUi.contains(QStringLiteral("objectName")));
     const QVariantList pressedKeyCodes = inputState.value(QStringLiteral("pressedKeyCodes")).toList();
-    QVERIFY(pressedKeyCodes.contains(QVariant::fromValue(static_cast<int>(Qt::Key_A))));
+    CTEST_CHECK(pressedKeyCodes.contains(QVariant::fromValue(static_cast<int>(Qt::Key_A))));
 
     QCoreApplication::sendEvent(window, &keyRelease);
     QCoreApplication::sendEvent(window, &keyReleaseShift);
     QCoreApplication::sendEvent(window, &mouseRelease);
 
-    QTRY_VERIFY(root->property("keyPressCount").toInt() > keyPressBefore);
-    QTRY_VERIFY(root->property("keyReleaseCount").toInt() > keyReleaseBefore);
-    QTRY_VERIFY(root->property("mouseMoveCount").toInt() > mouseMoveBefore);
-    QTRY_VERIFY(root->property("mousePressCount").toInt() > mousePressBefore);
-    QTRY_VERIFY(root->property("mouseReleaseCount").toInt() > mouseReleaseBefore);
-    QTRY_VERIFY(root->property("eventSequence").toInt() > seqBefore);
-    QTRY_VERIFY(root->property("recentEventCount").toInt() > 0);
+    CTEST_WAIT_DEFAULT(root->property("keyPressCount").toInt() > keyPressBefore);
+    CTEST_WAIT_DEFAULT(root->property("keyReleaseCount").toInt() > keyReleaseBefore);
+    CTEST_WAIT_DEFAULT(root->property("mouseMoveCount").toInt() > mouseMoveBefore);
+    CTEST_WAIT_DEFAULT(root->property("mousePressCount").toInt() > mousePressBefore);
+    CTEST_WAIT_DEFAULT(root->property("mouseReleaseCount").toInt() > mouseReleaseBefore);
+    CTEST_WAIT_DEFAULT(root->property("eventSequence").toInt() > seqBefore);
+    CTEST_WAIT_DEFAULT(root->property("recentEventCount").toInt() > 0);
 }
 
 void RuntimeEventsTests::daemon_contract_is_exposed_to_qml()
@@ -215,19 +214,27 @@ void RuntimeEventsTests::daemon_contract_is_exposed_to_qml()
     engine.addImportPath(importBase);
 
     QScopedPointer<QObject> root = createRuntimeWindow(engine);
-    QVERIFY(root);
+    CTEST_CHECK(root);
 
-    QTRY_VERIFY(root->property("running").toBool());
-    QVERIFY(root->property("daemonBootEpochMs").toDouble() > 0.0);
+    CTEST_WAIT_DEFAULT(root->property("running").toBool());
+    CTEST_CHECK(root->property("daemonBootEpochMs").toDouble() > 0.0);
     QVariant runningFromHealth;
-    QVERIFY(QMetaObject::invokeMethod(root.data(),
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(),
                                       "daemonHealthRunning",
                                       Q_RETURN_ARG(QVariant, runningFromHealth)));
-    QVERIFY(runningFromHealth.toBool());
+    CTEST_CHECK(runningFromHealth.toBool());
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "clearEventLog"));
-    QTRY_COMPARE(root->property("recentEventCount").toInt(), 0);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "clearEventLog"));
+    CTEST_WAIT_COMPARE(root->property("recentEventCount").toInt(), 0);
 }
 
-QTEST_MAIN(RuntimeEventsTests)
-#include "tst_runtimeevents.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    RuntimeEventsTests tests;
+    runner.run("runtime_events_are_exposed_and_idle_transitions", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.runtime_events_are_exposed_and_idle_transitions(); });
+    runner.run("keyboard_and_mouse_events_are_captured", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.keyboard_and_mouse_events_are_captured(); });
+    runner.run("daemon_contract_is_exposed_to_qml", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.daemon_contract_is_exposed_to_qml(); });
+    return runner.result();
+}

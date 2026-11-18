@@ -1,4 +1,9 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QEventLoop>
+#include <QGuiApplication>
+#include <QScopeGuard>
+#include <QTimer>
+#include <type_traits>
 
 #include <QCoreApplication>
 #include <QContextMenuEvent>
@@ -11,7 +16,6 @@
 #include <QPointer>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QSignalSpy>
 #include <QTouchEvent>
 #include <QtPlugin>
 
@@ -43,11 +47,29 @@ const QPointingDevice *testTouchDevice()
 
 } // namespace
 
-class RuntimeServicesTests : public QObject
+namespace {
+template <typename Actual, typename Expected>
+bool runtimeEqual(const Actual &actual, const Expected &expected)
 {
-    Q_OBJECT
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+void processFor(int milliseconds)
+{
+    QEventLoop loop;
+    QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);
+    loop.exec();
+}
+}
+#define RUNTIME_COMPARE(actual, expected) CTEST_CHECK(runtimeEqual((actual), (expected)))
+#define RUNTIME_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(runtimeEqual((actual), (expected)))
 
-private slots:
+class RuntimeServicesTests
+{
+public:
     void runtime_events_measurement_boundaries();
     void runtime_events_daemon_health_and_recent_log();
     void runtime_events_idle_and_reset_signal_contract();
@@ -71,48 +93,48 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     window.setWidth(800);
     window.setHeight(500);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
-    QCOMPARE(events.uiCreatedCount(), quint64(0));
-    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
-    QVERIFY(!events.pointerHitTestingEnabled());
-    QVERIFY(!events.uiTrackingEnabled());
+    CTEST_WAIT_DEFAULT(events.running());
+    RUNTIME_COMPARE(events.uiCreatedCount(), quint64(0));
+    RUNTIME_COMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    CTEST_CHECK(!events.pointerHitTestingEnabled());
+    CTEST_CHECK(!events.uiTrackingEnabled());
 
     events.setIdleTimeoutMs(-10);
-    QCOMPARE(events.idleTimeoutMs(), 250);
+    RUNTIME_COMPARE(events.idleTimeoutMs(), 250);
     events.setIdleTimeoutMs(24 * 60 * 60 * 1000 + 999);
-    QCOMPARE(events.idleTimeoutMs(), 24 * 60 * 60 * 1000);
+    RUNTIME_COMPARE(events.idleTimeoutMs(), 24 * 60 * 60 * 1000);
 
     events.setOsSampleIntervalMs(-10);
-    QCOMPARE(events.osSampleIntervalMs(), 250);
+    RUNTIME_COMPARE(events.osSampleIntervalMs(), 250);
     events.setOsSampleIntervalMs(70 * 1000);
-    QCOMPARE(events.osSampleIntervalMs(), 60 * 1000);
+    RUNTIME_COMPARE(events.osSampleIntervalMs(), 60 * 1000);
 
     events.setCaptureProfile(RuntimeEvents::LowLatencyCapture);
-    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
-    QVERIFY(!events.pointerHitTestingEnabled());
-    QVERIFY(!events.uiTrackingEnabled());
+    RUNTIME_COMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::LowLatencyCapture));
+    CTEST_CHECK(!events.pointerHitTestingEnabled());
+    CTEST_CHECK(!events.uiTrackingEnabled());
 
     events.setCaptureProfile(RuntimeEvents::FullCapture);
-    QCOMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::FullCapture));
-    QVERIFY(events.pointerHitTestingEnabled());
-    QVERIFY(events.uiTrackingEnabled());
-    QVERIFY(events.uiCreatedCount() > 0);
+    RUNTIME_COMPARE(events.captureProfile(), static_cast<int>(RuntimeEvents::FullCapture));
+    CTEST_CHECK(events.pointerHitTestingEnabled());
+    CTEST_CHECK(events.uiTrackingEnabled());
+    CTEST_CHECK(events.uiCreatedCount() > 0);
     events.setPointerHitTestMinIntervalMs(48);
-    QCOMPARE(events.pointerHitTestMinIntervalMs(), 48);
+    RUNTIME_COMPARE(events.pointerHitTestMinIntervalMs(), 48);
 
     const qint64 previousActivityEpoch = events.lastActivityEpochMs();
-    QTest::qWait(2);
+    processFor(2);
     events.markActivity();
-    QVERIFY(events.lastActivityEpochMs() >= previousActivityEpoch);
+    CTEST_CHECK(events.lastActivityEpochMs() >= previousActivityEpoch);
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_K, Qt::ControlModifier, QStringLiteral("k"));
     QCoreApplication::sendEvent(&window, &keyPress);
-    QVERIFY(events.isKeyPressed(Qt::Key_K));
+    CTEST_CHECK(events.isKeyPressed(Qt::Key_K));
     QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_K, Qt::ControlModifier, QStringLiteral("k"));
     QCoreApplication::sendEvent(&window, &keyRelease);
-    QVERIFY(!events.isKeyPressed(Qt::Key_K));
-    QVERIFY(events.keyPressCount() >= 1);
-    QVERIFY(events.keyReleaseCount() >= 1);
+    CTEST_CHECK(!events.isKeyPressed(Qt::Key_K));
+    CTEST_CHECK(events.keyPressCount() >= 1);
+    CTEST_CHECK(events.keyReleaseCount() >= 1);
 
     const QPointF p(24.0, 18.0);
     QMouseEvent mouseMove(QEvent::MouseMove, p, p, p, Qt::NoButton, Qt::NoButton, Qt::NoModifier);
@@ -121,35 +143,35 @@ void RuntimeServicesTests::runtime_events_measurement_boundaries()
     QCoreApplication::sendEvent(&window, &mouseMove);
     QCoreApplication::sendEvent(&window, &mousePress);
     QCoreApplication::sendEvent(&window, &mouseRelease);
-    QVERIFY(events.mouseMoveCount() >= 1);
-    QVERIFY(events.mousePressCount() >= 1);
-    QVERIFY(events.mouseReleaseCount() >= 1);
+    CTEST_CHECK(events.mouseMoveCount() >= 1);
+    CTEST_CHECK(events.mousePressCount() >= 1);
+    CTEST_CHECK(events.mouseReleaseCount() >= 1);
 
     const quint64 createdBefore = events.uiCreatedCount();
     auto *dynamicItem = new QQuickItem(window.contentItem());
     dynamicItem->setVisible(true);
     QCoreApplication::processEvents();
-    QVERIFY(events.uiCreatedCount() > createdBefore);
+    CTEST_CHECK(events.uiCreatedCount() > createdBefore);
     delete dynamicItem;
     QCoreApplication::processEvents();
-    QVERIFY(events.uiDestroyedCount() >= 1);
+    CTEST_CHECK(events.uiDestroyedCount() >= 1);
 
     const QVariantMap snapshot = events.snapshot();
-    QVERIFY(snapshot.contains(QStringLiteral("running")));
-    QVERIFY(snapshot.contains(QStringLiteral("keyPressCount")));
-    QVERIFY(snapshot.contains(QStringLiteral("mouseMoveCount")));
-    QVERIFY(snapshot.contains(QStringLiteral("uiCreatedCount")));
-    QVERIFY(snapshot.contains(QStringLiteral("idle")));
-    QVERIFY(snapshot.contains(QStringLiteral("pid")));
-    QVERIFY(snapshot.contains(QStringLiteral("rssBytes")));
-    QVERIFY(snapshot.contains(QStringLiteral("uptimeMs")));
-    QVERIFY(snapshot.contains(QStringLiteral("daemonBootEpochMs")));
-    QVERIFY(snapshot.contains(QStringLiteral("eventSequence")));
-    QVERIFY(snapshot.contains(QStringLiteral("recentEventCount")));
-    QVERIFY(snapshot.value(QStringLiteral("pid")).toLongLong() > 0);
+    CTEST_CHECK(snapshot.contains(QStringLiteral("running")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("keyPressCount")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("mouseMoveCount")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("uiCreatedCount")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("idle")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("pid")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("rssBytes")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("uptimeMs")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("daemonBootEpochMs")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("eventSequence")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("recentEventCount")));
+    CTEST_CHECK(snapshot.value(QStringLiteral("pid")).toLongLong() > 0);
 
     events.stop();
-    QVERIFY(!events.running());
+    CTEST_CHECK(!events.running());
 }
 
 void RuntimeServicesTests::runtime_events_daemon_health_and_recent_log()
@@ -159,32 +181,32 @@ void RuntimeServicesTests::runtime_events_daemon_health_and_recent_log()
     window.setWidth(640);
     window.setHeight(360);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
-    QVERIFY(events.daemonBootEpochMs() > 0);
+    CTEST_CHECK(events.daemonBootEpochMs() > 0);
     const QVariantMap health = events.daemonHealth();
-    QVERIFY(health.value(QStringLiteral("running")).toBool());
-    QVERIFY(health.value(QStringLiteral("attachedWindow")).toBool());
-    QVERIFY(health.contains(QStringLiteral("eventSequence")));
-    QVERIFY(health.contains(QStringLiteral("recentEventCount")));
+    CTEST_CHECK(health.value(QStringLiteral("running")).toBool());
+    CTEST_CHECK(health.value(QStringLiteral("attachedWindow")).toBool());
+    CTEST_CHECK(health.contains(QStringLiteral("eventSequence")));
+    CTEST_CHECK(health.contains(QStringLiteral("recentEventCount")));
 
     const quint64 seqBefore = events.eventSequence();
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_D, Qt::NoModifier, QStringLiteral("d"));
     QCoreApplication::sendEvent(&window, &keyPress);
-    QTRY_VERIFY(events.eventSequence() > seqBefore);
+    CTEST_WAIT_DEFAULT(events.eventSequence() > seqBefore);
 
     const QVariantMap lastEvent = events.lastEvent();
-    QVERIFY(!lastEvent.isEmpty());
-    QVERIFY(lastEvent.contains(QStringLiteral("type")));
-    QVERIFY(lastEvent.contains(QStringLiteral("sequence")));
-    QVERIFY(events.recentEventCount() > 0);
-    QVERIFY(!events.recentEvents().isEmpty());
+    CTEST_CHECK(!lastEvent.isEmpty());
+    CTEST_CHECK(lastEvent.contains(QStringLiteral("type")));
+    CTEST_CHECK(lastEvent.contains(QStringLiteral("sequence")));
+    CTEST_CHECK(events.recentEventCount() > 0);
+    CTEST_CHECK(!events.recentEvents().isEmpty());
 
     events.setRecentEventCapacity(16);
-    QCOMPARE(events.recentEventCapacity(), 16);
+    RUNTIME_COMPARE(events.recentEventCapacity(), 16);
     events.clearRecentEvents();
-    QCOMPARE(events.recentEventCount(), 0);
+    RUNTIME_COMPARE(events.recentEventCount(), 0);
 }
 
 void RuntimeServicesTests::runtime_events_idle_and_reset_signal_contract()
@@ -192,58 +214,70 @@ void RuntimeServicesTests::runtime_events_idle_and_reset_signal_contract()
     RuntimeEvents events;
     QQuickWindow window;
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
-    QSignalSpy idleChangedSpy(&events, &RuntimeEvents::idleChanged);
-    QSignalSpy idleEnteredSpy(&events, &RuntimeEvents::idleEntered);
-    QSignalSpy idleExitedSpy(&events, &RuntimeEvents::idleExited);
-    QSignalSpy runningSpy(&events, &RuntimeEvents::runningChanged);
-    QVERIFY(idleChangedSpy.isValid());
-    QVERIFY(idleEnteredSpy.isValid());
-    QVERIFY(idleExitedSpy.isValid());
-    QVERIFY(runningSpy.isValid());
+    QList<QVariantList> idleChangedSpyEvents;
+    const auto idleChangedSpyConnection = QObject::connect(&events, &RuntimeEvents::idleChanged,
+        [&idleChangedSpyEvents]() { idleChangedSpyEvents.append(QVariantList{}); });
+    const auto idleChangedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(idleChangedSpyConnection); });
+    QList<QVariantList> idleEnteredSpyEvents;
+    const auto idleEnteredSpyConnection = QObject::connect(&events, &RuntimeEvents::idleEntered,
+        [&idleEnteredSpyEvents]() { idleEnteredSpyEvents.append(QVariantList{}); });
+    const auto idleEnteredSpyDisconnect = qScopeGuard([&] { QObject::disconnect(idleEnteredSpyConnection); });
+    QList<QVariantList> idleExitedSpyEvents;
+    const auto idleExitedSpyConnection = QObject::connect(&events, &RuntimeEvents::idleExited,
+        [&idleExitedSpyEvents]() { idleExitedSpyEvents.append(QVariantList{}); });
+    const auto idleExitedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(idleExitedSpyConnection); });
+    QList<QVariantList> runningSpyEvents;
+    const auto runningSpyConnection = QObject::connect(&events, &RuntimeEvents::runningChanged,
+        [&runningSpyEvents]() { runningSpyEvents.append(QVariantList{}); });
+    const auto runningSpyDisconnect = qScopeGuard([&] { QObject::disconnect(runningSpyConnection); });
+    CTEST_CHECK(bool(idleChangedSpyConnection));
+    CTEST_CHECK(bool(idleEnteredSpyConnection));
+    CTEST_CHECK(bool(idleExitedSpyConnection));
+    CTEST_CHECK(bool(runningSpyConnection));
 
     events.setIdleTimeoutMs(250);
     events.markActivity();
-    QTRY_VERIFY_WITH_TIMEOUT(events.idle(), 1200);
-    QVERIFY(idleChangedSpy.count() >= 1);
-    QVERIFY(idleEnteredSpy.count() >= 1);
+    CTEST_WAIT_VERIFY(events.idle(), 1200);
+    CTEST_CHECK(idleChangedSpyEvents.size() >= 1);
+    CTEST_CHECK(idleEnteredSpyEvents.size() >= 1);
 
     events.markActivity();
-    QTRY_VERIFY(!events.idle());
-    QVERIFY(idleExitedSpy.count() >= 1);
+    CTEST_WAIT_DEFAULT(!events.idle());
+    CTEST_CHECK(idleExitedSpyEvents.size() >= 1);
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_T, Qt::NoModifier, QStringLiteral("t"));
     QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_T, Qt::NoModifier, QStringLiteral("t"));
     QCoreApplication::sendEvent(&window, &keyPress);
-    QVERIFY(events.anyKeyPressed());
+    CTEST_CHECK(events.anyKeyPressed());
     QCoreApplication::sendEvent(&window, &keyRelease);
-    QVERIFY(!events.anyKeyPressed());
+    CTEST_CHECK(!events.anyKeyPressed());
 
     const QPointF p(12.0, 14.0);
     QMouseEvent mousePress(QEvent::MouseButtonPress, p, p, p, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
     QMouseEvent mouseRelease(QEvent::MouseButtonRelease, p, p, p, Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &mousePress);
-    QVERIFY(events.mouseButtonPressed());
+    CTEST_CHECK(events.mouseButtonPressed());
     QCoreApplication::sendEvent(&window, &mouseRelease);
-    QVERIFY(!events.mouseButtonPressed());
+    CTEST_CHECK(!events.mouseButtonPressed());
 
     events.stop();
-    QVERIFY(!events.running());
+    CTEST_CHECK(!events.running());
 
     events.resetCounters();
-    QCOMPARE(events.keyPressCount(), 0u);
-    QCOMPARE(events.keyReleaseCount(), 0u);
-    QCOMPARE(events.mouseMoveCount(), 0u);
-    QCOMPARE(events.mousePressCount(), 0u);
-    QCOMPARE(events.mouseReleaseCount(), 0u);
-    QCOMPARE(events.uiCreatedCount(), 0u);
-    QCOMPARE(events.uiShownCount(), 0u);
-    QCOMPARE(events.uiHiddenCount(), 0u);
-    QCOMPARE(events.uiDestroyedCount(), 0u);
-    QVERIFY(!events.anyKeyPressed());
-    QVERIFY(!events.mouseButtonPressed());
-    QCOMPARE(runningSpy.count(), 1);
+    RUNTIME_COMPARE(events.keyPressCount(), 0u);
+    RUNTIME_COMPARE(events.keyReleaseCount(), 0u);
+    RUNTIME_COMPARE(events.mouseMoveCount(), 0u);
+    RUNTIME_COMPARE(events.mousePressCount(), 0u);
+    RUNTIME_COMPARE(events.mouseReleaseCount(), 0u);
+    RUNTIME_COMPARE(events.uiCreatedCount(), 0u);
+    RUNTIME_COMPARE(events.uiShownCount(), 0u);
+    RUNTIME_COMPARE(events.uiHiddenCount(), 0u);
+    RUNTIME_COMPARE(events.uiDestroyedCount(), 0u);
+    CTEST_CHECK(!events.anyKeyPressed());
+    CTEST_CHECK(!events.mouseButtonPressed());
+    RUNTIME_COMPARE(runningSpyEvents.size(), 1);
 }
 
 void RuntimeServicesTests::runtime_events_context_menu_signal_contract()
@@ -251,10 +285,13 @@ void RuntimeServicesTests::runtime_events_context_menu_signal_contract()
     RuntimeEvents events;
     QQuickWindow window;
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
-    QSignalSpy contextSpy(&events, &RuntimeEvents::contextRequested);
-    QVERIFY(contextSpy.isValid());
+    QList<QVariantList> contextSpyEvents;
+    const auto contextSpyConnection = QObject::connect(&events, &RuntimeEvents::contextRequested,
+        [&contextSpyEvents](qreal x, qreal y, int modifiers, int reason) { contextSpyEvents.append(QVariantList{x, y, modifiers, reason}); });
+    const auto contextSpyDisconnect = qScopeGuard([&] { QObject::disconnect(contextSpyConnection); });
+    CTEST_CHECK(bool(contextSpyConnection));
 
     const QPoint local(22, 16);
     const QPoint global(320, 240);
@@ -264,14 +301,14 @@ void RuntimeServicesTests::runtime_events_context_menu_signal_contract()
                                    Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &contextEvent);
 
-    QTRY_VERIFY(contextSpy.count() >= 1);
-    const QList<QVariant> args = contextSpy.takeLast();
-    QVERIFY(args.size() >= 4);
-    QCOMPARE(args.at(2).toInt(), static_cast<int>(Qt::NoModifier));
-    QCOMPARE(args.at(3).toInt(), static_cast<int>(QContextMenuEvent::Mouse));
-    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::RightButton));
-    QCOMPARE(events.lastMouseX(), static_cast<qreal>(global.x()));
-    QCOMPARE(events.lastMouseY(), static_cast<qreal>(global.y()));
+    CTEST_WAIT_DEFAULT(contextSpyEvents.size() >= 1);
+    const QList<QVariant> args = contextSpyEvents.takeLast();
+    CTEST_CHECK(args.size() >= 4);
+    RUNTIME_COMPARE(args.at(2).toInt(), static_cast<int>(Qt::NoModifier));
+    RUNTIME_COMPARE(args.at(3).toInt(), static_cast<int>(QContextMenuEvent::Mouse));
+    RUNTIME_COMPARE(events.lastMouseButtons(), static_cast<int>(Qt::RightButton));
+    RUNTIME_COMPARE(events.lastMouseX(), static_cast<qreal>(global.x()));
+    RUNTIME_COMPARE(events.lastMouseY(), static_cast<qreal>(global.y()));
 }
 
 void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
@@ -279,7 +316,7 @@ void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
     RuntimeEvents events;
     QQuickWindow window;
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
     events.resetCounters();
 
@@ -296,13 +333,13 @@ void RuntimeServicesTests::runtime_events_single_input_event_is_counted_once()
     QCoreApplication::sendEvent(&window, &mousePress);
     QCoreApplication::sendEvent(&window, &mouseRelease);
 
-    QCOMPARE(events.keyPressCount(), 1u);
-    QCOMPARE(events.keyReleaseCount(), 1u);
-    QCOMPARE(events.mouseMoveCount(), 1u);
-    QCOMPARE(events.mousePressCount(), 1u);
-    QCOMPARE(events.mouseReleaseCount(), 1u);
-    QCOMPARE(events.lastMouseX(), 30.0);
-    QCOMPARE(events.lastMouseY(), 22.0);
+    RUNTIME_COMPARE(events.keyPressCount(), 1u);
+    RUNTIME_COMPARE(events.keyReleaseCount(), 1u);
+    RUNTIME_COMPARE(events.mouseMoveCount(), 1u);
+    RUNTIME_COMPARE(events.mousePressCount(), 1u);
+    RUNTIME_COMPARE(events.mouseReleaseCount(), 1u);
+    RUNTIME_COMPARE(events.lastMouseX(), 30.0);
+    RUNTIME_COMPARE(events.lastMouseY(), 22.0);
 }
 
 void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_contract()
@@ -312,14 +349,23 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
     window.setWidth(480);
     window.setHeight(320);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
-    QSignalSpy mousePressedSpy(&events, &RuntimeEvents::mousePressed);
-    QSignalSpy mouseMovedSpy(&events, &RuntimeEvents::mouseMoved);
-    QSignalSpy mouseReleasedSpy(&events, &RuntimeEvents::mouseReleased);
-    QVERIFY(mousePressedSpy.isValid());
-    QVERIFY(mouseMovedSpy.isValid());
-    QVERIFY(mouseReleasedSpy.isValid());
+    QList<QVariantList> mousePressedSpyEvents;
+    const auto mousePressedSpyConnection = QObject::connect(&events, &RuntimeEvents::mousePressed,
+        [&mousePressedSpyEvents](qreal x, qreal y, int buttons, int modifiers) { mousePressedSpyEvents.append(QVariantList{x, y, buttons, modifiers}); });
+    const auto mousePressedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(mousePressedSpyConnection); });
+    QList<QVariantList> mouseMovedSpyEvents;
+    const auto mouseMovedSpyConnection = QObject::connect(&events, &RuntimeEvents::mouseMoved,
+        [&mouseMovedSpyEvents](qreal x, qreal y, int buttons, int modifiers) { mouseMovedSpyEvents.append(QVariantList{x, y, buttons, modifiers}); });
+    const auto mouseMovedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(mouseMovedSpyConnection); });
+    QList<QVariantList> mouseReleasedSpyEvents;
+    const auto mouseReleasedSpyConnection = QObject::connect(&events, &RuntimeEvents::mouseReleased,
+        [&mouseReleasedSpyEvents](qreal x, qreal y, int buttons, int modifiers) { mouseReleasedSpyEvents.append(QVariantList{x, y, buttons, modifiers}); });
+    const auto mouseReleasedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(mouseReleasedSpyConnection); });
+    CTEST_CHECK(bool(mousePressedSpyConnection));
+    CTEST_CHECK(bool(mouseMovedSpyConnection));
+    CTEST_CHECK(bool(mouseReleasedSpyConnection));
 
     events.resetCounters();
 
@@ -332,19 +378,19 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
                            {QEventPoint(0, QEventPoint::State::Pressed, beginPoint, beginPoint)});
     QCoreApplication::sendEvent(&window, &touchBegin);
 
-    QCOMPARE(events.mousePressCount(), 1u);
-    QCOMPARE(events.mouseMoveCount(), 0u);
-    QCOMPARE(events.mouseReleaseCount(), 0u);
-    QVERIFY(events.mouseButtonPressed());
-    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
-    QCOMPARE(events.lastMouseX(), beginPoint.x());
-    QCOMPARE(events.lastMouseY(), beginPoint.y());
-    QVERIFY(events.lastMousePressEpochMs() > 0);
-    QCOMPARE(mousePressedSpy.count(), 1);
+    RUNTIME_COMPARE(events.mousePressCount(), 1u);
+    RUNTIME_COMPARE(events.mouseMoveCount(), 0u);
+    RUNTIME_COMPARE(events.mouseReleaseCount(), 0u);
+    CTEST_CHECK(events.mouseButtonPressed());
+    RUNTIME_COMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
+    RUNTIME_COMPARE(events.lastMouseX(), beginPoint.x());
+    RUNTIME_COMPARE(events.lastMouseY(), beginPoint.y());
+    CTEST_CHECK(events.lastMousePressEpochMs() > 0);
+    RUNTIME_COMPARE(mousePressedSpyEvents.size(), 1);
 
     const QVariantMap beginState = events.inputState();
-    QCOMPARE(beginState.value(QStringLiteral("mouseButtons")).toInt(), static_cast<int>(Qt::LeftButton));
-    QVERIFY(beginState.value(QStringLiteral("mouseButtonPressed")).toBool());
+    RUNTIME_COMPARE(beginState.value(QStringLiteral("mouseButtons")).toInt(), static_cast<int>(Qt::LeftButton));
+    CTEST_CHECK(beginState.value(QStringLiteral("mouseButtonPressed")).toBool());
 
     QTouchEvent touchUpdate(QEvent::TouchUpdate,
                             testTouchDevice(),
@@ -352,14 +398,14 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
                             {QEventPoint(0, QEventPoint::State::Updated, updatePoint, updatePoint)});
     QCoreApplication::sendEvent(&window, &touchUpdate);
 
-    QCOMPARE(events.mousePressCount(), 1u);
-    QCOMPARE(events.mouseMoveCount(), 1u);
-    QCOMPARE(events.mouseReleaseCount(), 0u);
-    QVERIFY(events.mouseButtonPressed());
-    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
-    QCOMPARE(events.lastMouseX(), updatePoint.x());
-    QCOMPARE(events.lastMouseY(), updatePoint.y());
-    QCOMPARE(mouseMovedSpy.count(), 1);
+    RUNTIME_COMPARE(events.mousePressCount(), 1u);
+    RUNTIME_COMPARE(events.mouseMoveCount(), 1u);
+    RUNTIME_COMPARE(events.mouseReleaseCount(), 0u);
+    CTEST_CHECK(events.mouseButtonPressed());
+    RUNTIME_COMPARE(events.lastMouseButtons(), static_cast<int>(Qt::LeftButton));
+    RUNTIME_COMPARE(events.lastMouseX(), updatePoint.x());
+    RUNTIME_COMPARE(events.lastMouseY(), updatePoint.y());
+    RUNTIME_COMPARE(mouseMovedSpyEvents.size(), 1);
 
     QTouchEvent touchEnd(QEvent::TouchEnd,
                          testTouchDevice(),
@@ -367,22 +413,22 @@ void RuntimeServicesTests::runtime_events_touch_input_normalizes_to_pointer_cont
                          {QEventPoint(0, QEventPoint::State::Released, updatePoint, updatePoint)});
     QCoreApplication::sendEvent(&window, &touchEnd);
 
-    QCOMPARE(events.mousePressCount(), 1u);
-    QCOMPARE(events.mouseMoveCount(), 1u);
-    QCOMPARE(events.mouseReleaseCount(), 1u);
-    QVERIFY(!events.mouseButtonPressed());
-    QCOMPARE(events.lastMouseButtons(), static_cast<int>(Qt::NoButton));
-    QCOMPARE(events.lastMouseX(), updatePoint.x());
-    QCOMPARE(events.lastMouseY(), updatePoint.y());
-    QVERIFY(events.lastMouseReleaseEpochMs() > 0);
-    QCOMPARE(mouseReleasedSpy.count(), 1);
+    RUNTIME_COMPARE(events.mousePressCount(), 1u);
+    RUNTIME_COMPARE(events.mouseMoveCount(), 1u);
+    RUNTIME_COMPARE(events.mouseReleaseCount(), 1u);
+    CTEST_CHECK(!events.mouseButtonPressed());
+    RUNTIME_COMPARE(events.lastMouseButtons(), static_cast<int>(Qt::NoButton));
+    RUNTIME_COMPARE(events.lastMouseX(), updatePoint.x());
+    RUNTIME_COMPARE(events.lastMouseY(), updatePoint.y());
+    CTEST_CHECK(events.lastMouseReleaseEpochMs() > 0);
+    RUNTIME_COMPARE(mouseReleasedSpyEvents.size(), 1);
 
     const QVariantMap lastEvent = events.lastEvent();
-    QCOMPARE(lastEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    RUNTIME_COMPARE(lastEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
     const QVariantMap payload = lastEvent.value(QStringLiteral("payload")).toMap();
-    QCOMPARE(payload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
-    QCOMPARE(payload.value(QStringLiteral("buttons")).toInt(), static_cast<int>(Qt::NoButton));
-    QVERIFY(!payload.value(QStringLiteral("mouseButtonPressed")).toBool());
+    RUNTIME_COMPARE(payload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
+    RUNTIME_COMPARE(payload.value(QStringLiteral("buttons")).toInt(), static_cast<int>(Qt::NoButton));
+    CTEST_CHECK(!payload.value(QStringLiteral("mouseButtonPressed")).toBool());
 }
 
 void RuntimeServicesTests::runtime_events_touch_payload_exposes_native_point_details()
@@ -392,7 +438,7 @@ void RuntimeServicesTests::runtime_events_touch_payload_exposes_native_point_det
     window.setWidth(480);
     window.setHeight(320);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
     events.resetCounters();
 
@@ -408,41 +454,41 @@ void RuntimeServicesTests::runtime_events_touch_payload_exposes_native_point_det
     QCoreApplication::sendEvent(&window, &touchBegin);
 
     const QVariantMap beginEvent = events.lastEvent();
-    QCOMPARE(beginEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    RUNTIME_COMPARE(beginEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
     const QVariantMap beginPayload = beginEvent.value(QStringLiteral("payload")).toMap();
-    QCOMPARE(beginPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("begin"));
-    QCOMPARE(beginPayload.value(QStringLiteral("pointCount")).toInt(), 2);
-    QCOMPARE(beginPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
-    QCOMPARE(beginPayload.value(QStringLiteral("activeFingerCount")).toInt(), 2);
-    QCOMPARE(beginPayload.value(QStringLiteral("pressedFingerCount")).toInt(), 2);
-    QCOMPARE(beginPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 0);
-    QCOMPARE(beginPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
-    QVERIFY(beginPayload.value(QStringLiteral("multiTouch")).toBool());
-    QVERIFY(!beginPayload.value(QStringLiteral("released")).toBool());
-    QVERIFY(!beginPayload.value(QStringLiteral("cancelled")).toBool());
-    QCOMPARE(beginPayload.value(QStringLiteral("touchDeviceName")).toString(),
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("begin"));
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("pointCount")).toInt(), 2);
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("activeFingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("pressedFingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 0);
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
+    CTEST_CHECK(beginPayload.value(QStringLiteral("multiTouch")).toBool());
+    CTEST_CHECK(!beginPayload.value(QStringLiteral("released")).toBool());
+    CTEST_CHECK(!beginPayload.value(QStringLiteral("cancelled")).toBool());
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("touchDeviceName")).toString(),
              QStringLiteral("LVRS Test Touchscreen"));
-    QCOMPARE(beginPayload.value(QStringLiteral("maximumTouchPoints")).toInt(), 10);
-    QVERIFY(beginPayload.contains(QStringLiteral("nativeTimestamp")));
+    RUNTIME_COMPARE(beginPayload.value(QStringLiteral("maximumTouchPoints")).toInt(), 10);
+    CTEST_CHECK(beginPayload.contains(QStringLiteral("nativeTimestamp")));
 
     const QVariantList beginPoints = beginPayload.value(QStringLiteral("points")).toList();
-    QCOMPARE(beginPoints.size(), 2);
+    RUNTIME_COMPARE(beginPoints.size(), 2);
     const QVariantMap firstPoint = beginPoints.constFirst().toMap();
-    QCOMPARE(firstPoint.value(QStringLiteral("id")).toInt(), 0);
-    QCOMPARE(firstPoint.value(QStringLiteral("stateName")).toString(), QStringLiteral("pressed"));
-    QVERIFY(firstPoint.contains(QStringLiteral("positionX")));
-    QCOMPARE(firstPoint.value(QStringLiteral("scenePositionX")).toReal(), firstBegin.x());
-    QCOMPARE(firstPoint.value(QStringLiteral("globalX")).toReal(), firstBegin.x());
-    QVERIFY(firstPoint.contains(QStringLiteral("pressPositionX")));
-    QVERIFY(firstPoint.contains(QStringLiteral("globalPressPositionX")));
-    QVERIFY(firstPoint.contains(QStringLiteral("lastPositionX")));
-    QVERIFY(firstPoint.contains(QStringLiteral("timestamp")));
-    QVERIFY(firstPoint.contains(QStringLiteral("pressTimestamp")));
-    QVERIFY(firstPoint.contains(QStringLiteral("timeHeld")));
-    QVERIFY(firstPoint.contains(QStringLiteral("velocityX")));
-    QVERIFY(firstPoint.contains(QStringLiteral("pressure")));
+    RUNTIME_COMPARE(firstPoint.value(QStringLiteral("id")).toInt(), 0);
+    RUNTIME_COMPARE(firstPoint.value(QStringLiteral("stateName")).toString(), QStringLiteral("pressed"));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("positionX")));
+    RUNTIME_COMPARE(firstPoint.value(QStringLiteral("scenePositionX")).toReal(), firstBegin.x());
+    RUNTIME_COMPARE(firstPoint.value(QStringLiteral("globalX")).toReal(), firstBegin.x());
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("pressPositionX")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("globalPressPositionX")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("lastPositionX")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("timestamp")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("pressTimestamp")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("timeHeld")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("velocityX")));
+    CTEST_CHECK(firstPoint.contains(QStringLiteral("pressure")));
 
-    QTest::qWait(2);
+    processFor(2);
 
     const QPointF firstEnd(48.0, 44.0);
     const QPointF secondEnd(82.0, 52.0);
@@ -456,17 +502,17 @@ void RuntimeServicesTests::runtime_events_touch_payload_exposes_native_point_det
     QCoreApplication::sendEvent(&window, &touchEnd);
 
     const QVariantMap endEvent = events.lastEvent();
-    QCOMPARE(endEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
+    RUNTIME_COMPARE(endEvent.value(QStringLiteral("type")).toString(), QStringLiteral("touch-event"));
     const QVariantMap endPayload = endEvent.value(QStringLiteral("payload")).toMap();
-    QCOMPARE(endPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
-    QCOMPARE(endPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
-    QCOMPARE(endPayload.value(QStringLiteral("activeFingerCount")).toInt(), 0);
-    QCOMPARE(endPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 2);
-    QVERIFY(endPayload.value(QStringLiteral("released")).toBool());
-    QVERIFY(!endPayload.value(QStringLiteral("cancelled")).toBool());
-    QVERIFY(endPayload.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
-    QVERIFY(endPayload.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
-    QCOMPARE(endPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
+    RUNTIME_COMPARE(endPayload.value(QStringLiteral("phase")).toString(), QStringLiteral("end"));
+    RUNTIME_COMPARE(endPayload.value(QStringLiteral("fingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(endPayload.value(QStringLiteral("activeFingerCount")).toInt(), 0);
+    RUNTIME_COMPARE(endPayload.value(QStringLiteral("releasedFingerCount")).toInt(), 2);
+    CTEST_CHECK(endPayload.value(QStringLiteral("released")).toBool());
+    CTEST_CHECK(!endPayload.value(QStringLiteral("cancelled")).toBool());
+    CTEST_CHECK(endPayload.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
+    CTEST_CHECK(endPayload.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+    RUNTIME_COMPARE(endPayload.value(QStringLiteral("primaryPointId")).toInt(), 0);
 }
 
 void RuntimeServicesTests::runtime_events_hit_test_exposes_ui_hierarchy_metadata()
@@ -478,7 +524,7 @@ void RuntimeServicesTests::runtime_events_hit_test_exposes_ui_hierarchy_metadata
     window.setHeight(160);
 
     QQuickItem *content = window.contentItem();
-    QVERIFY(content);
+    CTEST_CHECK(content);
     content->setObjectName(QStringLiteral("contentRoot"));
 
     auto *panel = new QQuickItem(content);
@@ -498,25 +544,25 @@ void RuntimeServicesTests::runtime_events_hit_test_exposes_ui_hierarchy_metadata
     button->setZ(3.0);
 
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
     const QVariantMap hit = events.hitTestUiAt(20.0, 20.0);
-    QCOMPARE(hit.value(QStringLiteral("objectName")).toString(), QStringLiteral("button"));
-    QCOMPARE(hit.value(QStringLiteral("componentName")).toString(), QStringLiteral("button"));
-    QCOMPARE(hit.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
-    QCOMPARE(hit.value(QStringLiteral("windowObjectName")).toString(), QStringLiteral("runtimeWindow"));
-    QCOMPARE(hit.value(QStringLiteral("rootObjectName")).toString(), QStringLiteral("contentRoot"));
-    QCOMPARE(hit.value(QStringLiteral("z")).toReal(), 3.0);
-    QVERIFY(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("contentRoot")));
-    QVERIFY(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("button")));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("objectName")).toString(), QStringLiteral("button"));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("componentName")).toString(), QStringLiteral("button"));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("windowObjectName")).toString(), QStringLiteral("runtimeWindow"));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("rootObjectName")).toString(), QStringLiteral("contentRoot"));
+    RUNTIME_COMPARE(hit.value(QStringLiteral("z")).toReal(), 3.0);
+    CTEST_CHECK(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("contentRoot")));
+    CTEST_CHECK(hit.value(QStringLiteral("path")).toString().contains(QStringLiteral("button")));
 
     const QVariantList hierarchy = hit.value(QStringLiteral("hierarchy")).toList();
-    QCOMPARE(hierarchy.size(), 3);
-    QCOMPARE(hierarchy.constFirst().toMap().value(QStringLiteral("objectName")).toString(),
+    RUNTIME_COMPARE(hierarchy.size(), 3);
+    RUNTIME_COMPARE(hierarchy.constFirst().toMap().value(QStringLiteral("objectName")).toString(),
              QStringLiteral("contentRoot"));
-    QCOMPARE(hierarchy.constLast().toMap().value(QStringLiteral("objectName")).toString(),
+    RUNTIME_COMPARE(hierarchy.constLast().toMap().value(QStringLiteral("objectName")).toString(),
              QStringLiteral("button"));
-    QCOMPARE(hit.value(QStringLiteral("depth")).toInt(), hierarchy.size() - 1);
+    RUNTIME_COMPARE(hit.value(QStringLiteral("depth")).toInt(), hierarchy.size() - 1);
 }
 
 void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
@@ -527,9 +573,9 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
     window.setWidth(480);
     window.setHeight(320);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
-    QVERIFY(gestures.attachRuntime(&events));
-    QVERIFY(gestures.runtimeAttached());
+    CTEST_WAIT_DEFAULT(events.running());
+    CTEST_CHECK(gestures.attachRuntime(&events));
+    CTEST_CHECK(gestures.runtimeAttached());
 
     gestures.setHoldThresholdMs(60);
     gestures.setDragThresholdPx(10.0);
@@ -537,20 +583,41 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
     gestures.setSwipeMaxDurationMs(500);
     gestures.resetState();
 
-    QSignalSpy touchStartedSpy(&gestures, &GestureEvents::touchStarted);
-    QSignalSpy holdStartedSpy(&gestures, &GestureEvents::holdStarted);
-    QSignalSpy touchEndedSpy(&gestures, &GestureEvents::touchEnded);
-    QSignalSpy dragStartedSpy(&gestures, &GestureEvents::dragStarted);
-    QSignalSpy dragUpdatedSpy(&gestures, &GestureEvents::dragUpdated);
-    QSignalSpy dragEndedSpy(&gestures, &GestureEvents::dragEnded);
-    QSignalSpy swipeDetectedSpy(&gestures, &GestureEvents::swipeDetected);
-    QVERIFY(touchStartedSpy.isValid());
-    QVERIFY(holdStartedSpy.isValid());
-    QVERIFY(touchEndedSpy.isValid());
-    QVERIFY(dragStartedSpy.isValid());
-    QVERIFY(dragUpdatedSpy.isValid());
-    QVERIFY(dragEndedSpy.isValid());
-    QVERIFY(swipeDetectedSpy.isValid());
+    QList<QVariantList> touchStartedSpyEvents;
+    const auto touchStartedSpyConnection = QObject::connect(&gestures, &GestureEvents::touchStarted,
+        [&touchStartedSpyEvents](const QVariantMap &eventData) { touchStartedSpyEvents.append(QVariantList{eventData}); });
+    const auto touchStartedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(touchStartedSpyConnection); });
+    QList<QVariantList> holdStartedSpyEvents;
+    const auto holdStartedSpyConnection = QObject::connect(&gestures, &GestureEvents::holdStarted,
+        [&holdStartedSpyEvents](const QVariantMap &eventData) { holdStartedSpyEvents.append(QVariantList{eventData}); });
+    const auto holdStartedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(holdStartedSpyConnection); });
+    QList<QVariantList> touchEndedSpyEvents;
+    const auto touchEndedSpyConnection = QObject::connect(&gestures, &GestureEvents::touchEnded,
+        [&touchEndedSpyEvents](const QVariantMap &eventData) { touchEndedSpyEvents.append(QVariantList{eventData}); });
+    const auto touchEndedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(touchEndedSpyConnection); });
+    QList<QVariantList> dragStartedSpyEvents;
+    const auto dragStartedSpyConnection = QObject::connect(&gestures, &GestureEvents::dragStarted,
+        [&dragStartedSpyEvents](const QVariantMap &eventData) { dragStartedSpyEvents.append(QVariantList{eventData}); });
+    const auto dragStartedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(dragStartedSpyConnection); });
+    QList<QVariantList> dragUpdatedSpyEvents;
+    const auto dragUpdatedSpyConnection = QObject::connect(&gestures, &GestureEvents::dragUpdated,
+        [&dragUpdatedSpyEvents](const QVariantMap &eventData) { dragUpdatedSpyEvents.append(QVariantList{eventData}); });
+    const auto dragUpdatedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(dragUpdatedSpyConnection); });
+    QList<QVariantList> dragEndedSpyEvents;
+    const auto dragEndedSpyConnection = QObject::connect(&gestures, &GestureEvents::dragEnded,
+        [&dragEndedSpyEvents](const QVariantMap &eventData) { dragEndedSpyEvents.append(QVariantList{eventData}); });
+    const auto dragEndedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(dragEndedSpyConnection); });
+    QList<QVariantList> swipeDetectedSpyEvents;
+    const auto swipeDetectedSpyConnection = QObject::connect(&gestures, &GestureEvents::swipeDetected,
+        [&swipeDetectedSpyEvents](const QVariantMap &eventData) { swipeDetectedSpyEvents.append(QVariantList{eventData}); });
+    const auto swipeDetectedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(swipeDetectedSpyConnection); });
+    CTEST_CHECK(bool(touchStartedSpyConnection));
+    CTEST_CHECK(bool(holdStartedSpyConnection));
+    CTEST_CHECK(bool(touchEndedSpyConnection));
+    CTEST_CHECK(bool(dragStartedSpyConnection));
+    CTEST_CHECK(bool(dragUpdatedSpyConnection));
+    CTEST_CHECK(bool(dragEndedSpyConnection));
+    CTEST_CHECK(bool(swipeDetectedSpyConnection));
 
     const QPointF holdPoint(40.0, 28.0);
     QTouchEvent holdBegin(QEvent::TouchBegin,
@@ -559,25 +626,25 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
                           {QEventPoint(0, QEventPoint::State::Pressed, holdPoint, holdPoint)});
     QCoreApplication::sendEvent(&window, &holdBegin);
 
-    QTRY_COMPARE(touchStartedSpy.count(), 1);
-    const QVariantMap holdStartTouchPayload = touchStartedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchStarted"));
-    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(1));
-    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("globalX")).toReal(), holdPoint.x());
-    QCOMPARE(holdStartTouchPayload.value(QStringLiteral("globalY")).toReal(), holdPoint.y());
-    QVERIFY(holdStartTouchPayload.contains(QStringLiteral("ui")));
+    RUNTIME_WAIT_COMPARE(touchStartedSpyEvents.size(), 1);
+    const QVariantMap holdStartTouchPayload = touchStartedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(holdStartTouchPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchStarted"));
+    RUNTIME_COMPARE(holdStartTouchPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(1));
+    RUNTIME_COMPARE(holdStartTouchPayload.value(QStringLiteral("globalX")).toReal(), holdPoint.x());
+    RUNTIME_COMPARE(holdStartTouchPayload.value(QStringLiteral("globalY")).toReal(), holdPoint.y());
+    CTEST_CHECK(holdStartTouchPayload.contains(QStringLiteral("ui")));
     const QVariantMap holdStartUi = holdStartTouchPayload.value(QStringLiteral("ui")).toMap();
-    QCOMPARE(holdStartUi.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
-    QVERIFY(holdStartUi.value(QStringLiteral("hierarchy")).toList().size() >= 1);
-    QVERIFY(!holdStartUi.value(QStringLiteral("componentName")).toString().isEmpty());
+    RUNTIME_COMPARE(holdStartUi.value(QStringLiteral("layerKind")).toString(), QStringLiteral("content"));
+    CTEST_CHECK(holdStartUi.value(QStringLiteral("hierarchy")).toList().size() >= 1);
+    CTEST_CHECK(!holdStartUi.value(QStringLiteral("componentName")).toString().isEmpty());
 
-    QTRY_COMPARE_WITH_TIMEOUT(holdStartedSpy.count(), 1, 400);
-    const QVariantMap holdPayload = holdStartedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(holdPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("holdStarted"));
-    QCOMPARE(holdPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
-    QVERIFY2(holdPayload.value(QStringLiteral("durationMs")).toLongLong() >= gestures.holdThresholdMs(),
+    CTEST_WAIT_VERIFY(runtimeEqual(holdStartedSpyEvents.size(), 1), 400);
+    const QVariantMap holdPayload = holdStartedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(holdPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("holdStarted"));
+    RUNTIME_COMPARE(holdPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
+    CTEST_CHECK_MESSAGE(holdPayload.value(QStringLiteral("durationMs")).toLongLong() >= gestures.holdThresholdMs(),
              "A hold must not start before the configured duration has elapsed.");
-    QVERIFY(holdPayload.value(QStringLiteral("holdActive")).toBool());
+    CTEST_CHECK(holdPayload.value(QStringLiteral("holdActive")).toBool());
 
     QTouchEvent holdEnd(QEvent::TouchEnd,
                         testTouchDevice(),
@@ -585,10 +652,10 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
                         {QEventPoint(0, QEventPoint::State::Released, holdPoint, holdPoint)});
     QCoreApplication::sendEvent(&window, &holdEnd);
 
-    QTRY_COMPARE(touchEndedSpy.count(), 1);
-    const QVariantMap holdEndPayload = touchEndedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(holdEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
-    QCOMPARE(holdEndPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchEnded"));
+    RUNTIME_WAIT_COMPARE(touchEndedSpyEvents.size(), 1);
+    const QVariantMap holdEndPayload = touchEndedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(holdEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("hold"));
+    RUNTIME_COMPARE(holdEndPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("touchEnded"));
 
     const QPointF swipeBeginPoint(52.0, 36.0);
     const QPointF swipeUpdatePoint(94.0, 40.0);
@@ -599,7 +666,7 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
                            Qt::NoModifier,
                            {QEventPoint(0, QEventPoint::State::Pressed, swipeBeginPoint, swipeBeginPoint)});
     QCoreApplication::sendEvent(&window, &swipeBegin);
-    QTRY_COMPARE(touchStartedSpy.count(), 2);
+    RUNTIME_WAIT_COMPARE(touchStartedSpyEvents.size(), 2);
 
     QTouchEvent swipeUpdate(QEvent::TouchUpdate,
                             testTouchDevice(),
@@ -607,14 +674,14 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
                             {QEventPoint(0, QEventPoint::State::Updated, swipeUpdatePoint, swipeUpdatePoint)});
     QCoreApplication::sendEvent(&window, &swipeUpdate);
 
-    QTRY_COMPARE(dragStartedSpy.count(), 1);
-    QTRY_VERIFY(dragUpdatedSpy.count() >= 1);
-    const QVariantMap dragStartPayload = dragStartedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(dragStartPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("dragStarted"));
-    QCOMPARE(dragStartPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(2));
-    QCOMPARE(dragStartPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
-    QVERIFY(dragStartPayload.value(QStringLiteral("totalDeltaX")).toReal() > 0.0);
-    QVERIFY(qAbs(dragStartPayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
+    RUNTIME_WAIT_COMPARE(dragStartedSpyEvents.size(), 1);
+    CTEST_WAIT_DEFAULT(dragUpdatedSpyEvents.size() >= 1);
+    const QVariantMap dragStartPayload = dragStartedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(dragStartPayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("dragStarted"));
+    RUNTIME_COMPARE(dragStartPayload.value(QStringLiteral("sessionId")).toULongLong(), quint64(2));
+    RUNTIME_COMPARE(dragStartPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
+    CTEST_CHECK(dragStartPayload.value(QStringLiteral("totalDeltaX")).toReal() > 0.0);
+    CTEST_CHECK(qAbs(dragStartPayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
 
     QTouchEvent swipeEnd(QEvent::TouchEnd,
                          testTouchDevice(),
@@ -622,22 +689,22 @@ void RuntimeServicesTests::gesture_events_recognize_hold_drag_and_swipe()
                          {QEventPoint(0, QEventPoint::State::Released, swipeEndPoint, swipeEndPoint)});
     QCoreApplication::sendEvent(&window, &swipeEnd);
 
-    QTRY_COMPARE(dragEndedSpy.count(), 1);
-    QTRY_COMPARE(swipeDetectedSpy.count(), 1);
-    QTRY_COMPARE(touchEndedSpy.count(), 2);
+    RUNTIME_WAIT_COMPARE(dragEndedSpyEvents.size(), 1);
+    RUNTIME_WAIT_COMPARE(swipeDetectedSpyEvents.size(), 1);
+    RUNTIME_WAIT_COMPARE(touchEndedSpyEvents.size(), 2);
 
-    const QVariantMap swipePayload = swipeDetectedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(swipePayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("swipeDetected"));
-    QCOMPARE(swipePayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
-    QCOMPARE(swipePayload.value(QStringLiteral("swipeDirection")).toString(), QStringLiteral("leftToRight"));
-    QVERIFY(swipePayload.value(QStringLiteral("totalDeltaX")).toReal() >= 60.0);
-    QVERIFY(qAbs(swipePayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
-    QVERIFY(swipePayload.value(QStringLiteral("velocityX")).toReal() > 0.0);
+    const QVariantMap swipePayload = swipeDetectedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(swipePayload.value(QStringLiteral("gestureType")).toString(), QStringLiteral("swipeDetected"));
+    RUNTIME_COMPARE(swipePayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
+    RUNTIME_COMPARE(swipePayload.value(QStringLiteral("swipeDirection")).toString(), QStringLiteral("leftToRight"));
+    CTEST_CHECK(swipePayload.value(QStringLiteral("totalDeltaX")).toReal() >= 60.0);
+    CTEST_CHECK(qAbs(swipePayload.value(QStringLiteral("totalDeltaY")).toReal()) < 10.0);
+    CTEST_CHECK(swipePayload.value(QStringLiteral("velocityX")).toReal() > 0.0);
 
-    const QVariantMap swipeEndPayload = touchEndedSpy.at(1).at(0).toMap();
-    QCOMPARE(swipeEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
-    QCOMPARE(swipeEndPayload.value(QStringLiteral("directionX")).toString(), QStringLiteral("positive"));
-    QCOMPARE(swipeEndPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
+    const QVariantMap swipeEndPayload = touchEndedSpyEvents.at(1).at(0).toMap();
+    RUNTIME_COMPARE(swipeEndPayload.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("swipe"));
+    RUNTIME_COMPARE(swipeEndPayload.value(QStringLiteral("directionX")).toString(), QStringLiteral("positive"));
+    RUNTIME_COMPARE(swipeEndPayload.value(QStringLiteral("dominantAxis")).toString(), QStringLiteral("x"));
 }
 
 void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multitouch()
@@ -648,26 +715,41 @@ void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multi
     window.setWidth(480);
     window.setHeight(320);
     events.attachWindow(&window);
-    QTRY_VERIFY(events.running());
-    QVERIFY(gestures.attachRuntime(&events));
-    QVERIFY(gestures.runtimeAttached());
+    CTEST_WAIT_DEFAULT(events.running());
+    CTEST_CHECK(gestures.attachRuntime(&events));
+    CTEST_CHECK(gestures.runtimeAttached());
 
     gestures.setHoldThresholdMs(500);
     gestures.setDragThresholdPx(10.0);
     gestures.setSwipeThresholdPx(96.0);
-    QVERIFY(gestures.setProperty("scrollThresholdPx", 10.0));
+    CTEST_CHECK(gestures.setProperty("scrollThresholdPx", 10.0));
     gestures.resetState();
 
-    QSignalSpy pressStartedSpy(&gestures, SIGNAL(pressStarted(QVariantMap)));
-    QSignalSpy pressEndedSpy(&gestures, SIGNAL(pressEnded(QVariantMap)));
-    QSignalSpy scrollStartedSpy(&gestures, SIGNAL(scrollStarted(QVariantMap)));
-    QSignalSpy scrollUpdatedSpy(&gestures, SIGNAL(scrollUpdated(QVariantMap)));
-    QSignalSpy scrollEndedSpy(&gestures, SIGNAL(scrollEnded(QVariantMap)));
-    QVERIFY(pressStartedSpy.isValid());
-    QVERIFY(pressEndedSpy.isValid());
-    QVERIFY(scrollStartedSpy.isValid());
-    QVERIFY(scrollUpdatedSpy.isValid());
-    QVERIFY(scrollEndedSpy.isValid());
+    QList<QVariantList> pressStartedSpyEvents;
+    const auto pressStartedSpyConnection = QObject::connect(&gestures, &GestureEvents::pressStarted,
+        [&pressStartedSpyEvents](const QVariantMap &eventData) { pressStartedSpyEvents.append(QVariantList{eventData}); });
+    const auto pressStartedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(pressStartedSpyConnection); });
+    QList<QVariantList> pressEndedSpyEvents;
+    const auto pressEndedSpyConnection = QObject::connect(&gestures, &GestureEvents::pressEnded,
+        [&pressEndedSpyEvents](const QVariantMap &eventData) { pressEndedSpyEvents.append(QVariantList{eventData}); });
+    const auto pressEndedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(pressEndedSpyConnection); });
+    QList<QVariantList> scrollStartedSpyEvents;
+    const auto scrollStartedSpyConnection = QObject::connect(&gestures, &GestureEvents::scrollStarted,
+        [&scrollStartedSpyEvents](const QVariantMap &eventData) { scrollStartedSpyEvents.append(QVariantList{eventData}); });
+    const auto scrollStartedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(scrollStartedSpyConnection); });
+    QList<QVariantList> scrollUpdatedSpyEvents;
+    const auto scrollUpdatedSpyConnection = QObject::connect(&gestures, &GestureEvents::scrollUpdated,
+        [&scrollUpdatedSpyEvents](const QVariantMap &eventData) { scrollUpdatedSpyEvents.append(QVariantList{eventData}); });
+    const auto scrollUpdatedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(scrollUpdatedSpyConnection); });
+    QList<QVariantList> scrollEndedSpyEvents;
+    const auto scrollEndedSpyConnection = QObject::connect(&gestures, &GestureEvents::scrollEnded,
+        [&scrollEndedSpyEvents](const QVariantMap &eventData) { scrollEndedSpyEvents.append(QVariantList{eventData}); });
+    const auto scrollEndedSpyDisconnect = qScopeGuard([&] { QObject::disconnect(scrollEndedSpyConnection); });
+    CTEST_CHECK(bool(pressStartedSpyConnection));
+    CTEST_CHECK(bool(pressEndedSpyConnection));
+    CTEST_CHECK(bool(scrollStartedSpyConnection));
+    CTEST_CHECK(bool(scrollUpdatedSpyConnection));
+    CTEST_CHECK(bool(scrollEndedSpyConnection));
 
     const QPointF pressPoint(40.0, 28.0);
     QTouchEvent pressBegin(QEvent::TouchBegin,
@@ -675,26 +757,26 @@ void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multi
                            Qt::NoModifier,
                            {QEventPoint(0, QEventPoint::State::Pressed, pressPoint, pressPoint)});
     QCoreApplication::sendEvent(&window, &pressBegin);
-    QTRY_COMPARE(pressStartedSpy.count(), 1);
+    RUNTIME_WAIT_COMPARE(pressStartedSpyEvents.size(), 1);
 
-    QTest::qWait(2);
+    processFor(2);
 
     QTouchEvent pressEnd(QEvent::TouchEnd,
                          testTouchDevice(),
                          Qt::NoModifier,
                          {QEventPoint(0, QEventPoint::State::Released, pressPoint, pressPoint)});
     QCoreApplication::sendEvent(&window, &pressEnd);
-    QTRY_COMPARE(pressEndedSpy.count(), 1);
+    RUNTIME_WAIT_COMPARE(pressEndedSpyEvents.size(), 1);
 
-    const QVariantMap pressEnded = pressEndedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(pressEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("pressEnded"));
-    QCOMPARE(pressEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("press"));
-    QCOMPARE(pressEnded.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("press"));
-    QVERIFY(pressEnded.value(QStringLiteral("released")).toBool());
-    QVERIFY(pressEnded.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
-    QVERIFY(pressEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
-    QCOMPARE(pressEnded.value(QStringLiteral("fingerCount")).toInt(), 1);
-    QCOMPARE(pressEnded.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
+    const QVariantMap pressEnded = pressEndedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(pressEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("pressEnded"));
+    RUNTIME_COMPARE(pressEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("press"));
+    RUNTIME_COMPARE(pressEnded.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("press"));
+    CTEST_CHECK(pressEnded.value(QStringLiteral("released")).toBool());
+    CTEST_CHECK(pressEnded.value(QStringLiteral("releaseEpochMs")).toLongLong() > 0);
+    CTEST_CHECK(pressEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+    RUNTIME_COMPARE(pressEnded.value(QStringLiteral("fingerCount")).toInt(), 1);
+    RUNTIME_COMPARE(pressEnded.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
 
     const QPointF scrollBeginPoint(64.0, 34.0);
     const QPointF scrollUpdatePoint(67.0, 78.0);
@@ -704,38 +786,38 @@ void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multi
                                  Qt::NoModifier,
                                  {QEventPoint(0, QEventPoint::State::Pressed, scrollBeginPoint, scrollBeginPoint)});
     QCoreApplication::sendEvent(&window, &scrollBeginEvent);
-    QTRY_COMPARE(pressStartedSpy.count(), 2);
+    RUNTIME_WAIT_COMPARE(pressStartedSpyEvents.size(), 2);
 
     QTouchEvent scrollUpdateEvent(QEvent::TouchUpdate,
                                   testTouchDevice(),
                                   Qt::NoModifier,
                                   {QEventPoint(0, QEventPoint::State::Updated, scrollUpdatePoint, scrollUpdatePoint)});
     QCoreApplication::sendEvent(&window, &scrollUpdateEvent);
-    QTRY_COMPARE(scrollStartedSpy.count(), 1);
-    QTRY_VERIFY(scrollUpdatedSpy.count() >= 1);
+    RUNTIME_WAIT_COMPARE(scrollStartedSpyEvents.size(), 1);
+    CTEST_WAIT_DEFAULT(scrollUpdatedSpyEvents.size() >= 1);
 
-    const QVariantMap scrollStarted = scrollStartedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(scrollStarted.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollStarted"));
-    QCOMPARE(scrollStarted.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
-    QCOMPARE(scrollStarted.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("scroll"));
-    QCOMPARE(scrollStarted.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
-    QCOMPARE(scrollStarted.value(QStringLiteral("scrollDirection")).toString(), QStringLiteral("topToBottom"));
-    QCOMPARE(scrollStarted.value(QStringLiteral("fingerCount")).toInt(), 1);
-    QCOMPARE(scrollStarted.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
+    const QVariantMap scrollStarted = scrollStartedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollStarted"));
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("interactionKind")).toString(), QStringLiteral("scroll"));
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("scrollDirection")).toString(), QStringLiteral("topToBottom"));
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("fingerCount")).toInt(), 1);
+    RUNTIME_COMPARE(scrollStarted.value(QStringLiteral("maximumFingerCount")).toInt(), 1);
 
     QTouchEvent scrollEndEvent(QEvent::TouchEnd,
                                testTouchDevice(),
                                Qt::NoModifier,
                                {QEventPoint(0, QEventPoint::State::Released, scrollEndPoint, scrollEndPoint)});
     QCoreApplication::sendEvent(&window, &scrollEndEvent);
-    QTRY_COMPARE(scrollEndedSpy.count(), 1);
+    RUNTIME_WAIT_COMPARE(scrollEndedSpyEvents.size(), 1);
 
-    const QVariantMap scrollEnded = scrollEndedSpy.constFirst().constFirst().toMap();
-    QCOMPARE(scrollEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollEnded"));
-    QCOMPARE(scrollEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
-    QCOMPARE(scrollEnded.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
-    QVERIFY(scrollEnded.value(QStringLiteral("released")).toBool());
-    QVERIFY(scrollEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
+    const QVariantMap scrollEnded = scrollEndedSpyEvents.constFirst().constFirst().toMap();
+    RUNTIME_COMPARE(scrollEnded.value(QStringLiteral("gestureType")).toString(), QStringLiteral("scrollEnded"));
+    RUNTIME_COMPARE(scrollEnded.value(QStringLiteral("classification")).toString(), QStringLiteral("scroll"));
+    RUNTIME_COMPARE(scrollEnded.value(QStringLiteral("scrollAxis")).toString(), QStringLiteral("y"));
+    CTEST_CHECK(scrollEnded.value(QStringLiteral("released")).toBool());
+    CTEST_CHECK(scrollEnded.value(QStringLiteral("pressDurationMs")).toLongLong() >= 0);
 
     const QPointF firstPoint(110.0, 40.0);
     const QPointF secondPoint(146.0, 42.0);
@@ -747,13 +829,13 @@ void RuntimeServicesTests::gesture_events_classify_mobile_press_scroll_and_multi
                                QEventPoint(1, QEventPoint::State::Pressed, secondPoint, secondPoint),
                            });
     QCoreApplication::sendEvent(&window, &multiBegin);
-    QTRY_COMPARE(pressStartedSpy.count(), 3);
+    RUNTIME_WAIT_COMPARE(pressStartedSpyEvents.size(), 3);
 
-    const QVariantMap multiPress = pressStartedSpy.at(2).at(0).toMap();
-    QCOMPARE(multiPress.value(QStringLiteral("fingerCount")).toInt(), 2);
-    QCOMPARE(multiPress.value(QStringLiteral("activeFingerCount")).toInt(), 2);
-    QCOMPARE(multiPress.value(QStringLiteral("maximumFingerCount")).toInt(), 2);
-    QVERIFY(multiPress.value(QStringLiteral("multiTouch")).toBool());
+    const QVariantMap multiPress = pressStartedSpyEvents.at(2).at(0).toMap();
+    RUNTIME_COMPARE(multiPress.value(QStringLiteral("fingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(multiPress.value(QStringLiteral("activeFingerCount")).toInt(), 2);
+    RUNTIME_COMPARE(multiPress.value(QStringLiteral("maximumFingerCount")).toInt(), 2);
+    CTEST_CHECK(multiPress.value(QStringLiteral("multiTouch")).toBool());
 }
 
 void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window_destruction()
@@ -764,26 +846,26 @@ void RuntimeServicesTests::runtime_events_window_replacement_survives_old_window
     firstWindow->setWidth(640);
     firstWindow->setHeight(360);
     events.attachWindow(firstWindow);
-    QTRY_VERIFY(events.running());
+    CTEST_WAIT_DEFAULT(events.running());
 
     auto *secondWindow = new QQuickWindow;
     secondWindow->setWidth(640);
     secondWindow->setHeight(360);
     events.attachWindow(secondWindow);
-    QTRY_VERIFY(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
+    CTEST_WAIT_DEFAULT(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
 
     delete firstWindow;
     QCoreApplication::processEvents();
-    QTRY_VERIFY(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
+    CTEST_WAIT_DEFAULT(events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
 
     const quint64 sequenceBefore = events.eventSequence();
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_R, Qt::NoModifier, QStringLiteral("r"));
     QCoreApplication::sendEvent(secondWindow, &keyPress);
-    QTRY_VERIFY(events.eventSequence() > sequenceBefore);
+    CTEST_WAIT_DEFAULT(events.eventSequence() > sequenceBefore);
 
     delete secondWindow;
     QCoreApplication::processEvents();
-    QTRY_VERIFY(!events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
+    CTEST_WAIT_DEFAULT(!events.daemonHealth().value(QStringLiteral("attachedWindow")).toBool());
 }
 
 void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()
@@ -793,126 +875,160 @@ void RuntimeServicesTests::render_monitor_counts_frames_when_swapped()
     monitor.setFrameSampleCapacity(64);
     monitor.setDroppedFrameThresholdMs(1.0);
     monitor.attachWindow(&window);
-    QVERIFY(monitor.active());
-    QCOMPARE(monitor.frameCount(), 0u);
+    CTEST_CHECK(monitor.active());
+    RUNTIME_COMPARE(monitor.frameCount(), 0u);
 
-    QVERIFY(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
-    QTest::qWait(5);
-    QVERIFY(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
-    QVERIFY(monitor.frameCount() >= 2);
-    QVERIFY(monitor.lastFrameMs() >= 0.0);
-    QVERIFY(monitor.fps() >= 0.0);
-    QVERIFY(monitor.avgFrameMs() >= 0.0);
-    QVERIFY(monitor.p95FrameMs() >= 0.0);
-    QVERIFY(monitor.p99FrameMs() >= 0.0);
-    QVERIFY(monitor.recentSampleCount() >= 1);
-    QVERIFY(monitor.droppedFrameCount() >= 1);
+    CTEST_CHECK(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
+    processFor(5);
+    CTEST_CHECK(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
+    CTEST_CHECK(monitor.frameCount() >= 2);
+    CTEST_CHECK(monitor.lastFrameMs() >= 0.0);
+    CTEST_CHECK(monitor.fps() >= 0.0);
+    CTEST_CHECK(monitor.avgFrameMs() >= 0.0);
+    CTEST_CHECK(monitor.p95FrameMs() >= 0.0);
+    CTEST_CHECK(monitor.p99FrameMs() >= 0.0);
+    CTEST_CHECK(monitor.recentSampleCount() >= 1);
+    CTEST_CHECK(monitor.droppedFrameCount() >= 1);
 
     const QVariantMap snapshot = monitor.performanceSnapshot();
-    QCOMPARE(snapshot.value(QStringLiteral("schema")).toString(), QStringLiteral("lvrs.performance.v1"));
-    QCOMPARE(snapshot.value(QStringLiteral("component")).toString(), QStringLiteral("RenderMonitor"));
-    QVERIFY(snapshot.contains(QStringLiteral("p95FrameMs")));
-    QVERIFY(snapshot.contains(QStringLiteral("p99FrameMs")));
-    QVERIFY(snapshot.contains(QStringLiteral("droppedFrameCount")));
+    RUNTIME_COMPARE(snapshot.value(QStringLiteral("schema")).toString(), QStringLiteral("lvrs.performance.v1"));
+    RUNTIME_COMPARE(snapshot.value(QStringLiteral("component")).toString(), QStringLiteral("RenderMonitor"));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("p95FrameMs")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("p99FrameMs")));
+    CTEST_CHECK(snapshot.contains(QStringLiteral("droppedFrameCount")));
 
     monitor.reset();
-    QCOMPARE(monitor.frameCount(), 0u);
-    QCOMPARE(monitor.lastFrameMs(), 0.0);
-    QCOMPARE(monitor.avgFrameMs(), 0.0);
-    QCOMPARE(monitor.recentSampleCount(), 0);
+    RUNTIME_COMPARE(monitor.frameCount(), 0u);
+    RUNTIME_COMPARE(monitor.lastFrameMs(), 0.0);
+    RUNTIME_COMPARE(monitor.avgFrameMs(), 0.0);
+    RUNTIME_COMPARE(monitor.recentSampleCount(), 0);
 
     monitor.stop();
-    QVERIFY(!monitor.active());
+    CTEST_CHECK(!monitor.active());
     monitor.start();
-    QVERIFY(monitor.active());
+    CTEST_CHECK(monitor.active());
     monitor.attachWindow(static_cast<QObject *>(nullptr));
-    QVERIFY(!monitor.active());
+    CTEST_CHECK(!monitor.active());
 }
 
 void RuntimeServicesTests::render_monitor_active_signal_and_destroy_path()
 {
     RenderingMonitor monitor;
-    QSignalSpy activeSpy(&monitor, &RenderingMonitor::activeChanged);
-    QSignalSpy statsSpy(&monitor, &RenderingMonitor::statsChanged);
-    QSignalSpy thresholdSpy(&monitor, &RenderingMonitor::droppedFrameThresholdMsChanged);
-    QSignalSpy capacitySpy(&monitor, &RenderingMonitor::frameSampleCapacityChanged);
-    QVERIFY(activeSpy.isValid());
-    QVERIFY(statsSpy.isValid());
-    QVERIFY(thresholdSpy.isValid());
-    QVERIFY(capacitySpy.isValid());
+    QList<QVariantList> activeSpyEvents;
+    const auto activeSpyConnection = QObject::connect(&monitor, &RenderingMonitor::activeChanged,
+        [&activeSpyEvents]() { activeSpyEvents.append(QVariantList{}); });
+    const auto activeSpyDisconnect = qScopeGuard([&] { QObject::disconnect(activeSpyConnection); });
+    QList<QVariantList> statsSpyEvents;
+    const auto statsSpyConnection = QObject::connect(&monitor, &RenderingMonitor::statsChanged,
+        [&statsSpyEvents]() { statsSpyEvents.append(QVariantList{}); });
+    const auto statsSpyDisconnect = qScopeGuard([&] { QObject::disconnect(statsSpyConnection); });
+    QList<QVariantList> thresholdSpyEvents;
+    const auto thresholdSpyConnection = QObject::connect(&monitor, &RenderingMonitor::droppedFrameThresholdMsChanged,
+        [&thresholdSpyEvents]() { thresholdSpyEvents.append(QVariantList{}); });
+    const auto thresholdSpyDisconnect = qScopeGuard([&] { QObject::disconnect(thresholdSpyConnection); });
+    QList<QVariantList> capacitySpyEvents;
+    const auto capacitySpyConnection = QObject::connect(&monitor, &RenderingMonitor::frameSampleCapacityChanged,
+        [&capacitySpyEvents]() { capacitySpyEvents.append(QVariantList{}); });
+    const auto capacitySpyDisconnect = qScopeGuard([&] { QObject::disconnect(capacitySpyConnection); });
+    CTEST_CHECK(bool(activeSpyConnection));
+    CTEST_CHECK(bool(statsSpyConnection));
+    CTEST_CHECK(bool(thresholdSpyConnection));
+    CTEST_CHECK(bool(capacitySpyConnection));
 
     monitor.setDroppedFrameThresholdMs(2.0);
     monitor.setFrameSampleCapacity(32);
-    QCOMPARE(thresholdSpy.count(), 1);
-    QCOMPARE(capacitySpy.count(), 1);
+    RUNTIME_COMPARE(thresholdSpyEvents.size(), 1);
+    RUNTIME_COMPARE(capacitySpyEvents.size(), 1);
 
     auto *window = new QQuickWindow;
     monitor.attachWindow(window);
-    QVERIFY(monitor.active());
-    QCOMPARE(activeSpy.count(), 1);
-    QVERIFY(statsSpy.count() >= 1);
+    CTEST_CHECK(monitor.active());
+    RUNTIME_COMPARE(activeSpyEvents.size(), 1);
+    CTEST_CHECK(statsSpyEvents.size() >= 1);
 
-    QVERIFY(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
+    CTEST_CHECK(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
     const quint64 frameCountBeforeStop = monitor.frameCount();
-    QVERIFY(frameCountBeforeStop >= 1);
+    CTEST_CHECK(frameCountBeforeStop >= 1);
 
     monitor.stop();
-    QCOMPARE(activeSpy.count(), 2);
-    QVERIFY(!monitor.active());
-    QVERIFY(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
-    QCOMPARE(monitor.frameCount(), frameCountBeforeStop);
+    RUNTIME_COMPARE(activeSpyEvents.size(), 2);
+    CTEST_CHECK(!monitor.active());
+    CTEST_CHECK(QMetaObject::invokeMethod(&monitor, "handleFrameSwapped", Qt::DirectConnection));
+    RUNTIME_COMPARE(monitor.frameCount(), frameCountBeforeStop);
 
     monitor.start();
-    QCOMPARE(activeSpy.count(), 3);
-    QVERIFY(monitor.active());
+    RUNTIME_COMPARE(activeSpyEvents.size(), 3);
+    CTEST_CHECK(monitor.active());
 
     delete window;
     QCoreApplication::processEvents();
-    QTRY_VERIFY(!monitor.active());
-    QCOMPARE(activeSpy.count(), 4);
+    CTEST_WAIT_DEFAULT(!monitor.active());
+    RUNTIME_COMPARE(activeSpyEvents.size(), 4);
 }
 
 void RuntimeServicesTests::debug_logger_enabled_signal_and_message_format()
 {
     DebugLogger logger;
-    QSignalSpy enabledSpy(&logger, &DebugLogger::enabledChanged);
-    QVERIFY(enabledSpy.isValid());
+    QList<QVariantList> enabledSpyEvents;
+    const auto enabledSpyConnection = QObject::connect(&logger, &DebugLogger::enabledChanged,
+        [&enabledSpyEvents]() { enabledSpyEvents.append(QVariantList{}); });
+    const auto enabledSpyDisconnect = qScopeGuard([&] { QObject::disconnect(enabledSpyConnection); });
+    CTEST_CHECK(bool(enabledSpyConnection));
 
     logger.setEnabled(false);
-    QCOMPARE(enabledSpy.count(), 0);
+    RUNTIME_COMPARE(enabledSpyEvents.size(), 0);
     logger.setEnabled(true);
-    QCOMPARE(enabledSpy.count(), 1);
+    RUNTIME_COMPARE(enabledSpyEvents.size(), 1);
     logger.setEnabled(true);
-    QCOMPARE(enabledSpy.count(), 1);
+    RUNTIME_COMPARE(enabledSpyEvents.size(), 1);
 
     logger.log(QString(), QString(), 42);
     logger.warn(QStringLiteral("Runtime"), QStringLiteral("warning"));
     logger.error(QString(), QStringLiteral("failure"));
 
     const QVariantList entries = logger.entries();
-    QCOMPARE(entries.size(), 3);
+    RUNTIME_COMPARE(entries.size(), 3);
 
     const QVariantMap logEntry = entries.at(0).toMap();
-    QCOMPARE(logEntry.value(QStringLiteral("level")).toString(), QStringLiteral("LOG"));
-    QCOMPARE(logEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
-    QCOMPARE(logEntry.value(QStringLiteral("event")).toString(), QStringLiteral("event"));
-    QVERIFY(logEntry.value(QStringLiteral("message")).toString().contains(QStringLiteral("Unknown.event")));
+    RUNTIME_COMPARE(logEntry.value(QStringLiteral("level")).toString(), QStringLiteral("LOG"));
+    RUNTIME_COMPARE(logEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
+    RUNTIME_COMPARE(logEntry.value(QStringLiteral("event")).toString(), QStringLiteral("event"));
+    CTEST_CHECK(logEntry.value(QStringLiteral("message")).toString().contains(QStringLiteral("Unknown.event")));
 
     const QVariantMap warnEntry = entries.at(1).toMap();
-    QCOMPARE(warnEntry.value(QStringLiteral("level")).toString(), QStringLiteral("WARN"));
-    QCOMPARE(warnEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Runtime"));
-    QCOMPARE(warnEntry.value(QStringLiteral("event")).toString(), QStringLiteral("warning"));
+    RUNTIME_COMPARE(warnEntry.value(QStringLiteral("level")).toString(), QStringLiteral("WARN"));
+    RUNTIME_COMPARE(warnEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Runtime"));
+    RUNTIME_COMPARE(warnEntry.value(QStringLiteral("event")).toString(), QStringLiteral("warning"));
 
     const QVariantMap errorEntry = entries.at(2).toMap();
-    QCOMPARE(errorEntry.value(QStringLiteral("level")).toString(), QStringLiteral("ERROR"));
-    QCOMPARE(errorEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
-    QCOMPARE(errorEntry.value(QStringLiteral("event")).toString(), QStringLiteral("failure"));
+    RUNTIME_COMPARE(errorEntry.value(QStringLiteral("level")).toString(), QStringLiteral("ERROR"));
+    RUNTIME_COMPARE(errorEntry.value(QStringLiteral("component")).toString(), QStringLiteral("Unknown"));
+    RUNTIME_COMPARE(errorEntry.value(QStringLiteral("event")).toString(), QStringLiteral("failure"));
 
     logger.setEnabled(false);
-    QCOMPARE(enabledSpy.count(), 2);
+    RUNTIME_COMPARE(enabledSpyEvents.size(), 2);
     logger.log(QStringLiteral("PostDisable"), QStringLiteral("ignored"));
-    QCOMPARE(logger.entries().size(), 3);
+    RUNTIME_COMPARE(logger.entries().size(), 3);
 }
 
-QTEST_MAIN(RuntimeServicesTests)
-#include "tst_runtime_services.moc"
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    RuntimeServicesTests tests;
+    runner.run("runtime_events_measurement_boundaries", [&] { tests.runtime_events_measurement_boundaries(); });
+    runner.run("runtime_events_daemon_health_and_recent_log", [&] { tests.runtime_events_daemon_health_and_recent_log(); });
+    runner.run("runtime_events_idle_and_reset_signal_contract", [&] { tests.runtime_events_idle_and_reset_signal_contract(); });
+    runner.run("runtime_events_context_menu_signal_contract", [&] { tests.runtime_events_context_menu_signal_contract(); });
+    runner.run("runtime_events_single_input_event_is_counted_once", [&] { tests.runtime_events_single_input_event_is_counted_once(); });
+    runner.run("runtime_events_touch_input_normalizes_to_pointer_contract", [&] { tests.runtime_events_touch_input_normalizes_to_pointer_contract(); });
+    runner.run("runtime_events_touch_payload_exposes_native_point_details", [&] { tests.runtime_events_touch_payload_exposes_native_point_details(); });
+    runner.run("runtime_events_hit_test_exposes_ui_hierarchy_metadata", [&] { tests.runtime_events_hit_test_exposes_ui_hierarchy_metadata(); });
+    runner.run("gesture_events_recognize_hold_drag_and_swipe", [&] { tests.gesture_events_recognize_hold_drag_and_swipe(); });
+    runner.run("gesture_events_classify_mobile_press_scroll_and_multitouch", [&] { tests.gesture_events_classify_mobile_press_scroll_and_multitouch(); });
+    runner.run("runtime_events_window_replacement_survives_old_window_destruction", [&] { tests.runtime_events_window_replacement_survives_old_window_destruction(); });
+    runner.run("render_monitor_counts_frames_when_swapped", [&] { tests.render_monitor_counts_frames_when_swapped(); });
+    runner.run("render_monitor_active_signal_and_destroy_path", [&] { tests.render_monitor_active_signal_and_destroy_path(); });
+    runner.run("debug_logger_enabled_signal_and_message_format", [&] { tests.debug_logger_enabled_signal_and_message_format(); });
+    return runner.result();
+}

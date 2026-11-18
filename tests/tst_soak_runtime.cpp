@@ -1,7 +1,7 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QDir>
-#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QVariantMap>
 #include <QtPlugin>
@@ -36,22 +36,20 @@ qint64 operationStat(const Backend &backend, const QString &operation, const QSt
 
 class SoakRuntimeTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void backend_io_dispatch_soak_contract();
 };
 
 void SoakRuntimeTests::backend_io_dispatch_soak_contract()
 {
     MillisecondTimerResolution timerResolution;
-    QVERIFY(timerResolution.available());
+    CTEST_CHECK(timerResolution.available());
     const int iterations = envInt("LVRS_SOAK_ITERATIONS", 300, 64, 200000);
     const int workMs = envInt("LVRS_SOAK_WORK_MS", 1, 0, 20);
     const int waitTimeoutMs = envInt("LVRS_SOAK_TIMEOUT_MS", 120000, 10000, 900000);
 
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath(QStringLiteral("../resources/ctest-soak-XXXXXX")));
+    CTEST_CHECK(tempDir.isValid());
     const QString testFilePath = tempDir.filePath(QStringLiteral("soak-runtime.txt"));
 
     Backend backend;
@@ -60,16 +58,18 @@ void SoakRuntimeTests::backend_io_dispatch_soak_contract()
     backend.setReadTextCacheTtlMs(30000);
     backend.setReadTextCacheCapacityBytes(2 * 1024 * 1024);
 
-    QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
-    QVERIFY(finishedSpy.isValid());
+    QObject observer;
+    int finishedCount = 0;
+    const auto finishedConnection = QObject::connect(&backend, &Backend::asyncRequestFinished, &observer, [&] { ++finishedCount; });
+    CTEST_CHECK(finishedConnection);
 
     for (int i = 0; i < iterations; ++i) {
         const QString text = QStringLiteral("iteration=%1 payload=%2")
                                  .arg(i)
                                  .arg(QString(i % 101, QLatin1Char('x')));
-        QVERIFY2(backend.saveTextFile(testFilePath, text), qPrintable(backend.lastError()));
+        CTEST_CHECK_MESSAGE(backend.saveTextFile(testFilePath, text), qPrintable(backend.lastError()));
         const QString loaded = backend.readTextFile(testFilePath);
-        QCOMPARE(loaded, text);
+        CTEST_COMPARE(loaded, text);
 
         const QVariantMap payload {
             { QStringLiteral("coalesce"), false },
@@ -78,13 +78,13 @@ void SoakRuntimeTests::backend_io_dispatch_soak_contract()
             { QStringLiteral("iteration"), i }
         };
         const qulonglong requestId = backend.dispatchAsyncTask(QStringLiteral("soak-runtime-task"), payload, 0);
-        QVERIFY(requestId > 0);
+        CTEST_CHECK(requestId > 0);
         // Keep servicing worker completions while the fixture performs 300
         // synchronous filesystem writes, as the application event loop does.
         QCoreApplication::processEvents();
     }
 
-    QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.count(), iterations, waitTimeoutMs);
+    CTEST_WAIT_COMPARE_TIMEOUT(finishedCount, iterations, waitTimeoutMs);
 
     const QVariantMap metrics = backend.performanceMetrics();
     const QVariantMap byOperation = metrics.value(QStringLiteral("asyncLatencyByOperation")).toMap();
@@ -94,21 +94,21 @@ void SoakRuntimeTests::backend_io_dispatch_soak_contract()
     const qint64 p99Ms = operationStat(backend, QStringLiteral("dispatchTask"), QStringLiteral("p99Ms"));
     const qint64 p99LimitMs = static_cast<qint64>(envInt("LVRS_SOAK_P99_LIMIT_MS", 500, 10, 5000));
 
-    QVERIFY2(failureCount == 0,
+    CTEST_CHECK_MESSAGE(failureCount == 0,
              qPrintable(QStringLiteral("Soak detected failed async tasks: %1").arg(failureCount)));
-    QVERIFY2(backend.asyncQueueDepth() == 0,
+    CTEST_CHECK_MESSAGE(backend.asyncQueueDepth() == 0,
              qPrintable(QStringLiteral("Queue depth not drained after soak: %1").arg(backend.asyncQueueDepth())));
-    QVERIFY2(backend.asyncBackpressureDropCount() == 0,
+    CTEST_CHECK_MESSAGE(backend.asyncBackpressureDropCount() == 0,
              qPrintable(QStringLiteral("Backpressure drops detected: %1").arg(backend.asyncBackpressureDropCount())));
-    QVERIFY2(backend.readTextCacheBytes() <= backend.readTextCacheCapacityBytes(),
+    CTEST_CHECK_MESSAGE(backend.readTextCacheBytes() <= backend.readTextCacheCapacityBytes(),
              qPrintable(QStringLiteral("Read cache capacity exceeded: %1 > %2")
                             .arg(backend.readTextCacheBytes())
                             .arg(backend.readTextCacheCapacityBytes())));
-    QVERIFY2(backend.performanceTraceCount() <= backend.performanceTraceCapacity(),
+    CTEST_CHECK_MESSAGE(backend.performanceTraceCount() <= backend.performanceTraceCapacity(),
              qPrintable(QStringLiteral("Trace capacity exceeded: %1 > %2")
                             .arg(backend.performanceTraceCount())
                             .arg(backend.performanceTraceCapacity())));
-    QVERIFY2(p99Ms <= p99LimitMs,
+    CTEST_CHECK_MESSAGE(p99Ms <= p99LimitMs,
              qPrintable(QStringLiteral("Soak p99 limit exceeded: %1 > %2").arg(p99Ms).arg(p99LimitMs)));
 
     qInfo().noquote() << "LVRS soak summary iterations=" << iterations
@@ -117,5 +117,11 @@ void SoakRuntimeTests::backend_io_dispatch_soak_contract()
                       << "traceCount=" << backend.performanceTraceCount();
 }
 
-QTEST_MAIN(SoakRuntimeTests)
-#include "tst_soak_runtime.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    SoakRuntimeTests tests;
+    runner.run("backend_io_dispatch_soak_contract", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.backend_io_dispatch_soak_contract(); });
+    return runner.result();
+}

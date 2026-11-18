@@ -1,34 +1,90 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include "QtGuiTouch.h"
+#include <QCoreApplication>
+#include <QEventLoop>
+#include <QGuiApplication>
+#include <QMouseEvent>
+#include <QTimer>
+#include <type_traits>
 #include <QQmlEngine>
 #include <QQmlExpression>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QSignalSpy>
 #include <QKeyEvent>
 #include "test_utils.h"
 
-class MotionTests : public QObject
+class MotionSignalRecorder : public QObject
 {
     Q_OBJECT
-private slots:
+public:
+    int count = 0;
+public slots:
+    void recordSignal() { ++count; }
+};
+
+namespace {
+template <typename Actual, typename Expected>
+bool motionEqual(const Actual &actual, const Expected &expected)
+{
+    if constexpr (std::is_arithmetic_v<Actual> && std::is_arithmetic_v<Expected>
+                  && (std::is_floating_point_v<Actual> || std::is_floating_point_v<Expected>))
+        return qFuzzyCompare(qreal(actual) + 1.0, qreal(expected) + 1.0);
+    else
+        return actual == expected;
+}
+void processFor(int milliseconds)
+{
+    QEventLoop loop;
+    QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);
+    loop.exec();
+}
+Qt::MouseButtons pressedButtons = Qt::NoButton;
+void sendMouse(QQuickWindow *window, QEvent::Type type, const QPoint &point, Qt::MouseButton button, ulong delay = 16)
+{
+    if (type == QEvent::MouseButtonPress) pressedButtons |= button;
+    if (type == QEvent::MouseButtonRelease) pressedButtons &= ~Qt::MouseButtons(button);
+    static ulong timestamp = 10000;
+    const QPointF local(point), global(window->mapToGlobal(point));
+    QMouseEvent event(type, local, local, global, button, pressedButtons, Qt::NoModifier);
+    event.setTimestamp(timestamp += delay);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+void mouseMove(QQuickWindow *window, const QPoint &point, ulong delay = 16) { sendMouse(window, QEvent::MouseMove, point, Qt::NoButton, delay); }
+void mousePress(QQuickWindow *window, const QPoint &point) { sendMouse(window, QEvent::MouseButtonPress, point, Qt::LeftButton); }
+void mouseRelease(QQuickWindow *window, const QPoint &point) { sendMouse(window, QEvent::MouseButtonRelease, point, Qt::LeftButton); }
+void mouseClick(QQuickWindow *window, const QPoint &point) { mouseMove(window, point); mousePress(window, point); mouseRelease(window, point); }
+void sendKey(QQuickWindow *window, QEvent::Type type, Qt::Key key, Qt::KeyboardModifiers modifiers = Qt::NoModifier)
+{
+    const QString text = key == Qt::Key_Space ? QStringLiteral(" ") : QString();
+    QKeyEvent event(type, key, modifiers, text);
+    QCoreApplication::sendEvent(window, &event);
+    QCoreApplication::processEvents();
+}
+void keyClick(QQuickWindow *window, Qt::Key key, Qt::KeyboardModifiers modifiers = Qt::NoModifier)
+{
+    sendKey(window, QEvent::KeyPress, key, modifiers);
+    sendKey(window, QEvent::KeyRelease, key, modifiers);
+}
+}
+#define MOTION_COMPARE(actual, expected) CTEST_CHECK(motionEqual((actual), (expected)))
+#define MOTION_WAIT_COMPARE(actual, expected) CTEST_WAIT_DEFAULT(motionEqual((actual), (expected)))
+
+class MotionTests
+{
+public:
     void button_press_rebound_and_retarget();
     void preferences_settle_in_flight_motion();
     void keyboard_disabled_and_layout();
     void slider_drag_is_direct_and_release_settles();
-    void button_families_data();
-    void button_families();
+    void button_families(const QString &type);
     void slider_programmatic_travel_stays_bounded();
     void touch_keeps_the_input_target_fixed();
-    void compact_button_release_data();
-    void compact_button_release();
-    void compact_button_cancel_and_opt_out_data();
-    void compact_button_cancel_and_opt_out();
-    void compact_button_tones_and_keyboard_focus_data();
-    void compact_button_tones_and_keyboard_focus();
-    void row_interaction_states_data();
-    void row_interaction_states();
-    void enter_activates_on_release_data();
-    void enter_activates_on_release();
+    void compact_button_release(const QString &type, bool keyboard);
+    void compact_button_cancel_and_opt_out(const QString &type);
+    void compact_button_tones_and_keyboard_focus(const QString &type, int tone);
+    void row_interaction_states(const QString &type, const QString &configuration, bool inactive, bool selected);
+    void enter_activates_on_release(const QString &type);
     void hierarchy_mobile_release_and_cancel();
 };
 
@@ -52,115 +108,108 @@ void MotionTests::button_press_rebound_and_retarget()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion);
+    CTEST_CHECK(motion);
     const auto center = button->mapToScene(button->boundingRect().center()).toPoint();
-    QSignalSpy clicks(button, SIGNAL(clicked()));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTRY_VERIFY(motion->property("pressProgress").toReal() > 0.95);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
+    mousePress(window, center);
+    CTEST_WAIT_DEFAULT(motion->property("pressProgress").toReal() > 0.95);
+    mouseRelease(window, center);
     bool rebounded = false;
     for (int i = 0; i < 35; ++i) {
-        QTest::qWait(12);
+        processFor(12);
         rebounded |= motion->property("deformationProgress").toReal() < -0.01;
     }
-    QVERIFY(rebounded);
-    QTRY_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
-    QTRY_COMPARE(motion->property("pressProgress").toReal(), 0.0);
-    QCOMPARE(clicks.count(), 1);
+    CTEST_CHECK(rebounded);
+    MOTION_WAIT_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
+    MOTION_WAIT_COMPARE(motion->property("pressProgress").toReal(), 0.0);
+    MOTION_COMPARE(clicks.count, 1);
     for (int i = 0; i < 4; ++i) {
-        QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-        QTest::qWait(24);
-        QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-        QTest::qWait(24);
+        mousePress(window, center);
+        processFor(24);
+        mouseRelease(window, center);
+        processFor(24);
     }
-    QTRY_COMPARE(motion->property("pressProgress").toReal(), 0.0);
-    QCOMPARE(clicks.count(), 5);
+    MOTION_WAIT_COMPARE(motion->property("pressProgress").toReal(), 0.0);
+    MOTION_COMPARE(clicks.count, 5);
 }
 
 void MotionTests::preferences_settle_in_flight_motion()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *button = root->findChild<QQuickItem *>("button");
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion);
+    CTEST_CHECK(motion);
     button->setProperty("down", true);
-    QTest::qWait(40);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
-    QTRY_COMPARE(motion->property("pressProgress").toReal(), 0.0);
-    QCOMPARE(motion->property("xScale").toReal(), 1.0);
-    QCOMPARE(motion->property("yScale").toReal(), 1.0);
+    processFor(40);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
+    MOTION_WAIT_COMPARE(motion->property("pressProgress").toReal(), 0.0);
+    MOTION_COMPARE(motion->property("xScale").toReal(), 1.0);
+    MOTION_COMPARE(motion->property("yScale").toReal(), 1.0);
     button->setProperty("down", false);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
     button->setProperty("motionEnabled", false);
     button->setProperty("down", true);
-    QCOMPARE(motion->property("pressProgress").toReal(), 0.0);
+    MOTION_COMPARE(motion->property("pressProgress").toReal(), 0.0);
 }
 
 void MotionTests::keyboard_disabled_and_layout()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(motion);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const QRectF geometry(button->position(), button->size());
-    QSignalSpy clicks(button, SIGNAL(clicked()));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
     button->forceActiveFocus(Qt::TabFocusReason);
-    QTest::keyPress(window, Qt::Key_Space);
-    QTRY_VERIFY(motion->property("pressProgress").toReal() > 0.5);
-    QCOMPARE(QRectF(button->position(), button->size()), geometry);
-    QTest::keyRelease(window, Qt::Key_Space);
-    QCOMPARE(clicks.count(), 1);
+    sendKey(window, QEvent::KeyPress, Qt::Key_Space);
+    CTEST_WAIT_DEFAULT(motion->property("pressProgress").toReal() > 0.5);
+    MOTION_COMPARE(QRectF(button->position(), button->size()), geometry);
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
+    MOTION_COMPARE(clicks.count, 1);
     button->setEnabled(false);
-    QTRY_COMPARE(motion->property("pressProgress").toReal(), 0.0);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, geometry.center().toPoint());
-    QCOMPARE(clicks.count(), 1);
+    MOTION_WAIT_COMPARE(motion->property("pressProgress").toReal(), 0.0);
+    mouseClick(window, geometry.center().toPoint());
+    MOTION_COMPARE(clicks.count, 1);
 }
 
 void MotionTests::slider_drag_is_direct_and_release_settles()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *slider = root->findChild<QQuickItem *>("slider");
     auto *handle = slider->findChild<QQuickItem *>("slider_handle");
-    QVERIFY(handle);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(handle);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const auto start = handle->mapToScene(handle->boundingRect().center()).toPoint();
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, start);
-    QTest::mouseMove(window, start + QPoint(80, 0), 24);
-    QVERIFY(slider->property("value").toReal() > 0.4);
+    mousePress(window, start);
+    mouseMove(window, start + QPoint(80, 0), 24);
+    CTEST_CHECK(slider->property("value").toReal() > 0.4);
     const qreal expected = slider->property("leftPadding").toReal()
         + slider->property("visualPosition").toReal() * slider->property("rangeWidth").toReal();
-    QVERIFY(qAbs(handle->x() - expected) < 0.1);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, start + QPoint(80, 0));
-    QTRY_VERIFY(!slider->property("pressed").toBool());
+    CTEST_CHECK(qAbs(handle->x() - expected) < 0.1);
+    mouseRelease(window, start + QPoint(80, 0));
+    CTEST_WAIT_DEFAULT(!slider->property("pressed").toBool());
 }
 
-void MotionTests::button_families_data()
+void MotionTests::button_families(const QString &type)
 {
-    QTest::addColumn<QString>("type");
-    for (const char *type : {"AbstractButton", "PushButton", "DropdownButton", "LabelButton", "IconButton",
-                            "LabelMenuButton", "IconMenuButton", "CheckBox", "RadioButton", "Card",
-                            "AlertButton", "Link", "ToolbarButton", "HierarchyItem", "ListItem", "MenuItem", "ContextMenuItem",
-                            "Stepper", "ComboBox"})
-        QTest::newRow(type) << QString::fromLatin1(type);
-}
-
-void MotionTests::button_families()
-{
-    QFETCH(QString, type);
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
     const QByteArray qml = QString(R"(
@@ -172,43 +221,43 @@ Controls.ApplicationWindow {
     LV.%1 { objectName: "control"; x: 60; y: 60 }
 })").arg(type).toUtf8();
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, qml));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *control = root->findChild<QQuickItem *>("control");
-    QVERIFY(control);
+    CTEST_CHECK(control);
     auto *motion = control->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(motion);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     window->requestActivate();
-    QVERIFY(QTest::qWaitForWindowActive(window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isActive(); }, 5000));
     const QRectF bounds = control->mapRectToScene(control->boundingRect());
     const QPoint point = bounds.center().toPoint();
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
-    QTRY_VERIFY_WITH_TIMEOUT(motion->property("pressProgress").toReal() > 0.7, 500);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
-    QTRY_COMPARE(motion->property("pressProgress").toReal(), 0.0);
+    mousePress(window, point);
+    CTEST_WAIT_VERIFY(motion->property("pressProgress").toReal() > 0.7, 500);
+    mouseRelease(window, point);
+    MOTION_WAIT_COMPARE(motion->property("pressProgress").toReal(), 0.0);
     control->setEnabled(false);
-    QTRY_COMPARE(motion->property("xScale").toReal(), 1.0);
-    QTRY_COMPARE(motion->property("yScale").toReal(), 1.0);
+    MOTION_WAIT_COMPARE(motion->property("xScale").toReal(), 1.0);
+    MOTION_WAIT_COMPARE(motion->property("yScale").toReal(), 1.0);
 }
 
 void MotionTests::slider_programmatic_travel_stays_bounded()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *slider = root->findChild<QQuickItem *>("slider");
     auto *handle = slider->findChild<QQuickItem *>("slider_handle");
     const qreal left = slider->property("leftPadding").toReal();
     const qreal range = slider->property("rangeWidth").toReal();
     for (qreal value : {1.0, 0.0, 0.75}) {
-        QVERIFY(slider->setProperty("value", value));
-        QCOMPARE(slider->property("value").toReal(), value);
+        CTEST_CHECK(slider->setProperty("value", value));
+        MOTION_COMPARE(slider->property("value").toReal(), value);
         for (int i = 0; i < 35; ++i) {
-            QTest::qWait(12);
-            QVERIFY(handle->x() >= left && handle->x() <= left + range);
+            processFor(12);
+            CTEST_CHECK(handle->x() >= left && handle->x() <= left + range);
         }
-        QTRY_VERIFY(qAbs(handle->x() - left - value * range) < 0.01);
+        CTEST_WAIT_DEFAULT(qAbs(handle->x() - left - value * range) < 0.01);
     }
 }
 
@@ -216,21 +265,23 @@ void MotionTests::touch_keeps_the_input_target_fixed()
 {
     QQmlEngine engine;
     QScopedPointer<QObject> root(fixture(engine));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const QRectF bounds = button->mapRectToScene(button->boundingRect());
-    QSignalSpy clicks(button, SIGNAL(clicked()));
-    auto *device = QTest::createTouchDevice();
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
+    auto *device = lvrs_ctest::createTouchDevice();
     const QPoint point = bounds.center().toPoint();
-    QTest::touchEvent(window, device).press(0, point, window);
-    QTest::qWait(110);
-    QCOMPARE(button->mapRectToScene(button->boundingRect()), bounds);
-    QTest::touchEvent(window, device).release(0, point, window);
-    QTRY_COMPARE(clicks.count(), 1);
-    QTest::qWait(400);
-    QCOMPARE(button->mapRectToScene(button->boundingRect()), bounds);
+    lvrs_ctest::TouchSequence(window, device).press(0, point, window);
+    processFor(110);
+    MOTION_COMPARE(button->mapRectToScene(button->boundingRect()), bounds);
+    lvrs_ctest::TouchSequence(window, device).release(0, point, window);
+    MOTION_WAIT_COMPARE(clicks.count, 1);
+    processFor(400);
+    MOTION_COMPARE(button->mapRectToScene(button->boundingRect()), bounds);
 }
 
 static QObject *compactFixture(QQmlEngine &engine, const QString &type, int tone = 0)
@@ -249,219 +300,163 @@ Controls.ApplicationWindow {
 })").arg(type).arg(tone).toUtf8());
 }
 
-void MotionTests::compact_button_release_data()
+void MotionTests::compact_button_release(const QString &type, bool keyboard)
 {
-    QTest::addColumn<QString>("type");
-    QTest::addColumn<bool>("keyboard");
-    for (const char *type : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton",
-                            "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"}) {
-        for (bool keyboard : {false, true}) {
-            const QByteArray row = QByteArray(type) + (keyboard ? "-keyboard" : "-pointer");
-            QTest::newRow(row.constData()) << QString::fromLatin1(type) << keyboard;
-        }
-    }
-}
-
-void MotionTests::compact_button_release()
-{
-    QFETCH(QString, type);
-    QFETCH(bool, keyboard);
     QQmlEngine engine;
     QScopedPointer<QObject> root(compactFixture(engine, type));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(motion);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(motion);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const QRectF geometry = button->mapRectToScene(button->boundingRect());
     const QPoint center = geometry.center().toPoint();
-    QSignalSpy clicks(button, SIGNAL(clicked()));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
     button->forceActiveFocus(Qt::TabFocusReason);
 
     // A tap can finish before the 90ms compression has reached its first frame.
     for (int holdMs : {0, 110}) {
         if (keyboard)
-            QTest::keyPress(window, Qt::Key_Space);
+            sendKey(window, QEvent::KeyPress, Qt::Key_Space);
         else
-            QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
+            mousePress(window, center);
         if (holdMs)
-            QTest::qWait(holdMs);
+            processFor(holdMs);
         if (keyboard)
-            QTest::keyRelease(window, Qt::Key_Space);
+            sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
         else
-            QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-        QCOMPARE(clicks.count(), holdMs ? 2 : 1);
+            mouseRelease(window, center);
+        MOTION_COMPARE(clicks.count, holdMs ? 2 : 1);
         bool expanded = false;
         QElapsedTimer elapsed;
         elapsed.start();
         while (elapsed.elapsed() < 240) {
-            QTest::qWait(8);
+            processFor(8);
             expanded |= motion->property("deformationProgress").toReal() < -0.01;
-            QCOMPARE(button->mapRectToScene(button->boundingRect()), geometry);
+            MOTION_COMPARE(button->mapRectToScene(button->boundingRect()), geometry);
         }
-        QVERIFY2(expanded, "Both immediate taps and held releases must show one elastic return");
-        QCOMPARE(motion->property("deformationProgress").toReal(), 0.0);
+        CTEST_CHECK_MESSAGE(expanded, "Both immediate taps and held releases must show one elastic return");
+        MOTION_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
         auto *background = button->property("background").value<QQuickItem *>();
-        QCOMPARE(background->property("color"), button->property(button->property("hovered").toBool()
+        MOTION_COMPARE(background->property("color"), button->property(button->property("hovered").toBool()
             ? "backgroundColorHover" : "backgroundColor"));
     }
 }
 
-void MotionTests::compact_button_cancel_and_opt_out_data()
+void MotionTests::compact_button_cancel_and_opt_out(const QString &type)
 {
-    QTest::addColumn<QString>("type");
-    for (const char *type : {"PushButton", "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"})
-        QTest::newRow(type) << QString::fromLatin1(type);
-}
-
-void MotionTests::compact_button_cancel_and_opt_out()
-{
-    QFETCH(QString, type);
     QQmlEngine engine;
     QScopedPointer<QObject> root(compactFixture(engine, type));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const QPoint center = button->mapToScene(button->boundingRect().center()).toPoint();
     const QPoint outside(450, 220);
-    QSignalSpy clicks(button, SIGNAL(clicked()));
-    QSignalSpy cancelled(button, SIGNAL(canceled()));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTest::qWait(110);
-    QTest::mouseMove(window, outside);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, outside);
-    QCOMPARE(clicks.count(), 0);
-    QCOMPARE(cancelled.count(), 1);
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
+    MotionSignalRecorder cancelled;
+    const auto cancelledConnection = QObject::connect(button, SIGNAL(canceled()), &cancelled, SLOT(recordSignal()));
+    CTEST_CHECK(cancelledConnection);
+    mousePress(window, center);
+    processFor(110);
+    mouseMove(window, outside);
+    mouseRelease(window, outside);
+    MOTION_COMPARE(clicks.count, 0);
+    MOTION_COMPARE(cancelled.count, 1);
     for (int i = 0; i < 25; ++i) {
-        QTest::qWait(8);
-        QVERIFY(motion->property("deformationProgress").toReal() >= 0);
+        processFor(8);
+        CTEST_CHECK(motion->property("deformationProgress").toReal() >= 0);
     }
 
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(clicks.count(), 1);
-    QTest::qWait(24);
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
-    QCOMPARE(motion->property("deformationProgress").toReal(), 0.0);
-    QCOMPARE(motion->property("xScale").toReal(), 1.0);
-    QCOMPARE(motion->property("yScale").toReal(), 1.0);
+    mouseClick(window, center);
+    MOTION_COMPARE(clicks.count, 1);
+    processFor(24);
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "reduceMotion"));
+    MOTION_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
+    MOTION_COMPARE(motion->property("xScale").toReal(), 1.0);
+    MOTION_COMPARE(motion->property("yScale").toReal(), 1.0);
 
-    QVERIFY(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
+    CTEST_CHECK(QMetaObject::invokeMethod(root.data(), "restoreMotion"));
     button->setProperty("motionEnabled", false);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(clicks.count(), 2);
-    QCOMPARE(motion->property("deformationProgress").toReal(), 0.0);
+    mouseClick(window, center);
+    MOTION_COMPARE(clicks.count, 2);
+    MOTION_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
     button->setProperty("motionEnabled", true);
     for (int i = 0; i < 4; ++i) {
-        QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-        QTest::qWait(24);
-        QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-        QTest::qWait(24);
+        mousePress(window, center);
+        processFor(24);
+        mouseRelease(window, center);
+        processFor(24);
     }
-    QCOMPARE(clicks.count(), 6);
-    QTest::qWait(220);
-    QCOMPARE(motion->property("deformationProgress").toReal(), 0.0);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
+    MOTION_COMPARE(clicks.count, 6);
+    processFor(220);
+    MOTION_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
+    mouseClick(window, center);
     button->setEnabled(false);
-    QCOMPARE(motion->property("deformationProgress").toReal(), 0.0);
-    QCOMPARE(motion->property("xScale").toReal(), 1.0);
-    QCOMPARE(motion->property("yScale").toReal(), 1.0);
-    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(clicks.count(), 7);
+    MOTION_COMPARE(motion->property("deformationProgress").toReal(), 0.0);
+    MOTION_COMPARE(motion->property("xScale").toReal(), 1.0);
+    MOTION_COMPARE(motion->property("yScale").toReal(), 1.0);
+    mouseClick(window, center);
+    MOTION_COMPARE(clicks.count, 7);
 }
 
-void MotionTests::compact_button_tones_and_keyboard_focus_data()
+void MotionTests::compact_button_tones_and_keyboard_focus(const QString &type, int tone)
 {
-    QTest::addColumn<QString>("type");
-    QTest::addColumn<int>("tone");
-    for (const char *type : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton"}) {
-        for (int tone = 0; tone < 5; ++tone) {
-            const QByteArray row = QByteArray(type) + '-' + QByteArray::number(tone);
-            QTest::newRow(row.constData()) << QString::fromLatin1(type) << tone;
-        }
-    }
-}
-
-void MotionTests::compact_button_tones_and_keyboard_focus()
-{
-    QFETCH(QString, type);
-    QFETCH(int, tone);
     QQmlEngine engine;
     QScopedPointer<QObject> root(compactFixture(engine, type, tone));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
     auto *next = root->findChild<QQuickItem *>("next");
     auto *background = button->property("background").value<QQuickItem *>();
-    QVERIFY(background);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(background);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     // Turning motion off makes colors immediate without changing state semantics.
     button->setProperty("motionEnabled", false);
-    QTest::mouseMove(window, QPoint(450, 220));
-    QCOMPARE(background->property("color"), button->property(tone == 4
+    mouseMove(window, QPoint(450, 220));
+    MOTION_COMPARE(background->property("color"), button->property(tone == 4
         ? "backgroundColorDisabled" : "backgroundColor"));
-    QSignalSpy clicks(button, SIGNAL(clicked()));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
     const QPoint center = button->mapToScene(button->boundingRect().center()).toPoint();
-    QTest::mouseMove(window, center);
+    mouseMove(window, center);
     if (tone == 4) {
-        QVERIFY(!button->property("activeFocusOnTab").toBool());
-        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center);
-        QCOMPARE(clicks.count(), 0);
-        QCOMPARE(background->property("color"), button->property("backgroundColorDisabled"));
+        CTEST_CHECK(!button->property("activeFocusOnTab").toBool());
+        mouseClick(window, center);
+        MOTION_COMPARE(clicks.count, 0);
+        MOTION_COMPARE(background->property("color"), button->property("backgroundColorDisabled"));
         return;
     }
-    QTRY_VERIFY(button->property("hovered").toBool());
-    QCOMPARE(background->property("color"), button->property("backgroundColorHover"));
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(background->property("color"), button->property("backgroundColorPressed"));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(clicks.count(), 1);
-    QCOMPARE(background->property("color"), button->property("backgroundColorHover"));
+    CTEST_WAIT_DEFAULT(button->property("hovered").toBool());
+    MOTION_COMPARE(background->property("color"), button->property("backgroundColorHover"));
+    mousePress(window, center);
+    MOTION_COMPARE(background->property("color"), button->property("backgroundColorPressed"));
+    mouseRelease(window, center);
+    MOTION_COMPARE(clicks.count, 1);
+    MOTION_COMPARE(background->property("color"), button->property("backgroundColorHover"));
     next->forceActiveFocus(Qt::TabFocusReason);
-    QTest::keyClick(window, Qt::Key_Tab, Qt::ShiftModifier);
-    QVERIFY(button->property("visualFocus").toBool());
-    QTest::keyPress(window, Qt::Key_Space);
-    QVERIFY(button->property("visualFocus").toBool());
-    QTest::keyRelease(window, Qt::Key_Space);
-    QVERIFY(button->property("visualFocus").toBool());
-    QCOMPARE(clicks.count(), 2);
-    QTest::keyClick(window, Qt::Key_Tab);
-    QVERIFY(next->hasActiveFocus());
-    QTest::keyClick(window, Qt::Key_Tab, Qt::ShiftModifier);
-    QVERIFY(button->hasActiveFocus());
+    keyClick(window, Qt::Key_Tab, Qt::ShiftModifier);
+    CTEST_CHECK(button->property("visualFocus").toBool());
+    sendKey(window, QEvent::KeyPress, Qt::Key_Space);
+    CTEST_CHECK(button->property("visualFocus").toBool());
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
+    CTEST_CHECK(button->property("visualFocus").toBool());
+    MOTION_COMPARE(clicks.count, 2);
+    keyClick(window, Qt::Key_Tab);
+    CTEST_CHECK(next->hasActiveFocus());
+    keyClick(window, Qt::Key_Tab, Qt::ShiftModifier);
+    CTEST_CHECK(button->hasActiveFocus());
 }
 
-void MotionTests::row_interaction_states_data()
+void MotionTests::row_interaction_states(const QString &type, const QString &configuration, bool inactive, bool selected)
 {
-    QTest::addColumn<QString>("type");
-    QTest::addColumn<QString>("configuration");
-    QTest::addColumn<bool>("inactive");
-    QTest::addColumn<bool>("selected");
-    for (const char *type : {"MenuItem", "ContextMenuItem", "HierarchyItem"}) {
-        for (int state = 0; state < 3; ++state) {
-            const QString configuration = QString::fromLatin1(type) == "HierarchyItem"
-                ? (state == 1 ? "selected: true" : state == 2 ? "activatable: false" : "")
-                : QStringLiteral("state: %1").arg(state);
-            const QByteArray row = QByteArray(type) + '-' + QByteArray::number(state);
-            QTest::newRow(row.constData()) << QString::fromLatin1(type) << configuration << (state == 2) << (state == 1);
-        }
-    }
-    for (int variant = 0; variant < 17; ++variant) {
-        const QByteArray row = "ListItem-" + QByteArray::number(variant);
-        QTest::newRow(row.constData()) << QStringLiteral("ListItem") << QStringLiteral("type: %1").arg(variant) << false << false;
-    }
-    QTest::newRow("ListItem-selected") << QStringLiteral("ListItem") << QStringLiteral("selected: true") << false << true;
-    QTest::newRow("ListItem-disabled") << QStringLiteral("ListItem") << QStringLiteral("enabled: false") << true << false;
-}
-
-void MotionTests::row_interaction_states()
-{
-    QFETCH(QString, type);
-    QFETCH(QString, configuration);
-    QFETCH(bool, inactive);
-    QFETCH(bool, selected);
     QQmlEngine engine;
     engine.addImportPath(TestUtils::qmlImportBase());
     QScopedPointer<QObject> root(TestUtils::createFromQml(engine, QString(R"(
@@ -473,110 +468,106 @@ Controls.ApplicationWindow {
     LV.%1 { objectName: "row"; x: 40; y: 40; motionEnabled: false; %2 }
     LV.PushButton { objectName: "next"; x: 500; y: 280; text: "Next" }
 })").arg(type, configuration).toUtf8()));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *row = root->findChild<QQuickItem *>("row");
     auto *next = root->findChild<QQuickItem *>("next");
     auto *motion = row->findChild<QObject *>("interactionMotion");
     auto *ring = row->findChild<QQuickItem *>("buttonFocusRing");
     auto *background = row->property("background").value<QQuickItem *>();
-    QVERIFY(motion);
-    QVERIFY(ring);
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(motion);
+    CTEST_CHECK(ring);
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     const QRectF geometry = row->mapRectToScene(row->boundingRect());
     // Leading edge belongs to the row; embedded accessory controls keep their own events.
     const QPoint point = row->mapToScene(QPointF(2, row->height() / 2)).toPoint();
-    QSignalSpy clicks(row, SIGNAL(clicked()));
-    QTest::mouseMove(window, QPoint(650, 350));
-    QCOMPARE(background->property("color"), row->property(inactive ? "backgroundColorDisabled" : "backgroundColor"));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(row, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
+    mouseMove(window, QPoint(650, 350));
+    MOTION_COMPARE(background->property("color"), row->property(inactive ? "backgroundColorDisabled" : "backgroundColor"));
     const QVariant originalFill = background->property("color");
-    QTest::mouseMove(window, point);
+    mouseMove(window, point);
     if (inactive) {
-        QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, point);
-        QVERIFY(!row->property("activeFocusOnTab").toBool());
-        QVERIFY(!ring->property("active").toBool());
-        QCOMPARE(background->property("color"), originalFill);
-        QCOMPARE(motion->property("xScale").toReal(), 1.0);
-        QCOMPARE(motion->property("yScale").toReal(), 1.0);
+        mouseClick(window, point);
+        CTEST_CHECK(!row->property("activeFocusOnTab").toBool());
+        CTEST_CHECK(!ring->property("active").toBool());
+        MOTION_COMPARE(background->property("color"), originalFill);
+        MOTION_COMPARE(motion->property("xScale").toReal(), 1.0);
+        MOTION_COMPARE(motion->property("yScale").toReal(), 1.0);
         if (type != "HierarchyItem")
-            QCOMPARE(clicks.count(), 0);
+            MOTION_COMPARE(clicks.count, 0);
         return;
     }
-    QTRY_VERIFY(row->property("hovered").toBool());
-    QCOMPARE(background->property("color"), row->property("backgroundColorHover"));
+    CTEST_WAIT_DEFAULT(row->property("hovered").toBool());
+    MOTION_COMPARE(background->property("color"), row->property("backgroundColorHover"));
     if (selected)
-        QCOMPARE(background->property("color"), originalFill);
+        MOTION_COMPARE(background->property("color"), originalFill);
     else
-        QVERIFY(background->property("color") != originalFill);
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(background->property("color"), row->property("backgroundColorPressed"));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, point);
-    QCOMPARE(clicks.count(), 1);
-    QCOMPARE(background->property("color"), row->property("backgroundColorHover"));
+        CTEST_CHECK(background->property("color") != originalFill);
+    mousePress(window, point);
+    MOTION_COMPARE(background->property("color"), row->property("backgroundColorPressed"));
+    mouseRelease(window, point);
+    MOTION_COMPARE(clicks.count, 1);
+    MOTION_COMPARE(background->property("color"), row->property("backgroundColorHover"));
     next->forceActiveFocus(Qt::TabFocusReason);
     // Complex rows contain independently focusable controls; explicitly focus the row itself.
     row->forceActiveFocus(Qt::TabFocusReason);
-    QVERIFY(ring->property("active").toBool());
-    QCOMPARE(ring->x(), -3.0);
-    QCOMPARE(ring->width(), row->width() + 6.0);
-    QTest::keyPress(window, Qt::Key_Space);
-    QVERIFY(ring->property("active").toBool());
-    QTest::keyRelease(window, Qt::Key_Space);
-    QCOMPARE(clicks.count(), 2);
-    QVERIFY(ring->property("active").toBool());
-    QCOMPARE(row->mapRectToScene(row->boundingRect()), geometry);
+    CTEST_CHECK(ring->property("active").toBool());
+    MOTION_COMPARE(ring->x(), -3.0);
+    MOTION_COMPARE(ring->width(), row->width() + 6.0);
+    sendKey(window, QEvent::KeyPress, Qt::Key_Space);
+    CTEST_CHECK(ring->property("active").toBool());
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Space);
+    MOTION_COMPARE(clicks.count, 2);
+    CTEST_CHECK(ring->property("active").toBool());
+    MOTION_COMPARE(row->mapRectToScene(row->boundingRect()), geometry);
 }
 
-void MotionTests::enter_activates_on_release_data()
+void MotionTests::enter_activates_on_release(const QString &type)
 {
-    QTest::addColumn<QString>("type");
-    for (const char *type : {"PushButton", "DropdownButton", "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"})
-        QTest::newRow(type) << QString::fromLatin1(type);
-}
-
-void MotionTests::enter_activates_on_release()
-{
-    QFETCH(QString, type);
     QQmlEngine engine;
     QScopedPointer<QObject> root(compactFixture(engine, type));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *button = root->findChild<QQuickItem *>("button");
     auto *next = root->findChild<QQuickItem *>("next");
     auto *motion = button->findChild<QObject *>("interactionMotion");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
     button->forceActiveFocus(Qt::TabFocusReason);
-    QSignalSpy clicks(button, SIGNAL(clicked()));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(button, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
     for (Qt::Key key : {Qt::Key_Return, Qt::Key_Enter}) {
-        const int before = clicks.count();
-        QTest::keyPress(window, key);
-        QTRY_VERIFY(motion->property("pressProgress").toReal() > 0.5);
-        QCOMPARE(clicks.count(), before);
+        const int before = clicks.count;
+        sendKey(window, QEvent::KeyPress, key);
+        CTEST_WAIT_DEFAULT(motion->property("pressProgress").toReal() > 0.5);
+        MOTION_COMPARE(clicks.count, before);
         QKeyEvent repeat(QEvent::KeyPress, key, Qt::NoModifier, QString(), true);
         QCoreApplication::sendEvent(window, &repeat);
-        QCOMPARE(clicks.count(), before);
-        QTest::keyRelease(window, key);
-        QCOMPARE(clicks.count(), before + 1);
-        QVERIFY(button->property("visualFocus").toBool());
+        MOTION_COMPARE(clicks.count, before);
+        sendKey(window, QEvent::KeyRelease, key);
+        MOTION_COMPARE(clicks.count, before + 1);
+        CTEST_CHECK(button->property("visualFocus").toBool());
         // The first animation frame may already have advanced on a busy row.
-        QVERIFY(motion->property("releasing").toBool());
-        QTest::qWait(220);
+        CTEST_CHECK(motion->property("releasing").toBool());
+        processFor(220);
     }
-    QTest::keyPress(window, Qt::Key_Return);
+    sendKey(window, QEvent::KeyPress, Qt::Key_Return);
     next->forceActiveFocus(Qt::TabFocusReason);
-    QTest::keyRelease(window, Qt::Key_Return);
-    QCOMPARE(clicks.count(), 2);
-    QTRY_VERIFY(!button->property("down").toBool());
-    QCOMPARE(motion->property("releaseProgress").toReal(), 0.0);
+    sendKey(window, QEvent::KeyRelease, Qt::Key_Return);
+    MOTION_COMPARE(clicks.count, 2);
+    CTEST_WAIT_DEFAULT(!button->property("down").toBool());
+    MOTION_COMPARE(motion->property("releaseProgress").toReal(), 0.0);
     if (type == "PushButton") {
         button->setProperty("checkable", true);
         button->setProperty("checked", false);
         button->forceActiveFocus(Qt::TabFocusReason);
-        QTest::keyPress(window, Qt::Key_Return);
-        QVERIFY(!button->property("checked").toBool());
-        QTest::keyRelease(window, Qt::Key_Return);
-        QVERIFY(button->property("checked").toBool());
-        QCOMPARE(clicks.count(), 3);
+        sendKey(window, QEvent::KeyPress, Qt::Key_Return);
+        CTEST_CHECK(!button->property("checked").toBool());
+        sendKey(window, QEvent::KeyRelease, Qt::Key_Return);
+        CTEST_CHECK(button->property("checked").toBool());
+        MOTION_COMPARE(clicks.count, 3);
     }
 }
 
@@ -603,36 +594,89 @@ Controls.ApplicationWindow {
         hierarchyList: owner; generatedByTreeModel: true; showChevron: false
     }
 })"));
-    QVERIFY(root);
+    CTEST_CHECK(root);
     auto *window = qobject_cast<QQuickWindow *>(root.data());
     auto *row = root->findChild<QQuickItem *>("row");
     auto *motion = row->findChild<QObject *>("interactionMotion");
-    QVERIFY(QTest::qWaitForWindowExposed(window));
-    QVERIFY(row->property("pointerDragRequiresLongPress").toBool());
+    CTEST_CHECK(lvrs_ctest::waitFor([&] { return window->isExposed(); }, 5000));
+    CTEST_CHECK(row->property("pointerDragRequiresLongPress").toBool());
     const QPoint center = row->mapToScene(row->boundingRect().center()).toPoint();
-    QSignalSpy clicks(row, SIGNAL(clicked()));
+    MotionSignalRecorder clicks;
+    const auto clicksConnection = QObject::connect(row, SIGNAL(clicked()), &clicks, SLOT(recordSignal()));
+    CTEST_CHECK(clicksConnection);
     const QRectF geometry = row->mapRectToScene(row->boundingRect());
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTRY_VERIFY_WITH_TIMEOUT(motion->property("pressProgress").toReal() > 0.7, 500);
-    QVERIFY(!row->property("down").toBool());
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(clicks.count(), 1);
-    QVERIFY(motion->property("releaseProgress").toReal() >= 0.35);
-    QTest::qWait(220);
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTest::qWait(100);
-    QTest::mouseMove(window, QPoint(450, 230));
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, QPoint(450, 230));
-    QCOMPARE(clicks.count(), 1);
-    QCOMPARE(motion->property("releaseProgress").toReal(), 0.0);
+    mousePress(window, center);
+    CTEST_WAIT_VERIFY(motion->property("pressProgress").toReal() > 0.7, 500);
+    CTEST_CHECK(!row->property("down").toBool());
+    mouseRelease(window, center);
+    MOTION_COMPARE(clicks.count, 1);
+    CTEST_CHECK(motion->property("releaseProgress").toReal() >= 0.35);
+    processFor(220);
+    mousePress(window, center);
+    processFor(100);
+    mouseMove(window, QPoint(450, 230));
+    mouseRelease(window, QPoint(450, 230));
+    MOTION_COMPARE(clicks.count, 1);
+    MOTION_COMPARE(motion->property("releaseProgress").toReal(), 0.0);
     row->setProperty("dragPreviewActive", true);
-    QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, center);
-    QTest::qWait(100);
-    QCOMPARE(motion->property("xScale").toReal(), 1.0);
-    QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, center);
-    QCOMPARE(motion->property("releaseProgress").toReal(), 0.0);
-    QCOMPARE(row->mapRectToScene(row->boundingRect()), geometry);
+    mousePress(window, center);
+    processFor(100);
+    MOTION_COMPARE(motion->property("xScale").toReal(), 1.0);
+    mouseRelease(window, center);
+    MOTION_COMPARE(motion->property("releaseProgress").toReal(), 0.0);
+    MOTION_COMPARE(row->mapRectToScene(row->boundingRect()), geometry);
 }
 
-QTEST_MAIN(MotionTests)
+int main(int argc, char **argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc > 1 ? argv[1] : "");
+    MotionTests tests;
+    const auto runRow = [&](const QString &name, auto function) {
+        runner.run(name.toStdString(), [&] { pressedButtons = Qt::NoButton; function(); });
+    };
+    for (const char *value : {"AbstractButton", "PushButton", "DropdownButton", "LabelButton", "IconButton", "LabelMenuButton", "IconMenuButton", "CheckBox", "RadioButton", "Card", "AlertButton", "Link", "ToolbarButton", "HierarchyItem", "ListItem", "MenuItem", "ContextMenuItem", "Stepper", "ComboBox"}) {
+        const auto type = QString::fromLatin1(value);
+        runRow(QStringLiteral("button_families:") + type, [&] { tests.button_families(type); });
+    }
+    for (const char *value : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton", "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"}) {
+        const auto type = QString::fromLatin1(value);
+        for (bool keyboard : {false, true})
+            runRow(QStringLiteral("compact_button_release:") + type + (keyboard ? "-keyboard" : "-pointer"), [&] { tests.compact_button_release(type, keyboard); });
+    }
+    for (const char *value : {"PushButton", "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"}) {
+        const auto type = QString::fromLatin1(value);
+        runRow(QStringLiteral("compact_button_cancel_and_opt_out:") + type, [&] { tests.compact_button_cancel_and_opt_out(type); });
+    }
+    for (const char *value : {"PushButton", "DropdownButton", "IconButton", "IconMenuButton"}) {
+        const auto type = QString::fromLatin1(value);
+        for (int tone = 0; tone < 5; ++tone)
+            runRow(QStringLiteral("compact_button_tones_and_keyboard_focus:") + type + '-' + QString::number(tone), [&] { tests.compact_button_tones_and_keyboard_focus(type, tone); });
+    }
+    for (const char *value : {"MenuItem", "ContextMenuItem", "HierarchyItem"}) {
+        const auto type = QString::fromLatin1(value);
+        for (int state = 0; state < 3; ++state) {
+            const auto configuration = type == "HierarchyItem"
+                ? (state == 1 ? QStringLiteral("selected: true") : state == 2 ? QStringLiteral("activatable: false") : QString())
+                : QStringLiteral("state: %1").arg(state);
+            runRow(QStringLiteral("row_interaction_states:") + type + '-' + QString::number(state), [&] { tests.row_interaction_states(type, configuration, state == 2, state == 1); });
+        }
+    }
+    for (int variant = 0; variant < 17; ++variant)
+        runRow(QStringLiteral("row_interaction_states:ListItem-") + QString::number(variant), [&] { tests.row_interaction_states(QStringLiteral("ListItem"), QStringLiteral("type: %1").arg(variant), false, false); });
+    runRow(QStringLiteral("row_interaction_states:ListItem-selected"), [&] { tests.row_interaction_states(QStringLiteral("ListItem"), QStringLiteral("selected: true"), false, true); });
+    runRow(QStringLiteral("row_interaction_states:ListItem-disabled"), [&] { tests.row_interaction_states(QStringLiteral("ListItem"), QStringLiteral("enabled: false"), true, false); });
+    for (const char *value : {"PushButton", "DropdownButton", "MenuItem", "ContextMenuItem", "ListItem", "HierarchyItem"}) {
+        const auto type = QString::fromLatin1(value);
+        runRow(QStringLiteral("enter_activates_on_release:") + type, [&] { tests.enter_activates_on_release(type); });
+    }
+    runner.run("button_press_rebound_and_retarget", [&] { pressedButtons = Qt::NoButton; tests.button_press_rebound_and_retarget(); });
+    runner.run("preferences_settle_in_flight_motion", [&] { pressedButtons = Qt::NoButton; tests.preferences_settle_in_flight_motion(); });
+    runner.run("keyboard_disabled_and_layout", [&] { pressedButtons = Qt::NoButton; tests.keyboard_disabled_and_layout(); });
+    runner.run("slider_drag_is_direct_and_release_settles", [&] { pressedButtons = Qt::NoButton; tests.slider_drag_is_direct_and_release_settles(); });
+    runner.run("slider_programmatic_travel_stays_bounded", [&] { pressedButtons = Qt::NoButton; tests.slider_programmatic_travel_stays_bounded(); });
+    runner.run("touch_keeps_the_input_target_fixed", [&] { pressedButtons = Qt::NoButton; tests.touch_keeps_the_input_target_fixed(); });
+    runner.run("hierarchy_mobile_release_and_cancel", [&] { pressedButtons = Qt::NoButton; tests.hierarchy_mobile_release_and_cancel(); });
+    return runner.result();
+}
 #include "tst_motion.moc"

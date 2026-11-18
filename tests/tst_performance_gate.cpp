@@ -1,6 +1,6 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
-#include <QSignalSpy>
 #include <QVariantMap>
 #include <QtPlugin>
 
@@ -48,16 +48,14 @@ qint64 operationPercentileMs(const Backend &backend, const QString &operationKey
 
 class PerformanceGateTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void backend_dispatch_latency_regression_gate();
 };
 
 void PerformanceGateTests::backend_dispatch_latency_regression_gate()
 {
     MillisecondTimerResolution timerResolution;
-    QVERIFY(timerResolution.available());
+    CTEST_CHECK(timerResolution.available());
     const int rounds = envInt("LVRS_PERF_GATE_ROUNDS", 5, 3, 15);
     const int tasksPerRound = envInt("LVRS_PERF_GATE_TASKS", 48, 16, 512);
     const int workMs = envInt("LVRS_PERF_GATE_WORK_MS", 2, 1, 20);
@@ -75,8 +73,10 @@ void PerformanceGateTests::backend_dispatch_latency_regression_gate()
         backend.setAsyncMaxConcurrency(12);
         backend.setAsyncQueueDepthLimit(4096);
 
-        QSignalSpy finishedSpy(&backend, &Backend::asyncRequestFinished);
-        QVERIFY(finishedSpy.isValid());
+        QObject observer;
+        int finishedCount = 0;
+        const auto finishedConnection = QObject::connect(&backend, &Backend::asyncRequestFinished, &observer, [&] { ++finishedCount; });
+        CTEST_CHECK(finishedConnection);
 
         for (int i = 0; i < tasksPerRound; ++i) {
             const QVariantMap payload {
@@ -87,10 +87,10 @@ void PerformanceGateTests::backend_dispatch_latency_regression_gate()
                 { QStringLiteral("index"), i }
             };
             const qulonglong requestId = backend.dispatchAsyncTask(QStringLiteral("perf-gate-task"), payload, 0);
-            QVERIFY(requestId > 0);
+            CTEST_CHECK(requestId > 0);
         }
 
-        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.count(), tasksPerRound, waitTimeoutMs);
+        CTEST_WAIT_COMPARE_TIMEOUT(finishedCount, tasksPerRound, waitTimeoutMs);
 
         const qint64 p95Ms = operationPercentileMs(backend,
                                                    QStringLiteral("dispatchTask"),
@@ -110,11 +110,17 @@ void PerformanceGateTests::backend_dispatch_latency_regression_gate()
                       << "limits=" << p95LimitMs << "/" << p99LimitMs
                       << "samples=" << rounds;
 
-    QVERIFY2(medianP95Ms <= p95LimitMs,
+    CTEST_CHECK_MESSAGE(medianP95Ms <= p95LimitMs,
              qPrintable(QStringLiteral("p95 gate failed: %1 > %2").arg(medianP95Ms).arg(p95LimitMs)));
-    QVERIFY2(medianP99Ms <= p99LimitMs,
+    CTEST_CHECK_MESSAGE(medianP99Ms <= p99LimitMs,
              qPrintable(QStringLiteral("p99 gate failed: %1 > %2").arg(medianP99Ms).arg(p99LimitMs)));
 }
 
-QTEST_MAIN(PerformanceGateTests)
-#include "tst_performance_gate.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    PerformanceGateTests tests;
+    runner.run("backend_dispatch_latency_regression_gate", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.backend_dispatch_latency_regression_gate(); });
+    return runner.result();
+}

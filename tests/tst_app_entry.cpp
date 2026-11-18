@@ -1,4 +1,5 @@
-#include <QtTest>
+#include "QtEventWait.h"
+#include <QGuiApplication>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -90,9 +91,7 @@ QString createTestQmlModule(const QString &rootPath,
 
 class AppEntryTests : public QObject
 {
-    Q_OBJECT
-
-private slots:
+public:
     void default_runtime_qml_import_paths_include_staged_bundle_dirs();
     void default_runtime_qml_import_paths_include_snapshot_platform_dirs();
     void bootstrap_diagnostics_are_emitted();
@@ -106,19 +105,19 @@ private slots:
 
 void AppEntryTests::default_runtime_qml_import_paths_include_staged_bundle_dirs()
 {
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../resources/ctest-app-entry-XXXXXX"));
+    CTEST_CHECK(tempDir.isValid());
 
     const QString rootDir = tempDir.path();
     const QString appDir = QDir(rootDir).filePath(QStringLiteral("bin"));
     const QString bundledQmlDir = QDir(appDir).filePath(QStringLiteral("lvrs-runtime/qml/LVRS"));
     const QString installedQmlDir = QDir(appDir).filePath(QStringLiteral("../lib/qt6/qml/LVRS"));
 
-    QVERIFY(QDir().mkpath(bundledQmlDir));
-    QVERIFY(QDir().mkpath(installedQmlDir));
+    CTEST_CHECK(QDir().mkpath(bundledQmlDir));
+    CTEST_CHECK(QDir().mkpath(installedQmlDir));
 
     const QStringList importPaths = lvrs::defaultRuntimeQmlImportPaths(appDir);
-    QCOMPARE(importPaths,
+    CTEST_COMPARE(importPaths,
              QStringList({
                  QDir::cleanPath(QDir(appDir).filePath(QStringLiteral("lvrs-runtime/qml"))),
                  QDir::cleanPath(QDir(appDir).filePath(QStringLiteral("../lib/qt6/qml")))
@@ -127,19 +126,19 @@ void AppEntryTests::default_runtime_qml_import_paths_include_staged_bundle_dirs(
 
 void AppEntryTests::default_runtime_qml_import_paths_include_snapshot_platform_dirs()
 {
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../resources/ctest-app-entry-XXXXXX"));
+    CTEST_CHECK(tempDir.isValid());
 
     const QString installRoot = QDir(tempDir.path()).filePath(QStringLiteral("prefix"));
     const QString appDir = QDir(installRoot).filePath(QStringLiteral("src/LVRS/example/VisualCatalog/bin"));
     const QString snapshotQmlDir =
         QDir(installRoot).filePath(QStringLiteral("platforms/linux/lib/qt6/qml/LVRS"));
 
-    QVERIFY(QDir().mkpath(appDir));
-    QVERIFY(QDir().mkpath(snapshotQmlDir));
+    CTEST_CHECK(QDir().mkpath(appDir));
+    CTEST_CHECK(QDir().mkpath(snapshotQmlDir));
 
     const QStringList importPaths = lvrs::defaultRuntimeQmlImportPaths(appDir);
-    QCOMPARE(importPaths,
+    CTEST_COMPARE(importPaths,
              QStringList({
                  QDir::cleanPath(
                      QDir(appDir).filePath(QStringLiteral("../../../../../platforms/linux/lib/qt6/qml")))
@@ -160,18 +159,18 @@ void AppEntryTests::bootstrap_diagnostics_are_emitted()
     MessageCapture capture;
 
     const lvrs::AppBootstrapState state = lvrs::preApplicationBootstrap(options);
-    QVERIFY(state.ok);
+    CTEST_CHECK(state.ok);
     lvrs::postApplicationBootstrap(*qGuiApp, options);
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.pre.options")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.pre.render-quality")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.pre.graphics-backend")));
-    QVERIFY(logs.contains(QStringLiteral("\"bootstrapGraphicsBackend\":false")));
-    QVERIFY(logs.contains(QStringLiteral("\"QSG_RHI_PIPELINE_CACHE_LOAD\"")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.post.application")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.post.font-policy")));
-    QVERIFY(logs.contains(QStringLiteral("\"pretendardFallbackEnforced\":true")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.pre.options")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.pre.render-quality")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.pre.graphics-backend")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"bootstrapGraphicsBackend\":false")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"QSG_RHI_PIPELINE_CACHE_LOAD\"")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.post.application")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.post.font-policy")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"pretendardFallbackEnforced\":true")));
 
     if (qGuiApp)
         qGuiApp->setApplicationName(previousApplicationName);
@@ -179,11 +178,11 @@ void AppEntryTests::bootstrap_diagnostics_are_emitted()
 
 void AppEntryTests::qml_root_loader_loads_multiple_roots_with_initial_properties()
 {
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../resources/ctest-app-entry-XXXXXX"));
+    CTEST_CHECK(tempDir.isValid());
 
     const QString moduleUri = QStringLiteral("LVRSAppEntryMultiRootTest");
-    QVERIFY(!createTestQmlModule(tempDir.path(),
+    CTEST_CHECK(!createTestQmlModule(tempDir.path(),
                                  moduleUri,
                                  {
                                      {QStringLiteral("FirstRoot"),
@@ -209,25 +208,25 @@ void AppEntryTests::qml_root_loader_loads_multiple_roots_with_initial_properties
     MessageCapture capture;
     const lvrs::QmlRootLoadResult result = lvrs::loadQmlRootObjects(engine, {firstRoot, secondRoot});
 
-    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
-    QCOMPARE(result.rootObjects.size(), 2);
-    QCOMPARE(result.windows.size(), 0);
-    QCOMPARE(result.rootObjects.at(0)->property("marker").toString(), QStringLiteral("alpha"));
-    QCOMPARE(result.rootObjects.at(1)->property("marker").toString(), QStringLiteral("beta"));
+    CTEST_CHECK_MESSAGE(result.ok, qPrintable(result.errorMessage()));
+    CTEST_COMPARE(result.rootObjects.size(), 2);
+    CTEST_COMPARE(result.windows.size(), 0);
+    CTEST_COMPARE(result.rootObjects.at(0)->property("marker").toString(), QStringLiteral("alpha"));
+    CTEST_COMPARE(result.rootObjects.at(1)->property("marker").toString(), QStringLiteral("beta"));
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-load-request")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-loaded")));
-    QVERIFY(logs.contains(QStringLiteral("\"initialPropertyKeys\":[\"marker\"]")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-load-request")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-loaded")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"initialPropertyKeys\":[\"marker\"]")));
 }
 
 void AppEntryTests::qml_root_loader_reports_missing_root_object()
 {
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../resources/ctest-app-entry-XXXXXX"));
+    CTEST_CHECK(tempDir.isValid());
 
     const QString moduleUri = QStringLiteral("LVRSAppEntryMissingRootTest");
-    QVERIFY(!createTestQmlModule(tempDir.path(),
+    CTEST_CHECK(!createTestQmlModule(tempDir.path(),
                                  moduleUri,
                                  {
                                      {QStringLiteral("ExistingRoot"),
@@ -245,21 +244,21 @@ void AppEntryTests::qml_root_loader_reports_missing_root_object()
     MessageCapture capture;
     const lvrs::QmlRootLoadResult result = lvrs::loadQmlRootObjects(engine, {missingRoot});
 
-    QVERIFY(!result.ok);
-    QVERIFY(result.rootObjects.isEmpty());
-    QVERIFY(result.errorMessage().contains(QStringLiteral("did not create a root object")));
+    CTEST_CHECK(!result.ok);
+    CTEST_CHECK(result.rootObjects.isEmpty());
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("did not create a root object")));
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-load-failed")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.entry.root-load-failed")));
 }
 
 void AppEntryTests::qml_root_loader_applies_window_activation_policy()
 {
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir(QDir(QStringLiteral(LVRS_TEST_SOURCE_DIR)).filePath("../resources/ctest-app-entry-XXXXXX"));
+    CTEST_CHECK(tempDir.isValid());
 
     const QString moduleUri = QStringLiteral("LVRSAppEntryWindowRootTest");
-    QVERIFY(!createTestQmlModule(tempDir.path(),
+    CTEST_CHECK(!createTestQmlModule(tempDir.path(),
                                  moduleUri,
                                  {
                                      {QStringLiteral("WindowRoot"),
@@ -277,14 +276,14 @@ void AppEntryTests::qml_root_loader_applies_window_activation_policy()
 
     const lvrs::QmlRootLoadResult result = lvrs::loadQmlRootObjects(engine, {windowRoot});
 
-    QVERIFY2(result.ok, qPrintable(result.errorMessage()));
-    QCOMPARE(result.rootObjects.size(), 1);
-    QCOMPARE(result.windows.size(), 1);
+    CTEST_CHECK_MESSAGE(result.ok, qPrintable(result.errorMessage()));
+    CTEST_COMPARE(result.rootObjects.size(), 1);
+    CTEST_COMPARE(result.windows.size(), 1);
 
     QWindow *window = result.windows.first();
-    QVERIFY(window);
+    CTEST_CHECK(window);
     QCoreApplication::processEvents();
-    QVERIFY(window->isVisible());
+    CTEST_CHECK(window->isVisible());
     window->close();
 }
 
@@ -326,10 +325,10 @@ void AppEntryTests::lifecycle_stage_runs_hook_and_priority_tasks()
     const lvrs::QmlBootstrapQueueResult result =
         lvrs::runQmlAppLifecycleStage(context, hooks, lvrs::QmlAppLifecycleStage::AfterRootLoaded);
 
-    QVERIFY(result.ok);
-    QVERIFY(!result.fatalFailure());
-    QCOMPARE(result.taskResults.size(), 2);
-    QCOMPARE(*calls,
+    CTEST_CHECK(result.ok);
+    CTEST_CHECK(!result.fatalFailure());
+    CTEST_COMPARE(result.taskResults.size(), 2);
+    CTEST_COMPARE(*calls,
              QStringList({
                  QStringLiteral("hook:after-root-loaded"),
                  QStringLiteral("task:early"),
@@ -337,10 +336,10 @@ void AppEntryTests::lifecycle_stage_runs_hook_and_priority_tasks()
              }));
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.stage-start")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.queue-start")));
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.task-complete")));
-    QVERIFY(logs.contains(QStringLiteral("\"stage\":\"after-root-loaded\"")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.stage-start")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.queue-start")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.task-complete")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"stage\":\"after-root-loaded\"")));
 }
 
 void AppEntryTests::lifecycle_queue_reports_task_failures_and_fatality()
@@ -378,21 +377,21 @@ void AppEntryTests::lifecycle_queue_reports_task_failures_and_fatality()
     const lvrs::QmlBootstrapQueueResult result =
         lvrs::runQmlAppLifecycleStage(context, hooks, lvrs::QmlAppLifecycleStage::AfterWindowActivated);
 
-    QVERIFY(!result.ok);
-    QVERIFY(result.fatalFailure());
-    QCOMPARE(result.taskResults.size(), 2);
-    QCOMPARE(result.taskResults.at(0).name, QStringLiteral("recoverable"));
-    QVERIFY(!result.taskResults.at(0).fatal);
-    QCOMPARE(result.taskResults.at(0).errorMessage, QStringLiteral("recoverable failure"));
-    QCOMPARE(result.taskResults.at(1).name, QStringLiteral("fatal"));
-    QVERIFY(result.taskResults.at(1).fatal);
-    QCOMPARE(result.taskResults.at(1).errorMessage, QStringLiteral("fatal failure"));
-    QVERIFY(result.errorMessage().contains(QStringLiteral("recoverable failure")));
-    QVERIFY(result.errorMessage().contains(QStringLiteral("fatal failure")));
+    CTEST_CHECK(!result.ok);
+    CTEST_CHECK(result.fatalFailure());
+    CTEST_COMPARE(result.taskResults.size(), 2);
+    CTEST_COMPARE(result.taskResults.at(0).name, QStringLiteral("recoverable"));
+    CTEST_CHECK(!result.taskResults.at(0).fatal);
+    CTEST_COMPARE(result.taskResults.at(0).errorMessage, QStringLiteral("recoverable failure"));
+    CTEST_COMPARE(result.taskResults.at(1).name, QStringLiteral("fatal"));
+    CTEST_CHECK(result.taskResults.at(1).fatal);
+    CTEST_COMPARE(result.taskResults.at(1).errorMessage, QStringLiteral("fatal failure"));
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("recoverable failure")));
+    CTEST_CHECK(result.errorMessage().contains(QStringLiteral("fatal failure")));
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.task-failed")));
-    QVERIFY(logs.contains(QStringLiteral("\"fatalFailure\":true")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.task-failed")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"fatalFailure\":true")));
 }
 
 void AppEntryTests::lifecycle_stage_can_be_scheduled_for_first_idle()
@@ -419,22 +418,36 @@ void AppEntryTests::lifecycle_stage_can_be_scheduled_for_first_idle()
     hooks.tasks = {task};
 
     MessageCapture capture;
-    QVERIFY(lvrs::scheduleQmlAppLifecycleStage(qGuiApp,
+    CTEST_CHECK(lvrs::scheduleQmlAppLifecycleStage(qGuiApp,
                                                context,
                                                hooks,
                                                lvrs::QmlAppLifecycleStage::AfterFirstIdle));
 
-    QTRY_VERIFY(calls->size() == 2);
-    QCOMPARE(*calls,
+    CTEST_WAIT_DEFAULT(calls->size() == 2);
+    CTEST_COMPARE(*calls,
              QStringList({
                  QStringLiteral("hook:after-first-idle"),
                  QStringLiteral("task:idle")
              }));
 
     const QString logs = capture.joinedMessages();
-    QVERIFY(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.stage-start")));
-    QVERIFY(logs.contains(QStringLiteral("\"stage\":\"after-first-idle\"")));
+    CTEST_CHECK(logs.contains(QStringLiteral("LVRS bootstrap.lifecycle.stage-start")));
+    CTEST_CHECK(logs.contains(QStringLiteral("\"stage\":\"after-first-idle\"")));
 }
 
-QTEST_MAIN(AppEntryTests)
-#include "tst_app_entry.moc"
+int main(int argc, char** argv)
+{
+    QGuiApplication application(argc, argv);
+    lvrs_ctest::CTestRunner runner(argc == 2 ? argv[1] : "");
+    AppEntryTests tests;
+    runner.run("default_runtime_qml_import_paths_include_staged_bundle_dirs", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.default_runtime_qml_import_paths_include_staged_bundle_dirs(); });
+    runner.run("default_runtime_qml_import_paths_include_snapshot_platform_dirs", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.default_runtime_qml_import_paths_include_snapshot_platform_dirs(); });
+    runner.run("bootstrap_diagnostics_are_emitted", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.bootstrap_diagnostics_are_emitted(); });
+    runner.run("qml_root_loader_loads_multiple_roots_with_initial_properties", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.qml_root_loader_loads_multiple_roots_with_initial_properties(); });
+    runner.run("qml_root_loader_reports_missing_root_object", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.qml_root_loader_reports_missing_root_object(); });
+    runner.run("qml_root_loader_applies_window_activation_policy", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.qml_root_loader_applies_window_activation_policy(); });
+    runner.run("lifecycle_stage_runs_hook_and_priority_tasks", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.lifecycle_stage_runs_hook_and_priority_tasks(); });
+    runner.run("lifecycle_queue_reports_task_failures_and_fatality", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.lifecycle_queue_reports_task_failures_and_fatality(); });
+    runner.run("lifecycle_stage_can_be_scheduled_for_first_idle", [&] { lvrs_ctest::ScopedDeferredDeletes cleanup; tests.lifecycle_stage_can_be_scheduled_for_first_idle(); });
+    return runner.result();
+}
