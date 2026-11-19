@@ -551,10 +551,10 @@ Cargo executable during CMake cleanup, and recreation of a missing build directo
 
 ## License
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: Apache-2.0
 
 The original code and documentation in this repository are licensed under the
-[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
+[Apache License 2.0](LICENSE). Third-party code, libraries, fonts, tools, and model
 weights retain their respective licenses.
 
 `TableCellItem`, `TableRow`, and `TableHeader` now generate native C++ cells,
